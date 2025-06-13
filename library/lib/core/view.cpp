@@ -715,8 +715,10 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect f
             break;
         }
         case ViewBackground::VERTICAL_LINEAR:
+        case ViewBackground::HORIZONTAL_LINEAR:
         {
-            NVGpaint gradient = nvgLinearGradient(vg, x, y, x, y + height, a(backgroundStartColor), a(backgroundEndColor));
+            bool vertical     = this->background == ViewBackground::VERTICAL_LINEAR;
+            NVGpaint gradient = nvgLinearGradient(vg, x, y, vertical ? x : x + width, vertical ? y + height : y, a(backgroundStartColor), a(backgroundEndColor));
             nvgBeginPath(vg);
             nvgFillPaint(vg, gradient);
             if (std::all_of(this->backgroundRadius.begin(), this->backgroundRadius.end(), [](float i) { return i == 0.0f; }))
@@ -2260,6 +2262,7 @@ void View::registerCommonAttributes()
             { "sidebar", ViewBackground::SIDEBAR },
             { "backdrop", ViewBackground::BACKDROP },
             { "vertical_linear", ViewBackground::VERTICAL_LINEAR },
+            { "horizontal_linear", ViewBackground::HORIZONTAL_LINEAR },
         });
 
     // background start and end color for vertical linear style

@@ -121,6 +121,7 @@ enum class ViewBackground
     BACKDROP,
     SHAPE_COLOR,
     VERTICAL_LINEAR,
+    HORIZONTAL_LINEAR,
 };
 
 enum class AlignSelf
