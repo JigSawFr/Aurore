@@ -87,6 +87,16 @@ Box::Box(Axis axis)
             { "spaceAround", AlignItems::SPACE_AROUND },
         });
 
+    // Gap
+    this->registerFloatXMLAttribute("gap", [this](float value)
+        { this->setGap(value); });
+
+    this->registerFloatXMLAttribute("rowGap", [this](float value)
+        { this->setRowGap(value); });
+
+    this->registerFloatXMLAttribute("columnGap", [this](float value)
+        { this->setColumnGap(value); });
+
     // Padding
     this->registerFloatXMLAttribute("paddingTop", [this](float value)
         { this->setPaddingTop(value); });
@@ -349,6 +359,39 @@ float Box::getPaddingLeft()
 float Box::getPaddingRight()
 {
     return YGNodeStyleGetPadding(this->ygNode, YGEdgeRight).value;
+}
+
+void Box::setGap(float gap)
+{
+    YGNodeStyleSetGap(this->ygNode, YGGutterAll, gap);
+    this->invalidate();
+}
+
+float Box::getGap()
+{
+    return YGNodeStyleGetGap(this->ygNode, YGGutterAll);
+}
+
+void Box::setRowGap(float gap)
+{
+    YGNodeStyleSetGap(this->ygNode, YGGutterRow, gap);
+    this->invalidate();
+}
+
+float Box::getRowGap()
+{
+    return YGNodeStyleGetGap(this->ygNode, YGGutterRow);
+}
+
+void Box::setColumnGap(float gap)
+{
+    YGNodeStyleSetGap(this->ygNode, YGGutterColumn, gap);
+    this->invalidate();
+}
+
+float Box::getColumnGap()
+{
+    return YGNodeStyleGetGap(this->ygNode, YGGutterColumn);
 }
 
 View* Box::getDefaultFocus()

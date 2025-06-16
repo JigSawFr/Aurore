@@ -153,6 +153,31 @@ class Box : public View
     float getPaddingLeft();
 
     /**
+     * Sets the gap between child elements inside this view.
+     * This is typically used in layouts like grids or lists.
+     */
+    virtual void setGap(float gap);
+
+    /**
+     * Returns the current gap between child elements inside this view.
+     */
+    float getGap();
+
+    /**
+     * Sets the gap between two lines of children (wrapped rows, or
+     * the children of a column), overriding setGap() on that axis.
+     */
+    void setRowGap(float gap);
+    float getRowGap();
+
+    /**
+     * Sets the gap between two children along a row (or between
+     * wrapped columns), overriding setGap() on that axis.
+     */
+    void setColumnGap(float gap);
+    float getColumnGap();
+
+    /**
      * Sets the children alignment along the Box axis.
      *
      * Default is FLEX_START.
