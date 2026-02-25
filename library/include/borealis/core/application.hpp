@@ -364,6 +364,7 @@ class Application
     static VoidEvent* getGlobalHintsUpdateEvent();
     static Event<InputType>* getGlobalInputTypeChangeEvent();
     static VoidEvent* getRunLoopEvent();
+    static VoidEvent* getPostFrameEvent();
     static VoidEvent* getExitEvent();
     static VoidEvent* getExitDoneEvent();
     static VoidEvent* getWindowSizeChangedEvent();
@@ -516,6 +517,7 @@ class Application
     inline static VoidEvent globalHintsUpdateEvent;
     inline static Event<InputType> globalInputTypeChangeEvent;
     inline static VoidEvent runLoopEvent;
+    inline static VoidEvent postFrameEvent;
     inline static VoidEvent exitEvent;
     inline static VoidEvent exitDoneEvent;
     inline static VoidEvent windowSizeChangedEvent;
