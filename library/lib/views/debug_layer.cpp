@@ -101,7 +101,12 @@ DebugLayer::DebugLayer()
             contentView->addView(box, 0);
 
             if (contentView->getChildren().size() > brls::Application::contentHeight / 10 - 1)
-                contentView->removeView(contentView->getChildren()[contentView->getChildren().size() - 1]); }); });
+            {
+                // Not freeView(): it logs (Logger::verbose), which would add a line again, and so on
+                View* old = contentView->getChildren()[contentView->getChildren().size() - 1];
+                contentView->removeView(old, false);
+                delete old;
+            } }); });
 }
 
 } // namespace brls
