@@ -310,8 +310,9 @@ void View::drawClickAnimation(NVGcontext* vg, FrameContext* ctx, Rect frame)
     nvgFillColor(vg, a(color));
     nvgBeginPath(vg);
 
-    if (this->cornerRadius > 0.0f)
-        nvgRoundedRect(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
+    bool hasRadii = (this->cornerRadii[0] != 0 || this->cornerRadii[1] != 0 || this->cornerRadii[2] != 0 || this->cornerRadii[3] != 0);
+    if (hasRadii)
+        nvgRoundedRectVarying(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], this->cornerRadii[3]);
     else
         nvgRoundedRect(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), 4);
 
@@ -429,7 +430,13 @@ void View::drawBorder(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
     nvgBeginPath(vg);
     nvgStrokeColor(vg, a(this->borderColor));
     nvgStrokeWidth(vg, this->borderThickness);
-    nvgRoundedRect(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
+
+    bool hasRadii = (this->cornerRadii[0] != 0 || this->cornerRadii[1] != 0 || this->cornerRadii[2] != 0 || this->cornerRadii[3] != 0);
+    if (hasRadii)
+        nvgRoundedRectVarying(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], this->cornerRadii[3]);
+    else
+        nvgRoundedRect(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
+
     nvgStroke(vg);
 }
 
@@ -454,11 +461,12 @@ void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
             break;
     }
 
+    float maxRadius      = std::max({ this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], this->cornerRadii[3] });
     NVGpaint shadowPaint = nvgBoxGradient(
         vg,
         frame.getMinX(), frame.getMinY() + shadowWidth,
         frame.getWidth(), frame.getHeight(),
-        this->cornerRadius * 2, shadowFeather,
+        maxRadius * 2, shadowFeather,
         RGBA(0, 0, 0, shadowOpacity * alpha), TRANSPARENT);
 
     nvgBeginPath(vg);
@@ -468,7 +476,7 @@ void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
         frame.getMinY() - shadowOffset,
         frame.getWidth() + shadowOffset * 2,
         frame.getHeight() + shadowOffset * 3);
-    nvgRoundedRect(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
+    nvgRoundedRectVarying(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], this->cornerRadii[3]);
     nvgPathWinding(vg, NVG_HOLE);
     nvgFillPaint(vg, shadowPaint);
     nvgFill(vg);
@@ -731,8 +739,9 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect f
             nvgFillColor(vg, a(this->backgroundColor));
             nvgBeginPath(vg);
 
-            if (this->cornerRadius > 0.0f)
-                nvgRoundedRect(vg, x, y, width, height, this->cornerRadius);
+            bool hasRadii = (this->cornerRadii[0] != 0 || this->cornerRadii[1] != 0 || this->cornerRadii[2] != 0 || this->cornerRadii[3] != 0);
+            if (hasRadii)
+                nvgRoundedRectVarying(vg, x, y, width, height, this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], this->cornerRadii[3]);
             else
                 nvgRect(vg, x, y, width, height);
 
@@ -2202,6 +2211,18 @@ void View::registerCommonAttributes()
     this->registerFloatXMLAttribute("cornerRadius", [this](float value) {
         this->setCornerRadius(value);
     });
+
+    this->registerFloatXMLAttribute("cornerTopLeftRadius", [this](float value)
+        { this->setCornerRadius(value, this->cornerRadii[1], this->cornerRadii[2], this->cornerRadii[3]); });
+
+    this->registerFloatXMLAttribute("cornerTopRightRadius", [this](float value)
+        { this->setCornerRadius(this->cornerRadii[0], value, this->cornerRadii[2], this->cornerRadii[3]); });
+
+    this->registerFloatXMLAttribute("cornerBottomRightRadius", [this](float value)
+        { this->setCornerRadius(this->cornerRadii[0], this->cornerRadii[1], value, this->cornerRadii[3]); });
+
+    this->registerFloatXMLAttribute("cornerBottomLeftRadius", [this](float value)
+        { this->setCornerRadius(this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], value); });
 
     BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
         "shadowType", ShadowType, this->setShadowType,
