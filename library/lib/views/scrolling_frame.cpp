@@ -452,6 +452,9 @@ View* ScrollingFrame::getNextFocus(FocusDirection direction, View* currentView)
 
 View* ScrollingFrame::getDefaultFocus()
 {
+    if (this->getVisibility() != Visibility::VISIBLE)
+        return nullptr;
+
     if (behavior == ScrollingBehavior::CENTERED)
     {
         View* focus = contentView->getDefaultFocus();
