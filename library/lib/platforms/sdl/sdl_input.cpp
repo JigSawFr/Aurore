@@ -23,6 +23,8 @@
 #include <emscripten.h>
 #endif
 
+#include <algorithm>
+
 namespace brls
 {
 
@@ -30,6 +32,11 @@ namespace brls
 #define SDL_GAMEPAD_BUTTON_MAX 15
 #define SDL_GAMEPAD_AXIS_MAX 6
 #define SDL_STICKY 2
+
+static float normalizeSdlAxis(Sint16 axis)
+{
+    return axis < 0 ? static_cast<float>(axis) / 32768.0f : static_cast<float>(axis) / 32767.0f;
+}
 
 /// HidKeyboardScancode
 /// Uses the same key codes as GLFW
@@ -608,7 +615,7 @@ void SDLInputManager::updateControllerState(ControllerState* state, int controll
 
     for (size_t i = 0; i < SDL_GAMEPAD_AXIS_MAX; i++)
     {
-        state->axes[SDL_AXIS_MAPPING[i]] = SDL_GameControllerGetAxis(c, (SDL_GameControllerAxis)i) / 32767.0;
+        state->axes[SDL_AXIS_MAPPING[i]] = normalizeSdlAxis(SDL_GameControllerGetAxis(c, (SDL_GameControllerAxis)i));
     }
 }
 
