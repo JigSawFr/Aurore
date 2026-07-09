@@ -393,6 +393,12 @@ class View
 
     void setBackground(ViewBackground background);
 
+    /**
+     * Sets a linear gradient background for the view, from start to end:
+     * top to bottom (VERTICAL_LINEAR) or left to right (HORIZONTAL_LINEAR).
+     */
+    void setBackgroundLinearGradient(NVGcolor start, NVGcolor end, ViewBackground direction = ViewBackground::VERTICAL_LINEAR);
+
     void shakeHighlight(FocusDirection direction);
 
     Rect getFrame();

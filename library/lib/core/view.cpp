@@ -676,6 +676,17 @@ void View::setBackground(ViewBackground background)
     this->background = background;
 }
 
+void View::setBackgroundLinearGradient(NVGcolor start, NVGcolor end, ViewBackground direction)
+{
+    if (direction != ViewBackground::HORIZONTAL_LINEAR && direction != ViewBackground::VERTICAL_LINEAR)
+        fatal("setBackgroundLinearGradient: direction must be VERTICAL_LINEAR or HORIZONTAL_LINEAR");
+
+    this->backgroundStartColor = start;
+    this->backgroundEndColor   = end;
+
+    this->setBackground(direction);
+}
+
 void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame)
 {
     float x      = frame.getMinX();
