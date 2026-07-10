@@ -79,6 +79,9 @@ class DesktopPlatform : public Platform
     bool screenDimmingDisabled = false;
 #ifdef __linux__
     uint32_t inhibitCookie = 0;
+#ifndef __SDL2__
+    std::string inhibitRequestPath;
+#endif
 #elif defined(_WIN32)
     HANDLE hLCD;
 #elif defined(IOS) || defined(TVOS)
