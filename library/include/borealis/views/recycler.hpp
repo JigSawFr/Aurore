@@ -258,6 +258,7 @@ class RecyclerFrame : public ScrollingFrame
     std::map<std::string, std::function<RecyclerCell*(void)>> allocationMap;
 
     bool checkWidth();
+    float oldWidth = 0;
 
     void cacheCellFrames();
     void cellsRecyclingLoop();
