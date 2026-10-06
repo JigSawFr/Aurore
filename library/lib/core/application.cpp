@@ -228,6 +228,9 @@ bool Application::internalMainLoop()
     for (auto view : undeletedViews)
         Application::deletionPool.push_back(view);
 
+    if (!Application::currentFocus && !Application::activitiesStack.empty())
+        Application::giveFocus(Application::activitiesStack.back()->getContentView());
+
     if (Application::limitedFrameTime > 0)
     {
         Time deltaTime = getCPUTimeUsec() - frameStartTime;
@@ -911,6 +914,16 @@ void Application::giveFocus(View* view)
     }
 }
 
+void Application::forgetView(View* view)
+{
+    if (Application::currentFocus == view)
+        Application::currentFocus = nullptr;
+    if (Application::repetitionOldFocus == view)
+        Application::repetitionOldFocus = nullptr;
+    std::replace(Application::focusStack.begin(), Application::focusStack.end(), view,
+        static_cast<View*>(nullptr));
+}
+
 bool Application::popActivity(TransitionAnimation animation, std::function<void(void)> cb, bool free)
 {
     if (Application::activitiesStack.size() <= 1) // never pop the first activity
@@ -940,7 +953,7 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
     {
         View* newFocus = Application::focusStack[Application::focusStack.size() - 1];
 
-        if (!toShow || newFocus->getParentActivity() == toShow)
+        if (newFocus && (!toShow || newFocus->getParentActivity() == toShow))
         {
             Logger::debug("Giving focus to {}, and removing it from the focus stack", newFocus->describe());
             Application::giveFocus(newFocus);
@@ -1038,6 +1051,9 @@ void Application::clear()
     }
 
     Application::activitiesStack.clear();
+    Application::focusStack.clear();
+    Application::currentFocus       = nullptr;
+    Application::repetitionOldFocus = nullptr;
 }
 
 Theme Application::getTheme()

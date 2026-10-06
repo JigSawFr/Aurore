@@ -141,6 +141,12 @@ class Application
      */
     static void giveFocus(View* view);
 
+    /**
+     * Drops every reference the focus system holds to a view
+     * that is being destroyed.
+     */
+    static void forgetView(View* view);
+
     inline static Style getStyle()
     {
         return brls::getStyle();
