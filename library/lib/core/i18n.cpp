@@ -120,6 +120,15 @@ void loadTranslations()
         loadLocale(currentLocaleName, &currentLocale);
 }
 
+void loadTranslations(const std::string& locale)
+{
+    if (defaultLocale.empty())
+        loadLocale(LOCALE_DEFAULT, &defaultLocale);
+    currentLocale = nlohmann::json::object();
+    if (locale != LOCALE_DEFAULT)
+        loadLocale(locale, &currentLocale);
+}
+
 namespace internal
 {
     std::string getRawStr(std::string stringName)
