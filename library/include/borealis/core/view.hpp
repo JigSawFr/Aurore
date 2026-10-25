@@ -775,6 +775,14 @@ class View
     void setId(std::string id);
 
     /**
+     * The view's id (setId, or the XML's id attribute), "" for none.
+     */
+    const std::string& getId() const
+    {
+        return this->id;
+    }
+
+    /**
      * Overrides align items of the parent box.
      *
      * Default is AUTO.
