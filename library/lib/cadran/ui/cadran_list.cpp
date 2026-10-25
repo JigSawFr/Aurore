@@ -398,14 +398,15 @@ void cadran::List::tag(const char* id, const std::string& text, bool warn, const
         pill->setBackgroundColor(theme[warn ? "cadran/amber_surf" : "cadran/pill_ok"]);
         pill->setBorderColor(theme[warn ? "cadran/amber_line" : "cadran/none"]);
         pill->setVisibility(text.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
-        cell->setBorderColor(theme[warn && !text.empty() ? "cadran/amber_line" : "cadran/line"]);
+        cell->setBorderColor(theme[warn && (!text.empty() || !note.empty()) ? "cadran/amber_line" : "cadran/line"]);
         // The note: the view right after the pill (tiles()).
         const auto& children = cell->getChildren();
         const auto at = std::find(children.begin(), children.end(), pill);
         if (at != children.end() && at + 1 != children.end())
             if (auto* under = dynamic_cast<brls::Label*>(*(at + 1))) {
                 under->setText(note);
-                under->setVisibility(note.empty() || text.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
+                under->setTextColor(theme[warn ? "cadran/amber" : "cadran/text3"]);
+                under->setVisibility(note.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
             }
     }
 }
