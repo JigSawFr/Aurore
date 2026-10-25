@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- The fork's icon: an aurora over the mountains, framed by borealis' focus highlight. -->
+  <defs>
+    <linearGradient id="i-night" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0A1020"/>
+      <stop offset="1" stop-color="#16203A"/>
+    </linearGradient>
+    <linearGradient id="i-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B1430"/>
+      <stop offset="1" stop-color="#132A44"/>
+    </linearGradient>
+    <linearGradient id="i-colour" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00FFCC"/>
+      <stop offset="0.6" stop-color="#33BBFF"/>
+      <stop offset="1" stop-color="#8A5CFF"/>
+    </linearGradient>
+    <linearGradient id="i-rise" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0.25" stop-color="#fff" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="i-rays" width="9" height="256" patternUnits="userSpaceOnUse">
+      <rect width="9" height="256" fill="#fff" opacity="0.55"/>
+      <rect x="2" width="4" height="256" fill="#fff"/>
+    </pattern>
+    <filter id="i-ray-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.6 0"/></filter>
+    <mask id="i-curtain-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <g filter="url(#i-ray-blur)">
+        <rect width="256" height="256" fill="url(#i-rays)"/>
+      </g>
+    </mask>
+    <mask id="i-fade" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <path d="M40 150 C 80 118, 112 160, 150 128 S 200 96, 220 110 L 220 30 L 40 30 Z" transform="translate(0 0)" fill="url(#i-rise)"/>
+    </mask>
+    <filter id="i-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="i-line-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+    <clipPath id="i-frame"><rect x="44" y="44" width="168" height="168" rx="30"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#i-night)"/>
+  <g clip-path="url(#i-frame)">
+    <rect x="44" y="44" width="168" height="168" fill="url(#i-sky)"/>
+    <circle cx="74" cy="66" r="1.8" fill="#E8EEF7"/><circle cx="186" cy="60" r="1.5" fill="#E8EEF7" opacity="0.8"/>
+    <circle cx="120" cy="58" r="1.2" fill="#E8EEF7" opacity="0.6"/><circle cx="150" cy="76" r="1" fill="#E8EEF7" opacity="0.5"/>
+    <g mask="url(#i-fade)">
+      <rect x="30" y="20" width="200" height="150" fill="url(#i-colour)" mask="url(#i-curtain-mask)"/>
+    </g>
+    <path d="M40 150 C 80 118, 112 160, 150 128 S 200 96, 220 110" fill="none" stroke="url(#i-colour)" stroke-width="6" filter="url(#i-line-glow)"/>
+    <path d="M40 150 C 80 118, 112 160, 150 128 S 200 96, 220 110" fill="none" stroke="url(#i-colour)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M30 220 L 30 186 L 70 160 L 92 176 L 124 148 L 162 182 L 184 168 L 230 196 L 230 220 Z" fill="#0A1020"/>
+    <path d="M70 160 L 80 166 L 74 170 Z M124 148 L 136 158 L 126 160 Z" fill="#1F3355"/>
+  </g>
+  <rect x="44" y="44" width="168" height="168" rx="30" fill="none" stroke="#00FFCC" stroke-width="10" filter="url(#i-glow)" opacity="0.6"/>
+  <rect x="44" y="44" width="168" height="168" rx="30" fill="none" stroke="#00FFCC" stroke-width="8"/>
+</svg>
