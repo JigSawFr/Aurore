@@ -64,6 +64,12 @@
             "normal": "標準",
             "large": "較大",
             "auto": "自動：電視上較大"
+        },
+        "rail": "側邊欄",
+        "rail_values": {
+            "auto": "自動：選擇分頁時展開",
+            "open": "始終展開",
+            "icons": "僅圖示"
         }
     },
     "quick": {

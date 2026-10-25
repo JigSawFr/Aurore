@@ -64,6 +64,12 @@
             "normal": "Normal",
             "large": "Maior",
             "auto": "Automático: maior na TV"
+        },
+        "rail": "Barra lateral",
+        "rail_values": {
+            "auto": "Automático: aberta ao escolher um separador",
+            "open": "Sempre aberta",
+            "icons": "Só ícones"
         }
     },
     "quick": {

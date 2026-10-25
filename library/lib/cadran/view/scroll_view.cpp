@@ -45,6 +45,15 @@ void ScrollView::draw(NVGcontext* vg, float x, float y, float width, float heigh
     cadran::kit::draw_more_below(vg, this, x, y, width, height, "brls/background");
 }
 
+void ScrollView::reveal_focused()
+{
+    for (brls::View* v = brls::Application::getCurrentFocus(); v; v = v->hasParent() ? v->getParent() : nullptr)
+        if (auto* frame = dynamic_cast<ScrollView*>(v)) {
+            frame->reveal_pending = true;
+            return;
+        }
+}
+
 brls::View* ScrollView::getDefaultFocus()
 {
     if (this->parked) return this;

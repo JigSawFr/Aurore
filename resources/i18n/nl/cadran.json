@@ -64,6 +64,12 @@
             "normal": "Normaal",
             "large": "Groter",
             "auto": "Automatisch: groter op de tv"
+        },
+        "rail": "Zijbalk",
+        "rail_values": {
+            "auto": "Automatisch: open om een tabblad te kiezen",
+            "open": "Altijd open",
+            "icons": "Alleen pictogrammen"
         }
     },
     "quick": {

@@ -162,6 +162,7 @@ CadranTab::CadranTab()
     buttons->addView(action("demo/cadran/toast"_i18n, [] { ui::notify("demo/cadran/toast_text"_i18n); }, E));
     buttons->addView(action("demo/cadran/refused"_i18n, [] { ui::refuse("demo/cadran/refused_text"_i18n); }, E));
     buttons->addView(action("cadran/quick/title_text"_i18n, [] { ui::quick_settings(); }, E));
+    buttons->addView(action("cadran/prefs/rail"_i18n, [] { ui::pick_rail(); }, E));
     dialogs->addView(buttons);
 
     // The icons.

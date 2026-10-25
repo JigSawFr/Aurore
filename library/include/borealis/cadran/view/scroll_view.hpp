@@ -30,6 +30,10 @@ class ScrollView : public brls::ScrollingFrame
 
     static brls::View* create();
 
+    // The focused line shown again at the next frame, once laid out anew: a
+    // layout moved it (the rail's width changed, cadran::apply_rail).
+    static void reveal_focused();
+
   private:
     struct Span
     {
