@@ -765,6 +765,11 @@ std::string Label::getFullText()
     return this->fullText;
 }
 
+bool Label::isTruncated()
+{
+    return this->truncatedText != this->fullText;
+}
+
 void Label::setRequiredWidth(float requiredWidth)
 {
     this->requiredWidth = requiredWidth;

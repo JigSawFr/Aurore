@@ -126,6 +126,8 @@ class Label : public View
     NVGcolor getTextColor();
 
     std::string getFullText();
+    // The text as laid out does not fit: it is drawn cut, with an ellipsis.
+    bool isTruncated();
 
     static View* create();
 
