@@ -89,7 +89,8 @@ class List
     // A status tile's pill under its value ("23.0.1 available"; empty: none):
     // in amber on its amber ground, the tile outlined in amber, when `warn`
     // (something to do), else in the calm pill colours ("Up to date"); and
-    // `note` under it, smaller ("2 versions behind"; empty: none).
+    // `note` under it, smaller ("2 versions behind"; empty: none), in amber
+    // when `warn`. A note without a pill stands alone.
     void tag(const char* id, const std::string& text, bool warn, const std::string& note = "");
 
     // A tile's head (its icon's row, an action tile's title in it too), for a
