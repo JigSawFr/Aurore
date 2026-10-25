@@ -301,6 +301,15 @@ class View
     std::set<std::string> knownAttributes;
 
     void registerCommonAttributes();
+
+    // The common XML attributes are registered when first needed (an XML
+    // attribute applied or checked), not by every View's constructor: 76
+    // handlers per view, for the many views built in code that never read
+    // one. Registered then without replacing a subclass's own handler for
+    // the same name (registered first, in its constructor).
+    void ensureCommonAttributes();
+    bool commonAttributesRegistered  = false;
+    bool registeringCommonAttributes = false;
     void printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::string name, std::string value);
 
     unsigned maximumAllowedXMLElements = UINT_MAX;
