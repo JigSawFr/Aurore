@@ -887,9 +887,9 @@ void Application::setSwapInterval(int interval)
     Application::platform->getVideoContext()->setSwapInterval(interval);
 }
 
-void Application::notify(const std::string& text)
+void Application::notify(const std::string& text, View* leading)
 {
-    Application::notificationManager->notify(text);
+    Application::notificationManager->notify(text, leading);
 }
 
 void Application::giveFocus(View* view)

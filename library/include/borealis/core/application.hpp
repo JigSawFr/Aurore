@@ -190,7 +190,7 @@ class Application
 
     static int getDefaultFont();
 
-    static void notify(const std::string& text);
+    static void notify(const std::string& text, View* leading = nullptr);
 
     static void onControllerButtonPressed(enum ControllerButton button, bool repeating);
 
