@@ -58,6 +58,7 @@
 #error Please enable Yoga events with the YG_ENABLE_EVENTS define
 #endif
 
+#include <borealis/cadran.hpp>
 #include <chrono>
 #include <set>
 #include <thread>
@@ -92,6 +93,9 @@ bool Application::init()
 
     // Init i18n
     loadTranslations();
+    // Cadran: the preferences' language in place of the console's
+    if (Application::cadran)
+        cadran::start();
 
     Threading::start();
 
@@ -156,6 +160,10 @@ void Application::createWindow(std::string windowTitle)
 
     // Register built-in XML views
     Application::registerBuiltInXMLViews();
+
+    // Cadran's look, from the first screen on
+    if (Application::cadran)
+        cadran::start_window();
 
     Application::getWindowCreationDoneEvent()->fire();
 }

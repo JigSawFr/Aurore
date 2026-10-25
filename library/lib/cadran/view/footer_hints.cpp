@@ -136,6 +136,10 @@ void FooterHints::draw(NVGcontext* vg, float x, float y, float width, float heig
 
 void FooterHints::install()
 {
+    // Again (Application::createWindow, then an app of its own): once is enough.
+    static bool done = false;
+    if (done) return;
+    done = true;
     brls::Application::registerXMLView("brls:Hints", FooterHints::create);
 }
 

@@ -26,7 +26,7 @@ Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like
 It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. The code keeps borealis' names (`brls`, `borealis.hpp`), so a borealis app moves to Aurore by changing its submodule.
 
 > [!IMPORTANT]
-> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is part of Aurore and becomes its default look next. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
+> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's default look: an app gets it without a line of code, and `brls::Application::setCadran(false)` keeps borealis' own. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
 
 ## ✨ Features
 

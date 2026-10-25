@@ -67,6 +67,9 @@ static void badge_screen_of(brls::View* focus)
     // Not on the child screen: a version means nothing to a child, and its
     // amber reads as a warning.
     if (frame && frame->getView("child_root")) return;
+    // An app that says no version (ui::hooks' version) gets no badge.
+    const auto& version = ui::hooks::get().version;
+    if (!version || version().empty()) return;
     auto* label = frame ? frame->getView("brls/applet_frame/title_label") : nullptr;
     auto* row   = label ? dynamic_cast<brls::Box*>(label->getParent()) : nullptr;
     if (!row || row->getView(BADGE_ID)) return;
@@ -91,5 +94,8 @@ brls::Box* VersionBadge::header_tools(brls::AppletFrame* frame)
 
 void VersionBadge::install()
 {
+    static bool done = false;
+    if (done) return;
+    done = true;
     brls::Application::getGlobalFocusChangeEvent()->subscribe(badge_screen_of);
 }
