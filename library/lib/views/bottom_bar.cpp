@@ -122,7 +122,7 @@ void BottomBar::updateText()
     auto tm = *std::localtime(&in_time_t);
 #endif
     std::stringstream ss;
-    ss << std::put_time(&tm, "%H:%M:%S");
+    ss << std::put_time(&tm, "%H:%M");
     if (ss.str() != bottomText)
     {
         bottomText = ss.str();
