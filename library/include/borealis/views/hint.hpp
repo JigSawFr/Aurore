@@ -25,6 +25,12 @@
 namespace brls
 {
 
+// The footer's hints and clock with a larger text (Label::setFontScale):
+// drawn at most `max` times their size (1 by default: they keep theirs),
+// smaller again when the footer has no room for them.
+void setHintsFontScaleMax(float max);
+float getHintsFontScaleMax();
+
 class Hint : public Box
 {
   public:

@@ -59,6 +59,11 @@ Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
 {
     this->inflateFromXMLString(hintXML);
     this->setFocusable(false);
+    // The bottom bar has little room to grow: its hints at most this larger.
+    icon->setFontScaleMax(getHintsFontScaleMax());
+    icon->setShrinkToFit(true);
+    hint->setFontScaleMax(getHintsFontScaleMax());
+    hint->setShrinkToFit(true);
 
     icon->setText(getKeyIcon(static_cast<ControllerButton>(action->getButton())));
     hint->setText(action->getHintText());
@@ -121,6 +126,18 @@ std::string Hint::getKeyIcon(ControllerButton button, bool ignoreKeysSwap)
         default:
             return "\uE152";
     }
+}
+
+static float hintsFontScaleMax = 1.0f;
+
+void setHintsFontScaleMax(float max)
+{
+    hintsFontScaleMax = max;
+}
+
+float getHintsFontScaleMax()
+{
+    return hintsFontScaleMax;
 }
 
 Hints::Hints()

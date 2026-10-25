@@ -15,6 +15,7 @@
 */
 
 #include <borealis/views/bottom_bar.hpp>
+#include <borealis/views/hint.hpp>
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -91,6 +92,8 @@ const std::string bottomBarXML = R"xml(
 BottomBar::BottomBar()
 {
     this->inflateFromXMLString(bottomBarXML);
+    // Little room to grow: the clock as large as the hints.
+    time->setFontScaleMax(getHintsFontScaleMax());
 
     Platform* platform = Application::getPlatform();
     battery->setVisibility(platform->canShowBatteryLevel() ? Visibility::VISIBLE : Visibility::GONE);
