@@ -30,7 +30,8 @@ namespace brls
 class Notification : public Box
 {
   public:
-    explicit Notification(const std::string& text);
+    // `leading` (an icon, owned by the notification) before the text.
+    explicit Notification(const std::string& text, View* leading = nullptr);
     ~Notification() override;
 
     Animatable timeoutTimer;
@@ -45,7 +46,7 @@ class NotificationManager : public Box
     NotificationManager();
     ~NotificationManager() override;
 
-    void notify(const std::string& text);
+    void notify(const std::string& text, View* leading = nullptr);
 };
 
 }; // namespace brls

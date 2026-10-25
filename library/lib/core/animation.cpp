@@ -98,10 +98,16 @@ bool Animatable::operator==(const float value)
 static double highlightGradientX = 0;
 static double highlightGradientY = 0;
 static double highlightColor     = 0;
+static bool highlightStill       = false;
+
+void setHighlightAnimationStill(bool still)
+{
+    highlightStill = still;
+}
 
 void updateHighlightAnimation()
 {
-    if (!Application::hasActiveEvent())
+    if (highlightStill || !Application::hasActiveEvent())
         return;
 
     Time currentTime = getCPUTimeUsec() / 1000;

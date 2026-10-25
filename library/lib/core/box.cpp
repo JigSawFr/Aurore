@@ -418,6 +418,11 @@ float Box::getColumnGap()
 
 View* Box::getDefaultFocus()
 {
+    // Out of sight, nothing in it takes the focus: a child still visible in
+    // a hidden box would otherwise get it (as isFocusable() does for a view).
+    if (this->getVisibility() != Visibility::VISIBLE)
+        return nullptr;
+
     // Focus ourself first
     if (this->isFocusable())
         return this;

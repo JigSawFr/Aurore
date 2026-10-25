@@ -301,6 +301,15 @@ class View
     std::set<std::string> knownAttributes;
 
     void registerCommonAttributes();
+
+    // The common XML attributes are registered when first needed (an XML
+    // attribute applied or checked), not by every View's constructor: 76
+    // handlers per view, for the many views built in code that never read
+    // one. Registered then without replacing a subclass's own handler for
+    // the same name (registered first, in its constructor).
+    void ensureCommonAttributes();
+    bool commonAttributesRegistered  = false;
+    bool registeringCommonAttributes = false;
     void printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::string name, std::string value);
 
     unsigned maximumAllowedXMLElements = UINT_MAX;
@@ -764,6 +773,14 @@ class View
      * Sets the id of the view.
      */
     void setId(std::string id);
+
+    /**
+     * The view's id (setId, or the XML's id attribute), "" for none.
+     */
+    const std::string& getId() const
+    {
+        return this->id;
+    }
 
     /**
      * Overrides align items of the parent box.

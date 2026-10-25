@@ -1,5 +1,6 @@
 #include <nanovg/dk_renderer.hpp>
 
+#include <algorithm>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -110,7 +111,9 @@ namespace nvg {
     {
         printf("DkRenderer create\n");
         /* Create a dynamic command buffer and allocate memory for it. */
-        m_dyn_cmd_buf = dk::CmdBufMaker{m_device}.create();
+        /* PlayGuard: a frame of more draws than DynamicCmdSize holds asks for
+           more memory (AddCmdMemory) instead of aborting the app. */
+        m_dyn_cmd_buf = dk::CmdBufMaker{m_device}.setUserData(this).setCbAddMem(AddCmdMemory).create();
         m_dyn_cmd_mem.allocate(m_data_mem_pool, DynamicCmdSize);
 
         m_image_descriptor_set.allocate(m_data_mem_pool);
@@ -151,7 +154,25 @@ namespace nvg {
         init_cmd_buf.destroy();
     }
 
+    void DkRenderer::AddCmdMemory(void *user_data, DkCmdBuf cmdbuf, size_t min_size) {
+        DkRenderer *self = static_cast<DkRenderer *>(user_data);
+        const size_t size = std::max(min_size, ExtraCmdSize);
+        CMemPool::Handle mem = self->m_data_mem_pool.allocate(size, DK_CMDMEM_ALIGNMENT);
+        /* Left without memory, deko3d raises DkResult_OutOfMemory itself. */
+        if (!mem) return;
+        dkCmdBufAddMemory(cmdbuf, mem.getMemBlock(), mem.getOffset(), mem.getSize());
+        self->m_dyn_cmd_extra.push_back(mem);
+    }
+
+    void DkRenderer::ReleaseExtraCmdMemory() {
+        for (CMemPool::Handle &mem : m_dyn_cmd_extra) {
+            mem.destroy();
+        }
+        m_dyn_cmd_extra.clear();
+    }
+
     DkRenderer::~DkRenderer() {
+        ReleaseExtraCmdMemory();
         if (m_vertex_buffer) {
             m_vertex_buffer->destroy();
         }
@@ -560,6 +581,9 @@ namespace nvg {
         if (ctx.ncalls > 0) {
             /* Prepare dynamic command buffer. */
             m_dyn_cmd_mem.begin(m_dyn_cmd_buf);
+            /* PlayGuard: begin() waited for the last frame's commands, so the
+               memory they took past DynamicCmdSize is free again. */
+            ReleaseExtraCmdMemory();
 
             /* Update buffers with data. */
             this->UpdateVertexBuffer(ctx.verts, ctx.nverts * sizeof(NVGvertex));

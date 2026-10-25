@@ -96,6 +96,25 @@ class Label : public View
     void setVerticalAlign(VerticalAlign align);
 
     void setFontSize(float value);
+    // Every label drawn `scale` times its size (1 by default), but those
+    // that keep theirs (setFontScaled(false)). It can change at any time:
+    // the labels then need laying out again (their nodes marked dirty).
+    // getFontSize() gives the size asked.
+    static void setFontScale(float scale);
+    static float getFontScale();
+    void setFontScaled(bool scaled);
+    // This label drawn at most `max` times its size, whatever the scale
+    // (with a scale of 1, as asked: nothing changes).
+    void setFontScaleMax(float max);
+    // A single line its box is too narrow for, at a scale above 1: drawn
+    // smaller until it fits, never below the size asked (then cut as
+    // before), rather than wrapped. Nothing changes at a scale of 1.
+    void setShrinkToFit(bool shrink);
+    bool isShrinkingToFit();
+    // The size it is drawn at, and the same before any shrinking to fit
+    // (what the text is measured at).
+    float getDrawnFontSize();
+    float getFullFontSize();
     void setFontQuality(float value);
     void setLineHeight(float value);
     void setTextColor(NVGcolor color);
@@ -107,6 +126,8 @@ class Label : public View
     NVGcolor getTextColor();
 
     std::string getFullText();
+    // The text as laid out does not fit: it is drawn cut, with an ellipsis.
+    bool isTruncated();
 
     static View* create();
 
@@ -150,6 +171,7 @@ class Label : public View
     static std::string STConverter(const std::string& text);
 
     static inline bool OPENCC_ON = true;
+    static inline float FONT_SCALE = 1.0f;
     void setCursor(int cursor);
 
   protected:
@@ -158,6 +180,12 @@ class Label : public View
 
     int font;
     float fontSize;
+    bool fontScaled = true;
+    float fontScaleMax = 1e6f;
+    bool shrinkToFit   = false;
+    float fitScale     = 1.0f;   // from onLayout, when shrinkToFit
+    float fittedWidth  = 0;      // the text's width at that scale
+    float textWidth();           // the text's width as drawn
     float lineHeight;
     float fontQuality;
 

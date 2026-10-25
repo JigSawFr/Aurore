@@ -32,16 +32,23 @@ NotificationManager::NotificationManager()
     this->setAxis(Axis::COLUMN);
 }
 
-void NotificationManager::notify(const std::string& text)
+void NotificationManager::notify(const std::string& text, View* leading)
 {
     // Create the notification
     brls::Logger::debug("Showing notification \"{}\"", text);
 
-    auto* notification = new Notification(text);
+    auto* notification = new Notification(text, leading);
     this->addView(notification, 0);
 
+    // Where the stack sits, from the style as it is now (an app may set it
+    // after the manager is made)
+    auto style  = Application::getStyle();
+    float width = style.getMetric("brls/notification/width");
+    this->setWidth(width);
+    this->setTranslationX(Application::ORIGINAL_WINDOW_WIDTH - width - style.getMetric("brls/notification/margin_right"));
+    this->setTranslationY(style.getMetric("brls/notification/margin_top"));
+
     // Timeout timer
-    auto style    = Application::getStyle();
     float timeout = style.getMetric("brls/animations/notification_timeout");
     float show    = style.getMetric("brls/animations/notification_show");
     float slide   = style.getMetric("brls/notification/slide");
@@ -73,17 +80,27 @@ NotificationManager::~NotificationManager()
     }
 }
 
-Notification::Notification(const std::string& text)
+Notification::Notification(const std::string& text, View* leading)
 {
-    this->setBackground(ViewBackground::BACKDROP);
     auto style    = Application::getStyle();
+    Theme theme   = Application::getTheme();
+    this->setBackgroundColor(theme["brls/notification/background"]);
+    this->setCornerRadius(style.getMetric("brls/notification/corner_radius"));
+    this->setMarginBottom(style.getMetric("brls/notification/spacing"));
     float padding = style.getMetric("brls/notification/padding");
     this->setPadding(padding);
     float width = style.getMetric("brls/notification/width");
     this->setWidth(width);
     this->label = new Label();
     this->label->setText(text);
-    this->label->setTextColor(RGB(255, 255, 255));
+    this->label->setTextColor(theme["brls/notification/text"]);
+    if (leading) {
+        // The text beside it, wrapping in what is left.
+        this->setAlignItems(AlignItems::CENTER);
+        this->addView(leading);
+        this->label->setGrow(1.0f);
+        this->label->setWidth(0);
+    }
     this->addView(label);
 }
 

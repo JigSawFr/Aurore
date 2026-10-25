@@ -40,6 +40,10 @@ static StyleValues styleValues = {
     { "brls/notification/width", 280.0f },
     { "brls/notification/padding", 16.0f },
     { "brls/notification/slide", 40.0f },
+    { "brls/notification/corner_radius", 0.0f },
+    { "brls/notification/margin_top", 0.0f },
+    { "brls/notification/margin_right", 0.0f },
+    { "brls/notification/spacing", 0.0f },
 
     // Highlight
     { "brls/highlight/stroke_width", 5.0f },

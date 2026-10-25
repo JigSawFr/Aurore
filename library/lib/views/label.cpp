@@ -106,7 +106,7 @@ static YGSize labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthM
     }
 
     // Setup nvg state for the measurements
-    nvgFontSize(vg, label->getFontSize());
+    nvgFontSize(vg, label->getFullFontSize());
     nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
     nvgFontFaceId(vg, label->getFont());
     nvgTextLineHeight(vg, label->getLineHeight());
@@ -147,7 +147,18 @@ static YGSize labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthM
     // Measure the required height, with wrapping
 
     // Is wrapping necessary and allowed ?
-    if ((availableWidth < requiredWidth || fullText.find("\n") != std::string::npos) && !label->isSingleLine())
+    // (Not when it shrinks to fit instead: on one line at its size or larger.)
+    bool fits = false;
+    if (availableWidth < requiredWidth && label->isShrinkingToFit() && label->getFullFontSize() > label->getFontSize()
+        && fullText.find("\n") == std::string::npos)
+    {
+        float small[4];
+        nvgFontSize(vg, label->getFontSize());
+        nvgTextBounds(vg, 0, 0, fullText.c_str(), nullptr, small);
+        nvgFontSize(vg, label->getFullFontSize());
+        fits = small[2] - small[0] - 0.5f <= availableWidth;
+    }
+    if ((availableWidth < requiredWidth || fullText.find("\n") != std::string::npos) && !label->isSingleLine() && !fits)
     {
         float boxBounds[4];
         nvgTextBoxBounds(vg, 0, 0, availableWidth, fullText.c_str(), nullptr, boxBounds);
@@ -353,18 +364,29 @@ void Label::setText(const std::string& text)
     static bool trans = Application::getLocale() == LOCALE_ZH_HANT || Application::getLocale() == LOCALE_ZH_TW;
     if (trans && OPENCC_ON)
     {
-        this->truncatedText = Label::STConverter(text);
-        this->fullText      = this->truncatedText;
+        const std::string converted = Label::STConverter(text);
+        // The same text: nothing to lay out again (invalidate() lays the
+        // whole screen out).
+        if (converted == this->fullText)
+            return;
+        this->truncatedText = converted;
+        this->fullText      = converted;
         this->stringLength  = strLen(this->fullText);
     }
     else
     {
+        if (text == this->fullText)
+            return;
         this->truncatedText = text;
         this->fullText      = text;
         this->stringLength  = strLen(this->fullText);
     }
     this->invalidate();
 #else
+    // The same text: nothing to lay out again (invalidate() lays the whole
+    // screen out).
+    if (text == this->fullText)
+        return;
     this->truncatedText = text;
     this->fullText      = text;
     this->stringLength  = strLen(text);
@@ -385,6 +407,62 @@ void Label::setFontSize(float value)
     this->fontSize = value;
 
     this->invalidate();
+}
+
+void Label::setFontScale(float scale)
+{
+    FONT_SCALE = scale;
+}
+
+float Label::getFontScale()
+{
+    return FONT_SCALE;
+}
+
+void Label::setFontScaled(bool scaled)
+{
+    this->fontScaled = scaled;
+
+    this->invalidate();
+}
+
+void Label::setFontScaleMax(float max)
+{
+    if (max == this->fontScaleMax)
+        return;
+    this->fontScaleMax = max;
+
+    YGNodeMarkDirty(this->ygNode);
+    this->invalidate();
+}
+
+void Label::setShrinkToFit(bool shrink)
+{
+    this->shrinkToFit = shrink;
+
+    this->invalidate();
+}
+
+bool Label::isShrinkingToFit()
+{
+    return this->shrinkToFit;
+}
+
+float Label::getFullFontSize()
+{
+    if (!this->fontScaled)
+        return this->fontSize;
+    return this->fontSize * std::min(FONT_SCALE, this->fontScaleMax);
+}
+
+float Label::getDrawnFontSize()
+{
+    return this->getFullFontSize() * this->fitScale;
+}
+
+float Label::textWidth()
+{
+    return this->shrinkToFit ? this->fittedWidth : this->requiredWidth;
 }
 
 void Label::setFontQuality(float value)
@@ -450,7 +528,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     enum NVGalign vertAlign  = this->getNVGVerticalAlign();
     int cursor_position = -1;
 
-    nvgFontSize(vg, this->fontSize);
+    nvgFontSize(vg, this->getDrawnFontSize());
     nvgTextAlign(vg, horizAlign | vertAlign);
     nvgFontFaceId(vg, this->font);
     nvgFontQuality(vg, this->fontQuality);
@@ -469,7 +547,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     if (this->animating)
     {
         nvgSave(vg);
-        float scissorHeight = fontSize * lineHeight;
+        float scissorHeight = this->getDrawnFontSize() * lineHeight;
         nvgIntersectScissor(vg, x, y, width, scissorHeight < height ? height : scissorHeight);
 
         float baseX   = x - this->scrollingAnimation;
@@ -478,7 +556,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
         nvgText(vg, baseX, y + height / 2.0f, this->fullText.c_str(), nullptr);
 
         if (this->scrollingAnimation > 0)
-            nvgText(vg, baseX + this->requiredWidth + spacing, y + height / 2.0f, this->fullText.c_str(), nullptr);
+            nvgText(vg, baseX + this->textWidth() + spacing, y + height / 2.0f, this->fullText.c_str(), nullptr);
 
         nvgRestore(vg);
     }
@@ -528,7 +606,7 @@ void Label::onScrollTimerFinished()
     Style style = Application::getStyle();
 
     // Step 2: actual scrolling animation
-    float target   = this->requiredWidth + style["brls/label/scrolling_animation_spacing"];
+    float target   = this->textWidth() + style["brls/label/scrolling_animation_spacing"];
     float duration = target / style["brls/animations/label_scrolling_speed"];
 
     this->scrollingAnimation.reset();
@@ -575,7 +653,7 @@ void Label::resetScrollingAnimation()
     {
         float width = this->getWidth();
 
-        if (width < this->requiredWidth)
+        if (width < this->textWidth())
             this->startScrollTimer();
     }
 }
@@ -590,13 +668,42 @@ void Label::onLayout()
         return;
     }
 
+    // Too narrow for its larger text: smaller, down to the size asked
+    // (requiredWidth is measured at the full size).
+    float required = this->requiredWidth;
+    this->fitScale = 1.0f;
+    if (this->shrinkToFit && !this->fullText.empty() && width < required && !this->isWrapping)
+    {
+        const float full = this->getFullFontSize();
+        if (full > this->fontSize)
+        {
+            auto vg = Application::getNVGContext();
+            nvgFontFaceId(vg, this->font);
+            nvgTextLineHeight(vg, this->lineHeight);
+            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+            float bounds[4];
+            float size = std::max(this->fontSize, full * width / required);
+            for (;;)
+            {
+                nvgFontSize(vg, size);
+                nvgTextBounds(vg, 0, 0, this->fullText.c_str(), nullptr, bounds);
+                required = bounds[2] - bounds[0] - 0.5f;
+                if (required <= width || size <= this->fontSize)
+                    break;
+                size = std::max(this->fontSize, size - 0.25f);
+            }
+            this->fitScale = size / full;
+        }
+    }
+    this->fittedWidth = required;
+
     // Prebake clipping
-    if (!this->fullText.empty() && width < this->requiredWidth && !this->isWrapping)
+    if (!this->fullText.empty() && width < required && !this->isWrapping)
     {
         // Compute the position of the ellipsis (in chars), should the string be truncated
         // Cannot do it in the measure function because the margins are not applied yet there
         auto vg = Application::getNVGContext();
-        nvgFontSize(vg, this->fontSize);
+        nvgFontSize(vg, this->getDrawnFontSize());
         nvgTextAlign(vg, this->getNVGHorizontalAlign() | this->getNVGVerticalAlign());
         nvgFontFaceId(vg, this->font);
         nvgTextLineHeight(vg, this->lineHeight);
@@ -656,6 +763,11 @@ NVGcolor Label::getTextColor()
 std::string Label::getFullText()
 {
     return this->fullText;
+}
+
+bool Label::isTruncated()
+{
+    return this->truncatedText != this->fullText;
 }
 
 void Label::setRequiredWidth(float requiredWidth)

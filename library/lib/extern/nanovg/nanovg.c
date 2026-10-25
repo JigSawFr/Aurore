@@ -2863,7 +2863,6 @@ int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, floa
 			case 9:			// \t
 			case 11:		// \v
 			case 12:		// \f
-			case 0x00a0:	// NBSP
 				type = NVG_CONTROL;
 				break;
 			case 10:		// \n
@@ -2959,9 +2958,11 @@ int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, floa
 				if (((type == NVG_CHAR || type == NVG_CJK_CHAR || type == NVG_SPACE) && ptype == NVG_CONTROL) ||
                     ((ptype == NVG_CJK_CHAR || ptype == NVG_SPACE) && type == NVG_CHAR) ||
                     type == NVG_CJK_CHAR || type == NVG_SPACE) {
-					wordStart = iter.str;
-					wordStartX = iter.x;
-					wordMinX = q.x0;
+					// After a space, the word begins with the next character: a
+					// line broken there does not start with the space.
+					wordStart = type == NVG_SPACE ? iter.next : iter.str;
+					wordStartX = type == NVG_SPACE ? iter.nextx : iter.x;
+					wordMinX = type == NVG_SPACE ? iter.nextx : q.x0;
                     lastWordSize += wordSize;
                     wordSize = 0;
 				}

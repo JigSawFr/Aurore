@@ -71,8 +71,8 @@ View::View()
     YGNodeStyleSetWidthAuto(this->ygNode);
     YGNodeStyleSetHeightAuto(this->ygNode);
 
-    // Register common XML attributes
-    this->registerCommonAttributes();
+    // The common XML attributes: registered when first needed
+    // (ensureCommonAttributes()).
 
     // Default values
     Style style = Application::getStyle();
@@ -918,6 +918,15 @@ void View::setDimensions(float width, float height)
 
 void View::setWidth(float width)
 {
+    // The same width: nothing to lay out again (invalidate() lays the whole
+    // screen out). Set as below: the width and the minimum in points, or
+    // both automatic.
+    const YGValue current = YGNodeStyleGetWidth(this->ygNode);
+    const YGValue minimum = YGNodeStyleGetMinWidth(this->ygNode);
+    if (width == View::AUTO ? current.unit == YGUnitAuto && minimum.unit == YGUnitUndefined
+                         : current.unit == YGUnitPoint && current.value == width && minimum.unit == YGUnitPoint && minimum.value == width)
+        return;
+
     YGNodeStyleSetMinWidthPercent(this->ygNode, 0);
 
     if (width == View::AUTO)
@@ -936,6 +945,15 @@ void View::setWidth(float width)
 
 void View::setHeight(float height)
 {
+    // The same height: nothing to lay out again (invalidate() lays the whole
+    // screen out). Set as below: the height and the minimum in points, or
+    // both automatic.
+    const YGValue current = YGNodeStyleGetHeight(this->ygNode);
+    const YGValue minimum = YGNodeStyleGetMinHeight(this->ygNode);
+    if (height == View::AUTO ? current.unit == YGUnitAuto && minimum.unit == YGUnitUndefined
+                         : current.unit == YGUnitPoint && current.value == height && minimum.unit == YGUnitPoint && minimum.value == height)
+        return;
+
     YGNodeStyleSetMinHeightPercent(this->ygNode, 0);
 
     if (height == View::AUTO)
@@ -1594,8 +1612,20 @@ std::string View::getFilePathXMLAttributeValue(std::string value)
     return value;
 }
 
+void View::ensureCommonAttributes()
+{
+    if (this->commonAttributesRegistered)
+        return;
+    this->commonAttributesRegistered  = true;
+    this->registeringCommonAttributes = true;
+    this->registerCommonAttributes();
+    this->registeringCommonAttributes = false;
+}
+
 bool View::applyXMLAttribute(std::string name, std::string value)
 {
+    this->ensureCommonAttributes();
+
     // String -> string
     if (this->stringAttributes.count(name) > 0)
     {
@@ -1850,6 +1880,7 @@ void View::applyXMLAttributes(tinyxml2::XMLElement* element)
 
 bool View::isXMLAttributeValid(std::string attributeName)
 {
+    this->ensureCommonAttributes();
     return this->knownAttributes.count(attributeName) > 0;
 }
 
@@ -2408,6 +2439,7 @@ Visibility View::getVisibility()
 
 void View::printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::string name, std::string value)
 {
+    this->ensureCommonAttributes();
     if (this->knownAttributes.find(name) != this->knownAttributes.end())
         fatal("Illegal value \"" + value + "\" for \"" + std::string(element->Name()) + "\" XML attribute \"" + name + "\"");
     else
@@ -2416,42 +2448,56 @@ void View::printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::str
 
 void View::registerFloatXMLAttribute(std::string name, FloatAttributeHandler handler)
 {
+    if (this->registeringCommonAttributes && this->floatAttributes.count(name) > 0)
+        return;   // the subclass's own, registered first
     this->floatAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
 
 void View::registerPercentageXMLAttribute(std::string name, FloatAttributeHandler handler)
 {
+    if (this->registeringCommonAttributes && this->percentageAttributes.count(name) > 0)
+        return;   // the subclass's own, registered first
     this->percentageAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
 
 void View::registerAutoXMLAttribute(std::string name, AutoAttributeHandler handler)
 {
+    if (this->registeringCommonAttributes && this->autoAttributes.count(name) > 0)
+        return;   // the subclass's own, registered first
     this->autoAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
 
 void View::registerStringXMLAttribute(std::string name, StringAttributeHandler handler)
 {
+    if (this->registeringCommonAttributes && this->stringAttributes.count(name) > 0)
+        return;   // the subclass's own, registered first
     this->stringAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
 
 void View::registerColorXMLAttribute(std::string name, ColorAttributeHandler handler)
 {
+    if (this->registeringCommonAttributes && this->colorAttributes.count(name) > 0)
+        return;   // the subclass's own, registered first
     this->colorAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
 
 void View::registerBoolXMLAttribute(std::string name, BoolAttributeHandler handler)
 {
+    if (this->registeringCommonAttributes && this->boolAttributes.count(name) > 0)
+        return;   // the subclass's own, registered first
     this->boolAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
 
 void View::registerFilePathXMLAttribute(std::string name, FilePathAttributeHandler handler)
 {
+    if (this->registeringCommonAttributes && this->filePathAttributes.count(name) > 0)
+        return;   // the subclass's own, registered first
     this->filePathAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }

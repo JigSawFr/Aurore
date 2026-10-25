@@ -102,4 +102,8 @@ class Animatable : public FiniteTicking
 void updateHighlightAnimation();
 void getHighlightAnimation(float* gradient_x, float* gradient_y, float* color);
 
+// Holds the focus highlight's moving glow where it is, so that a screenshot
+// does not depend on when it was taken.
+void setHighlightAnimationStill(bool still);
+
 } // namespace brls

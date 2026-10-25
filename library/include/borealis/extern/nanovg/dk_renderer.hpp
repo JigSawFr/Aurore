@@ -157,6 +157,7 @@ namespace nvg {
             };
         private:
             static constexpr size_t DynamicCmdSize = 0x20000;
+            static constexpr size_t ExtraCmdSize = 0x10000;
             static constexpr size_t FragmentUniformSize = sizeof(DKNVGfragUniforms) + 4 - sizeof(DKNVGfragUniforms) % 4;
             static constexpr size_t MaxImages = 0x1000;
 
@@ -172,6 +173,9 @@ namespace nvg {
             /* State. */
             dk::UniqueCmdBuf m_dyn_cmd_buf;
             CCmdMemRing<1> m_dyn_cmd_mem;
+            /* PlayGuard: what a frame took past DynamicCmdSize (AddCmdMemory),
+               given back at the start of the next one. */
+            std::vector<CMemPool::Handle> m_dyn_cmd_extra;
             std::optional<CMemPool::Handle> m_vertex_buffer;
             CShader m_vertex_shader;
             CShader m_fragment_shader;
@@ -191,6 +195,8 @@ namespace nvg {
             int FindFreeImageDescriptor() const;
             void TrimImageDescriptorTail();
             void SetUniforms(const DKNVGcontext &ctx, int offset, int image);
+            static void AddCmdMemory(void *user_data, DkCmdBuf cmdbuf, size_t min_size);
+            void ReleaseExtraCmdMemory();
 
             void UpdateVertexBuffer(const void *data, size_t size);
 

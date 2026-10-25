@@ -85,6 +85,13 @@ std::string getStr(std::string stringName, Args&&... args)
  */
 void loadTranslations();
 
+/**
+ * Loads the translations of `locale` in place of the current ones, while the
+ * app runs (the platform's locale is left as it is): the strings read after
+ * it are in that language
+ */
+void loadTranslations(const std::string& locale);
+
 inline namespace literals
 {
     /**

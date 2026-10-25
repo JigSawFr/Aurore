@@ -887,9 +887,9 @@ void Application::setSwapInterval(int interval)
     Application::platform->getVideoContext()->setSwapInterval(interval);
 }
 
-void Application::notify(const std::string& text)
+void Application::notify(const std::string& text, View* leading)
 {
-    Application::notificationManager->notify(text);
+    Application::notificationManager->notify(text, leading);
 }
 
 void Application::giveFocus(View* view)
@@ -1305,12 +1305,14 @@ int Application::getFont(std::string fontName)
 
 int Application::getDefaultFont()
 {
+    // Looked up for each label, not once: an app may register another font
+    // under that name while it runs (a language with its own font), and the
+    // labels made after it use it.
 #ifdef __SWITCH__
-    static int regular = Application::getFont(FONT_CHINESE_SIMPLIFIED);
+    return Application::getFont(FONT_CHINESE_SIMPLIFIED);
 #else
-    static int regular = Application::getFont(FONT_REGULAR);
+    return Application::getFont(FONT_REGULAR);
 #endif
-    return regular;
 }
 
 bool Application::XMLViewsRegisterContains(std::string name)
