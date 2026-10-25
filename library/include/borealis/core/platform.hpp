@@ -272,7 +272,9 @@ class Platform
     /**
      * App locale, empty for default
      */
-    static inline std::string APP_LOCALE_DEFAULT = LOCALE_AUTO;
+    // From the text itself, not LOCALE_AUTO: that is another const string in
+    // each file (internal linkage), not yet built when this inline one is.
+    static inline std::string APP_LOCALE_DEFAULT = "auto";
 };
 
 } // namespace brls
