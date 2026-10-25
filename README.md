@@ -8,7 +8,7 @@
 
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](#-use-it-in-your-project)
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
-[![license: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
 [**What's new**](#-what-aurore-adds) ·
 [**Use&nbsp;it**](#-use-it-in-your-project) ·
@@ -25,8 +25,8 @@ Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like
 
 It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. The code keeps borealis' names (`brls`, `borealis.hpp`), so a borealis app moves to Aurore by changing its submodule.
 
-> [!NOTE]
-> **Coming next:** *Cadran*, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), becomes Aurore's default look. Cadran is GPLv3: once it is in, an app built with Aurore is GPLv3.
+> [!IMPORTANT]
+> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is part of Aurore and becomes its default look next. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
 
 ## ✨ Features
 
@@ -147,7 +147,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 2. Add Aurore as a submodule:
 
    ```sh
-   git submodule add -b wiliwili https://github.com/JigSawFr/borealis.git library/borealis
+   git submodule add -b main https://github.com/JigSawFr/aurore.git library/aurore
    git submodule update --init --recursive
    ```
 
@@ -161,8 +161,8 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 On Windows, macOS or Linux:
 
 ```sh
-git clone --recursive https://github.com/JigSawFr/borealis.git
-cd borealis
+git clone --recursive https://github.com/JigSawFr/aurore.git
+cd aurore
 cmake -B build_pc -DPLATFORM_DESKTOP=ON
 cmake --build build_pc
 ./build_pc/borealis_demo
@@ -187,11 +187,11 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 
 ## 🤝 Contributing
 
-The default branch is `wiliwili`, as upstream's. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/). A fix that is not specific to Aurore is worth sending [upstream](https://github.com/xfangfang/borealis) too.
+The default branch is `main`; upstream's is `wiliwili`. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/). A fix that is not specific to Aurore is worth sending [upstream](https://github.com/xfangfang/borealis) too.
 
 ## 📜 License and credits
 
-**Apache 2.0**, see [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE). Maintained by [JigSawFr](https://github.com/JigSawFr).
+borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`LICENSE.GPL`](LICENSE.GPL)), and so is an app built with it. [`NOTICE`](NOTICE) says which is which, and the licences of what is bundled (QR Code generator, Twemoji, Sora). Maintained by [JigSawFr](https://github.com/JigSawFr).
 
 <details>
 <summary>Credits</summary>
