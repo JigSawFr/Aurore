@@ -1,0 +1,107 @@
+{
+    "date": "{1}, {2} de {3}",
+    "months": {
+        "1": "janeiro",
+        "2": "fevereiro",
+        "3": "março",
+        "4": "abril",
+        "5": "maio",
+        "6": "junho",
+        "7": "julho",
+        "8": "agosto",
+        "9": "setembro",
+        "10": "outubro",
+        "11": "novembro",
+        "12": "dezembro"
+    },
+    "pill": {
+        "read_only": "Só de leitura"
+    },
+    "common": {
+        "hold_hint": "Mantenha «{}» premido durante 2 segundos",
+        "hours": "{} h",
+        "hours_minutes": "{} h {}",
+        "less_than_minute": "< 1 min",
+        "minutes": "{} min",
+        "no": "Não",
+        "unavailable": "Indisponível",
+        "yes": "Sim"
+    },
+    "days": {
+        "0": "Domingo",
+        "1": "Segunda-feira",
+        "2": "Terça-feira",
+        "3": "Quarta-feira",
+        "4": "Quinta-feira",
+        "5": "Sexta-feira",
+        "6": "Sábado"
+    },
+    "days_lower": {
+        "0": "domingo",
+        "1": "segunda-feira",
+        "2": "terça-feira",
+        "3": "quarta-feira",
+        "4": "quinta-feira",
+        "5": "sexta-feira",
+        "6": "sábado"
+    },
+    "error": {
+        "code": "erro {}"
+    },
+    "markdown": {
+        "note": "Nota",
+        "tip": "Dica",
+        "important": "Importante",
+        "warning": "Aviso",
+        "caution": "Cuidado"
+    },
+    "notices": {
+        "send_report": "Enviar um relatório"
+    },
+    "prefs": {
+        "text_size": "Tamanho do texto",
+        "text_sizes": {
+            "normal": "Normal",
+            "large": "Maior",
+            "auto": "Automático: maior na TV"
+        }
+    },
+    "quick": {
+        "title_text": "Idioma, tema e tamanho do texto"
+    },
+    "tiles": {
+        "text_size_auto": "Auto: maior na TV",
+        "themes": {
+            "system": "Sistema",
+            "light": "Claro",
+            "dark": "Escuro"
+        }
+    },
+    "tools": {
+        "language": "Idioma",
+        "languages": {
+            "system": "Idioma do sistema",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "Tema",
+        "themes": {
+            "system": "Sistema",
+            "light": "Claro",
+            "dark": "Escuro"
+        }
+    }
+}

@@ -1,0 +1,107 @@
+{
+    "date": "{1} {2} {3}",
+    "months": {
+        "1": "januari",
+        "2": "februari",
+        "3": "maart",
+        "4": "april",
+        "5": "mei",
+        "6": "juni",
+        "7": "juli",
+        "8": "augustus",
+        "9": "september",
+        "10": "oktober",
+        "11": "november",
+        "12": "december"
+    },
+    "pill": {
+        "read_only": "Alleen-lezen"
+    },
+    "common": {
+        "hold_hint": "Houd “{}” 2 seconden ingedrukt",
+        "hours": "{} u",
+        "hours_minutes": "{} u {}",
+        "less_than_minute": "< 1 min",
+        "minutes": "{} min",
+        "no": "Nee",
+        "unavailable": "Niet beschikbaar",
+        "yes": "Ja"
+    },
+    "days": {
+        "0": "Zondag",
+        "1": "Maandag",
+        "2": "Dinsdag",
+        "3": "Woensdag",
+        "4": "Donderdag",
+        "5": "Vrijdag",
+        "6": "Zaterdag"
+    },
+    "days_lower": {
+        "0": "zondag",
+        "1": "maandag",
+        "2": "dinsdag",
+        "3": "woensdag",
+        "4": "donderdag",
+        "5": "vrijdag",
+        "6": "zaterdag"
+    },
+    "error": {
+        "code": "fout {}"
+    },
+    "markdown": {
+        "note": "Opmerking",
+        "tip": "Tip",
+        "important": "Belangrijk",
+        "warning": "Waarschuwing",
+        "caution": "Voorzichtig"
+    },
+    "notices": {
+        "send_report": "Rapport versturen"
+    },
+    "prefs": {
+        "text_size": "Tekstgrootte",
+        "text_sizes": {
+            "normal": "Normaal",
+            "large": "Groter",
+            "auto": "Automatisch: groter op de tv"
+        }
+    },
+    "quick": {
+        "title_text": "Taal, thema en tekstgrootte"
+    },
+    "tiles": {
+        "text_size_auto": "Auto: groter op de tv",
+        "themes": {
+            "system": "Systeem",
+            "light": "Licht",
+            "dark": "Donker"
+        }
+    },
+    "tools": {
+        "language": "Taal",
+        "languages": {
+            "system": "Systeemtaal",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "Thema",
+        "themes": {
+            "system": "Systeem",
+            "light": "Licht",
+            "dark": "Donker"
+        }
+    }
+}

@@ -1,0 +1,107 @@
+{
+    "date": "{3}{2}日 {0}",
+    "months": {
+        "1": "1月",
+        "2": "2月",
+        "3": "3月",
+        "4": "4月",
+        "5": "5月",
+        "6": "6月",
+        "7": "7月",
+        "8": "8月",
+        "9": "9月",
+        "10": "10月",
+        "11": "11月",
+        "12": "12月"
+    },
+    "pill": {
+        "read_only": "閲覧のみ"
+    },
+    "common": {
+        "hold_hint": "「{}」を2秒間押し続けてください",
+        "hours": "{}時間",
+        "hours_minutes": "{}時間{}分",
+        "less_than_minute": "1分未満",
+        "minutes": "{}分",
+        "no": "いいえ",
+        "unavailable": "取得できません",
+        "yes": "はい"
+    },
+    "days": {
+        "0": "日曜日",
+        "1": "月曜日",
+        "2": "火曜日",
+        "3": "水曜日",
+        "4": "木曜日",
+        "5": "金曜日",
+        "6": "土曜日"
+    },
+    "days_lower": {
+        "0": "日曜日",
+        "1": "月曜日",
+        "2": "火曜日",
+        "3": "水曜日",
+        "4": "木曜日",
+        "5": "金曜日",
+        "6": "土曜日"
+    },
+    "error": {
+        "code": "エラー {}"
+    },
+    "markdown": {
+        "note": "注",
+        "tip": "ヒント",
+        "important": "重要",
+        "warning": "警告",
+        "caution": "注意"
+    },
+    "notices": {
+        "send_report": "レポートを送信"
+    },
+    "prefs": {
+        "text_size": "文字の大きさ",
+        "text_sizes": {
+            "normal": "標準",
+            "large": "大きめ",
+            "auto": "自動：テレビでは大きめ"
+        }
+    },
+    "quick": {
+        "title_text": "言語、テーマ、文字の大きさ"
+    },
+    "tiles": {
+        "text_size_auto": "自動：テレビでは大きめ",
+        "themes": {
+            "system": "本体の設定",
+            "light": "ホワイト",
+            "dark": "ブラック"
+        }
+    },
+    "tools": {
+        "language": "言語",
+        "languages": {
+            "system": "本体の言語",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "テーマ",
+        "themes": {
+            "system": "本体の設定",
+            "light": "ベーシックホワイト",
+            "dark": "ベーシックブラック"
+        }
+    }
+}

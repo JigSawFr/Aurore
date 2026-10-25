@@ -1,0 +1,107 @@
+{
+    "date": "{3}{2}日 {0}",
+    "months": {
+        "1": "1月",
+        "2": "2月",
+        "3": "3月",
+        "4": "4月",
+        "5": "5月",
+        "6": "6月",
+        "7": "7月",
+        "8": "8月",
+        "9": "9月",
+        "10": "10月",
+        "11": "11月",
+        "12": "12月"
+    },
+    "pill": {
+        "read_only": "只读"
+    },
+    "common": {
+        "hold_hint": "按住“{}”2秒",
+        "hours": "{}小时",
+        "hours_minutes": "{}小时{}分",
+        "less_than_minute": "< 1分钟",
+        "minutes": "{}分钟",
+        "no": "否",
+        "unavailable": "不可用",
+        "yes": "是"
+    },
+    "days": {
+        "0": "星期日",
+        "1": "星期一",
+        "2": "星期二",
+        "3": "星期三",
+        "4": "星期四",
+        "5": "星期五",
+        "6": "星期六"
+    },
+    "days_lower": {
+        "0": "星期日",
+        "1": "星期一",
+        "2": "星期二",
+        "3": "星期三",
+        "4": "星期四",
+        "5": "星期五",
+        "6": "星期六"
+    },
+    "error": {
+        "code": "错误{}"
+    },
+    "markdown": {
+        "note": "注意",
+        "tip": "提示",
+        "important": "重要",
+        "warning": "警告",
+        "caution": "小心"
+    },
+    "notices": {
+        "send_report": "发送报告"
+    },
+    "prefs": {
+        "text_size": "文字大小",
+        "text_sizes": {
+            "normal": "标准",
+            "large": "较大",
+            "auto": "自动：电视上较大"
+        }
+    },
+    "quick": {
+        "title_text": "语言、主题和文字大小"
+    },
+    "tiles": {
+        "text_size_auto": "自动：电视上较大",
+        "themes": {
+            "system": "跟随系统",
+            "light": "浅色",
+            "dark": "深色"
+        }
+    },
+    "tools": {
+        "language": "语言",
+        "languages": {
+            "system": "系统语言",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "主题",
+        "themes": {
+            "system": "跟随系统",
+            "light": "浅色",
+            "dark": "深色"
+        }
+    }
+}

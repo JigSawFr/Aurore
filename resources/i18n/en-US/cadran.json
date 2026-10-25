@@ -1,0 +1,107 @@
+{
+    "date": "{0}, {3} {2}",
+    "months": {
+        "1": "January",
+        "2": "February",
+        "3": "March",
+        "4": "April",
+        "5": "May",
+        "6": "June",
+        "7": "July",
+        "8": "August",
+        "9": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December"
+    },
+    "pill": {
+        "read_only": "Read-only"
+    },
+    "common": {
+        "hold_hint": "Hold on “{}” for 2 seconds",
+        "hours": "{} h",
+        "hours_minutes": "{} h {}",
+        "less_than_minute": "< 1 min",
+        "minutes": "{} min",
+        "no": "No",
+        "unavailable": "Unavailable",
+        "yes": "Yes"
+    },
+    "days": {
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday"
+    },
+    "days_lower": {
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday"
+    },
+    "error": {
+        "code": "error {}"
+    },
+    "markdown": {
+        "note": "Note",
+        "tip": "Tip",
+        "important": "Important",
+        "warning": "Warning",
+        "caution": "Caution"
+    },
+    "notices": {
+        "send_report": "Send a report"
+    },
+    "prefs": {
+        "text_size": "Text size",
+        "text_sizes": {
+            "normal": "Normal",
+            "large": "Larger",
+            "auto": "Automatic: larger on the TV"
+        }
+    },
+    "quick": {
+        "title_text": "Language, theme and text size"
+    },
+    "tiles": {
+        "text_size_auto": "Auto: larger on TV",
+        "themes": {
+            "system": "System",
+            "light": "Light",
+            "dark": "Dark"
+        }
+    },
+    "tools": {
+        "language": "Language",
+        "languages": {
+            "system": "System language",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "Theme",
+        "themes": {
+            "system": "System",
+            "light": "Light",
+            "dark": "Dark"
+        }
+    }
+}
