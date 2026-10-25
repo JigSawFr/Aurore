@@ -5,6 +5,7 @@
 #include <cmath>
 #include <string>
 
+#include <borealis/cadran/ui/cadran_frame.hpp>
 #include <borealis/cadran/ui/cadran_list.hpp>
 #include <borealis/cadran/ui/cadran_kit.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
@@ -171,7 +172,7 @@ static void settings_screen_of(brls::View* focus)
     if (!focus) return;
     while (focus->hasParent()) focus = focus->getParent();
     auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
-    if (!frame || !frame->getView("main_tabs")) return;
+    if (!frame || !cadran::is_main_frame(frame)) return;
     auto* tools = VersionBadge::header_tools(frame);
     if (!tools || tools->getView(LANGUAGE_ID)) return;
     tools->addView(new HeaderSetting(HeaderSetting::Kind::LANGUAGE), 0);
@@ -181,5 +182,8 @@ static void settings_screen_of(brls::View* focus)
 
 void HeaderSetting::install()
 {
+    static bool done = false;
+    if (done) return;
+    done = true;
     brls::Application::getGlobalFocusChangeEvent()->subscribe(settings_screen_of);
 }

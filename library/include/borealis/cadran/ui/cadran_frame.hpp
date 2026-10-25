@@ -28,6 +28,10 @@ void install_screens();
 void style_rail(brls::View* tab_frame);
 // Both, for the main screen.
 void style_frame(brls::AppletFrame* frame, brls::View* tab_frame);
+// Whether `frame` is a main screen: it holds a TabFrame (or a view with the
+// id "main_tabs"). install_screens() styles it with style_frame() the first
+// time it takes the focus, unless the app did already.
+bool is_main_frame(brls::View* frame);
 // The main screen's header pill: its text, or hidden when empty (each
 // screen says what it has to: "Library up to date", "Play timer on"…), its
 // icon, and its tone: amber for a state that needs the user, coral for
