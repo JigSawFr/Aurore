@@ -158,7 +158,7 @@ void ScrollingFrame::naturalScrollingBehaviour()
         // If current focus view is outside scrolling bounds,
         // change focus to this.
         View* currentFocus = Application::getCurrentFocus();
-        if (!currentFocus->getFrame().inscribed(getFrame()))
+        if (!currentFocus || !currentFocus->getFrame().inscribed(getFrame()))
         {
             Application::giveFocus(this);
         }
@@ -262,7 +262,9 @@ void ScrollingFrame::naturalScrollingButtonProcessing(FocusDirection focusDirect
 
     setContentOffsetY(newOffset, false);
     View* current = Application::getCurrentFocus();
-    View* next    = current->getParent()->getNextFocus(focusDirection, current);
+    if (!current || !current->hasParent())
+        return;
+    View* next = current->getParent()->getNextFocus(focusDirection, current);
     if (next)
     {
         if (current != next->getDefaultFocus())
@@ -450,6 +452,9 @@ View* ScrollingFrame::getNextFocus(FocusDirection direction, View* currentView)
 
 View* ScrollingFrame::getDefaultFocus()
 {
+    if (this->getVisibility() != Visibility::VISIBLE)
+        return nullptr;
+
     if (behavior == ScrollingBehavior::CENTERED)
     {
         View* focus = contentView->getDefaultFocus();
@@ -488,6 +493,13 @@ void ScrollingFrame::onChildFocusGained(View* directChild, View* focusedView)
 
 void ScrollingFrame::onChildFocusLost(View* directChild, View* focusedView)
 {
+    // Must propagate to parent frames (mirrors onChildFocusGained and
+    // HScrollingFrame): nested ScrollingFrames (e.g. a RecyclingGrid inside a
+    // ScrollingFrame) otherwise kept a stale childFocused=true forever.
+    // naturalScrollingBehaviour() then hijacked the focus of a *different*
+    // activity whenever the old frame was drawn during a push transition.
+    Box::onChildFocusLost(directChild, focusedView);
+
     this->childFocused = false;
 }
 
@@ -505,7 +517,7 @@ View* ScrollingFrame::getParentNavigationDecision(View* from, View* newFocus, Fo
         if (from == contentView)
         {
             naturalScrollingCanScroll = true;
-            if (currentFocus->getFrame().inscribed(this->getFrame()))
+            if (currentFocus && currentFocus->getFrame().inscribed(this->getFrame()))
                 return currentFocus;
 
             return this;
@@ -520,7 +532,7 @@ View* ScrollingFrame::getParentNavigationDecision(View* from, View* newFocus, Fo
             naturalScrollingCanScroll = true;
     }
 
-    if (currentFocus->getFrame().inscribed(this->getFrame()))
+    if (currentFocus && currentFocus->getFrame().inscribed(this->getFrame()))
         return currentFocus;
 
     return this;

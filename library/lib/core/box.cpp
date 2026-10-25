@@ -24,6 +24,7 @@
 #include <cmath>
 #include <fstream>
 #include <functional>
+#include <limits>
 
 namespace brls
 {
@@ -40,6 +41,19 @@ static YGFlexDirection getYGFlexDirection(Axis axis)
     }
 }
 
+static YGWrap getYGWrap(Wrap wrap)
+{
+    switch (wrap)
+    {
+        case Wrap::WRAP:
+            return YGWrapWrap;
+        case Wrap::WRAP_REVERSE:
+            return YGWrapWrapReverse;
+        default:
+            return YGWrapNoWrap;
+    }
+}
+
 Box::Box(Axis axis)
     : axis(axis)
 {
@@ -53,6 +67,14 @@ Box::Box(Axis axis)
         {
             { "row", Axis::ROW },
             { "column", Axis::COLUMN },
+        });
+
+    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+        "flexWrap", Wrap, this->setWrap,
+        {
+            { "wrap", Wrap::WRAP },
+            { "noWrap", Wrap::NO_WRAP },
+            { "wrapReverse", Wrap::WRAP_REVERSE },
         });
 
     BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
@@ -86,6 +108,16 @@ Box::Box(Axis axis)
             { "spaceBetween", AlignItems::SPACE_BETWEEN },
             { "spaceAround", AlignItems::SPACE_AROUND },
         });
+
+    // Gap
+    this->registerFloatXMLAttribute("gap", [this](float value)
+        { this->setGap(value); });
+
+    this->registerFloatXMLAttribute("rowGap", [this](float value)
+        { this->setRowGap(value); });
+
+    this->registerFloatXMLAttribute("columnGap", [this](float value)
+        { this->setColumnGap(value); });
 
     // Padding
     this->registerFloatXMLAttribute("paddingTop", [this](float value)
@@ -222,6 +254,9 @@ void Box::removeView(View* view, bool free)
         YGNodeRemoveChild(this->ygNode, view->getYGNode());
     this->children.erase(this->children.begin() + index);
 
+    if (this->lastFocusedView == view)
+        this->lastFocusedView = nullptr;
+
     // Update parent userdata
     for (size_t i = index; i < this->children.size(); i++)
     {
@@ -348,6 +383,39 @@ float Box::getPaddingRight()
     return YGNodeStyleGetPadding(this->ygNode, YGEdgeRight).value;
 }
 
+void Box::setGap(float gap)
+{
+    YGNodeStyleSetGap(this->ygNode, YGGutterAll, gap);
+    this->invalidate();
+}
+
+float Box::getGap()
+{
+    return YGNodeStyleGetGap(this->ygNode, YGGutterAll);
+}
+
+void Box::setRowGap(float gap)
+{
+    YGNodeStyleSetGap(this->ygNode, YGGutterRow, gap);
+    this->invalidate();
+}
+
+float Box::getRowGap()
+{
+    return YGNodeStyleGetGap(this->ygNode, YGGutterRow);
+}
+
+void Box::setColumnGap(float gap)
+{
+    YGNodeStyleSetGap(this->ygNode, YGGutterColumn, gap);
+    this->invalidate();
+}
+
+float Box::getColumnGap()
+{
+    return YGNodeStyleGetGap(this->ygNode, YGGutterColumn);
+}
+
 View* Box::getDefaultFocus()
 {
     // Focus ourself first
@@ -410,7 +478,81 @@ View* Box::getNextFocus(FocusDirection direction, View* currentView)
 {
     void* parentUserData = currentView->getParentUserData();
 
-    // Return nullptr immediately if focus direction mismatches the box axis (clang-format refuses to split it in multiple lines...)
+    // For wrapped layouts, use spatial navigation for the cross-axis direction
+    bool isWrapped   = YGNodeStyleGetFlexWrap(this->ygNode) != YGWrapNoWrap;
+    bool isCrossAxis = (this->axis == Axis::ROW && (direction == FocusDirection::UP || direction == FocusDirection::DOWN))
+        || (this->axis == Axis::COLUMN && (direction == FocusDirection::LEFT || direction == FocusDirection::RIGHT));
+
+    if (isCrossAxis && isWrapped && !this->children.empty())
+    {
+        Rect currentFrame    = currentView->getFrame();
+        float currentCenterX = currentFrame.getMinX() + currentFrame.getWidth() / 2.0f;
+        float currentCenterY = currentFrame.getMinY() + currentFrame.getHeight() / 2.0f;
+
+        View* bestCandidate = nullptr;
+        float bestDistance  = std::numeric_limits<float>::max();
+
+        for (View* child : this->children)
+        {
+            if (child == currentView)
+                continue;
+
+            View* focusable = child->getDefaultFocus();
+            if (!focusable)
+                continue;
+
+            Rect frame    = child->getFrame();
+            float centerX = frame.getMinX() + frame.getWidth() / 2.0f;
+            float centerY = frame.getMinY() + frame.getHeight() / 2.0f;
+
+            bool valid = false;
+            switch (direction)
+            {
+                case FocusDirection::UP:
+                    valid = centerY < currentCenterY;
+                    break;
+                case FocusDirection::DOWN:
+                    valid = centerY > currentCenterY;
+                    break;
+                case FocusDirection::LEFT:
+                    valid = centerX < currentCenterX;
+                    break;
+                case FocusDirection::RIGHT:
+                    valid = centerX > currentCenterX;
+                    break;
+            }
+
+            if (!valid)
+                continue;
+
+            // Prefer closest on the cross axis, then closest on main axis
+            float crossDist, mainDist;
+            if (direction == FocusDirection::UP || direction == FocusDirection::DOWN)
+            {
+                crossDist = std::abs(centerY - currentCenterY);
+                mainDist  = std::abs(centerX - currentCenterX);
+            }
+            else
+            {
+                crossDist = std::abs(centerX - currentCenterX);
+                mainDist  = std::abs(centerY - currentCenterY);
+            }
+
+            float distance = crossDist * 1000.0f + mainDist;
+            if (distance < bestDistance)
+            {
+                bestDistance  = distance;
+                bestCandidate = focusable;
+            }
+        }
+
+        View* result = getParentNavigationDecision(this, bestCandidate, direction);
+        if (!result && hasParent())
+            result = getParent()->getNextFocus(direction, this);
+        return result;
+    }
+
+    // Return nullptr immediately if focus direction mismatches the box axis
     if ((this->axis == Axis::ROW && direction != FocusDirection::LEFT && direction != FocusDirection::RIGHT) || (this->axis == Axis::COLUMN && direction != FocusDirection::UP && direction != FocusDirection::DOWN))
     {
         View* next = getParentNavigationDecision(this, nullptr, direction);
@@ -559,6 +701,25 @@ void Box::setAxis(Axis axis)
 Axis Box::getAxis() const
 {
     return axis;
+}
+
+void Box::setWrap(Wrap wrap)
+{
+    YGNodeStyleSetFlexWrap(this->ygNode, getYGWrap(wrap));
+    this->invalidate();
+}
+
+Wrap Box::getWrap() const
+{
+    switch (YGNodeStyleGetFlexWrap(this->ygNode))
+    {
+        case YGWrapWrap:
+            return Wrap::WRAP;
+        case YGWrapWrapReverse:
+            return Wrap::WRAP_REVERSE;
+        default:
+            return Wrap::NO_WRAP;
+    }
 }
 
 void Box::setDirection(Direction direction)

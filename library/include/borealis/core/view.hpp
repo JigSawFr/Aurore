@@ -26,6 +26,7 @@
 #include <borealis/core/geometry.hpp>
 #include <borealis/core/gesture.hpp>
 #include <borealis/core/util.hpp>
+#include <array>
 #include <functional>
 #include <memory>
 #include <set>
@@ -120,6 +121,7 @@ enum class ViewBackground
     BACKDROP,
     SHAPE_COLOR,
     VERTICAL_LINEAR,
+    HORIZONTAL_LINEAR,
 };
 
 enum class AlignSelf
@@ -319,11 +321,12 @@ class View
     // Background corner radii for vertical linear style: top-left, top-right, bottom-right, bottom-left
     std::vector<float> backgroundRadius{0.0f, 0.0f, 0.0f, 0.0f};
 
-    NVGcolor borderColor  = TRANSPARENT;
-    float borderThickness = 0.0f;
-    float cornerRadius    = 0.0f;
-    ShadowType shadowType = ShadowType::NONE;
-    bool showShadow       = true;
+    NVGcolor borderColor             = TRANSPARENT;
+    float borderThickness            = 0.0f;
+    float cornerRadius               = 0.0f;
+    std::array<float, 4> cornerRadii = { 0.0f, 0.0f, 0.0f, 0.0f }; // TL, TR, BR, BL
+    ShadowType shadowType            = ShadowType::NONE;
+    bool showShadow                  = true;
 
     std::unordered_map<FocusDirection, std::string> customFocusById;
     std::unordered_map<FocusDirection, View*> customFocusByPtr;
@@ -389,6 +392,12 @@ class View
     virtual ~View();
 
     void setBackground(ViewBackground background);
+
+    /**
+     * Sets a linear gradient background for the view, from start to end:
+     * top to bottom (VERTICAL_LINEAR) or left to right (HORIZONTAL_LINEAR).
+     */
+    void setBackgroundLinearGradient(NVGcolor start, NVGcolor end, ViewBackground direction = ViewBackground::VERTICAL_LINEAR);
 
     void shakeHighlight(FocusDirection direction);
 
@@ -853,12 +862,29 @@ class View
     }
 
     /**
-     * Sets the view shape corner radius.
+     * Sets the view shape corner radius (uniform).
      * 0 means no rounded corners.
      */
     inline void setCornerRadius(float radius)
     {
-        this->cornerRadius = radius;
+        this->cornerRadius   = radius;
+        this->cornerRadii[0] = radius;
+        this->cornerRadii[1] = radius;
+        this->cornerRadii[2] = radius;
+        this->cornerRadii[3] = radius;
+    }
+
+    /**
+     * Sets the view shape corner radii individually.
+     * Order: top-left, top-right, bottom-right, bottom-left.
+     */
+    inline void setCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
+    {
+        this->cornerRadii[0] = topLeft;
+        this->cornerRadii[1] = topRight;
+        this->cornerRadii[2] = bottomRight;
+        this->cornerRadii[3] = bottomLeft;
+        this->cornerRadius   = (topLeft == topRight && topRight == bottomRight && bottomRight == bottomLeft) ? topLeft : 0.0f;
     }
 
     inline float getCornerRadius()

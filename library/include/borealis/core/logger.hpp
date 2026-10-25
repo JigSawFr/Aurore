@@ -130,9 +130,10 @@ class Logger
             printf("! Invalid log format string: \"%s\": %s\n", fmt::basic_string_view<char>(format).data(), e.what());
         }
 
-#ifdef __MINGW32__
+        // Flush on every platform: once the output is not a terminal (nxlink
+        // socket, file, pipe) stdio buffers it fully, and the lines a crash
+        // leaves in the buffer are the ones needed to diagnose it.
         fflush(logOut);
-#endif
     }
 
     template <typename... Args>

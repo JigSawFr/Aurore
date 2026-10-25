@@ -369,17 +369,34 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
         if (controller)
         {
             SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(event->cdevice.which);
-            Logger::info("Controller connected: {}/{}", jid, SDL_GameControllerName(controller));
-            controllers.push_back({ jid, controller });
+            // SDL_GameControllerOpen is reference-counted: a controller already
+            // in the list (opened at start-up) is not tracked a second time.
+            auto existing = std::find_if(controllers.begin(), controllers.end(), [jid](const auto& c) {
+                return c.first == jid;
+            });
+            if (existing != controllers.end())
+            {
+                SDL_GameControllerClose(controller);
+            }
+            else
+            {
+                Logger::info("Controller connected: {}/{}", jid, SDL_GameControllerName(controller));
+                controllers.push_back({ jid, controller });
+            }
         }
     }
     else if (event->type == SDL_CONTROLLERDEVICEREMOVED)
     {
-        Logger::info("Controller disconnected: {}", event->cdevice.which);
-        SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(event->cdevice.which);
-        controllers.erase(std::remove_if(controllers.begin(), controllers.end(), [jid](auto x) {
+        // For SDL_CONTROLLERDEVICEREMOVED, event->cdevice.which is already the instance ID
+        SDL_JoystickID jid = event->cdevice.which;
+        Logger::info("Controller disconnected: {}", jid);
+        auto it = std::find_if(controllers.begin(), controllers.end(), [jid](auto x) {
             return x.first == jid;
-        }), controllers.end());
+        });
+        if (it != controllers.end()) {
+            SDL_GameControllerClose(it->second);
+            controllers.erase(it);
+        }
     }
     else if (event->type == SDL_MOUSEBUTTONDOWN)
     {
@@ -458,10 +475,11 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
     for (float& axe : state->axes)
         axe = 0;
 
-    for (auto& c : controllers)
+    // updateControllerState takes a position in the list, not an instance ID
+    for (size_t index = 0; index < controllers.size(); index++)
     {
         ControllerState localState {};
-        updateControllerState(&localState, c.first);
+        updateControllerState(&localState, (int)index);
 
         for (size_t i = 0; i < _BUTTON_MAX; i++)
             state->buttons[i] |= localState.buttons[i];
@@ -509,7 +527,7 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
 
 void SDLInputManager::updateControllerState(ControllerState* state, int controller)
 {
-    if (controllers.size() <= controller) return;
+    if ((int)controllers.size() <= controller) return;
 
     SDL_GameController* c = controllers[controller].second;
 

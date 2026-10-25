@@ -29,6 +29,10 @@ ProgressSpinner::ProgressSpinner(ProgressSpinnerSize size)
             { "normal", ProgressSpinnerSize::NORMAL },
             { "large", ProgressSpinnerSize::LARGE },
         });
+
+    this->registerColorXMLAttribute("barColor", [this](NVGcolor color) {
+        this->setColor(color);
+    });
 }
 
 void ProgressSpinner::restartAnimation()
@@ -60,8 +64,8 @@ void ProgressSpinner::animate(bool animate)
 
 void ProgressSpinner::draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx)
 {
-    Theme theme       = Application::getTheme();
-    NVGcolor barColor = a(theme["brls/spinner/bar_color"]);
+    NVGcolor baseColor = this->customBarColor ? this->barColor : Application::getTheme()["brls/spinner/bar_color"];
+    NVGcolor barColor  = baseColor;
 
     // Each bar of the spinner
     switch (size)
@@ -69,7 +73,7 @@ void ProgressSpinner::draw(NVGcontext* vg, float x, float y, float width, float 
         case NORMAL:
             for (int i = 0 + animationValue; i < 8 + animationValue; i++)
             {
-                barColor.a = fmax((i - animationValue) / 8.0f, theme["brls/spinner/bar_color"].a) * this->getAlpha();
+                barColor.a = fmax((i - animationValue) / 8.0f, baseColor.a) * this->getAlpha();
                 nvgSave(vg);
                 nvgTranslate(vg, x + width / 2, y + height / 2);
                 nvgRotate(vg, nvgDegToRad(i * 45)); // Internal angle of octagon
@@ -86,7 +90,7 @@ void ProgressSpinner::draw(NVGcontext* vg, float x, float y, float width, float 
         case LARGE:
             for (int i = 0 + animationValue; i < 12 + animationValue; i++)
             {
-                barColor.a = fmax((i - animationValue) / 12.0f, theme["brls/spinner/bar_color"].a) * this->getAlpha();
+                barColor.a = fmax((i - animationValue) / 12.0f, baseColor.a) * this->getAlpha();
                 nvgSave(vg);
                 nvgTranslate(vg, x + width / 2, y + height / 2);
                 nvgRotate(vg, nvgDegToRad(i * 30)); // Internal angle of octagon
@@ -111,6 +115,12 @@ void ProgressSpinner::willAppear(bool resetState)
 void ProgressSpinner::willDisappear(bool resetState)
 {
     this->animationValue.stop();
+}
+
+void ProgressSpinner::setColor(NVGcolor color)
+{
+    this->barColor       = color;
+    this->customBarColor = true;
 }
 
 brls::View* ProgressSpinner::create()

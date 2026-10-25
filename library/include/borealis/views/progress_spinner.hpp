@@ -38,11 +38,19 @@ class ProgressSpinner : public View
     void willAppear(bool resetState = false) override;
     void willDisappear(bool resetState = false) override;
 
+    /**
+     * Sets the color of the spinner's bars, in place of the theme's
+     * brls/spinner/bar_color (its alpha is the faintest bar's).
+     */
+    void setColor(NVGcolor color);
+
     void animate(bool animate);
 
     static brls::View* create();
 
   private:
+    NVGcolor barColor;
+    bool customBarColor       = false;
     Animatable animationValue = 0.0f;
     ProgressSpinnerSize size;
     void setSize(ProgressSpinnerSize size)

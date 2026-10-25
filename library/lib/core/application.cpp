@@ -208,8 +208,11 @@ bool Application::internalMainLoop()
 
     // Free views deletion pool.
     // A view deletion might inserts other views to deletionPool
+    std::deque<View*> pendingViews;
+    pendingViews.swap(Application::deletionPool);
+
     std::deque<View*> undeletedViews;
-    for (auto view : Application::deletionPool)
+    for (auto view : pendingViews)
     {
         if (!view->isPtrLocked())
         {
@@ -221,7 +224,12 @@ bool Application::internalMainLoop()
             brls::Logger::verbose("Application: will delete view: {}", view->describe());
         }
     }
-    Application::deletionPool = undeletedViews;
+
+    for (auto view : undeletedViews)
+        Application::deletionPool.push_back(view);
+
+    if (!Application::currentFocus && !Application::activitiesStack.empty())
+        Application::giveFocus(Application::activitiesStack.back()->getContentView());
 
     if (Application::limitedFrameTime > 0)
     {
@@ -630,7 +638,8 @@ bool Application::setInputType(InputType type)
     if (type == InputType::GAMEPAD)
     {
         Application::setDrawCoursor(false);
-        Application::currentFocus->onFocusGained();
+        if (Application::currentFocus)
+            Application::currentFocus->onFocusGained();
     }
 
     return true;
@@ -822,10 +831,14 @@ void Application::exit()
     Application::clear();
 
     // Free views deletion pool
-    for (auto view : Application::deletionPool)
-        delete view;
+    while (!Application::deletionPool.empty())
+    {
+        std::deque<View*> pendingViews;
+        pendingViews.swap(Application::deletionPool);
 
-    Application::deletionPool.clear();
+        for (auto view : pendingViews)
+            delete view;
+    }
 
     Threading::stop();
 
@@ -902,6 +915,16 @@ void Application::giveFocus(View* view)
     }
 }
 
+void Application::forgetView(View* view)
+{
+    if (Application::currentFocus == view)
+        Application::currentFocus = nullptr;
+    if (Application::repetitionOldFocus == view)
+        Application::repetitionOldFocus = nullptr;
+    std::replace(Application::focusStack.begin(), Application::focusStack.end(), view,
+        static_cast<View*>(nullptr));
+}
+
 bool Application::popActivity(TransitionAnimation animation, std::function<void(void)> cb, bool free)
 {
     if (Application::activitiesStack.size() <= 1) // never pop the first activity
@@ -931,7 +954,7 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
     {
         View* newFocus = Application::focusStack[Application::focusStack.size() - 1];
 
-        if (!toShow || newFocus->getParentActivity() == toShow)
+        if (newFocus && (!toShow || newFocus->getParentActivity() == toShow))
         {
             Logger::debug("Giving focus to {}, and removing it from the focus stack", newFocus->describe());
             Application::giveFocus(newFocus);
@@ -1029,6 +1052,9 @@ void Application::clear()
     }
 
     Application::activitiesStack.clear();
+    Application::focusStack.clear();
+    Application::currentFocus       = nullptr;
+    Application::repetitionOldFocus = nullptr;
 }
 
 Theme Application::getTheme()
@@ -1056,7 +1082,7 @@ std::string Application::getLocale()
 
 void Application::addToFreeQueue(View* view)
 {
-    if (std::binary_search(deletionPool.cbegin(), deletionPool.cend(), view))
+    if (std::find(deletionPool.cbegin(), deletionPool.cend(), view) != deletionPool.cend())
         return;
 
     brls::Logger::verbose("Application::addToFreeQueue {}", view->describe());
@@ -1129,9 +1155,10 @@ void Application::blockInputs(bool muteSounds)
 
 void Application::unblockInputs()
 {
-    Application::blockInputsTokens -= 1;
+    if (Application::blockInputsTokens > 0)
+        Application::blockInputsTokens -= 1;
 
-    if (Application::blockInputsTokens <= 0)
+    if (Application::blockInputsTokens == 0)
         muteSounds = false;
 
     getGlobalHintsUpdateEvent()->fire();

@@ -368,8 +368,7 @@ void RecyclerFrame::cacheCellFrames()
 
 bool RecyclerFrame::checkWidth()
 {
-    float width           = getWidth();
-    static float oldWidth = width;
+    float width = getWidth();
     if ((int)oldWidth != (int)width && width != 0)
     {
         oldWidth = width;

@@ -167,6 +167,11 @@ void Button::setState(ButtonState state)
     this->applyStyle();
 }
 
+ButtonState Button::getState()
+{
+    return this->state;
+}
+
 void Button::setTextColor(NVGcolor color)
 {
     textColor           = color;
