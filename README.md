@@ -6,7 +6,6 @@
 
 **Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch**
 
-[![build](https://github.com/JigSawFr/borealis/actions/workflows/ci.yaml/badge.svg?branch=wiliwili)](https://github.com/JigSawFr/borealis/actions/workflows/ci.yaml)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](#-use-it-in-your-project)
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
@@ -171,8 +170,6 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 - 🖥️ [Windows, macOS, Linux](https://github.com/xfangfang/borealis/wiki/Windows-macOS-Linux)
 - 🎮 [Nintendo Switch](https://github.com/xfangfang/borealis/wiki/NintendoSwitch) · [PS4](https://github.com/xfangfang/borealis/wiki/PS4) · [PS Vita](https://github.com/xfangfang/borealis/wiki/PS-Vita)
 - 📱 [Android](https://github.com/xfangfang/borealis/wiki/Android) · [iOS](https://github.com/xfangfang/borealis/wiki/iOS)
-
-The CI builds the demo for each platform on every push.
 
 ## 🕹️ Made with borealis
 
