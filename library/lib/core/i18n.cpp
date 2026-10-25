@@ -136,22 +136,21 @@ namespace internal
             return stringName;
         }
 
-        // First look for translated string in current locale
-        try
+        // First look for translated string in current locale, then in the
+        // default locale. The current one is empty when it is the default
+        // locale: skipped, not looked up (a lookup that misses throws, and
+        // operator[] added a null to it each time).
+        for (const nlohmann::json* locale : { &currentLocale, &defaultLocale })
         {
-            return currentLocale[pointer].get<std::string>();
-        }
-        catch (...)
-        {
-        }
-
-        // Then look for default locale
-        try
-        {
-            return defaultLocale[pointer].get<std::string>();
-        }
-        catch (...)
-        {
+            if (locale->is_null() || locale->empty())
+                continue;
+            try
+            {
+                return locale->at(pointer).get<std::string>();
+            }
+            catch (...)
+            {
+            }
         }
 
         // Fallback to returning the string name
