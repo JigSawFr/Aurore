@@ -2,8 +2,14 @@
     iconInterpolation="linear"
     footerHidden="false">
     <brls:TabFrame
+        id="main_tabs"
         title="@i18n/demo/title"
         icon="@res/img/borealis_96.png">
+
+        <!-- Built in code: Cadran, Aurore's look -->
+        <brls:Tab label="@i18n/demo/tabs/cadran" >
+            <CadranTab />
+        </brls:Tab>
 
         <!-- Dynamic tab - required to get references to the views in the code -->
         <brls:Tab label="@i18n/demo/tabs/components" >
