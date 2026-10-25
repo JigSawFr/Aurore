@@ -638,7 +638,8 @@ bool Application::setInputType(InputType type)
     if (type == InputType::GAMEPAD)
     {
         Application::setDrawCoursor(false);
-        Application::currentFocus->onFocusGained();
+        if (Application::currentFocus)
+            Application::currentFocus->onFocusGained();
     }
 
     return true;
