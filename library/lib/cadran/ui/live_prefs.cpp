@@ -52,9 +52,17 @@ std::string focused_row()
 
 // Every screen made again, the main one on the tab that was shown, the focus
 // back on its line: the screens above it (a sub-screen the header's setting
-// was changed from) go.
+// was changed from) go. An app that cannot build its main screen again
+// (ui::hooks' push_main unset) keeps the screens open: the screens opened
+// from then on take the change, and the one shown is read again.
 void rebuild()
 {
+    if (!ui::hooks::get().push_main) {
+        brls::sync([]() {
+            if (ui::hooks::get().refresh_shown) ui::hooks::get().refresh_shown();
+        });
+        return;
+    }
     brls::sync([]() {
         const int tab = shown_tab();
         const std::string row = focused_row();
@@ -68,6 +76,11 @@ void rebuild()
 
 void start()
 {
+    // Again (Application::init, then an app of its own): the console's
+    // language is the one read the first time.
+    static bool done = false;
+    if (done) return;
+    done = true;
     // The platform read the console's language (the app leaves borealis'
     // locale on auto), and the strings are in it: the preferences' instead.
     s_system_theme = brls::Application::getPlatform()->getThemeVariant();

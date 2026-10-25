@@ -16,14 +16,15 @@ namespace live_prefs
 // preferences' language.
 void start();
 
-// The variant of the theme in the preferences (config::Config::theme).
+// The variant of the theme in the preferences (ui::Prefs::theme).
 void apply_theme();
 
 // The language the strings are in now: the preferences', or the console's.
 std::string locale();
 
 // After the preferences' theme or language changed: applied, and the screens
-// built again.
+// built again (ui::hooks' push_main; without it, the screens opened from
+// then on take the change).
 void theme_changed();
 void language_changed();
 }   // namespace live_prefs

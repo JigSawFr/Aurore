@@ -78,6 +78,9 @@ void apply()
 void install()
 {
     apply();
+    static bool hooked = false;
+    if (hooked) return;
+    hooked = true;
 #ifdef __SWITCH__
     appletHook(&s_cookie, on_applet_hook, nullptr);
 #endif

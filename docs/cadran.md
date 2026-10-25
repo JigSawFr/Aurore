@@ -4,53 +4,36 @@ Cadran is the look of [PlayGuard](https://github.com/JigSawFr/playguard) and [Pl
 
 It lives in `library/include/borealis/cadran/` and `library/lib/cadran/`, its strings in `resources/i18n/<language>/cadran.json`, its emoji in `resources/img/emoji/`, its font in `resources/font/`. It is **GPLv3** (`LICENSE.GPL`): an app built with it is GPLv3.
 
-For now an app turns it on itself, as below; it becomes Aurore's default look next.
-
 ## Turning it on
+
+There is nothing to do: `brls::Application::init()` and `createWindow()` start it, and every screen takes its look the first time it takes the focus. A main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header with the app's mark, the date and the language, theme and text size; every other screen its header and its list in cards; every dialog its card.
+
+What the app sets **before** `init()`:
 
 ```cpp
 #include <borealis.hpp>
-#include <borealis/cadran/ui/cadran_frame.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/live_prefs.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/text_size.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/footer_hints.hpp>
-#include <borealis/cadran/view/header_settings.hpp>
-#include <borealis/cadran/view/version_badge.hpp>
+#include <borealis/cadran.hpp>
 
-// 1. What Cadran asks of the app (all optional), and its preferences, kept
-//    in the app's own settings.
+// What Cadran asks of the app (all optional), and its preferences, kept in
+// the app's own settings (a ui::Prefs).
 auto& h = ui::hooks::get();
-h.version   = [] { return std::string("1.0.0"); };
+h.version    = [] { return std::string("1.0.0"); };
+h.rail_icons = [] { return std::vector<std::string>{ "today", "list", "", "settings" }; };
+h.push_main  = [](int tab, const std::string& row) { /* push a new main screen on `tab` */ };
 h.save_prefs = [] { return my_settings::save(); };
-ui::use_prefs(my_settings::get().look);   // a ui::Prefs
+ui::use_prefs(my_settings::get().look);
 
-// 2. borealis, then the preferences' language and theme.
 brls::Application::init();
-live_prefs::start();
 brls::Application::createWindow("my_app/title"_i18n);
-ui::use_font_for(live_prefs::locale());
-live_prefs::apply_theme();
-
-// 3. The look, before the first screen.
-cadran::install_theme();
-text_size::install();
-FooterHints::install();
-VersionBadge::install();
-HeaderSetting::install();
-cadran::install_screens();
-
-// 4. The main screen: an AppletFrame holding a TabFrame.
-cadran::style_frame(frame, frame->getView("main_tabs"));
 ```
+
+`brls::Application::setCadran(false)`, before `init()`, keeps borealis' own look.
 
 ## What the app tells it
 
 `ui::hooks::get()` (`cadran/ui/hooks.hpp`) holds what Cadran asks of the app: the main screen and its tabs (to go back to a tab, re-read it, title a screen opened from it), the rail's icons, the app's version, commit and logo, whether it writes nothing for now (the header's pill says so), saving the preferences, sending a report, today's date by the app's own clock, and its test flags. Each one left empty does nothing.
 
-`ui::Prefs` (`cadran/ui/prefs.hpp`) is the language, theme, text size, effects and background glow chosen. The app keeps it in its settings and hands it over with `ui::use_prefs()`; the pickers (`ui::pick_language`, `pick_theme`, `pick_text_size`, `quick_settings`) change it there and save it through the hook.
+`ui::Prefs` (`cadran/ui/prefs.hpp`) is the language, theme, text size, effects and background glow chosen. The app keeps it in its settings and hands it over with `ui::use_prefs()`; the pickers (`ui::pick_language`, `pick_theme`, `pick_text_size`, `quick_settings`) change it there and save it through the hook. A new language or theme builds the screens again through `push_main`; without it, the screens opened from then on take the change.
 
 ## What it gives
 

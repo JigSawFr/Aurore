@@ -33,10 +33,10 @@ public class DemoActivity extends SDLActivity
 
     @Override
     protected String[] getLibraries() {
-        // Load SDL2 and borealis demo app
+        // Load SDL2 and the Aurore demo app
         return new String[] {
                 "SDL2",
-                "borealis_demo"
+                "aurore_demo"
         };
     }
 

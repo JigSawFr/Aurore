@@ -10,7 +10,9 @@ namespace focus_log
 void install()
 {
 #if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
-    if (!ui::env_flag("FOCUS_LOG")) return;
+    static bool done = false;
+    if (done || !ui::env_flag("FOCUS_LOG")) return;
+    done = true;
     brls::Application::getGlobalFocusChangeEvent()->subscribe([](brls::View* view) {
         // A list's line (a sheet's too), else a dialog's button.
         if (auto* cell = dynamic_cast<brls::DetailCell*>(view)) brls::Logger::info("focus: {}", cell->title->getFullText());

@@ -497,7 +497,7 @@ std::string crumb_of(brls::AppletFrame* frame)
         if (stack[i]->getContentView() == frame) below = i > 0 ? stack[i - 1]->getContentView() : nullptr;
     if (!below && !stack.empty() && stack.back()->getContentView() != frame) below = stack.back()->getContentView();
     if (!below) return "";
-    if (below->getView("main_tabs")) {
+    if (cadran::is_main_frame(below)) {
         const auto& h = ui::hooks::get();
         const std::string tab = h.main_screen ? h.main_screen() : "";   // "tab/console"
         return h.tab_title && !tab.empty() ? h.tab_title(tab) : "";
@@ -523,9 +523,11 @@ void add_crumb(brls::AppletFrame* frame)
     row->addView(label, std::find(views.begin(), views.end(), title) - views.begin());
 }
 
-// Every screen but the main one (MainActivity styles that one, rail and all):
-// the header after the boards, and its list in cards; a dialog as a card.
-// Once per screen: the mark it adds says it is done.
+// Every screen the first time it takes the focus: a main screen (a TabFrame
+// in it) as style_frame() does, rail and all, unless the app styled it
+// already; the others, the header after the boards, and their list in
+// cards; a dialog as a card. Once per screen: the mark it adds says it is
+// done.
 void skin_screen_of(brls::View* focus)
 {
     if (!focus) return;
@@ -535,8 +537,12 @@ void skin_screen_of(brls::View* focus)
         return;
     }
     auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
-    if (!frame || frame->getView("main_tabs") || frame->getView("cadran_mark")) return;
+    if (!frame || frame->getView("cadran_mark")) return;
     if (!frame->getView("brls/applet_frame/header")) return;
+    if (cadran::is_main_frame(frame)) {
+        cadran::style_frame(frame, frame);
+        return;
+    }
     cadran::style_header(frame, nullptr, "", false, false);
     add_crumb(frame);
     if (!frame->getView("cadran_list")) cadran::List(frame, true).apply(SCREEN_ICONS);   // a Cadran screen dresses itself
@@ -548,6 +554,9 @@ void skin_screen_of(brls::View* focus)
 
 void cadran::install_screens()
 {
+    static bool done = false;
+    if (done) return;
+    done = true;
     brls::Application::getGlobalFocusChangeEvent()->subscribe(skin_screen_of);
 }
 
@@ -596,10 +605,11 @@ void cadran::style_rail(brls::View* tab_frame)
             label->setMarginTop(0);
             label->setMarginBottom(0);
             label->setMarginRight(0);
-            label->setMarginLeft(10);
+            label->setMarginLeft(name.empty() ? 4 : 10);
             label->setSingleLine(true);
         }
-        item->addView(icon(name.c_str(), RAIL_ICON, theme["cadran/text2"]), 0);
+        // No icon from the app (ui::hooks' rail_icons): the label alone.
+        if (!name.empty()) item->addView(icon(name.c_str(), RAIL_ICON, theme["cadran/text2"]), 0);
         items.push_back(item);
     }
     // The active tab's pill, behind the items (their background stays none).
@@ -621,9 +631,15 @@ void cadran::style_rail(brls::View* tab_frame)
     pill->activate(items[0]);   // the first tab is already active
 }
 
+bool cadran::is_main_frame(brls::View* frame)
+{
+    return frame && (frame->getView("main_tabs") || frame->getView("brls/tab_frame/sidebar"));
+}
+
 void cadran::style_frame(brls::AppletFrame* frame, brls::View* tab_frame)
 {
     if (frame) frame->addView(make_glow(300.0f, -80.0f, 640.0f, "cadran/glow"), 0);
     style_header(frame, "check", "", true, true);
     style_rail(tab_frame);
+    refresh_pill();   // hidden until a screen says something
 }

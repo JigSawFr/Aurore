@@ -82,6 +82,14 @@ class Application
     static const std::string& getAppId() { return Application::appId; }
 
     /**
+     * Aurore draws every app in Cadran's look (docs/cadran.md): init() and
+     * createWindow() start it. false, before init(), keeps borealis' own
+     * look instead.
+     */
+    static void setCadran(bool on) { Application::cadran = on; }
+    static bool isCadran() { return Application::cadran; }
+
+    /**
      * Creates the application window with the given title.
      * Must be called after calling init().
      */
@@ -379,6 +387,7 @@ class Application
 
   private:
     inline static bool inited               = false;
+    inline static bool cadran               = true;
     inline static bool quitRequested        = false;
     inline static bool debuggingViewEnabled = false;
     inline static bool swapInputKeys        = false;
