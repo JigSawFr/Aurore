@@ -42,20 +42,27 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 <br>
 
 <p align="center">
-  <img src=".github/readme/components.png" alt="Basic components" width="49%">
-  <img src=".github/readme/layout.png" alt="Layout and alignment" width="49%">
-  <br><sub><b>Basic components</b> · <b>Layout and alignment</b></sub>
+  <img src=".github/readme/cadran.png" alt="Cadran's pieces" width="49%">
+  <img src=".github/readme/sheet.png" alt="An action sheet" width="49%">
+  <br><sub><b>Cadran's pieces</b> · <b>An action sheet</b></sub>
 </p>
 
 <p align="center">
-  <img src=".github/readme/pokedex.png" alt="A recycling list" width="49%">
-  <img src=".github/readme/settings.png" alt="Settings cells" width="49%">
-  <br><sub><b>A recycling list</b> · <b>Settings cells</b></sub>
+  <img src=".github/readme/picker.png" alt="A list of values" width="49%">
+  <img src=".github/readme/checklist.png" alt="A checklist" width="49%">
+  <br><sub><b>A list of values</b> · <b>A checklist</b></sub>
+</p>
+
+<p align="center">
+  <img src=".github/readme/markdown.png" alt="Icons and Markdown" width="49%">
+  <img src=".github/readme/components.png" alt="borealis' components in Cadran" width="49%">
+  <br><sub><b>Icons and Markdown</b> · <b>borealis' components in Cadran</b></sub>
 </p>
 
 <p align="center">
   <img src=".github/readme/light.png" alt="The light theme" width="49%">
-  <br><sub><b>The light theme</b></sub>
+  <img src=".github/readme/french.png" alt="In French, switched while the app runs" width="49%">
+  <br><sub><b>The light theme</b> · <b>In French, switched while the app runs</b></sub>
 </p>
 
 </details>
