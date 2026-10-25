@@ -1,1 +1,48 @@
-{}
+{
+    "title": "Démo de Borealis",
+
+    "tabs": {
+        "cadran": "Cadran"
+    },
+
+    "cadran": {
+        "figures": "En un coup d’œil",
+        "played": "joué aujourd’hui",
+        "on_track": "Dans les temps",
+        "games": "jeux",
+        "updates": "3 mises à jour",
+        "storage": "de la carte SD",
+        "almost_full": "Presque pleine",
+        "chips": "Puces et barres",
+        "dialogs": "Dialogues, menus et notifications",
+        "confirm": "Confirmer",
+        "confirm_text": "Enregistrer ces réglages ?\n\nIls s’appliquent à tous les écrans.",
+        "done": "C’est fait",
+        "delete": "Supprimer",
+        "delete_text": "Supprimer ce profil ?\n\nSon historique part avec lui.",
+        "deleted": "Supprimé",
+        "sheet": "Actions",
+        "sheet_subtitle": "La démo d’Aurore",
+        "share": "Partager",
+        "shared": "Lien copié",
+        "favourite": "Favori",
+        "rename": "Renommer",
+        "pick": "Choisir une valeur",
+        "checklist": "Liste de vérifications",
+        "check_ok": "Tout est en place",
+        "check_warn": "Une mise à jour attend",
+        "check_bad": "La carte SD est presque pleine",
+        "check_info": "Vérifié aujourd’hui",
+        "check_note": "Vérifié sur cette console seulement.",
+        "hold": "Maintenir pour confirmer",
+        "hold_text": "Tout réinitialiser ?\n\nMaintenez le bouton 2 secondes.",
+        "qr": "Code QR",
+        "qr_text": "Ouvrez Aurore sur votre téléphone :",
+        "toast": "Notification",
+        "toast_text": "Du nouveau",
+        "refused": "Refus",
+        "refused_text": "Pas maintenant : la console est occupée",
+        "icons": "Icônes",
+        "markdown": "Markdown"
+    }
+}
