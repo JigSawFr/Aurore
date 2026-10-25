@@ -1,0 +1,107 @@
+{
+    "date": "{1} {2} {3}",
+    "months": {
+        "1": "janvier",
+        "2": "février",
+        "3": "mars",
+        "4": "avril",
+        "5": "mai",
+        "6": "juin",
+        "7": "juillet",
+        "8": "août",
+        "9": "septembre",
+        "10": "octobre",
+        "11": "novembre",
+        "12": "décembre"
+    },
+    "pill": {
+        "read_only": "Lecture seule"
+    },
+    "common": {
+        "hold_hint": "Maintenez « {} » pendant 2 secondes",
+        "hours": "{} h",
+        "hours_minutes": "{} h {}",
+        "less_than_minute": "< 1 min",
+        "minutes": "{} min",
+        "no": "Non",
+        "unavailable": "Indisponible",
+        "yes": "Oui"
+    },
+    "days": {
+        "0": "Dimanche",
+        "1": "Lundi",
+        "2": "Mardi",
+        "3": "Mercredi",
+        "4": "Jeudi",
+        "5": "Vendredi",
+        "6": "Samedi"
+    },
+    "days_lower": {
+        "0": "dimanche",
+        "1": "lundi",
+        "2": "mardi",
+        "3": "mercredi",
+        "4": "jeudi",
+        "5": "vendredi",
+        "6": "samedi"
+    },
+    "error": {
+        "code": "erreur {}"
+    },
+    "markdown": {
+        "note": "Remarque",
+        "tip": "Astuce",
+        "important": "Important",
+        "warning": "Attention",
+        "caution": "Prudence"
+    },
+    "notices": {
+        "send_report": "Envoyer un rapport"
+    },
+    "prefs": {
+        "text_size": "Taille du texte",
+        "text_sizes": {
+            "normal": "Normale",
+            "large": "Plus grande",
+            "auto": "Automatique : plus grande sur la TV"
+        }
+    },
+    "quick": {
+        "title_text": "Langue, thème et taille du texte"
+    },
+    "tiles": {
+        "text_size_auto": "Auto : grande sur TV",
+        "themes": {
+            "system": "Console",
+            "light": "Clair",
+            "dark": "Sombre"
+        }
+    },
+    "tools": {
+        "language": "Langue",
+        "languages": {
+            "system": "Langue de la console",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "Thème",
+        "themes": {
+            "system": "Console",
+            "light": "Clair",
+            "dark": "Sombre"
+        }
+    }
+}

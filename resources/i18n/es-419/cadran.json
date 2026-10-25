@@ -1,0 +1,107 @@
+{
+    "date": "{1}, {2} de {3}",
+    "months": {
+        "1": "enero",
+        "2": "febrero",
+        "3": "marzo",
+        "4": "abril",
+        "5": "mayo",
+        "6": "junio",
+        "7": "julio",
+        "8": "agosto",
+        "9": "septiembre",
+        "10": "octubre",
+        "11": "noviembre",
+        "12": "diciembre"
+    },
+    "pill": {
+        "read_only": "Solo lectura"
+    },
+    "common": {
+        "hold_hint": "Mantén «{}» durante 2 segundos",
+        "hours": "{} h",
+        "hours_minutes": "{} h {}",
+        "less_than_minute": "< 1 min",
+        "minutes": "{} min",
+        "no": "No",
+        "unavailable": "No disponible",
+        "yes": "Sí"
+    },
+    "days": {
+        "0": "Domingo",
+        "1": "Lunes",
+        "2": "Martes",
+        "3": "Miércoles",
+        "4": "Jueves",
+        "5": "Viernes",
+        "6": "Sábado"
+    },
+    "days_lower": {
+        "0": "domingo",
+        "1": "lunes",
+        "2": "martes",
+        "3": "miércoles",
+        "4": "jueves",
+        "5": "viernes",
+        "6": "sábado"
+    },
+    "error": {
+        "code": "error {}"
+    },
+    "markdown": {
+        "note": "Nota",
+        "tip": "Consejo",
+        "important": "Importante",
+        "warning": "Advertencia",
+        "caution": "Precaución"
+    },
+    "notices": {
+        "send_report": "Enviar un informe"
+    },
+    "prefs": {
+        "text_size": "Tamaño del texto",
+        "text_sizes": {
+            "normal": "Normal",
+            "large": "Más grande",
+            "auto": "Automático: más grande en la TV"
+        }
+    },
+    "quick": {
+        "title_text": "Idioma, tema y tamaño del texto"
+    },
+    "tiles": {
+        "text_size_auto": "Auto: mayor en la TV",
+        "themes": {
+            "system": "Consola",
+            "light": "Claro",
+            "dark": "Oscuro"
+        }
+    },
+    "tools": {
+        "language": "Idioma",
+        "languages": {
+            "system": "Idioma de la consola",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "Tema",
+        "themes": {
+            "system": "Consola",
+            "light": "Claro",
+            "dark": "Oscuro"
+        }
+    }
+}

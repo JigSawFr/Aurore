@@ -1,0 +1,107 @@
+{
+    "date": "{3} {2}일 {0}",
+    "months": {
+        "1": "1월",
+        "2": "2월",
+        "3": "3월",
+        "4": "4월",
+        "5": "5월",
+        "6": "6월",
+        "7": "7월",
+        "8": "8월",
+        "9": "9월",
+        "10": "10월",
+        "11": "11월",
+        "12": "12월"
+    },
+    "pill": {
+        "read_only": "읽기 전용"
+    },
+    "common": {
+        "hold_hint": "“{}”을(를) 2초간 누르고 계세요",
+        "hours": "{}시간",
+        "hours_minutes": "{}시간 {}분",
+        "less_than_minute": "1분 미만",
+        "minutes": "{}분",
+        "no": "아니요",
+        "unavailable": "사용 불가",
+        "yes": "예"
+    },
+    "days": {
+        "0": "일요일",
+        "1": "월요일",
+        "2": "화요일",
+        "3": "수요일",
+        "4": "목요일",
+        "5": "금요일",
+        "6": "토요일"
+    },
+    "days_lower": {
+        "0": "일요일",
+        "1": "월요일",
+        "2": "화요일",
+        "3": "수요일",
+        "4": "목요일",
+        "5": "금요일",
+        "6": "토요일"
+    },
+    "error": {
+        "code": "오류 {}"
+    },
+    "markdown": {
+        "note": "참고",
+        "tip": "팁",
+        "important": "중요",
+        "warning": "경고",
+        "caution": "주의"
+    },
+    "notices": {
+        "send_report": "보고서 보내기"
+    },
+    "prefs": {
+        "text_size": "글자 크기",
+        "text_sizes": {
+            "normal": "보통",
+            "large": "크게",
+            "auto": "자동: TV에서는 크게"
+        }
+    },
+    "quick": {
+        "title_text": "언어, 테마, 글자 크기"
+    },
+    "tiles": {
+        "text_size_auto": "자동: TV에서는 크게",
+        "themes": {
+            "system": "시스템",
+            "light": "밝게",
+            "dark": "어둡게"
+        }
+    },
+    "tools": {
+        "language": "언어",
+        "languages": {
+            "system": "시스템 언어",
+            "en-US": "English",
+            "fr": "Français (France)",
+            "fr-CA": "Français (Canada)",
+            "de": "Deutsch",
+            "es": "Español (España)",
+            "es-419": "Español (Latinoamérica)",
+            "it": "Italiano",
+            "nl": "Nederlands",
+            "pt": "Português (Portugal)",
+            "pt-BR": "Português (Brasil)",
+            "ru": "Русский",
+            "ja": "日本語",
+            "ko": "한국어",
+            "zh-Hans": "简体中文",
+            "zh-Hant": "繁體中文"
+        },
+        "theme": "테마",
+        "themes": {
+            "system": "시스템",
+            "light": "밝게",
+            "dark": "어둡게"
+        }
+    }
+}
