@@ -252,6 +252,11 @@ void        pick_language(std::function<void()> after = nullptr);
 void        pick_theme(std::function<void()> after = nullptr);
 void        pick_text_size(std::function<void()> after = nullptr);
 std::string text_size_name(bool tile = false);
+// The main screen's sidebar (ui::Prefs::rail): open, on its icons, or
+// folding by itself; applied at once (cadran::apply_rail). rail_name: the
+// choice saved, as text.
+void        pick_rail(std::function<void()> after = nullptr);
+std::string rail_name();
 std::string language_name(bool tile = false);
 std::string theme_name(bool tile = false);
 // − on the main screen: a list of the two, each opening its picker.

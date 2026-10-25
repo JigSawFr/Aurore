@@ -1,5 +1,5 @@
 // ui::prefs — what the user chose for Cadran's look: the language, the
-// theme, the text size and the effects. The app keeps them in its own
+// theme, the text size, the effects and the sidebar. The app keeps them in its own
 // settings and hands them over with use_prefs() at start-up, before the
 // first screen; the pickers (ui::pick_language…) change them there, then
 // save them through ui::hooks::get().save_prefs.
@@ -18,6 +18,10 @@ struct Prefs
     std::string text_size = "auto";     // one of TEXT_SIZES: "auto", larger on a TV
     std::string effects   = "auto";     // one of EFFECTS: "auto", lighter on battery
     bool        glow      = true;       // the Cadran screens' background glow
+    // The main screen's sidebar: "auto" (on its icons while a tab has the
+    // focus, open over the tab while the focus is on it), "open" (always)
+    // or "icons" (always on its icons). cadran::apply_rail() after a change.
+    std::string rail      = "auto";
 };
 
 constexpr const char* LANGUAGES[]  = { "system", "en-US", "fr", "fr-CA", "de", "es", "es-419", "it", "nl",
@@ -25,6 +29,7 @@ constexpr const char* LANGUAGES[]  = { "system", "en-US", "fr", "fr-CA", "de", "
 constexpr const char* THEMES[]     = { "system", "light", "dark" };
 constexpr const char* TEXT_SIZES[] = { "auto", "normal", "large" };
 constexpr const char* EFFECTS[]    = { "auto", "full", "reduced" };
+constexpr const char* RAILS[]      = { "auto", "open", "icons" };
 
 // The ones in use: the app's (use_prefs), else defaults of their own.
 Prefs& prefs();

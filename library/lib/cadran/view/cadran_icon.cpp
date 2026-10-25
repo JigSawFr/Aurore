@@ -186,6 +186,26 @@ void CadranIcon::draw(NVGcontext* vg, float x, float y, float width, float heigh
     } else if (i == "list") {
         nvgBeginPath(vg); nvgMoveTo(vg, 4, 6); nvgLineTo(vg, 20, 6); nvgMoveTo(vg, 4, 12); nvgLineTo(vg, 20, 12);
         nvgMoveTo(vg, 4, 18); nvgLineTo(vg, 14, 18); nvgStroke(vg);
+    } else if (i == "rail-open" || i == "rail-icons" || i == "rail-auto") {
+        // Preferences › Sidebar: a screen with its rail, wide with its
+        // names, narrow on its dots, or narrow and opening (an arrow out).
+        const bool open = i == "rail-open";
+        const float edge = open ? 11.0f : 8.0f;
+        nvgBeginPath(vg); nvgRoundedRect(vg, 3, 4, 18, 16, 2); nvgStroke(vg);
+        nvgBeginPath(vg); nvgMoveTo(vg, edge, 4); nvgLineTo(vg, edge, 20); nvgStroke(vg);
+        if (open) {
+            nvgBeginPath(vg);
+            for (float r : { 8.5f, 12.0f, 15.5f }) { nvgMoveTo(vg, 5.5f, r); nvgLineTo(vg, 8.5f, r); }
+            nvgStroke(vg);
+        } else {
+            nvgBeginPath(vg);
+            for (float r : { 8.5f, 12.0f, 15.5f }) nvgCircle(vg, 5.5f, r, 0.9f);
+            nvgFill(vg);
+        }
+        if (i == "rail-auto") {
+            nvgBeginPath(vg); nvgMoveTo(vg, 11.5f, 12); nvgLineTo(vg, 17.5f, 12);
+            nvgMoveTo(vg, 15, 9.5f); nvgLineTo(vg, 17.5f, 12); nvgLineTo(vg, 15, 14.5f); nvgStroke(vg);
+        }
     } else if (i == "lines") {
         nvgBeginPath(vg); nvgMoveTo(vg, 3, 12); nvgLineTo(vg, 11, 12); nvgMoveTo(vg, 3, 6); nvgLineTo(vg, 21, 6);
         nvgMoveTo(vg, 3, 18); nvgLineTo(vg, 15, 18); nvgStroke(vg);

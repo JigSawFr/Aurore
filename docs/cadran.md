@@ -31,13 +31,13 @@ brls::Application::createWindow("my_app/title"_i18n);
 
 ## What the app tells it
 
-`ui::hooks::get()` (`cadran/ui/hooks.hpp`) holds what Cadran asks of the app: the main screen and its tabs (to go back to a tab, re-read it, title a screen opened from it), the rail's icons, the app's version, commit and logo, whether it writes nothing for now (the header's pill says so), saving the preferences, sending a report, today's date by the app's own clock, and its test flags. Each one left empty does nothing.
+`ui::hooks::get()` (`cadran/ui/hooks.hpp`) holds what Cadran asks of the app: the main screen and its tabs (to go back to a tab, re-read it, title a screen opened from it), the rail's icons, the app's version, commit and logo, whether it writes nothing for now and a mode of its own the header's pill says over every screen (`pill`, with what a tap opens), the icons of its own screens' lines, saving the preferences, sending a report, today's date by the app's own clock, and its test flags. Each one left empty does nothing.
 
-`ui::Prefs` (`cadran/ui/prefs.hpp`) is the language, theme, text size, effects and background glow chosen. The app keeps it in its settings and hands it over with `ui::use_prefs()`; the pickers (`ui::pick_language`, `pick_theme`, `pick_text_size`, `quick_settings`) change it there and save it through the hook. A new language or theme builds the screens again through `push_main`; without it, the screens opened from then on take the change.
+`ui::Prefs` (`cadran/ui/prefs.hpp`) is the language, theme, text size, effects, sidebar and background glow chosen. The app keeps it in its settings and hands it over with `ui::use_prefs()`; the pickers (`ui::pick_language`, `pick_theme`, `pick_text_size`, `quick_settings`) change it there and save it through the hook. A new language or theme builds the screens again through `push_main`; without it, the screens opened from then on take the change.
 
 ## What it gives
 
-- **Frame** (`cadran/ui/cadran_frame.hpp`): the rail, the header (mark, title, pill, date), the crumb of a screen opened from a tab, the background glow.
+- **Frame** (`cadran/ui/cadran_frame.hpp`): the rail, open, on its icons, or folding on its icons while a tab has the focus and opening over the tab to choose one (`ui::Prefs::rail`, `ui::pick_rail`), with a badge per tab (`TabBadge`); the header (mark, title, pill, date), the crumb of a screen opened from a tab, the background glow.
 - **Pieces** (`cadran_kit.hpp`, `cadran_list.hpp`): cards, rows, chips, pills, bars, keys, switches, QR codes, empty states.
 - **Dialogs and sheets** (`ui.hpp`, `cadran_modal.hpp`, `action_sheet.hpp`): confirmations (dangerous ones in coral), notices, checklists, hold-to-confirm, failures with a report button, lists of values (rows, grids, several marked), lists of actions with icons, details, groups and switches, the keyboard.
 - **Toasts** (`ui::notify`, `ui::refuse`, `ui::error`): news, done, refused, each with its icon.

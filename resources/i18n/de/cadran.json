@@ -64,6 +64,12 @@
             "normal": "Normal",
             "large": "Größer",
             "auto": "Automatisch: größer am Fernseher"
+        },
+        "rail": "Seitenleiste",
+        "rail_values": {
+            "auto": "Automatisch: offen zur Tab-Auswahl",
+            "open": "Immer offen",
+            "icons": "Nur Symbole"
         }
     },
     "quick": {

@@ -64,6 +64,12 @@
             "normal": "보통",
             "large": "크게",
             "auto": "자동: TV에서는 크게"
+        },
+        "rail": "사이드바",
+        "rail_values": {
+            "auto": "자동: 탭을 고를 때 열림",
+            "open": "항상 열림",
+            "icons": "아이콘만"
         }
     },
     "quick": {

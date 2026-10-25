@@ -8,7 +8,10 @@
 #include <borealis.hpp>
 #include <functional>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include <borealis/cadran/ui/cadran_frame.hpp>
 
 namespace ui::hooks
 {
@@ -47,6 +50,13 @@ struct Hooks
     // The app's logo, drawn in a `w` × `h` box at (0, 0) (CadranIcon "mark":
     // the header's, the about screen's). Unset: Aurore's.
     std::function<void(NVGcontext* vg, float w, float h)> mark;
+    // A mode of the app the main screen's pill says over every screen: fills
+    // `mode` in and returns true while it lasts (parental controls paused,
+    // unlocked…). Unset or false: the screen's own words, or read-only.
+    std::function<bool(cadran::PillMode& mode)> pill;
+    // The icons of the lines of the app's own screens that Cadran dresses
+    // (a DetailCell's id, a CadranIcon's name), besides Aurore's.
+    std::function<std::vector<std::pair<const char*, const char*>>()> screen_icons;
     // The title of the main screen's tab `screen` ("tab/about"), for the
     // crumb of a screen opened from it. Unset: none.
     std::function<std::string(const std::string& screen)> tab_title;

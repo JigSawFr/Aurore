@@ -64,6 +64,12 @@
             "normal": "Normal",
             "large": "Larger",
             "auto": "Automatic: larger on the TV"
+        },
+        "rail": "Sidebar",
+        "rail_values": {
+            "auto": "Automatic: open to choose a tab",
+            "open": "Always open",
+            "icons": "Icons only"
         }
     },
     "quick": {

@@ -2,6 +2,7 @@
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #include <borealis/cadran/ui/ui.hpp>
 
+#include <borealis/cadran/ui/cadran_frame.hpp>
 #include <borealis/cadran/ui/cadran_kit.hpp>
 #include <borealis/cadran/ui/cadran_modal.hpp>
 #include <borealis/cadran/ui/cadran_list.hpp>
@@ -497,6 +498,26 @@ void pick_text_size(std::function<void()> after)
         text_size::apply();
         if (after) after();
     }, true, {}, icons);
+}
+
+void pick_rail(std::function<void()> after)
+{
+    std::vector<std::string> labels;
+    for (const char* r : ui::RAILS) labels.push_back(brls::getStr(std::string("cadran/prefs/rail_values/") + r));
+    const std::vector<std::string> icons = { "rail-auto", "rail-open", "rail-icons" };
+    static_assert(std::size(ui::RAILS) == 3, "an icon for each sidebar");
+    pick("cadran/prefs/rail"_i18n, labels, index_of(ui::RAILS, ui::prefs().rail), [after](int i) {
+        // At once: the main screen's rail wider or narrower.
+        ui::prefs().rail = ui::RAILS[i];
+        save_prefs();
+        cadran::apply_rail();
+        if (after) after();
+    }, true, {}, icons);
+}
+
+std::string rail_name()
+{
+    return brls::getStr("cadran/prefs/rail_values/" + std::string(ui::RAILS[index_of(ui::RAILS, ui::prefs().rail)]));
 }
 
 std::string text_size_name(bool tile)
