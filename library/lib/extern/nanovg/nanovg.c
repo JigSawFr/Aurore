@@ -2863,7 +2863,6 @@ int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, floa
 			case 9:			// \t
 			case 11:		// \v
 			case 12:		// \f
-			case 0x00a0:	// NBSP
 				type = NVG_CONTROL;
 				break;
 			case 10:		// \n
