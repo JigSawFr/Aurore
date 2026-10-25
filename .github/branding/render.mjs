@@ -1,4 +1,4 @@
-// Renders the fork's branding (.github/branding/*.svg) to PNG:
+// Renders Aurore's branding (.github/branding/*.svg) to PNG:
 //   icon.png (256x256), social-preview.png (1280x640, the repository's social
 //   preview, uploaded by hand in Settings › General) and the README's banner,
 //   .github/readme/banner.png (1280x320).

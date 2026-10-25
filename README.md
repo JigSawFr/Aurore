@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/readme/banner.png" alt="borealis" width="100%">
+<img src=".github/readme/banner.png" alt="Aurore" width="100%">
 
 ### A Switch-like interface for your app, on every screen
 
@@ -10,20 +10,23 @@
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-[**What's new here**](#-what-this-fork-adds) ·
+[**What's new**](#-what-aurore-adds) ·
 [**Use&nbsp;it**](#-use-it-in-your-project) ·
 [**Build&nbsp;the&nbsp;demo**](#-build-the-demo) ·
 [**Upstream&nbsp;wiki**](https://github.com/xfangfang/borealis/wiki)
 
-<img src=".github/readme/tour.gif" alt="The borealis demo" width="100%">
+<img src=".github/readme/tour.gif" alt="The Aurore demo" width="100%">
 
 </div>
 
 ---
 
-borealis is a C++ UI library for controllers, TVs and touch screens. It looks like the Nintendo Switch's own menus out of the box, and can be restyled into anything else.
+Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like the Nintendo Switch's own menus out of the box, and can be restyled into anything else.
 
-This is [JigSawFr](https://github.com/JigSawFr)'s fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch, itself from [natinusala/borealis](https://github.com/natinusala/borealis)), maintained for [PlayGuard](https://github.com/JigSawFr/playguard). It follows upstream and adds **fixes and features picked from other forks** and **the changes PlayGuard needs**, each one opt-in unless it is a fix.
+It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. The code keeps borealis' names (`brls`, `borealis.hpp`), so a borealis app moves to Aurore by changing its submodule.
+
+> [!NOTE]
+> **Coming next:** *Cadran*, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), becomes Aurore's default look. Cadran is GPLv3: once it is in, an app built with Aurore is GPLv3.
 
 ## ✨ Features
 
@@ -57,7 +60,7 @@ This is [JigSawFr](https://github.com/JigSawFr)'s fork of [xfangfang/borealis](h
 
 </details>
 
-## 🌟 What this fork adds
+## 🌟 What Aurore adds
 
 - 📐 **Layout** — `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; a radius per corner; horizontal gradients.
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
@@ -141,7 +144,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 ## 📦 Use it in your project
 
 1. Build your project as **C++17**, without `-fno-rtti` or `-fno-exceptions`.
-2. Add borealis as a submodule:
+2. Add Aurore as a submodule:
 
    ```sh
    git submodule add -b wiliwili https://github.com/JigSawFr/borealis.git library/borealis
@@ -184,7 +187,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 
 ## 🤝 Contributing
 
-The default branch is `wiliwili`, as upstream's. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/). A fix that is not specific to this fork is worth sending [upstream](https://github.com/xfangfang/borealis) too.
+The default branch is `wiliwili`, as upstream's. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/). A fix that is not specific to Aurore is worth sending [upstream](https://github.com/xfangfang/borealis) too.
 
 ## 📜 License and credits
 
@@ -194,11 +197,11 @@ The default branch is `wiliwili`, as upstream's. Picks from upstream and other f
 <summary>Credits</summary>
 <br>
 
-- Created by [natinusala](https://github.com/natinusala/borealis) and its [contributors](AUTHORS); carried on by [xfangfang](https://github.com/xfangfang/borealis) and [dragonflylee](https://github.com/dragonflylee).
+- borealis was created by [natinusala](https://github.com/natinusala/borealis) and its [contributors](AUTHORS); carried on by [xfangfang](https://github.com/xfangfang/borealis) and [dragonflylee](https://github.com/dragonflylee).
 - Changes picked from the forks of Nika0000, Kelvin Wong, kawaii-flesh, Alexander Kiselev, youngzyl, Elias da Rosa, XITRIX, CostelaBR, PalindromicBreadLoaf and xlanor, each commit keeping its author.
 - Built on [nanovg](https://github.com/memononen/nanovg), [Yoga](https://github.com/facebook/yoga), [GLFW](https://www.glfw.org/), [SDL](https://www.libsdl.org/), [tinyxml2](https://github.com/leethomason/tinyxml2), [fmt](https://github.com/fmtlib/fmt), [nlohmann/json](https://github.com/nlohmann/json), [tweeny](https://github.com/mobius3/tweeny) and the others in `library/lib/extern`, under their own licences.
-- The demo's logo by @MeganRoshelle; this fork's icon and banner in [`.github/branding`](.github/branding).
+- The demo's logo by @MeganRoshelle; Aurore's icon and banner in [`.github/branding`](.github/branding).
 
 </details>
 
-<sub>borealis is not affiliated with or endorsed by Nintendo. Nintendo Switch is a trademark of Nintendo.</sub>
+<sub>Aurore is not affiliated with or endorsed by Nintendo. Nintendo Switch is a trademark of Nintendo.</sub>
