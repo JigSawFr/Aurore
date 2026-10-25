@@ -81,4 +81,9 @@ class Hints : public Box
     VoidEvent::Subscription hintSubscription;
 };
 
+// Draws the hints as they are once a screen has opened or closed: greyed
+// only for an action that is not available, not while the input is blocked
+// by the screen's fade. So a screenshot does not depend on when it was taken.
+void setHintsSteady(bool steady);
+
 } // namespace brls

@@ -53,6 +53,13 @@ const std::string hintXML = R"xml(
     </brls:Box>
 )xml";
 
+static bool hintsSteady = false;
+
+void setHintsSteady(bool steady)
+{
+    hintsSteady = steady;
+}
+
 Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
     : Box(Axis::ROW)
       , action(action)
@@ -68,7 +75,8 @@ Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
     icon->setText(getKeyIcon(static_cast<ControllerButton>(action->getButton())));
     hint->setText(action->getHintText());
 
-    if ((action->getButton() != BUTTON_A || allowAButtonTouch) && action->isAvailable() && !Application::isInputBlocks())
+    const bool blocked = !hintsSteady && Application::isInputBlocks();
+    if ((action->getButton() != BUTTON_A || allowAButtonTouch) && action->isAvailable() && !blocked)
     {
         this->addGestureRecognizer(new TapGestureRecognizer(this, [this, action]()
         {
@@ -76,7 +84,7 @@ Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
         }));
     }
 
-    if (!action->isAvailable() || Application::isInputBlocks())
+    if (!action->isAvailable() || blocked)
     {
         Theme theme = Application::getTheme();
         icon->setTextColor(theme["brls/text_disabled"]);
