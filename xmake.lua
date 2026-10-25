@@ -73,9 +73,13 @@ target("borealis")
     -- set_kind("shared")
     add_includedirs("library/include")
     add_includedirs("library/include/borealis/extern")
+    add_includedirs("library/include/borealis/extern/qrcodegen")
     add_files("library/lib/core/**.cpp")
     add_files("library/lib/views/**.cpp")
     add_files("library/lib/extern/libretro-common/**.c")
+    add_files("library/lib/extern/qrcodegen/*.cpp")
+    -- Cadran, Aurore's look (GPLv3, LICENSE.GPL)
+    add_files("library/lib/cadran/**.cpp")
 
     if get_config("window") == "glfw" then
         add_files("library/lib/platforms/glfw/*.cpp")

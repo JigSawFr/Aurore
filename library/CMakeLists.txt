@@ -257,6 +257,7 @@ list(APPEND BOREALIS_INCLUDE
         ${BOREALIS_PATH}/include
         ${BOREALIS_PATH}/include/borealis/extern
         ${BOREALIS_PATH}/include/borealis/extern/nanovg
+        ${BOREALIS_PATH}/include/borealis/extern/qrcodegen
         )
 list(APPEND BOREALIS_SOURCE
         ${BOREALIS_PATH}/lib/core
@@ -268,6 +269,9 @@ list(APPEND BOREALIS_SOURCE
         ${BOREALIS_PATH}/lib/extern/libretro-common/compat
         ${BOREALIS_PATH}/lib/extern/libretro-common/encodings
         ${BOREALIS_PATH}/lib/extern/libretro-common/features
+        ${BOREALIS_PATH}/lib/extern/qrcodegen
+        # Cadran, Aurore's look (GPLv3, LICENSE.GPL)
+        ${BOREALIS_PATH}/lib/cadran
         )
 if (PLATFORM_PSV OR PLATFORM_PS4 OR BOREALIS_USE_D3D11)
         list(REMOVE_ITEM BOREALIS_SOURCE ${BOREALIS_PATH}/lib/extern/glad)
