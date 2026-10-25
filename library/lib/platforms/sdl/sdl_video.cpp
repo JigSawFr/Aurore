@@ -174,7 +174,13 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     }
 
     // Create window
+#ifdef __EMSCRIPTEN__
+    // In a browser the page scales the canvas with CSS: the window keeps the
+    // console's 1280x720, which a resizable one would follow the page out of.
+    Uint32 windowFlags = SDL_WINDOW_SHOWN;
+#else
     Uint32 windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+#endif
 #ifdef BOREALIS_USE_OPENGL
 #ifdef __SWITCH__
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);

@@ -18,6 +18,9 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/platforms/sdl/sdl_input.hpp>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 namespace brls
 {
@@ -318,6 +321,23 @@ static const size_t SDL_BUTTONS_MAPPING[SDL_GAMEPAD_BUTTON_MAX] = {
 
 static std::unordered_map<SDL_Scancode, int> keyboardKeys {};
 
+#ifdef __EMSCRIPTEN__
+// In a browser, the page presses buttons itself (the keys it maps by their
+// meaning, so on any layout, and its on-screen pad). A press seen by no
+// frame (down and up before the next one) still counts for one.
+static bool webButtonsHeld[_BUTTON_MAX] {};
+static bool webButtonsPressed[_BUTTON_MAX] {};
+
+extern "C" EMSCRIPTEN_KEEPALIVE void brls_web_button(int button, int down)
+{
+    if (button < 0 || button >= _BUTTON_MAX)
+        return;
+    webButtonsHeld[button] = down != 0;
+    if (down)
+        webButtonsPressed[button] = true;
+}
+#endif
+
 static const size_t SDL_AXIS_MAPPING[SDL_GAMEPAD_AXIS_MAX] = {
     LEFT_X,
     LEFT_Y,
@@ -421,7 +441,7 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
 {
 
     int32_t flags = SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER;
-#ifndef __WINRT__
+#if !defined(__WINRT__) && !defined(__EMSCRIPTEN__)
     flags |= SDL_INIT_HAPTIC;
 #endif
     if (SDL_Init(flags) < 0)
@@ -518,6 +538,14 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
     state->buttons[BUTTON_RIGHT] |= getKeyboardKeys(SDL_SCANCODE_RIGHT);
     state->buttons[BUTTON_DOWN] |= getKeyboardKeys(SDL_SCANCODE_DOWN);
     state->buttons[BUTTON_LEFT] |= getKeyboardKeys(SDL_SCANCODE_LEFT);
+
+#ifdef __EMSCRIPTEN__
+    for (int i = 0; i < _BUTTON_MAX; i++)
+    {
+        state->buttons[i] |= webButtonsHeld[i] || webButtonsPressed[i];
+        webButtonsPressed[i] = false;
+    }
+#endif
 
     state->buttons[BUTTON_NAV_UP] |= state->buttons[BUTTON_UP];
     state->buttons[BUTTON_NAV_RIGHT] |= state->buttons[BUTTON_RIGHT];

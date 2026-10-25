@@ -118,6 +118,13 @@ void DesktopFontLoader::loadFonts()
     std::vector<std::string> simplifiedChineseFonts = {
         prefix+"msyh",
     };
+#elif defined(__EMSCRIPTEN__)
+    // A browser has no system font to read: the page's build packages one
+    // with the han, kana and hangul PlayGuard's catalogs use.
+    std::vector<std::string> koreanFonts;
+    std::vector<std::string> simplifiedChineseFonts = {
+        BRLS_ASSET("font/cjk"),
+    };
 #elif defined(ANDROID)
     std::vector<std::string> koreanFonts;
     std::vector<std::string> simplifiedChineseFonts = {
