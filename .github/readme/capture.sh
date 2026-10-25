@@ -7,13 +7,13 @@
 set -e
 cd "$(dirname "$0")/../.."
 OUT=.github/readme
-APP=./build_pc/borealis_demo
+APP=./build_pc/aurore_demo
 
 start() {
     dbus-run-session -- $APP > /dev/null 2>&1 &
     sleep 6
 }
-stop() { pkill -x borealis_demo || true; sleep 1; }
+stop() { pkill -x aurore_demo || true; sleep 1; }
 key() { xdotool key "$1"; sleep "${2:-1}"; }
 
 # name, then the keys from the first tab

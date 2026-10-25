@@ -55,8 +55,8 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 <p align="center">
   <img src=".github/readme/markdown.png" alt="Icons and Markdown" width="49%">
-  <img src=".github/readme/components.png" alt="borealis' components in Cadran" width="49%">
-  <br><sub><b>Icons and Markdown</b> · <b>borealis' components in Cadran</b></sub>
+  <img src=".github/readme/components.png" alt="The demo's other tabs in Cadran" width="49%">
+  <br><sub><b>Icons and Markdown</b> · <b>The demo's other tabs in Cadran</b></sub>
 </p>
 
 <p align="center">
@@ -172,7 +172,7 @@ git clone --recursive https://github.com/JigSawFr/aurore.git
 cd aurore
 cmake -B build_pc -DPLATFORM_DESKTOP=ON
 cmake --build build_pc
-./build_pc/borealis_demo
+./build_pc/aurore_demo
 ```
 
 For the other platforms, upstream's wiki has the toolchains and the commands:

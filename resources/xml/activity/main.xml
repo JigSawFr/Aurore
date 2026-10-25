@@ -4,7 +4,7 @@
     <brls:TabFrame
         id="main_tabs"
         title="@i18n/demo/title"
-        icon="@res/img/borealis_96.png">
+        icon="@res/img/aurore_96.png">
 
         <!-- Built in code: Cadran, Aurore's look -->
         <brls:Tab label="@i18n/demo/tabs/cadran" >
@@ -73,7 +73,7 @@
                 <brls:Image
                     width="auto"
                     height="33%"
-                    image="@res/img/borealis_256.png"
+                    image="@res/img/aurore_256.png"
                     marginBottom="@style/about/description_margin"/>
 
                 <brls:Box

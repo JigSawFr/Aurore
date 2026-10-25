@@ -1,4 +1,4 @@
-name: Build borealis demo
+name: Build the Aurore demo
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
           ./build_libromfs_generator.sh
           cmake -B build -G Xcode -DPLATFORM_IOS=ON -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0
           cmake --build build
-          ditto -ck --rsrc --sequesterRsrc --keepParent build/Debug-iphoneos/borealis_demo.app borealis_demo.zip
+          ditto -ck --rsrc --sequesterRsrc --keepParent build/Debug-iphoneos/aurore_demo.app aurore_demo.zip
       - uses: actions/cache/save@v5
         if: ${{ !steps.ios-cache.outputs.cache-hit }}
         with:
@@ -33,8 +33,8 @@ jobs:
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-ios
-          path: borealis_demo.zip
+          name: aurore-ios
+          path: aurore_demo.zip
 
   ps4:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-ps4
+          name: aurore-ps4
           path: build/*.pkg
 
   psv:
@@ -87,7 +87,7 @@ jobs:
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-psv-${{ matrix.driver }}
+          name: aurore-psv-${{ matrix.driver }}
           path: build/*.vpk
 
   switch:
@@ -110,12 +110,12 @@ jobs:
       - name: Build
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DPLATFORM_SWITCH=ON ${{ matrix.cmake }}
-          make -C build borealis_demo.nro -j$(nproc)
+          make -C build aurore_demo.nro -j$(nproc)
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-switch-${{ matrix.ext }}
-          path: build/borealis_demo.nro
+          name: aurore-switch-${{ matrix.ext }}
+          path: build/aurore_demo.nro
 
   android:
     runs-on: ubuntu-latest
@@ -135,7 +135,7 @@ jobs:
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-android
+          name: aurore-android
           path: android-project/app/build/outputs/apk/debug/*.apk
 
   macos:
@@ -155,14 +155,14 @@ jobs:
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DBUNDLE_MACOS_APP=ON ${{ matrix.window.cmake }}
           make -C build -j$(sysctl -n hw.ncpu)
-          mkdir borealis-macos-${{ matrix.window.name }}
-          mv build/borealis_demo.app borealis-macos-${{ matrix.window.name }}/
-          tar -czvf borealis-macos-${{ matrix.window.name }}.tar.gz borealis-macos-${{ matrix.window.name }}
+          mkdir aurore-macos-${{ matrix.window.name }}
+          mv build/aurore_demo.app aurore-macos-${{ matrix.window.name }}/
+          tar -czvf aurore-macos-${{ matrix.window.name }}.tar.gz aurore-macos-${{ matrix.window.name }}
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-macos-${{ matrix.window.name }}
-          path: borealis-macos-${{ matrix.window.name }}.tar.gz
+          name: aurore-macos-${{ matrix.window.name }}
+          path: aurore-macos-${{ matrix.window.name }}.tar.gz
 
   windows:
     runs-on: windows-latest
@@ -201,8 +201,8 @@ jobs:
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-windows-x86_64-${{ matrix.driver }}
-          path: build/borealis_demo.exe
+          name: aurore-windows-x86_64-${{ matrix.driver }}
+          path: build/aurore_demo.exe
 
   linux:
     name: linux (${{ matrix.driver }}${{ matrix.ext }})
@@ -231,13 +231,13 @@ jobs:
               -DPLATFORM_DESKTOP=ON \
               -DUSE_LIBROMFS=ON
           make -C build -j$(nproc)
-          output_dir=borealis-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
-          strip build/borealis_demo
+          output_dir=aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
+          strip build/aurore_demo
           mkdir -p ${output_dir}
-          mv build/borealis_demo ${output_dir}
+          mv build/aurore_demo ${output_dir}
           tar -czvf ${output_dir}.tar.gz ${output_dir}
       - name: Upload dist
         uses: actions/upload-artifact@v6
         with:
-          name: borealis-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
-          path: borealis-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}.tar.gz
+          name: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
+          path: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}.tar.gz

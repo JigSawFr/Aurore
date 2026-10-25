@@ -12,7 +12,7 @@
         id="image"
         width="auto"
         height="33%"
-        image="@res/img/borealis_256.png"
+        image="@res/img/aurore_256.png"
         marginBottom="@style/about/description_margin"/>
 
     <brls:Label

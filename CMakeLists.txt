@@ -23,7 +23,7 @@ endif ()
 include(${BOREALIS_LIBRARY}/cmake/toolchain.cmake)
 
 # project info
-project(borealis_demo)
+project(aurore_demo)
 set(VERSION_MAJOR "1")
 set(VERSION_MINOR "0")
 set(VERSION_ALTER "0")
@@ -31,7 +31,7 @@ set(VERSION_BUILD "0")
 set(PACKAGE_NAME "com.borealis.demo")
 set(PSN_TITLE_ID  "BRLS00000")
 set(PSN_VERSION  "01.00")
-set(PROJECT_AUTHOR "borealis")
+set(PROJECT_AUTHOR "Aurore")
 set(PROJECT_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/img/demo_icon.jpg)
 set(PROJECT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
@@ -57,7 +57,7 @@ if (PLATFORM_DESKTOP)
             set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static" CACHE STRING "" FORCE)
         endif ()
     elseif (BUNDLE_MACOS_APP)
-        list(APPEND MAIN_SRC ${CMAKE_SOURCE_DIR}/demo/borealis.icns)
+        list(APPEND MAIN_SRC ${CMAKE_SOURCE_DIR}/demo/aurore.icns)
     endif ()
 elseif (PLATFORM_SWITCH)
     list(APPEND MAIN_SRC ${CMAKE_SOURCE_DIR}/library/lib/platforms/switch/switch_wrapper.c)
@@ -83,9 +83,9 @@ if (PLATFORM_DESKTOP)
             MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}"
             MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}"
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}"
-            MACOSX_BUNDLE_ICON_FILE "borealis.icns"
+            MACOSX_BUNDLE_ICON_FILE "aurore.icns"
             MACOSX_BUNDLE_COPYRIGHT "Copyright 2023 ${PROJECT_AUTHOR}"
-            RESOURCE "${CMAKE_SOURCE_DIR}/demo/borealis.icns"
+            RESOURCE "${CMAKE_SOURCE_DIR}/demo/aurore.icns"
         )
         add_custom_target(${PROJECT_NAME}.data
                 COMMAND "${CMAKE_COMMAND}" -E copy_directory ${PROJECT_RESOURCES} ${PROJECT_NAME}.app/Contents/Resources/resources
@@ -128,7 +128,7 @@ elseif (PLATFORM_PS4)
                 # eg: `cmake-build/ps4/resources/icon.png` -> `/app0/resources/icon.png`
                 ${CMAKE_BINARY_DIR}/ps4
                 ${PSN_TITLE_ID}
-                "Borealis DEMO"
+                "Aurore demo"
                 ${PSN_VERSION}
                 # https://psdevwiki.com/ps4/param.sfo#ATTRIBUTE
                 # Support ps4 pro
@@ -155,14 +155,14 @@ elseif (PLATFORM_IOS)
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/iphoneos/Splash.storyboard"
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/Images.xcassets"
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/iOSBundleInfo.plist.in"
-            "borealis"
+            "Aurore"
             "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}")
 elseif (PLATFORM_TVOS)
     ios_bundle(
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/tvos/Splash.storyboard"
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/Images.xcassets"
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/iOSBundleInfo.plist.in"
-            "borealis"
+            "Aurore"
             "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}")
 endif ()
 

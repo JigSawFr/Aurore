@@ -1,5 +1,5 @@
 {
-    "title": "Borealis Demo App",
+    "title": "Aurore Demo",
 
     "tabs": {
         "cadran": "Cadran",
@@ -15,10 +15,10 @@
         "misc_layouts": "Misc. layouts",
         "misc_components": "Misc. components",
         "misc_tools": "Misc. dev tools",
-        "about": "About borealis"
+        "about": "About Aurore"
     },
 
-    "welcome": "Welcome to the borealis demo! Feel free to explore and discover what the library can do.",
+    "welcome": "Welcome to the Aurore demo! Feel free to explore and discover what the library can do.",
 
     "components": {
         "buttons_header": "Buttons",
@@ -45,11 +45,11 @@
     },
 
     "about": {
-        "title": "borealis",
-        "description": "A hardware accelerated, controller and TV oriented UI library for PC / Android / iOS / PSV / PS4 and Nintendo Switch (libnx).",
-        "github": "Find it on github.com/natinusala/borealis",
-        "licence": "Licensed under Apache 2.0",
-        "logo_credit": "Logo by @MeganRoshelle"
+        "title": "Aurore",
+        "description": "A hardware accelerated, controller and TV oriented UI library for PC / Android / iOS / PSV / PS4 and Nintendo Switch, after borealis.",
+        "github": "Find it on github.com/JigSawFr/aurore",
+        "licence": "Licensed under GPLv3 (borealis: Apache 2.0)",
+        "logo_credit": "Logo: an aurora in the focus highlight"
     },
 
     "cadran": {

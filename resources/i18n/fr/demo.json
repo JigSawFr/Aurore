@@ -1,8 +1,19 @@
 {
-    "title": "Démo de Borealis",
+    "title": "Démo d’Aurore",
 
     "tabs": {
-        "cadran": "Cadran"
+        "cadran": "Cadran",
+        "about": "À propos d’Aurore"
+    },
+
+    "welcome": "Bienvenue dans la démo d’Aurore ! Explorez et découvrez ce que la bibliothèque sait faire.",
+
+    "about": {
+        "title": "Aurore",
+        "description": "Une bibliothèque d’interface accélérée, pensée pour la manette et la télé, pour PC / Android / iOS / PSV / PS4 et Nintendo Switch, d’après borealis.",
+        "github": "Sur github.com/JigSawFr/aurore",
+        "licence": "Sous licence GPLv3 (borealis : Apache 2.0)",
+        "logo_credit": "Logo : une aurore dans le cadre du focus"
     },
 
     "cadran": {
