@@ -11,3 +11,15 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+Cadran (library/include/borealis/cadran, library/lib/cadran, and the
+resources it reads: resources/i18n/*/cadran.json, resources/img/emoji,
+resources/font/sora_bold_latin.ttf) is
+Copyright 2026 JigSawFr, and Taylor for the files that say so,
+licensed under the GNU General Public License, version 3 or later
+(LICENSE.GPL). A program built with it is covered by the GPL.
+
+Also bundled: QR Code generator (library/lib/extern/qrcodegen, MIT,
+Copyright Project Nayuki), Twemoji 15.1.0 (resources/img/emoji,
+CC-BY 4.0, Copyright Twitter, Inc and other contributors) and Sora
+(resources/font, SIL Open Font License 1.1, OFL-Sora.txt).
