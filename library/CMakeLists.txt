@@ -223,18 +223,8 @@ elseif(PLATFORM_IOS OR PLATFORM_TVOS)
         list(APPEND BRLS_PLATFORM_OPTION -D__SDL2__ -DTVOS)
     endif()
 elseif(PLATFORM_SWITCH)
-    list(APPEND BOREALIS_SOURCE
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/archive
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfgrp
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfsar
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfwar
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfwav
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfwsd
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/player
-            )
     file(GLOB_RECURSE SWITCH_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/switch/*.cpp")
     list(APPEND BOREALIS_SRC ${SWITCH_PLATFORM_SRC})
-    list(APPEND BOREALIS_INCLUDE ${BOREALIS_PATH}/lib/extern/switch-libpulsar/include)
     list(APPEND BRLS_PLATFORM_OPTION $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile> -DHAVE_LIBNX -DSWITCH -D__SWITCH__ -DSTBI_NO_THREAD_LOCALS)
     find_package(PkgConfig REQUIRED)
 

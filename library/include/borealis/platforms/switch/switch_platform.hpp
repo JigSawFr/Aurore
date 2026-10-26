@@ -23,9 +23,9 @@
 #else
 #include <borealis/platforms/glfw/glfw_video.hpp>
 #endif
+#include <borealis/core/audio.hpp>
 #include <borealis/core/platform.hpp>
 #include <borealis/core/theme.hpp>
-#include <borealis/platforms/switch/switch_audio.hpp>
 #include <borealis/platforms/switch/switch_font.hpp>
 #include <borealis/platforms/switch/switch_ime.hpp>
 #include <borealis/platforms/switch/switch_input.hpp>
@@ -77,7 +77,7 @@ class SwitchPlatform : public Platform
     ThemeVariant themeVariant;
     std::string locale;
 
-    SwitchAudioPlayer* audioPlayer;
+    AudioPlayer* audioPlayer;
     SwitchInputManager* inputManager;
     SwitchImeManager* imeManager;
 
