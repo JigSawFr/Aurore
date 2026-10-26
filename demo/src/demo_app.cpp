@@ -26,6 +26,7 @@
 #include "activity/main_activity.hpp"
 #include "tab/cadran_tab.hpp"
 #include "tab/components_tab.hpp"
+#include "tab/grid_tab.hpp"
 #include "tab/recycling_list_tab.hpp"
 #include "tab/settings_tab.hpp"
 #include "tab/styles_tab.hpp"
@@ -54,7 +55,7 @@ void installCadranHooks()
     h.rail_icons        = []()
     {
         return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "contrast", "language", "", "activity", "gamepad",
-            "", "settings", "", "info" };
+            "shelf", "", "settings", "", "info" };
     };
     h.shown_screen = []() { return "tab/" + std::to_string(shownTab); };
     h.main_screen  = h.shown_screen;
@@ -96,6 +97,7 @@ void registerViews()
     brls::Application::registerXMLView("CadranTab", CadranTab::create);
     brls::Application::registerXMLView("RecyclingListTab", RecyclingListTab::create);
     brls::Application::registerXMLView("ComponentsTab", ComponentsTab::create);
+    brls::Application::registerXMLView("GridTab", GridTab::create);
     brls::Application::registerXMLView("TransformTab", TransformTab::create);
     brls::Application::registerXMLView("TransformBox", TransformBox::create);
     brls::Application::registerXMLView("PokemonView", PokemonView::create);
