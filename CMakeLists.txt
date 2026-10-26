@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16...3.31)
 
 set(BOREALIS_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)
 
@@ -53,9 +53,6 @@ if (PLATFORM_DESKTOP)
     if (WIN32)
         configure_file("${CMAKE_SOURCE_DIR}/demo/resource.rc.in" "${CMAKE_BINARY_DIR}/resource.rc")
         list(APPEND MAIN_SRC ${CMAKE_BINARY_DIR}/resource.rc)
-        if (MINGW)
-            set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static" CACHE STRING "" FORCE)
-        endif ()
     elseif (BUNDLE_MACOS_APP)
         list(APPEND MAIN_SRC ${CMAKE_SOURCE_DIR}/demo/aurore.icns)
     endif ()
@@ -64,14 +61,15 @@ elseif (PLATFORM_SWITCH)
 elseif (PLATFORM_PS4)
     # Show backtrace when app crash
     list(APPEND MAIN_SRC ${CMAKE_SOURCE_DIR}/library/lib/platforms/ps4/crashlog.c)
-elseif (PLATFORM_PSV)
-    add_definitions(-D__psp2__ -D__PSV__)
 endif ()
 
 
 # building target
 program_target(${PROJECT_NAME} "${MAIN_SRC}")
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_SCAN_FOR_MODULES OFF)
+if (PLATFORM_DESKTOP AND MINGW)
+    target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++ -static)
+endif ()
 
 
 # building release file
@@ -169,4 +167,4 @@ endif ()
 
 target_include_directories(${PROJECT_NAME} PRIVATE demo ${APP_PLATFORM_INCLUDE})
 target_compile_options(${PROJECT_NAME} PRIVATE -ffunction-sections -fdata-sections ${APP_PLATFORM_OPTION})
-target_link_libraries(${PROJECT_NAME} PRIVATE borealis ${APP_PLATFORM_LIB})
+target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore ${APP_PLATFORM_LIB})

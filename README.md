@@ -159,6 +159,9 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
    ```
 
 3. Copy its `resources` folder to the root of your project.
+4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore` (the old `borealis` target name still works). It brings its include directories, definitions and dependencies with it.
+
+   On the desktop, `-DAURORE_INSTALL=ON` (with `USE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
 > [!TIP]
 > Starting from scratch? Upstream's [**template**](https://github.com/xfangfang/borealis_template) has the build files for every platform; point its submodule here.
@@ -174,6 +177,20 @@ cmake -B build_pc -DPLATFORM_DESKTOP=ON
 cmake --build build_pc
 ./build_pc/aurore_demo
 ```
+
+With CMake 3.21 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>`:
+
+```sh
+cmake --preset desktop-glfw        # or desktop-sdl
+cmake --build --preset desktop-glfw
+./build/desktop-glfw/aurore_demo
+
+export DEVKITPRO=/opt/devkitpro    # Switch: switch-deko3d or switch-gl (OpenGL)
+cmake --preset switch-deko3d
+cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
+```
+
+With the resources built in (`USE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
 
 For the other platforms, upstream's wiki has the toolchains and the commands:
 

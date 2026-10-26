@@ -15,7 +15,7 @@
     limitations under the License.
 */
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <stdio.h>
 
 #include <borealis/core/logger.hpp>

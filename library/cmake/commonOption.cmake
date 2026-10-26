@@ -42,9 +42,11 @@ option(USE_BOOST_FILESYSTEM "Whether to use the boost::filesystem instead of std
 
 option(USE_STD_THREAD "Whether to use std::thread instead of pthread" OFF)
 
+# Desktop: the directory that holds "resources/" at runtime, when the app
+# does not set BRLS_RESOURCES_DIR itself (default: the working directory).
 # Do not use it until you know what you are doing.
 # You may need this option when packaging to AppImage.
-option(CUSTOM_RESOURCES_DIR "Custom resources dir" "")
+set(CUSTOM_RESOURCES_DIR "" CACHE STRING "Custom resources dir")
 
 option(USE_GLFW "using glfw for input and create window" OFF)
 option(USE_SDL2 "using sdl2 for input and create window" OFF)

@@ -104,7 +104,7 @@ SwitchPlatform::SwitchPlatform()
     }
 
     // Init platform impls
-    this->audioPlayer = new SwitchAudioPlayer();
+    this->audioPlayer = new NullAudioPlayer();
     this->fontLoader  = new SwitchFontLoader();
     this->imeManager  = new SwitchImeManager();
 

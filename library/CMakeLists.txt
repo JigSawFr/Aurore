@@ -1,27 +1,81 @@
-cmake_minimum_required(VERSION 3.10)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+cmake_minimum_required(VERSION 3.16...3.31)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+include(GNUInstallDirs)
 set(BOREALIS_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(BOREALIS_SOURCE)
 set(BOREALIS_SRC)
+# The usage requirements of the borealis target, filled in below. Headers of
+# other projects are system headers: their warnings are not the library's.
 set(BOREALIS_INCLUDE)
 set(BRLS_PLATFORM_LIBS)
-set(BRLS_PLATFORM_OPTION)
+set(BRLS_PRIVATE_LIBS)
+set(BRLS_PUBLIC_DEFINITIONS ${BRLS_TOOLCHAIN_DEFINITIONS})
+set(BRLS_PRIVATE_DEFINITIONS)
+set(BRLS_PUBLIC_OPTIONS)
+# The vendored projects install their packages along with the library
+set(BRLS_EXTERN_EXCLUDE EXCLUDE_FROM_ALL)
+if (AURORE_INSTALL)
+    set(BRLS_EXTERN_EXCLUDE)
+endif ()
 if (NOT BRLS_RESOURCES_DIR)
-    set(BRLS_RESOURCES_DIR ".")
+    if (CUSTOM_RESOURCES_DIR)
+        set(BRLS_RESOURCES_DIR "${CUSTOM_RESOURCES_DIR}")
+    else ()
+        set(BRLS_RESOURCES_DIR ".")
+    endif ()
+endif ()
+
+option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
+
+# fmt, tinyxml2, GLFW and SDL2 from the system when find_package() finds
+# them, downloaded at configure time otherwise, instead of the copies in
+# lib/extern (for packagers). nanovg, yoga and the others stay vendored.
+option(AURORE_FETCH_DEPS "Use fmt, tinyxml2, GLFW and SDL2 from the system or downloaded (CMake 3.24+)" OFF)
+if (AURORE_FETCH_DEPS)
+    if (CMAKE_VERSION VERSION_LESS 3.24)
+        message(FATAL_ERROR "AURORE_FETCH_DEPS needs CMake 3.24 or later (FIND_PACKAGE_ARGS)")
+    endif ()
+    include(FetchContent)
+    # The versions of the vendored copies
+    FetchContent_Declare(fmt
+            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+            GIT_TAG 12.2.0
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS 10)
+    FetchContent_Declare(tinyxml2
+            GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
+            GIT_TAG 11.0.0
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS)
+    # The vendored GLFW is xfangfang's fork, for its fixes
+    FetchContent_Declare(glfw
+            GIT_REPOSITORY https://github.com/xfangfang/glfw.git
+            GIT_TAG 892256c3f630739fb02552544b8d83240883ec8a
+            FIND_PACKAGE_ARGS NAMES glfw3)
+    FetchContent_Declare(SDL2
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-2.32.10
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS)
 endif ()
 
 # fmt
 if (USE_SYSTEM_FMT)
   find_package(fmt REQUIRED)
+elseif (AURORE_FETCH_DEPS)
+  FetchContent_MakeAvailable(fmt)
 else()
-  add_subdirectory(${BOREALIS_PATH}/lib/extern/fmt EXCLUDE_FROM_ALL)
+  if (AURORE_INSTALL)
+    set(FMT_INSTALL ON CACHE BOOL "" FORCE)
+  endif ()
+  add_subdirectory(${BOREALIS_PATH}/lib/extern/fmt ${BRLS_EXTERN_EXCLUDE})
 endif()
 
 # tweeny
 if (USE_SYSTEM_TWEENY)
   find_package(Tweeny REQUIRED)
 else()
-  add_subdirectory(${BOREALIS_PATH}/lib/extern/tweeny EXCLUDE_FROM_ALL)
+  add_subdirectory(${BOREALIS_PATH}/lib/extern/tweeny ${BRLS_EXTERN_EXCLUDE})
 endif()
 
 # yoga
@@ -32,15 +86,15 @@ target_compile_options(yogacore PRIVATE -fvisibility=default)
 if (BRLS_USE_OPENCC)
     list(APPEND BRLS_PLATFORM_LIBS libopencc)
     list(APPEND BOREALIS_INCLUDE ${BRLS_OPENCC_INCLUDE})
-    list(APPEND BRLS_PLATFORM_OPTION -DOPENCC)
+    list(APPEND BRLS_PUBLIC_DEFINITIONS OPENCC)
 endif ()
 
 # boost::filesystem
 if (USE_BOOST_FILESYSTEM)
     find_package(Boost 1.44 REQUIRED COMPONENTS filesystem)
     if(Boost_FOUND)
-        list(APPEND BRLS_PLATFORM_LIBS Boost::filesystem)
-        list(APPEND BRLS_PLATFORM_OPTION -DUSE_BOOST_FILESYSTEM)
+        list(APPEND BRLS_PRIVATE_LIBS Boost::filesystem)
+        list(APPEND BRLS_PRIVATE_DEFINITIONS USE_BOOST_FILESYSTEM)
     endif()
 elseif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR
     (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32) AND NOT PLATFORM_ANDROID AND NOT PLATFORM_PS4)
@@ -51,6 +105,7 @@ endif ()
 if(USE_LIBROMFS)
     add_subdirectory(${BOREALIS_PATH}/lib/extern/libromfs EXCLUDE_FROM_ALL)
     list(APPEND BRLS_PLATFORM_LIBS ${LIBROMFS_LIBRARY})
+    list(APPEND BRLS_PUBLIC_DEFINITIONS USE_LIBROMFS)
 endif()
 
 # tinyxml2
@@ -59,9 +114,15 @@ if (USE_SYSTEM_TINYXML2)
 
     list(APPEND BOREALIS_INCLUDE ${tinyxml2_INCLUDE_DIRS})
     list(APPEND BRLS_PLATFORM_LIBS tinyxml2::tinyxml2)
+elseif (AURORE_FETCH_DEPS)
+    set(tinyxml2_BUILD_TESTING OFF)
+    FetchContent_MakeAvailable(tinyxml2)
+    list(APPEND BRLS_PLATFORM_LIBS tinyxml2::tinyxml2)
 else()
-    add_library(tinyxml2 ${BOREALIS_PATH}/lib/extern/tinyxml2/tinyxml2.cpp)
-    target_include_directories(tinyxml2 PUBLIC ${BOREALIS_PATH}/include/borealis/extern/tinyxml2)
+    add_library(tinyxml2 STATIC ${BOREALIS_PATH}/lib/extern/tinyxml2/tinyxml2.cpp)
+    target_include_directories(tinyxml2 SYSTEM PUBLIC
+            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/borealis/extern/tinyxml2>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/borealis/extern/tinyxml2>)
     list(APPEND BRLS_PLATFORM_LIBS tinyxml2)
 endif()
 
@@ -82,23 +143,40 @@ if (PLATFORM_DESKTOP)
             message(STATUS "Find SDL2: ${SDL2_INCLUDE_DIR}, ${SDL2_LIBRARIES}")
             list(APPEND BRLS_PLATFORM_LIBS ${SDL2_LIBRARIES})
             list(APPEND BOREALIS_INCLUDE ${SDL2_INCLUDE_DIRS})
+        elseif (AURORE_FETCH_DEPS)
+            set(BUILD_SHARED_LIBS OFF)
+            set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
+            FetchContent_MakeAvailable(SDL2)
+            if (sdl2_SOURCE_DIR)
+                list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
+            else ()
+                list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2 SDL2::SDL2main)
+            endif ()
         else ()
             set(BUILD_SHARED_LIBS OFF)
             set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
-            add_subdirectory(${BOREALIS_PATH}/lib/extern/SDL EXCLUDE_FROM_ALL)
+            if (AURORE_INSTALL)
+                set(SDL2_DISABLE_INSTALL OFF CACHE BOOL "" FORCE)
+            endif ()
+            add_subdirectory(${BOREALIS_PATH}/lib/extern/SDL ${BRLS_EXTERN_EXCLUDE})
             list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
         endif ()
-        list(APPEND BRLS_PLATFORM_OPTION -D__SDL2__)
+        list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__)
         list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/sdl)
     else ()
         if (USE_SYSTEM_GLFW)
             find_package(glfw3 REQUIRED)
+        elseif (AURORE_FETCH_DEPS)
+            set(GLFW_BUILD_DOCS OFF)
+            set(GLFW_BUILD_EXAMPLES OFF)
+            set(GLFW_BUILD_TESTS OFF)
+            FetchContent_MakeAvailable(glfw)
         else ()
             set(GLFW_BUILD_DOCS OFF)
-            add_subdirectory(${BOREALIS_PATH}/lib/extern/glfw EXCLUDE_FROM_ALL)
+            add_subdirectory(${BOREALIS_PATH}/lib/extern/glfw ${BRLS_EXTERN_EXCLUDE})
         endif ()
         list(APPEND BRLS_PLATFORM_LIBS glfw)
-        list(APPEND BRLS_PLATFORM_OPTION -D__GLFW__)
+        list(APPEND BRLS_PUBLIC_DEFINITIONS __GLFW__)
         list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/glfw)
     endif ()
     if (WIN32)
@@ -107,7 +185,7 @@ if (PLATFORM_DESKTOP)
             list(APPEND BRLS_PLATFORM_LIBS d3d11)
         endif ()
         if (MINGW)
-            list(APPEND BRLS_PLATFORM_OPTION -DWINVER=0x0605)
+            list(APPEND BRLS_PUBLIC_DEFINITIONS WINVER=0x0605)
         endif ()
         list(APPEND BRLS_PLATFORM_LIBS wlanapi iphlpapi ws2_32)
     elseif (APPLE)
@@ -178,7 +256,7 @@ elseif (PLATFORM_PSV)
         list(APPEND BOREALIS_SRC ${SDL_PLATFORM_SRC})
         list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/psv/psv_platform.cpp)
     endif ()
-    list(APPEND BRLS_PLATFORM_OPTION -D__PSV__ -DSTBI_NEON)
+    list(APPEND BRLS_PUBLIC_DEFINITIONS __PSV__ STBI_NEON)
     set(BRLS_PLATFORM_RESOURCES_PATH "\"app0:resources/\"")
     set_target_properties(yogacore PROPERTIES POSITION_INDEPENDENT_CODE OFF)
 elseif(PLATFORM_PS4)
@@ -191,10 +269,10 @@ elseif(PLATFORM_PS4)
     list(APPEND BOREALIS_SRC ${PS4_PLATFORM_SRC})
     list(APPEND BOREALIS_INCLUDE /opt/OpenOrbis-PS4-Toolchain/include)
     list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SceNetCtl SceImeDialog SceCommonDialog)
-    list(APPEND BRLS_PLATFORM_OPTION -D__SDL2__ -DPS4 -DUSE_GLES2)
+    list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ PS4 USE_GLES2)
     if (LIBJBC)
         list(APPEND BRLS_PLATFORM_LIBS jbc)
-        list(APPEND BRLS_PLATFORM_OPTION -DUSE_JBC)
+        list(APPEND BRLS_PUBLIC_DEFINITIONS USE_JBC)
         set(BRLS_PLATFORM_RESOURCES_PATH "\"/mnt/sandbox/${PSN_TITLE_ID}_000/app0/resources/\"")
     else ()
         set(BRLS_PLATFORM_RESOURCES_PATH "\"/app0/resources/\"")
@@ -206,7 +284,10 @@ elseif(PLATFORM_ANDROID)
             ${BOREALIS_PATH}/lib/platforms/desktop
             ${BOREALIS_PATH}/lib/platforms/android)
     list(APPEND BRLS_PLATFORM_LIBS SDL2 SDL2main)
-    list(APPEND BRLS_PLATFORM_OPTION -D__SDL2__ -DANDROID)
+    list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ ANDROID)
+    # The NDK's libc++ returns std::string from path::u8string() in C++20,
+    # which nlohmann json's path conversion does not build with
+    list(APPEND BRLS_PUBLIC_DEFINITIONS JSON_HAS_FILESYSTEM=0 JSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
 elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     set(BUILD_SHARED_LIBS OFF)
     add_subdirectory(${BOREALIS_PATH}/lib/extern/SDL)
@@ -218,24 +299,16 @@ elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/desktop/ios_darwin.mm)
 
     if(PLATFORM_IOS)
-        list(APPEND BRLS_PLATFORM_OPTION -D__SDL2__ -DIOS)
+        list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ IOS)
     elseif(PLATFORM_TVOS)
-        list(APPEND BRLS_PLATFORM_OPTION -D__SDL2__ -DTVOS)
+        list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ TVOS)
     endif()
 elseif(PLATFORM_SWITCH)
-    list(APPEND BOREALIS_SOURCE
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/archive
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfgrp
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfsar
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfwar
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfwav
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/bfwsd
-            ${BOREALIS_PATH}/lib/extern/switch-libpulsar/src/player
-            )
     file(GLOB_RECURSE SWITCH_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/switch/*.cpp")
     list(APPEND BOREALIS_SRC ${SWITCH_PLATFORM_SRC})
-    list(APPEND BOREALIS_INCLUDE ${BOREALIS_PATH}/lib/extern/switch-libpulsar/include)
-    list(APPEND BRLS_PLATFORM_OPTION $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile> -DHAVE_LIBNX -DSWITCH -D__SWITCH__ -DSTBI_NO_THREAD_LOCALS)
+    list(APPEND BRLS_PUBLIC_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>)
+    list(APPEND BRLS_PUBLIC_DEFINITIONS SWITCH __SWITCH__ STBI_NO_THREAD_LOCALS)
+    list(APPEND BRLS_PRIVATE_DEFINITIONS HAVE_LIBNX)
     find_package(PkgConfig REQUIRED)
 
     if (BOREALIS_USE_DEKO3D)
@@ -251,17 +324,14 @@ elseif(PLATFORM_SWITCH)
         list(APPEND BRLS_PLATFORM_LIBS glfw3 EGL glapi drm_nouveau nx m)
     endif ()
     set(BRLS_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
+    # devkitPro's portlibs (GLFW, SDL2, EGL, curl…) last: it also has a
+    # tinyxml2.h and a glad/glad.h, which must not hide the library's own
+    list(APPEND BOREALIS_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
 else ()
     message(FATAL_ERROR "Please set build target. Example: -DPLATFORM_DESKTOP=ON or -DPLATFORM_SWITCH=ON")
 endif ()
 
 # borealis c/cpp source
-list(APPEND BOREALIS_INCLUDE
-        ${BOREALIS_PATH}/include
-        ${BOREALIS_PATH}/include/borealis/extern
-        ${BOREALIS_PATH}/include/borealis/extern/nanovg
-        ${BOREALIS_PATH}/include/borealis/extern/qrcodegen
-        )
 list(APPEND BOREALIS_SOURCE
         ${BOREALIS_PATH}/lib/core
         ${BOREALIS_PATH}/lib/core/touch
@@ -343,32 +413,77 @@ elseif (BOREALIS_USE_DEKO3D)
 elseif (BOREALIS_USE_GXM)
     set(BOREALIS_DRIVER BOREALIS_USE_GXM)
     if (USE_VITA_SHARK)
-        list(APPEND BRLS_PLATFORM_OPTION -DUSE_VITA_SHARK)
+        list(APPEND BRLS_PUBLIC_DEFINITIONS USE_VITA_SHARK)
     endif ()
 endif ()
-list(APPEND BRLS_PLATFORM_OPTION -D${BOREALIS_DRIVER})
+list(APPEND BRLS_PUBLIC_DEFINITIONS ${BOREALIS_DRIVER})
 message(STATUS "borealis driver ${BOREALIS_DRIVER}")
 
 # borealis Library
 add_library(borealis STATIC ${BOREALIS_SRC})
+add_library(Aurore::aurore ALIAS borealis)
 set_target_properties(borealis PROPERTIES
         CXX_STANDARD 20
         CXX_STANDARD_REQUIRED ON
         UNITY_BUILD ${BRLS_UNITY_BUILD}
+        # No C++20 modules: no dependency scanning step (CMake >= 3.28)
+        CXX_SCAN_FOR_MODULES OFF
+        EXPORT_NAME aurore
 )
 set_source_files_properties(${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwin.mm PROPERTIES
         SKIP_UNITY_BUILD_INCLUSION ON)
-target_include_directories(borealis PUBLIC ${BOREALIS_INCLUDE})
+target_include_directories(borealis PUBLIC
+        $<BUILD_INTERFACE:${BOREALIS_PATH}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+# The headers of other projects shipped in include/borealis/extern, before
+# the ones found on the system
+set(BRLS_EXTERN_INCLUDE extern extern/nanovg extern/qrcodegen)
+if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
+    list(APPEND BRLS_EXTERN_INCLUDE extern/tinyxml2)
+endif ()
+foreach (dir ${BRLS_EXTERN_INCLUDE})
+    target_include_directories(borealis SYSTEM PUBLIC
+            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/borealis/${dir}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/borealis/${dir}>)
+endforeach ()
+if (BOREALIS_INCLUDE)
+    target_include_directories(borealis SYSTEM PUBLIC ${BOREALIS_INCLUDE})
+endif ()
 if (BOREALIS_DKSH_INCLUDE)
     target_include_directories(borealis PRIVATE ${BOREALIS_DKSH_INCLUDE})
 endif ()
+# The vendored projects' headers are system headers too, for the library and the apps
+foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main ${LIBROMFS_LIBRARY})
+    if (TARGET ${dep})
+        get_target_property(dep_imported ${dep} IMPORTED)
+        get_target_property(dep_include ${dep} INTERFACE_INCLUDE_DIRECTORIES)
+        if (NOT dep_imported AND dep_include)
+            set_property(TARGET ${dep} APPEND PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${dep_include})
+        endif ()
+    endif ()
+endforeach ()
 # The projects that link the library build with C++20 too, so its headers can use it
 target_compile_features(borealis PUBLIC cxx_std_20)
-target_link_libraries(borealis fmt tweeny yogacore ${BRLS_PLATFORM_LIBS})
+target_link_libraries(borealis
+        PUBLIC fmt::fmt tweeny yogacore ${BRLS_PLATFORM_LIBS}
+        PRIVATE ${BRLS_PRIVATE_LIBS})
+list(REMOVE_DUPLICATES BRLS_PUBLIC_DEFINITIONS)
+target_compile_definitions(borealis
+        PUBLIC
+        BRLS_RESOURCES=${BRLS_PLATFORM_RESOURCES_PATH}
+        YG_ENABLE_EVENTS
+        ${BRLS_PUBLIC_DEFINITIONS}
+        PRIVATE
+        ${BRLS_PRIVATE_DEFINITIONS})
+# Public: apps rely on them for --gc-sections to drop what they do not use
 target_compile_options(borealis PUBLIC
-        -DBRLS_RESOURCES=${BRLS_PLATFORM_RESOURCES_PATH}
-        -DYG_ENABLE_EVENTS
         -ffunction-sections
         -fdata-sections
-        ${BRLS_PLATFORM_OPTION}
-        )
+        ${BRLS_PUBLIC_OPTIONS})
+if (PLATFORM_DESKTOP)
+    target_compile_options(borealis PRIVATE -Wall)
+endif ()
+
+if (AURORE_INSTALL)
+    include(${BOREALIS_PATH}/cmake/install.cmake)
+endif ()

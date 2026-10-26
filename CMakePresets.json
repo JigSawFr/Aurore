@@ -1,0 +1,82 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "desktop-glfw",
+      "displayName": "Desktop (GLFW)",
+      "description": "Windows, macOS or Linux, windowing and input with GLFW, resources built in",
+      "inherits": "base",
+      "cacheVariables": {
+        "PLATFORM_DESKTOP": "ON",
+        "USE_GLFW": "ON",
+        "USE_LIBROMFS": "ON"
+      }
+    },
+    {
+      "name": "desktop-sdl",
+      "displayName": "Desktop (SDL2)",
+      "description": "Windows, macOS or Linux, windowing and input with SDL2, resources built in",
+      "inherits": "base",
+      "cacheVariables": {
+        "PLATFORM_DESKTOP": "ON",
+        "USE_SDL2": "ON",
+        "USE_LIBROMFS": "ON"
+      }
+    },
+    {
+      "name": "switch-deko3d",
+      "displayName": "Nintendo Switch (deko3d)",
+      "description": "Switch homebrew drawn with deko3d; needs devkitPro and DEVKITPRO set",
+      "inherits": "base",
+      "cacheVariables": {
+        "PLATFORM_SWITCH": "ON",
+        "USE_DEKO3D": "ON"
+      }
+    },
+    {
+      "name": "switch-gl",
+      "displayName": "Nintendo Switch (OpenGL)",
+      "description": "Switch homebrew drawn with OpenGL (mesa) and GLFW; needs devkitPro and DEVKITPRO set",
+      "inherits": "base",
+      "cacheVariables": {
+        "PLATFORM_SWITCH": "ON",
+        "USE_DEKO3D": "OFF",
+        "USE_GLFW": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "desktop-glfw",
+      "configurePreset": "desktop-glfw"
+    },
+    {
+      "name": "desktop-sdl",
+      "configurePreset": "desktop-sdl"
+    },
+    {
+      "name": "switch-deko3d",
+      "configurePreset": "switch-deko3d",
+      "targets": ["aurore_demo.nro"]
+    },
+    {
+      "name": "switch-gl",
+      "configurePreset": "switch-gl",
+      "targets": ["aurore_demo.nro"]
+    }
+  ]
+}
