@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace brls
 {
@@ -27,9 +28,13 @@ class HotReload
      */
     static std::string diskResource(const std::string& value);
 
-    // An XML file read from disk, a file read by Theme::loadFile()
+    // An XML file read from disk
     static void noteXMLFile(const std::string& path);
-    static void noteThemeFile(const std::string& path);
+
+    // The theme file in use (Theme::loadFile) and the files it includes and
+    // inherits, replacing the ones before; empty without a theme file. A
+    // change to one of them reads the theme file in use again.
+    static void setThemeFiles(const std::vector<std::string>& paths);
 
     // The activity whose content is being made, to which the XML files read
     // are counted (the activity on top otherwise)

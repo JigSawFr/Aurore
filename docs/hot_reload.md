@@ -9,7 +9,7 @@ It is off unless asked for:
 - in code, after `init()`: `brls::Application::setHotReload(true);` or `setHotReload(true, "/path/to/my_app/resources");`
 - for one run: `BRLS_HOT_RELOAD=1 ./my_app`, or `BRLS_HOT_RELOAD=/path/to/my_app/resources ./my_app`.
 
-A theme file is watched when it is read by `Theme::loadFile()` after hot reload is on (with the environment variable, it is on from `init()`).
+A theme file is watched when it is read by `Theme::loadFile()` after hot reload is on (with the environment variable, it is on from `init()`), with the files it `@include`s and `inherit`s (not the presets: they have no file). An `@res/…` theme is read from hot reload's resources folder when the file is there, as the XML files are.
 
 ### Where the XML files are read from
 
@@ -24,7 +24,7 @@ It does nothing on the Switch, the PS4, the PS Vita, Android and iOS: their reso
 The files are looked at about three times a second; a file seen changed is acted on once it has stopped changing (an editor writing it in several goes).
 
 - **An XML file** used by the activity on top (read while it was made, or while it was on top: a tab made when it is opened counts) clears its cached document, and the activity is built again: its `createContentView()` makes a new content, `onContentAvailable()` runs again, and the tabs shown and the focus are put back where they were when the new tree has a view at the same place. A file used only by an activity below waits until that one is made again.
-- **The theme file** is read again (`Theme::loadFile`), and the activity on top is built again for the metrics read when views are made. A colour or metric taken out of the file keeps the value it had.
+- **The theme file, or a file it includes or inherits**: the theme file in use is read again (`Theme::loadFile`), and the activity on top is built again for the metrics read when views are made. A colour or metric taken out of the file goes back to its value without the file.
 
 `Application::rebuildActivity()` does the same on demand.
 

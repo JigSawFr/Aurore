@@ -115,14 +115,31 @@ void HotReload::noteXMLFile(const std::string& path)
         file.activities.insert(activity);
 }
 
-void HotReload::noteThemeFile(const std::string& path)
+void HotReload::setThemeFiles(const std::vector<std::string>& paths)
 {
     if (!HotReload::enabled)
         return;
-    // Only the theme in use: one picked since replaces it
-    files.erase(std::remove_if(files.begin(), files.end(), [&path](const Watched& file) { return file.theme && file.path != path; }),
-        files.end());
-    watch(path).theme = true;
+    files.erase(std::remove_if(files.begin(), files.end(), [](const Watched& file) { return file.theme; }), files.end());
+    for (const std::string& path : paths)
+    {
+        // A preset has no file; a resource is one when read from a folder
+        std::string disk = path;
+        if (path.rfind("builtin:", 0) == 0)
+            continue;
+        if (path.rfind("@res/", 0) == 0)
+        {
+            disk = HotReload::diskResource(path);
+            if (disk.empty())
+            {
+#ifndef USE_LIBROMFS
+                disk = std::string(BRLS_RESOURCES) + path.substr(5);
+#else
+                continue;
+#endif
+            }
+        }
+        watch(disk).theme = true;
+    }
 }
 
 void HotReload::forgetActivity(Activity* activity)
@@ -144,12 +161,9 @@ void HotReload::poll()
     Activity* top                = stack.empty() ? nullptr : stack.back();
 
     bool rebuild = false;
-    std::vector<std::string> themes;
+    bool theme   = false;
     for (Watched& file : files)
     {
-        // Theme::reset() went back to the colours of the code
-        if (file.theme && file.path != Theme::getCurrentPath())
-            continue;
         size_t hash;
         if (!contents(file.path, &hash)) // being written, or moved away
             continue;
@@ -171,7 +185,7 @@ void HotReload::poll()
         Logger::info("hot reload: {} changed", file.path);
         if (file.theme)
         {
-            themes.push_back(file.path);
+            theme   = true;
             rebuild = true; // metrics are read when the views are made
             continue;
         }
@@ -182,13 +196,12 @@ void HotReload::poll()
             Logger::info("hot reload: {} is not used by the activity on top, it shows next time it is made", file.path);
     }
 
-    for (const std::string& path : themes)
-        Theme::loadFile(path);
+    // Again from the file in use, which replaces the files watched
+    if (theme && !Theme::getCurrentPath().empty())
+        Theme::loadFile(Theme::getCurrentPath());
 
     if (rebuild && top)
         Application::rebuildActivity();
-    if (!themes.empty())
-        Application::requestRedraw();
 }
 
 } // namespace brls

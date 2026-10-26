@@ -722,9 +722,12 @@ static const BuiltinTheme* findBuiltin(std::string id)
     return nullptr;
 }
 
-// The text of a file, a resource ("@res/…") or a preset ("builtin:…")
-static bool readThemeRaw(const std::string& path, std::string* text)
+// The text of a file, a resource ("@res/…", from hot reload's folder when
+// it has the file) or a preset ("builtin:…")
+static bool readThemeRaw(const std::string& name, std::string* text)
 {
+    std::string disk        = HotReload::diskResource(name);
+    const std::string& path = disk.empty() ? name : disk;
     if (startsWithText(path, BUILTIN_PREFIX))
     {
         const BuiltinTheme* theme = findBuiltin(path);
@@ -802,6 +805,7 @@ struct ParsedTheme
     std::string name, author, version, description;
     std::string inherit;
     std::string backgroundImage; // its path, from the file's folder
+    std::vector<std::string> files; // the files it includes and inherits, read
     bool lightSection = false, darkSection = false;
     bool light = false, dark = false;
 
@@ -854,7 +858,10 @@ static void parseThemeText(const std::string& text, const std::string& directory
             else if (!readThemeText(path, &included))
                 out->errors.push_back(where(number) + ": @include " + name + ": cannot read " + path);
             else
+            {
+                out->files.push_back(path);
                 parseThemeText(included, directoryOf(path), name, depth + 1, false, out);
+            }
             continue;
         }
 
@@ -957,8 +964,10 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
         theme->errors.push_back("inherit " + inherit + ": cannot read " + path);
     else
     {
+        theme->files.push_back(path);
         parseThemeText(text, directoryOf(path), inherit, depth + 1, true, &parent);
         resolveInherit(&parent, directoryOf(path), depth + 1);
+        theme->files.insert(theme->files.end(), parent.files.begin(), parent.files.end());
     }
 
     for (int slot = 0; slot < 3; slot++)
@@ -1079,6 +1088,15 @@ static bool applyTheme(const std::string& text, const std::string& directory, co
     currentPath  = path;
     currentTheme = std::make_unique<ParsedTheme>(theme);
 
+    // A file's own text is read again on a change; text given to load() is not
+    std::vector<std::string> watched;
+    if (!path.empty())
+    {
+        watched.push_back(path);
+        watched.insert(watched.end(), theme.files.begin(), theme.files.end());
+    }
+    HotReload::setThemeFiles(watched);
+
     if (variant)
     {
         if (theme.light != theme.dark)
@@ -1098,7 +1116,6 @@ bool Theme::load(const std::string& text, ThemeVariant* variant, const std::stri
 
 bool Theme::loadFile(const std::string& path, ThemeVariant* variant)
 {
-    HotReload::noteThemeFile(path);
     std::string text;
     if (!readThemeText(path, &text))
     {
@@ -1112,6 +1129,7 @@ void Theme::reset()
 {
     currentTheme.reset();
     currentPath.clear();
+    HotReload::setThemeFiles({});
     useOverlays(ResolvedTheme());
 }
 
