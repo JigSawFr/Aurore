@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <borealis/core/time.hpp>
+
 #include <borealis/core/animation.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/views/rectangle.hpp>
@@ -88,6 +90,12 @@ class ScrollingFrame : public Box
      */
     void setContentOffsetY(float value, bool animated);
 
+    // On by default: the indicator shows while scrolling, then fades
+    void setScrollingIndicatorAutoHide(bool autoHide)
+    {
+        autoHideScrollingIndicator = autoHide;
+    }
+
     void setScrollingIndicatorVisible(bool visible)
     {
         showScrollingIndicator = visible;
@@ -102,6 +110,11 @@ class ScrollingFrame : public Box
     bool updateScrollingOnNextFrame = false;
     bool childFocused               = false;
     bool showScrollingIndicator     = true;
+    // The indicator shows while the content scrolls, then fades away (or
+    // stays, as before, when off)
+    bool autoHideScrollingIndicator = true;
+    float lastIndicatorOffset       = -1;
+    Time lastScrollTime             = 0;
 
     float middleY = 0; // y + height/2
     float bottomY = 0; // y + height
