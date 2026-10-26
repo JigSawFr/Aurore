@@ -534,13 +534,13 @@ View* Box::getNextFocus(FocusDirection direction, View* currentView)
             float crossDist, mainDist;
             if (direction == FocusDirection::UP || direction == FocusDirection::DOWN)
             {
-                crossDist = std::abs(centerY - currentCenterY);
-                mainDist  = std::abs(centerX - currentCenterX);
+                crossDist = std::fabs(centerY - currentCenterY);
+                mainDist  = std::fabs(centerX - currentCenterX);
             }
             else
             {
-                crossDist = std::abs(centerX - currentCenterX);
-                mainDist  = std::abs(centerY - currentCenterY);
+                crossDist = std::fabs(centerX - currentCenterX);
+                mainDist  = std::fabs(centerY - currentCenterY);
             }
 
             float distance = crossDist * 1000.0f + mainDist;
@@ -630,7 +630,7 @@ void Box::inflateFromXMLString(std::string_view xml)
         tinyxml2::XMLError error = document->Parse(xml.data());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
-            fatal("Invalid XML when inflating " + this->describe() + ": error " + std::to_string(error));
+            fatal("Invalid XML when inflating " + this->describe() + ": " + View::describeXMLError(document.get()));
 
         element = document->RootElement();
 
@@ -650,7 +650,9 @@ void Box::inflateFromXMLRes(const std::string& name)
     }
 
 #ifdef USE_LIBROMFS
-    return Box::inflateFromXMLString(romfs::get(name).string());
+    View::currentXMLResource = name;
+    Box::inflateFromXMLString(romfs::get(name).string());
+    View::currentXMLResource.clear();
 #else
     return Box::inflateFromXMLFile(std::string(BRLS_RESOURCES) + name);
 #endif
@@ -666,7 +668,7 @@ void Box::inflateFromXMLFile(const std::string& path)
         tinyxml2::XMLError error = document->LoadFile(path.c_str());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
-            fatal("Invalid XML when inflating " + this->describe() + ": error " + std::to_string(error));
+            fatal("Invalid XML when inflating " + this->describe() + ": " + View::describeXMLError(document.get(), path));
 
         element = document->RootElement();
 

@@ -156,7 +156,7 @@ class Sheet : public brls::Box
         panel->setHeight(std::min((subtitle.empty() ? 70.0f : 92.0f) + body + 40, most));
         column->measured = [panel, head, most](float lines_height) {
             const float want = std::min(head->getHeight() + lines_height + 2, most);
-            if (std::abs(want - panel->getHeight()) > 1) brls::sync([panel, want]() { panel->setHeight(want); });
+            if (std::fabs(want - panel->getHeight()) > 1) brls::sync([panel, want]() { panel->setHeight(want); });
         };
 
         auto* row = new brls::Box(brls::Axis::ROW);

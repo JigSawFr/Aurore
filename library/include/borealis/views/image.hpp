@@ -98,12 +98,29 @@ class Image : public View
     void setImageFromFile(const std::string& path);
 
     /**
+     * Sets the image from the given file path, decoded on the async thread:
+     * the UI thread only uploads the pixels, so a grid of covers does not
+     * stall while they load. The image stays as it was until then (a cached
+     * texture is shown at once). An image set again meanwhile, or deleted,
+     * drops the result.
+     */
+    void setImageFromFileAsync(const std::string& path);
+
+    /**
      * Sets the image from memory.
      *
      * See Image class documentation for the list of supported
      * image formats.
      */
     void setImageFromMem(const unsigned char* data, int size);
+
+    /**
+     * Sets the image from raw RGBA pixels (width × height × 4 bytes), for an
+     * image made by the app (a QR code, a video frame, a thumbnail it
+     * decoded). Pixels of the same size as the image shown replace its own
+     * texture's in place, without making a new one.
+     */
+    void setImageFromRGBA(const unsigned char* pixels, int width, int height);
 
     virtual void innerSetImage(int texture);
 
@@ -163,6 +180,9 @@ class Image : public View
     float imageWidth  = 0;
 
     bool freeTexture = true;
+
+    // Bumped each time the image is set: an async load set before is stale
+    unsigned asyncGeneration = 0;
 
     // Deletes the texture if owned, or hands it back to TextureCache
     void releaseTexture();
