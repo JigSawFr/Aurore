@@ -81,10 +81,8 @@ endif()
 # yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
 add_subdirectory(${BOREALIS_PATH}/lib/extern/yoga/yoga EXCLUDE_FROM_ALL)
 target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
-if (PLATFORM_PS4)
-    # C++20 library parts Yoga 3 needs and OpenOrbis' libc++ lacks
-    target_compile_options(yogacore PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/ps4/yoga_std_compat.h)
-endif ()
+# C++20 library parts Yoga 3 needs that some toolchains' libraries lack
+target_compile_options(yogacore PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/yoga_std_compat.h)
 
 # opencc
 if (BRLS_USE_OPENCC)
