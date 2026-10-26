@@ -168,7 +168,7 @@ void SwitchVideoContext::updateWindowSize()
     // If it failed, use hardcoded resolutions as fallback
     else
     {
-        Logger::warning("switch: failed to detect display resolution ({:#x}), falling back to hardcoded resolution");
+        Logger::warning("switch: failed to detect display resolution ({:#x}), falling back to hardcoded resolution", rc);
 
         switch (appletGetOperationMode())
         {
