@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include <functional>
+#include <list>
 #include <stdexcept>
+#include <unordered_map>
 
 #include "borealis/core/singleton.hpp"
 
@@ -34,6 +37,9 @@ struct Node
 
     /// Reference count, 1 for each cache hit
     size_t count = 1;
+
+    /// What the entry weighs (bytes), for a budget in bytes
+    size_t bytes = 0;
 
     Node(K k, T v)
         : key(k)
@@ -94,11 +100,39 @@ class LRUCache
         }
         // Add new cache
         cacheList.push_front(Node<K, T>(key, value));
+        if (sizeOf)
+        {
+            cacheList.front().bytes = sizeOf(value);
+            totalBytes += cacheList.front().bytes;
+        }
 
         // Update the values of two maps
         cacheMap[key]                  = cacheList.begin();
         valueMap[cacheMap[key]->value] = cacheList.begin();
+
+        trimToBudget();
     }
+
+    /**
+     * A budget in bytes, on top of the capacity in entries (0: none). Over
+     * it, the least recently used entries nothing holds are freed. sizeOf
+     * says what an entry weighs.
+     */
+    void setMemoryBudget(size_t bytes, std::function<size_t(T)> sizeOf)
+    {
+        if (sizeOf && !this->sizeOf)
+            for (auto& i : cacheList)
+            {
+                i.bytes = sizeOf(i.value);
+                totalBytes += i.bytes;
+            }
+        this->budget = bytes;
+        this->sizeOf = sizeOf;
+        trimToBudget();
+    }
+
+    size_t getTotalBytes() const { return totalBytes; }
+    size_t getSize() const { return cacheList.size(); }
 
     /**
      * It is not really to remove a cache, but to reduce the counter of the corresponding cache by 1
@@ -113,6 +147,9 @@ class LRUCache
         // to its maximum and the entry could never be freed)
         if (valueMap[value]->count > 0)
             valueMap[value]->count--;
+        // Nothing holds it any more: freed now if over the budget
+        if (valueMap[value]->count == 0)
+            trimToBudget();
     }
 
     /**
@@ -127,6 +164,13 @@ class LRUCache
         valueMap[old_val]->value = new_val;
         valueMap[new_val]        = valueMap[old_val];
         valueMap.erase(old_val);
+        if (sizeOf)
+        {
+            auto& node = *valueMap[new_val];
+            totalBytes -= node.bytes;
+            node.bytes = sizeOf(new_val);
+            totalBytes += node.bytes;
+        }
     }
 
     void setCapacity(int c)
@@ -189,6 +233,7 @@ class LRUCache
                 nvgDeleteImage(vg, i->value);
                 cacheMap.erase(i->key);
                 valueMap.erase(i->value);
+                totalBytes -= i->bytes;
                 i = cacheList.erase(i);
             }
             else
@@ -212,7 +257,32 @@ class LRUCache
 
   private:
     size_t capacity = 1;
+    size_t budget     = 0;
+    size_t totalBytes = 0;
+    std::function<size_t(T)> sizeOf;
     T defaultValue;
+
+    /// Frees the least recently used entries nothing holds while over the
+    /// budget (never the one just added, at the front)
+    void trimToBudget()
+    {
+        if (budget == 0 || totalBytes <= budget || cacheList.size() < 2)
+            return;
+        auto vg = brls::Application::getNVGContext();
+        auto i  = cacheList.end();
+        while (totalBytes > budget && i != std::next(cacheList.begin()))
+        {
+            --i;
+            if (i->count <= 0)
+            {
+                nvgDeleteImage(vg, i->value);
+                cacheMap.erase(i->key);
+                valueMap.erase(i->value);
+                totalBytes -= i->bytes;
+                i = cacheList.erase(i);
+            }
+        }
+    }
     std::list<Node<K, T>> cacheList;
     std::unordered_map<K, CacheIter> cacheMap;
     std::unordered_map<T, CacheIter> valueMap;
@@ -242,6 +312,7 @@ class LRUCache
                 nvgDeleteImage(vg, i->value);
                 cacheMap.erase(i->key);
                 valueMap.erase(i->value);
+                totalBytes -= i->bytes;
                 i = cacheList.erase(i);
             }
         }
@@ -312,6 +383,23 @@ class TextureCache : public Singleton<TextureCache>
             return;
         cache.update(old_tex, new_tex);
     }
+
+    /**
+     * At most `bytes` of textures nothing shows are kept (0: no limit, the
+     * default); the least recently used go first. A texture weighs its
+     * width × height × 4.
+     */
+    void setMemoryBudget(size_t bytes)
+    {
+        cache.setMemoryBudget(bytes, [](size_t texture) -> size_t
+            {
+                int w = 0, h = 0;
+                nvgImageSize(brls::Application::getNVGContext(), (int)texture, &w, &h);
+                return (size_t)w * (size_t)h * 4; });
+    }
+
+    size_t getTotalBytes() const { return cache.getTotalBytes(); }
+    size_t getSize() const { return cache.getSize(); }
 
     void clean()
     {
