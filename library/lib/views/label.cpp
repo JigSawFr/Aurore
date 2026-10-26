@@ -286,7 +286,9 @@ Label::Label()
 
 void Label::setAnimated(bool animated)
 {
-    if (animated == this->animated || this->isWrapping || this->horizontalAlign != HorizontalAlign::LEFT)
+    // Any alignment: a text that scrolls is wider than its label, so it
+    // starts from the left whatever its alignment when it fits
+    if (animated == this->animated || this->isWrapping)
         return;
 
     this->animated = animated;
@@ -547,6 +549,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     if (this->animating)
     {
         nvgSave(vg);
+        nvgTextAlign(vg, NVG_ALIGN_LEFT | vertAlign);
         float scissorHeight = this->getDrawnFontSize() * lineHeight;
         nvgIntersectScissor(vg, x, y, width, scissorHeight < height ? height : scissorHeight);
 
