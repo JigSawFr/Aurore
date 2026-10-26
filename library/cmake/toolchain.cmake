@@ -82,10 +82,13 @@ elseif (PLATFORM_SWITCH)
         message(FATAL_ERROR "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
     endif ()
     set(DEVKITPRO $ENV{DEVKITPRO} CACHE BOOL "DEVKITPRO")
-    set(__SWITCH__ ON)
-    set(CMAKE_C_FLAGS "-I${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include")
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
+    # devkitPro's platform file gives the compilers their flags through
+    # CMAKE_<LANG>_FLAGS_INIT (Cortex-A57 tuning, crc and crypto, the TLS
+    # model libnx is built with, -D__SWITCH__) and libnx's include directory.
+    # Setting CMAKE_C_FLAGS here, as before, hid them all: only the portlibs'
+    # include directory is added.
     include(${DEVKITPRO}/cmake/Switch.cmake REQUIRED)
+    include_directories(SYSTEM ${DEVKITPRO}/portlibs/switch/include)
     if (NOT USE_GLFW AND NOT SDL2)
         set(USE_GLFW ON)
     endif ()
