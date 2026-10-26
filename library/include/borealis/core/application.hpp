@@ -110,14 +110,6 @@ class Application
      */
     static YGConfig* getYogaConfig();
 
-    /**
-     * Lays out every view as CSS flexbox does (true), or keeps the
-     * Yoga 2 placement of absolute children that apps were written
-     * against (false, the default). Call it before the first views are
-     * built: views already laid out keep their layout until invalidated.
-     */
-    static void setStandardLayout(bool standard);
-
     static NVGcontext* getNVGContext();
     inline static float contentWidth, contentHeight;
 

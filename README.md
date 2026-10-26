@@ -86,7 +86,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | --- | --- |
 | Gaps between a box's children | `gap`, `rowGap`, `columnGap` (XML) · `Box::setGap`, `setRowGap`, `setColumnGap` |
 | Wrapping boxes, focus moving across their lines | `flexWrap="wrap"` · `Box::setWrap` |
-| Yoga 3.2, laid out as Yoga 2 did by default; standard CSS flexbox for new apps | `Application::setStandardLayout(true)` · `Application::getYogaConfig()` |
+| Yoga 3.2, standard CSS flexbox | `Application::getYogaConfig()` |
 | Width and height measured with or without padding and border | `boxSizing="borderBox"` (default) or `"contentBox"` · `View::setBoxSizing` |
 | A view whose position offsets are ignored and that absolute children skip to find their reference | `positionType="static"` · `PositionType::STATIC` |
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |

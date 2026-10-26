@@ -174,8 +174,6 @@ YGConfig* Application::getYogaConfig()
     {
         YGConfigRef config = YGConfigNew();
         YGConfigSetUseWebDefaults(config, true);
-        // Yoga 2 results: absolute children placed and sized as before
-        YGConfigSetErrata(config, YGErrataClassic);
         // Yoga's messages in the app's log, one line each
         YGConfigSetLogger(config, [](YGConfigConstRef, YGNodeConstRef, YGLogLevel level, const char* format, va_list args)
             {
@@ -191,11 +189,6 @@ YGConfig* Application::getYogaConfig()
         return config;
     }();
     return config;
-}
-
-void Application::setStandardLayout(bool standard)
-{
-    YGConfigSetErrata(Application::getYogaConfig(), standard ? YGErrataNone : YGErrataClassic);
 }
 
 bool Application::mainLoop()
