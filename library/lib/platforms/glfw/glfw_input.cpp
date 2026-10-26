@@ -128,11 +128,12 @@ void GLFWInputManager::keyboardCallback(GLFWwindow* window, int key, int scancod
     state.key            = (BrlsKeyboardScancode)key;
     state.mods           = mods;
     state.pressed        = action != GLFW_RELEASE;
-    const char* key_name = glfwGetKeyName(key, scancode);
-    if (key_name != NULL)
-        Logger::debug("Key: {} / Code: {} / Action: {}", key_name, key, action);
+    // A key that types a character is not logged: it may be a password
+    // or a PIN being typed
+    if (glfwGetKeyName(key, scancode) != NULL)
+        Logger::debug("Key: (character) / Action: {}", action);
     else
-        Logger::debug("Key: NULL / Code: {} / Action: {}", key, action);
+        Logger::debug("Key: Code: {} / Action: {}", key, action);
     self->getKeyboardKeyStateChanged()->fire(state);
     Application::setActiveEvent(true);
 }
