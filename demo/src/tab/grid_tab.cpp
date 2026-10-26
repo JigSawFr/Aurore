@@ -83,6 +83,19 @@ class RowSource : public brls::RecyclingGridDataSource
 PictureCell::PictureCell()
 {
     this->inflateFromXMLString(pictureCellXML);
+
+    // X or a long press: the item's menu, next to it
+    brls::ContextMenu::attach(this, [this](brls::ContextMenu* menu) {
+        std::string name = names[this->getIndex() % names.size()];
+        auto chosen      = [name](const std::string& what) {
+            return [name, what]() { brls::Application::notify(name + ": " + what); };
+        };
+        menu->setTitle(name);
+        menu->addItem("demo/components/menu_open"_i18n, chosen("demo/components/menu_open"_i18n), "\uE89E");
+        menu->addItem("demo/components/menu_favourite"_i18n, chosen("demo/components/menu_favourite"_i18n), "\uE87D");
+        menu->addSeparator();
+        menu->addItem("demo/components/menu_delete"_i18n, chosen("demo/components/menu_delete"_i18n), "\uE872");
+    });
 }
 
 void PictureCell::prepareForReuse()

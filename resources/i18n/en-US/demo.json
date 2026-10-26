@@ -29,6 +29,17 @@
         "button_bordered": "Bordered button",
         "button_borderless": "Borderless button",
 
+        "icon_buttons_header": "Icon buttons and context menu",
+        "icon_buttons_subtitle": "The first one opens a menu; X, or a long press, on a picture of the Grid tab too",
+        "icon_play": "Play",
+        "icon_image": "A picture",
+        "menu_title": "Options",
+        "menu_open": "Open",
+        "menu_favourite": "Add to favourites",
+        "menu_share": "Share",
+        "menu_delete": "Delete",
+        "menu_chosen": "Chosen: {}",
+
         "slider_header": "Slider",
         "labels_header": "Labels",
         "regular_label": "This is a label. By default, they will automatically wrap and expand their height, should the remaining vertical space allow it. Otherwise, they will be truncated, like some of the tabs of the sidebar.\nThis is a label. By default, they will automatically wrap and expand their height, should the remaining vertical space allow it. Otherwise, they will be truncated, like some of the tabs of the sidebar.",

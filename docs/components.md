@@ -1,6 +1,6 @@
 # Components
 
-Views of Aurore beyond borealis' own. The demo shows them: the **Grid** tab (a grid and a row of pictures, a menu on each) and **Basic components** (icon buttons, a menu under a button).
+Views of Aurore beyond borealis' own. The demo shows them: the **Grid** tab (a grid and a row of pictures, a menu on each: X or a long press) and **Basic components** (icon buttons, a menu under a button).
 
 ## Recycled grid and row
 
@@ -56,3 +56,45 @@ grid->setDataSource(new Covers());             // deleted by the grid
 - `getGridItemByIndex(index)` gives the cell of an item on screen, valid until the next frame.
 
 They come from Switchfin's `recycling_grid` and `h_recycling` (Apache-2.0, see `NOTICE`), without its skeleton cells and its flow mode (items of different heights).
+
+## Context menu
+
+`brls::ContextMenu` is a short list of actions in a popup next to a view: below it, or above when there is no room, kept on screen. The screen stays visible around it, lightly dimmed. B, a touch or a click outside it, or choosing a line closes it; a line's action runs once it is closed.
+
+```cpp
+auto* menu = new brls::ContextMenu(anchor);       // the view it opens next to
+menu->setTitle("Bulbasaur");
+menu->addItem("Open", [] { /* … */ }, "\uE89E");  // a Material Icons glyph
+menu->addItem("Rename", [] { /* … */ }, "@res/img/rename.png");
+menu->addSeparator();
+menu->addItem("Delete", [] { /* … */ }, cadran::kit::icon("trash", 22, "cadran/coral")); // any view
+menu->open();
+```
+
+`ContextMenu::attach(view, fill)` opens one with X on `view` (its hint reads "Options", or the text given) and with a long press on it; `fill` fills the menu each time it opens:
+
+```cpp
+brls::ContextMenu::attach(cell, [cell](brls::ContextMenu* menu) {
+    menu->addItem("Open", [cell] { open(cell->getIndex()); });
+});
+```
+
+The long press is a gesture recognizer of its own, `brls::LongPressGestureRecognizer(view, respond, duration = 500, slop = 16)`: a touch or the mouse's left button held still for `duration` ms. It takes over from the tap under it, which then does not click.
+
+## Icon button
+
+`brls::IconButton` is a `Button` with an icon before its text, or an icon alone in a round button when it has no text. Every `Button` attribute and style applies.
+
+```xml
+<brls:IconButton glyph="&#xE5D4;" />                                     <!-- round, a glyph -->
+<brls:IconButton style="primary" glyph="&#xE037;" text="Play" />
+<brls:IconButton style="bordered" icon="@res/img/logo.png" iconSize="28" text="Aurore" />
+```
+
+| Attribute | Meaning |
+|---|---|
+| `glyph` | A Material Icons glyph, drawn in the text's colour (it follows the style and the state) |
+| `icon` | A picture: `@res/…` or a file path |
+| `iconSize` | The icon's side; default 24 |
+
+In code: `setGlyph()`, `setIcon()`, `setIconView(view)` (a view of the app's, a `CadranIcon`…), `setIconSize()`, `setText()`.
