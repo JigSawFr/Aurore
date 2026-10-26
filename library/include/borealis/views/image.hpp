@@ -98,6 +98,15 @@ class Image : public View
     void setImageFromFile(const std::string& path);
 
     /**
+     * Sets the image from the given file path, decoded on the async thread:
+     * the UI thread only uploads the pixels, so a grid of covers does not
+     * stall while they load. The image stays as it was until then (a cached
+     * texture is shown at once). An image set again meanwhile, or deleted,
+     * drops the result.
+     */
+    void setImageFromFileAsync(const std::string& path);
+
+    /**
      * Sets the image from memory.
      *
      * See Image class documentation for the list of supported
@@ -163,6 +172,9 @@ class Image : public View
     float imageWidth  = 0;
 
     bool freeTexture = true;
+
+    // Bumped each time the image is set: an async load set before is stale
+    unsigned asyncGeneration = 0;
 
     // Deletes the texture if owned, or hands it back to TextureCache
     void releaseTexture();

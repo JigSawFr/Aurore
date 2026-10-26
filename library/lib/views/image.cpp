@@ -24,6 +24,9 @@
 
 #include "borealis/core/cache_helper.hpp"
 #include "borealis/core/thread.hpp"
+#include "borealis/extern/nanovg/stb_image.h"
+
+#include <memory>
 
 namespace brls
 {
@@ -315,6 +318,7 @@ size_t Image::checkCache(const std::string& path)
 
 void Image::setImageFromRes(const std::string& path)
 {
+    this->asyncGeneration++;
 #ifdef USE_LIBROMFS
     // TextureCache decides when the texture is deleted (the previous one is
     // released by innerSetImage as it was held, before the flag changes)
@@ -350,6 +354,7 @@ int Image::getImageFlags()
 
 void Image::setImageFromFile(const std::string& path)
 {
+    this->asyncGeneration++;
 #ifdef USE_LIBROMFS
     if (path.rfind("@res/", 0) == 0)
         return this->setImageFromRes(path.substr(5));
@@ -378,6 +383,7 @@ void Image::setImageFromFile(const std::string& path)
 
 void Image::setImageFromMem(const unsigned char* data, int size)
 {
+    this->asyncGeneration++;
     NVGcontext* vg = Application::getNVGContext();
 
     // Load texture: this image owns it (nothing else would delete it)
@@ -389,6 +395,52 @@ void Image::setImageFromMem(const unsigned char* data, int size)
     }
     innerSetImage(tex);
     this->setFreeTexture(true);
+}
+
+void Image::setImageFromFileAsync(const std::string& path)
+{
+#ifdef USE_LIBROMFS
+    if (path.rfind("@res/", 0) == 0)
+        return this->setImageFromRes(path.substr(5));
+#endif
+    if (checkCache(path) > 0)
+    {
+        this->asyncGeneration++;
+        this->setFreeTexture(false);
+        return;
+    }
+
+    unsigned generation = ++this->asyncGeneration;
+    int flags           = this->getImageFlags();
+    ASYNC_RETAIN
+    brls::async([ASYNC_TOKEN, path, generation, flags]()
+        {
+            int width = 0, height = 0, channels = 0;
+            // Freed whatever happens to the image meanwhile
+            std::shared_ptr<unsigned char> pixels(stbi_load(path.c_str(), &width, &height, &channels, 4), stbi_image_free);
+            brls::sync([ASYNC_TOKEN, path, generation, flags, pixels, width, height]()
+                {
+                    ASYNC_RELEASE
+                    if (generation != this->asyncGeneration)
+                        return; // set again since
+                    if (!pixels)
+                    {
+                        Logger::error("Cannot load image: {}", path);
+                        return;
+                    }
+                    // Loaded by another image meanwhile
+                    if (checkCache(path) > 0)
+                    {
+                        this->setFreeTexture(false);
+                        return;
+                    }
+                    int tex = nvgCreateImageRGBA(Application::getNVGContext(), width, height, flags, pixels.get());
+                    if (tex == 0)
+                        return;
+                    innerSetImage(tex);
+                    this->setFreeTexture(false);
+                    TextureCache::instance().addCache(path, tex);
+                }); });
 }
 
 void Image::releaseTexture()
@@ -448,6 +500,7 @@ void Image::innerSetImage(int tex)
 
 void Image::clear()
 {
+    this->asyncGeneration++;
     // A cached texture is handed back too: it was never released, so the
     // cache could never free it
     this->releaseTexture();
