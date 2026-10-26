@@ -119,6 +119,9 @@ void HotReload::noteThemeFile(const std::string& path)
 {
     if (!HotReload::enabled)
         return;
+    // Only the theme in use: one picked since replaces it
+    files.erase(std::remove_if(files.begin(), files.end(), [&path](const Watched& file) { return file.theme && file.path != path; }),
+        files.end());
     watch(path).theme = true;
 }
 
@@ -144,6 +147,9 @@ void HotReload::poll()
     std::vector<std::string> themes;
     for (Watched& file : files)
     {
+        // Theme::reset() went back to the colours of the code
+        if (file.theme && file.path != Theme::getCurrentPath())
+            continue;
         size_t hash;
         if (!contents(file.path, &hash)) // being written, or moved away
             continue;
