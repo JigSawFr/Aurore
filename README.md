@@ -143,6 +143,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | XML attribute handlers registered the first time one is used | 200 labels built in code: 3–6 → under 1 ms |
 | Cached textures freed once nothing uses them | — |
 | Views queued while the deletion pool drains kept; each recycling list checks its own width | — |
+| Text measures kept per text and style (`nvgTextBounds`, `nvgTextBoxBounds`) | a measure: 2.1 → 0.18 µs; 95% of the demo's answered from the cache |
 
 Each commit says what it changes, why, and where it comes from: `git log 5f08b28..`.
 
