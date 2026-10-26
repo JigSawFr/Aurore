@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
             brls::Logger::setLogOutput(std::fopen(path, "w+"));
         } else if (std::strcmp(argv[i], "-v") == 0) {
             brls::Application::enableDebuggingView(true);
+        } else if (std::strcmp(argv[i], "-r") == 0) { // Redraw on demand
+            brls::Application::setRedrawOnDemand(true);
         }
     }
 
@@ -146,6 +148,8 @@ int main(int argc, char* argv[])
     // Run the app
     while (brls::Application::mainLoop())
         ;
+
+    brls::Logger::info("{} frames drawn", brls::Application::getDrawnFrameCount());
 
     // Exit
     return EXIT_SUCCESS;

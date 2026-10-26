@@ -14,6 +14,7 @@
     limitations under the License.
 */
 
+#include <borealis/core/application.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/thread.hpp>
 #include <exception>
@@ -107,6 +108,11 @@ void Threading::performSyncTasks()
     local.swap(m_sync_functions);
     m_sync_mutex.unlock();
 
+    // A task run from another thread's result (an image loaded...) may
+    // change the screen
+    if (!local.empty())
+        Application::requestRedraw();
+
     for (auto& f : local)
     {
         try
@@ -149,6 +155,7 @@ void Threading::performSyncTasks()
 
         if (duration >= d.delayMilliseconds)
         {
+            Application::requestRedraw();
             try
             {
                 d.func();

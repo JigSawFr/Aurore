@@ -18,8 +18,11 @@ float progress(brls::Time since, float duration_us)
 {
     if (since == 0 || duration_us <= 0.0f) return 1.0f;
     const brls::Time at = now();
+    if ((float)(at - since) >= duration_us) return 1.0f;
+    // An animation under way keeps the frames coming (redraw on demand)
+    brls::Application::requestRedraw();
     if (at <= since) return 0.0f;
-    return std::min(1.0f, (float)(at - since) / duration_us);
+    return (float)(at - since) / duration_us;
 }
 
 float ease_out(float t)

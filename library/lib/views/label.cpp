@@ -544,6 +544,8 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     if (this->cursor >= (int)CursorPosition::END) {
         // blink
         auto blink = ((brls::getCPUTimeUsec() - cursor_blink) >> 10) % 1000 ;
+        // The cursor blinks between frames nothing else asks for
+        Application::requestRedraw();
         if (blink < 500)
             cursor_position = this->cursor;
     }
