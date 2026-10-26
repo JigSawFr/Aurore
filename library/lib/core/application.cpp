@@ -28,6 +28,7 @@
 #include <borealis/views/dialog.hpp>
 #include <borealis/core/font.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/thread.hpp>
 #include <borealis/core/time.hpp>
 #include <borealis/core/util.hpp>
@@ -163,7 +164,10 @@ void Application::createWindow(std::string windowTitle)
             return;
 
         if (eventType == facebook::yoga::Event::NodeLayout)
-            view->onLayout(); });
+        {
+            Profiler::addViewLaidOut();
+            view->onLayout();
+        } });
 
     // Load fonts and setup fallbacks
     Application::platform->getFontLoader()->loadFonts();
@@ -188,6 +192,7 @@ bool Application::internalMainLoop()
     Application::updateFPS();
     Application::frameStartTime = getCPUTimeUsec();
     Application::setActiveEvent(false);
+    Profiler::beginFrame();
 
     // Main loop callback
     if (!Application::platform->mainLoopIteration() || Application::quitRequested)
@@ -196,6 +201,7 @@ bool Application::internalMainLoop()
         Application::exit();
         return false;
     }
+    Profiler::endPhase(Profiler::Phase::EVENTS);
 
     // Mouse and touch
     if (Application::blockInputsTokens == 0)
@@ -209,11 +215,14 @@ bool Application::internalMainLoop()
             Application::getAudioPlayer()->play(Sound::SOUND_CLICK_ERROR);
     }
 
+    Profiler::endPhase(Profiler::Phase::INPUT);
+
     // Animations
 #ifndef SIMPLE_HIGHLIGHT
     updateHighlightAnimation();
 #endif
     Ticking::updateTickings();
+    Profiler::endPhase(Profiler::Phase::UPDATE);
 
     // Render: every frame, or with redraw on demand only when something
     // asked for it (and at least once a second, for what changes without
@@ -274,6 +283,9 @@ bool Application::internalMainLoop()
 
     if (!Application::currentFocus && !Application::activitiesStack.empty())
         Application::giveFocus(Application::activitiesStack.back()->getContentView());
+
+    Profiler::endPhase(Profiler::Phase::UPDATE);
+    Profiler::endFrame(draw);
 
     // The simulated clock (the test harness) moves on its own: nothing to
     // wait for
@@ -982,11 +994,13 @@ void Application::frame(bool present)
 
     if (!present)
         return;
+    Profiler::endPhase(Profiler::Phase::DRAW);
 
     if (Application::redrawDebug)
         videoContext->readPixels(&Application::presentedPixels, &Application::presentedWidth, &Application::presentedHeight);
 
     videoContext->endFrame();
+    Profiler::endPhase(Profiler::Phase::SWAP);
     postFrameEvent.fire();
 }
 

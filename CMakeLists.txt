@@ -171,7 +171,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE demo ${APP_PLATFORM_INCLUDE})
 target_compile_options(${PROJECT_NAME} PRIVATE -ffunction-sections -fdata-sections ${APP_PLATFORM_OPTION})
 target_link_libraries(${PROJECT_NAME} PRIVATE borealis ${APP_PLATFORM_LIB})
 
-# The demo's tests, on the test harness
+# The demo's tests and bench, on the test harness
 # (-DBRLS_BUILD_TESTS=ON, then ctest)
 if (BRLS_BUILD_TESTS)
     enable_testing()

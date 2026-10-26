@@ -93,6 +93,21 @@ ctest --test-dir build --output-on-failure
 
 `tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
 
+## The bench
+
+`aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, swap, total).
+
+```sh
+aurore_bench                                   # the table
+aurore_bench --json out.json                   # and the numbers
+aurore_bench --write-baseline tests/bench_baseline.json
+aurore_bench --check tests/bench_baseline.json # exit 1 on a regression
+```
+
+`--check` fails when a count is above the baseline's by more than `--margin` (25 %, and 1). Times depend on the machine: they are checked only with `--time-margin <factor>`. `ctest` runs the check.
+
+The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too, and logs averages every 120 frames.
+
 ## Redraw on demand: finding a missing invalidation
 
 With redraw on demand (`Application::setRedrawOnDemand(true)`), a view that changes how it looks without `invalidate()` or `requestRedraw()` stays stale on screen. `Application::setRedrawDebug(true)`, or `BRLS_REDRAW_DEBUG=1` on the desktop, draws each skipped frame all the same, without presenting it, compares it with the last frame presented, and logs a difference as a warning with its area and the views drawn there:

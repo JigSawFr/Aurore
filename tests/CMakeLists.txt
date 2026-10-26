@@ -1,4 +1,5 @@
-# The demo's views, without its main(): what the tests show
+# The demo's views, without its main(): what the tests and the
+# bench show
 file(GLOB_RECURSE DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/*.cpp)
 list(REMOVE_ITEM DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/main.cpp)
 add_library(aurore_demo_views STATIC ${DEMO_VIEWS_SRC})
@@ -9,3 +10,8 @@ target_link_libraries(aurore_demo_views PUBLIC borealis)
 add_executable(aurore_tests demo_tests.cpp)
 target_link_libraries(aurore_tests PRIVATE aurore_demo_views borealis_test)
 brls_add_tests(aurore_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/references)
+
+# The main loop's cost on the demo (Profiler), checked against a baseline
+add_executable(aurore_bench bench.cpp)
+target_link_libraries(aurore_bench PRIVATE aurore_demo_views borealis_test)
+add_test(NAME aurore_bench COMMAND aurore_bench --check ${CMAKE_CURRENT_SOURCE_DIR}/bench_baseline.json)

@@ -27,6 +27,7 @@
 #include <functional>
 #include <borealis/core/animation.hpp>
 #include <borealis/core/application.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/input.hpp>
@@ -1375,6 +1376,12 @@ void View::invalidate()
 
     if (this->hasParent() && !this->detached)
         this->getParent()->invalidate();
+    else if (Profiler::isEnabled())
+    {
+        Time start = getRealTimeUsec();
+        YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
+        Profiler::addLayout(getRealTimeUsec() - start);
+    }
     else
         YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
 }

@@ -1,0 +1,41 @@
+{
+  "idle": {
+    "allocations_per_frame": 97.06,
+    "drawn_per_frame": 1.00,
+    "layouts_per_frame": 0.00,
+    "us_draw": 73475.60,
+    "us_input": 79.40,
+    "us_layout": 0.00,
+    "us_swap": 6897.30,
+    "us_total": 80460.28,
+    "us_total_p95": 134919.00,
+    "us_update": 7.06,
+    "views_laid_out_per_frame": 0.00
+  },
+  "idle_on_demand": {
+    "allocations_per_frame": 6.68,
+    "drawn_per_frame": 0.05,
+    "layouts_per_frame": 0.00,
+    "us_draw": 3040.76,
+    "us_input": 0.37,
+    "us_layout": 0.00,
+    "us_swap": 455.73,
+    "us_total": 3577.17,
+    "us_total_p95": 18720.00,
+    "us_update": 0.62,
+    "views_laid_out_per_frame": 0.00
+  },
+  "navigate": {
+    "allocations_per_frame": 505.49,
+    "drawn_per_frame": 1.00,
+    "layouts_per_frame": 15.01,
+    "us_draw": 53408.49,
+    "us_input": 653.18,
+    "us_layout": 449.92,
+    "us_swap": 5996.00,
+    "us_total": 60787.70,
+    "us_total_p95": 104876.00,
+    "us_update": 290.28,
+    "views_laid_out_per_frame": 61.52
+  }
+}
