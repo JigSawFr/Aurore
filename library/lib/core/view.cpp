@@ -179,6 +179,8 @@ void View::frame(FrameContext* ctx)
     float width  = frame.getWidth();
     float height = frame.getHeight();
 
+    this->applyScale(ctx->vg, frame);
+
     if (this->alpha > 0.0f && this->collapseState != 0.0f)
     {
         // Draw background
@@ -230,7 +232,41 @@ void View::frame(FrameContext* ctx)
 void View::frameHighlight(FrameContext* ctx)
 {
     if (this->alpha > 0.0f && this->collapseState != 0.0f && this->highlightAlpha > 0.0f && !this->hideHighlightBorder && !this->hideHighlight)
+    {
+        nvgSave(ctx->vg);
+        this->applyScale(ctx->vg, this->getFrame());
         this->drawHighlight(ctx->vg, ctx->theme, this->highlightAlpha, Application::getStyle(), false);
+        nvgRestore(ctx->vg);
+    }
+}
+
+void View::applyScale(NVGcontext* vg, const Rect& frame)
+{
+    if (this->scaleX == 1.0f && this->scaleY == 1.0f)
+        return;
+
+    // Around the view's centre
+    float cx = frame.getMidX();
+    float cy = frame.getMidY();
+    nvgTranslate(vg, cx, cy);
+    nvgScale(vg, this->scaleX, this->scaleY);
+    nvgTranslate(vg, -cx, -cy);
+}
+
+void View::setScale(float scale)
+{
+    this->scaleX = scale;
+    this->scaleY = scale;
+}
+
+void View::setScaleX(float scale)
+{
+    this->scaleX = scale;
+}
+
+void View::setScaleY(float scale)
+{
+    this->scaleY = scale;
 }
 
 void View::resetClickAnimation()
@@ -2395,6 +2431,9 @@ void View::registerCommonAttributes()
     this->registerFloatXMLAttribute("alpha", [this](float value) {
         this->setAlpha(value);
     });
+
+    this->registerFloatXMLAttribute("scale", [this](float value)
+        { this->setScale(value); });
 
     this->registerBoolXMLAttribute("clipsToBounds", [this](float value) {
         this->setClipsToBounds(value);

@@ -276,6 +276,10 @@ class View
 
     bool wireframeEnabled = false;
     bool clipsToBounds    = false;
+    float scaleX          = 1.0f;
+    float scaleY          = 1.0f;
+
+    void applyScale(NVGcontext* vg, const Rect& frame);
 
     std::vector<std::shared_ptr<Action>> actions;
     std::vector<GestureRecognizer*> gestureRecognizers;
@@ -393,6 +397,18 @@ class View
     }
 
   public:
+    /**
+     * Draws the view (its background, content and highlight) scaled around
+     * its centre, without laying anything out again: a pressed or focused
+     * view grown or shrunk a little. Touch hit-testing keeps the unscaled
+     * frame. XML: scale="1.05".
+     */
+    void setScale(float scale);
+    void setScaleX(float scale);
+    void setScaleY(float scale);
+    float getScaleX() const { return scaleX; }
+    float getScaleY() const { return scaleY; }
+
     static constexpr float AUTO = NAN;
 
     inline static std::string CUSTOM_RESOURCES_PATH;
