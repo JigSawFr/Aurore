@@ -3,6 +3,7 @@
 
     "tabs": {
         "cadran": "Cadran",
+        "styles": "Styles and data",
         "components": "Basic components",
         "transform": "Transform test",
         "text": "Text test",

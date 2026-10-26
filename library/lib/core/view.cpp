@@ -174,6 +174,10 @@ void View::frame(FrameContext* ctx)
     if (this->visibility != Visibility::VISIBLE)
         return;
 
+    // State styles changed since the last frame: applied after the focus
+    // and press handlers have all run, whatever their order.
+    this->applyPendingStyles();
+
     Style style    = Application::getStyle();
     Theme oldTheme = ctx->theme;
 
@@ -265,6 +269,8 @@ void View::applyScale(NVGcontext* vg, const Rect& frame)
 
 void View::setScale(float scale)
 {
+    if (this->transitionStyle("scale", StyleValue::of(scale)))
+        return;
     this->scaleX = scale;
     this->scaleY = scale;
 }
@@ -286,6 +292,10 @@ void View::resetClickAnimation()
 
 void View::playClickAnimation(bool reverse, bool animateBack, bool force)
 {
+    // A pressed: style: released when the animation plays back, or after the
+    // time it would take when there is none to play back.
+    this->notePress(!reverse, !reverse && animateBack && Application::getInputType() != InputType::TOUCH && hideClickAnimation && !force);
+
     if (hideClickAnimation && !force)
         return;
 
@@ -581,6 +591,8 @@ void View::expand(bool animated)
 
 void View::setAlpha(float alpha)
 {
+    if (this->transitionStyle("alpha", StyleValue::of(alpha)))
+        return;
     this->alpha = alpha;
 }
 
@@ -626,7 +638,8 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
             // From where the border was drawn last, if that was on the frame
             // drawn before (not after a while in touch mode, or on another
             // screen; a frame skipped by redraw on demand does not count)
-            gliding = highlightGlide && glideLastView && glideLastFrame + 1 >= Application::getDrawnFrameCount();
+            gliding = highlightGlide && !Application::isReduceMotionSet() && glideLastView
+                && glideLastFrame + 1 >= Application::getDrawnFrameCount();
             if (gliding)
             {
                 std::copy(std::begin(glideLast), std::end(glideLast), std::begin(glideFrom));
@@ -1452,6 +1465,7 @@ bool View::isDetached()
 void View::onFocusGained()
 {
     this->focused = true;
+    this->noteStyleState(StyleState::FOCUS, true);
 
     Style style = Application::getStyle();
 
@@ -1478,6 +1492,7 @@ GenericEvent* View::getFocusLostEvent()
 void View::onFocusLost()
 {
     this->focused = false;
+    this->noteStyleState(StyleState::FOCUS, false);
 
     Style style = Application::getStyle();
 
@@ -1746,9 +1761,34 @@ void View::ensureCommonAttributes()
     this->registeringCommonAttributes = false;
 }
 
+// "focus:backgroundColor" -> FOCUS, "backgroundColor"
+static bool splitStateAttribute(const std::string& name, StyleState* state, std::string* property)
+{
+    size_t colon = name.find(':');
+    if (colon == std::string::npos)
+        return false;
+    static const std::unordered_map<std::string, StyleState> STATES = {
+        { "hover", StyleState::HOVER },
+        { "focus", StyleState::FOCUS },
+        { "pressed", StyleState::PRESSED },
+        { "disabled", StyleState::DISABLED },
+    };
+    auto it = STATES.find(name.substr(0, colon));
+    if (it == STATES.end())
+        return false;
+    *state    = it->second;
+    *property = name.substr(colon + 1);
+    return true;
+}
+
 bool View::applyXMLAttribute(std::string name, std::string value)
 {
     this->ensureCommonAttributes();
+
+    StyleState state;
+    std::string property;
+    if (splitStateAttribute(name, &state, &property))
+        return this->setStateStyle(state, property, value);
 
     // String -> string
     if (this->stringAttributes.count(name) > 0)
@@ -2005,6 +2045,11 @@ void View::applyXMLAttributes(tinyxml2::XMLElement* element)
 bool View::isXMLAttributeValid(std::string attributeName)
 {
     this->ensureCommonAttributes();
+    StyleState state;
+    std::string property;
+    StyleValue probe;
+    if (splitStateAttribute(attributeName, &state, &property))
+        return this->getStyleProperty(property, &probe);
     return this->knownAttributes.count(attributeName) > 0;
 }
 
@@ -2524,6 +2569,40 @@ void View::registerCommonAttributes()
 
     this->registerBoolXMLAttribute("culled", [this](float value) {
         this->setCulled(value);
+    });
+
+    this->registerStringXMLAttribute("transition", [this](std::string value) {
+        if (!this->setTransition(value))
+            Logger::error("Cannot read transition=\"{}\" on {}", value, this->describe());
+    });
+
+    this->registerStringXMLAttribute("bind", [this](std::string value) {
+        if (!this->bind(value))
+            Logger::error("Cannot read bind=\"{}\" on {}", value, this->describe());
+    });
+
+    this->registerStringXMLAttribute("accessibilityLabel", [this](std::string value) {
+        this->setAccessibilityLabel(value);
+    });
+
+    this->registerStringXMLAttribute("accessibilityRole", [this](std::string value) {
+        static const std::unordered_map<std::string, AccessibilityRole> ROLES = {
+            { "none", AccessibilityRole::NONE },
+            { "button", AccessibilityRole::BUTTON },
+            { "label", AccessibilityRole::LABEL },
+            { "header", AccessibilityRole::HEADER },
+            { "image", AccessibilityRole::IMAGE },
+            { "cell", AccessibilityRole::CELL },
+            { "toggle", AccessibilityRole::TOGGLE },
+            { "slider", AccessibilityRole::SLIDER },
+            { "text_field", AccessibilityRole::TEXT_FIELD },
+            { "tab", AccessibilityRole::TAB },
+            { "list", AccessibilityRole::LIST },
+        };
+        auto it = ROLES.find(value);
+        if (it == ROLES.end())
+            fatal("Illegal value \"" + value + "\" for XML attribute \"accessibilityRole\"");
+        this->setAccessibilityRole(it->second);
     });
 
     this->registerFloatXMLAttribute("aspectRatio", [this](float value) {

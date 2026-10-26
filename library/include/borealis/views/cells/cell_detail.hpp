@@ -38,6 +38,13 @@ class DetailCell : public RecyclerCell
     BRLS_BIND(Label, detail, "brls/rediocell/detail");
 
     static View* create();
+
+    bool setBoundText(const std::string& text) override;
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::CELL; }
+    // Its title, then its detail (a value, On or Off).
+    std::string getDefaultAccessibilityLabel() override;
 };
 
 } // namespace brls

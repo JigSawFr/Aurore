@@ -48,7 +48,29 @@ void Activity::setContentView(View* view)
     this->contentView->setParentActivity(this);
     // willAppear is only called when the activity is pushed onto the stack
 
+    // bind= attributes read while the XML was inflated, before the view
+    // knew its activity.
+    this->contentView->resolveBindings(this);
+
     this->resizeToFitWindow();
+}
+
+void Activity::registerModel(const std::string& name, DataModel* model)
+{
+    this->models[name] = model;
+    if (this->contentView)
+        this->contentView->resolveBindings(this);
+}
+
+void Activity::unregisterModel(const std::string& name)
+{
+    this->models.erase(name);
+}
+
+DataModel* Activity::getModel(const std::string& name)
+{
+    auto it = this->models.find(name);
+    return it == this->models.end() ? nullptr : it->second;
 }
 
 void Activity::resizeToFitWindow()

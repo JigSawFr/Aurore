@@ -1,0 +1,147 @@
+<brls:Box
+        width="auto"
+        height="auto">
+
+<brls:ScrollingFrame
+        width="auto"
+        height="auto"
+        grow="1.0">
+
+    <brls:Box
+            width="auto"
+            height="auto"
+            axis="column"
+            paddingLeft="@style/brls/tab_frame/content_padding_sides"
+            paddingRight="@style/brls/tab_frame/content_padding_sides"
+            paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
+            paddingBottom="@style/brls/tab_frame/content_padding_top_bottom">
+
+        <brls:Label
+                text="State styles and transitions"
+                fontSize="24"
+                accessibilityRole="header"
+                marginBottom="10" />
+
+        <brls:Box axis="row" height="auto">
+
+            <!-- focus: and pressed:, with a transition on each -->
+            <brls:Box
+                    id="styles/fade"
+                    focusable="true"
+                    hideHighlightBackground="true"
+                    width="230"
+                    height="110"
+                    margin="10"
+                    cornerRadius="12"
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor="@theme/brls/button/default_enabled_background"
+                    focus:backgroundColor="@theme/brls/button/primary_enabled_background"
+                    pressed:scale="0.94"
+                    transition="backgroundColor 180ms ease-out, scale 120ms ease-out"
+                    accessibilityRole="button"
+                    accessibilityLabel="Fades in its colour">
+                <brls:Label text="Fades in its colour" />
+            </brls:Box>
+
+            <!-- several properties at once, with an overshoot -->
+            <brls:Box
+                    focusable="true"
+                    hideHighlight="true"
+                    width="230"
+                    height="110"
+                    margin="10"
+                    cornerRadius="4"
+                    borderThickness="3"
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor="@theme/brls/button/default_enabled_background"
+                    borderColor="#00000000"
+                    focus:borderColor="@theme/brls/accent"
+                    focus:cornerRadius="28"
+                    transition="all 300ms backOut"
+                    accessibilityRole="button"
+                    accessibilityLabel="Rounds its corners">
+                <brls:Label text="Rounds its corners" />
+            </brls:Box>
+
+            <!-- hover: follows the mouse pointer (desktop) -->
+            <brls:Box
+                    focusable="true"
+                    width="230"
+                    height="110"
+                    margin="10"
+                    cornerRadius="12"
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor="@theme/brls/button/default_enabled_background"
+                    hover:backgroundColor="#3a7bd5"
+                    transition="backgroundColor 150ms"
+                    accessibilityRole="button"
+                    accessibilityLabel="Lights up under the mouse">
+                <brls:Label text="Lights up under the mouse" />
+            </brls:Box>
+        </brls:Box>
+
+        <brls:Box axis="row" height="auto" alignItems="center">
+            <brls:Button
+                    id="styles/disabled"
+                    text="A disabled button"
+                    width="300"
+                    margin="10"
+                    style="primary"
+                    disabled:alpha="0.4"
+                    transition="alpha 200ms" />
+            <brls:Button
+                    id="styles/toggle"
+                    text="Enable or disable it"
+                    width="300"
+                    margin="10" />
+        </brls:Box>
+
+        <brls:Label
+                text="Data binding"
+                fontSize="24"
+                accessibilityRole="header"
+                marginTop="20"
+                marginBottom="10" />
+
+        <brls:Box axis="row" height="auto" alignItems="center">
+            <brls:Button
+                    id="styles/increment"
+                    text="Add one"
+                    width="200"
+                    margin="10" />
+            <!-- text: and color: follow the model's observables -->
+            <brls:Label
+                    bind="text: styles.counter"
+                    fontSize="40"
+                    width="100"
+                    horizontalAlign="center"
+                    margin="10" />
+            <brls:Rectangle
+                    bind="color: styles.swatch"
+                    transition="color 300ms ease-in-out"
+                    width="60"
+                    height="60"
+                    cornerRadius="30"
+                    margin="10" />
+            <brls:Label
+                    text="Even"
+                    bind="visible: styles.even"
+                    margin="10" />
+        </brls:Box>
+
+        <brls:BooleanCell id="styles/reduce_motion" />
+
+        <brls:Label
+                bind="text: styles.announced"
+                marginTop="10"
+                fontSize="18"
+                textColor="@theme/brls/header/subtitle" />
+
+    </brls:Box>
+
+</brls:ScrollingFrame>
+
+</brls:Box>

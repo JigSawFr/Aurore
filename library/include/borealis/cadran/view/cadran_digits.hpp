@@ -36,6 +36,7 @@ class CadranDigits : public brls::View
     void setRolls(bool rolls);
     // The size taken again after the text size changed (ui/text_size).
     void remeasure() { this->measure(); }
+    void onTextScaleChanged() override { this->measure(); }
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
               brls::Style style, brls::FrameContext* ctx) override;

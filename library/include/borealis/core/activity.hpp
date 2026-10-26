@@ -16,7 +16,10 @@
 
 #pragma once
 
+#include <borealis/core/observable.hpp>
 #include <borealis/core/view.hpp>
+
+#include <unordered_map>
 
 namespace brls
 {
@@ -79,6 +82,16 @@ class Activity
      * if it hasn't been found in the activity.
      */
     View* getView(std::string id);
+
+    /**
+     * A data model for the XML bindings of this activity's views
+     * (bind="text: name.key"), looked up before the application's
+     * (Application::registerModel). Register it before the content view is
+     * set (in the constructor); the model must outlive the activity.
+     */
+    void registerModel(const std::string& name, DataModel* model);
+    void unregisterModel(const std::string& name);
+    DataModel* getModel(const std::string& name);
 
     /**
      * Resizes the activity to fit the window. Called when the activity
@@ -162,6 +175,7 @@ class Activity
     void setAlpha(float alpha);
 
   private:
+    std::unordered_map<std::string, DataModel*> models;
     View* constructorView = nullptr;
     View* contentView     = nullptr;
 };

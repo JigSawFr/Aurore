@@ -348,7 +348,45 @@ void Label::onParentFocusLost(View* focusedView)
 
 void Label::setTextColor(NVGcolor color)
 {
+    if (this->transitionStyle("textColor", StyleValue::of(color)))
+        return;
     this->textColor = color;
+}
+
+bool Label::getStyleProperty(const std::string& name, StyleValue* value)
+{
+    if (name != "textColor")
+        return View::getStyleProperty(name, value);
+    *value = StyleValue::of(this->textColor);
+    return true;
+}
+
+bool Label::setStyleProperty(const std::string& name, const StyleValue& value)
+{
+    if (name != "textColor")
+        return View::setStyleProperty(name, value);
+    if (value.type != StyleValue::Type::COLOR)
+        return false;
+    this->setTextColor(value.color);
+    return true;
+}
+
+bool Label::setBoundText(const std::string& text)
+{
+    this->setText(text);
+    return true;
+}
+
+void Label::onTextScaleChanged()
+{
+    if (YGNodeHasMeasureFunc(this->getYGNode()))
+        YGNodeMarkDirty(this->getYGNode());
+}
+
+void Label::bindText(Observable<std::string>& text)
+{
+    this->setText(text.get());
+    this->keepSubscription(text.subscribe([this](const std::string& value) { this->setText(value); }));
 }
 
 std::string Label::STConverter(const std::string& text)

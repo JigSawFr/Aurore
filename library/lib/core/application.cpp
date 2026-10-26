@@ -441,6 +441,15 @@ void Application::processInput()
         Application::requestRedraw();
     }
 
+    // hover: styles follow the pointer when it moves (its offset is only
+    // known while it is locked: the position is compared instead).
+    static Point lastPointer = mouseState.position;
+    if (mouseState.position.x != lastPointer.x || mouseState.position.y != lastPointer.y)
+    {
+        lastPointer = mouseState.position;
+        Application::updateHover(mouseState.position, true);
+    }
+
     if (mouseState.scroll.x == 0 && mouseState.scroll.y == 0 && mouseState.leftButton == TouchPhase::NONE && mouseState.middleButton == TouchPhase::NONE && mouseState.rightButton == TouchPhase::NONE)
         mouseState.view = nullptr;
     else if (mouseState.view == nullptr)
@@ -1058,6 +1067,13 @@ void Application::giveFocus(View* view)
         {
             newFocus->onFocusGained();
             Logger::debug("Giving focus to {}", newFocus->describe());
+
+            if (Application::focusAnnouncer)
+            {
+                std::string description = newFocus->getAccessibilityDescription();
+                if (!description.empty())
+                    Application::focusAnnouncer(description);
+            }
         }
 
         Application::globalHintsUpdateEvent.fire();
@@ -1070,8 +1086,100 @@ void Application::setHighlightIdleFade(bool fade)
     Application::lastInputTime     = getCPUTimeUsec();
 }
 
+void Application::setFocusAnnouncer(std::function<void(const std::string&)> announcer)
+{
+    Application::focusAnnouncer = std::move(announcer);
+}
+
+void Application::setReduceMotion(bool reduce)
+{
+    Application::reduceMotion = reduce;
+}
+
+bool Application::getReduceMotion()
+{
+    return Application::reduceMotion || (Application::cadran && !effects::motion());
+}
+
+// Each label measured again (and what else measures text), and the roots to
+// lay out again: the screen's, and each detached one (a scrolling frame's
+// content, laid out on its own).
+static void markTextScaleChanged(View* view, std::vector<View*>& roots)
+{
+    view->onTextScaleChanged();
+    if (view->isDetached())
+        roots.push_back(view);
+    if (auto* box = dynamic_cast<Box*>(view))
+        for (View* child : box->getChildren())
+            markTextScaleChanged(child, roots);
+}
+
+void Application::setTextScale(float scale)
+{
+    if (scale == Label::getFontScale())
+        return;
+    Label::setFontScale(scale);
+    for (Activity* activity : Application::activitiesStack)
+    {
+        View* root = activity->getContentView();
+        if (!root)
+            continue;
+        std::vector<View*> roots;
+        markTextScaleChanged(root, roots);
+        root->invalidate();
+        for (View* detached : roots)
+            detached->invalidate();
+    }
+}
+
+float Application::getTextScale()
+{
+    return Label::getFontScale();
+}
+
+void Application::registerModel(const std::string& name, DataModel* model)
+{
+    Application::models[name] = model;
+    for (Activity* activity : Application::activitiesStack)
+        if (activity->getContentView())
+            activity->getContentView()->resolveBindings(activity);
+}
+
+void Application::unregisterModel(const std::string& name)
+{
+    Application::models.erase(name);
+}
+
+DataModel* Application::getModel(const std::string& name)
+{
+    auto it = Application::models.find(name);
+    return it == Application::models.end() ? nullptr : it->second;
+}
+
+void Application::updateHover(Point position, bool inside)
+{
+    View* hovered = nullptr;
+    if (inside && !Application::activitiesStack.empty())
+    {
+        View* content = Application::activitiesStack.back()->getContentView();
+        hovered       = content ? content->hitTest(position) : nullptr;
+        // The nearest view that has a hover: style, the hit one or a parent.
+        while (hovered && !hovered->hasStateStyle(StyleState::HOVER))
+            hovered = hovered->getParent();
+    }
+    if (hovered == Application::hoveredView)
+        return;
+    if (Application::hoveredView)
+        Application::hoveredView->setStyleState(StyleState::HOVER, false);
+    Application::hoveredView = hovered;
+    if (hovered)
+        hovered->setStyleState(StyleState::HOVER, true);
+}
+
 void Application::forgetView(View* view)
 {
+    if (Application::hoveredView == view)
+        Application::hoveredView = nullptr;
     if (Application::currentFocus == view)
         Application::currentFocus = nullptr;
     if (Application::repetitionOldFocus == view)

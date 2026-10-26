@@ -188,6 +188,15 @@ class Button : public Box
      */
     std::string getText();
 
+    // textColor: its label's.
+    bool getStyleProperty(const std::string& name, StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const StyleValue& value) override;
+    bool setBoundText(const std::string& text) override;
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::BUTTON; }
+    std::string getDefaultAccessibilityLabel() override { return this->getText(); }
+
   private:
     const ButtonStyle* style = &BUTTONSTYLE_DEFAULT;
     ButtonState state        = ButtonState::ENABLED;
