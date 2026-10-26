@@ -16,7 +16,7 @@
 */
 
 #include <tinyxml2.h>
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
 
 #include <borealis/core/application.hpp>
 #include <borealis/core/box.hpp>

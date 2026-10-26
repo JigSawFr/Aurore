@@ -17,10 +17,11 @@
     limitations under the License.
 */
 
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
 #include <yoga/event/event.h>
 
 #include <algorithm>
@@ -54,10 +55,6 @@
 #include <borealis/views/debug_layer.hpp>
 #include <stdexcept>
 #include <string>
-
-#ifndef YG_ENABLE_EVENTS
-#error Please enable Yoga events with the YG_ENABLE_EVENTS define
-#endif
 
 #include <borealis/cadran.hpp>
 #include <chrono>
@@ -145,13 +142,11 @@ void Application::createWindow(std::string windowTitle)
     Application::title        = windowTitle;
 
     // Init yoga
-    YGConfig* defaultConfig       = YGConfigGetDefault();
-    defaultConfig->setUseWebDefaults(true);
-    using namespace facebook;
+    Application::getYogaConfig();
 
-    facebook::yoga::Event::subscribe([](const YGNode& node, facebook::yoga::Event::Type eventType, facebook::yoga::Event::Data eventData)
+    facebook::yoga::Event::subscribe([](YGNodeConstRef node, facebook::yoga::Event::Type eventType, facebook::yoga::Event::Data eventData)
         {
-        View* view = (View*)node.getContext();
+        View* view = (View*)YGNodeGetContext(node);
 
         if (!view)
             return;
@@ -170,6 +165,32 @@ void Application::createWindow(std::string windowTitle)
         cadran::start_window();
 
     Application::getWindowCreationDoneEvent()->fire();
+}
+
+YGConfig* Application::getYogaConfig()
+{
+    // Created on first use: views can be built before the window
+    static YGConfigRef config = []
+    {
+        YGConfigRef config = YGConfigNew();
+        YGConfigSetUseWebDefaults(config, true);
+        // Yoga 2 results: absolute children placed and sized as before
+        YGConfigSetErrata(config, YGErrataClassic);
+        // Yoga's messages in the app's log, one line each
+        YGConfigSetLogger(config, [](YGConfigConstRef, YGNodeConstRef, YGLogLevel level, const char* format, va_list args)
+            {
+            char message[512];
+            int length = std::vsnprintf(message, sizeof(message), format, args);
+            if (level == YGLogLevelError || level == YGLogLevelFatal)
+                Logger::error("yoga: {}", message);
+            else if (level == YGLogLevelWarn)
+                Logger::warning("yoga: {}", message);
+            else
+                Logger::debug("yoga: {}", message);
+            return length; });
+        return config;
+    }();
+    return config;
 }
 
 bool Application::mainLoop()

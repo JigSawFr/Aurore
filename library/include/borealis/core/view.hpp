@@ -98,6 +98,7 @@ namespace tinyxml2
     class XMLElement;
 }
 struct YGNode;
+struct YGConfig;
 
 namespace brls
 {

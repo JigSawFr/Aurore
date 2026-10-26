@@ -16,7 +16,10 @@
     limitations under the License.
 */
 
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
+
+#include <algorithm>
+#include <cmath>
 
 #include <borealis/core/application.hpp>
 #include <borealis/core/util.hpp>
@@ -31,7 +34,7 @@
 namespace brls
 {
 
-static float measureWidth(YGNodeRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, float originalWidth, ImageScalingType type)
+static float measureWidth(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, float originalWidth, ImageScalingType type)
 {
     if (widthMode == YGMeasureModeUndefined)
         return originalWidth;
@@ -48,7 +51,7 @@ static float measureWidth(YGNodeRef node, float width, YGMeasureMode widthMode, 
     return width;
 }
 
-static float measureHeight(YGNodeRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, float originalHeight, ImageScalingType type)
+static float measureHeight(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, float originalHeight, ImageScalingType type)
 {
     if (heightMode == YGMeasureModeUndefined)
         return originalHeight;
@@ -65,9 +68,9 @@ static float measureHeight(YGNodeRef node, float width, YGMeasureMode widthMode,
     return height;
 }
 
-static YGSize imageMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
+static YGSize imageMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
 {
-    Image* image                 = (Image*)node->getContext();
+    Image* image                 = (Image*)YGNodeGetContext(node);
     int texture                  = image->getTexture();
     float originalWidth          = image->getOriginalImageWidth();
     float originalHeight         = image->getOriginalImageHeight();
@@ -133,7 +136,12 @@ static YGSize imageMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthM
 
 Image::Image()
 {
-    YGNodeSetMeasureFunc(this->ygNode, imageMeasureFunc);
+    YGNodeSetMeasureFunc(this->ygNode, [](YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
+        {
+            // Yoga reads an undefined or negative size as 0, with a warning
+            YGSize size = imageMeasureFunc(node, width, widthMode, height, heightMode);
+            return YGSize { std::isnan(size.width) ? 0.0f : std::max(size.width, 0.0f), std::isnan(size.height) ? 0.0f : std::max(size.height, 0.0f) };
+        });
 
     // This view uses a custom measure function, so the node type is automatically set to YGNodeTypeText,
     // which causes some deviations in the calculation of YGRoundToPixelGrid.

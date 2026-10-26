@@ -41,7 +41,7 @@ end
 
 
 add_requires("tinyxml2")
-add_requires("yoga")
+add_requires("yoga 3.2.1")
 add_requires("stb")
 add_requires("nanovg")
 add_requires("nlohmann_json")
@@ -49,8 +49,7 @@ add_requires("fmt")
 add_requires("tweeny")
 
 add_defines(
-    'BRLS_RESOURCES="./resources/"',
-    "YG_ENABLE_EVENTS"
+    'BRLS_RESOURCES="./resources/"'
 )
 
 if get_config("driver") == "opengl" then

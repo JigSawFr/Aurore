@@ -21,7 +21,7 @@
 #include <cxxabi.h>
 #endif
 #include <tinyxml2.h>
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
 #include <algorithm>
 #include <sstream>
 #include <functional>
@@ -65,7 +65,7 @@ AppletFrameItem::~AppletFrameItem()
 View::View()
 {
     // Instantiate and prepare YGNode
-    this->ygNode = YGNodeNew();
+    this->ygNode = YGNodeNewWithConfig(Application::getYogaConfig());
     YGNodeSetContext(this->ygNode, this);
 
     YGNodeStyleSetWidthAuto(this->ygNode);

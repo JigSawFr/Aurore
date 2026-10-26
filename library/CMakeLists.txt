@@ -24,9 +24,9 @@ else()
   add_subdirectory(${BOREALIS_PATH}/lib/extern/tweeny EXCLUDE_FROM_ALL)
 endif()
 
-# yoga
+# yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
 add_subdirectory(${BOREALIS_PATH}/lib/extern/yoga/yoga EXCLUDE_FROM_ALL)
-target_compile_options(yogacore PRIVATE -fvisibility=default)
+target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
 
 # opencc
 if (BRLS_USE_OPENCC)
@@ -367,7 +367,6 @@ target_compile_features(borealis PUBLIC cxx_std_20)
 target_link_libraries(borealis fmt tweeny yogacore ${BRLS_PLATFORM_LIBS})
 target_compile_options(borealis PUBLIC
         -DBRLS_RESOURCES=${BRLS_PLATFORM_RESOURCES_PATH}
-        -DYG_ENABLE_EVENTS
         -ffunction-sections
         -fdata-sections
         ${BRLS_PLATFORM_OPTION}

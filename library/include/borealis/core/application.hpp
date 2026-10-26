@@ -104,6 +104,12 @@ class Application
     static Platform* getPlatform();
     static AudioPlayer* getAudioPlayer();
 
+    /**
+     * The Yoga configuration every view's node is created with
+     * (web defaults, layout errata).
+     */
+    static YGConfig* getYogaConfig();
+
     static NVGcontext* getNVGContext();
     inline static float contentWidth, contentHeight;
 
