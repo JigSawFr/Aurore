@@ -39,6 +39,7 @@ class ThemeValues
 
     void addColor(const std::string&, NVGcolor color);
     NVGcolor getColor(const std::string&);
+    bool hasColor(const std::string&) const;
 
   private:
     std::unordered_map<std::string, NVGcolor> values;
@@ -56,6 +57,38 @@ class Theme
 
     static Theme& getLightTheme();
     static Theme& getDarkTheme();
+
+    /**
+     * Reads a theme file into the light or the dark theme, to restyle an app
+     * without rebuilding it:
+     *
+     *     # a comment
+     *     inherit = dark                  # the theme it changes (dark by default)
+     *     [colors]
+     *     brls/accent = #2ec4b6           # #rgb, #rrggbb, #rrggbbaa,
+     *     cadran/well = rgba(255, 255, 255, 0.08)   # rgb() or rgba()
+     *     [metrics]
+     *     brls/sidebar/width = 320
+     *
+     * Colours and metrics not named keep their values. Read again, a file
+     * changes the theme again (the screens drawn afterwards use it).
+     * Returns false when the file cannot be read; a line it cannot read is
+     * logged and skipped. The variant it inherits is put in `variant` when
+     * given, for Platform::setThemeVariant. A text colour that reads badly on
+     * its background (contrast under 4.5:1) is logged as a warning.
+     */
+    static bool loadFile(const std::string& path, ThemeVariant* variant = nullptr);
+
+    /**
+     * As loadFile, from the file's text.
+     */
+    static bool load(const std::string& text, ThemeVariant* variant = nullptr);
+
+    /**
+     * Reads a colour as loadFile does ("#2ec4b6", "rgba(…)"); false if it is
+     * not one.
+     */
+    static bool parseColor(const std::string& text, NVGcolor* color);
 
   private:
     ThemeValues* values;
