@@ -28,6 +28,7 @@
 #include "tab/components_tab.hpp"
 #include "tab/recycling_list_tab.hpp"
 #include "tab/settings_tab.hpp"
+#include "tab/styles_tab.hpp"
 #include "tab/text_test_tab.hpp"
 #include "tab/transform_tab.hpp"
 #include "view/captioned_image.hpp"
@@ -52,7 +53,7 @@ void installCadranHooks()
     ui::hooks::Hooks& h = ui::hooks::get();
     h.rail_icons        = []()
     {
-        return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "", "activity", "gamepad",
+        return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "language", "", "activity", "gamepad",
             "", "settings", "", "info" };
     };
     h.shown_screen = []() { return "tab/" + std::to_string(shownTab); };
@@ -100,6 +101,7 @@ void registerViews()
     brls::Application::registerXMLView("PokemonView", PokemonView::create);
     brls::Application::registerXMLView("SettingsTab", SettingsTab::create);
     brls::Application::registerXMLView("TextTestTab", TextTestTab::create);
+    brls::Application::registerXMLView("StylesTab", StylesTab::create);
 
     // Add custom values to the theme
     brls::Theme::getLightTheme().addColor("captioned_image/caption", nvgRGB(2, 176, 183));
