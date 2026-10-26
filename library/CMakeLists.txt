@@ -285,6 +285,9 @@ elseif(PLATFORM_ANDROID)
             ${BOREALIS_PATH}/lib/platforms/android)
     list(APPEND BRLS_PLATFORM_LIBS SDL2 SDL2main)
     list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ ANDROID)
+    # The NDK's libc++ returns std::string from path::u8string() in C++20,
+    # which nlohmann json's path conversion does not build with
+    list(APPEND BRLS_PUBLIC_DEFINITIONS JSON_HAS_FILESYSTEM=0 JSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
 elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     set(BUILD_SHARED_LIBS OFF)
     add_subdirectory(${BOREALIS_PATH}/lib/extern/SDL)
