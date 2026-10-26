@@ -15,7 +15,7 @@
     limitations under the License.
 */
 
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
 
 #include <borealis/core/application.hpp>
 #include <borealis/core/bidi.hpp>
@@ -72,7 +72,7 @@ static void computeLabelHeight(Label* label, float width, YGMeasureMode widthMod
     }
 }
 
-static YGSize labelMeasureFunc(YGNodeRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
+static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
 {
     NVGcontext* vg       = Application::getNVGContext();
     auto* label          = (Label*)YGNodeGetContext(node);
@@ -232,7 +232,12 @@ Label::Label()
     this->setHighlightPadding(style["brls/label/highlight_padding"]);
 
     // Setup the custom measure function
-    YGNodeSetMeasureFunc(this->ygNode, labelMeasureFunc);
+    YGNodeSetMeasureFunc(this->ygNode, [](YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
+        {
+            // Yoga reads an undefined or negative size as 0, with a warning
+            YGSize size = labelMeasureFunc(node, width, widthMode, height, heightMode);
+            return YGSize { std::isnan(size.width) ? 0.0f : std::max(size.width, 0.0f), std::isnan(size.height) ? 0.0f : std::max(size.height, 0.0f) };
+        });
 
     // Set the max width and height to 100% to avoid overflowing
     // The view will be shortened if the text is too long

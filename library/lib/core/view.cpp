@@ -21,7 +21,7 @@
 #include <cxxabi.h>
 #endif
 #include <tinyxml2.h>
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
 #include <algorithm>
 #include <sstream>
 #include <functional>
@@ -67,7 +67,7 @@ AppletFrameItem::~AppletFrameItem()
 View::View()
 {
     // Instantiate and prepare YGNode
-    this->ygNode = YGNodeNew();
+    this->ygNode = YGNodeNewWithConfig(Application::getYogaConfig());
     YGNodeSetContext(this->ygNode, this);
 
     YGNodeStyleSetWidthAuto(this->ygNode);
@@ -1344,8 +1344,17 @@ void View::setPositionType(PositionType type)
         case PositionType::ABSOLUTE:
             YGNodeStyleSetPositionType(this->ygNode, YGPositionTypeAbsolute);
             break;
+        case PositionType::STATIC:
+            YGNodeStyleSetPositionType(this->ygNode, YGPositionTypeStatic);
+            break;
     }
 
+    this->invalidate();
+}
+
+void View::setBoxSizing(BoxSizing sizing)
+{
+    YGNodeStyleSetBoxSizing(this->ygNode, sizing == BoxSizing::CONTENT_BOX ? YGBoxSizingContentBox : YGBoxSizingBorderBox);
     this->invalidate();
 }
 
@@ -2426,6 +2435,14 @@ void View::registerCommonAttributes()
         {
             { "relative", PositionType::RELATIVE },
             { "absolute", PositionType::ABSOLUTE },
+            { "static", PositionType::STATIC },
+        });
+
+    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+        "boxSizing", BoxSizing, this->setBoxSizing,
+        {
+            { "borderBox", BoxSizing::BORDER_BOX },
+            { "contentBox", BoxSizing::CONTENT_BOX },
         });
 
     // Custom focus routes
