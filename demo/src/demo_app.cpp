@@ -53,7 +53,7 @@ void installCadranHooks()
     ui::hooks::Hooks& h = ui::hooks::get();
     h.rail_icons        = []()
     {
-        return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "language", "", "activity", "gamepad",
+        return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "contrast", "language", "", "activity", "gamepad",
             "", "settings", "", "info" };
     };
     h.shown_screen = []() { return "tab/" + std::to_string(shownTab); };
