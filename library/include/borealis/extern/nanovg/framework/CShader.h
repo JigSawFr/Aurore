@@ -28,4 +28,6 @@ public:
     }
 
     bool load(CMemPool& pool, const char* path);
+    // A shader built into the program (a .dksh file's bytes)
+    bool loadFromMemory(CMemPool& pool, const void* data, size_t size);
 };

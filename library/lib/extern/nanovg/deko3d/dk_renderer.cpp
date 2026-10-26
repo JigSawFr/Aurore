@@ -8,6 +8,13 @@
 #include <math.h>
 #include <switch.h>
 
+#include <dk_shaders.h>
+
+/* The size of a shader built in, or 0 when it was not (a null pointer). */
+template <size_t N>
+static constexpr size_t DkshSize(const unsigned char (&)[N]) { return N; }
+static constexpr size_t DkshSize(const unsigned char *) { return 0; }
+
 
 namespace nvg {
 
@@ -481,13 +488,21 @@ namespace nvg {
     }
 
     int DkRenderer::Create(DKNVGcontext &ctx) {
-        m_vertex_shader.load(m_code_mem_pool, "romfs:/shaders/fill_vsh.dksh");
+        /* The shaders built into the library (dk_shaders.h), else those of
+           the app's romfs. */
+        auto load = [this](CShader &shader, const unsigned char *data, size_t size, const char *path) {
+            if (!shader.loadFromMemory(m_code_mem_pool, data, size)) {
+                shader.load(m_code_mem_pool, path);
+            }
+        };
+
+        load(m_vertex_shader, dksh_fill_vsh, DkshSize(dksh_fill_vsh), "romfs:/shaders/fill_vsh.dksh");
 
         /* Load the appropriate fragment shader depending on whether AA is enabled. */
         if (ctx.flags & NVG_ANTIALIAS) {
-            m_fragment_shader.load(m_code_mem_pool, "romfs:/shaders/fill_aa_fsh.dksh");
+            load(m_fragment_shader, dksh_fill_aa_fsh, DkshSize(dksh_fill_aa_fsh), "romfs:/shaders/fill_aa_fsh.dksh");
         } else {
-            m_fragment_shader.load(m_code_mem_pool, "romfs:/shaders/fill_fsh.dksh");
+            load(m_fragment_shader, dksh_fill_fsh, DkshSize(dksh_fill_fsh), "romfs:/shaders/fill_fsh.dksh");
         }
 
         /* Set the size of fragment uniforms. */
