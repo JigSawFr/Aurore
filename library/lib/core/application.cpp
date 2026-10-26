@@ -403,6 +403,7 @@ void Application::processInput()
     {
         if (controllerState.buttons[i])
         {
+            Application::lastInputTime = cpuTime;
             repeating = controllerState.repeatingButtonStop[i] > 0 && cpuTime > controllerState.repeatingButtonStop[i];
 
             if (repeating)
@@ -808,7 +809,22 @@ void Application::frame()
     if (currentFocus && Application::getInputType() != InputType::TOUCH
         && (activitiesStack.empty() || currentFocus->getParentActivity() == activitiesStack.back()))
     {
-        currentFocus->frameHighlight(&frameContext);
+        if (!Application::highlightIdleFade)
+        {
+            currentFocus->frameHighlight(&frameContext);
+        }
+        else
+        {
+            float idle           = (float)(getCPUTimeUsec() - Application::lastInputTime) / 1000.0f;
+            float highlightAlpha = idle < 800.0f ? 1.0f : std::max(0.0f, 1.0f - (idle - 800.0f) / 400.0f);
+            if (highlightAlpha > 0.0f)
+            {
+                nvgSave(frameContext.vg);
+                nvgGlobalAlpha(frameContext.vg, highlightAlpha);
+                currentFocus->frameHighlight(&frameContext);
+                nvgRestore(frameContext.vg);
+            }
+        }
     }
 
     // Notifications
@@ -925,6 +941,12 @@ void Application::giveFocus(View* view)
 
         Application::globalHintsUpdateEvent.fire();
     }
+}
+
+void Application::setHighlightIdleFade(bool fade)
+{
+    Application::highlightIdleFade = fade;
+    Application::lastInputTime     = getCPUTimeUsec();
 }
 
 void Application::forgetView(View* view)
