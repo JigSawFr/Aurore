@@ -1397,7 +1397,8 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
     if (!this->hidden)
     {
         this->onShowAnimationEnd();
-        cb();
+        if (cb)
+            cb();
         return;
     }
 
@@ -1416,7 +1417,8 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
         this->alpha.setEndCallback([this, cb](bool finished) {
             this->fadeIn = false;
             this->onShowAnimationEnd();
-            cb();
+            if (cb)
+                cb();
         });
 
         this->alpha.start();
@@ -1426,7 +1428,8 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
         this->alpha  = 1.0f;
         this->fadeIn = false;
         this->onShowAnimationEnd();
-        cb();
+        if (cb)
+            cb();
     }
 }
 
@@ -1439,7 +1442,8 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
 {
     if (this->hidden)
     {
-        cb();
+        if (cb)
+            cb();
         return;
     }
 
@@ -1455,7 +1459,7 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
         this->alpha.addStep(0.0f, animationDuration, EasingFunction::quadraticOut);
 
         this->alpha.setEndCallback([cb](bool finished) {
-            if (finished) cb();
+            if (finished && cb) cb();
         });
 
         this->alpha.start();
@@ -1463,7 +1467,8 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
     else
     {
         this->alpha = 0.0f;
-        cb();
+        if (cb)
+            cb();
     }
 }
 
