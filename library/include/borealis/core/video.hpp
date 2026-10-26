@@ -19,6 +19,7 @@
 #include <nanovg.h>
 
 #include <cmath>
+#include <vector>
 
 // A VideoContext is responsible for providing a nanovg context for the app
 // (so by extension it manages all the graphics state as well as the window / context).
@@ -63,6 +64,13 @@ class VideoContext
     virtual void fullScreen(bool fs) { }
 
     virtual NVGcontext* getNVGContext() = 0;
+
+    /**
+     * Reads back the frame drawn so far (before endFrame() presents it):
+     * top-down rows of opaque RGBA pixels, at the drawable's size. Returns
+     * false where the driver cannot (only the OpenGL ones do for now).
+     */
+    virtual bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) { return false; }
 
     virtual void setSwapInterval(int interval) = 0;
 

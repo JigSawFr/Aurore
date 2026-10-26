@@ -27,6 +27,7 @@
 #include <functional>
 #include <borealis/core/animation.hpp>
 #include <borealis/core/application.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/core/hot_reload.hpp>
 #include <borealis/core/i18n.hpp>
@@ -1414,11 +1415,14 @@ void View::invalidate()
     {
         this->getParent()->invalidate();
     }
-    else if (Inspector::isOpen())
+    else if (Profiler::isEnabled() || Inspector::isOpen())
     {
-        Time start = getCPUTimeUsec();
+        Time start = getRealTimeUsec();
         YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
-        Inspector::addLayoutTime(getCPUTimeUsec() - start);
+        Time spent = getRealTimeUsec() - start;
+        Profiler::addLayout(spent);
+        if (Inspector::isOpen())
+            Inspector::addLayoutTime(spent);
     }
     else
     {

@@ -487,7 +487,7 @@ std::string long_date()
     // The app's clock when it has one of its own (the console's), else the
     // system's.
     if (ui::hooks::get().today) return long_date(ui::hooks::get().today());
-    const std::time_t now = std::time(nullptr);
+    const std::time_t now = brls::getWallTime();
     char ymd[16] = "";
     if (const std::tm* tm = std::localtime(&now)) std::strftime(ymd, sizeof ymd, "%Y-%m-%d", tm);
     return long_date(std::string(ymd));

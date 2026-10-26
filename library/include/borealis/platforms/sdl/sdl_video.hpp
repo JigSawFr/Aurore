@@ -42,6 +42,7 @@ class SDLVideoContext : public VideoContext
     SDL_Window* getSDLWindow();
 
     double getScaleFactor() override;
+    bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) override;
 
   private:
     SDL_Window* window     = nullptr;

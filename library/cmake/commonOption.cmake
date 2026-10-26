@@ -84,6 +84,11 @@ option(USE_FRIBIDI "labels reorder right-to-left text with FriBidi" OFF)
 # (Application::setInspectorEnabled does it at run time)
 option(BRLS_INSPECTOR "Built-in inspector on" OFF)
 
+# The test harness (headless platform, brls::test::Harness: target
+# borealis_test), and with this project the demo's tests, bench and
+# aurore-preview. Desktop with OpenGL 3 (the default driver) only.
+option(BRLS_BUILD_TESTS "Build the test harness" OFF)
+
 if (NOT DEFINED APP_PLATFORM_INCLUDE)
     set(APP_PLATFORM_INCLUDE)
 endif ()

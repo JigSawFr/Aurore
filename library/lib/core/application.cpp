@@ -32,6 +32,7 @@
 #include <borealis/core/hot_reload.hpp>
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/thread.hpp>
 #include <borealis/core/time.hpp>
 #include <borealis/core/util.hpp>
@@ -115,6 +116,12 @@ bool Application::init()
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
     }
 
+#if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+    const char* redrawDebugEnv = std::getenv("BRLS_REDRAW_DEBUG");
+    if (redrawDebugEnv && *redrawDebugEnv && *redrawDebugEnv != '0')
+        Application::setRedrawDebug(true);
+#endif
+
     Application::inited = true;
 
     return true;
@@ -167,7 +174,10 @@ void Application::createWindow(std::string windowTitle)
             return;
 
         if (eventType == facebook::yoga::Event::NodeLayout)
-            view->onLayout(); });
+        {
+            Profiler::addViewLaidOut();
+            view->onLayout();
+        } });
 
     // Load fonts and setup fallbacks
     Application::platform->getFontLoader()->loadFonts();
@@ -216,6 +226,7 @@ bool Application::internalMainLoop()
     Application::updateFPS();
     Application::frameStartTime = getCPUTimeUsec();
     Application::setActiveEvent(false);
+    Profiler::beginFrame();
 
     // Main loop callback
     if (!Application::platform->mainLoopIteration() || Application::quitRequested)
@@ -224,6 +235,7 @@ bool Application::internalMainLoop()
         Application::exit();
         return false;
     }
+    Profiler::endPhase(Profiler::Phase::EVENTS);
 
     // Mouse and touch
     if (Application::blockInputsTokens == 0)
@@ -237,11 +249,14 @@ bool Application::internalMainLoop()
             Application::getAudioPlayer()->play(Sound::SOUND_CLICK_ERROR);
     }
 
+    Profiler::endPhase(Profiler::Phase::INPUT);
+
     // Animations
 #ifndef SIMPLE_HIGHLIGHT
     updateHighlightAnimation();
 #endif
     Ticking::updateTickings();
+    Profiler::endPhase(Profiler::Phase::UPDATE);
 
     // Render: every frame, or with redraw on demand only when something
     // asked for it (and at least once a second, for what changes without
@@ -261,6 +276,10 @@ bool Application::internalMainLoop()
         Application::drawnFrames++;
         if (Application::redrawFrames > 0)
             Application::redrawFrames--;
+    }
+    else if (Application::redrawDebug)
+    {
+        Application::checkSkippedFrame();
     }
 
     // Run sync functions
@@ -300,6 +319,14 @@ bool Application::internalMainLoop()
 
     if (!Application::currentFocus && !Application::activitiesStack.empty())
         Application::giveFocus(Application::activitiesStack.back()->getContentView());
+
+    Profiler::endPhase(Profiler::Phase::UPDATE);
+    Profiler::endFrame(draw);
+
+    // The simulated clock (the test harness) moves on its own: nothing to
+    // wait for
+    if (isTimeSimulated())
+        return true;
 
     // A frame not drawn is not presented either, so nothing waits for the
     // display: the loop waits a frame's time instead (the limiter below does
@@ -924,7 +951,7 @@ bool Application::handleAction(const ActionType type, const int button, const bo
     return !consumedButtons.empty();
 }
 
-void Application::frame()
+void Application::frame(bool present)
 {
     VideoContext* videoContext = Application::platform->getVideoContext();
 
@@ -1029,17 +1056,137 @@ void Application::frame()
     nvgResetTransform(Application::getNVGContext()); // scale
     nvgEndFrame(Application::getNVGContext());
 
+    if (!present)
+        return;
+    Profiler::endPhase(Profiler::Phase::DRAW);
+
+    if (Application::redrawDebug)
+        videoContext->readPixels(&Application::presentedPixels, &Application::presentedWidth, &Application::presentedHeight);
+
     if (inspect)
     {
         Time presentStart = getCPUTimeUsec();
-        Application::platform->getVideoContext()->endFrame();
+        videoContext->endFrame();
         Inspector::endFrame(presentStart - flushStart, getCPUTimeUsec() - presentStart);
     }
     else
     {
-        Application::platform->getVideoContext()->endFrame();
+        videoContext->endFrame();
     }
+    Profiler::endPhase(Profiler::Phase::SWAP);
     postFrameEvent.fire();
+}
+
+// The views drawn over `area` with nothing of theirs drawn over it: the
+// deepest ones (a label rather than the list it is in)
+static void collectViewsIn(View* view, const Rect& area, std::vector<View*>* found)
+{
+    if (!view || view->getVisibility() != Visibility::VISIBLE)
+        return;
+    Rect frame = view->getFrame();
+    if (frame.getMaxX() <= area.getMinX() || frame.getMinX() >= area.getMaxX() || frame.getMaxY() <= area.getMinY() || frame.getMinY() >= area.getMaxY())
+        return;
+    size_t before = found->size();
+    if (auto* box = dynamic_cast<Box*>(view))
+        for (View* child : box->getChildren())
+            collectViewsIn(child, area, found);
+    if (found->size() == before)
+        found->push_back(view);
+}
+
+void Application::checkSkippedFrame()
+{
+    if (Application::presentedPixels.empty())
+        return;
+
+    // Drawn as it would be: what draw() asks for while at it is not this
+    // frame's business
+    int redrawFramesBefore = Application::redrawFrames;
+    Application::frame(false);
+    Application::redrawFrames = redrawFramesBefore;
+
+    std::vector<unsigned char> pixels;
+    int width = 0, height = 0;
+    bool read = Application::platform->getVideoContext()->readPixels(&pixels, &width, &height);
+    if (!read || width != Application::presentedWidth || height != Application::presentedHeight)
+        return;
+
+    int minX = width, minY = height, maxX = -1, maxY = -1;
+    size_t differing = 0;
+    for (int y = 0; y < height; y++)
+    {
+        const unsigned char* a = pixels.data() + (size_t)y * width * 4;
+        const unsigned char* b = Application::presentedPixels.data() + (size_t)y * width * 4;
+        for (int x = 0; x < width; x++, a += 4, b += 4)
+        {
+            if (std::abs(a[0] - b[0]) > 2 || std::abs(a[1] - b[1]) > 2 || std::abs(a[2] - b[2]) > 2)
+            {
+                differing++;
+                minX = std::min(minX, x);
+                minY = std::min(minY, y);
+                maxX = std::max(maxX, x);
+                maxY = std::max(maxY, y);
+            }
+        }
+    }
+    if (differing == 0)
+        return;
+
+    float scale = Application::windowScale > 0 ? Application::windowScale : 1.0f;
+    Rect area(minX / scale, minY / scale, (maxX + 1 - minX) / scale, (maxY + 1 - minY) / scale);
+    Application::missedRedraws++;
+    bool sameArea = Application::missedRedrawArea.getMinX() == area.getMinX() && Application::missedRedrawArea.getMinY() == area.getMinY()
+        && Application::missedRedrawArea.getWidth() == area.getWidth() && Application::missedRedrawArea.getHeight() == area.getHeight();
+    Application::missedRedrawArea = area;
+    if (sameArea)
+        return;
+
+    std::vector<View*> views;
+    for (size_t i = Application::activitiesStack.size(); i > 0; i--)
+    {
+        Activity* activity = Application::activitiesStack[i - 1];
+        collectViewsIn(activity->getContentView(), area, &views);
+        if (!activity->isTranslucent())
+            break;
+    }
+    // The smallest first: the most likely to have changed on its own
+    std::stable_sort(views.begin(), views.end(), [](View* a, View* b)
+        { return a->getWidth() * a->getHeight() < b->getWidth() * b->getHeight(); });
+    std::string described;
+    if (Application::currentFocus)
+    {
+        Rect focus = Application::currentFocus->getFrame();
+        if (focus.getMaxX() > area.getMinX() && focus.getMinX() < area.getMaxX() && focus.getMaxY() > area.getMinY() && focus.getMinY() < area.getMaxY())
+            described = "the focused " + Application::currentFocus->describe() + " (its highlight?), ";
+    }
+    for (size_t i = 0; i < views.size() && i < 4; i++)
+        described += (i ? ", " : "") + views[i]->describe();
+    if (views.size() > 4)
+        described += fmt::format(" and {} more", views.size() - 4);
+    Logger::warning("redraw debug: a skipped frame differs from the last one presented ({} pixels in {:.0f},{:.0f} {:.0f}x{:.0f}): no redraw asked for {}",
+        differing, area.getMinX(), area.getMinY(), area.getWidth(), area.getHeight(), described.empty() ? "?" : described);
+}
+
+void Application::setRedrawDebug(bool enabled)
+{
+    Application::redrawDebug = enabled;
+    Application::presentedPixels.clear();
+    Application::requestRedraw();
+}
+
+bool Application::isRedrawDebug()
+{
+    return Application::redrawDebug;
+}
+
+uint64_t Application::getMissedRedrawCount()
+{
+    return Application::missedRedraws;
+}
+
+Rect Application::getLastMissedRedrawArea()
+{
+    return Application::missedRedrawArea;
 }
 
 void Application::exit()

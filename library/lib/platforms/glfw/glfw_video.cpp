@@ -31,6 +31,7 @@
 #define NANOVG_GL3_IMPLEMENTATION
 #endif /* USE_GL2 */
 #include <nanovg_gl.h>
+#include <borealis/platforms/driver/gl_read_pixels.hpp>
 #elif defined(BOREALIS_USE_METAL)
 static void* METAL_CONTEXT = nullptr;
 #include <borealis/platforms/glfw/driver/metal.hpp>
@@ -498,6 +499,17 @@ void GLFWVideoContext::resetState()
 double GLFWVideoContext::getScaleFactor()
 {
     return scaleFactor;
+}
+
+bool GLFWVideoContext::readPixels(std::vector<unsigned char>* rgba, int* width, int* height)
+{
+#ifdef BOREALIS_USE_OPENGL
+    *width  = (int)Application::windowWidth;
+    *height = (int)Application::windowHeight;
+    return glReadPixelsTopDown(*width, *height, rgba);
+#else
+    return false;
+#endif
 }
 
 GLFWVideoContext::~GLFWVideoContext()

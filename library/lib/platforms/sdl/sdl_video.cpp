@@ -47,6 +47,7 @@ extern "C"
 #endif
 #endif
 #include <nanovg_gl.h>
+#include <borealis/platforms/driver/gl_read_pixels.hpp>
 #elif defined(BOREALIS_USE_D3D11)
 #include <nanovg_d3d11.h>
 
@@ -422,6 +423,17 @@ void SDLVideoContext::resetState()
 double SDLVideoContext::getScaleFactor()
 {
     return scaleFactor;
+}
+
+bool SDLVideoContext::readPixels(std::vector<unsigned char>* rgba, int* width, int* height)
+{
+#ifdef BOREALIS_USE_OPENGL
+    *width  = (int)Application::windowWidth;
+    *height = (int)Application::windowHeight;
+    return glReadPixelsTopDown(*width, *height, rgba);
+#else
+    return false;
+#endif
 }
 
 SDLVideoContext::~SDLVideoContext()

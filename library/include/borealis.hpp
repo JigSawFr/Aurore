@@ -36,6 +36,7 @@
 #include <borealis/core/input.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/platform.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/task.hpp>
 #include <borealis/core/theme.hpp>

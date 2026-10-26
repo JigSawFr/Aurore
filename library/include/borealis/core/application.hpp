@@ -416,6 +416,26 @@ class Application
      */
     static uint64_t getDrawnFrameCount();
 
+    /**
+     * Debugging redraw on demand: each frame it skips is drawn all the same,
+     * without being presented, and compared with the last frame presented.
+     * A difference is something that changed on screen without asking for a
+     * redraw (a missing invalidate() or requestRedraw()): it is logged as a
+     * warning, with the area and the views drawn there (once per area).
+     * Reads every frame back: slow, and OpenGL drivers only. Off by default;
+     * BRLS_REDRAW_DEBUG=1 in the environment turns it on (desktop).
+     */
+    static void setRedrawDebug(bool enabled);
+    static bool isRedrawDebug();
+
+    /**
+     * With setRedrawDebug(): the number of skipped frames found different
+     * from the last frame presented, and the last such area, in the views'
+     * coordinates.
+     */
+    static uint64_t getMissedRedrawCount();
+    static Rect getLastMissedRedrawArea();
+
     static GenericEvent* getGlobalFocusChangeEvent();
     static VoidEvent* getGlobalHintsUpdateEvent();
     static Event<InputType>* getGlobalInputTypeChangeEvent();
@@ -605,6 +625,11 @@ class Application
     inline static int redrawFrames         = 2; // frames still to draw
     inline static Time lastDrawTime        = 0;
     inline static uint64_t drawnFrames     = 0;
+    inline static bool redrawDebug         = false;
+    inline static uint64_t missedRedraws   = 0;
+    inline static Rect missedRedrawArea;
+    inline static std::vector<unsigned char> presentedPixels;
+    inline static int presentedWidth = 0, presentedHeight = 0;
     inline static int deactivatedFPS       = 5; // FPS 5
     inline static int deactivatedTime      = 5000000; // 5s
 
@@ -626,7 +651,9 @@ class Application
 
     static void navigate(FocusDirection direction, bool repeating);
 
-    static void frame();
+    // present: false draws the frame without presenting it (redraw debug)
+    static void frame(bool present = true);
+    static void checkSkippedFrame();
     static void exit();
 
     /**
