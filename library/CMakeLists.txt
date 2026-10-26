@@ -535,7 +535,10 @@ if (BRLS_BUILD_TESTS)
         # A context without any window system (Mesa's surfaceless EGL)
         find_package(OpenGL COMPONENTS EGL)
         if (OpenGL_EGL_FOUND)
-            target_link_libraries(aurore_test PRIVATE OpenGL::EGL)
+            # The library itself: OpenGL::EGL is only visible in this directory,
+            # and a static library hands its link dependencies to its users
+            target_include_directories(aurore_test SYSTEM PRIVATE ${OPENGL_EGL_INCLUDE_DIRS})
+            target_link_libraries(aurore_test PRIVATE ${OPENGL_egl_LIBRARY})
             target_compile_definitions(aurore_test PRIVATE BRLS_HEADLESS_EGL)
         else ()
             message(WARNING "EGL not found (libegl-dev): the test harness will need an X server (a hidden GLFW window)")
