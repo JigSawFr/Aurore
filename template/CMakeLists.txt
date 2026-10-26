@@ -52,7 +52,7 @@ endif ()
 program_target(${PROJECT_NAME} "${APP_SRC}")
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(${PROJECT_NAME} PRIVATE borealis ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore ${CMAKE_THREAD_LIBS_INIT})
 
 # Aurore's demo assets stay out; on the Switch, so do the fonts the system
 # already has (Cadran's own, Sora, stays).
