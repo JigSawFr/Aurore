@@ -247,9 +247,14 @@ void open_screen(brls::View* content, const std::string& title);
 // screen again, live_prefs; a theme or the text size runs `after`, a
 // refresh). language_name / theme_name: the choice saved, as text;
 // text_size_name, language_name and theme_name their shorter words on a tile
-// (Preferences).
+// (Preferences). The theme picker ends with the palette's row, which opens
+// pick_palette: the boards' colours, Aurore's presets (brls::Theme::
+// builtinThemes) or the user's theme files (ui::hooks' themes_dir);
+// palette_name, the one saved (ui::Prefs::theme_file), by its name.
 void        pick_language(std::function<void()> after = nullptr);
 void        pick_theme(std::function<void()> after = nullptr);
+void        pick_palette(std::function<void()> after = nullptr);
+std::string palette_name();
 void        pick_text_size(std::function<void()> after = nullptr);
 std::string text_size_name(bool tile = false);
 // The main screen's sidebar (ui::Prefs::rail): open, on its icons, or

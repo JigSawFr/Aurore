@@ -473,21 +473,80 @@ void pick_language(std::function<void()> after)
     }, true, {}, flags);
 }
 
+namespace
+{
+// The theme files the palette picker offers: Aurore's presets, then the
+// user's (ui::hooks' themes_dir), the readable ones.
+std::vector<brls::ThemeInfo> theme_files()
+{
+    std::vector<brls::ThemeInfo> files = brls::Theme::builtinThemes();
+    if (ui::hooks::get().themes_dir) {
+        for (brls::ThemeInfo& own : brls::Theme::listThemes(ui::hooks::get().themes_dir())) {
+            if (own.ok()) files.push_back(std::move(own));
+            else brls::Logger::warning("theme {} left out: {}", own.path, own.errors.front());
+        }
+    }
+    return files;
+}
+
+void theme_chosen(std::function<void()> after)
+{
+    save_prefs();
+    live_prefs::apply_theme();
+    if (after) after();
+}
+}   // namespace
+
+std::string palette_name()
+{
+    const std::string& file = ui::prefs().theme_file;
+    if (file.empty()) return "cadran/tools/palettes/default"_i18n;
+    for (const brls::ThemeInfo& info : theme_files())
+        if (info.path == file) return info.name;
+    return "cadran/tools/palettes/default"_i18n;
+}
+
+void pick_palette(std::function<void()> after)
+{
+    const std::vector<brls::ThemeInfo> files = theme_files();
+    std::vector<std::string> labels = { "cadran/tools/palettes/default"_i18n }, paths = { "" };
+    int selected = 0;
+    for (const brls::ThemeInfo& info : files) {
+        if (info.path == ui::prefs().theme_file) selected = (int)labels.size();
+        labels.push_back(info.name);
+        paths.push_back(info.path);
+    }
+    pick("cadran/tools/palette"_i18n, labels, selected, [after, paths](int i) {
+        ui::prefs().theme_file = paths[i];
+        theme_chosen(after);
+    });
+}
+
 void pick_theme(std::function<void()> after)
 {
-    std::vector<std::string> labels;
-    for (const char* t : ui::THEMES) labels.push_back(brls::getStr(std::string("cadran/tools/themes/") + t));
+    std::vector<std::string> labels, details;
+    for (const char* t : ui::THEMES) {
+        labels.push_back(brls::getStr(std::string("cadran/tools/themes/") + t));
+        details.push_back("");
+    }
+    // Its colours, after the variants: a picker of their own.
+    labels.push_back("cadran/tools/palette"_i18n);
+    details.push_back(palette_name());
     // As the header's button draws them (view/header_settings.cpp).
-    const std::vector<std::string> icons = { "contrast", "sun", "moon" };
+    const std::vector<std::string> icons = { "contrast", "sun", "moon", "sparkle" };
     static_assert(std::size(ui::THEMES) == 3, "an icon for each theme");
     pick("cadran/tools/theme"_i18n, labels, index_of(ui::THEMES, ui::prefs().theme), [after](int i) {
-        if (ui::prefs().theme != ui::THEMES[i]) {
-            ui::prefs().theme = ui::THEMES[i];
-            save_prefs();
-            live_prefs::apply_theme();
+        if (i == (int)std::size(ui::THEMES)) {
+            pick_palette(after);
+            return;
         }
-        if (after) after();
-    }, true, {}, icons);
+        if (ui::prefs().theme == ui::THEMES[i]) {
+            if (after) after();
+            return;
+        }
+        ui::prefs().theme = ui::THEMES[i];
+        theme_chosen(after);
+    }, true, details, icons);
 }
 
 void pick_text_size(std::function<void()> after)

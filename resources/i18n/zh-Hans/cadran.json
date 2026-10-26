@@ -108,6 +108,10 @@
             "system": "跟随系统",
             "light": "浅色",
             "dark": "深色"
+        },
+        "palette": "配色",
+        "palettes": {
+            "default": "默认"
         }
     }
 }

@@ -1,0 +1,9 @@
+{
+    "presets": {
+        "high_contrast_dark": "Hoog contrast donker",
+        "high_contrast_light": "Hoog contrast licht",
+        "ocean": "Oceaan",
+        "amethyst": "Amethist",
+        "sand": "Zand"
+    }
+}

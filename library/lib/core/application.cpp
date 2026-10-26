@@ -905,6 +905,7 @@ void Application::frame()
 
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
+    Application::drawThemeBackground(frameContext.vg);
 
     // Kept from frame to frame: no allocation once it is large enough
     static std::vector<View*> viewsToDraw;
@@ -1648,6 +1649,56 @@ Event<ThemeVariant>* Application::getThemeChangedEvent()
     return &Application::themeChangedEvent;
 }
 
+void Application::loadThemeBackground()
+{
+    std::string path = Theme::getBackgroundImage();
+    if (path == Application::themeBackgroundPath)
+        return;
+    NVGcontext* vg = Application::getNVGContext();
+    if (Application::themeBackground)
+        nvgDeleteImage(vg, Application::themeBackground);
+    Application::themeBackground     = 0;
+    Application::themeBackgroundPath = path;
+    if (path.empty())
+        return;
+#ifdef USE_LIBROMFS
+    if (path.rfind("@res/", 0) == 0)
+    {
+        try
+        {
+            auto image                   = romfs::get(path.substr(5));
+            Application::themeBackground = nvgCreateImageMem(vg, 0, (unsigned char*)image.data(), (int)image.size());
+        }
+        catch (const std::exception& e)
+        {
+        }
+    }
+    else
+#endif
+        Application::themeBackground = nvgCreateImage(vg,
+            (path.rfind("@res/", 0) == 0 ? std::string(BRLS_RESOURCES) + path.substr(5) : path).c_str(), 0);
+    if (!Application::themeBackground)
+        Logger::error("theme: cannot load the background image {}", path);
+}
+
+// Covering the window, centred, over the clear colour
+void Application::drawThemeBackground(NVGcontext* vg)
+{
+    if (!Application::themeBackground)
+        return;
+    int width, height;
+    nvgImageSize(vg, Application::themeBackground, &width, &height);
+    if (width <= 0 || height <= 0)
+        return;
+    float scale = std::max(Application::contentWidth / width, Application::contentHeight / height);
+    float w = width * scale, h = height * scale;
+    float x = (Application::contentWidth - w) / 2, y = (Application::contentHeight - h) / 2;
+    nvgBeginPath(vg);
+    nvgRect(vg, 0, 0, Application::contentWidth, Application::contentHeight);
+    nvgFillPaint(vg, nvgImagePattern(vg, x, y, w, h, 0, Application::themeBackground, 1.0f));
+    nvgFill(vg);
+}
+
 void Application::checkThemeChanged()
 {
     ThemeVariant variant = Application::getThemeVariant();
@@ -1657,6 +1708,7 @@ void Application::checkThemeChanged()
     Application::themeGeneration = generation;
     Application::themeVariant    = variant;
 
+    Application::loadThemeBackground();
     for (Activity* activity : Application::activitiesStack)
         if (View* view = activity->getContentView())
             view->onThemeChanged();

@@ -1,5 +1,5 @@
 // live_prefs — Preferences › Theme and Language applied at once, without
-// restarting. The theme: its variant set, every view of the
+// restarting. The theme: its variant and its file set, every view of the
 // screens drawn in it from the next frame (View::setThemeColor,
 // brls::Application::getThemeChangedEvent). The language: its strings loaded
 // again (brls::loadTranslations), then the main screen built again on the tab
@@ -18,8 +18,9 @@ namespace live_prefs
 // preferences' language.
 void start();
 
-// The variant of the theme in the preferences (ui::Prefs::theme). The
-// screens take it at their next frame.
+// The theme in the preferences: its variant (ui::Prefs::theme) and its file
+// (ui::Prefs::theme_file), the boards' palettes when it cannot be read.
+// The screens take it at their next frame.
 void apply_theme();
 
 // The language the strings are in now: the preferences', or the console's.

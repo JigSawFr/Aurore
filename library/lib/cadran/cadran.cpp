@@ -14,8 +14,8 @@ void start()
 void start_window()
 {
     ui::use_font_for(live_prefs::locale());
-    live_prefs::apply_theme();
     install_theme();
+    live_prefs::apply_theme();   // a theme file over the palettes just installed
     text_size::install();
     FooterHints::install();
     VersionBadge::install();
