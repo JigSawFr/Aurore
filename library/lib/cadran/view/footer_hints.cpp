@@ -80,7 +80,7 @@ void FooterHints::fit()
     // first, then between button and text. Refilled hints are new views, so
     // each starts from borealis' spacing again.
     float need = std::ceil(over / this->getChildren().size());   // per hint
-    const float padding_cut = std::min(std::ceil(need / 2), HINT_PADDING - HINT_PADDING_MIN);
+    const float padding_cut = std::min<float>(std::ceil(need / 2), HINT_PADDING - HINT_PADDING_MIN);
     need = std::max(0.0f, need - 2 * padding_cut);
     const float gap_cut = std::min(need, HINT_GAP - HINT_GAP_MIN);
     for (brls::View* v : this->getChildren()) {

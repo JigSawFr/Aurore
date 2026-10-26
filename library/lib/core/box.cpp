@@ -534,13 +534,13 @@ View* Box::getNextFocus(FocusDirection direction, View* currentView)
             float crossDist, mainDist;
             if (direction == FocusDirection::UP || direction == FocusDirection::DOWN)
             {
-                crossDist = std::abs(centerY - currentCenterY);
-                mainDist  = std::abs(centerX - currentCenterX);
+                crossDist = std::fabs(centerY - currentCenterY);
+                mainDist  = std::fabs(centerX - currentCenterX);
             }
             else
             {
-                crossDist = std::abs(centerX - currentCenterX);
-                mainDist  = std::abs(centerY - currentCenterY);
+                crossDist = std::fabs(centerX - currentCenterX);
+                mainDist  = std::fabs(centerY - currentCenterY);
             }
 
             float distance = crossDist * 1000.0f + mainDist;
