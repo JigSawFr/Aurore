@@ -6,7 +6,7 @@ It is built with `-DBRLS_BUILD_TESTS=ON`, on the desktop with the OpenGL 3 drive
 
 ## The harness
 
-`library/include/borealis/test/harness.hpp`, target `borealis_test`.
+`library/include/borealis/test/harness.hpp`, target `Aurore::test`.
 
 ```cpp
 #include <borealis.hpp>
@@ -75,7 +75,7 @@ add_subdirectory(library/aurore/library)
 
 enable_testing()
 add_executable(my_app_tests tests/ui_tests.cpp ${MY_APP_SOURCES_BUT_MAIN})
-target_link_libraries(my_app_tests PRIVATE borealis_test)
+target_link_libraries(my_app_tests PRIVATE Aurore::test)
 brls_add_tests(my_app_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/tests/references)
 ```
 

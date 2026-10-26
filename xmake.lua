@@ -67,7 +67,7 @@ elseif get_config("window") == "glfw" then
     add_requires("xfangfang_glfw")
 end
 
-target("borealis")
+target("aurore")
     set_kind("static")
     -- set_kind("shared")
     add_includedirs("library/include")
@@ -137,7 +137,7 @@ target("demo")
     if get_config("window") == "sdl" then
         add_packages("sdl2")
     end
-    add_deps("borealis")
+    add_deps("aurore")
     on_config(function (target)
         local cmakefile = io.readfile("CMakeLists.txt")
         target:set("configvar", "VERSION_MAJOR", string.match(cmakefile, "set%(VERSION_MAJOR \"(%d)\"%)"))

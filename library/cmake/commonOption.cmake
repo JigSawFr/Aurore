@@ -85,7 +85,7 @@ option(USE_FRIBIDI "labels reorder right-to-left text with FriBidi" OFF)
 option(BRLS_INSPECTOR "Built-in inspector on" OFF)
 
 # The test harness (headless platform, brls::test::Harness: target
-# borealis_test), and with this project the demo's tests, bench and
+# Aurore::test), and with this project the demo's tests, bench and
 # aurore-preview. Desktop with OpenGL 3 (the default driver) only.
 option(BRLS_BUILD_TESTS "Build the test harness" OFF)
 
@@ -104,6 +104,6 @@ endif ()
 if (NOT DEFINED APP_PLATFORM_LINK_OPTION)
     set(APP_PLATFORM_LINK_OPTION)
     if (PLATFORM_SWITCH OR PLATFORM_PSV)
-        list(APPEND APP_PLATFORM_LINK_OPTION "-Wl,-Map,borealis.map")
+        list(APPEND APP_PLATFORM_LINK_OPTION "-Wl,-Map,aurore.map")
     endif ()
 endif ()

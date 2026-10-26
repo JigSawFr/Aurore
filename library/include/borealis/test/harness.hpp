@@ -19,7 +19,7 @@
 // brls::test::Harness runs an app's screens with no window: inputs given
 // through calls, a simulated clock (frames advance without waiting, the
 // same way every run), screenshots compared with references. Built with
-// -DBRLS_BUILD_TESTS=ON (target borealis_test); docs/testing.md has a guide.
+// -DBRLS_BUILD_TESTS=ON (target Aurore::test); docs/testing.md has a guide.
 //
 //     brls::test::Harness h;                  // Application::init + window
 //     h.push(new MainActivity());
