@@ -21,6 +21,7 @@
 #include <borealis/views/applet_frame.hpp>
 #include <borealis/views/sidebar.hpp>
 #include <functional>
+#include <map>
 
 namespace brls
 {
@@ -41,12 +42,26 @@ class TabFrame : public Box
     void clearTabs();
     void addSeparator();
 
+    /**
+     * When on, a tab's content is kept once made rather than freed when
+     * another tab is shown: coming back to it finds its scroll and focus as
+     * left, without making it again. Off by default (one tab in memory).
+     */
+    void setKeepTabs(bool keep);
+
+    ~TabFrame();
+
     static View* create();
 
   private:
     BRLS_BIND(Sidebar, sidebar, "brls/tab_frame/sidebar");
 
     View* activeTab = nullptr;
+    bool keepTabs   = false;
+    int tabCount    = 0;
+    std::map<int, View*> keptTabs;
+
+    void freeKeptTabs();
 };
 
 } // namespace brls
