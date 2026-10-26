@@ -130,6 +130,16 @@ void View::interruptGestures(bool onlyIfUnsureState)
         parent->interruptGestures(onlyIfUnsureState);
 }
 
+bool View::removeGestureRecognizer(GestureRecognizer* recognizer)
+{
+    auto it = std::find(this->gestureRecognizers.begin(), this->gestureRecognizers.end(), recognizer);
+    if (it == this->gestureRecognizers.end())
+        return false;
+    this->gestureRecognizers.erase(it);
+    delete recognizer;
+    return true;
+}
+
 void View::addGestureRecognizer(GestureRecognizer* recognizer)
 {
     this->gestureRecognizers.push_back(recognizer);

@@ -1310,6 +1310,13 @@ class View
     void addGestureRecognizer(GestureRecognizer* recognizer);
 
     /**
+     * Removes a recognizer added with addGestureRecognizer and deletes it
+     * (false if the view did not have it). Not from one of its own
+     * callbacks: the gesture being handled still uses it.
+     */
+    bool removeGestureRecognizer(GestureRecognizer* recognizer);
+
+    /**
      * Called each frame when touch is registered.
      * 
      * @returns sound to play invoked by touch recognizers.
