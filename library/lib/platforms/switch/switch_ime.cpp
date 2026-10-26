@@ -18,6 +18,7 @@ limitations under the License.
 
 #include <switch.h>
 
+#include <borealis/core/logger.hpp>
 #include <borealis/platforms/switch/switch_ime.hpp>
 #include <cstring>
 #include <iostream>
@@ -121,17 +122,28 @@ bool SwitchImeManager::openForNumber(std::function<void(long)> f, std::string he
 
     char buffer[0x100];
 
-    if (R_SUCCEEDED(swkbdShow(&config, buffer, 0x100)) && strcmp(buffer, "") != 0)
-    {
-        f(std::stoll(buffer));
-
-        swkbdClose(&config);
-        return true;
-    }
+    bool shown = R_SUCCEEDED(swkbdShow(&config, buffer, 0x100));
 
     swkbdClose(&config);
 
-    return false;
+    if (!shown || strcmp(buffer, "") == 0)
+        return false;
+
+    // The optional symbol keys can leave a text that is not a number ("-",
+    // "."), or one too large for a long
+    long value;
+    try
+    {
+        value = std::stol(buffer);
+    }
+    catch (const std::exception& e)
+    {
+        Logger::warning("switch ime: \"{}\" is not a number: {}", buffer, e.what());
+        return false;
+    }
+
+    f(value);
+    return true;
 }
 
 };
