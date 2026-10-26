@@ -75,7 +75,7 @@
                     justifyContent="center"
                     alignItems="center"
                     backgroundColor="@theme/brls/button/default_enabled_background"
-                    hover:backgroundColor="#3a7bd5"
+                    hover:backgroundColor="@theme/brls/accent/hover"
                     transition="backgroundColor 150ms"
                     accessibilityRole="button"
                     accessibilityLabel="Lights up under the mouse">

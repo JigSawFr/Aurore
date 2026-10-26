@@ -110,6 +110,14 @@ void registerViews()
     // Add custom values to the theme
     brls::Theme::getLightTheme().addColor("captioned_image/caption", nvgRGB(2, 176, 183));
     brls::Theme::getDarkTheme().addColor("captioned_image/caption", nvgRGB(51, 186, 227));
+    const std::pair<const char*, NVGcolor> swatches[] = { { "demo/swatch/teal", nvgRGB(46, 196, 182) },
+        { "demo/swatch/orange", nvgRGB(255, 159, 28) }, { "demo/swatch/red", nvgRGB(231, 29, 54) },
+        { "demo/swatch/blue", nvgRGB(58, 123, 213) } };
+    for (const auto& [key, color] : swatches)
+    {
+        brls::Theme::getLightTheme().addColor(key, color);
+        brls::Theme::getDarkTheme().addColor(key, color);
+    }
 
     // Add custom values to the style
     brls::getStyle().addMetric("about/padding_top_bottom", 50);
