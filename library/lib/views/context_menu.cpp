@@ -100,12 +100,7 @@ ContextMenu::ContextMenu(View* anchor)
     : Box(Axis::COLUMN)
     , anchor(anchor)
 {
-    Theme theme = Application::getTheme();
-
-    // A light dim: the screen it was opened from stays readable
-    NVGcolor backdrop = theme["brls/backdrop"];
-    backdrop.a *= 0.4f;
-    this->setBackgroundColor(backdrop);
+    this->dimBackground();
 
     // Outside the panel: a touch or a click closes the menu
     this->addGestureRecognizer(new TapGestureRecognizer(this, [this]() { this->close(); }, TapGestureConfig(false, SOUND_NONE, SOUND_NONE, SOUND_BACK)));
@@ -115,8 +110,8 @@ ContextMenu::ContextMenu(View* anchor)
     this->panel->setWidth(PANEL_WIDTH);
     this->panel->setPadding(8);
     this->panel->setCornerRadius(16);
-    this->panel->setBackgroundColor(theme["brls/background"]);
-    this->panel->setBorderColor(theme["brls/sidebar/separator"]);
+    this->panel->setThemeColor("backgroundColor", "brls/background");
+    this->panel->setThemeColor("borderColor", "brls/sidebar/separator");
     this->panel->setBorderThickness(1);
     this->panel->setShadowType(ShadowType::GENERIC);
     this->panel->setShadowVisibility(true);
@@ -130,6 +125,20 @@ ContextMenu::ContextMenu(View* anchor)
     }, false, false, SOUND_BACK);
 }
 
+// A light dim: the screen it was opened from stays readable
+void ContextMenu::dimBackground()
+{
+    NVGcolor backdrop = Application::getTheme()["brls/backdrop"];
+    backdrop.a *= 0.4f;
+    this->setBackgroundColor(backdrop);
+}
+
+void ContextMenu::onThemeChanged()
+{
+    this->dimBackground();
+    Box::onThemeChanged();
+}
+
 void ContextMenu::setTitle(const std::string& text)
 {
     if (!this->title)
@@ -137,7 +146,7 @@ void ContextMenu::setTitle(const std::string& text)
         this->title = new Label();
         this->title->setFontSize(15);
         this->title->setSingleLine(true);
-        this->title->setTextColor(Application::getTheme()["brls/header/subtitle"]);
+        this->title->setThemeColor("textColor", "brls/header/subtitle");
         this->title->setMarginLeft(14);
         this->title->setMarginRight(14);
         this->title->setMarginTop(6);
@@ -165,7 +174,8 @@ ContextMenuItem* ContextMenu::addItem(const std::string& label, std::function<vo
 
 void ContextMenu::addSeparator()
 {
-    auto* line = new Rectangle(Application::getTheme()["brls/sidebar/separator"]);
+    auto* line = new Rectangle();
+    line->setThemeColor("color", "brls/sidebar/separator");
     line->setHeight(1);
     line->setMarginTop(6);
     line->setMarginBottom(6);

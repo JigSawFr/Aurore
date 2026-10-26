@@ -217,6 +217,14 @@ RecyclingGridItem* RecyclingView::addCell(size_t index)
     return cell;
 }
 
+// The cells kept for reuse: they come back in the theme drawn now
+void RecyclingView::queuedCellsThemeChanged()
+{
+    for (auto& [identifier, queue] : this->queueMap)
+        for (RecyclingGridItem* cell : queue)
+            cell->onThemeChanged();
+}
+
 void RecyclingView::queueCell(RecyclingGridItem* cell)
 {
     auto& children = this->contentBox->getChildren();
@@ -571,6 +579,12 @@ void RecyclingGrid::draw(NVGcontext* vg, float x, float y, float width, float he
     ScrollingFrame::draw(vg, x, y, width, height, style, ctx);
 }
 
+void RecyclingGrid::onThemeChanged()
+{
+    ScrollingFrame::onThemeChanged();
+    this->queuedCellsThemeChanged();
+}
+
 void RecyclingGrid::onLayout()
 {
     ScrollingFrame::onLayout();
@@ -673,6 +687,12 @@ void HRecyclerFrame::draw(NVGcontext* vg, float x, float y, float width, float h
 {
     this->recyclingLoop();
     HScrollingFrame::draw(vg, x, y, width, height, style, ctx);
+}
+
+void HRecyclerFrame::onThemeChanged()
+{
+    HScrollingFrame::onThemeChanged();
+    this->queuedCellsThemeChanged();
 }
 
 void HRecyclerFrame::onLayout()

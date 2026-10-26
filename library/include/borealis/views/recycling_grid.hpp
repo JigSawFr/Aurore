@@ -165,6 +165,10 @@ class RecyclingView
     // Applies a pending layoutChanged().
     void flushLayout();
 
+    // onThemeChanged() on the cells kept for reuse (the frame's own
+    // onThemeChanged() reaches the cells shown).
+    void queuedCellsThemeChanged();
+
     // The cell the focus enters the recycler on, if any.
     View* defaultCell();
 
@@ -236,6 +240,7 @@ class RecyclingGrid : public ScrollingFrame, public RecyclingView
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
     void onLayout() override;
+    void onThemeChanged() override;
     View* getDefaultFocus() override;
 
     void setSpanCount(int count);
@@ -276,6 +281,7 @@ class HRecyclerFrame : public HScrollingFrame, public RecyclingView
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
     void onLayout() override;
+    void onThemeChanged() override;
     View* getDefaultFocus() override;
 
     void setSpanCount(int count);

@@ -80,6 +80,7 @@ class ContextMenu : public Box
     bool isTranslucent() override { return true; }
     View* getDefaultFocus() override;
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
+    void onThemeChanged() override;
 
   private:
     View* anchor;
@@ -89,6 +90,7 @@ class ContextMenu : public Box
     Rect anchorFrame;
 
     void place();
+    void dimBackground();
 };
 
 } // namespace brls
