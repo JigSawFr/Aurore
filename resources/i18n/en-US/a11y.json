@@ -1,0 +1,13 @@
+{
+    "role": {
+        "button": "button",
+        "header": "heading",
+        "image": "image",
+        "toggle": "switch",
+        "slider": "slider",
+        "text_field": "text field",
+        "tab": "tab",
+        "list": "list"
+    },
+    "disabled": "disabled"
+}

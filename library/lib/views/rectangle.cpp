@@ -58,7 +58,27 @@ void Rectangle::draw(NVGcontext* vg, float x, float y, float width, float height
 
 void Rectangle::setColor(NVGcolor color)
 {
+    if (this->transitionStyle("color", StyleValue::of(color)))
+        return;
     this->color = color;
+}
+
+bool Rectangle::getStyleProperty(const std::string& name, StyleValue* value)
+{
+    if (name != "color")
+        return View::getStyleProperty(name, value);
+    *value = StyleValue::of(this->color);
+    return true;
+}
+
+bool Rectangle::setStyleProperty(const std::string& name, const StyleValue& value)
+{
+    if (name != "color")
+        return View::setStyleProperty(name, value);
+    if (value.type != StyleValue::Type::COLOR)
+        return false;
+    this->setColor(value.color);
+    return true;
 }
 
 // void Rectangle::layout(NVGcontext* vg, Style* style, FontStash* stash)

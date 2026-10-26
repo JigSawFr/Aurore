@@ -26,6 +26,7 @@
 #include <borealis/core/geometry.hpp>
 #include <borealis/core/gesture.hpp>
 #include <borealis/core/util.hpp>
+#include <borealis/core/view_style.hpp>
 #include <array>
 #include <functional>
 #include <memory>
@@ -202,6 +203,7 @@ extern const NVGcolor transparent;
 class View;
 class Box;
 class AppletFrame;
+class Subscription;
 class Activity;
 
 typedef Event<View*> GenericEvent;
@@ -823,6 +825,8 @@ class View
      */
     inline void setLineColor(NVGcolor color)
     {
+        if (this->transitionStyle("lineColor", StyleValue::of(color)))
+            return;
         this->lineColor = color;
     }
 
@@ -875,6 +879,8 @@ class View
      */
     inline void setBackgroundColor(NVGcolor color)
     {
+        if (this->transitionStyle("backgroundColor", StyleValue::of(color)))
+            return;
         this->backgroundColor = color;
         this->setBackground(ViewBackground::SHAPE_COLOR);
     }
@@ -884,6 +890,8 @@ class View
      */
     inline void setBorderColor(NVGcolor color)
     {
+        if (this->transitionStyle("borderColor", StyleValue::of(color)))
+            return;
         this->borderColor = color;
     }
 
@@ -892,6 +900,8 @@ class View
      */
     inline void setBorderThickness(float thickness)
     {
+        if (this->transitionStyle("borderThickness", StyleValue::of(thickness)))
+            return;
         this->borderThickness = thickness;
     }
 
@@ -906,6 +916,8 @@ class View
      */
     inline void setCornerRadius(float radius)
     {
+        if (this->transitionStyle("cornerRadius", StyleValue::of(radius)))
+            return;
         this->cornerRadius   = radius;
         this->cornerRadii[0] = radius;
         this->cornerRadii[1] = radius;
@@ -1645,6 +1657,145 @@ class View
 
     Activity* getParentActivity();
     void setParentActivity(Activity* activity);
+
+    // -----------------------------------------------------------
+    // State styles, transitions, bindings, accessibility
+    // (docs/styles.md). Nothing is kept for a view that uses none.
+    // -----------------------------------------------------------
+
+    /**
+     * While `state` is on, the style property `property` takes `value`
+     * (as XML writes it: "#rrggbb", "rgba(…)", "@theme/…", "4", "@style/…"),
+     * and goes back to what it was when no state styles it any more.
+     * XML: focus:backgroundColor="@theme/brls/accent", pressed:scale="0.96",
+     * disabled:alpha="0.4", hover:borderColor="#ffffff". A "@theme/" value is
+     * read when the state comes on, so it follows the theme. Returns false
+     * for a property the view does not have.
+     */
+    bool setStateStyle(StyleState state, const std::string& property, const std::string& value);
+
+    /**
+     * Turns a style state on or off. FOCUS, PRESSED and HOVER follow the
+     * focus, the click animation and the mouse by themselves; DISABLED is the
+     * app's (a Button sets it from its ButtonState).
+     */
+    void setStyleState(StyleState state, bool on);
+    bool hasStyleState(StyleState state);
+
+    /**
+     * Animates the changes of style properties instead of applying them at
+     * once, the state styles' as well as the setters' (setBackgroundColor…):
+     * "backgroundColor 150ms ease-out, scale 120ms" or "all 200ms". The
+     * easing is linear, ease, ease-in, ease-out, ease-in-out, or one of
+     * tweeny's (quadraticOut, backOut…). Skipped while the app asks for
+     * reduced motion (Application::getReduceMotion). An empty spec removes
+     * them. XML: transition="…". Returns false (and changes nothing) for a
+     * spec it cannot read.
+     */
+    bool setTransition(const std::string& spec);
+
+    /**
+     * The style properties the states and transitions work on, by name:
+     * backgroundColor, borderColor, lineColor (colours), borderThickness,
+     * cornerRadius, alpha, scale (numbers); a Label adds textColor, a
+     * Rectangle color, a Button textColor. Only properties that are drawn,
+     * never laid out. A subclass adds its own by overriding both and calling
+     * the base for the others.
+     */
+    virtual bool getStyleProperty(const std::string& name, StyleValue* value);
+    virtual bool setStyleProperty(const std::string& name, const StyleValue& value);
+
+    /**
+     * Keeps `subscription` (an Observable's) as long as the view lives:
+     * what binds a view to an Observable ends with the view.
+     */
+    void keepSubscription(Subscription&& subscription);
+
+    /**
+     * Binds a property of the view to an observable of the data models
+     * (Application::registerModel, Activity::registerModel):
+     * "text: profile.name, visible: profile.online". Properties: text (a
+     * string, int or float observable; views that have a text: Label,
+     * Button, cells), visible (bool: VISIBLE or GONE), and every style
+     * property (float or NVGcolor). Returns false for a spec it cannot read;
+     * a model not registered yet is looked up again when the view joins an
+     * activity. XML: bind="…".
+     */
+    bool bind(const std::string& spec);
+
+    /**
+     * Sets the view's text, for bind="text: …"; false when it has none.
+     */
+    virtual bool setBoundText(const std::string& text) { return false; }
+
+    /**
+     * What the view is and what it says, for the focus announcer
+     * (Application::setFocusAnnouncer). By default a Label says its text, a
+     * Button and the cells their title (and value). XML:
+     * accessibilityRole="button", accessibilityLabel="@i18n/…".
+     */
+    void setAccessibilityRole(AccessibilityRole role);
+    AccessibilityRole getAccessibilityRole();
+    void setAccessibilityLabel(const std::string& label);
+    std::string getAccessibilityLabel();
+
+    /**
+     * What is announced when the view takes the focus: its label, then its
+     * role and state in the app's language ("Save, button, disabled").
+     */
+    virtual std::string getAccessibilityDescription();
+
+    /**
+     * Resolves the bindings left pending in this view and its children
+     * against `activity`'s models (its own activity's when nullptr), then
+     * the application's. Called when a tree joins an activity.
+     */
+    void resolveBindings(Activity* activity = nullptr);
+
+    /**
+     * Called on every view of the screens when the text scale changes
+     * (Application::setTextScale): a view that measures text marks itself
+     * dirty here.
+     */
+    virtual void onTextScaleChanged() {}
+
+  protected:
+    /**
+     * The view's own role and label when the app gave none.
+     */
+    virtual AccessibilityRole getDefaultAccessibilityRole() { return AccessibilityRole::NONE; }
+    virtual std::string getDefaultAccessibilityLabel() { return ""; }
+
+    /**
+     * Called by a style property's setter before it changes the value:
+     * true when a transition takes the change over (the setter then returns
+     * without changing anything). Cheap for a view with no transition.
+     */
+    bool transitionStyle(const char* name, const StyleValue& to)
+    {
+        return this->extras && this->startTransition(name, to);
+    }
+
+  private:
+    friend class Application;
+    struct Extras;
+    struct ExtrasDeleter
+    {
+        void operator()(Extras* extras) const;
+    };
+    std::unique_ptr<Extras, ExtrasDeleter> extras;
+    Extras& getExtras();
+    // The focus, the click animation and the mouse: recorded only for a
+    // view that has state styles (or extras already).
+    void noteStyleState(StyleState state, bool on);
+    void notePress(bool pressed, bool releaseLater);
+    void applyPendingStyles();
+    bool hasStateStyle(StyleState state);
+    bool startTransition(const char* name, const StyleValue& to);
+    void updateStateStyles();
+    bool bindOne(const std::string& property, const std::string& path, Activity* activity);
+    static bool parseStyleValue(const std::string& text, StyleValue::Type type, StyleValue* value);
+    static unsigned pendingBindings;
 };
 
 } // namespace brls

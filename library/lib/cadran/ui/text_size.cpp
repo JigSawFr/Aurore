@@ -35,18 +35,6 @@ bool larger()
 
 namespace
 {
-// Each label's node made dirty (its text measured again at the new size),
-// and the roots to lay out again: the screen's, and each detached one
-// (a scrolling frame's content, laid out on its own).
-void mark(brls::View* view, std::vector<brls::View*>& roots)
-{
-    if (dynamic_cast<brls::Label*>(view) && YGNodeHasMeasureFunc(view->getYGNode())) YGNodeMarkDirty(view->getYGNode());
-    if (auto* digits = dynamic_cast<CadranDigits*>(view)) digits->remeasure();
-    if (view->isDetached()) roots.push_back(view);
-    if (auto* box = dynamic_cast<brls::Box*>(view))
-        for (brls::View* child : box->getChildren()) mark(child, roots);
-}
-
 #ifdef __SWITCH__
 AppletHookCookie s_cookie;
 
@@ -61,16 +49,9 @@ void on_applet_hook(AppletHookType hook, void*)
 void apply()
 {
     const float scale = larger() ? LARGE : 1.0f;
-    if (scale == brls::Label::getFontScale()) return;
-    brls::Label::setFontScale(scale);
-    for (brls::Activity* activity : brls::Application::getActivitiesStack()) {
-        brls::View* root = activity->getContentView();
-        if (!root) continue;
-        std::vector<brls::View*> roots;
-        mark(root, roots);
-        root->invalidate();
-        for (brls::View* detached : roots) detached->invalidate();
-    }
+    if (scale == brls::Application::getTextScale()) return;
+    // Every label of every screen measured and laid out again (the core's).
+    brls::Application::setTextScale(scale);
     // The tab on screen, for what it lays out by the size (Today's room).
     ui::refresh_shown_tab();
 }

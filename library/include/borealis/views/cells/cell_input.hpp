@@ -78,6 +78,9 @@ class InputCell : public DetailCell
 
     Event<std::string> event;
     void updateUI();
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::TEXT_FIELD; }
 };
 
 class InputNumericCell : public DetailCell
@@ -118,6 +121,9 @@ class InputNumericCell : public DetailCell
 
     Event<long> event;
     void updateUI();
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::TEXT_FIELD; }
 };
 
 } // namespace brls

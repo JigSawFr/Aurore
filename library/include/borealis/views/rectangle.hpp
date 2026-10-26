@@ -34,6 +34,10 @@ class Rectangle : public View
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
 
     void setColor(NVGcolor color);
+    NVGcolor getColor() { return this->color; }
+
+    bool getStyleProperty(const std::string& name, StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const StyleValue& value) override;
 
     static View* create();
 

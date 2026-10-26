@@ -63,6 +63,10 @@ class SidebarItem : public Box
 
     GenericEvent* getActiveEvent();
 
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::TAB; }
+    std::string getDefaultAccessibilityLabel() override { return this->label->getFullText(); }
+
   private:
     BRLS_BIND(Rectangle, accent, "brls/sidebar/item_accent");
     BRLS_BIND(Label, label, "brls/sidebar/item_label");

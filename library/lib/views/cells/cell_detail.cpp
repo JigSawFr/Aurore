@@ -83,4 +83,19 @@ View* DetailCell::create()
     return new DetailCell();
 }
 
+bool DetailCell::setBoundText(const std::string& text)
+{
+    this->setText(text);
+    return true;
+}
+
+std::string DetailCell::getDefaultAccessibilityLabel()
+{
+    std::string label  = this->title->getFullText();
+    std::string detail = this->detail->getVisibility() == Visibility::VISIBLE ? this->detail->getFullText() : "";
+    if (!detail.empty())
+        label += (label.empty() ? "" : ", ") + detail;
+    return label;
+}
+
 } // namespace brls

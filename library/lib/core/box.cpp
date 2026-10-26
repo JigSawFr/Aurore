@@ -223,6 +223,9 @@ void Box::addView(View* view, size_t position)
     // Layout and events
     this->invalidate();
     view->willAppear();
+
+    // Its bind= attributes, now that it may know its activity.
+    view->resolveBindings();
 }
 
 void Box::removeView(View* view, bool free)

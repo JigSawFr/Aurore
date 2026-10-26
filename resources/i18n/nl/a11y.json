@@ -1,0 +1,13 @@
+{
+    "role": {
+        "button": "knop",
+        "header": "kop",
+        "image": "afbeelding",
+        "toggle": "schakelaar",
+        "slider": "schuifregelaar",
+        "text_field": "tekstveld",
+        "tab": "tabblad",
+        "list": "lijst"
+    },
+    "disabled": "uitgeschakeld"
+}

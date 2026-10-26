@@ -40,6 +40,9 @@ class SliderCell : public DetailCell
     View* getDefaultFocus() override;
 
     Slider* slider;
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::SLIDER; }
 };
 
 } // namespace brls

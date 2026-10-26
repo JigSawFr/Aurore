@@ -28,8 +28,11 @@
 #include <borealis/core/theme.hpp>
 #include <borealis/core/view.hpp>
 #include <borealis/core/notification_manager.hpp>
+#include <borealis/core/observable.hpp>
 #include <borealis/views/label.hpp>
 #include <deque>
+#include <functional>
+#include <unordered_map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -184,6 +187,52 @@ class Application
      * by default.
      */
     static void setHighlightIdleFade(bool fade);
+
+    /**
+     * Called with the focused view's description (View::
+     * getAccessibilityDescription: "Save, button") each time the focus moves:
+     * where a screen reader, a text-to-speech engine or a log plugs in.
+     * Nothing by default; an empty function removes it.
+     */
+    static void setFocusAnnouncer(std::function<void(const std::string&)> announcer);
+
+    /**
+     * Reduced motion: the movements that are only there for show are skipped
+     * (the transition= of views, the highlight's glide; Cadran's entrances,
+     * glides and breathing glow). Off by default. getReduceMotion(), which
+     * transitions read, is also true while Cadran's effects leave movement
+     * out (Preferences › Visual effects "reduced", the lighter effects in
+     * hand, BRLS_STILL_FOCUS); the highlight's glide follows the app's
+     * setting only.
+     */
+    static void setReduceMotion(bool reduce);
+    static bool getReduceMotion();
+    // The app's own setting alone, without Cadran's.
+    static bool isReduceMotionSet() { return Application::reduceMotion; }
+
+    /**
+     * Every Label drawn `scale` times its size (Label::setFontScale), and the
+     * screens laid out again for it at once (every view told through
+     * View::onTextScaleChanged). 1 by default; Cadran's text size setting
+     * goes through here.
+     */
+    static void setTextScale(float scale);
+    static float getTextScale();
+
+    /**
+     * The data models XML bindings read (View::bind, bind="text: name.key"),
+     * by name, for every screen. An Activity's own (Activity::registerModel)
+     * come first. The model must outlive its registration.
+     */
+    static void registerModel(const std::string& name, DataModel* model);
+    static void unregisterModel(const std::string& name);
+    static DataModel* getModel(const std::string& name);
+
+    /**
+     * The view under the mouse pointer that has a hover: style (desktop), or
+     * nullptr.
+     */
+    static View* getHoveredView() { return Application::hoveredView; }
 
     inline static Style getStyle()
     {
@@ -451,6 +500,13 @@ class Application
     static void removeWatchedKeys(const BrlsKeyCombination key);
 
   private:
+    static void updateHover(Point position, bool inside);
+
+    inline static std::function<void(const std::string&)> focusAnnouncer;
+    inline static bool reduceMotion = false;
+    inline static std::unordered_map<std::string, DataModel*> models;
+    inline static View* hoveredView = nullptr;
+
     inline static bool inited               = false;
     inline static bool cadran               = true;
     inline static bool quitRequested        = false;

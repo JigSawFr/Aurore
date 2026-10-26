@@ -1,0 +1,13 @@
+{
+    "role": {
+        "button": "botão",
+        "header": "título",
+        "image": "imagem",
+        "toggle": "chave",
+        "slider": "controle deslizante",
+        "text_field": "campo de texto",
+        "tab": "guia",
+        "list": "lista"
+    },
+    "disabled": "desativado"
+}
