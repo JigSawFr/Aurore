@@ -40,9 +40,10 @@ namespace
 // The tab shown: its position in the sidebar, separators included.
 int shownTab = 0;
 
-// What Cadran, Aurore's look, asks of the demo: the rail's icons, and the
-// main screen built again on the tab shown when the language or the theme
-// changes (Language & theme, in the header or on the Cadran tab).
+// What Cadran, Aurore's look, asks of the demo: the rail's icons, the main
+// screen built again on the tab shown when the language changes (Language &
+// theme, in the header or on the Cadran tab), and the folder of the theme
+// files the palette picker lists after Aurore's presets.
 void installCadranHooks()
 {
     static ui::Prefs prefs;   // not saved: the demo starts in the defaults
@@ -52,6 +53,7 @@ void installCadranHooks()
     ui::use_prefs(prefs);
 
     ui::hooks::Hooks& h = ui::hooks::get();
+    h.themes_dir        = []() { return std::string("@res/themes"); };
     h.rail_icons        = []()
     {
         return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "contrast", "language", "", "activity", "gamepad",
