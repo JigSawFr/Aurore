@@ -109,7 +109,10 @@ class LRUCache
         {
             return;
         }
-        valueMap[value]->count--;
+        // Released more than taken: kept at zero (an unsigned count wrapped
+        // to its maximum and the entry could never be freed)
+        if (valueMap[value]->count > 0)
+            valueMap[value]->count--;
     }
 
     /**
@@ -226,18 +229,20 @@ class LRUCache
         //  new cache from O(1) to O(N) after the cache is full.
         if (num <= 0)
             return 0;
+        // From the least recently used. (A reverse iterator erased through
+        // its base was invalidated, and the next entry was skipped.)
         auto vg = brls::Application::getNVGContext();
-        for (auto i = cacheList.rbegin(); i != cacheList.rend(); i++)
+        auto i  = cacheList.end();
+        while (num > 0 && i != cacheList.begin())
         {
+            --i;
             if (i->count <= 0)
             {
                 num--;
                 nvgDeleteImage(vg, i->value);
                 cacheMap.erase(i->key);
                 valueMap.erase(i->value);
-                cacheList.erase(std::next(i).base());
-                if (num == 0)
-                    break;
+                i = cacheList.erase(i);
             }
         }
         return num;
