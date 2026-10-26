@@ -216,25 +216,30 @@ bool Application::internalMainLoop()
 
     // Free views deletion pool.
     // A view deletion might inserts other views to deletionPool
-    std::deque<View*> pendingViews;
-    pendingViews.swap(Application::deletionPool);
-
-    std::deque<View*> undeletedViews;
-    for (auto view : pendingViews)
+    // (A std::deque allocates when made: nothing is made on the frames,
+    // most of them, with nothing to delete.)
+    if (!Application::deletionPool.empty())
     {
-        if (!view->isPtrLocked())
-        {
-            delete view;
-        }
-        else
-        {
-            undeletedViews.push_back(view);
-            brls::Logger::verbose("Application: will delete view: {}", view->describe());
-        }
-    }
+        std::deque<View*> pendingViews;
+        pendingViews.swap(Application::deletionPool);
 
-    for (auto view : undeletedViews)
-        Application::deletionPool.push_back(view);
+        std::deque<View*> undeletedViews;
+        for (auto view : pendingViews)
+        {
+            if (!view->isPtrLocked())
+            {
+                delete view;
+            }
+            else
+            {
+                undeletedViews.push_back(view);
+                brls::Logger::verbose("Application: will delete view: {}", view->describe());
+            }
+        }
+
+        for (auto view : undeletedViews)
+            Application::deletionPool.push_back(view);
+    }
 
     if (!Application::currentFocus && !Application::activitiesStack.empty())
         Application::giveFocus(Application::activitiesStack.back()->getContentView());
@@ -298,7 +303,7 @@ void Application::processInput()
     std::vector<TouchState> touchState;
     for (auto& i : rawTouch)
     {
-        auto old = std::find_if(std::begin(currentTouchState), std::end(currentTouchState), [rawTouch, &i](TouchState touch)
+        auto old = std::find_if(std::begin(currentTouchState), std::end(currentTouchState), [&i](const TouchState& touch)
             { return touch.fingerId == i.fingerId; });
 
         if (old != std::end(currentTouchState))
@@ -780,7 +785,9 @@ void Application::frame()
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
 
-    std::vector<View*> viewsToDraw;
+    // Kept from frame to frame: no allocation once it is large enough
+    static std::vector<View*> viewsToDraw;
+    viewsToDraw.clear();
 
     // Draw all activities in the stack
     // until we find one that's not translucent

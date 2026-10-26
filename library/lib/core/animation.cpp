@@ -85,6 +85,12 @@ Animatable::operator float()
 
 void Animatable::operator=(const float value)
 {
+    // Views set the same value on every frame (an alpha, a scroll
+    // indicator): resetting made a new tween each time, an allocation per
+    // frame. Nothing to reset when it holds that value with no step pending.
+    if (!this->isRunning() && this->currentValue == value && this->tween.duration() == 0)
+        return;
+
     this->reset(value);
 }
 
