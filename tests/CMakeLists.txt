@@ -1,5 +1,5 @@
-# The demo's views, without its main(): what the tests and the
-# bench show
+# The demo's views, without its main(): what the tests, the bench and
+# aurore-preview show
 file(GLOB_RECURSE DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/*.cpp)
 list(REMOVE_ITEM DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/main.cpp)
 add_library(aurore_demo_views STATIC ${DEMO_VIEWS_SRC})
@@ -15,3 +15,10 @@ brls_add_tests(aurore_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/references)
 add_executable(aurore_bench bench.cpp)
 target_link_libraries(aurore_bench PRIVATE aurore_demo_views borealis_test)
 add_test(NAME aurore_bench COMMAND aurore_bench --check ${CMAKE_CURRENT_SOURCE_DIR}/bench_baseline.json)
+
+# An XML layout drawn to a PNG
+add_executable(aurore-preview preview.cpp)
+target_link_libraries(aurore-preview PRIVATE aurore_demo_views borealis_test)
+add_test(NAME aurore_preview
+        COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
+                -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)

@@ -70,8 +70,8 @@ option(BRLS_UNITY_BUILD "Unity build" OFF)
 option(BRLS_FONTSTASH_STREAM "fontstash use stream" OFF)
 
 # The test harness (headless platform, brls::test::Harness: target
-# borealis_test), and with this project the demo's tests and bench.
-# Desktop with OpenGL 3 (the default driver) only.
+# borealis_test), and with this project the demo's tests, bench and
+# aurore-preview. Desktop with OpenGL 3 (the default driver) only.
 option(BRLS_BUILD_TESTS "Build the test harness" OFF)
 
 if (NOT DEFINED APP_PLATFORM_INCLUDE)

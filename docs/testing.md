@@ -108,6 +108,14 @@ aurore_bench --check tests/bench_baseline.json # exit 1 on a regression
 
 The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too, and logs averages every 120 frames.
 
+## aurore-preview
+
+```sh
+aurore-preview resources/xml/tabs/layout.xml --theme light --lang fr --size 1920x1080 -o layout.png
+```
+
+Draws an XML layout to a PNG with the harness: `--theme dark`, `light` or a theme file (`Theme::loadFile`), `--lang` a locale, `--size` the window. The XML may use borealis', Cadran's and the demo's views; an app with views of its own builds the same tool on the harness after registering them.
+
 ## Redraw on demand: finding a missing invalidation
 
 With redraw on demand (`Application::setRedrawOnDemand(true)`), a view that changes how it looks without `invalidate()` or `requestRedraw()` stays stale on screen. `Application::setRedrawDebug(true)`, or `BRLS_REDRAW_DEBUG=1` on the desktop, draws each skipped frame all the same, without presenting it, compares it with the last frame presented, and logs a difference as a warning with its area and the views drawn there:
