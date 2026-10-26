@@ -193,6 +193,11 @@ YGConfig* Application::getYogaConfig()
     return config;
 }
 
+void Application::setStandardLayout(bool standard)
+{
+    YGConfigSetErrata(Application::getYogaConfig(), standard ? YGErrataNone : YGErrataClassic);
+}
+
 bool Application::mainLoop()
 {
     return Application::platform->runLoop(internalMainLoop);

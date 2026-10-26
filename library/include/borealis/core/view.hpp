@@ -150,6 +150,14 @@ enum class PositionType
 {
     RELATIVE, // position attributes offset the view from the base layout
     ABSOLUTE, // position attributes set the absolute coordinates of the view
+    STATIC, // position attributes are ignored, and absolute children are placed against an ancestor that is not static
+};
+
+// What the width and height of a view measure
+enum class BoxSizing
+{
+    BORDER_BOX, // the whole view, padding and border included
+    CONTENT_BOX, // the content only, padding and border are added to it
 };
 
 // The animation to play when
@@ -811,6 +819,13 @@ class View
      * Default is AUTO.
      */
     void setAlignSelf(AlignSelf align);
+
+    /**
+     * Sets what the width and height of the view measure.
+     *
+     * Default is BORDER_BOX.
+     */
+    void setBoxSizing(BoxSizing sizing);
 
     // -----------------------------------------------------------
     // Styling and view shape properties

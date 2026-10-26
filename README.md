@@ -69,7 +69,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 ## 🌟 What Aurore adds
 
-- 📐 **Layout** — `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; a radius per corner; horizontal gradients.
+- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients.
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
 - 🎯 **Focus and hints** — no focus lost in hidden or destroyed views; optional and steady footer hints.
@@ -86,6 +86,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | --- | --- |
 | Gaps between a box's children | `gap`, `rowGap`, `columnGap` (XML) · `Box::setGap`, `setRowGap`, `setColumnGap` |
 | Wrapping boxes, focus moving across their lines | `flexWrap="wrap"` · `Box::setWrap` |
+| Yoga 3.2, laid out as Yoga 2 did by default; standard CSS flexbox for new apps | `Application::setStandardLayout(true)` · `Application::getYogaConfig()` |
+| Width and height measured with or without padding and border | `boxSizing="borderBox"` (default) or `"contentBox"` · `View::setBoxSizing` |
+| A view whose position offsets are ignored and that absolute children skip to find their reference | `positionType="static"` · `PositionType::STATIC` |
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
