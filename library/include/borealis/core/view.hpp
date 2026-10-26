@@ -398,6 +398,12 @@ class View
 
   public:
     /**
+     * Whether the highlight's border glides from the view that had the focus
+     * to the next one (140 ms), rather than jumping. On by default.
+     */
+    static void setHighlightGlide(bool glide);
+
+    /**
      * Draws the view (its background, content and highlight) scaled around
      * its centre, without laying anything out again: a pressed or focused
      * view grown or shrunk a little. Touch hit-testing keeps the unscaled

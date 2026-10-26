@@ -232,7 +232,16 @@ View* HScrollingFrame::findLeftMostFocusableView()
 
         while (focusCheck && !focusCheck->getFrame().inscribed(frame))
         {
-            focusCheck = focusCheck->getParent()->getNextFocus(FocusDirection::RIGHT, focusCheck);
+            // A view without a parent, or a navigation that answers with the
+            // same view (holding the focus until scrolling catches up), would
+            // crash or loop here forever: give up until the next frame
+            View* parent = focusCheck->getParent();
+            if (!parent)
+                return nullptr;
+            View* next = parent->getNextFocus(FocusDirection::RIGHT, focusCheck);
+            if (next == focusCheck)
+                return nullptr;
+            focusCheck = next;
         }
 
         return focusCheck;

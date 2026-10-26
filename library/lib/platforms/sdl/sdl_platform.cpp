@@ -79,26 +79,14 @@ SDLPlatform::SDLPlatform()
         SDL_Locale* locales = SDL_GetPreferredLocales();
         if (locales != nullptr && locales->language != nullptr)
         {
-            std::unordered_map<std::string, std::string> sdl2brls = {
-                { "zh_CN", LOCALE_ZH_HANS },
-                { "zh_TW", LOCALE_ZH_HANT },
-                { "ja_JP", LOCALE_JA },
-                { "ko_KR", LOCALE_Ko },
-                { "it_IT", LOCALE_IT }
-            };
+            // Every locale of borealis (a browser in French gave English:
+            // only five were known)
             std::string lang = std::string { locales->language };
             if (locales->country)
             {
                 lang += "_" + std::string { locales->country };
             }
-            if (sdl2brls.count(lang) > 0)
-            {
-                this->locale = sdl2brls[lang];
-            }
-            else
-            {
-                this->locale = LOCALE_EN_US;
-            }
+            this->locale = localeFromSystem(lang);
             brls::Logger::info("Set app locale: {}", this->locale);
             SDL_free(locales);
         }
@@ -227,6 +215,14 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     {
         brls::Application::getWindowFocusChangedEvent()->fire(true);
 
+    }
+    else if (event->type == SDL_APP_TERMINATING)
+    {
+        // OS 正要杀我们（Android swipe-to-recents / iOS 强杀）。在这个窗口期主动走
+        // 清理路径，让 MPVCore::clean() + mpv_terminate_destroy 有机会释放
+        // MediaCodec / Surface 等底层资源，避免 Tegra 驱动层 slot 泄漏。
+        brls::Application::quit();
+        return false;
     }
 #endif
     else if (event->type != SDL_POLLSENTINEL)

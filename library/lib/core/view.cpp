@@ -584,6 +584,23 @@ void View::setAlpha(float alpha)
     this->alpha = alpha;
 }
 
+// The highlight's border glides from the view that had it to the next one.
+// Only the rectangle drawn last is kept, never the view (it may be gone).
+static bool highlightGlide          = true;
+static const View* glideLastView    = nullptr;
+static float glideLast[4]           = { 0, 0, 0, 0 };
+static float glideFrom[4]           = { 0, 0, 0, 0 };
+static Time glideLastDrawn          = 0;
+static Time glideStart              = 0;
+static bool gliding                 = false;
+static constexpr Time GLIDE_TIME_MS = 140;
+
+void View::setHighlightGlide(bool glide)
+{
+    highlightGlide = glide;
+    gliding        = false;
+}
+
 void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, bool background)
 {
     if (Application::getInputType() == InputType::TOUCH)
@@ -600,6 +617,46 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
     float y      = this->getY() - padding - strokeWidth / 2;
     float width  = this->getWidth() + padding * 2 + strokeWidth;
     float height = this->getHeight() + padding * 2 + strokeWidth;
+
+    if (!background)
+    {
+        Time now = getCPUTimeUsec() / 1000;
+        if (this != glideLastView)
+        {
+            // From where the border was drawn last, if it was a moment ago
+            // (not after a while in touch mode, or on another screen)
+            gliding = highlightGlide && glideLastView && now - glideLastDrawn < 200;
+            if (gliding)
+            {
+                std::copy(std::begin(glideLast), std::end(glideLast), std::begin(glideFrom));
+                glideStart = now;
+            }
+            glideLastView = this;
+        }
+
+        if (gliding)
+        {
+            float t = (float)(now - glideStart) / (float)GLIDE_TIME_MS;
+            if (t >= 1.0f)
+            {
+                gliding = false;
+            }
+            else
+            {
+                float e = 1.0f - (1.0f - t) * (1.0f - t); // quadratic out
+                x      = glideFrom[0] + (x - glideFrom[0]) * e;
+                y      = glideFrom[1] + (y - glideFrom[1]) * e;
+                width  = glideFrom[2] + (width - glideFrom[2]) * e;
+                height = glideFrom[3] + (height - glideFrom[3]) * e;
+            }
+        }
+
+        glideLast[0]   = x;
+        glideLast[1]   = y;
+        glideLast[2]   = width;
+        glideLast[3]   = height;
+        glideLastDrawn = now;
+    }
 
     // Shake animation
     if (this->highlightShaking)
@@ -672,11 +729,14 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         float gradientX, gradientY, color;
         getHighlightAnimation(&gradientX, &gradientY, &color);
 
+        // The border pulses between the two highlight colours. (Since the
+        // 2.0 rewrite both terms used color1, so it never pulsed.)
         NVGcolor highlightColor1 = theme["brls/highlight/color1"];
+        NVGcolor highlightColor2 = theme["brls/highlight/color2"];
 
-        NVGcolor pulsationColor = RGBAf((color * highlightColor1.r) + (1 - color) * highlightColor1.r,
-            (color * highlightColor1.g) + (1 - color) * highlightColor1.g,
-            (color * highlightColor1.b) + (1 - color) * highlightColor1.b,
+        NVGcolor pulsationColor = RGBAf((color * highlightColor1.r) + (1 - color) * highlightColor2.r,
+            (color * highlightColor1.g) + (1 - color) * highlightColor2.g,
+            (color * highlightColor1.b) + (1 - color) * highlightColor2.b,
             alpha);
 
         NVGcolor borderColor = theme["brls/highlight/color2"];
@@ -1451,7 +1511,8 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
     if (!this->hidden)
     {
         this->onShowAnimationEnd();
-        cb();
+        if (cb)
+            cb();
         return;
     }
 
@@ -1470,7 +1531,8 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
         this->alpha.setEndCallback([this, cb](bool finished) {
             this->fadeIn = false;
             this->onShowAnimationEnd();
-            cb();
+            if (cb)
+                cb();
         });
 
         this->alpha.start();
@@ -1480,7 +1542,8 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
         this->alpha  = 1.0f;
         this->fadeIn = false;
         this->onShowAnimationEnd();
-        cb();
+        if (cb)
+            cb();
     }
 }
 
@@ -1493,7 +1556,8 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
 {
     if (this->hidden)
     {
-        cb();
+        if (cb)
+            cb();
         return;
     }
 
@@ -1509,7 +1573,7 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
         this->alpha.addStep(0.0f, animationDuration, EasingFunction::quadraticOut);
 
         this->alpha.setEndCallback([cb](bool finished) {
-            if (finished) cb();
+            if (finished && cb) cb();
         });
 
         this->alpha.start();
@@ -1517,7 +1581,8 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
     else
     {
         this->alpha = 0.0f;
-        cb();
+        if (cb)
+            cb();
     }
 }
 
@@ -2628,12 +2693,13 @@ View* View::hitTest(Point point)
 
 std::shared_ptr<tinyxml2::XMLDocument> View::getXMLCache(std::string_view path)
 {
-    static std::unordered_map<size_t, std::shared_ptr<tinyxml2::XMLDocument>> xmlCache;
-    const size_t hash = std::hash<std::string>{}(path.data());
-    if (xmlCache.count(hash) == 0) {
-        xmlCache[hash] = std::make_shared<tinyxml2::XMLDocument>();
-    }
-    return xmlCache[hash];
+    // Keyed by the path itself: two paths with the same hash would have
+    // shared a document. (string_view::data() is not null-terminated either.)
+    static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>> xmlCache;
+    auto& doc = xmlCache[std::string(path)];
+    if (!doc)
+        doc = std::make_shared<tinyxml2::XMLDocument>();
+    return doc;
 }
 
 void View::setWireframeEnabled(bool wireframe)

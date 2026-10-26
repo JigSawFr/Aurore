@@ -151,6 +151,7 @@ void cadran::install_theme()
     if (ui::env_flag("STILL_FOCUS")) {
         brls::setHighlightAnimationStill(true);
         brls::setHintsSteady(true);
+        brls::View::setHighlightGlide(false);   // drawn where the focus is, at once
     }
 #endif
     // The footer's hints and clock grow less than the rest with the larger

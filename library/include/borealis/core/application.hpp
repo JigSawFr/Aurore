@@ -177,6 +177,14 @@ class Application
      */
     static void forgetView(View* view);
 
+    /**
+     * When on, the focus highlight fades out after a moment without any
+     * button pressed (0.8 s, then 0.4 s), and comes back at the next one:
+     * for a screen watched more than browsed (a player, a slideshow). Off
+     * by default.
+     */
+    static void setHighlightIdleFade(bool fade);
+
     inline static Style getStyle()
     {
         return brls::getStyle();
@@ -204,6 +212,12 @@ class Application
      * no such font is currently loaded.
      */
     static int getFont(std::string fontName);
+
+    /**
+     * Glyphs missing from the font loaded as `font` are looked up in the one
+     * loaded as `fallback`. False when either is not loaded.
+     */
+    static bool addFontFallback(const std::string& font, const std::string& fallback);
 
     static int getDefaultFont();
 
@@ -452,6 +466,8 @@ class Application
     inline static bool deactivatedBehavior = false;
     inline static bool activeEvent         = false;
     inline static Time lastActiveTime      = 0;
+    inline static Time lastInputTime       = 0;
+    inline static bool highlightIdleFade   = false;
     inline static int deactivatedFPS       = 5; // FPS 5
     inline static int deactivatedTime      = 5000000; // 5s
 

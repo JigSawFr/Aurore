@@ -8,9 +8,13 @@
 #include <math.h>
 #include <switch.h>
 
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES /* Enforces GLSL std140/std430 alignment rules for glm types. */
-#define GLM_FORCE_INTRINSICS               /* Enables usage of SIMD CPU instructions (requiring the above as well). */
-#include <glm/vec2.hpp>
+#include <dk_shaders.h>
+
+/* The size of a shader built in, or 0 when it was not (a null pointer). */
+template <size_t N>
+static constexpr size_t DkshSize(const unsigned char (&)[N]) { return N; }
+static constexpr size_t DkshSize(const unsigned char *) { return 0; }
+
 
 namespace nvg {
 
@@ -23,8 +27,14 @@ namespace nvg {
             DkVtxAttribState{0, 0, offsetof(NVGvertex, u), DkVtxAttribSize_2x32, DkVtxAttribType_Float, 0},
         };
 
+        /* The vertex shader's view size: a vec2, 8-byte aligned in std140
+           (no need for glm and switch-glm for two floats). */
+        struct alignas(8) Vec2 {
+            float x, y;
+        };
+
         struct View {
-            glm::vec2 size;
+            Vec2 size;
         };
 
         void UpdateImage(dk::Image &image, CMemPool &scratchPool, dk::Device device, dk::Queue transferQueue, int type, int x, int y, int w, int h, const u8 *data) {
@@ -180,6 +190,7 @@ namespace nvg {
         m_view_uniform_buffer.destroy();
         m_frag_uniform_buffer.destroy();
         m_textures.clear();
+        m_textures_to_free.clear();
     }
 
     int DkRenderer::FindFreeImageDescriptor() const {
@@ -477,13 +488,21 @@ namespace nvg {
     }
 
     int DkRenderer::Create(DKNVGcontext &ctx) {
-        m_vertex_shader.load(m_code_mem_pool, "romfs:/shaders/fill_vsh.dksh");
+        /* The shaders built into the library (dk_shaders.h), else those of
+           the app's romfs. */
+        auto load = [this](CShader &shader, const unsigned char *data, size_t size, const char *path) {
+            if (!shader.loadFromMemory(m_code_mem_pool, data, size)) {
+                shader.load(m_code_mem_pool, path);
+            }
+        };
+
+        load(m_vertex_shader, dksh_fill_vsh, DkshSize(dksh_fill_vsh), "romfs:/shaders/fill_vsh.dksh");
 
         /* Load the appropriate fragment shader depending on whether AA is enabled. */
         if (ctx.flags & NVG_ANTIALIAS) {
-            m_fragment_shader.load(m_code_mem_pool, "romfs:/shaders/fill_aa_fsh.dksh");
+            load(m_fragment_shader, dksh_fill_aa_fsh, DkshSize(dksh_fill_aa_fsh), "romfs:/shaders/fill_aa_fsh.dksh");
         } else {
-            m_fragment_shader.load(m_code_mem_pool, "romfs:/shaders/fill_fsh.dksh");
+            load(m_fragment_shader, dksh_fill_fsh, DkshSize(dksh_fill_fsh), "romfs:/shaders/fill_fsh.dksh");
         }
 
         /* Set the size of fragment uniforms. */
@@ -513,8 +532,12 @@ namespace nvg {
         bool found = false;
 
         for (auto it = m_textures.begin(); it != m_textures.end();) {
-            /* Remove textures with the given id. */
+            /* Remove textures with the given id. Their memory is freed only
+               once the GPU is done with the frame submitted last, which may
+               still draw them: freed now, it could be given to a new texture
+               and overwritten while being read. */
             if ((*it)->GetId() == image) {
+                m_textures_to_free.push_back(*it);
                 it = m_textures.erase(it);
                 found = true;
             } else {
@@ -584,6 +607,8 @@ namespace nvg {
             /* PlayGuard: begin() waited for the last frame's commands, so the
                memory they took past DynamicCmdSize is free again. */
             ReleaseExtraCmdMemory();
+            /* Nor does it draw the textures deleted since. */
+            m_textures_to_free.clear();
 
             /* Update buffers with data. */
             this->UpdateVertexBuffer(ctx.verts, ctx.nverts * sizeof(NVGvertex));
@@ -598,7 +623,7 @@ namespace nvg {
             m_dyn_cmd_buf.bindVtxBuffer(0, m_vertex_buffer->getGpuAddr(), m_vertex_buffer->getSize());
 
             /* Push the view size to the uniform buffer and bind it. */
-            const auto view = View{glm::vec2{m_view_width, m_view_height}};
+            const auto view = View{Vec2{static_cast<float>(m_view_width), static_cast<float>(m_view_height)}};
             m_dyn_cmd_buf.pushConstants(m_view_uniform_buffer.getGpuAddr(), m_view_uniform_buffer.getSize(), 0, sizeof(view), &view);
             m_dyn_cmd_buf.bindUniformBuffer(DkStage_Vertex, 0, m_view_uniform_buffer.getGpuAddr(), m_view_uniform_buffer.getSize());
 

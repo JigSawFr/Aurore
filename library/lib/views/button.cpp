@@ -165,6 +165,7 @@ void Button::setState(ButtonState state)
 {
     this->state = state;
     this->applyStyle();
+    this->setActionsAvailable(state == ButtonState::ENABLED);
 }
 
 ButtonState Button::getState()

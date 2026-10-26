@@ -71,6 +71,9 @@ class SwitchInputManager : public InputManager
     HidVibrationDeviceHandle m_vibration_device_handles[GAMEPADS_MAX][2];
     HidVibrationValue m_vibration_values[GAMEPADS_MAX][2];
     u32 padsStyleSet[GAMEPADS_MAX];
+    // How many vibration devices each pad has (2 for a pair of Joy-Con,
+    // 1 for a Pro Controller or a single Joy-Con)
+    int m_vibration_count[GAMEPADS_MAX] = {};
     bool pointerLocked = false;
     HidMouseState currentMouseState;
     HidSixAxisSensorHandle m_six_axis_sensor_handle[4]; // All for player 1, player 2 not supported
@@ -86,9 +89,9 @@ class SwitchInputManager : public InputManager
     void upToDateMouseState();
     void hidInitializeKeyboardMap();
     void updateControllerStateInner(ControllerState* state, PadState* pad);
-    void sendRumbleInternal(HidVibrationDeviceHandle vibration_device[2], HidVibrationValue vibration_values[2],
+    void sendRumbleInternal(HidVibrationDeviceHandle vibration_device[2], HidVibrationValue vibration_values[2], int count,
         unsigned short lowFreqMotor, unsigned short highFreqMotor);
-    void sendRumbleInternal(HidVibrationDeviceHandle vibration_device[2], HidVibrationValue vibration_values[2],
+    void sendRumbleInternal(HidVibrationDeviceHandle vibration_device[2], HidVibrationValue vibration_values[2], int count,
         float lowFreq, float highFreq, float lowAmp, float highAmp);
 
 };

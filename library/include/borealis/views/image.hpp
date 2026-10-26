@@ -163,6 +163,9 @@ class Image : public View
     float imageWidth  = 0;
 
     bool freeTexture = true;
+
+    // Deletes the texture if owned, or hands it back to TextureCache
+    void releaseTexture();
 };
 
 } // namespace brls

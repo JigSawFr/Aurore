@@ -59,8 +59,6 @@ static const size_t GLFW_AXIS_MAPPING[GLFW_GAMEPAD_AXIS_MAX] = {
     RIGHT_Z,
 };
 
-static short controllersCount = 0;
-
 static void glfwJoystickCallback(int jid, int event)
 {
     if (event == GLFW_CONNECTED)
@@ -71,14 +69,10 @@ static void glfwJoystickCallback(int jid, int event)
         {
             Logger::info("glfw: joystick {} is gamepad: \"{}\"", jid, glfwGetGamepadName(jid));
         }
-
-        controllersCount++;
     }
     else if (event == GLFW_DISCONNECTED)
     {
         Logger::info("glfw: joystick {} disconnected", jid);
-
-        controllersCount--;
     }
     Application::setActiveEvent(true);
 }
@@ -128,11 +122,12 @@ void GLFWInputManager::keyboardCallback(GLFWwindow* window, int key, int scancod
     state.key            = (BrlsKeyboardScancode)key;
     state.mods           = mods;
     state.pressed        = action != GLFW_RELEASE;
-    const char* key_name = glfwGetKeyName(key, scancode);
-    if (key_name != NULL)
-        Logger::debug("Key: {} / Code: {} / Action: {}", key_name, key, action);
+    // A key that types a character is not logged: it may be a password
+    // or a PIN being typed
+    if (glfwGetKeyName(key, scancode) != NULL)
+        Logger::debug("Key: (character) / Action: {}", action);
     else
-        Logger::debug("Key: NULL / Code: {} / Action: {}", key, action);
+        Logger::debug("Key: Code: {} / Action: {}", key, action);
     self->getKeyboardKeyStateChanged()->fire(state);
     Application::setActiveEvent(true);
 }
@@ -230,7 +225,13 @@ GLFWInputManager::GLFWInputManager(GLFWwindow* window)
 
 short GLFWInputManager::getControllersConnectedCount()
 {
-    return controllersCount;
+    // Counted now rather than by the callback: the controllers already
+    // plugged in at start-up raise no connection event
+    short count = 0;
+    for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
+        if (glfwJoystickPresent(jid))
+            count++;
+    return count;
 }
 
 void GLFWInputManager::updateUnifiedControllerState(ControllerState* state)

@@ -3,6 +3,8 @@
 **   CShader.cpp: Utility class for loading shaders from the filesystem
 */
 #include <nanovg/framework/CShader.h>
+#include <cstring>
+#include <cstdlib>
 
 struct DkshHeader
 {
@@ -59,4 +61,39 @@ _fail1:
 _fail0:
     fclose(f);
     return false;
+}
+
+bool CShader::loadFromMemory(CMemPool& pool, const void* data, size_t size)
+{
+    m_codemem.destroy();
+
+    if (!data || size < sizeof(DkshHeader))
+        return false;
+
+    DkshHeader hdr;
+    memcpy(&hdr, data, sizeof(hdr));
+    if ((size_t)hdr.control_sz + hdr.code_sz > size)
+        return false;
+
+    // The control section is read by the maker; the code follows it
+    void* ctrlmem = malloc(hdr.control_sz);
+    if (!ctrlmem)
+        return false;
+    memcpy(ctrlmem, data, hdr.control_sz);
+
+    m_codemem = pool.allocate(hdr.code_sz, DK_SHADER_CODE_ALIGNMENT);
+    if (!m_codemem)
+    {
+        free(ctrlmem);
+        return false;
+    }
+    memcpy(m_codemem.getCpuAddr(), (const uint8_t*)data + hdr.control_sz, hdr.code_sz);
+
+    dk::ShaderMaker{m_codemem.getMemBlock(), m_codemem.getOffset()}
+        .setControl(ctrlmem)
+        .setProgramId(0)
+        .initialize(m_shader);
+
+    free(ctrlmem);
+    return true;
 }

@@ -107,7 +107,9 @@ void TabFrame::addTab(std::string label, TabViewCreator creator)
 
 void TabFrame::focusTab(int position)
 {
-    Application::giveFocus(this->sidebar->getItem(position));
+    SidebarItem* item = this->sidebar->getItem(position);
+    if (item)
+        Application::giveFocus(item);
 }
 
 void TabFrame::clearTabs()

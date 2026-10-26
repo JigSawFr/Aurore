@@ -14,6 +14,7 @@
     limitations under the License.
 */
 
+#include <algorithm>
 #include <borealis/core/time.hpp>
 
 namespace brls
@@ -36,6 +37,12 @@ void Ticking::updateTickings()
 
     for (Ticking* ticking : tickings)
     {
+        // A ticking stopped or destroyed by the callback of one before it
+        // (an activity deleted at the end of its animation) is no longer
+        // in the list: skip it rather than touch it.
+        if (std::find(Ticking::runningTickings.begin(), Ticking::runningTickings.end(), ticking) == Ticking::runningTickings.end())
+            continue;
+
         bool run = ticking->onUpdate(delta);
 
         ticking->tickCallback();

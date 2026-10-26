@@ -14,8 +14,6 @@
     limitations under the License.
 */
 
-#include <libretro-common/retro_timers.h>
-
 #include <borealis/core/logger.hpp>
 #include <borealis/core/thread.hpp>
 #include <exception>
@@ -44,19 +42,19 @@ Threading::Threading()
     start_task_loop();
 }
 
-void sync(const std::function<void()>& func)
+void sync(std::function<void()> func)
 {
-    Threading::sync(func);
+    Threading::sync(std::move(func));
 }
 
-void async(const std::function<void()>& task)
+void async(std::function<void()> task)
 {
-    Threading::async(task);
+    Threading::async(std::move(task));
 }
 
-size_t delay(long milliseconds, const std::function<void()>& func)
+size_t delay(long milliseconds, std::function<void()> func)
 {
-    return Threading::delay(milliseconds, func);
+    return Threading::delay(milliseconds, std::move(func));
 }
 
 void cancelDelay(size_t iter)
@@ -64,19 +62,22 @@ void cancelDelay(size_t iter)
     Threading::cancelDelay(iter);
 }
 
-void Threading::sync(const std::function<void()>& func)
+void Threading::sync(std::function<void()> func)
 {
     std::lock_guard<std::mutex> guard(m_sync_mutex);
-    m_sync_functions.push_back(func);
+    m_sync_functions.push_back(std::move(func));
 }
 
-void Threading::async(const std::function<void()>& task)
+void Threading::async(std::function<void()> task)
 {
-    std::lock_guard<std::mutex> guard(m_async_mutex);
-    m_async_tasks.push_back(task);
+    {
+        std::lock_guard<std::mutex> guard(m_async_mutex);
+        m_async_tasks.push_back(std::move(task));
+    }
+    m_async_cv.notify_one();
 }
 
-size_t Threading::delay(long milliseconds, const std::function<void()>& func)
+size_t Threading::delay(long milliseconds, std::function<void()> func)
 {
     std::lock_guard<std::mutex> guard(m_delay_mutex);
     DelayOperation operation;
@@ -87,7 +88,7 @@ size_t Threading::delay(long milliseconds, const std::function<void()>& func)
     operation.startPoint        = std::chrono::high_resolution_clock::now();
     operation.delayMilliseconds = milliseconds;
 #endif
-    operation.func              = func;
+    operation.func              = std::move(func);
     operation.index             = ++m_delay_index;
     m_delay_tasks.push_back(operation);
     return m_delay_index;
@@ -101,9 +102,9 @@ void Threading::cancelDelay(size_t iter)
 
 void Threading::performSyncTasks()
 {
+    std::vector<std::function<void()>> local;
     m_sync_mutex.lock();
-    auto local = m_sync_functions;
-    m_sync_functions.clear();
+    local.swap(m_sync_functions);
     m_sync_mutex.unlock();
 
     for (auto& f : local)
@@ -116,11 +117,15 @@ void Threading::performSyncTasks()
         {
             brls::Logger::error("error: performSyncTasks: {}", e.what());
         }
+        catch (...)
+        {
+            brls::Logger::error("error: performSyncTasks: unknown exception");
+        }
     }
 
+    std::vector<DelayOperation> delay_local;
     m_delay_mutex.lock();
-    auto delay_local = m_delay_tasks;
-    m_delay_tasks.clear();
+    delay_local.swap(m_delay_tasks);
     m_delay_mutex.unlock();
 
     for (auto& d : delay_local)
@@ -152,6 +157,10 @@ void Threading::performSyncTasks()
             {
                 brls::Logger::error("error: performSyncTasks(delay): {}", e.what());
             }
+            catch (...)
+            {
+                brls::Logger::error("error: performSyncTasks(delay): unknown exception");
+            }
 
             m_delay_mutex.lock();
             if (m_delay_cancel_set.count(d.index)) m_delay_cancel_set.erase(d.index);
@@ -161,7 +170,7 @@ void Threading::performSyncTasks()
         else
         {
             m_delay_mutex.lock();
-            m_delay_tasks.push_back(d);
+            m_delay_tasks.push_back(std::move(d));
             m_delay_mutex.unlock();
         }
     }
@@ -175,7 +184,11 @@ void Threading::start()
 
 void Threading::stop()
 {
-    task_loop_active = false;
+    {
+        std::lock_guard<std::mutex> guard(m_async_mutex);
+        task_loop_active = false;
+    }
+    m_async_cv.notify_all();
 
 #ifdef BOREALIS_USE_STD_THREAD
     task_loop_thread->join();
@@ -190,21 +203,36 @@ void Threading::std_task_loop() {
 }
 void* Threading::task_loop(void* a)
 {
-    while (task_loop_active)
+    while (true)
     {
-        std::vector<std::function<void()>> m_tasks_copy;
+        std::vector<std::function<void()>> tasks;
         {
-            std::lock_guard<std::mutex> guard(m_async_mutex);
-            m_tasks_copy = m_async_tasks;
-            m_async_tasks.clear();
+            // Woken as soon as a task is queued, instead of polling the
+            // queue every 500 ms
+            std::unique_lock<std::mutex> lock(m_async_mutex);
+            m_async_cv.wait(lock, [] { return !task_loop_active || !m_async_tasks.empty(); });
+            if (!task_loop_active)
+                break;
+            tasks.swap(m_async_tasks);
         }
 
-        for (auto task : m_tasks_copy)
+        for (auto& task : tasks)
         {
-            task();
+            // An exception thrown by a task would end the program from
+            // this thread: log it and go on with the next one
+            try
+            {
+                task();
+            }
+            catch (std::exception& e)
+            {
+                brls::Logger::error("error: async task: {}", e.what());
+            }
+            catch (...)
+            {
+                brls::Logger::error("error: async task: unknown exception");
+            }
         }
-
-        retro_sleep(500);
     }
     return NULL;
 }

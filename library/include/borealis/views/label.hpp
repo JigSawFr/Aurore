@@ -119,6 +119,12 @@ class Label : public View
     void setLineHeight(float value);
     void setTextColor(NVGcolor color);
 
+    // The font this label is drawn with (the app's default one unless set):
+    // by its id, or by the name it was loaded under (Application::loadFont*).
+    // A name not loaded leaves the font as it was. XML: fontFamily="name".
+    void setFont(int font);
+    bool setFontFamily(const std::string& name);
+
     int getFont();
     float getFontSize();
     float getFontQuality();

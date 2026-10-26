@@ -220,37 +220,47 @@ bool Application::internalMainLoop()
 
     // Free views deletion pool.
     // A view deletion might inserts other views to deletionPool
-    std::deque<View*> pendingViews;
-    pendingViews.swap(Application::deletionPool);
-
-    std::deque<View*> undeletedViews;
-    for (auto view : pendingViews)
+    // (A std::deque allocates when made: nothing is made on the frames,
+    // most of them, with nothing to delete.)
+    if (!Application::deletionPool.empty())
     {
-        if (!view->isPtrLocked())
-        {
-            delete view;
-        }
-        else
-        {
-            undeletedViews.push_back(view);
-            brls::Logger::verbose("Application: will delete view: {}", view->describe());
-        }
-    }
+        std::deque<View*> pendingViews;
+        pendingViews.swap(Application::deletionPool);
 
-    for (auto view : undeletedViews)
-        Application::deletionPool.push_back(view);
+        std::deque<View*> undeletedViews;
+        for (auto view : pendingViews)
+        {
+            if (!view->isPtrLocked())
+            {
+                delete view;
+            }
+            else
+            {
+                undeletedViews.push_back(view);
+                brls::Logger::verbose("Application: will delete view: {}", view->describe());
+            }
+        }
+
+        for (auto view : undeletedViews)
+            Application::deletionPool.push_back(view);
+    }
 
     if (!Application::currentFocus && !Application::activitiesStack.empty())
         Application::giveFocus(Application::activitiesStack.back()->getContentView());
 
     if (Application::limitedFrameTime > 0)
     {
-        Time deltaTime = getCPUTimeUsec() - frameStartTime;
-        Time interval  = Application::limitedFrameTime - deltaTime;
-        if (interval > 0)
-        {
-            std::this_thread::sleep_for(std::chrono::microseconds(interval));
-        }
+        // Frames start on a schedule of their own, one every limitedFrameTime:
+        // sleeping what was left of each frame let the oversleeps add up (and
+        // a limit of 60 gave 57 or 58). A schedule more than 4 frames late
+        // (a long load) starts again from now rather than racing to catch up.
+        static Time deadline = 0;
+        Time now             = getCPUTimeUsec();
+        if (deadline == 0 || now - deadline > 4 * Application::limitedFrameTime)
+            deadline = now;
+        deadline += Application::limitedFrameTime;
+        if (deadline > now)
+            std::this_thread::sleep_for(std::chrono::microseconds(deadline - now));
     }
 
     return true;
@@ -262,9 +272,11 @@ void Application::updateFPS()
     static size_t index = 0;
 
     index++;
-    // update FPS every second
-    if (Application::frameStartTime - start > 1000000) {
-        Application::globalFPS = index;
+    // update FPS every second, from the time that really went by (the
+    // frames of slightly more than a second are not a second's worth)
+    Time elapsed = Application::frameStartTime - start;
+    if (elapsed > 1000000) {
+        Application::globalFPS = (size_t)((double)index * 1000000.0 / (double)elapsed + 0.5);
         start = Application::frameStartTime;
         index = 0;
     }
@@ -273,6 +285,34 @@ void Application::updateFPS()
 const ControllerState& Application::getControllerState()
 {
     return controllerState;
+}
+
+// A stick pushed on a diagonal turns both of its axes into navigation
+// buttons, and the focus then moved twice in one frame (up, then right).
+// Only the direction the stick leans to most is kept, unless the other one
+// also comes from the D-pad.
+static void keepDominantStickDirection(ControllerState* state)
+{
+    const float threshold = 0.5f;
+    float x = std::max(std::fabs(state->axes[LEFT_X]), std::fabs(state->axes[RIGHT_X]));
+    float y = std::max(std::fabs(state->axes[LEFT_Y]), std::fabs(state->axes[RIGHT_Y]));
+    if (x <= threshold || y <= threshold)
+        return;
+
+    if (x > y)
+    {
+        if (!state->buttons[BUTTON_UP])
+            state->buttons[BUTTON_NAV_UP] = false;
+        if (!state->buttons[BUTTON_DOWN])
+            state->buttons[BUTTON_NAV_DOWN] = false;
+    }
+    else
+    {
+        if (!state->buttons[BUTTON_LEFT])
+            state->buttons[BUTTON_NAV_LEFT] = false;
+        if (!state->buttons[BUTTON_RIGHT])
+            state->buttons[BUTTON_NAV_RIGHT] = false;
+    }
 }
 
 void Application::processInput()
@@ -288,6 +328,7 @@ void Application::processInput()
     inputManager->updateTouchStates(&rawTouch);
     inputManager->updateMouseStates(&rawMouse);
     inputManager->updateUnifiedControllerState(&controllerState);
+    keepDominantStickDirection(&controllerState);
 
     if (isSwapInputKeys())
     {
@@ -302,7 +343,7 @@ void Application::processInput()
     std::vector<TouchState> touchState;
     for (auto& i : rawTouch)
     {
-        auto old = std::find_if(std::begin(currentTouchState), std::end(currentTouchState), [rawTouch, &i](TouchState touch)
+        auto old = std::find_if(std::begin(currentTouchState), std::end(currentTouchState), [&i](const TouchState& touch)
             { return touch.fingerId == i.fingerId; });
 
         if (old != std::end(currentTouchState))
@@ -407,6 +448,7 @@ void Application::processInput()
     {
         if (controllerState.buttons[i])
         {
+            Application::lastInputTime = cpuTime;
             repeating = controllerState.repeatingButtonStop[i] > 0 && cpuTime > controllerState.repeatingButtonStop[i];
 
             if (repeating)
@@ -680,6 +722,11 @@ bool Application::hasActiveEvent()
 #else
     if (!Application::deactivatedBehavior || activeEvent || Application::frameStartTime - lastActiveTime < Application::deactivatedTime)
         return true;
+    // An animation under way (not a timer that never ends, a clock) keeps
+    // the frames coming: idle, it was drawn at the idle rate, in jerks.
+    for (Ticking* ticking : Ticking::runningTickings)
+        if (dynamic_cast<FiniteTicking*>(ticking))
+            return true;
     return false;
 #endif
 }
@@ -784,7 +831,9 @@ void Application::frame()
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
 
-    std::vector<View*> viewsToDraw;
+    // Kept from frame to frame: no allocation once it is large enough
+    static std::vector<View*> viewsToDraw;
+    viewsToDraw.clear();
 
     // Draw all activities in the stack
     // until we find one that's not translucent
@@ -806,9 +855,28 @@ void Application::frame()
         view->frame(&frameContext);
     }
 
-    if (currentFocus && Application::getInputType() != InputType::TOUCH)
+    // Only a focus on the activity on top is highlighted: one pushed with
+    // nothing focusable yet (its content still coming) would otherwise show
+    // the screen below's highlight floating over it
+    if (currentFocus && Application::getInputType() != InputType::TOUCH
+        && (activitiesStack.empty() || currentFocus->getParentActivity() == activitiesStack.back()))
     {
-        currentFocus->frameHighlight(&frameContext);
+        if (!Application::highlightIdleFade)
+        {
+            currentFocus->frameHighlight(&frameContext);
+        }
+        else
+        {
+            float idle           = (float)(getCPUTimeUsec() - Application::lastInputTime) / 1000.0f;
+            float highlightAlpha = idle < 800.0f ? 1.0f : std::max(0.0f, 1.0f - (idle - 800.0f) / 400.0f);
+            if (highlightAlpha > 0.0f)
+            {
+                nvgSave(frameContext.vg);
+                nvgGlobalAlpha(frameContext.vg, highlightAlpha);
+                currentFocus->frameHighlight(&frameContext);
+                nvgRestore(frameContext.vg);
+            }
+        }
     }
 
     // Notifications
@@ -840,6 +908,10 @@ void Application::exit()
     exitEvent.fire();
     Logger::info("Exiting...");
 
+    // The async thread first: a task still running must not reach views
+    // or textures freed below
+    Threading::stop();
+
     Application::clear();
 
     // Free views deletion pool
@@ -851,8 +923,6 @@ void Application::exit()
         for (auto view : pendingViews)
             delete view;
     }
-
-    Threading::stop();
 
     exitDoneEvent.fire();
 
@@ -927,6 +997,12 @@ void Application::giveFocus(View* view)
     }
 }
 
+void Application::setHighlightIdleFade(bool fade)
+{
+    Application::highlightIdleFade = fade;
+    Application::lastInputTime     = getCPUTimeUsec();
+}
+
 void Application::forgetView(View* view)
 {
     if (Application::currentFocus == view)
@@ -978,6 +1054,10 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
 
         Application::focusStack.pop_back();
     }
+    else if (toShow)
+    {
+        Application::giveFocus(toShow->getContentView());
+    }
 
     // Hide animation (and show previous activity, if any)
     last->hide([last, cb, free]()
@@ -989,10 +1069,12 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
                 break;
             }
         }
-        cb();
-        brls::Logger::debug("Start delete top activity");
-        if(free) delete last;
-        brls::Logger::debug("Top activity deleted");
+        if (cb)
+            cb();
+        // Deleted after this frame's animations: this callback runs while
+        // they update, and the activity owns some of them.
+        if (free)
+            brls::sync([last]() { delete last; });
 
         Application::unblockInputs(); },
         fade, last->getShowAnimationDuration(animation));
@@ -1368,6 +1450,15 @@ int Application::getFont(std::string fontName)
         return FONT_INVALID;
 
     return Application::fontStash[fontName];
+}
+
+bool Application::addFontFallback(const std::string& font, const std::string& fallback)
+{
+    int base  = Application::getFont(font);
+    int other = Application::getFont(fallback);
+    if (base == FONT_INVALID || other == FONT_INVALID || base == other)
+        return false;
+    return nvgAddFallbackFontId(Application::getNVGContext(), base, other) != 0;
 }
 
 int Application::getDefaultFont()

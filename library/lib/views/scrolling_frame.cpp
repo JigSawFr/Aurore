@@ -119,10 +119,29 @@ void ScrollingFrame::updateScrollingIndicatior()
         return;
     }
 
-    scrollingIndicator->setAlpha(contentHeight <= viewHeight ? 0 : 0.3f);
+    float scrollViewOffset = getContentOffsetY() / contentHeight * getHeight();
+
+    float alpha = 0.3f;
+    if (autoHideScrollingIndicator)
+    {
+        // Shown while the offset moves, then faded out over 300 ms once it
+        // has been still for 600 ms
+        Time now = getCPUTimeUsec() / 1000;
+        if (scrollViewOffset != lastIndicatorOffset)
+        {
+            lastIndicatorOffset = scrollViewOffset;
+            lastScrollTime      = now;
+        }
+        Time still = now - lastScrollTime;
+        if (still > 900)
+            alpha = 0;
+        else if (still > 600)
+            alpha = 0.3f * (1.0f - (float)(still - 600) / 300.0f);
+    }
+
+    scrollingIndicator->setAlpha(alpha);
     scrollingIndicator->setHeight(viewHeight / contentHeight * viewHeight);
 
-    float scrollViewOffset = getContentOffsetY() / contentHeight * getHeight();
     scrollingIndicator->setDetachedPosition(getWidth() - 14 - SCROLLING_INDICATOR_WIDTH, scrollViewOffset);
 }
 

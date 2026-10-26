@@ -248,6 +248,9 @@ Label::Label()
     this->registerFloatXMLAttribute("fontQuality", [this](float value)
         { this->setFontQuality(value); });
 
+    this->registerStringXMLAttribute("fontFamily", [this](std::string value)
+        { this->setFontFamily(value); });
+
     this->registerColorXMLAttribute("textColor", [this](NVGcolor color)
         { this->setTextColor(color); });
 
@@ -736,6 +739,28 @@ void Label::onLayout()
     }
 
     this->resetScrollingAnimation(); // either stops it or restarts it with the new text
+}
+
+void Label::setFont(int font)
+{
+    if (font == FONT_INVALID || font == this->font)
+        return;
+
+    this->font = font;
+    this->invalidate();
+}
+
+bool Label::setFontFamily(const std::string& name)
+{
+    int font = Application::getFont(name);
+    if (font == FONT_INVALID)
+    {
+        Logger::warning("Label: no font loaded as \"{}\"", name);
+        return false;
+    }
+
+    this->setFont(font);
+    return true;
 }
 
 int Label::getFont()

@@ -75,8 +75,13 @@ NotificationManager::~NotificationManager()
     std::vector<View*> views = this->getChildren();
     for (auto& view : views)
     {
-        auto label = dynamic_cast<Notification*>(view);
-        label->timeoutTimer.stop();
+        auto notification = dynamic_cast<Notification*>(view);
+        if (!notification)
+            continue;
+        // Stopped without its end callback, which would remove the view
+        // from a manager being destroyed
+        notification->timeoutTimer.setEndCallback([](bool) {});
+        notification->timeoutTimer.stop();
     }
 }
 
