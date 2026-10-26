@@ -210,6 +210,27 @@ BRLS_TEST(redraw_on_demand_skips_still_frames)
     BRLS_CHECK_EQ(h.focusText(), std::string("Second"));
 }
 
+BRLS_TEST(theme_change_draws_at_once_on_demand)
+{
+    Harness h;
+    h.push(new brls::Activity(screenOf({ new brls::Button() })));
+    brls::Application::setRedrawOnDemand(true);
+    h.settle();
+    h.step(3);
+
+    // A theme loaded from code, nothing else asking for a frame: drawn at
+    // the next iteration, not at the next periodic redraw
+    uint64_t drawn = brls::Application::getDrawnFrameCount();
+    brls::Theme::loadFile("builtin:high-contrast-dark");
+    h.step();
+    BRLS_CHECK(brls::Application::getDrawnFrameCount() > drawn);
+
+    drawn = brls::Application::getDrawnFrameCount();
+    brls::Theme::reset();
+    h.step();
+    BRLS_CHECK(brls::Application::getDrawnFrameCount() > drawn);
+}
+
 BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
 {
     Harness h;
