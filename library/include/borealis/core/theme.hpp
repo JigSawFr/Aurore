@@ -144,8 +144,9 @@ class Theme
      * variant to show it in is put in `variant` when given (the one it
      * styles, or the one in use when it styles both), for
      * Platform::setThemeVariant. Text that reads badly on its background is
-     * logged as a warning (checkContrast). The screens take it at their next
-     * frame.
+     * logged as a warning (checkContrast). The screens take it at the next
+     * iteration of the main loop, which draws them again (redraw on demand
+     * or not).
      */
     static bool loadFile(const std::string& path, ThemeVariant* variant = nullptr);
 
@@ -225,7 +226,8 @@ class Theme
 
     /**
      * Changes each time a colour or a metric changes (a theme file used, a
-     * colour added): Application compares it each frame to tell the views.
+     * colour added): the main loop compares it at each iteration to tell
+     * the views and draw them again.
      */
     static uint64_t getGeneration();
 

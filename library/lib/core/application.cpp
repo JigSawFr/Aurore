@@ -258,6 +258,10 @@ bool Application::internalMainLoop()
     updateHighlightAnimation();
 #endif
     Ticking::updateTickings();
+
+    // Before deciding whether to draw: a theme change asks for a redraw,
+    // however it was made
+    Application::checkThemeChanged();
     Profiler::endPhase(Profiler::Phase::UPDATE);
 
     // Render: every frame, or with redraw on demand only when something
@@ -955,8 +959,6 @@ bool Application::handleAction(const ActionType type, const int button, const bo
 
 void Application::frame(bool present)
 {
-    Application::checkThemeChanged();
-
     VideoContext* videoContext = Application::platform->getVideoContext();
 
     const bool inspect = Inspector::isOpen();
