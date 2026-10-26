@@ -187,6 +187,46 @@
 
                 </brls:Box>
                 
+                <!-- Icon buttons and context menu -->
+                <brls:Header
+                    width="auto"
+                    height="auto"
+                    title="@i18n/demo/components/icon_buttons_header"
+                    subtitle="@i18n/demo/components/icon_buttons_subtitle"
+                    marginBottom="30px" />
+
+                <brls:Box
+                    width="100%"
+                    height="auto"
+                    axis="row"
+                    alignItems="center"
+                    marginBottom="30px">
+
+                    <brls:IconButton
+                        id="icon_menu"
+                        glyph="&#xE5D4;"
+                        marginRight="30px" />
+
+                    <brls:IconButton
+                        id="icon_play"
+                        style="primary"
+                        glyph="&#xE037;"
+                        text="@i18n/demo/components/icon_play"
+                        marginRight="30px" />
+
+                    <brls:IconButton
+                        style="bordered"
+                        icon="@res/img/aurore_96.png"
+                        iconSize="28"
+                        text="@i18n/demo/components/icon_image"
+                        marginRight="30px" />
+
+                    <brls:IconButton
+                        style="borderless"
+                        glyph="&#xE8B8;" />
+
+                </brls:Box>
+
                 <!-- Scroll -->
                 <brls:Header
                     width="auto"

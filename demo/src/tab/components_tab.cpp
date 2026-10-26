@@ -16,6 +16,10 @@
 
 #include "tab/components_tab.hpp"
 
+#include <borealis/cadran/ui/cadran_kit.hpp>
+
+using namespace brls::literals; // for _i18n
+
 ComponentsTab::ComponentsTab()
 {
     // Inflate the tab from the XML file
@@ -28,6 +32,25 @@ ComponentsTab::ComponentsTab()
     brls::Button* highlightButton = (brls::Button*)this->getView("button_highlight");
     highlightButton->registerAction(
         "Honk", brls::BUTTON_A, [](brls::View* view) { return true; }, false, false, brls::SOUND_HONK);
+
+    // A context menu under the "more" button, its icons Cadran's
+    this->getView("icon_menu")->registerClickAction([](brls::View* view) {
+        auto* menu    = new brls::ContextMenu(view);
+        auto chosen   = [](const std::string& what) { return [what]() { brls::Application::notify(brls::getStr("demo/components/menu_chosen", what)); }; };
+        menu->setTitle("demo/components/menu_title"_i18n);
+        menu->addItem("demo/components/menu_open"_i18n, chosen("demo/components/menu_open"_i18n), cadran::kit::icon("eye", 22));
+        menu->addItem("demo/components/menu_favourite"_i18n, chosen("demo/components/menu_favourite"_i18n), cadran::kit::icon("heart", 22));
+        menu->addItem("demo/components/menu_share"_i18n, chosen("demo/components/menu_share"_i18n), cadran::kit::icon("upload", 22));
+        menu->addSeparator();
+        menu->addItem("demo/components/menu_delete"_i18n, chosen("demo/components/menu_delete"_i18n), cadran::kit::icon("trash", 22, "cadran/coral"));
+        menu->open();
+        return true;
+    });
+
+    this->getView("icon_play")->registerClickAction([](brls::View* view) {
+        brls::Application::notify("demo/components/icon_play"_i18n);
+        return true;
+    });
 
     progress->setText(std::to_string((int)(slider->getProgress() * 100)));
     slider->getProgressEvent()->subscribe([this](float progress) {

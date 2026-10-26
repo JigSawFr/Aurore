@@ -47,6 +47,10 @@
             <RecyclingListTab />
         </brls:Tab>
 
+        <brls:Tab label="@i18n/demo/tabs/grid">
+            <GridTab />
+        </brls:Tab>
+
         <brls:Separator />
 
         <brls:Tab label="@i18n/demo/tabs/settings">

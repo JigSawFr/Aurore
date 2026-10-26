@@ -1,0 +1,19 @@
+<brls:Box
+    width="auto"
+    height="auto"
+    axis="column"
+    alignItems="center"
+    justifyContent="center">
+
+    <brls:Label
+        text="@i18n/app/home/hello"
+        fontSize="28"
+        marginBottom="30" />
+
+    <brls:Button
+        id="counter"
+        style="primary"
+        width="320"
+        text="@i18n/app/home/click" />
+
+</brls:Box>
