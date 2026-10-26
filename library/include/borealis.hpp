@@ -55,6 +55,7 @@
 #include <borealis/views/progress_spinner.hpp>
 #include <borealis/views/rectangle.hpp>
 #include <borealis/views/recycler.hpp>
+#include <borealis/views/recycling_grid.hpp>
 #include <borealis/views/scrolling_frame.hpp>
 #include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/sidebar.hpp>

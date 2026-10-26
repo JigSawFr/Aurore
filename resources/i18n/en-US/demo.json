@@ -9,6 +9,7 @@
         "scroll": "Scroll test",
         "layout": "Layout and alignment",
         "pokedex": "Pokedex",
+        "grid": "Grid",
         "settings": "Settings",
         "popups": "Popups, notifications and dialogs",
         "hos_layout": "Horizon layouts",
@@ -91,5 +92,12 @@
         "refused_text": "Not now: the console is busy",
         "icons": "Icons",
         "markdown": "Markdown"
+    },
+
+    "grid": {
+        "row_title": "A horizontal row",
+        "row_subtitle": "40 items: only those on screen exist",
+        "grid_title": "A grid of pictures",
+        "grid_subtitle": "{} of {} items: more load when the end comes into view"
     }
 }

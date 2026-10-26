@@ -3,6 +3,7 @@
 
     "tabs": {
         "cadran": "Cadran",
+        "grid": "Grille",
         "about": "À propos d’Aurore"
     },
 
@@ -55,5 +56,12 @@
         "refused_text": "Pas maintenant : la console est occupée",
         "icons": "Icônes",
         "markdown": "Markdown"
+    },
+
+    "grid": {
+        "row_title": "Une rangée horizontale",
+        "row_subtitle": "40 éléments : seuls ceux à l’écran existent",
+        "grid_title": "Une grille d’images",
+        "grid_subtitle": "{} éléments sur {} : la suite se charge quand la fin arrive à l’écran"
     }
 }

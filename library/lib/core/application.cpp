@@ -45,6 +45,7 @@
 #include <borealis/views/progress_spinner.hpp>
 #include <borealis/views/rectangle.hpp>
 #include <borealis/views/recycler.hpp>
+#include <borealis/views/recycling_grid.hpp>
 #include <borealis/views/sidebar.hpp>
 #include <borealis/views/slider.hpp>
 #include <borealis/views/tab_frame.hpp>
@@ -1584,6 +1585,8 @@ void Application::registerBuiltInXMLViews()
     Application::registerXMLView("brls:ScrollingFrame", ScrollingFrame::create);
     Application::registerXMLView("brls:HScrollingFrame", HScrollingFrame::create);
     Application::registerXMLView("brls:RecyclerFrame", RecyclerFrame::create);
+    Application::registerXMLView("brls:RecyclingGrid", RecyclingGrid::create);
+    Application::registerXMLView("brls:HRecyclerFrame", HRecyclerFrame::create);
     Application::registerXMLView("brls:Image", Image::create);
     Application::registerXMLView("brls:Padding", Padding::create);
     Application::registerXMLView("brls:Button", Button::create);
