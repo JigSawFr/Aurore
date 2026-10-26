@@ -1,5 +1,6 @@
 <!-- Emoji and other scripts. Colour emoji need USE_FREETYPE and a colour
-     emoji font (FontLoader::USER_EMOJI_PATH, or the system's on desktop). -->
+     emoji font (FontLoader::USER_EMOJI_PATH, or the system's on desktop);
+     Arabic and Hebrew in reading order need USE_FRIBIDI. -->
 <brls:Box
     width="auto"
     height="auto">

@@ -122,6 +122,21 @@ int main(int argc, char* argv[])
 
     brls::Application::createWindow("demo/title"_i18n);
 
+#ifdef BRLS_USE_FRIBIDI
+    // The bundled font has neither Hebrew nor Arabic: a system font for the
+    // scripts tab
+    for (const char* path : { "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/TTF/DejaVuSans.ttf" })
+    {
+        if (std::FILE* file = std::fopen(path, "rb"))
+        {
+            std::fclose(file);
+            if (brls::Application::loadFontFromFile("rtl", path))
+                nvgAddFallbackFontId(brls::Application::getNVGContext(), brls::Application::getFont(brls::FONT_REGULAR), brls::Application::getFont("rtl"));
+            break;
+        }
+    }
+#endif
+
     brls::ThemeVariant variant;
     if (!themeFile.empty() && brls::Theme::loadFile(themeFile, &variant))
         brls::Application::getPlatform()->setThemeVariant(variant);
