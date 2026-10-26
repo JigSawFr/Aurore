@@ -48,6 +48,27 @@ struct DemoHarness : Demo, Harness
     }
 };
 
+// A square of colour, changed without asking for a redraw unless told to
+class Swatch : public brls::View
+{
+  public:
+    Swatch()
+    {
+        setWidth(120);
+        setHeight(80);
+    }
+
+    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx) override
+    {
+        nvgBeginPath(vg);
+        nvgRect(vg, x, y, width, height);
+        nvgFillColor(vg, color);
+        nvgFill(vg);
+    }
+
+    NVGcolor color = nvgRGB(200, 40, 40);
+};
+
 brls::Box* screenOf(std::initializer_list<brls::View*> views)
 {
     auto* box = new brls::Box(brls::Axis::COLUMN);
@@ -187,6 +208,33 @@ BRLS_TEST(redraw_on_demand_skips_still_frames)
     h.tap(brls::BUTTON_DOWN);
     BRLS_CHECK(brls::Application::getDrawnFrameCount() - drawn > 2);
     BRLS_CHECK_EQ(h.focusText(), std::string("Second"));
+}
+
+BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
+{
+    Harness h;
+    auto* swatch = new Swatch();
+    h.push(new brls::Activity(screenOf({ swatch })));
+    brls::Application::setRedrawOnDemand(true);
+    brls::Application::setRedrawDebug(true);
+    h.settle();
+    h.step(3);
+    BRLS_CHECK_EQ(brls::Application::getMissedRedrawCount(), (uint64_t)0);
+
+    // Changed, and said so: drawn, nothing missed
+    swatch->color = nvgRGB(40, 200, 40);
+    brls::Application::requestRedraw();
+    h.step(3);
+    BRLS_CHECK_EQ(brls::Application::getMissedRedrawCount(), (uint64_t)0);
+
+    // Changed without a word: the skipped frames differ, over the swatch
+    swatch->color = nvgRGB(40, 40, 200);
+    h.step(3);
+    BRLS_CHECK(brls::Application::getMissedRedrawCount() > 0);
+    brls::Rect area  = brls::Application::getLastMissedRedrawArea();
+    brls::Rect frame = swatch->getFrame();
+    BRLS_CHECK(std::fabs(area.getMinX() - frame.getMinX()) <= 1 && std::fabs(area.getMinY() - frame.getMinY()) <= 1);
+    BRLS_CHECK(std::fabs(area.getWidth() - frame.getWidth()) <= 2 && std::fabs(area.getHeight() - frame.getHeight()) <= 2);
 }
 
 BRLS_TEST(images_compare_with_tolerance)

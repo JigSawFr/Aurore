@@ -91,4 +91,14 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-`tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
+`tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
+
+## Redraw on demand: finding a missing invalidation
+
+With redraw on demand (`Application::setRedrawOnDemand(true)`), a view that changes how it looks without `invalidate()` or `requestRedraw()` stays stale on screen. `Application::setRedrawDebug(true)`, or `BRLS_REDRAW_DEBUG=1` on the desktop, draws each skipped frame all the same, without presenting it, compares it with the last frame presented, and logs a difference as a warning with its area and the views drawn there:
+
+```
+redraw debug: a skipped frame differs from the last one presented (412 pixels in 1104,20 96x28): no redraw asked for Label (id: clock)
+```
+
+`Application::getMissedRedrawCount()` and `getLastMissedRedrawArea()` give the same to a test. It reads every frame back: slow, for debugging, OpenGL drivers only (`VideoContext::readPixels`).
