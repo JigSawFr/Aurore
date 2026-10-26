@@ -35,7 +35,7 @@ git submodule update --init --recursive
 cp -r library/aurore/resources resources
 ```
 
-Aurore's [`template/`](../template/README.md) is such an app, with the `CMakeLists.txt` for the desktop and the Switch (upstream's [template](https://github.com/xfangfang/borealis_template) has the other platforms'). The program itself starts the app, pushes a first screen and runs the loop:
+Aurore's `template/` folder (see its `README.md`) is such an app, with the `CMakeLists.txt` for the desktop and the Switch (upstream's [template](https://github.com/xfangfang/borealis_template) has the other platforms'). The program itself starts the app, pushes a first screen and runs the loop:
 
 ```cpp
 #include <borealis.hpp>

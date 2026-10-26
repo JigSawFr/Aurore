@@ -157,7 +157,7 @@ class Theme
     static bool loadFile(const std::string& path, ThemeVariant* variant = nullptr);
 
     /**
-     * As loadFile, from the file's text; `directory` is where its @include
+     * As loadFile, from the file's text; `directory` is where its `@include`
      * and inherit files are looked for.
      */
     static bool load(const std::string& text, ThemeVariant* variant = nullptr, const std::string& directory = "");
