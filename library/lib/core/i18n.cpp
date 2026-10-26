@@ -34,6 +34,8 @@ namespace fs = std::experimental::filesystem;
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <cctype>
+#include <vector>
 
 #ifndef BRLS_I18N_PREFIX
 #define BRLS_I18N_PREFIX ""
@@ -125,6 +127,61 @@ static void loadLocale(std::string locale, nlohmann::json* target)
         (*target)[name.substr(0, name.length() - 5)] = strings;
     }
 #endif /* USE_LIBROMFS */
+}
+
+std::string localeFromSystem(std::string system)
+{
+    // Drop the encoding and the modifier, then split language, script and
+    // region ("zh_Hant_TW", "pt-BR", "es-419")
+    for (char stop : { '.', '@' })
+    {
+        auto at = system.find(stop);
+        if (at != std::string::npos)
+            system.erase(at);
+    }
+    for (char& c : system)
+        if (c == '_')
+            c = '-';
+
+    std::vector<std::string> parts;
+    size_t start = 0;
+    while (start <= system.size())
+    {
+        size_t end = system.find('-', start);
+        if (end == std::string::npos)
+            end = system.size();
+        parts.push_back(system.substr(start, end - start));
+        start = end + 1;
+    }
+
+    std::string language = parts.empty() ? "" : parts[0];
+    for (char& c : language)
+        c = (char)std::tolower((unsigned char)c);
+    std::string script, region;
+    for (size_t i = 1; i < parts.size(); i++)
+    {
+        if (parts[i].size() == 4)
+            script = parts[i];
+        else if (region.empty())
+            region = parts[i];
+    }
+    for (char& c : region)
+        c = (char)std::toupper((unsigned char)c);
+
+    if (language == "zh")
+        return script == "Hant" || region == "TW" || region == "HK" || region == "MO" ? LOCALE_ZH_HANT : LOCALE_ZH_HANS;
+    if (language == "en")
+        return region == "GB" || region == "IE" || region == "AU" || region == "NZ" || region == "ZA" || region == "IN" ? LOCALE_EN_GB : LOCALE_EN_US;
+    if (language == "fr")
+        return region == "CA" ? LOCALE_FR_CA : LOCALE_FR;
+    if (language == "pt")
+        return region == "BR" ? LOCALE_PT_BR : LOCALE_PT;
+    if (language == "es")
+        return region.empty() || region == "ES" ? LOCALE_ES : LOCALE_ES_419;
+    for (const std::string* known : { &LOCALE_JA, &LOCALE_DE, &LOCALE_IT, &LOCALE_Ko, &LOCALE_NL, &LOCALE_RU })
+        if (language == *known)
+            return *known;
+    return LOCALE_EN_US;
 }
 
 void loadTranslations()
