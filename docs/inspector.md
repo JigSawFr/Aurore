@@ -48,9 +48,9 @@ While the inspector is open every frame is drawn, redraw on demand or not, so th
 
 **The tree** of every activity, the one on top first: each view by its class and `#id`, and its size. The view focused is marked `>` and the views it is in `|` (the focus chain); a view that is not visible is greyed. The selected view is drawn over the screen as browsers do: its margin in orange, border in yellow, padding in green and content in blue, with its name and size on a tag; the view focused, when another one is selected, is outlined in blue.
 
-**The selected view**: its position and size, the width and height asked of yoga (`auto`, points or `%`), its margin, border and padding (top, right, bottom, left, or one value when they are all the same), its flex grow, shrink, basis and direction, its visibility and alpha, whether it can take the focus, its background, border and corner radius, and for a label its font size, colour and text.
+**The selected view**: its position and size, the width and height asked of yoga (`auto`, points or `%`), its margin, border and padding (top, right, bottom, left, or one value when they are all the same), its flex grow, shrink, basis and direction, its visibility and alpha, whether it can take the focus, its background, border and corner radius, and for a label its font size, colour and text; a colour that follows a theme key (`View::setThemeColor`, `@theme/…` in XML) shows its key.
 
-**What it looked up in the theme** while it drew itself (not its children): each colour (`Theme::getColor`) with its value and a swatch, each metric (`Style`). Values read once when the view was made are not there.
+**What it looked up in the theme** while it drew itself (not its children): each colour (`Theme::getColor`) with its value and a swatch, each metric (`Style`). Values read once when the view was made, or given by key, are not there: the keys show next to the colours above.
 
 **The focus chain**, from the root down to the view focused, at the bottom.
 

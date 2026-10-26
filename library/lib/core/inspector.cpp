@@ -235,6 +235,13 @@ namespace inspector_detail
         nvgStroke(vg);
     }
 
+    // The theme key a colour property follows (View::setThemeColor), if any
+    float themeKey(NVGcontext* vg, float x, float y, View* view, const char* property)
+    {
+        std::string key = view->getThemeColor(property);
+        return key.empty() ? x : text(vg, x + 6, y, DIM, key);
+    }
+
     // The area between two rectangles, filled
     void ring(NVGcontext* vg, float x, float y, float w, float h, float top, float right, float bottom, float left,
         NVGcolor color)
@@ -521,6 +528,7 @@ namespace inspector_detail
         {
             swatch(vg, sx, y, view->getBackgroundColor());
             sx = text(vg, sx + 14, y, TEXT, hex(view->getBackgroundColor()));
+            sx = themeKey(vg, sx, y, view, "backgroundColor");
         }
         else
         {
@@ -532,6 +540,7 @@ namespace inspector_detail
             sx = text(vg, sx + 12, y, TEXT, "border " + number(view->getBorderThickness()) + " ");
             swatch(vg, sx, y, view->getBorderColor());
             sx = text(vg, sx + 14, y, TEXT, hex(view->getBorderColor()));
+            sx = themeKey(vg, sx, y, view, "borderColor");
         }
         if (view->getCornerRadius() > 0)
             text(vg, sx + 12, y, TEXT, "radius " + number(view->getCornerRadius()));
@@ -544,7 +553,8 @@ namespace inspector_detail
                 string = string.substr(0, 45) + "...";
             float lx = text(vg, x, y, TEXT, "font " + number(label->getFontSize()) + "  ");
             swatch(vg, lx, y, label->getTextColor());
-            lx = text(vg, lx + 14, y, TEXT, hex(label->getTextColor()) + "  ");
+            lx = text(vg, lx + 14, y, TEXT, hex(label->getTextColor()));
+            lx = themeKey(vg, lx, y, label, "textColor") + 8;
             nvgSave(vg);
             nvgIntersectScissor(vg, lx, y, x + w - lx, LINE);
             text(vg, lx, y, DIM, "\"" + string + "\"");
