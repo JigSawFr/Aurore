@@ -14,6 +14,7 @@
     limitations under the License.
 */
 
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/profiler.hpp>
 
@@ -27,6 +28,11 @@ static const int LOG_EVERY = 120;
 void Profiler::setEnabled(bool on)
 {
     enabled = on;
+}
+
+bool Profiler::isMeasuring()
+{
+    return enabled || Inspector::isOpen();
 }
 
 void Profiler::beginFrame()
@@ -43,10 +49,15 @@ void Profiler::beginFrame()
         enabled = true;
     }
 #endif
-    if (!enabled)
+    if (!isMeasuring())
+    {
+        lastStart = 0;
         return;
+    }
     current          = FrameProfile();
     frameStart       = getRealTimeUsec();
+    current.interval = lastStart != 0 ? frameStart - lastStart : 0;
+    lastStart        = frameStart;
     phaseStart       = frameStart;
     layoutMark       = 0;
     allocationsStart = allocationCounter ? allocationCounter() : 0;
@@ -54,7 +65,7 @@ void Profiler::beginFrame()
 
 void Profiler::endPhase(Phase phase)
 {
-    if (!enabled || frameStart == 0)
+    if (frameStart == 0)
         return;
     Time now = getRealTimeUsec();
     // The layout run during the phase is the layout's, not the phase's
@@ -75,6 +86,12 @@ void Profiler::endPhase(Phase phase)
         case Phase::DRAW:
             current.draw += spent;
             break;
+        case Phase::INSPECTOR:
+            current.inspector += spent;
+            break;
+        case Phase::FLUSH:
+            current.flush += spent;
+            break;
         case Phase::SWAP:
             current.swap += spent;
             break;
@@ -85,7 +102,7 @@ void Profiler::endPhase(Phase phase)
 
 void Profiler::endFrame(bool drawn)
 {
-    if (!enabled || frameStart == 0)
+    if (frameStart == 0)
         return;
     current.drawn       = drawn;
     current.total       = getRealTimeUsec() - frameStart;
@@ -104,6 +121,8 @@ void Profiler::endFrame(bool drawn)
     sum.update += last.update;
     sum.layout += last.layout;
     sum.draw += last.draw;
+    sum.inspector += last.inspector;
+    sum.flush += last.flush;
     sum.swap += last.swap;
     sum.total += last.total;
     sum.layouts += last.layouts;
@@ -113,8 +132,8 @@ void Profiler::endFrame(bool drawn)
     if (++frames < LOG_EVERY)
         return;
     double n = frames;
-    Logger::info("profile ({} frames, {} drawn), us per frame: events {:.0f} input {:.0f} update {:.0f} layout {:.0f} draw {:.0f} swap {:.0f} total {:.0f}; per frame: {:.2f} layouts, {:.1f} views laid out, {:.1f} allocations",
-        frames, drawnFrames, sum.events / n, sum.input / n, sum.update / n, sum.layout / n, sum.draw / n, sum.swap / n, sum.total / n,
+    Logger::info("profile ({} frames, {} drawn), us per frame: events {:.0f} input {:.0f} update {:.0f} layout {:.0f} draw {:.0f} inspector {:.0f} flush {:.0f} swap {:.0f} total {:.0f}; per frame: {:.2f} layouts, {:.1f} views laid out, {:.1f} allocations",
+        frames, drawnFrames, sum.events / n, sum.input / n, sum.update / n, sum.layout / n, sum.draw / n, sum.inspector / n, sum.flush / n, sum.swap / n, sum.total / n,
         sum.layouts / n, sum.viewsLaidOut / n, sum.allocations / n);
     sum         = FrameProfile();
     frames      = 0;
@@ -123,10 +142,24 @@ void Profiler::endFrame(bool drawn)
 
 void Profiler::addLayout(Time duration)
 {
-    if (!enabled)
+    if (frameStart == 0)
         return;
     current.layouts++;
     current.layout += duration;
+}
+
+void Profiler::addViewLaidOut()
+{
+    if (frameStart != 0)
+        current.viewsLaidOut++;
+}
+
+void Profiler::setDrawStats(uint32_t drawCalls, uint32_t triangles)
+{
+    if (frameStart == 0)
+        return;
+    current.drawCalls = drawCalls;
+    current.triangles = triangles;
 }
 
 } // namespace brls

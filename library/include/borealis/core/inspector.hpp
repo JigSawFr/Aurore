@@ -5,7 +5,6 @@
 
 #include <nanovg.h>
 
-#include <borealis/core/time.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -55,10 +54,10 @@ class Inspector
      */
     static void processInput(InputManager* input, ControllerState* state);
 
-    // Around Application::frame(), when open
+    // In Application::frame(), when open. The timings shown are the
+    // Profiler's, which measures while the inspector is open.
     static void beginFrame();
-    static void draw(FrameContext* ctx, Time viewsTime);
-    static void endFrame(Time flushTime, Time presentTime);
+    static void draw(FrameContext* ctx);
 
     static void forgetView(View* view);
 
@@ -69,7 +68,6 @@ class Inspector
     inline static bool recording     = false;
     static void recordColor(const std::string& name, NVGcolor color);
     static void recordMetric(const std::string& name, float value);
-    static void addLayoutTime(Time time);
 
   private:
     inline static bool enabled = false;

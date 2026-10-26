@@ -35,12 +35,12 @@ In browse mode:
 
 ## What it shows
 
-**The frame**, averaged over the last 30 frames:
+**The frame**, averaged over the last 30 frames, as `brls::Profiler` measured them (it measures while the inspector is open, [testing.md](testing.md#the-bench) has the rest of what it records):
 
 - `frame`: the time from one frame to the next (and the longest), and the frames per second;
 - `views`: drawing the activities, the highlight and the notifications (nanovg's calls, before anything reaches the GPU);
 - `layout`: yoga's layouts since the frame before, and how many there were;
-- `flush`: `nvgEndFrame`, where nanovg hands its work to the GPU; `present`: the swap, which waits for the screen when vsync is on (both of the frame before, the inspector's own drawing included);
+- `flush`: `nvgEndFrame`, where nanovg hands its work to the GPU; `present`: the swap, which waits for the screen when vsync is on (the inspector's own drawing included);
 - `nanovg`: the draw calls and triangles of the app's drawing, the inspector's left out;
 - a graph of the last 120 frames, the line at 60 fps, the slow frames in red.
 
@@ -56,4 +56,4 @@ While the inspector is open every frame is drawn, redraw on demand or not, so th
 
 ## For the curious
 
-`library/lib/core/inspector.cpp`. The panel is drawn with nanovg directly, not with views: it neither changes the tree it shows nor takes the focus. nanovg's counters are read through `nvgDebugGetStats()`, added to Aurore's nanovg.
+`library/lib/core/inspector.cpp`. The panel is drawn with nanovg directly, not with views: it neither changes the tree it shows nor takes the focus. The timings and nanovg's counters (read through `nvgDebugGetStats()`, added to Aurore's nanovg) are the `FrameProfile`s of `library/lib/core/profiler.cpp`, which also has the time the panel itself took (`inspector`).

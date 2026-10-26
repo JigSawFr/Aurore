@@ -1424,14 +1424,11 @@ void View::invalidate()
     {
         this->getParent()->invalidate();
     }
-    else if (Profiler::isEnabled() || Inspector::isOpen())
+    else if (Profiler::isMeasuring())
     {
         Time start = getRealTimeUsec();
         YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
-        Time spent = getRealTimeUsec() - start;
-        Profiler::addLayout(spent);
-        if (Inspector::isOpen())
-            Inspector::addLayoutTime(spent);
+        Profiler::addLayout(getRealTimeUsec() - start);
     }
     else
     {

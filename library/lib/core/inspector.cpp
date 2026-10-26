@@ -9,6 +9,7 @@
 #include <borealis/core/frame_context.hpp>
 #include <borealis/core/input.hpp>
 #include <borealis/core/inspector.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/views/label.hpp>
 #include <cmath>
 #include <cstdio>
@@ -33,13 +34,14 @@ namespace inspector_detail
         std::string heading;
     };
 
+    // What the panel shows of a frame the Profiler measured
     struct Sample
     {
         float frame   = 0; // ms since the frame before
         float views   = 0; // ms drawing the views, highlight and notifications
-        float layout  = 0; // ms in yoga since the frame before
-        float flush   = 0; // ms in nvgEndFrame (the frame before)
-        float present = 0; // ms presenting it (the frame before)
+        float layout  = 0; // ms in yoga
+        float flush   = 0; // ms in nvgEndFrame
+        float present = 0; // ms presenting it
         int layouts   = 0;
         int draws     = 0;
         int triangles = 0;
@@ -71,9 +73,6 @@ namespace inspector_detail
     bool prev[_BUTTON_MAX] = {};
     Time nextRepeat[_BUTTON_MAX] = {};
 
-    Time layoutTime = 0;
-    int layoutCount = 0;
-    Time lastFlush = 0, lastPresent = 0, lastDraw = 0;
     Sample history[HISTORY];
     int historyEnd   = 0;
     int historyCount = 0;
@@ -625,7 +624,6 @@ void Inspector::setMode(Mode newMode)
         Inspector::recording    = false;
         rows.clear();
         historyCount = 0;
-        lastDraw     = 0;
     }
     else if (old == Mode::CLOSED || newMode == Mode::LIVE)
     {
@@ -712,8 +710,34 @@ void Inspector::processInput(InputManager* input, ControllerState* state)
     Application::requestRedraw();
 }
 
+// The frames drawn while open, as the Profiler measured them
+static void recordInspectedFrame()
+{
+    const FrameProfile& f = Profiler::getLastFrame();
+    if (!Inspector::isOpen() || !f.drawn || f.interval == 0)
+        return;
+    Sample& s    = history[historyEnd];
+    s.frame      = f.interval / 1000.0f;
+    s.views      = f.draw / 1000.0f;
+    s.layout     = f.layout / 1000.0f;
+    s.layouts    = (int)f.layouts;
+    s.flush      = f.flush / 1000.0f;
+    s.present    = f.swap / 1000.0f;
+    s.draws      = (int)f.drawCalls;
+    s.triangles  = (int)f.triangles;
+    historyEnd   = (historyEnd + 1) % HISTORY;
+    historyCount = std::min(historyCount + 1, HISTORY);
+}
+
 void Inspector::beginFrame()
 {
+    static bool subscribed = false;
+    if (!subscribed)
+    {
+        Profiler::getFrameEvent()->subscribe(recordInspectedFrame);
+        subscribed = true;
+    }
+
     colors.clear();
     metrics.clear();
     if (mode == Mode::LIVE || !selected)
@@ -721,32 +745,9 @@ void Inspector::beginFrame()
     Inspector::recordTarget = selected;
 }
 
-void Inspector::draw(FrameContext* ctx, Time viewsTime)
+void Inspector::draw(FrameContext* ctx)
 {
     NVGcontext* vg = ctx->vg;
-
-    // The app's own drawing: the inspector's is not counted
-    int draws = 0, fill = 0, stroke = 0, textTris = 0;
-    nvgDebugGetStats(vg, &draws, &fill, &stroke, &textTris);
-
-    Time now = getRealTimeUsec();
-    if (lastDraw != 0)
-    {
-        Sample& s   = history[historyEnd];
-        s.frame     = (now - lastDraw) / 1000.0f;
-        s.views     = viewsTime / 1000.0f;
-        s.layout    = layoutTime / 1000.0f;
-        s.layouts   = layoutCount;
-        s.flush     = lastFlush / 1000.0f;
-        s.present   = lastPresent / 1000.0f;
-        s.draws     = draws;
-        s.triangles = fill + stroke + textTris;
-        historyEnd  = (historyEnd + 1) % HISTORY;
-        historyCount = std::min(historyCount + 1, HISTORY);
-    }
-    lastDraw    = now;
-    layoutTime  = 0;
-    layoutCount = 0;
     Inspector::recording = false;
 
     buildRows();
@@ -783,12 +784,6 @@ void Inspector::draw(FrameContext* ctx, Time viewsTime)
     Application::requestRedraw();
 }
 
-void Inspector::endFrame(Time flushTime, Time presentTime)
-{
-    lastFlush   = flushTime;
-    lastPresent = presentTime;
-}
-
 void Inspector::forgetView(View* view)
 {
     if (selected == view)
@@ -814,12 +809,6 @@ void Inspector::recordMetric(const std::string& name, float value)
         if (entry.first == name)
             return;
     metrics.emplace_back(name, value);
-}
-
-void Inspector::addLayoutTime(Time time)
-{
-    layoutTime += time;
-    layoutCount++;
 }
 
 } // namespace brls

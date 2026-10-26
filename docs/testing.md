@@ -95,7 +95,7 @@ ctest --test-dir build --output-on-failure
 
 ## The bench
 
-`aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, swap, total).
+`aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, nanovg draw calls, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, flush, swap, total).
 
 ```sh
 aurore_bench                                   # the table
@@ -106,7 +106,7 @@ aurore_bench --check tests/bench_baseline.json # exit 1 on a regression
 
 `--check` fails when a count is above the baseline's by more than `--margin` (25 %, and 1). Times depend on the machine: they are checked only with `--time-margin <factor>`. `ctest` runs the check.
 
-The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too, and logs averages every 120 frames.
+The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too, and logs averages every 120 frames. The [inspector](inspector.md)'s panel shows its figures, and it measures while the panel is open. Each `FrameProfile` has the time of each phase (`events`, `input`, `update`, `layout`, `draw`, `inspector`, `flush`, `swap`), the `total` and the `interval` since the iteration before, and counts: layouts, views laid out, nanovg's draw calls and triangles, allocations.
 
 ## aurore-preview
 

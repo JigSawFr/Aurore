@@ -128,6 +128,8 @@ struct Run
         m["us_update"]              = mean([](auto& f) { return f.update; });
         m["us_layout"]              = mean([](auto& f) { return f.layout; });
         m["us_draw"]                = mean([](auto& f) { return f.draw; });
+        m["us_flush"]               = mean([](auto& f) { return f.flush; });
+        m["draw_calls_per_frame"]   = mean([](auto& f) { return f.drawCalls; });
         m["us_swap"]                = mean([](auto& f) { return f.swap; });
         m["us_total"]               = mean([](auto& f) { return f.total; });
         m["us_total_p95"]           = p95([](auto& f) { return f.total; });

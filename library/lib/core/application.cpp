@@ -960,12 +960,8 @@ void Application::frame(bool present)
     VideoContext* videoContext = Application::platform->getVideoContext();
 
     const bool inspect = Inspector::isOpen();
-    Time drawStart     = 0;
     if (inspect)
-    {
         Inspector::beginFrame();
-        drawStart = getRealTimeUsec();
-    }
 
     // Frame context
     FrameContext frameContext = FrameContext();
@@ -1050,11 +1046,20 @@ void Application::frame(bool present)
         debugLayer->frame(&frameContext);
     }
 
-    Time flushStart = 0;
+    // A frame drawn only to be compared (checkSkippedFrame) is not profiled
+    if (present && Profiler::isMeasuring())
+    {
+        int draws = 0, fill = 0, stroke = 0, text = 0;
+        nvgDebugGetStats(frameContext.vg, &draws, &fill, &stroke, &text);
+        Profiler::setDrawStats(draws, fill + stroke + text);
+        Profiler::endPhase(Profiler::Phase::DRAW);
+    }
+
     if (inspect)
     {
-        Inspector::draw(&frameContext, getRealTimeUsec() - drawStart);
-        flushStart = getRealTimeUsec();
+        Inspector::draw(&frameContext);
+        if (present)
+            Profiler::endPhase(Profiler::Phase::INSPECTOR);
     }
 
     // End frame
@@ -1063,21 +1068,12 @@ void Application::frame(bool present)
 
     if (!present)
         return;
-    Profiler::endPhase(Profiler::Phase::DRAW);
+    Profiler::endPhase(Profiler::Phase::FLUSH);
 
     if (Application::redrawDebug)
         videoContext->readPixels(&Application::presentedPixels, &Application::presentedWidth, &Application::presentedHeight);
 
-    if (inspect)
-    {
-        Time presentStart = getRealTimeUsec();
-        videoContext->endFrame();
-        Inspector::endFrame(presentStart - flushStart, getRealTimeUsec() - presentStart);
-    }
-    else
-    {
-        videoContext->endFrame();
-    }
+    videoContext->endFrame();
     Profiler::endPhase(Profiler::Phase::SWAP);
     postFrameEvent.fire();
 }
