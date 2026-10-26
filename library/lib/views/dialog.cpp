@@ -17,6 +17,7 @@
 
 #include <borealis/core/application.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/touch/tap_gesture.hpp>
 #include <borealis/views/dialog.hpp>
 #include <borealis/views/label.hpp>
 
@@ -148,6 +149,16 @@ Dialog::Dialog(Box* contentView)
             return cancelable;
         },
         false, false, SOUND_BACK);
+
+    // A tap on the backdrop, outside the dialog, cancels it as B does
+    this->addGestureRecognizer(new TapGestureRecognizer([this](TapGestureStatus status, Sound* soundToPlay)
+        {
+            if (status.state != GestureState::END || !this->cancelable)
+                return;
+            if (this->appletFrame->getFrame().pointInside(status.position))
+                return;
+            *soundToPlay = SOUND_BACK;
+            this->close(this->closeCallback); }));
 }
 
 Dialog::Dialog(std::string text)
@@ -177,6 +188,16 @@ Dialog::Dialog(std::string text)
             return cancelable;
         },
         false, false, SOUND_BACK);
+
+    // A tap on the backdrop, outside the dialog, cancels it as B does
+    this->addGestureRecognizer(new TapGestureRecognizer([this](TapGestureStatus status, Sound* soundToPlay)
+        {
+            if (status.state != GestureState::END || !this->cancelable)
+                return;
+            if (this->appletFrame->getFrame().pointInside(status.position))
+                return;
+            *soundToPlay = SOUND_BACK;
+            this->close(this->closeCallback); }));
 }
 
 void Dialog::addButton(std::string label, VoidEvent::Callback cb)
