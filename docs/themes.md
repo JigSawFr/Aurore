@@ -186,7 +186,7 @@ A view drawn from a theme key follows every change. What the core and Cadran dra
 - **Code**: `label->setThemeColor("textColor", "cadran/text2")`, `box->setThemeColor("backgroundColor", "cadran/surf")`, instead of `setTextColor(theme["cadran/text2"])`, which keeps the colour of the moment. A colour set afterwards by value (`setTextColor(…)`) replaces the key; `setThemeColor(property, "")` forgets it.
 - **Drawing**: in `draw()`, `ctx->theme["cadran/teal"]` is always the theme in use.
 
-What keeps colours another way (a cached `NVGcolor`, an image per variant) refreshes them in `View::onThemeChanged()` (call the base; a `Box` goes on to its children), or listens to `Application::getThemeChangedEvent()`, fired once a frame when the variant, the file or a colour changed, after every view of the screens took the change.
+What keeps colours another way (a cached `NVGcolor`, an image per variant) refreshes them in `View::onThemeChanged()` (call the base; a `Box` goes on to its children), or listens to `Application::getThemeChangedEvent()`, fired at most once per iteration of the main loop when the variant, the file or a colour changed, after every view of the screens took the change.
 
 ## A theme picker in an app
 

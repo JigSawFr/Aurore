@@ -21,9 +21,6 @@ option(USE_EGL "Using EGL instead of native GL." OFF)
 cmake_dependent_option(WIN32_TERMINAL "Show terminal when run on Windows" ON "WIN32" OFF)
 cmake_dependent_option(USE_D3D11 "Using directx 11 instead of OpenGL." OFF "WIN32" OFF)
 
-# Linux Only
-cmake_dependent_option(INSTALL "Install to system." OFF "UNIX;NOT APPLE" OFF)
-
 # PS4 Only
 cmake_dependent_option(LIBJBC "Root access enabled" OFF "PLATFORM_PS4" OFF)
 
@@ -51,8 +48,7 @@ set(CUSTOM_RESOURCES_DIR "" CACHE STRING "Custom resources dir")
 option(USE_GLFW "using glfw for input and create window" OFF)
 option(USE_SDL2 "using sdl2 for input and create window" OFF)
 
-# OpenGL version
-option(USE_GL3 "using OpenGL 3.2+" OFF)
+# OpenGL version: 3.2+ unless one of these
 option(USE_GL2 "using OpenGL 2.1" OFF)
 option(USE_GLES2 "using OpenGL ES 2.0" OFF)
 option(USE_GLES3 "using OpenGL ES 3.0" OFF)
@@ -88,22 +84,3 @@ option(BRLS_INSPECTOR "Built-in inspector on" OFF)
 # Aurore::test), and with this project the demo's tests, bench and
 # aurore-preview. Desktop with OpenGL 3 (the default driver) only.
 option(BRLS_BUILD_TESTS "Build the test harness" OFF)
-
-if (NOT DEFINED APP_PLATFORM_INCLUDE)
-    set(APP_PLATFORM_INCLUDE)
-endif ()
-
-if (NOT DEFINED APP_PLATFORM_LIB)
-    set(APP_PLATFORM_LIB)
-endif ()
-
-if (NOT DEFINED APP_PLATFORM_OPTION)
-    set(APP_PLATFORM_OPTION)
-endif ()
-
-if (NOT DEFINED APP_PLATFORM_LINK_OPTION)
-    set(APP_PLATFORM_LINK_OPTION)
-    if (PLATFORM_SWITCH OR PLATFORM_PSV)
-        list(APPEND APP_PLATFORM_LINK_OPTION "-Wl,-Map,aurore.map")
-    endif ()
-endif ()

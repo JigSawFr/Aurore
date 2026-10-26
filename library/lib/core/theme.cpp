@@ -705,14 +705,9 @@ std::vector<std::string> Theme::checkContrast(ThemeVariant variant)
 static const char* BUILTIN_PREFIX = "builtin:";
 static const int MAX_DEPTH        = 8;
 
-static bool startsWithText(const std::string& text, const std::string& prefix)
-{
-    return text.rfind(prefix, 0) == 0;
-}
-
 static const BuiltinTheme* findBuiltin(std::string id)
 {
-    if (startsWithText(id, BUILTIN_PREFIX))
+    if (startsWith(id, BUILTIN_PREFIX))
         id = id.substr(std::string(BUILTIN_PREFIX).size());
     if (endsWith(id, ".theme"))
         id = id.substr(0, id.size() - 6);
@@ -728,7 +723,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
 {
     std::string disk        = HotReload::diskResource(name);
     const std::string& path = disk.empty() ? name : disk;
-    if (startsWithText(path, BUILTIN_PREFIX))
+    if (startsWith(path, BUILTIN_PREFIX))
     {
         const BuiltinTheme* theme = findBuiltin(path);
         if (!theme)
@@ -737,7 +732,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
         return true;
     }
 #ifdef USE_LIBROMFS
-    if (startsWithText(path, "@res/"))
+    if (startsWith(path, "@res/"))
     {
         try
         {
@@ -751,7 +746,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
     }
 #endif
     std::string file = path;
-    if (startsWithText(file, "@res/"))
+    if (startsWith(file, "@res/"))
         file = std::string(BRLS_RESOURCES) + file.substr(5);
     std::ifstream stream(file);
     if (!stream)
@@ -775,7 +770,7 @@ static bool readThemeText(const std::string& path, std::string* text)
 
 static std::string directoryOf(const std::string& path)
 {
-    if (startsWithText(path, BUILTIN_PREFIX))
+    if (startsWith(path, BUILTIN_PREFIX))
         return BUILTIN_PREFIX;
     size_t slash = path.find_last_of('/');
     return slash == std::string::npos ? "" : path.substr(0, slash);
@@ -785,7 +780,7 @@ static std::string directoryOf(const std::string& path)
 // preset when no such file exists
 static std::string resolvePath(const std::string& name, const std::string& directory)
 {
-    if (startsWithText(name, BUILTIN_PREFIX) || startsWithText(name, "@res/") || startsWithText(name, "/")
+    if (startsWith(name, BUILTIN_PREFIX) || startsWith(name, "@res/") || startsWith(name, "/")
         || name.find(":/") != std::string::npos)
         return name;
     if (directory == BUILTIN_PREFIX)
@@ -847,7 +842,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
         if (line.empty())
             continue;
 
-        if (startsWithText(line, "@include"))
+        if (startsWith(line, "@include"))
         {
             std::string name = trim(line.substr(8));
             if (name.size() >= 2 && name.front() == '"' && name.back() == '"')
@@ -903,7 +898,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
         {
             // An included file's is the including one's too
             out->backgroundImage = resolvePath(value, directory);
-            if (startsWithText(out->backgroundImage, BUILTIN_PREFIX))
+            if (startsWith(out->backgroundImage, BUILTIN_PREFIX))
                 out->errors.push_back(where(number) + ": background_image is a file, not " + value);
             continue;
         }
@@ -1055,7 +1050,7 @@ static ParsedTheme parseTheme(const std::string& text, const std::string& direct
 // "@i18n/…": a string of the app's catalogs (the presets' names)
 static std::string localized(const std::string& value)
 {
-    return startsWithText(value, "@i18n/") ? getStr(value.substr(6)) : value;
+    return startsWith(value, "@i18n/") ? getStr(value.substr(6)) : value;
 }
 
 static std::string currentPath;
@@ -1244,7 +1239,7 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory)
     while (folder.size() > 1 && folder.back() == '/')
         folder.pop_back();
 #ifdef USE_LIBROMFS
-    if (startsWithText(folder, "@res/"))
+    if (startsWith(folder, "@res/"))
     {
         try
         {
@@ -1259,7 +1254,7 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory)
     else
 #endif
     {
-        std::string real = startsWithText(folder, "@res/") ? std::string(BRLS_RESOURCES) + folder.substr(5) : folder;
+        std::string real = startsWith(folder, "@res/") ? std::string(BRLS_RESOURCES) + folder.substr(5) : folder;
         try
         {
             if (fs::is_directory(real))

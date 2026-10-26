@@ -42,10 +42,7 @@ endif ()
 add_subdirectory(library)
 
 find_package(Threads REQUIRED)
-list(APPEND APP_PLATFORM_LIB ${CMAKE_THREAD_LIBS_INIT})
 
-# setting src and include
-list(APPEND APP_PLATFORM_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/demo/include)
 file(GLOB_RECURSE MAIN_SRC demo/*.cpp)
 
 set(PLATFORM_OPTION)
@@ -165,9 +162,8 @@ elseif (PLATFORM_TVOS)
             "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}")
 endif ()
 
-target_include_directories(${PROJECT_NAME} PRIVATE demo ${APP_PLATFORM_INCLUDE})
-target_compile_options(${PROJECT_NAME} PRIVATE -ffunction-sections -fdata-sections ${APP_PLATFORM_OPTION})
-target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore ${APP_PLATFORM_LIB})
+target_include_directories(${PROJECT_NAME} PRIVATE demo demo/include)
+target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore Threads::Threads)
 
 # The demo's tests, bench and aurore-preview, on the test harness
 # (-DBRLS_BUILD_TESTS=ON, then ctest)

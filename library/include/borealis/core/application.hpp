@@ -109,7 +109,7 @@ class Application
 
     /**
      * The Yoga configuration every view's node is created with
-     * (web defaults, layout errata).
+     * (web defaults, yoga's messages in the log).
      */
     static YGConfig* getYogaConfig();
 
