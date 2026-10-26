@@ -483,18 +483,22 @@ int fons__tt_getGlyphIndex(FONSttFontImpl *font, int codepoint)
 int fons__tt_buildGlyphBitmap(FONSttFontImpl *font, int glyph, float size, float scale,
 							  int *advance, int *lsb, int *x0, int *y0, int *x1, int *y1)
 {
+	FT_Face face = font->font;
 	FT_Error ftError;
 	FT_GlyphSlot ftGlyph;
 	FT_Fixed advFixed;
 	FONS_NOTUSED(scale);
 
-	ftError = FT_Set_Pixel_Sizes(font->font, 0, size);
+	*advance = *lsb = *x0 = *y0 = *x1 = *y1 = 0;
+
+	// The size as asked, not rounded to whole pixels
+	ftError = FT_Set_Char_Size(face, 0, (FT_F26Dot6)(size * 64.0f + 0.5f), 72, 72);
 	if (ftError) return 0;
-	ftError = FT_Load_Glyph(font->font, glyph, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
+	ftError = FT_Load_Glyph(face, glyph, FT_LOAD_RENDER | FT_LOAD_NO_BITMAP | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT);
 	if (ftError) return 0;
-	ftError = FT_Get_Advance(font->font, glyph, FT_LOAD_NO_SCALE, &advFixed);
+	ftError = FT_Get_Advance(face, glyph, FT_LOAD_NO_SCALE, &advFixed);
 	if (ftError) return 0;
-	ftGlyph = font->font->glyph;
+	ftGlyph = face->glyph;
 	*advance = (int)advFixed;
 	*lsb = (int)ftGlyph->metrics.horiBearingX;
 	*x0 = ftGlyph->bitmap_left;
@@ -507,27 +511,31 @@ int fons__tt_buildGlyphBitmap(FONSttFontImpl *font, int glyph, float size, float
 void fons__tt_renderGlyphBitmap(FONSttFontImpl *font, unsigned char *output, int outWidth, int outHeight, int outStride,
 								float scaleX, float scaleY, int glyph)
 {
-	FT_GlyphSlot ftGlyph = font->font->glyph;
-	int ftGlyphOffset = 0;
-	unsigned int x, y;
-	FONS_NOTUSED(outWidth);
-	FONS_NOTUSED(outHeight);
+	FT_Bitmap* bitmap = &font->font->glyph->bitmap;
+	int x, y;
 	FONS_NOTUSED(scaleX);
 	FONS_NOTUSED(scaleY);
 	FONS_NOTUSED(glyph);	// glyph has already been loaded by fons__tt_buildGlyphBitmap
 
-	for ( y = 0; y < ftGlyph->bitmap.rows; y++ ) {
-		for ( x = 0; x < ftGlyph->bitmap.width; x++ ) {
-			output[(y * outStride) + x] = ftGlyph->bitmap.buffer[ftGlyphOffset++];
+	for (y = 0; y < (int)bitmap->rows && y < outHeight; y++) {
+		const unsigned char* row = bitmap->buffer + y * bitmap->pitch;
+		unsigned char* dst = &output[y * outStride];
+		for (x = 0; x < (int)bitmap->width && x < outWidth; x++) {
+			if (bitmap->pixel_mode == FT_PIXEL_MODE_MONO)
+				dst[x] = (row[x >> 3] & (0x80 >> (x & 7))) ? 0xff : 0;
+			else
+				dst[x] = row[x];
 		}
 	}
 }
 
 int fons__tt_getGlyphKernAdvance(FONSttFontImpl *font, int glyph1, int glyph2)
 {
+	// In font units, as stb_truetype gives it: the caller scales it.
 	FT_Vector ftKerning;
-	FT_Get_Kerning(font->font, glyph1, glyph2, FT_KERNING_DEFAULT, &ftKerning);
-	return (int)((ftKerning.x + 32) >> 6);  // Round up and convert to integer
+	if (FT_Get_Kerning(font->font, glyph1, glyph2, FT_KERNING_UNSCALED, &ftKerning) != 0)
+		return 0;
+	return (int)ftKerning.x;
 }
 
 #else

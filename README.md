@@ -101,6 +101,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A label tells when it is cut with "…" | `Label::isTruncated` |
 | A wrapped line no longer starts with a space; a no-break space keeps words together | — |
 | The default font looked up for each new label | — |
+| FreeType instead of stb_truetype, hinted (an option) | `-DUSE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
 
 **Languages**
 

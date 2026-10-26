@@ -69,6 +69,11 @@ option(BRLS_UNITY_BUILD "Unity build" OFF)
 
 option(BRLS_FONTSTASH_STREAM "fontstash use stream" OFF)
 
+# Rasterize glyphs with FreeType instead of stb_truetype: hinted text and
+# colour emoji (CBDT/CBLC, sbix and COLR fonts). The system FreeType on
+# desktop, devkitPro's switch-freetype on Switch.
+option(USE_FREETYPE "fontstash renders glyphs with FreeType" OFF)
+
 if (NOT DEFINED APP_PLATFORM_INCLUDE)
     set(APP_PLATFORM_INCLUDE)
 endif ()
