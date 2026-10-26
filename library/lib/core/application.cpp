@@ -1051,6 +1051,42 @@ void Application::pushActivity(Activity* activity, TransitionAnimation animation
     }
 }
 
+void Application::replaceActivity(Activity* activity, TransitionAnimation animation)
+{
+    if (Application::activitiesStack.empty())
+    {
+        Application::pushActivity(activity, animation);
+        return;
+    }
+
+    Activity* replaced = Application::activitiesStack.back();
+    size_t focusDepth  = Application::focusStack.size();
+
+    Application::pushActivity(activity, animation);
+
+    // Nothing will give the focus back to the replaced activity
+    if (Application::focusStack.size() > focusDepth)
+        Application::focusStack.pop_back();
+    replaced->willDisappear(true);
+
+    // Drawn beneath the new one while it fades in, then removed
+    auto remove = [replaced]()
+    {
+        auto it = std::find(Application::activitiesStack.begin(), Application::activitiesStack.end(), replaced);
+        if (it == Application::activitiesStack.end())
+            return;
+        Application::activitiesStack.erase(it);
+        delete replaced;
+    };
+
+    bool animated  = animation == TransitionAnimation::FADE || animation == TransitionAnimation::SLIDE_LEFT || animation == TransitionAnimation::SLIDE_RIGHT;
+    float duration = animated ? activity->getShowAnimationDuration(animation) : 0;
+    if (duration > 0)
+        brls::delay((long)duration + 1, remove);
+    else
+        brls::sync(remove);
+}
+
 void Application::clear()
 {
     for (Activity* activity : Application::activitiesStack)
