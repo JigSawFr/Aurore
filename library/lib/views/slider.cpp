@@ -18,6 +18,7 @@
 #include <borealis/core/touch/pan_gesture.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/views/slider.hpp>
+#include <cmath>
 
 namespace brls
 {
@@ -60,14 +61,22 @@ Slider::Slider()
     line->setColor(theme["brls/slider/line_filled"]);
     lineEmpty->setColor(theme["brls/slider/line_empty"]);
 
+    // The D-pad moves the slider (in buttonsProcessing, or here a step at a
+    // time with a discrete step) rather than the focus
     pointer->registerAction(
-        "Right Click Blocker", BUTTON_NAV_RIGHT, [](View* view)
-        { return true; },
+        "Right Click Blocker", BUTTON_NAV_RIGHT, [this](View* view)
+        {
+            if (this->discreteStep > 0)
+                this->moveByStep(1);
+            return true; },
         true, true, SOUND_NONE);
 
     pointer->registerAction(
-        "Right Click Blocker", BUTTON_NAV_LEFT, [](View* view)
-        { return true; },
+        "Right Click Blocker", BUTTON_NAV_LEFT, [this](View* view)
+        {
+            if (this->discreteStep > 0)
+                this->moveByStep(-1);
+            return true; },
         true, true, SOUND_NONE);
 
     pointer->registerAction(
@@ -96,6 +105,7 @@ Slider::Slider()
         else if (status.state == GestureState::START)
         {
             lastProgress = progress;
+            progressing  = true;
         }
 
         float paddingWidth = getWidth() - pointer->getWidth();
@@ -104,7 +114,11 @@ Slider::Slider()
         setProgress(lastProgress + delta / paddingWidth);
 
         if (status.state == GestureState::END)
-            Application::getPlatform()->getAudioPlayer()->play(SOUND_SLIDER_RELEASE); },
+        {
+            Application::getPlatform()->getAudioPlayer()->play(SOUND_SLIDER_RELEASE);
+            progressing = false;
+            inputProgressEvent.fire(progress);
+        } },
         PanAxis::HORIZONTAL));
 
     progress = 0.33f;
@@ -136,6 +150,20 @@ void Slider::buttonsProcessing()
     {
         auto& state        = Application::getControllerState();
         static bool repeat = false;
+
+        bool held = state.buttons[BUTTON_NAV_RIGHT] || state.buttons[BUTTON_NAV_LEFT];
+        if (held)
+            progressing = true;
+        else if (progressing)
+        {
+            // Let go: the value is chosen
+            progressing = false;
+            inputProgressEvent.fire(progress);
+        }
+
+        // A discrete step moves on each press, in the actions
+        if (this->discreteStep > 0)
+            return;
 
         if (state.buttons[BUTTON_NAV_RIGHT] && state.buttons[BUTTON_NAV_LEFT])
             return;
@@ -217,6 +245,35 @@ float Slider::getProgress()
 Event<float>* Slider::getProgressEvent()
 {
     return &progressEvent;
+}
+
+Event<float>* Slider::getInputProgressEvent()
+{
+    return &inputProgressEvent;
+}
+
+bool Slider::isProgressing()
+{
+    return this->progressing;
+}
+
+void Slider::setDiscreteStep(float step)
+{
+    this->discreteStep = step;
+}
+
+void Slider::moveByStep(int direction)
+{
+    // On the grid of the step, so a value set from elsewhere snaps to it
+    float steps = std::round(this->progress / this->discreteStep) + direction;
+    float next  = steps * this->discreteStep;
+    if ((direction > 0 && this->progress >= 1) || (direction < 0 && this->progress <= 0))
+    {
+        pointer->shakeHighlight(direction > 0 ? FocusDirection::RIGHT : FocusDirection::LEFT);
+        Application::getAudioPlayer()->play(SOUND_FOCUS_ERROR);
+        return;
+    }
+    this->setProgress(next);
 }
 
 void Slider::setStep(float step)

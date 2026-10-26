@@ -40,6 +40,12 @@ class InputCell : public DetailCell
     }
 
     void setPlaceholder(std::string placeholder);
+
+    /**
+     * A secret value (a password, a PIN): shown as dots, typed with the
+     * password keyboard. XML: secure="true".
+     */
+    void setSecure(bool secure);
     std::string getPlaceholder()
     {
         return placeholder;
@@ -63,6 +69,7 @@ class InputCell : public DetailCell
     static View* create();
 
   private:
+    bool secure = false;
     std::string value;
     std::string hint;
     std::string placeholder;

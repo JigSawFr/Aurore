@@ -148,6 +148,15 @@ class Application
     static void pushActivity(Activity* view, TransitionAnimation animation = TransitionAnimation::FADE);
 
     /**
+     * Pushes the activity in place of the one on top, in one transition:
+     * the one replaced is not shown again on the way, nor given the focus
+     * back later, and is deleted once the new one is shown (a wizard's next
+     * step, a sign-in screen giving way to the home screen). With an empty
+     * stack it is a push.
+     */
+    static void replaceActivity(Activity* activity, TransitionAnimation animation = TransitionAnimation::FADE);
+
+    /**
      * Pops the last pushed activity from the stack
      * and gives focus back where it was before.
      *
@@ -220,6 +229,11 @@ class Application
 
     /**
      * "Crashes" the app (displays a fullscreen CrashFrame)
+     */
+    /**
+     * Shows `text` in a dialog that cannot be dismissed, with one button that
+     * quits the app: for an error the app cannot go on after. Can be called
+     * from any thread.
      */
     static void crash(std::string text);
 

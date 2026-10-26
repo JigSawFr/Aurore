@@ -266,6 +266,10 @@ void Hints::refillHints(View* focusView)
             }
 
             addedButtons.insert(static_cast<ControllerButton>(action->getButton()));
+            // With nothing to say, no hint, but the button stays this
+            // action's (a parent's hint for it would be wrong)
+            if (action->getHintText().empty())
+                continue;
             actions.push_back(action);
             if (focusView == hintsOptionalOwner && action->getButton() != BUTTON_A && action->getButton() != BUTTON_B)
                 optional.insert(action.get());

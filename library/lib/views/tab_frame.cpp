@@ -51,16 +51,33 @@ TabFrame::TabFrame()
 
 void TabFrame::addTab(std::string label, TabViewCreator creator)
 {
-    this->sidebar->addItem(label, [this, creator](brls::View* view) {
+    int index = this->tabCount++;
+    this->sidebar->addItem(label, [this, creator, index](brls::View* view) {
         // Only trigger when the sidebar item gains focus
         if (!view->isFocused())
+            return;
+
+        // A kept tab shown again
+        auto kept = this->keepTabs ? this->keptTabs.find(index) : this->keptTabs.end();
+        if (kept != this->keptTabs.end() && kept->second == this->activeTab)
             return;
 
         // Remove the existing tab if it exists
         if (this->activeTab)
         {
-            this->removeView(this->activeTab); // will call willDisappear and delete
+            // will call willDisappear, and delete it unless it is kept
+            bool keepIt = false;
+            for (auto& tab : this->keptTabs)
+                keepIt |= tab.second == this->activeTab;
+            this->removeView(this->activeTab, !keepIt);
             this->activeTab = nullptr;
+        }
+
+        if (kept != this->keptTabs.end())
+        {
+            this->addView(kept->second); // addView calls willAppear
+            this->activeTab = kept->second;
+            return;
         }
 
         // Add the new tab
@@ -73,6 +90,8 @@ void TabFrame::addTab(std::string label, TabViewCreator creator)
         this->addView(newContent); // addView calls willAppear
 
         this->activeTab = newContent;
+        if (this->keepTabs)
+            this->keptTabs[index] = newContent;
 
         newContent->registerAction(
             "hints/back"_i18n, BUTTON_B, [this](View* view) {
@@ -96,6 +115,30 @@ void TabFrame::focusTab(int position)
 void TabFrame::clearTabs()
 {
     this->sidebar->clearItems();
+    this->tabCount = 0;
+    this->freeKeptTabs();
+}
+
+void TabFrame::setKeepTabs(bool keep)
+{
+    this->keepTabs = keep;
+    if (!keep)
+        this->freeKeptTabs();
+}
+
+void TabFrame::freeKeptTabs()
+{
+    // The one shown stays (freed when replaced, as without keeping); the
+    // others are not in the tree and are deleted here
+    for (auto& tab : this->keptTabs)
+        if (tab.second != this->activeTab)
+            delete tab.second;
+    this->keptTabs.clear();
+}
+
+TabFrame::~TabFrame()
+{
+    this->freeKeptTabs();
 }
 
 void TabFrame::addSeparator()

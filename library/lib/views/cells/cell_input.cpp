@@ -18,6 +18,8 @@
 
 #include "borealis/views/dropdown.hpp"
 
+#include <algorithm>
+
 namespace brls
 {
 
@@ -27,12 +29,24 @@ InputCell::InputCell()
 
     this->registerClickAction([this](View* view)
         {
-            Application::getImeManager()->openForText([&](std::string text) {
-            this->setValue(text);
-        },
-            this->title->getFullText(), this->hint, this->maxInputLength, this->value, this->kbdDisableBitmask);
+            auto done = [this](std::string text) { this->setValue(text); };
+            if (this->secure)
+                Application::getImeManager()->openForPassword(done,
+                    this->title->getFullText(), this->hint, this->maxInputLength, "", this->kbdDisableBitmask);
+            else
+                Application::getImeManager()->openForText(done,
+                    this->title->getFullText(), this->hint, this->maxInputLength, this->value, this->kbdDisableBitmask);
 
         return true; });
+
+    this->registerBoolXMLAttribute("secure", [this](bool value)
+        { this->setSecure(value); });
+}
+
+void InputCell::setSecure(bool secure)
+{
+    this->secure = secure;
+    updateUI();
 }
 
 void InputCell::init(std::string title, std::string value, Event<std::string>::Callback callback, std::string placeholder, std::string hint, int maxInputLength, int kbdDisableBitmask)
@@ -70,7 +84,22 @@ void InputCell::updateUI()
     }
     else
     {
-        this->detail->setText(value);
+        if (this->secure)
+        {
+            // One dot a character (a code point), at most 12
+            size_t chars = 0;
+            for (unsigned char c : this->value)
+                if ((c & 0xC0) != 0x80)
+                    chars++;
+            std::string dots;
+            for (size_t i = 0; i < std::min<size_t>(chars, 12); i++)
+                dots += "\u2022";
+            this->detail->setText(dots);
+        }
+        else
+        {
+            this->detail->setText(value);
+        }
         this->detail->setTextColor(theme["brls/list/listItem_value_color"]);
     }
 }

@@ -276,6 +276,10 @@ class View
 
     bool wireframeEnabled = false;
     bool clipsToBounds    = false;
+    float scaleX          = 1.0f;
+    float scaleY          = 1.0f;
+
+    void applyScale(NVGcontext* vg, const Rect& frame);
 
     std::vector<std::shared_ptr<Action>> actions;
     std::vector<GestureRecognizer*> gestureRecognizers;
@@ -398,6 +402,18 @@ class View
      * to the next one (140 ms), rather than jumping. On by default.
      */
     static void setHighlightGlide(bool glide);
+
+    /**
+     * Draws the view (its background, content and highlight) scaled around
+     * its centre, without laying anything out again: a pressed or focused
+     * view grown or shrunk a little. Touch hit-testing keeps the unscaled
+     * frame. XML: scale="1.05".
+     */
+    void setScale(float scale);
+    void setScaleX(float scale);
+    void setScaleY(float scale);
+    float getScaleX() const { return scaleX; }
+    float getScaleY() const { return scaleY; }
 
     static constexpr float AUTO = NAN;
 
@@ -1265,6 +1281,12 @@ class View
     void setActionAvailable(enum ControllerButton button, bool available);
     void setActionsAvailable(bool available) const;
 
+    /**
+     * Shows or hides the hint of the action on `button` (the action still
+     * works), as registerAction's `hidden` but while the view lives.
+     */
+    void setActionHidden(enum ControllerButton button, bool hidden);
+
     void resetClickAnimation();
     void playClickAnimation(bool reverse = false, bool animateBack = true, bool force = false);
 
@@ -1292,6 +1314,13 @@ class View
      * Add new gesture recognizer on this view.
      */
     void addGestureRecognizer(GestureRecognizer* recognizer);
+
+    /**
+     * Removes a recognizer added with addGestureRecognizer and deletes it
+     * (false if the view did not have it). Not from one of its own
+     * callbacks: the gesture being handled still uses it.
+     */
+    bool removeGestureRecognizer(GestureRecognizer* recognizer);
 
     /**
      * Called each frame when touch is registered.
