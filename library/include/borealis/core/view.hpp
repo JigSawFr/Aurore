@@ -389,6 +389,8 @@ class View
         return this->a(nvgRGBAf(r, g, b, a));
     }
 
+    NVGcolor shadowColor(NVGcolor color, float opacity);
+
     /**
      * Should the hint alpha be animated when
      * pushing the view?
@@ -1759,6 +1761,32 @@ class View
      */
     virtual void onTextScaleChanged() {}
 
+    /**
+     * Draws the style property `property` (backgroundColor, textColor…, see
+     * getStyleProperty) in the theme colour `key` ("brls/text"), now and
+     * again each time the theme changes (a theme file, the light or dark
+     * variant). XML does it for every "@theme/…" colour. A colour the app
+     * sets on the property afterwards (setTextColor…) replaces the key.
+     * An empty key only forgets the property's key (the colour stays).
+     * Returns false for a property the view does not have or an unknown key.
+     */
+    bool setThemeColor(const std::string& property, const std::string& key);
+
+    /**
+     * The key setThemeColor gave `property`, "" when it has none.
+     */
+    std::string getThemeColor(const std::string& property);
+
+    /**
+     * Called on every view of the screens when the theme changes
+     * (Application::getThemeChangedEvent): the colours given by key
+     * (setThemeColor) take their new values, the state styles read their
+     * "@theme/" values again. A view that keeps other colours of its own
+     * looks them up again here, then calls the base. A Box goes on to its
+     * children.
+     */
+    virtual void onThemeChanged();
+
   protected:
     /**
      * The view's own role and label when the app gave none.
@@ -1796,6 +1824,16 @@ class View
     bool bindOne(const std::string& property, const std::string& path, Activity* activity);
     static bool parseStyleValue(const std::string& text, StyleValue::Type type, StyleValue* value);
     static unsigned pendingBindings;
+
+    // setThemeColor's: the property, its key, and the colour set last (to
+    // tell the app's own changes from ours)
+    struct ThemeColor
+    {
+        std::string property;
+        std::string key;
+        NVGcolor applied;
+    };
+    std::unique_ptr<std::vector<ThemeColor>> themeColors;
 };
 
 } // namespace brls

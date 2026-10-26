@@ -90,6 +90,7 @@ class RecyclerCell : public Box
     void onFocusLost() override;
 
   private:
+    void showSeparator(bool show);
     IndexPath indexPath;
     Event<InputType>::Subscription subscription;
 };
@@ -178,6 +179,7 @@ class RecyclerFrame : public ScrollingFrame
     View* getNextCellFocus(FocusDirection direction, View* currentView);
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
     void onLayout() override;
+    void onThemeChanged() override;
     void setPadding(float padding) override;
     void setPadding(float top, float right, float bottom, float left) override;
     void setPaddingTop(float top) override;

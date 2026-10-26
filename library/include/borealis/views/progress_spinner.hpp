@@ -44,6 +44,10 @@ class ProgressSpinner : public View
      */
     void setColor(NVGcolor color);
 
+    // barColor, the bars' colour (the theme's until setColor)
+    bool getStyleProperty(const std::string& name, StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const StyleValue& value) override;
+
     void animate(bool animate);
 
     static brls::View* create();

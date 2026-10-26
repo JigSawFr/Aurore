@@ -219,14 +219,13 @@ void Label::setCursor(int cursor) {
 Label::Label()
 {
     Style style = Application::getStyle();
-    Theme theme = Application::getTheme();
 
     // Default attributes
     this->font        = Application::getDefaultFont();
     this->fontSize    = style["brls/label/default_font_size"];
     this->lineHeight  = style["brls/label/default_line_height"];
-    this->textColor   = theme["brls/text"];
     this->fontQuality = 1.0f;
+    this->setThemeColor("textColor", "brls/text");
 
     this->setHighlightPadding(style["brls/label/highlight_padding"]);
 

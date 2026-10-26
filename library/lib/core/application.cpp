@@ -886,6 +886,8 @@ bool Application::handleAction(const ActionType type, const int button, const bo
 
 void Application::frame()
 {
+    Application::checkThemeChanged();
+
     VideoContext* videoContext = Application::platform->getVideoContext();
 
     // Frame context
@@ -1639,6 +1641,32 @@ VoidEvent* Application::getWindowShouldCloseEvent()
 Event<bool>* Application::getWindowFocusChangedEvent()
 {
     return &Application::windowFocusChangedEvent;
+}
+
+Event<ThemeVariant>* Application::getThemeChangedEvent()
+{
+    return &Application::themeChangedEvent;
+}
+
+void Application::checkThemeChanged()
+{
+    ThemeVariant variant = Application::getThemeVariant();
+    uint64_t generation  = Theme::getGeneration();
+    if (generation == Application::themeGeneration && variant == Application::themeVariant)
+        return;
+    Application::themeGeneration = generation;
+    Application::themeVariant    = variant;
+
+    for (Activity* activity : Application::activitiesStack)
+        if (View* view = activity->getContentView())
+            view->onThemeChanged();
+    Application::notificationManager->onThemeChanged();
+
+    // The console records its clear colour once (deko3d): again
+    Application::platform->setThemeVariant(variant);
+
+    Application::themeChangedEvent.fire(variant);
+    Application::requestRedraw();
 }
 
 int Application::getFont(std::string fontName)

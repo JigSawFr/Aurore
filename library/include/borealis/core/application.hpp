@@ -242,6 +242,15 @@ class Application
     static Theme getTheme();
     static ThemeVariant getThemeVariant();
 
+    /**
+     * Fired when the theme changed: another variant
+     * (Platform::setThemeVariant), a theme file (Theme::loadFile) or a
+     * colour changed (Theme::addColor). Checked once a
+     * frame, before it is drawn; by then every view of the screens took the
+     * change (View::onThemeChanged). For what keeps colours of its own.
+     */
+    static Event<ThemeVariant>* getThemeChangedEvent();
+
     static ImeManager* getImeManager();
 
     /**
@@ -581,6 +590,13 @@ class Application
     inline static VoidEvent windowCreationDoneEvent;
     inline static VoidEvent windowShouldCloseEvent;
     inline static Event<bool> windowFocusChangedEvent;
+    inline static Event<ThemeVariant> themeChangedEvent;
+
+    // The theme the screens were last told about
+    inline static uint64_t themeGeneration   = 0;
+    inline static ThemeVariant themeVariant = ThemeVariant::DARK;
+    static void checkThemeChanged();
+
 
     inline static std::unordered_map<std::string, XMLViewCreator> xmlViewsRegister;
 

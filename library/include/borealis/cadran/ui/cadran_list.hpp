@@ -29,12 +29,13 @@ std::string upper(const std::string& text);
 // A card of the lists: a rounded surface with a 1 px border (`accent`, the
 // line colour unless set) drawn behind its rows, the rows' separators kept
 // on all but the last visible one. Nothing is drawn when every row is hidden.
+// Its colours are theme keys ("cadran/coral_line", "cadran/none").
 class Card : public brls::Box
 {
   public:
     Card();
-    void setAccent(NVGcolor color);
-    void setFill(NVGcolor color);
+    void setAccent(const std::string& key);
+    void setFill(const std::string& key);
     // Gone with its last row (and back with its first), so that its top
     // margin leaves no gap between the cards around it.
     void follow_rows();
@@ -42,7 +43,7 @@ class Card : public brls::Box
               brls::Style style, brls::FrameContext* ctx) override;
 
   private:
-    NVGcolor fill, border;
+    std::string fill = "cadran/surf", border = "cadran/line";
 };
 
 // The boards' switch, drawn from a BooleanCell's state each frame (so it
@@ -56,7 +57,6 @@ class Switch : public brls::View
 
   private:
     brls::BooleanCell* cell;
-    NVGcolor on, off, knob_on, knob_off;
 };
 
 class List

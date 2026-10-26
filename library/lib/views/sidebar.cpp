@@ -103,19 +103,17 @@ void SidebarItem::setActive(bool active)
     if (active == this->active)
         return;
 
-    Theme theme = Application::getTheme();
-
     if (active)
     {
         this->activeEvent.fire(this);
 
         this->accent->setVisibility(Visibility::VISIBLE);
-        this->label->setTextColor(theme["brls/sidebar/active_item"]);
+        this->label->setThemeColor("textColor", "brls/sidebar/active_item");
     }
     else
     {
         this->accent->setVisibility(Visibility::INVISIBLE);
-        this->label->setTextColor(theme["brls/text"]);
+        this->label->setThemeColor("textColor", "brls/text");
     }
 
     this->active = active;

@@ -22,10 +22,9 @@ namespace kit = cadran::kit;
 namespace
 {
 // A label that takes the rest of its row and wraps there.
-brls::Label* growing(const std::string& text, float size, NVGcolor color)
+brls::Label* growing(const std::string& text, float size, const char* color_key)
 {
-    brls::Label* l = kit::label(text, size);
-    l->setTextColor(color);
+    brls::Label* l = kit::label(text, size, color_key);
     l->setGrow(1.0f);
     l->setShrink(1.0f);
     return l;
@@ -93,13 +92,14 @@ brls::View* checkbox(bool done)
     box->setShrink(0.0f);
     box->setCornerRadius(4);
     box->setBorderThickness(2);
-    box->setBorderColor(done ? kit::color("cadran/teal_fill") : kit::color("cadran/text3"));
+    box->setThemeColor("borderColor", done ? "cadran/teal_fill" : "cadran/text3");
     box->setJustifyContent(brls::JustifyContent::CENTER);
     box->setAlignItems(brls::AlignItems::CENTER);
     box->setMarginTop(4);
     if (done) {
-        box->setBackgroundColor(kit::color("cadran/teal_fill"));
-        auto* mark = new brls::Rectangle(kit::color("cadran/navy"));
+        box->setThemeColor("backgroundColor", "cadran/teal_fill");
+        auto* mark = new brls::Rectangle();
+        mark->setThemeColor("color", "cadran/navy");
         mark->setWidth(8);
         mark->setHeight(8);
         mark->setCornerRadius(2);
@@ -123,15 +123,15 @@ brls::View* item(const markdown::Block& b)
     marker->setShrink(0.0f);
     row->addView(marker);
     // A task done reads quieter, as GitHub greys it.
-    row->addView(growing(b.text, 18, b.task == 1 ? kit::color("cadran/text3") : kit::color("cadran/text")));
+    row->addView(growing(b.text, 18, b.task == 1 ? "cadran/text3" : "cadran/text"));
     return row;
 }
 
 brls::View* code(const markdown::Block& b)
 {
     auto* box = new brls::Box(brls::Axis::COLUMN);
-    box->setBackgroundColor(kit::color("cadran/surf2"));
-    box->setBorderColor(kit::color("cadran/line"));
+    box->setThemeColor("backgroundColor", "cadran/surf2");
+    box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
     box->setCornerRadius(kit::RADIUS_ROW);
     box->setPadding(12, 18, 12, 18);
@@ -145,22 +145,23 @@ brls::View* quote(const markdown::Block& b)
 {
     // GitHub's alerts: their colour and their title, on the second surface
     // as the boards' notes.
-    NVGcolor color = kit::color("cadran/text3");
+    const char* color = "cadran/text3";
     std::string title;
-    if (b.alert == "note") color = kit::color("cadran/blue"), title = "cadran/markdown/note"_i18n;
-    else if (b.alert == "tip") color = kit::color("cadran/teal"), title = "cadran/markdown/tip"_i18n;
-    else if (b.alert == "important") color = kit::color("cadran/violet"), title = "cadran/markdown/important"_i18n;
-    else if (b.alert == "warning") color = kit::color("cadran/amber"), title = "cadran/markdown/warning"_i18n;
-    else if (b.alert == "caution") color = kit::color("cadran/coral"), title = "cadran/markdown/caution"_i18n;
+    if (b.alert == "note") color = "cadran/blue", title = "cadran/markdown/note"_i18n;
+    else if (b.alert == "tip") color = "cadran/teal", title = "cadran/markdown/tip"_i18n;
+    else if (b.alert == "important") color = "cadran/violet", title = "cadran/markdown/important"_i18n;
+    else if (b.alert == "warning") color = "cadran/amber", title = "cadran/markdown/warning"_i18n;
+    else if (b.alert == "caution") color = "cadran/coral", title = "cadran/markdown/caution"_i18n;
     auto* row = new brls::Box(brls::Axis::ROW);
     row->setAlignItems(brls::AlignItems::STRETCH);
     row->setMarginTop(8);
     if (!title.empty()) {
-        row->setBackgroundColor(kit::color("cadran/surf2"));
+        row->setThemeColor("backgroundColor", "cadran/surf2");
         row->setCornerRadius(kit::RADIUS_ROW);
         row->setPaddingLeft(10);
     }
-    auto* bar = new brls::Rectangle(color);
+    auto* bar = new brls::Rectangle();
+    bar->setThemeColor("color", color);
     bar->setWidth(4);
     bar->setCornerRadius(2);
     bar->setMarginRight(14);
@@ -170,8 +171,7 @@ brls::View* quote(const markdown::Block& b)
     body->setShrink(1.0f);
     body->setPadding(6, 8, 6, 0);
     if (!title.empty()) {
-        brls::Label* t = kit::label(cadran::upper(title), kit::TEXT_META);
-        t->setTextColor(color);
+        brls::Label* t = kit::label(cadran::upper(title), kit::TEXT_META, color);
         t->setMarginBottom(4);
         body->addView(t);
     }
@@ -187,22 +187,22 @@ brls::View* table(const markdown::Block& b)
     auto* grid = new brls::Box(brls::Axis::COLUMN);
     grid->setMarginTop(8);
     grid->setBorderThickness(1);
-    grid->setBorderColor(kit::color("cadran/line"));
+    grid->setThemeColor("borderColor", "cadran/line");
     grid->setCornerRadius(kit::RADIUS_ROW);
-    grid->setBackgroundColor(kit::color("cadran/surf"));
+    grid->setThemeColor("backgroundColor", "cadran/surf");
     for (size_t r = 0; r < b.rows.size(); r++) {
         auto* row = new brls::Box(brls::Axis::ROW);
         row->setAlignItems(brls::AlignItems::STRETCH);
         if (r + 1 < b.rows.size()) {
             row->setLineBottom(1);
-            row->setLineColor(kit::color("cadran/line"));
+            row->setThemeColor("lineColor", "cadran/line");
         }
         for (size_t c = 0; c < columns; c++) {
             const std::string text = c < b.rows[r].size() ? b.rows[r][c] : "";
             auto* cell = new brls::Box(brls::Axis::ROW);
             cell->setWidthPercentage(100.0f / (float)columns);
             cell->setPadding(8, 14, 8, 14);
-            cell->addView(growing(text, kit::TEXT_BODY, r == 0 ? kit::color("cadran/text2") : kit::color("cadran/text")));
+            cell->addView(growing(text, kit::TEXT_BODY, r == 0 ? "cadran/text2" : "cadran/text"));
             row->addView(cell);
         }
         grid->addView(row);
@@ -226,7 +226,8 @@ void fill(brls::Box* box, const std::vector<markdown::Block>& blocks)
             case markdown::Block::Code: view = code(b); break;
             case markdown::Block::Quote: view = quote(b); break;
             case markdown::Block::Rule: {
-                auto* rule = new brls::Rectangle(kit::color("cadran/line"));
+                auto* rule = new brls::Rectangle();
+                rule->setThemeColor("color", "cadran/line");
                 rule->setHeight(1);
                 rule->setMarginTop(14);
                 rule->setMarginBottom(6);

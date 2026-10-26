@@ -103,12 +103,6 @@ std::string locale()
     return s_locale;
 }
 
-void theme_changed()
-{
-    apply_theme();
-    rebuild();
-}
-
 void language_changed()
 {
     const std::string& chosen = ui::prefs().language;

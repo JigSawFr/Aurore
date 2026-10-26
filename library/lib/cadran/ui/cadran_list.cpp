@@ -96,13 +96,13 @@ void move_to(brls::View* view, brls::Box* to)
     to->addView(view);
 }
 
-CadranIcon* make_icon(const char* name, float size, NVGcolor color)
+CadranIcon* make_icon(const char* name, float size, const char* color_key)
 {
     auto* icon = new CadranIcon();
     icon->setIcon(name);
     icon->setWidth(size);
     icon->setHeight(size);
-    icon->setColor(color);
+    icon->setThemeColor("color", color_key);
     return icon;
 }
 
@@ -114,7 +114,7 @@ CadranIcon* make_icon(const char* name, float size, NVGcolor color)
 class TileGlow : public brls::View
 {
   public:
-    TileGlow(brls::View* cell, NVGcolor own, NVGcolor next)
+    TileGlow(brls::View* cell, const char* own, const char* next)
         : tile(cell), ink(own), far(next)
     {
         this->setFocusable(false);
@@ -122,7 +122,7 @@ class TileGlow : public brls::View
         this->setPositionTop(0);
         this->setPositionLeft(0);
     }
-    void draw(NVGcontext* vg, float x, float y, float, float, brls::Style, brls::FrameContext*) override
+    void draw(NVGcontext* vg, float x, float y, float, float, brls::Style, brls::FrameContext* ctx) override
     {
         // At the tile's corner (top and left 0), as large as the tile: a
         // percentage of it does not follow its height.
@@ -132,8 +132,8 @@ class TileGlow : public brls::View
         // Fainter on the light theme's white, where a tint shows more.
         const bool light = brls::Application::getThemeVariant() == brls::ThemeVariant::LIGHT;
         const float lift = this->tile->isFocused() ? 1.5f : 1.0f;
-        light_at(vg, x, y, width, height, x + width * 0.12f, y + height * 0.1f, width * 0.9f, this->ink, (light ? 0.14f : 0.28f) * lift);
-        light_at(vg, x, y, width, height, x + width, y + height, width * 0.75f, this->far, (light ? 0.10f : 0.18f) * lift);
+        light_at(vg, x, y, width, height, x + width * 0.12f, y + height * 0.1f, width * 0.9f, ctx->theme[this->ink], (light ? 0.14f : 0.28f) * lift);
+        light_at(vg, x, y, width, height, x + width, y + height, width * 0.75f, ctx->theme[this->far], (light ? 0.10f : 0.18f) * lift);
     }
 
   private:
@@ -150,7 +150,8 @@ class TileGlow : public brls::View
     }
 
     brls::View* tile;
-    NVGcolor ink, far;
+    const char* ink;   // theme keys
+    const char* far;
 };
 
 // The tiles' inks, one per tile in turn, never the warnings' (amber, coral):
@@ -229,17 +230,16 @@ class TileFit : public brls::View
 // The icon before a row's title, in a soft rounded square.
 brls::Box* row_icon(const char* name)
 {
-    brls::Theme theme = brls::Application::getTheme();
     auto* square = new brls::Box(brls::Axis::ROW);
     square->setWidth(ICON_SQUARE);
     square->setHeight(ICON_SQUARE);
     square->setCornerRadius(10);
     square->setShrink(0);
-    square->setBackgroundColor(theme["cadran/surf2"]);
+    square->setThemeColor("backgroundColor", "cadran/surf2");
     square->setAlignItems(brls::AlignItems::CENTER);
     square->setJustifyContent(brls::JustifyContent::CENTER);
     square->setMarginRight(ICON_GAP);
-    square->addView(make_icon(name, 19, theme["cadran/text2"]));
+    square->addView(make_icon(name, 19, "cadran/text2"));
     return square;
 }
 }   // namespace
@@ -270,14 +270,11 @@ std::string cadran::upper(const std::string& text)
 cadran::Card::Card()
     : brls::Box(brls::Axis::COLUMN)
 {
-    brls::Theme theme = brls::Application::getTheme();
-    this->fill = theme["cadran/surf"];
-    this->border = theme["cadran/line"];
     this->setAlignItems(brls::AlignItems::STRETCH);
 }
 
-void cadran::Card::setAccent(NVGcolor color) { this->border = color; }
-void cadran::Card::setFill(NVGcolor color) { this->fill = color; }
+void cadran::Card::setAccent(const std::string& key) { this->border = key; }
+void cadran::Card::setFill(const std::string& key) { this->fill = key; }
 
 void cadran::Card::follow_rows()
 {
@@ -300,9 +297,10 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
     }
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x + 0.5f, y + 0.5f, width - 1, height - 1, kit::RADIUS_CARD);
-    nvgFillColor(vg, this->a(this->fill));
+    const NVGcolor border = ctx->theme[this->border];
+    nvgFillColor(vg, this->a(ctx->theme[this->fill]));
     nvgFill(vg);
-    nvgStrokeColor(vg, this->a(this->border));
+    nvgStrokeColor(vg, this->a(border));
     nvgStrokeWidth(vg, 1);
     nvgStroke(vg);
     // A line between the visible rows, from the title (after the icon) to the end.
@@ -314,7 +312,7 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
             const float inset = has_icon(previous) ? ROW_PAD_ICON + ICON_SQUARE + ICON_GAP : ROW_PAD;
             nvgBeginPath(vg);
             nvgRect(vg, x + inset, row->getY() - 0.5f, width - inset - ROW_PAD_END, 1);
-            nvgFillColor(vg, this->a(this->border));
+            nvgFillColor(vg, this->a(border));
             nvgFill(vg);
         }
         previous = row;
@@ -327,33 +325,28 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
 cadran::Switch::Switch(brls::BooleanCell* boolean_cell)
     : cell(boolean_cell)
 {
-    brls::Theme theme = brls::Application::getTheme();
-    this->on = theme["cadran/teal_fill"];
-    this->off = theme["cadran/track"];
-    // A white knob either way: the track's colour says on or off.
-    this->knob_on = theme["cadran/knob"];
-    this->knob_off = theme["cadran/knob"];
     this->setFocusable(false);
     this->setWidth(50);
     this->setHeight(28);
     this->setShrink(0);
 }
 
-void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext*)
+void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx)
 {
     const bool state = this->cell->isOn();
     const float r = height / 2;
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, r);
-    nvgFillColor(vg, this->a(state ? this->on : this->off));
+    nvgFillColor(vg, this->a(ctx->theme[state ? "cadran/teal_fill" : "cadran/track"]));
     nvgFill(vg);
+    // A white knob either way: the track's colour says on or off.
     nvgBeginPath(vg);
     nvgCircle(vg, state ? x + width - r : x + r, y + r, r - 4);
-    nvgFillColor(vg, this->a(state ? this->knob_on : this->knob_off));
+    nvgFillColor(vg, this->a(ctx->theme["cadran/knob"]));
     nvgFill(vg);
     // Off on a light track, a hairline keeps the knob's edge.
     if (!state) {
-        nvgStrokeColor(vg, this->a(brls::Application::getTheme()["cadran/knob_line"]));
+        nvgStrokeColor(vg, this->a(ctx->theme["cadran/knob_line"]));
         nvgStrokeWidth(vg, 1.0f);
         nvgStroke(vg);
     }
@@ -389,23 +382,22 @@ void cadran::List::state(const char* id, const char* color_key)
 
 void cadran::List::tag(const char* id, const std::string& text, bool warn, const std::string& note)
 {
-    brls::Theme theme = brls::Application::getTheme();
     for (auto& [cell, pill] : this->tags) {
         if (cell != this->tab->getView(id)) continue;
         auto* words = static_cast<brls::Label*>(pill->getChildren()[0]);
         words->setText(text);
-        words->setTextColor(theme[warn ? "cadran/amber" : "cadran/pill_ok_ink"]);
-        pill->setBackgroundColor(theme[warn ? "cadran/amber_surf" : "cadran/pill_ok"]);
-        pill->setBorderColor(theme[warn ? "cadran/amber_line" : "cadran/none"]);
+        words->setThemeColor("textColor", warn ? "cadran/amber" : "cadran/pill_ok_ink");
+        pill->setThemeColor("backgroundColor", warn ? "cadran/amber_surf" : "cadran/pill_ok");
+        pill->setThemeColor("borderColor", warn ? "cadran/amber_line" : "cadran/none");
         pill->setVisibility(text.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
-        cell->setBorderColor(theme[warn && (!text.empty() || !note.empty()) ? "cadran/amber_line" : "cadran/line"]);
+        cell->setThemeColor("borderColor", warn && (!text.empty() || !note.empty()) ? "cadran/amber_line" : "cadran/line");
         // The note: the view right after the pill (tiles()).
         const auto& children = cell->getChildren();
         const auto at = std::find(children.begin(), children.end(), pill);
         if (at != children.end() && at + 1 != children.end())
             if (auto* under = dynamic_cast<brls::Label*>(*(at + 1))) {
                 under->setText(note);
-                under->setTextColor(theme[warn ? "cadran/amber" : "cadran/text3"]);
+                under->setThemeColor("textColor", warn ? "cadran/amber" : "cadran/text3");
                 under->setVisibility(note.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
             }
     }
@@ -421,7 +413,6 @@ brls::Box* cadran::List::head(const char* id) const
 brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const char*>>& cells, bool status)
 {
     if (!this->box || cells.empty()) return nullptr;
-    brls::Theme theme = brls::Application::getTheme();
     brls::View* first = this->tab->getView(cells[0].first);
     const int at = first ? index_in(this->box, first) : -1;
     if (at < 0) return nullptr;
@@ -451,8 +442,8 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         cell->setMarginRight(0);
         cell->setCornerRadius(kit::RADIUS_CARD);
         cell->setHighlightCornerRadius(kit::RADIUS_CARD);
-        cell->setBackgroundColor(theme["cadran/surf"]);
-        cell->setBorderColor(theme["cadran/line"]);
+        cell->setThemeColor("backgroundColor", "cadran/surf");
+        cell->setThemeColor("borderColor", "cadran/line");
         cell->setBorderThickness(1);
         cell->setLineBottom(0);
         // The icon on its own line above a status tile's title; before an
@@ -463,12 +454,12 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         // A tile's ink: its icon, and an action tile's light (TileGlow).
         const size_t inks = sizeof(TILE_INKS) / sizeof(TILE_INKS[0]);
         const char* ink = TILE_INKS[i % inks];
-        brls::View* icon = make_icon(cells[i].second, ACTION_ICON, theme[ink]);
+        brls::View* icon = make_icon(cells[i].second, ACTION_ICON, ink);
         head->addView(icon);
         cell->addView(head, 0);
         this->heads.push_back({ cell, head });
         if (!status) {
-            cell->addView(new TileGlow(cell, theme[ink], theme[TILE_INKS[(i + 1) % inks]]), 0);
+            cell->addView(new TileGlow(cell, ink, TILE_INKS[(i + 1) % inks]), 0);
             icon->setMarginRight(ACTION_ICON_GAP);
             cell->removeView(cell->title, false);
             head->addView(cell->title);
@@ -478,7 +469,7 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         cell->title->setMarginRight(0);
         cell->title->setSingleLine(false);
         cell->title->setFontSize(status ? kit::TEXT_META : kit::TEXT_BODY);
-        if (status) cell->title->setTextColor(theme["cadran/text3"]);
+        if (status) cell->title->setThemeColor("textColor", "cadran/text3");
         cell->detail->setHorizontalAlign(brls::HorizontalAlign::LEFT);
         cell->detail->setMaxWidth(10000);
         cell->detail->setFontSize(status ? 22.0f : kit::TEXT_META);
@@ -489,7 +480,7 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         if (!status) {
             // Under the title, from where it starts: past the icon.
             cell->detail->setMarginLeft(ACTION_ICON + ACTION_ICON_GAP);
-            cell->detail->setTextColor(theme["cadran/text2"]);
+            cell->detail->setThemeColor("textColor", "cadran/text2");
             cell->addView(new TileFit(cell, cell->title));
         }
         if (status) {
@@ -573,7 +564,7 @@ void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>&
                     note->setMarginTop(2);
                     note->setMarginBottom(0);
                     note->setMargins(2, ROW_PAD_END, 16, ROW_PAD);
-                    note->setTextColor(brls::Application::getTheme()["cadran/text3"]);
+                    note->setThemeColor("textColor", "cadran/text3");
                     move_to(note, above);
                     above->setMarginBottom(std::max(margin_bottom(above), below));
                 }
@@ -636,10 +627,9 @@ void cadran::List::row(brls::DetailCell* cell, const char* icon, bool alone)
         toggle->addView(new Switch(toggle));
     }
     if (alone) {
-        brls::Theme theme = brls::Application::getTheme();
         cell->setCornerRadius(kit::RADIUS_ROW);
-        cell->setBackgroundColor(theme["cadran/surf"]);
-        cell->setBorderColor(theme["cadran/line"]);
+        cell->setThemeColor("backgroundColor", "cadran/surf");
+        cell->setThemeColor("borderColor", "cadran/line");
         cell->setBorderThickness(1);
         cell->setMarginBottom(8);
     }
@@ -670,12 +660,11 @@ void cadran::List::recolor_icon(brls::DetailCell* cell, const char* icon, const 
 {
     auto* square = cell && !cell->getChildren().empty() ? dynamic_cast<brls::Box*>(cell->getChildren()[0]) : nullptr;
     if (!square) return;   // a row without its icon
-    brls::Theme theme = brls::Application::getTheme();
-    square->setBackgroundColor(theme[square_key ? square_key : "cadran/surf2"]);
+    square->setThemeColor("backgroundColor", square_key ? square_key : "cadran/surf2");
     for (brls::View* v : square->getChildren())
         if (auto* glyph = dynamic_cast<CadranIcon*>(v)) {
             if (icon) glyph->setIcon(icon);
-            glyph->setColor(theme[color_key]);
+            glyph->setThemeColor("color", color_key);
         }
 }
 
@@ -725,6 +714,6 @@ void cadran::List::sync()
         if (bare != value) cell->detail->setText(bare);
         const NVGcolor c = cell->detail->getTextColor();
         if (c.r == neutral.r && c.g == neutral.g && c.b == neutral.b && c.a == neutral.a)
-            cell->detail->setTextColor(theme["cadran/text"]);
+            cell->detail->setThemeColor("textColor", "cadran/text");
     }
 }

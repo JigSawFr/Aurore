@@ -17,6 +17,9 @@ class CadranDigits : public brls::View
     void setText(const std::string& text);
     void setFontSize(float size);
     void setTextColor(NVGcolor color);
+    // "textColor" (setThemeColor, XML textColor="@theme/…")
+    bool getStyleProperty(const std::string& name, brls::StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const brls::StyleValue& value) override;
     // At most that wide: a longer text is drawn smaller to fit (0: never).
     void setFitWidth(float width);
     // At most as wide as its parent is laid out: a longer text is drawn

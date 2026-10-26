@@ -32,9 +32,9 @@ constexpr float TEXT_BODY   = 17;
 constexpr float TEXT_LEAD   = 19;
 constexpr float TEXT_TITLE  = 23;
 
-// A theme colour of the boards ("cadran/teal"…), for what draws itself or
-// sets a colour: always a key of the palettes, never a value of its own, so
-// it follows the theme.
+// A theme colour of the boards ("cadran/teal"…), for what draws itself:
+// looked up when drawing, it follows the theme. A view's colour is set by
+// its key instead (View::setThemeColor), to follow a theme change.
 NVGcolor color(const char* key);
 
 // A label of `size` px in the theme colour `color_key` ("cadran/text2"…);
@@ -81,7 +81,7 @@ class Mark : public brls::View
         CHECK,
         WARN,
     } shape = Shape::DOT;
-    NVGcolor color;
+    std::string key;   // its colour's, looked up when drawn
 };
 
 // A pill: a mark of `dot_key` (its first child) and its text, on a thin

@@ -1,6 +1,7 @@
 /*
     Copyright 2019 natinusala
     Copyright 2019 p-sam
+    Copyright 2026 JigSawFr
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,6 +23,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cctype>
+#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
@@ -90,6 +92,14 @@ static ThemeValues lightThemeValues = {
     // Spinner
     { "brls/spinner/bar_color", nvgRGBA(131, 131, 131, 80) },
 
+    // Shadows: a view's (shadowType), the focus highlight's; their opacity
+    // is the style's (brls/shadow/opacity, brls/highlight/shadow_opacity)
+    { "brls/shadow", nvgRGB(0, 0, 0) },
+    { "brls/highlight/shadow", nvgRGB(0, 0, 0) },
+
+    // Battery widget
+    { "brls/battery/level", nvgRGB(0, 0, 0) },
+    { "brls/battery/charging", nvgRGB(140, 251, 79) },
 };
 
 static ThemeValues darkThemeValues = {
@@ -149,8 +159,18 @@ static ThemeValues darkThemeValues = {
     { "brls/slider/line_empty", nvgRGB(140, 140, 140) },
 
     // Spinner
-    { "brls/spinner/bar_color", nvgRGBA(192, 192, 192, 80) }, // TODO: get this right
+    { "brls/spinner/bar_color", nvgRGBA(192, 192, 192, 80) },
+
+    // Shadows
+    { "brls/shadow", nvgRGB(0, 0, 0) },
+    { "brls/highlight/shadow", nvgRGB(0, 0, 0) },
+
+    // Battery widget
+    { "brls/battery/level", nvgRGB(255, 255, 255) },
+    { "brls/battery/charging", nvgRGB(140, 251, 79) },
 };
+
+static uint64_t generation = 1;
 
 ThemeValues::ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>> list)
 {
@@ -160,15 +180,20 @@ ThemeValues::ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>>
 
 void ThemeValues::addColor(const std::string& name, NVGcolor color)
 {
-        this->values[name] = color;
+    auto it = this->values.find(name);
+    if (it != this->values.end() && it->second.r == color.r && it->second.g == color.g && it->second.b == color.b
+        && it->second.a == color.a)
+        return;
+    this->values[name] = color;
+    generation++;
 }
 
 NVGcolor ThemeValues::getColor(const std::string& name)
 {
-    if (this->values.count(name) == 0)
+    auto it = this->values.find(name);
+    if (it == this->values.end())
         fatal("Unknown theme value \"" + name + "\" in size: " + std::to_string(this->values.size()));
-
-    return this->values[name];
+    return it->second;
 }
 
 bool ThemeValues::hasColor(const std::string& name) const
@@ -184,6 +209,11 @@ Theme::Theme(ThemeValues* values)
 NVGcolor Theme::getColor(const std::string& name)
 {
     return this->values->getColor(name);
+}
+
+bool Theme::hasColor(const std::string& name)
+{
+    return this->values->hasColor(name);
 }
 
 void Theme::addColor(const std::string& name, NVGcolor color)
@@ -206,6 +236,16 @@ Theme& Theme::getDarkTheme()
 {
     static Theme darkTheme(&darkThemeValues);
     return darkTheme;
+}
+
+Theme& Theme::get(ThemeVariant variant)
+{
+    return variant == ThemeVariant::LIGHT ? getLightTheme() : getDarkTheme();
+}
+
+uint64_t Theme::getGeneration()
+{
+    return generation;
 }
 
 static std::string trim(const std::string& text)
@@ -273,10 +313,69 @@ static float luminance(NVGcolor c)
     return 0.2126f * channel(c.r) + 0.7152f * channel(c.g) + 0.0722f * channel(c.b);
 }
 
-static float contrast(NVGcolor a, NVGcolor b)
+float Theme::contrast(NVGcolor a, NVGcolor b)
 {
     float la = luminance(a), lb = luminance(b);
     return (std::max(la, lb) + 0.05f) / (std::min(la, lb) + 0.05f);
+}
+
+// `top` drawn over the opaque `under`
+static NVGcolor over(NVGcolor top, NVGcolor under)
+{
+    return nvgRGBAf(under.r + (top.r - under.r) * top.a, under.g + (top.g - under.g) * top.a,
+        under.b + (top.b - under.b) * top.a, 1.0f);
+}
+
+struct ContrastCheck
+{
+    std::string ink;
+    std::string surface;
+    float minimum;
+};
+
+// The pairs most of the core's text is drawn with
+static std::vector<ContrastCheck> contrastChecks = {
+    { "brls/text", "brls/background", 4.5f },
+    { "brls/text", "brls/sidebar/background", 4.5f },
+    { "brls/button/primary_enabled_text", "brls/button/primary_enabled_background", 4.5f },
+};
+
+void Theme::addContrastCheck(const std::string& ink, const std::string& surface, float minimum)
+{
+    for (auto& check : contrastChecks)
+        if (check.ink == ink && check.surface == surface)
+        {
+            check.minimum = minimum;
+            return;
+        }
+    contrastChecks.push_back({ ink, surface, minimum });
+}
+
+std::vector<std::string> Theme::checkContrast(ThemeVariant variant)
+{
+    std::vector<std::string> warnings;
+    const auto& colors = Theme::get(variant).getValues()->getColors();
+    auto background    = colors.find("brls/background");
+    if (background == colors.end())
+        return warnings;
+    NVGcolor under = over(background->second, nvgRGB(0, 0, 0));
+    for (auto& check : contrastChecks)
+    {
+        auto ink     = colors.find(check.ink);
+        auto surface = colors.find(check.surface);
+        if (ink == colors.end() || surface == colors.end())
+            continue;
+        NVGcolor drawnSurface = over(surface->second, under);
+        float ratio           = Theme::contrast(over(ink->second, drawnSurface), drawnSurface);
+        if (ratio < check.minimum)
+        {
+            char text[256];
+            std::snprintf(text, sizeof(text), "%s on %s reads badly: %.1f:1, under %.1f:1", check.ink.c_str(),
+                check.surface.c_str(), ratio, check.minimum);
+            warnings.push_back(text);
+        }
+    }
+    return warnings;
 }
 
 bool Theme::load(const std::string& text, ThemeVariant* variant)
@@ -361,20 +460,8 @@ bool Theme::load(const std::string& text, ThemeVariant* variant)
     for (auto& [name, metric] : metrics)
         getStyle().addMetric(name, metric);
 
-    // The pairs most text is drawn with
-    const char* pairs[][2] = {
-        { "brls/text", "brls/background" },
-        { "brls/text", "brls/sidebar/background" },
-        { "brls/button/primary_enabled_text", "brls/button/primary_enabled_background" },
-    };
-    for (auto& pair : pairs)
-    {
-        if (!theme.values->hasColor(pair[0]) || !theme.values->hasColor(pair[1]))
-            continue;
-        float ratio = contrast(theme.getColor(pair[0]), theme.getColor(pair[1]));
-        if (ratio < 4.5f)
-            Logger::warning("theme: {} on {} reads badly (contrast {:.1f}:1, at least 4.5:1)", pair[0], pair[1], ratio);
-    }
+    for (const std::string& warning : checkContrast(inherit))
+        Logger::warning("theme: {}", warning);
 
     if (variant)
         *variant = inherit;

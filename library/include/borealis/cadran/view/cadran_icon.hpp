@@ -21,6 +21,9 @@ class CadranIcon : public brls::View
 
     void setIcon(const std::string& name);
     void setColor(NVGcolor color);
+    // "color" (setThemeColor, XML color="@theme/…")
+    bool getStyleProperty(const std::string& name, brls::StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const brls::StyleValue& value) override;
     // The icon pops into place (grows from nothing, a little past its size,
     // then settles): a check that was just earned. Nothing with the motion
     // off (ui/effects).

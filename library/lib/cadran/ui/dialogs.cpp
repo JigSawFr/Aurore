@@ -225,7 +225,7 @@ brls::Box* check_panel()
 {
     auto* panel = new brls::Box(brls::Axis::COLUMN);
     panel->setAlignItems(brls::AlignItems::STRETCH);
-    panel->setBackgroundColor(brls::Application::getTheme()["cadran/surf2"]);
+    panel->setThemeColor("backgroundColor", "cadran/surf2");
     panel->setCornerRadius(14);
     panel->setPadding(12, 18, 14, 18);
     return panel;
@@ -352,7 +352,7 @@ class HoldFill : public brls::View
         this->setWidthPercentage(100);
         this->setHeightPercentage(100);
     }
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext*) override
+    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx) override
     {
         const int64_t now = brls::getCPUTimeUsec();
         // A finger on the button: held as long as it stays (no key repeats).
@@ -368,7 +368,7 @@ class HoldFill : public brls::View
         nvgIntersectScissor(vg, x, y, (float)(width * part), height);
         nvgBeginPath(vg);
         nvgRoundedRect(vg, x, y, width, height, height / 2);
-        nvgFillColor(vg, nvgRGBA(255, 255, 255, 70));
+        nvgFillColor(vg, ctx->theme["cadran/hold_fill"]);
         nvgFill(vg);
         nvgRestore(vg);
     }
@@ -442,7 +442,7 @@ int index_of(const char* const (&list)[N], const std::string& value)
 }
 
 // Saves `value` in `field`, then applies it at once (`apply`: every screen
-// made again), or refreshes when nothing changed.
+// made again, the language), or refreshes when nothing changed.
 void choose(std::string& field, const char* value, std::function<void()> after, void (*apply)())
 {
     if (field == value) {
@@ -481,7 +481,12 @@ void pick_theme(std::function<void()> after)
     const std::vector<std::string> icons = { "contrast", "sun", "moon" };
     static_assert(std::size(ui::THEMES) == 3, "an icon for each theme");
     pick("cadran/tools/theme"_i18n, labels, index_of(ui::THEMES, ui::prefs().theme), [after](int i) {
-        choose(ui::prefs().theme, ui::THEMES[i], after, live_prefs::theme_changed);
+        if (ui::prefs().theme != ui::THEMES[i]) {
+            ui::prefs().theme = ui::THEMES[i];
+            save_prefs();
+            live_prefs::apply_theme();
+        }
+        if (after) after();
     }, true, {}, icons);
 }
 

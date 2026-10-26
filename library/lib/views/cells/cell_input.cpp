@@ -25,7 +25,7 @@ namespace brls
 
 InputCell::InputCell()
 {
-    detail->setTextColor(Application::getTheme()["brls/list/listItem_value_color"]);
+    detail->setThemeColor("textColor", "brls/list/listItem_value_color");
 
     this->registerClickAction([this](View* view)
         {
@@ -76,11 +76,10 @@ void InputCell::setPlaceholder(std::string placeholder)
 
 void InputCell::updateUI()
 {
-    Theme theme = Application::getTheme();
     if (this->value.empty())
     {
         this->detail->setText(placeholder);
-        this->detail->setTextColor(theme["brls/text_disabled"]);
+        this->detail->setThemeColor("textColor", "brls/text_disabled");
     }
     else
     {
@@ -100,7 +99,7 @@ void InputCell::updateUI()
         {
             this->detail->setText(value);
         }
-        this->detail->setTextColor(theme["brls/list/listItem_value_color"]);
+        this->detail->setThemeColor("textColor", "brls/list/listItem_value_color");
     }
 }
 
@@ -111,7 +110,7 @@ View* InputCell::create()
 
 InputNumericCell::InputNumericCell()
 {
-    detail->setTextColor(Application::getTheme()["brls/list/listItem_value_color"]);
+    detail->setThemeColor("textColor", "brls/list/listItem_value_color");
 
     this->registerClickAction([this](View* view)
         {
@@ -143,9 +142,8 @@ void InputNumericCell::setValue(long value)
 
 void InputNumericCell::updateUI()
 {
-    Theme theme = Application::getTheme();
     this->detail->setText(std::to_string(value));
-    this->detail->setTextColor(theme["brls/list/listItem_value_color"]);
+    this->detail->setThemeColor("textColor", "brls/list/listItem_value_color");
 }
 
 View* InputNumericCell::create()

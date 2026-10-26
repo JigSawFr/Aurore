@@ -52,97 +52,20 @@ float s_rail_open = 1.0f;
 void cadran::install_theme()
 {
     namespace pal = cadran::palette;
-    const NVGcolor navy = nvgRGB(pal::NAVY.r, pal::NAVY.g, pal::NAVY.b);
     // The palettes and why they are what they are: ui/cadran_palette.hpp.
-    const pal::Palette* dark = &pal::DARK;
-    const pal::Palette* light = &pal::LIGHT;
-    const std::pair<brls::Theme*, const pal::Palette*> variants[] = { { &brls::Theme::getDarkTheme(), dark }, { &brls::Theme::getLightTheme(), light } };
+    const std::pair<brls::Theme*, const pal::Palette*> variants[] = { { &brls::Theme::getDarkTheme(), &pal::DARK },
+                                                                       { &brls::Theme::getLightTheme(), &pal::LIGHT } };
     const auto c = [](pal::Rgba x) { return nvgRGBA(x.r, x.g, x.b, x.a); };
     for (const auto& [t, p] : variants) {
-        t->addColor("brls/background", c(p->bg));
-        t->addColor("brls/clear", c(p->bg));
-        t->addColor("brls/text", c(p->text));
-        t->addColor("brls/sidebar/background", c(p->bg));
-        t->addColor("brls/sidebar/separator", c(p->line));
-        t->addColor("brls/sidebar/active_item", c(p->teal));
-        t->addColor("brls/applet_frame/separator", c(p->line));
-        t->addColor("brls/header/border", c(p->line));
-        t->addColor("brls/highlight/background", c(p->surf));
-        t->addColor("brls/highlight/color1", c(p->hl1));
-        t->addColor("brls/highlight/color2", c(p->hl2));
+        for (const pal::Key& key : pal::KEYS) t->addColor(key.name, c(p->*key.color));
+        t->addColor("cadran/none", nvgRGBA(0, 0, 0, 0));
 #ifndef __SWITCH__
         // The still focus of an app's screenshot tests (STILL_FOCUS): the glow in
         // the stroke's own colour, so a screenshot does not depend on when.
         if (ui::env_flag("STILL_FOCUS")) t->addColor("brls/highlight/color2", c(p->hl1));
 #endif
-        NVGcolor pulse = c(p->teal_fill);
-        pulse.a = 38 / 255.0f;
-        t->addColor("brls/click_pulse", pulse);
-        t->addColor("brls/button/primary_enabled_background", c(p->teal_fill));
-        t->addColor("brls/button/primary_enabled_text", navy);
-        t->addColor("brls/button/default_enabled_background", c(p->surf2));
-        t->addColor("brls/button/default_enabled_text", c(p->text));
-        t->addColor("brls/button/enabled_border_color", c(p->border));
-        t->addColor("brls/button/highlight_enabled_text", c(p->teal));
-        // A list line's plain value in the second ink, so the list screens
-        // (cadran::List) take it as it is.
-        t->addColor("brls/list/listItem_value_color", c(p->text2));
-        t->addColor("cadran/navy", navy);
-        t->addColor("cadran/text", c(p->text));
-        t->addColor("cadran/text2", c(p->text2));
-        t->addColor("cadran/text3", c(p->text3));
-        t->addColor("cadran/teal", c(p->teal));
-        t->addColor("cadran/teal_fill", c(p->teal_fill));
-        t->addColor("cadran/teal_soft", c(p->teal_soft));
-        t->addColor("cadran/amber", c(p->amber));
-        t->addColor("cadran/amber_fill", c(p->amber_fill));
-        t->addColor("cadran/coral", c(p->coral));
-        t->addColor("cadran/coral_fill", c(p->coral_fill));
-        t->addColor("cadran/coral_line", c(p->coral_line));
-        t->addColor("cadran/coral_soft", p == dark ? nvgRGBA(0xFF, 0x7A, 0x7A, 36) : nvgRGBA(0xE5, 0x48, 0x4D, 28));
-        t->addColor("cadran/track", c(p->track));
-        t->addColor("cadran/surf", c(p->surf));
-        t->addColor("cadran/surf2", c(p->surf2));
-        t->addColor("cadran/line", c(p->line));
-        t->addColor("cadran/glow", c(p->glow));
-        t->addColor("cadran/glow_strong", c(p->glow_strong));
-        t->addColor("cadran/amber_surf", c(p->amber_surf));
-        t->addColor("cadran/amber_line", c(p->amber_line));
-        t->addColor("cadran/pill_ok", c(p->pill_ok));
-        t->addColor("cadran/pill_ok_ink", c(p->pill_ok_ink));
-        t->addColor("cadran/rail_active", c(p->rail_active));
-        t->addColor("cadran/key_bg", c(p->key_bg));
-        t->addColor("cadran/key_fg", c(p->key_fg));
-        t->addColor("cadran/none", nvgRGBA(0, 0, 0, 0));
-        // The empty part of a progress bar, behind a game's missing cover.
-        t->addColor("cadran/well", p == dark ? nvgRGBA(255, 255, 255, 46) : nvgRGBA(0, 0, 0, 34));
-        // The inks the palettes have no use for elsewhere: a release note's
-        // alerts and a build's tags (blue, violet), each as dark on the
-        // light theme as the other inks (4.5:1 on white).
-        t->addColor("cadran/blue", c(p->blue));
-        t->addColor("cadran/violet", c(p->violet));
-        // The action tiles' fourth ink (cadran::List::tiles()), after teal,
-        // blue and violet: the third avatar's pink, darker on white.
-        t->addColor("cadran/pink", p == dark ? nvgRGB(0xE9, 0x6A, 0xA8) : nvgRGB(0xC2, 0x45, 0x7F));
-        // The accounts' avatars, in turn: fills under a navy initial, alike
-        // on both themes.
-        t->addColor("cadran/avatar0", nvgRGB(0x7C, 0x6C, 0xF2));
-        t->addColor("cadran/avatar1", nvgRGB(0xFF, 0xB5, 0x47));
-        t->addColor("cadran/avatar2", nvgRGB(0x4F, 0xA3, 0xFF));
-        t->addColor("cadran/avatar3", nvgRGB(0xE9, 0x6A, 0xA8));
-        // A switch's knob, white on either track, and its edge while off.
-        t->addColor("cadran/knob", nvgRGB(0xFF, 0xFF, 0xFF));
-        t->addColor("cadran/knob_line", nvgRGBA(0x0B, 0x14, 0x24, 40));
-        t->addColor("cadran/bar", p == dark ? nvgRGB(0x33, 0x48, 0x6B) : nvgRGB(0xB9, 0xC6, 0xDA));
-        t->addColor("cadran/bar_today", p == dark ? nvgRGB(0x5A, 0x71, 0x96) : nvgRGB(0x7E, 0x90, 0xAE));
-        // Behind a dialog or a picker: the navy, dimmed enough that the screen
-        // under it does not read through around a dialog's text and QR codes.
-        // A toast: a card of the second surface on the dark theme, navy on
-        // the light one.
-        t->addColor("brls/backdrop", p == dark ? nvgRGBA(3, 8, 18, 225) : nvgRGBA(0x0B, 0x14, 0x24, 160));
-        t->addColor("brls/notification/background", p == dark ? nvgRGBA(0x1A, 0x2A, 0x45, 250) : nvgRGBA(0x0B, 0x14, 0x24, 240));
-        t->addColor("brls/notification/text", p == dark ? c(p->text) : nvgRGB(0xEE, 0xF2, 0xF8));
     }
+    for (const pal::Contrast& pair : pal::CONTRAST) brls::Theme::addContrastCheck(pair.ink, pair.surface, pair.minimum);
 #ifndef __SWITCH__
     // And held where it is (brls::setHighlightAnimationStill). The footer's hints too:
     // drawn as once a screen or a dialog has opened, not greyed while its
@@ -219,7 +142,7 @@ class Glow : public brls::View
 {
   public:
     Glow(float centre_x, float centre_y, float r, const char* color_key)
-        : cx(centre_x), cy(centre_y), radius(r), glow(brls::Application::getTheme()[color_key]), clear(nvgRGBA(0x2E, 0xC4, 0xA6, 0))
+        : cx(centre_x), cy(centre_y), radius(r), key(color_key)
     {
         this->setFocusable(false);
         this->setPositionType(brls::PositionType::ABSOLUTE);
@@ -228,7 +151,7 @@ class Glow : public brls::View
         this->setWidth(brls::Application::contentWidth);
         this->setHeight(brls::Application::contentHeight);
     }
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext*) override
+    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx) override
     {
         static const bool off = ui::env_flag("CADRAN_NOGLOW");
         if (off || !ui::prefs().glow || effects::light()) return;
@@ -242,7 +165,10 @@ class Glow : public brls::View
             gy += (float)std::cos(t * 0.7) * this->radius * 0.025f;
             gr *= 1.0f + 0.05f * (float)std::sin(t * 1.3);
         }
-        const NVGpaint paint = nvgRadialGradient(vg, x + gx, y + gy, 0.0f, gr, this->glow, this->clear);
+        const NVGcolor glow = ctx->theme[this->key];
+        NVGcolor clear = glow;
+        clear.a = 0.0f;
+        const NVGpaint paint = nvgRadialGradient(vg, x + gx, y + gy, 0.0f, gr, glow, clear);
         // Only the square around the light: past its radius it is clear, so
         // the screen's other pixels are left alone (the same picture, about
         // half the fill).
@@ -257,26 +183,23 @@ class Glow : public brls::View
 
   private:
     float cx, cy, radius;
-    NVGcolor glow, clear;
+    const char* key;   // the light's colour
 };
 
-CadranIcon* icon(const char* name, float size, NVGcolor color)
-{
-    auto* view = new CadranIcon();
-    view->setIcon(name);
-    view->setWidth(size);
-    view->setHeight(size);
-    view->setColor(color);
-    return view;
-}
-
 // A sidebar item's words and icon in one colour (teal when active, else
-// text2), after the library's own colouring of the frame.
-void tint_item(brls::SidebarItem* it, NVGcolor color)
+// text2), after the library's own colouring of the frame: a theme key at
+// rest, a colour on the way from one to the other.
+void tint_item(brls::SidebarItem* it, NVGcolor color, const char* key = nullptr)
 {
     for (brls::View* c : it->getChildren()) {
-        if (auto* label = dynamic_cast<brls::Label*>(c)) label->setTextColor(color);
-        else if (auto* ic = dynamic_cast<CadranIcon*>(c)) ic->setColor(color);
+        if (!dynamic_cast<brls::Label*>(c) && !dynamic_cast<CadranIcon*>(c)) continue;
+        const char* property = dynamic_cast<brls::Label*>(c) ? "textColor" : "color";
+        if (key) {
+            c->setThemeColor(property, key);
+        } else {
+            c->setThemeColor(property, "");
+            c->setStyleProperty(property, brls::StyleValue::of(color));
+        }
     }
 }
 
@@ -341,9 +264,10 @@ class RailPill : public brls::View
         brls::Theme theme = brls::Application::getTheme();
         const NVGcolor on = theme["cadran/teal"], off = theme["cadran/text2"];
         for (brls::SidebarItem* it : this->items) {
-            if (it == this->to) tint_item(it, nvgLerpRGBA(off, on, t));
+            if (t >= 1.0f) tint_item(it, on, it == this->to ? "cadran/teal" : "cadran/text2");
+            else if (it == this->to) tint_item(it, nvgLerpRGBA(off, on, t));
             else if (it == this->from) tint_item(it, nvgLerpRGBA(on, off, t));
-            else tint_item(it, off);
+            else tint_item(it, off, "cadran/text2");
         }
     }
 
@@ -410,18 +334,15 @@ void cadran::refresh_pill()
     const std::string text = moded ? mode.text : s_pill_text;
     const char* glyph = moded ? mode.icon.c_str() : s_pill_glyph.c_str();
     const Tone tone = moded ? mode.tone : s_pill_tone;
-    brls::Theme theme = brls::Application::getTheme();
-    const NVGcolor ink = tone == Tone::DANGER ? theme["cadran/coral"]
-                         : tone == Tone::WARN ? theme["cadran/amber"]
-                                              : theme["cadran/pill_ok_ink"];
+    const char* ink = tone == Tone::DANGER ? "cadran/coral" : tone == Tone::WARN ? "cadran/amber" : "cadran/pill_ok_ink";
     s_main_pill_label->setText(text);
-    s_main_pill_label->setTextColor(ink);
+    s_main_pill_label->setThemeColor("textColor", ink);
     s_main_pill_icon->setIcon(glyph);
-    s_main_pill_icon->setColor(ink);
-    s_main_pill->setBackgroundColor(tone == Tone::DANGER ? theme["cadran/coral_soft"]
-                                    : tone == Tone::WARN ? theme["cadran/amber_surf"]
-                                                         : theme["cadran/pill_ok"]);
-    s_main_pill->setBorderColor(tone == Tone::DANGER ? theme["cadran/coral_line"] : theme["cadran/amber_line"]);
+    s_main_pill_icon->setThemeColor("color", ink);
+    s_main_pill->setThemeColor("backgroundColor", tone == Tone::DANGER ? "cadran/coral_soft"
+                                                  : tone == Tone::WARN ? "cadran/amber_surf"
+                                                                       : "cadran/pill_ok");
+    s_main_pill->setThemeColor("borderColor", tone == Tone::DANGER ? "cadran/coral_line" : "cadran/amber_line");
     s_main_pill->setBorderThickness(tone == Tone::OK ? 0 : 1);
     s_main_pill->setVisibility(text.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
 }
@@ -434,14 +355,13 @@ brls::View* cadran::make_glow(float cx, float cy, float radius, const char* colo
 void cadran::style_header(brls::AppletFrame* frame, const char* pill_icon, const std::string& pill_text, bool filled, bool with_date)
 {
     if (!frame || frame->getView("cadran_mark")) return;
-    brls::Theme theme = brls::Application::getTheme();
     brls::View* app_icon = frame->getView("brls/applet_frame/title_icon");
     brls::Box* left = app_icon ? app_icon->getParent() : nullptr;
     if (app_icon) app_icon->setVisibility(brls::Visibility::GONE);
     if (left) {
         left->setAlignItems(brls::AlignItems::CENTER);
         left->setGrow(1.0f);
-        CadranIcon* mark = icon("mark", MARK_SIZE, theme["cadran/text"]);
+        CadranIcon* mark = kit::icon("mark", MARK_SIZE, "cadran/text");
         mark->setId("cadran_mark");
         mark->setMarginRight(14);
         if (with_date) {
@@ -461,7 +381,7 @@ void cadran::style_header(brls::AppletFrame* frame, const char* pill_icon, const
     if (!pill_icon) return;   // a screen of its own: the mark and the title
     auto* right = new brls::Box(brls::Axis::ROW);
     right->setAlignItems(brls::AlignItems::CENTER);
-    const NVGcolor ink = filled ? theme["cadran/pill_ok_ink"] : theme["cadran/text2"];
+    const char* ink = filled ? "cadran/pill_ok_ink" : "cadran/text2";
     auto* pill = new HeaderPill();
     pill->setAlignItems(brls::AlignItems::CENTER);
     pill->setHeight(32);
@@ -469,18 +389,18 @@ void cadran::style_header(brls::AppletFrame* frame, const char* pill_icon, const
     pill->setPaddingRight(14);
     pill->setCornerRadius(16);
     if (filled) {
-        pill->setBackgroundColor(theme["cadran/pill_ok"]);
+        pill->setThemeColor("backgroundColor", "cadran/pill_ok");
     } else {
-        pill->setBorderColor(theme["cadran/line"]);
+        pill->setThemeColor("borderColor", "cadran/line");
         pill->setBorderThickness(1);
     }
-    CadranIcon* glyph = icon(pill_icon, 14, ink);
+    CadranIcon* glyph = kit::icon(pill_icon, 14, ink);
     glyph->setMarginRight(8);
     pill->addView(glyph);
     auto* pill_label = new brls::Label();
     pill_label->setText(pill_text);
     chrome(pill_label, 15, PILL_SCALE);
-    pill_label->setTextColor(ink);
+    pill_label->setThemeColor("textColor", ink);
     pill->addView(pill_label);
     right->addView(pill);
     if (with_date) {   // the main screen: its pill is the one set_pill() changes
@@ -493,7 +413,7 @@ void cadran::style_header(brls::AppletFrame* frame, const char* pill_icon, const
         auto* date = new brls::Label();
         date->setText(cadran::kit::long_date());
         chrome(date, 16, DATE_SCALE);
-        date->setTextColor(theme["cadran/text3"]);
+        date->setThemeColor("textColor", "cadran/text3");
         date->setMarginLeft(10);
         right->addView(date);
     }
@@ -745,7 +665,10 @@ class RailFold : public brls::Box
         if (t > 0.0f) {
             const brls::Rect at = this->getFrame();
             const float edge = at.getMinX() + this->visible();
-            const NVGcolor dark = nvgRGBA(0, 0, 0, (unsigned char)(70 * t)), clear = nvgRGBA(0, 0, 0, 0);
+            NVGcolor dark = ctx->theme["cadran/rail_shadow"];
+            dark.a = (float)(unsigned char)(std::round(dark.a * 255.0f) * t) / 255.0f;
+            NVGcolor clear = dark;
+            clear.a = 0.0f;
             nvgBeginPath(ctx->vg);
             nvgRect(ctx->vg, edge, at.getMinY(), SHADOW, at.getHeight());
             nvgFillPaint(ctx->vg, nvgLinearGradient(ctx->vg, edge, 0, edge + SHADOW, 0, dark, clear));
@@ -871,7 +794,6 @@ void cadran::apply_rail()
 
 void cadran::style_rail(brls::View* tab_frame)
 {
-    brls::Theme theme = brls::Application::getTheme();
     auto* sidebar = tab_frame ? dynamic_cast<brls::Sidebar*>(tab_frame->getView("brls/tab_frame/sidebar")) : nullptr;
     brls::SidebarItem* first = sidebar ? sidebar->getItem(0) : nullptr;
     brls::Box* list = first ? first->getParent() : nullptr;
@@ -906,7 +828,7 @@ void cadran::style_rail(brls::View* tab_frame)
         if (auto* accent = dynamic_cast<brls::Rectangle*>(item->getView("brls/sidebar/item_accent"))) {
             accent->setWidth(0);
             accent->setMargins(0, 0, 0, 0);
-            accent->setColor(theme["cadran/none"]);
+            accent->setThemeColor("color", "cadran/none");
             accent->setVisibility(brls::Visibility::GONE);
         }
         if (auto* label = dynamic_cast<brls::Label*>(item->getView("brls/sidebar/item_label"))) {
@@ -918,7 +840,7 @@ void cadran::style_rail(brls::View* tab_frame)
             label->setSingleLine(true);
         }
         // No icon from the app (ui::hooks' rail_icons): the label alone.
-        if (!name.empty()) item->addView(icon(name.c_str(), RAIL_ICON, theme["cadran/text2"]), 0);
+        if (!name.empty()) item->addView(kit::icon(name.c_str(), RAIL_ICON, "cadran/text2"), 0);
         items.push_back(item);
     }
     // The active tab's pill, behind the items (their background stays none).
@@ -926,7 +848,7 @@ void cadran::style_rail(brls::View* tab_frame)
     auto* pill = new RailPill(items);
     items[0]->addView(pill, 0);
     for (brls::SidebarItem* item : items) {
-        item->setBackgroundColor(theme["cadran/none"]);
+        item->setThemeColor("backgroundColor", "cadran/none");
         item->getActiveEvent()->subscribe([items, item, pill](brls::View*) {
             // In this frame, not the next (the frame would be drawn in the
             // library's colours first, the text flashing at each move): the
