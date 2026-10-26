@@ -43,6 +43,7 @@ class GLFWVideoContext : public VideoContext
     void setSwapInterval(int interval) override;
     void resetState() override;
     double getScaleFactor() override;
+    bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) override;
     void fullScreen(bool fs) override;
     int getCurrentMonitorIndex() override;
 

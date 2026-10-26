@@ -19,6 +19,9 @@
 #include <libretro-common/features/features_cpu.h>
 #include <libretro-common/libretro.h>
 
+#include <atomic>
+#include <ctime>
+
 #include <functional>
 #include <vector>
 
@@ -27,12 +30,71 @@ namespace brls
 
 typedef retro_time_t Time;
 
+namespace detail
+{
+    // A negative value: the real clock
+    inline std::atomic<Time> simulatedTimeUsec { -1 };
+    inline std::atomic<int64_t> simulatedWallTime { -1 };
+    inline std::atomic<Time> simulatedWallTimeSetAt { 0 };
+}
+
 /**
- * Returns the current CPU time in microseconds.
+ * Returns the current CPU time in microseconds: the simulated clock's while
+ * one is set (setSimulatedTimeUsec()), else the system's monotonic clock.
  */
 inline Time getCPUTimeUsec()
 {
+    Time simulated = detail::simulatedTimeUsec.load(std::memory_order_relaxed);
+    return simulated >= 0 ? simulated : cpu_features_get_time_usec();
+}
+
+/**
+ * Returns the system's monotonic clock in microseconds, even while a
+ * simulated clock is set (to measure how long something really took).
+ */
+inline Time getRealTimeUsec()
+{
     return cpu_features_get_time_usec();
+}
+
+/**
+ * Replaces the clock read by getCPUTimeUsec() (animations, timers, delay(),
+ * button repeat...) with one that only moves when told: frames then run
+ * without waiting for real time, the same way every run. Used by the test
+ * harness (brls::test::Harness). A negative value goes back to the real clock.
+ */
+inline void setSimulatedTimeUsec(Time usec)
+{
+    detail::simulatedTimeUsec.store(usec, std::memory_order_relaxed);
+}
+
+inline bool isTimeSimulated()
+{
+    return detail::simulatedTimeUsec.load(std::memory_order_relaxed) >= 0;
+}
+
+/**
+ * The wall clock (the dates and times shown), in seconds since the epoch:
+ * the system's, or the one set with setSimulatedWallTime(), which moves on
+ * with getCPUTimeUsec().
+ */
+inline std::time_t getWallTime()
+{
+    int64_t start = detail::simulatedWallTime.load(std::memory_order_relaxed);
+    if (start < 0)
+        return std::time(nullptr);
+    return (std::time_t)(start + (getCPUTimeUsec() - detail::simulatedWallTimeSetAt.load(std::memory_order_relaxed)) / 1000000);
+}
+
+/**
+ * Sets the wall clock to `seconds` since the epoch from now on (the test
+ * harness: the same date on every screenshot). A negative value goes back
+ * to the system's.
+ */
+inline void setSimulatedWallTime(int64_t seconds)
+{
+    detail::simulatedWallTimeSetAt.store(getCPUTimeUsec(), std::memory_order_relaxed);
+    detail::simulatedWallTime.store(seconds, std::memory_order_relaxed);
 }
 
 typedef std::function<void()> TickingGenericCallback;

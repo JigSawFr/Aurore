@@ -265,6 +265,11 @@ bool Application::internalMainLoop()
     if (!Application::currentFocus && !Application::activitiesStack.empty())
         Application::giveFocus(Application::activitiesStack.back()->getContentView());
 
+    // The simulated clock (the test harness) moves on its own: nothing to
+    // wait for
+    if (isTimeSimulated())
+        return true;
+
     // A frame not drawn is not presented either, so nothing waits for the
     // display: the loop waits a frame's time instead (the limiter below does
     // when it is set)

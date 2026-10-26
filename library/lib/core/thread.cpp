@@ -86,7 +86,7 @@ size_t Threading::delay(long milliseconds, std::function<void()> func)
     operation.startPoint        = sceKernelGetProcessTime();
     operation.delayMilliseconds = milliseconds * 1000;
 #else
-    operation.startPoint        = std::chrono::high_resolution_clock::now();
+    operation.startPoint        = getCPUTimeUsec();
     operation.delayMilliseconds = milliseconds;
 #endif
     operation.func              = std::move(func);
@@ -99,6 +99,17 @@ void Threading::cancelDelay(size_t iter)
 {
     std::lock_guard<std::mutex> guard(m_delay_mutex);
     m_delay_cancel_set.insert(iter);
+}
+
+bool Threading::isIdle()
+{
+    {
+        std::lock_guard<std::mutex> guard(m_async_mutex);
+        if (!m_async_tasks.empty() || m_async_running > 0)
+            return false;
+    }
+    std::lock_guard<std::mutex> guard(m_sync_mutex);
+    return m_sync_functions.empty();
 }
 
 void Threading::setSyncTaskBudget(uint64_t microseconds)
@@ -164,8 +175,7 @@ void Threading::performSyncTasks()
 #ifdef PS4
         uint64_t duration = sceKernelGetProcessTime() - d.startPoint;
 #else
-        auto timeNow  = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - d.startPoint).count();
+        auto duration = (getCPUTimeUsec() - d.startPoint) / 1000;
 #endif
 
         if (duration >= d.delayMilliseconds)
@@ -236,6 +246,7 @@ void* Threading::task_loop(void* a)
             if (!task_loop_active)
                 break;
             tasks.swap(m_async_tasks);
+            m_async_running = (int)tasks.size();
         }
 
         for (auto& task : tasks)
@@ -254,6 +265,8 @@ void* Threading::task_loop(void* a)
             {
                 brls::Logger::error("error: async task: unknown exception");
             }
+            std::lock_guard<std::mutex> lock(m_async_mutex);
+            m_async_running--;
         }
     }
     return NULL;

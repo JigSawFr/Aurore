@@ -285,3 +285,32 @@ jobs:
       - name: Demo log
         if: always()
         run: cat demo.log || true
+
+  linux-tests:
+    name: linux (tests)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          # EGL and Mesa's software renderer: the harness draws with no display
+          sudo apt update -y
+          sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols xorg-dev ninja-build \
+            libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri
+      - name: Build
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON \
+              -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
+          cmake --build build
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: aurore-test-output
+          path: build/tests/test-output

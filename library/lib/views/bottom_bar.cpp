@@ -117,8 +117,7 @@ void BottomBar::updateText()
     tm.tm_min = lt.minute;
     tm.tm_sec = lt.second;
 #else
-    auto timeNow   = std::chrono::system_clock::now();
-    auto in_time_t = std::chrono::system_clock::to_time_t(timeNow);
+    std::time_t in_time_t = getWallTime();
     auto tm = *std::localtime(&in_time_t);
 #endif
     std::stringstream ss;

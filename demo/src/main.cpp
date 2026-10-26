@@ -25,15 +25,8 @@
 #include <cstring>
 #include <string>
 
-#include "view/captioned_image.hpp"
-#include "view/pokemon_view.hpp"
-#include "tab/cadran_tab.hpp"
-#include "tab/components_tab.hpp"
-#include "tab/transform_tab.hpp"
-#include "tab/recycling_list_tab.hpp"
-#include "tab/settings_tab.hpp"
-#include "tab/text_test_tab.hpp"
 #include "activity/main_activity.hpp"
+#include "demo_app.hpp"
 
 #if defined(__PSV__) && defined(BOREALIS_USE_OPENGL)
 // Needed for the OpenGL driver to work
@@ -41,53 +34,6 @@ extern "C" unsigned int sceLibcHeapSize = 2 * 1024 * 1024;
 #endif
 
 using namespace brls::literals; // for _i18n
-
-namespace
-{
-// The tab shown: its position in the sidebar, separators included.
-int shownTab = 0;
-
-// What Cadran, Aurore's look, asks of the demo: the rail's icons, and the
-// main screen built again on the tab shown when the language or the theme
-// changes (Language & theme, in the header or on the Cadran tab).
-void installCadranHooks()
-{
-    static ui::Prefs prefs;   // not saved: the demo starts in the defaults
-    const char* theme = std::getenv("BOREALIS_THEME");
-    if (theme && !std::strcmp(theme, "LIGHT"))
-        prefs.theme = "light";
-    ui::use_prefs(prefs);
-
-    ui::hooks::Hooks& h = ui::hooks::get();
-    h.rail_icons        = []()
-    {
-        return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "", "activity", "gamepad",
-            "", "settings", "", "info" };
-    };
-    h.shown_screen = []() { return "tab/" + std::to_string(shownTab); };
-    h.main_screen  = h.shown_screen;
-    h.tab_position = [](const std::string& screen)
-    { return screen.rfind("tab/", 0) == 0 ? std::atoi(screen.c_str() + 4) : -1; };
-    h.push_main = [](int position, const std::string&)
-    {
-        auto* main = new MainActivity();
-        brls::Application::pushActivity(main, brls::TransitionAnimation::NONE);
-        brls::sync([main, position]()
-            {
-            if (auto* tabs = dynamic_cast<brls::TabFrame*>(main->getView("main_tabs")))
-                tabs->focusTab(position); });
-    };
-    brls::Application::getGlobalFocusChangeEvent()->subscribe([](brls::View* view)
-        {
-        auto* item = dynamic_cast<brls::SidebarItem*>(view);
-        if (!item || !item->getParent())
-            return;
-        const auto& items = item->getParent()->getChildren();
-        for (size_t i = 0; i < items.size(); i++)
-            if (items[i] == item)
-                shownTab = (int)i; });
-}
-}
 
 int main(int argc, char* argv[])
 {
@@ -111,7 +57,7 @@ int main(int argc, char* argv[])
     brls::Platform::APP_LOCALE_DEFAULT = brls::LOCALE_AUTO;
 
     // Before init(): Cadran reads its preferences from it on
-    installCadranHooks();
+    demo::installHooks();
 
     // Init the app and i18n
     if (!brls::Application::init())
@@ -129,25 +75,8 @@ int main(int argc, char* argv[])
     // Have the application register an action on every activity that will quit when you press BUTTON_START
     brls::Application::setGlobalQuit(false);
 
-    // Register custom views (including tabs, which are views)
-    brls::Application::registerXMLView("CaptionedImage", CaptionedImage::create);
-    brls::Application::registerXMLView("CadranTab", CadranTab::create);
-    brls::Application::registerXMLView("RecyclingListTab", RecyclingListTab::create);
-    brls::Application::registerXMLView("ComponentsTab", ComponentsTab::create);
-    brls::Application::registerXMLView("TransformTab", TransformTab::create);
-    brls::Application::registerXMLView("TransformBox", TransformBox::create);
-    brls::Application::registerXMLView("PokemonView", PokemonView::create);
-    brls::Application::registerXMLView("SettingsTab", SettingsTab::create);
-    brls::Application::registerXMLView("TextTestTab", TextTestTab::create);
-
-    // Add custom values to the theme
-    brls::Theme::getLightTheme().addColor("captioned_image/caption", nvgRGB(2, 176, 183));
-    brls::Theme::getDarkTheme().addColor("captioned_image/caption", nvgRGB(51, 186, 227));
-
-    // Add custom values to the style
-    brls::getStyle().addMetric("about/padding_top_bottom", 50);
-    brls::getStyle().addMetric("about/padding_sides", 75);
-    brls::getStyle().addMetric("about/description_margin", 50);
+    // The demo's own views, theme colours and metrics
+    demo::registerViews();
 
     // Create and push the main activity to the stack
     brls::Application::pushActivity(new MainActivity());
