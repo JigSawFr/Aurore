@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <cstdint>
 #include <condition_variable>
 #include <functional>
 #include <mutex>
@@ -96,6 +97,14 @@ class Threading
 
     static void performSyncTasks();
 
+    /**
+     * Bounds the time the sync tasks may take on a frame, in microseconds:
+     * once it is spent, the tasks left run on the next frames, in order, so
+     * a burst of results (a page of covers) does not stall a frame. 0, the
+     * default, runs every task on the frame it was queued for.
+     */
+    static void setSyncTaskBudget(uint64_t microseconds);
+
     static std::vector<std::function<void()>>* getSyncFunctions()
     {
         std::lock_guard<std::mutex> guard(m_sync_mutex);
@@ -111,6 +120,7 @@ class Threading
   private:
     inline static std::mutex m_sync_mutex;
     inline static std::vector<std::function<void()>> m_sync_functions;
+    inline static uint64_t m_sync_budget = 0;
 
     inline static std::mutex m_async_mutex;
     inline static std::vector<std::function<void()>> m_async_tasks;

@@ -468,6 +468,56 @@ void portalUnInhibit(DBusConnection* connection, const std::string& requestPath)
 
 static std::unique_ptr<DBusConnection, std::function<void(DBusConnection*)>> dbus_conn(connectSessionBus(),
     closeSessionBus);
+
+// Whether the desktop prefers a dark appearance, from the XDG desktop portal's
+// org.freedesktop.appearance color-scheme (1: dark, 2: light, 0: none). False
+// without a session bus or a portal; at most half a second is waited.
+static bool portalPrefersDark(DBusConnection* connection)
+{
+    if (!connection)
+        return false;
+
+    DBusMessage* msg = dbus_message_new_method_call("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop",
+        "org.freedesktop.portal.Settings", "Read");
+    if (!msg)
+        return false;
+
+    const char* space = "org.freedesktop.appearance";
+    const char* key   = "color-scheme";
+    dbus_message_append_args(msg, DBUS_TYPE_STRING, &space, DBUS_TYPE_STRING, &key, DBUS_TYPE_INVALID);
+
+    DBusError error;
+    dbus_error_init(&error);
+    DBusMessage* reply = dbus_connection_send_with_reply_and_block(connection, msg, 500, &error);
+    dbus_message_unref(msg);
+    if (!reply)
+    {
+        brls::Logger::debug("dbus: no colour scheme from the desktop portal: {}", error.message ? error.message : "?");
+        dbus_error_free(&error);
+        return false;
+    }
+
+    // The value comes as a variant, in a variant with older portals
+    bool dark = false;
+    DBusMessageIter iter;
+    if (dbus_message_iter_init(reply, &iter))
+    {
+        while (dbus_message_iter_get_arg_type(&iter) == DBUS_TYPE_VARIANT)
+        {
+            DBusMessageIter inner;
+            dbus_message_iter_recurse(&iter, &inner);
+            iter = inner;
+        }
+        if (dbus_message_iter_get_arg_type(&iter) == DBUS_TYPE_UINT32)
+        {
+            dbus_uint32_t scheme = 0;
+            dbus_message_iter_get_basic(&iter, &scheme);
+            dark = scheme == 1;
+        }
+    }
+    dbus_message_unref(reply);
+    return dark;
+}
 #endif
 
 DesktopPlatform::DesktopPlatform()
@@ -511,6 +561,12 @@ DesktopPlatform::DesktopPlatform()
                 brls::Logger::info("Set app theme: Dark");
             }
             FreeLibrary(hUxtheme);
+        }
+#elif defined(__linux__) && !defined(__SDL2__)
+        if (portalPrefersDark(dbus_conn.get()))
+        {
+            this->themeVariant = ThemeVariant::DARK;
+            brls::Logger::info("Set app theme: Dark");
         }
 #endif
     }
