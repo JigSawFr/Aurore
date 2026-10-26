@@ -294,3 +294,63 @@ function(gen_dksh romfs_dir)
     execute_process(COMMAND ${NX_UAM_EXE} -s frag -o "${romfs_dir}/fill_aa_fsh.dksh" "${SHADER_BASE}/fill_aa_fsh.glsl" TIMEOUT 5)
     execute_process(COMMAND ${NX_UAM_EXE} -s frag -o "${romfs_dir}/fill_fsh.dksh" "${SHADER_BASE}/fill_fsh.glsl" TIMEOUT 5)
 endfunction()
+# ps4 platform
+# The pacbrew toolchain's add_pkg, with the gp4's directory tree rewritten
+# before PkgTool reads it (see ps4_gp4_rootdir.cmake).
+function(ps4_pkg project pkgdir title_id title version)
+    if (NOT DEFINED BOREALIS_LIBRARY)
+        message(FATAL_ERROR BOREALIS_LIBRARY is not defined)
+    endif ()
+    # Title must not exceed 128 characters
+    string(SUBSTRING "${title}" 0 127 title)
+
+    # Version in a form the PS4 accepts
+    string(SUBSTRING "${version}" 0 7 verclean)
+    string(REGEX MATCH "([0-9]+\\.[0-9]+)" verclean ${verclean})
+    if ("${verclean}" STREQUAL "")
+        message(WARNING "The version string '${version}' is formatted in a way that is incompatable with the PS4, using '01.00'")
+        set(verclean "01.00")
+    endif ()
+
+    # Content id from the title id and the version
+    string(REPLACE "." "0" vercont ${verclean})
+    string(APPEND vercont "00000000")
+    string(SUBSTRING "${vercont}" 0 7 vercont)
+    set(content_id "IV0001-${title_id}_00-${title_id}${vercont}")
+    set(PKG_OUT_NAME "${content_id}.pkg" CACHE STRING "ps4 pkg name" FORCE)
+
+    set(attribute 0)
+    if (${ARGC} GREATER 5)
+        set(attribute ${ARGV5})
+    endif ()
+    set(category "gde")
+    if (${ARGC} GREATER 6)
+        set(category "${ARGV6}")
+    endif ()
+
+    set(PKGTOOL ${CMAKE_COMMAND} -E env DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 "${OPENORBIS}/bin/linux/PkgTool.Core")
+    set(SFO ${pkgdir}/sce_sys/param.sfo)
+    add_custom_command(
+            OUTPUT "${project}.pkg"
+            COMMAND ${CMAKE_COMMAND} -E copy eboot.bin ${pkgdir}/eboot.bin
+            COMMAND ${PKGTOOL} sfo_new ${SFO}
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} APP_TYPE --type Integer --maxsize 4 --value 1
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} APP_VER --type Utf8 --maxsize 8 --value "${verclean}"
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} ATTRIBUTE --type Integer --maxsize 4 --value ${attribute}
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} CATEGORY --type Utf8 --maxsize 4 --value "${category}"
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} FORMAT --type Utf8 --maxsize 4 --value "obs"
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} CONTENT_ID --type Utf8 --maxsize 48 --value "${content_id}"
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} DOWNLOAD_DATA_SIZE --type Integer --maxsize 4 --value 0
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} SYSTEM_VER --type Integer --maxsize 4 --value 1020
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} TITLE --type Utf8 --maxsize 128 --value "${title}"
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} TITLE_ID --type Utf8 --maxsize 12 --value "${title_id}"
+            COMMAND ${PKGTOOL} sfo_setentry ${SFO} VERSION --type Utf8 --maxsize 8 --value "${verclean}"
+            COMMAND "${OPENORBIS}/bin/linux/create-gp4" -out ${pkgdir}/${project}.gp4 --content-id "${content_id}" --path "${pkgdir}"
+            COMMAND ${CMAKE_COMMAND} -DGP4=${pkgdir}/${project}.gp4 -P ${BOREALIS_LIBRARY}/cmake/ps4_gp4_rootdir.cmake
+            COMMAND ${PKGTOOL} pkg_build ${pkgdir}/${project}.gp4 ${CMAKE_BINARY_DIR}
+            COMMAND ${CMAKE_COMMAND} -E remove ${pkgdir}/eboot.bin ${SFO} ${pkgdir}/${project}.gp4
+            VERBATIM
+            DEPENDS "${project}.self"
+    )
+    add_custom_target("${project}_pkg" ALL DEPENDS "${project}.pkg")
+endfunction()
