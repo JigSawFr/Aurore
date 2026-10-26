@@ -114,9 +114,8 @@ Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
 
     if (!action->isAvailable() || blocked)
     {
-        Theme theme = Application::getTheme();
-        icon->setTextColor(theme["brls/text_disabled"]);
-        hint->setTextColor(theme["brls/text_disabled"]);
+        icon->setThemeColor("textColor", "brls/text_disabled");
+        hint->setThemeColor("textColor", "brls/text_disabled");
     }
 }
 

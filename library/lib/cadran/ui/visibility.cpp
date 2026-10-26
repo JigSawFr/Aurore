@@ -14,21 +14,16 @@ using namespace brls::literals;
 namespace ui
 {
 
-void show_writable(brls::DetailCell* cell, bool writable, NVGcolor title, NVGcolor detail)
+void show_writable(brls::DetailCell* cell, bool writable, const char* title_key, const char* detail_key)
 {
-    const NVGcolor grey = nvgTransRGBA(cadran::kit::color("cadran/text"), 110);
-    cell->title->setTextColor(writable ? title : grey);
+    const char* grey = "cadran/text_off";
+    cell->title->setThemeColor("textColor", writable ? title_key : grey);
     if (auto* sw = dynamic_cast<brls::BooleanCell*>(cell)) {
         if (writable) sw->setOn(sw->isOn(), false);   // its own value colours back
-        else sw->detail->setTextColor(grey);
+        else sw->detail->setThemeColor("textColor", grey);
         return;
     }
-    cell->detail->setTextColor(writable ? detail : grey);
-}
-
-void show_writable(brls::DetailCell* cell, bool writable)
-{
-    show_writable(cell, writable, cadran::kit::color("cadran/text"), cadran::kit::color("cadran/text2"));
+    cell->detail->setThemeColor("textColor", writable ? detail_key : grey);
 }
 
 void set_visible(brls::View* view, bool visible)

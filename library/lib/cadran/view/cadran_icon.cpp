@@ -14,7 +14,7 @@ constexpr float POP_US = 380000.0f;
 
 CadranIcon::CadranIcon()
 {
-    this->color = brls::Application::getTheme()["brls/text"];
+    this->setThemeColor("color", "brls/text");
     this->setWidth(22);
     this->setHeight(22);
     this->setFocusable(false);
@@ -23,7 +23,26 @@ CadranIcon::CadranIcon()
 }
 
 void CadranIcon::setIcon(const std::string& name) { this->icon = name; }
-void CadranIcon::setColor(NVGcolor value) { this->color = value; }
+void CadranIcon::setColor(NVGcolor value)
+{
+    if (!this->transitionStyle("color", brls::StyleValue::of(value))) this->color = value;
+}
+
+bool CadranIcon::getStyleProperty(const std::string& name, brls::StyleValue* value)
+{
+    if (name != "color") return brls::View::getStyleProperty(name, value);
+    *value = brls::StyleValue::of(this->color);
+    return true;
+}
+
+bool CadranIcon::setStyleProperty(const std::string& name, const brls::StyleValue& value)
+{
+    if (name != "color") return brls::View::setStyleProperty(name, value);
+    if (value.type != brls::StyleValue::Type::COLOR) return false;
+    if (!this->transitionStyle("color", value)) this->color = value.color;
+    return true;
+}
+
 void CadranIcon::pop() { this->pop_since = effects::motion() ? motion::now() : 0; }
 
 static void mark(NVGcontext* vg, float w, float h)

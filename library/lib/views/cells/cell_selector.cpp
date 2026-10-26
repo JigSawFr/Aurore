@@ -23,7 +23,7 @@ namespace brls
 
 SelectorCell::SelectorCell()
 {
-    detail->setTextColor(Application::getTheme()["brls/list/listItem_value_color"]);
+    detail->setThemeColor("textColor", "brls/list/listItem_value_color");
 
     this->registerClickAction([this](View* view) {
         Dropdown* dropdown = new Dropdown(

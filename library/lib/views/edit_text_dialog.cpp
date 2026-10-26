@@ -235,13 +235,13 @@ namespace brls
     {
         if (content.empty())
         {
-            label->setTextColor(Application::getTheme().getColor("brls/text_disabled"));
+            label->setThemeColor("textColor", "brls/text_disabled");
             label->setText(hint);
             label->setCursor((int)CursorPosition::START);
         }
         else
         {
-            label->setTextColor(Application::getTheme().getColor("brls/text"));
+            label->setThemeColor("textColor", "brls/text");
             label->setText(content);
         }
     }

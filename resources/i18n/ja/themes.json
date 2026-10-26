@@ -1,0 +1,9 @@
+{
+    "presets": {
+        "high_contrast_dark": "ハイコントラスト（ダーク）",
+        "high_contrast_light": "ハイコントラスト（ライト）",
+        "ocean": "オーシャン",
+        "amethyst": "アメジスト",
+        "sand": "サンド"
+    }
+}

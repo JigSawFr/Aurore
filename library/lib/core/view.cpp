@@ -23,6 +23,7 @@
 #include <tinyxml2.h>
 #include <yoga/Yoga.h>
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 #include <functional>
 #include <borealis/core/animation.hpp>
@@ -512,6 +513,14 @@ void View::drawBorder(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
     nvgStroke(vg);
 }
 
+// A shadow's colour (a theme key's, usually black), `opacity` from 0 to 255
+// times the key's own alpha
+NVGcolor View::shadowColor(NVGcolor color, float opacity)
+{
+    auto channel = [](float value) { return (unsigned)std::lround(value * 255.0f); };
+    return RGBA(channel(color.r), channel(color.g), channel(color.b), (unsigned)(opacity * color.a));
+}
+
 void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame)
 {
     float shadowWidth   = 0.0f;
@@ -539,7 +548,7 @@ void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
         frame.getMinX(), frame.getMinY() + shadowWidth,
         frame.getWidth(), frame.getHeight(),
         maxRadius * 2, shadowFeather,
-        RGBA(0, 0, 0, shadowOpacity * alpha), TRANSPARENT);
+        this->shadowColor(ctx->theme["brls/shadow"], shadowOpacity * alpha), TRANSPARENT);
 
     nvgBeginPath(vg);
     nvgRect(
@@ -747,7 +756,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
             x, y + style["brls/highlight/shadow_width"],
             width, height,
             cornerRadius * 2, style["brls/highlight/shadow_feather"],
-            RGBA(0, 0, 0, style["brls/highlight/shadow_opacity"] * alpha), TRANSPARENT);
+            this->shadowColor(theme["brls/highlight/shadow"], style["brls/highlight/shadow_opacity"] * alpha), TRANSPARENT);
 
         nvgBeginPath(vg);
         nvgRect(vg, x - shadowOffset, y - shadowOffset,
@@ -1951,83 +1960,28 @@ bool View::applyXMLAttribute(std::string name, std::string value)
             return false;
         }
     }
-    // Starts with with # -> color
+    // Starts with # -> color
     else if (startsWith(value, "#"))
     {
-        // Parse the color
-        // #RRGGBB format
-        if (value.size() == 7)
-        {
-            unsigned int r = 0, g = 0, b = 0;
-            std::stringstream sr{value.substr(1,2)};
-            sr >> std::hex >> r;
-            std::stringstream sg{value.substr(3,2)};
-            sg >> std::hex >> g;
-            std::stringstream sb{value.substr(5,2)};
-            sb >> std::hex >> b;
-
-            if (sr.fail() || sg.fail() || sb.fail())
-            {
-                return false;
-            }
-            else if (this->colorAttributes.count(name) > 0)
-            {
-                this->colorAttributes[name](nvgRGB(r, g, b));
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        // #RRGGBBAA format
-        else if (value.size() == 9)
-        {
-            unsigned int r = 0, g = 0, b = 0, a = 0;
-            std::stringstream sr{value.substr(1,2)};
-            sr >> std::hex >> r;
-            std::stringstream sg{value.substr(3,2)};
-            sg >> std::hex >> g;
-            std::stringstream sb{value.substr(5,2)};
-            sb >> std::hex >> b;
-            std::stringstream sa{value.substr(7,2)};
-            sa >> std::hex >> a;
-
-            if (sr.fail() || sg.fail() || sb.fail() || sa.fail())
-            {
-                return false;
-            }
-            else if (this->colorAttributes.count(name) > 0)
-            {
-                this->colorAttributes[name](nvgRGBA(r, g, b, a));
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
+        NVGcolor color;
+        if (!Theme::parseColor(value, &color) || this->colorAttributes.count(name) == 0)
             return false;
-        }
+        this->colorAttributes[name](color);
+        return true;
     }
-    // Starts with @theme -> color
+    // Starts with @theme -> a theme colour, kept by key when the attribute
+    // is a style property (it follows the theme)
     else if (startsWith(value, "@theme/"))
     {
-        // Parse the color name
-        std::string colorName = value.substr(7); // length of "@theme/"
-        NVGcolor value        = Application::getTheme()[colorName]; // will throw logic_error if the color doesn't exist
+        std::string key = value.substr(7); // length of "@theme/"
+        StyleValue current;
+        if (this->getStyleProperty(name, &current) && current.type == StyleValue::Type::COLOR)
+            return this->setThemeColor(name, key);
 
-        if (this->colorAttributes.count(name) > 0)
-        {
-            this->colorAttributes[name](value);
-            return true;
-        }
-        else
-        {
+        if (this->colorAttributes.count(name) == 0 || !Application::getTheme().hasColor(key))
             return false;
-        }
+        this->colorAttributes[name](Application::getTheme()[key]);
+        return true;
     }
     // Equals true or false -> bool
     else if (value == "true" || value == "false")

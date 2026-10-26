@@ -25,7 +25,7 @@ An attribute prefixed with a state applies while the view is in that state, and 
 
 When several states style the same property, the later one in this table wins.
 
-Values are written as for the property itself: colours as `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(…)`, `rgba(…)` or `@theme/<name>`; numbers as `4`, `4px` or `@style/<name>`. A `@theme/` value is read each time the state comes on, so it follows a theme loaded or switched since.
+Values are written as for the property itself: colours as `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(…)`, `rgba(…)` or `@theme/<name>`; numbers as `4`, `4px` or `@style/<name>`. A `@theme/` value is read each time the state comes on, and again when the theme changes, so it follows a theme loaded or switched since; a plain `textColor="@theme/…"` attribute does too (`View::setThemeColor`, docs/themes.md).
 
 The properties are those that are drawn, never laid out (a size or a margin would move the screen around):
 
@@ -127,4 +127,4 @@ Both are settings of the core, which Cadran's preferences feed:
 - `brls::Application::setReduceMotion(true)`: the movements there only for show are left out: transitions, the focus highlight's glide, and Cadran's entrances, glides and breathing glow. `getReduceMotion()`, which transitions read, is also true while Cadran's effects leave movement out (Preferences › Visual effects "Reduced", the lighter effects in hand, `BRLS_STILL_FOCUS`); the highlight's glide follows the app's setting only.
 - `brls::Application::setTextScale(1.25f)`: every label drawn that much larger (`Label::setFontScale`), and every screen measured and laid out again at once. A view of the app that measures text of its own is told through `View::onTextScaleChanged()`. Cadran's Preferences › Text size goes through it.
 
-Cadran has no high-contrast setting of its own to move into the core: a high-contrast look is a theme file (`brls::Theme::loadFile`, which warns about colours that read badly).
+High contrast is a theme: the presets `builtin:high-contrast-dark` and `builtin:high-contrast-light` (docs/themes.md), offered by Cadran's palette picker, or any theme file (`brls::Theme::loadFile`, which warns about colours that read badly).

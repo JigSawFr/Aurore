@@ -38,6 +38,14 @@ class SettingsTab : public brls::Box
     BRLS_BIND(brls::SelectorCell, swapInterval, "swapInterval");
     BRLS_BIND(brls::SliderCell, slider, "slider");
     BRLS_BIND(brls::DetailCell, notify, "notify");
+    BRLS_BIND(brls::BooleanCell, themeDark, "themeDark");
+    BRLS_BIND(brls::Box, themes, "themes");
 
     static brls::View* create();
+
+  private:
+    // A line per theme file (Theme::builtinThemes, Theme::listThemes): its
+    // name, a few of its colours, what is wrong with it; A uses it.
+    void listThemes();
+    std::vector<std::pair<brls::DetailCell*, std::string>> themeCells;
 };

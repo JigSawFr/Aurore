@@ -30,7 +30,7 @@ brls::Label* label(const std::string& text, float size, const char* color_key)
     auto* l = new brls::Label();
     l->setText(text);
     l->setFontSize(size);
-    l->setTextColor(brls::Application::getTheme()[color_key]);
+    l->setThemeColor("textColor", color_key);
     return l;
 }
 
@@ -53,7 +53,7 @@ brls::Label* display(const std::string& text, float size, const char* color_key)
     auto* l = new DisplayLabel();
     l->setText(text);
     l->setFontSize(size);
-    l->setTextColor(brls::Application::getTheme()[color_key]);
+    l->setThemeColor("textColor", color_key);
     return l;
 }
 
@@ -63,17 +63,16 @@ CadranIcon* icon(const char* name, float size, const char* color_key)
     view->setIcon(name);
     view->setWidth(size);
     view->setHeight(size);
-    view->setColor(brls::Application::getTheme()[color_key]);
+    view->setThemeColor("color", color_key);
     return view;
 }
 
 brls::Box* card(bool focusable, bool grow)
 {
-    brls::Theme theme = brls::Application::getTheme();
     auto* box = new brls::Box(brls::Axis::COLUMN);
     box->setAlignItems(brls::AlignItems::STRETCH);
-    box->setBackgroundColor(theme["cadran/surf"]);
-    box->setBorderColor(theme["cadran/line"]);
+    box->setThemeColor("backgroundColor", "cadran/surf");
+    box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
     box->setCornerRadius(RADIUS_CARD);
     box->setPadding(20, 24, 20, 24);
@@ -102,7 +101,7 @@ void set_kicker(brls::Label* label, const std::string& text)
 {
     if (!label) return;
     label->setFontSize(TEXT_KICKER);
-    label->setTextColor(color("cadran/text2"));
+    label->setThemeColor("textColor", "cadran/text2");
     if (!text.empty()) label->setText(cadran::upper(text));
 }
 
@@ -130,27 +129,28 @@ Mark::Mark(const char* color_key)
 void Mark::set(const char* color_key)
 {
     const std::string key = color_key;
-    this->color = brls::Application::getTheme()[color_key];
+    this->key = key;
     this->shape = key.rfind("cadran/teal", 0) == 0                                          ? Shape::CHECK
                   : key.rfind("cadran/amber", 0) == 0 || key.rfind("cadran/coral", 0) == 0 ? Shape::WARN
                                                                                            : Shape::DOT;
 }
 
-void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext*)
+void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx)
 {
+    const NVGcolor color = ctx->theme[this->key];
     const float cx = x + width / 2, cy = y + height / 2;
     nvgBeginPath(vg);
     switch (this->shape) {
         case Shape::DOT:
             nvgCircle(vg, cx, cy, 4);
-            nvgFillColor(vg, this->a(this->color));
+            nvgFillColor(vg, this->a(color));
             nvgFill(vg);
             break;
         case Shape::CHECK:
             nvgMoveTo(vg, x + 1.5f, cy + 0.5f);
             nvgLineTo(vg, x + 4.8f, cy + 3.6f);
             nvgLineTo(vg, x + width - 1.2f, y + 2.6f);
-            nvgStrokeColor(vg, this->a(this->color));
+            nvgStrokeColor(vg, this->a(color));
             nvgStrokeWidth(vg, 2.2f);
             nvgLineCap(vg, NVG_ROUND);
             nvgLineJoin(vg, NVG_ROUND);
@@ -162,9 +162,9 @@ void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brl
             nvgLineTo(vg, x + width, y + height - 0.5f);
             nvgLineTo(vg, x, y + height - 0.5f);
             nvgClosePath(vg);
-            nvgFillColor(vg, this->a(this->color));
+            nvgFillColor(vg, this->a(color));
             nvgFill(vg);
-            const NVGcolor cut = this->a(brls::Application::getTheme()["brls/background"]);
+            const NVGcolor cut = this->a(ctx->theme["brls/background"]);
             nvgBeginPath(vg);
             nvgRoundedRect(vg, cx - 0.8f, y + 4.2f, 1.6f, 3.8f, 0.8f);
             nvgCircle(vg, cx, y + height - 2.6f, 0.95f);
@@ -177,14 +177,13 @@ void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brl
 
 brls::Box* pill(const std::string& text, const char* dot_key)
 {
-    brls::Theme theme = brls::Application::getTheme();
     auto* box = new brls::Box(brls::Axis::ROW);
     box->setAlignItems(brls::AlignItems::CENTER);
     box->setHeight(30);
     box->setPaddingLeft(14);
     box->setPaddingRight(16);
     box->setCornerRadius(15);
-    box->setBorderColor(theme["cadran/line"]);
+    box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
     box->setMarginRight(10);
     box->setMarginBottom(8);
@@ -200,18 +199,17 @@ brls::Box* pill(const std::string& text, const char* dot_key)
 
 brls::Box* key(const char* letter, float size)
 {
-    brls::Theme theme = brls::Application::getTheme();
     auto* bubble = new brls::Box(brls::Axis::ROW);
     bubble->setWidth(size);
     bubble->setHeight(size);
     bubble->setCornerRadius(size / 2);
     bubble->setShrink(0);
-    bubble->setBackgroundColor(theme["cadran/key_bg"]);
+    bubble->setThemeColor("backgroundColor", "cadran/key_bg");
     bubble->setAlignItems(brls::AlignItems::CENTER);
     bubble->setJustifyContent(brls::JustifyContent::CENTER);
     auto* text = new CadranDigits();
     text->setFontSize(12);
-    text->setTextColor(theme["cadran/key_fg"]);
+    text->setThemeColor("textColor", "cadran/key_fg");
     text->setText(letter);
     bubble->addView(text);
     return bubble;
@@ -244,15 +242,14 @@ void Chip::frame(brls::FrameContext* ctx)
 
 brls::Box* chip(const std::string& text, float height)
 {
-    brls::Theme theme = brls::Application::getTheme();
     auto* box = new Chip();
     box->setAlignItems(brls::AlignItems::CENTER);
     box->setHeight(height);
     box->setPaddingLeft(22);
     box->setPaddingRight(22);
     box->setCornerRadius(height / 2);
-    box->setBackgroundColor(theme["cadran/surf2"]);
-    box->setBorderColor(theme["cadran/line"]);
+    box->setThemeColor("backgroundColor", "cadran/surf2");
+    box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
     box->setFocusable(true);
     box->setHideHighlightBackground(true);
@@ -324,7 +321,6 @@ void Bar::draw(NVGcontext* vg, float x, float y, float width, float height, brls
 
 Empty empty(const char* icon_name)
 {
-    brls::Theme theme = brls::Application::getTheme();
     Empty e;
     e.box = card(false, false);
     e.box->setAlignItems(brls::AlignItems::CENTER);
@@ -333,7 +329,7 @@ Empty empty(const char* icon_name)
     circle->setWidth(64);
     circle->setHeight(64);
     circle->setCornerRadius(32);
-    circle->setBackgroundColor(theme["cadran/teal_soft"]);
+    circle->setThemeColor("backgroundColor", "cadran/teal_soft");
     circle->setAlignItems(brls::AlignItems::CENTER);
     circle->setJustifyContent(brls::JustifyContent::CENTER);
     circle->addView(icon(icon_name, 28, "cadran/teal"));
@@ -365,7 +361,7 @@ brls::Box* empty_around(brls::Label* label, const char* icon_name)
     parent->removeView(label, false);
     e.box->removeView(e.title);
     label->setFontSize(TEXT_LEAD);
-    label->setTextColor(color("cadran/text"));
+    label->setThemeColor("textColor", "cadran/text");
     label->setSingleLine(false);
     label->setHorizontalAlign(brls::HorizontalAlign::CENTER);
     label->setAlignSelf(brls::AlignSelf::STRETCH);

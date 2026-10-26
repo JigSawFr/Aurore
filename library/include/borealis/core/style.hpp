@@ -30,11 +30,18 @@ class StyleValues
   public:
     StyleValues(std::initializer_list<std::pair<std::string, float>> list);
 
+    // A metric of the base: what it is without a theme file.
     void addMetric(const std::string&, float value);
     float getMetric(const std::string& name);
+    bool hasMetric(const std::string& name) const;
+
+    // The theme file's metrics, over the base (empty: the base alone).
+    void setOverlay(const std::unordered_map<std::string, float>& overlay);
 
   private:
-    std::unordered_map<std::string, float> values;
+    std::unordered_map<std::string, float> base;
+    std::unordered_map<std::string, float> overlay;
+    std::unordered_map<std::string, float> values; // base, then overlay
 };
 
 // Simple wrapper around StyleValues for the array operator
@@ -46,6 +53,8 @@ class Style
 
     void addMetric(const std::string& name, float value);
     float getMetric(const std::string& name);
+    bool hasMetric(const std::string& name);
+    StyleValues* getValues() { return this->values; }
 
   private:
     StyleValues* values;

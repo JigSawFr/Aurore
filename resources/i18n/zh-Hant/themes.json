@@ -1,0 +1,9 @@
+{
+    "presets": {
+        "high_contrast_dark": "高對比深色",
+        "high_contrast_light": "高對比淺色",
+        "ocean": "海洋",
+        "amethyst": "紫水晶",
+        "sand": "沙色"
+    }
+}

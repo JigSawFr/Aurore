@@ -619,6 +619,13 @@ void Box::onWindowSizeChanged()
         child->onWindowSizeChanged();
 }
 
+void Box::onThemeChanged()
+{
+    View::onThemeChanged();
+    for (View* child : this->children)
+        child->onThemeChanged();
+}
+
 std::vector<View*>& Box::getChildren()
 {
     return this->children;

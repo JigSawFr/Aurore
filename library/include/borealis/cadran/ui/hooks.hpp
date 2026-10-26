@@ -64,6 +64,11 @@ struct Hooks
     // Unset: the system's local date.
     std::function<std::string()> today;
 
+    // The folder of the user's own theme files (*.theme, docs/themes.md),
+    // listed by the theme picker after Aurore's presets: the app's, such as
+    // "sdmc:/config/<app>/themes". Unset: the presets only.
+    std::function<std::string()> themes_dir;
+
     // Saves ui::prefs() (the language, theme, text size and effects chosen):
     // false when it cannot be saved at all. Unset: the choice lasts until the
     // app quits.

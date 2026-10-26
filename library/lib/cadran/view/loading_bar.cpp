@@ -5,11 +5,6 @@
 
 namespace
 {
-// The brand palette: the loading screen looks the same in both themes.
-const NVGcolor TRACK      = nvgRGB(0x1F, 0x33, 0x55);
-const NVGcolor TEAL       = nvgRGB(0x2E, 0xC4, 0xA6);
-const NVGcolor TEAL_LIGHT = nvgRGB(0x9A, 0xF0, 0xDC);
-
 // How long the fill takes to reach a new value, in µs.
 constexpr float EASE_US = 350000.0f;
 
@@ -64,12 +59,11 @@ void LoadingBar::draw(NVGcontext* vg, float x, float y, float width, float heigh
                       brls::Style style, brls::FrameContext* ctx)
 {
     (void)style;
-    (void)ctx;
     const float radius = height / 2.0f;
-    brls::Theme theme = brls::Application::getTheme();
+    brls::Theme& theme = ctx->theme;
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, radius);
-    nvgFillColor(vg, this->a(this->brand ? TRACK : theme["cadran/well"]));
+    nvgFillColor(vg, this->a(theme[this->brand ? "cadran/brand/track" : "cadran/well"]));
     nvgFill(vg);
 
     const brls::Time now = brls::getCPUTimeUsec();
@@ -81,8 +75,8 @@ void LoadingBar::draw(NVGcontext* vg, float x, float y, float width, float heigh
     // Teal, lighter toward its end: the end that moves.
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, w, height, radius);
-    nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x + w, y, this->a(this->brand ? TEAL : theme["cadran/teal_fill"]),
-                                       this->a(this->brand ? TEAL_LIGHT : theme["brls/highlight/color2"])));
+    nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x + w, y, this->a(theme[this->brand ? "cadran/brand/fill" : "cadran/teal_fill"]),
+                                       this->a(theme[this->brand ? "cadran/brand/glow" : "brls/highlight/color2"])));
     nvgFill(vg);
 }
 

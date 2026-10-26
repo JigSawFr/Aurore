@@ -173,8 +173,8 @@ ScrollingFrame::ScrollingFrame()
 
 void ScrollingFrame::setupScrollingIndicator()
 {
-    Theme theme        = Application::getTheme();
-    scrollingIndicator = new Rectangle(theme["brls/text"]);
+    scrollingIndicator = new Rectangle();
+    scrollingIndicator->setThemeColor("color", "brls/text");
     scrollingIndicator->setSize(Size(SCROLLING_INDICATOR_WIDTH, 0));
     scrollingIndicator->setCornerRadius(SCROLLING_INDICATOR_WIDTH / 2);
     scrollingIndicator->detach();

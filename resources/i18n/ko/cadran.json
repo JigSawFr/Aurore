@@ -108,6 +108,10 @@
             "system": "시스템",
             "light": "밝게",
             "dark": "어둡게"
+        },
+        "palette": "팔레트",
+        "palettes": {
+            "default": "기본"
         }
     }
 }

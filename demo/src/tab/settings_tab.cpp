@@ -16,6 +16,10 @@
 
 #include "tab/settings_tab.hpp"
 
+#include <borealis/cadran/ui/live_prefs.hpp>
+#include <borealis/cadran/ui/prefs.hpp>
+#include <borealis/cadran/ui/ui.hpp>
+
 using namespace brls::literals;  // for _i18n
 
 bool radioSelected = false;
@@ -121,6 +125,71 @@ SettingsTab::SettingsTab()
         brls::Application::notify(notification);
         return true;
     });
+
+    // The variant and the theme file go through Cadran's preferences, as
+    // its own pickers do (the header's theme button): the screens are drawn
+    // in them from the next frame, nothing is built again.
+    themeDark->init("Dark variant", ui::prefs().theme != "light", [](bool dark) {
+        ui::prefs().theme = dark ? "dark" : "light";
+        live_prefs::apply_theme();
+    });
+    this->listThemes();
+}
+
+void SettingsTab::listThemes()
+{
+    std::vector<brls::ThemeInfo> files = brls::Theme::builtinThemes();
+    for (brls::ThemeInfo& info : brls::Theme::listThemes("@res/themes"))
+        files.push_back(std::move(info));
+
+    brls::ThemeInfo none;
+    none.name = "Default (Cadran's palettes)";
+    none.light = none.dark = true;
+    files.insert(files.begin(), none);
+
+    for (const brls::ThemeInfo& info : files)
+    {
+        auto* cell = new brls::DetailCell();
+        cell->setText(info.author.empty() ? info.name : info.name + "  ·  " + info.author);
+
+        // Its colours, as it draws the variant it shows first
+        if (!info.path.empty())
+        {
+            const brls::ThemeInfo::Preview& preview = info.dark ? info.darkPreview : info.lightPreview;
+            auto* swatches = new brls::Box(brls::Axis::ROW);
+            swatches->setMarginRight(16);
+            for (NVGcolor color : { preview.background, preview.surface, preview.text, preview.accent, preview.highlight })
+            {
+                auto* swatch = new brls::Rectangle(color);
+                swatch->setSize(brls::Size(22, 22));
+                swatch->setCornerRadius(11);
+                swatch->setMarginLeft(6);
+                swatch->setBorderThickness(1);
+                swatch->setThemeColor("borderColor", "brls/header/border");
+                swatches->addView(swatch);
+            }
+            cell->addView(swatches, (int)cell->getChildren().size() - 1);
+        }
+
+        if (!info.ok())
+            cell->setDetailText(std::to_string(info.errors.size()) + " error(s): " + info.errors.front());
+        else if (!info.warnings.empty())
+            cell->setDetailText(std::to_string(info.warnings.size()) + " warning(s)");
+
+        std::string path = info.path;
+        cell->registerClickAction([this, path](brls::View*) {
+            ui::prefs().theme_file = path;
+            live_prefs::apply_theme();
+            for (auto& [line, file] : this->themeCells)
+                line->setDetailText(file == path ? "Active" : "");
+            this->themeDark->setOn(brls::Application::getThemeVariant() == brls::ThemeVariant::DARK, false);
+            return true;
+        });
+        if (info.path == ui::prefs().theme_file)
+            cell->setDetailText("Active");
+        this->themeCells.emplace_back(cell, path);
+        this->themes->addView(cell);
+    }
 }
 
 brls::View* SettingsTab::create()

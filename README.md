@@ -34,7 +34,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - 🧱 **Flexbox layout** — every view is laid out by [Yoga](https://github.com/facebook/yoga), described in XML, code only where it matters.
 - 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM), scaled for a TV.
 - 🧩 **Ready-made components** — tabs, lists that recycle their cells, settings cells, dialogs, toasts, sliders, images, all restyled by a theme.
-- 🌗 **Light and dark themes**, and translations in one JSON catalogue per language.
+- 🌗 **Light and dark themes, theme files and presets** (high contrast included) switched while the app runs ([docs/themes.md](docs/themes.md)), and translations in one JSON catalogue per language.
 - 🧰 **The toolbox** — logger, animations, timers, background tasks, storage.
 
 <details>

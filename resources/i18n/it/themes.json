@@ -1,0 +1,9 @@
+{
+    "presets": {
+        "high_contrast_dark": "Contrasto elevato scuro",
+        "high_contrast_light": "Contrasto elevato chiaro",
+        "ocean": "Oceano",
+        "amethyst": "Ametista",
+        "sand": "Sabbia"
+    }
+}

@@ -14,7 +14,7 @@ constexpr float ROLL_US = 240000.0f;   // a digit's roll, in µs
 
 CadranDigits::CadranDigits()
 {
-    this->color = brls::Application::getTheme()["brls/text"];
+    this->setThemeColor("textColor", "brls/text");
     this->font = brls::Application::getFont("cadran/digits");
     if (this->font == brls::FONT_INVALID) this->font = brls::Application::getDefaultFont();
     this->setFocusable(false);
@@ -48,7 +48,25 @@ void CadranDigits::setFontSize(float value)
     this->measure();
 }
 
-void CadranDigits::setTextColor(NVGcolor value) { this->color = value; }
+void CadranDigits::setTextColor(NVGcolor value)
+{
+    if (!this->transitionStyle("textColor", brls::StyleValue::of(value))) this->color = value;
+}
+
+bool CadranDigits::getStyleProperty(const std::string& name, brls::StyleValue* value)
+{
+    if (name != "textColor") return brls::View::getStyleProperty(name, value);
+    *value = brls::StyleValue::of(this->color);
+    return true;
+}
+
+bool CadranDigits::setStyleProperty(const std::string& name, const brls::StyleValue& value)
+{
+    if (name != "textColor") return brls::View::setStyleProperty(name, value);
+    if (value.type != brls::StyleValue::Type::COLOR) return false;
+    this->setTextColor(value.color);
+    return true;
+}
 
 void CadranDigits::setFollowsTextSize(bool follows)
 {

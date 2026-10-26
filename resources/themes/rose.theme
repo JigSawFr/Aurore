@@ -1,0 +1,21 @@
+# Both variants in one file: the one shown follows the system's mode (or
+# the app's light / dark setting). The shared metrics come from an include.
+name = Rose
+author = Aurore demo
+version = 1.0
+description = Pink and plum, light or dark.
+
+@include shared.inc
+
+[light]
+background = #fbf3f5
+surface = #ffffff
+text = #2a1520
+accent = #b8326a
+
+[dark]
+background = #1d1016
+surface = #2a1820
+text = #f8e9ef
+accent = #ff7eb0
+brls/highlight/color2 = #ffc2da

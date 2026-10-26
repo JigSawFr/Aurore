@@ -79,6 +79,7 @@ class Box : public View
     void willAppear(bool resetState) override;
     void willDisappear(bool resetState) override;
     void onWindowSizeChanged() override;
+    void onThemeChanged() override;
     void onFocusGained() override;
     void onFocusLost() override;
     void onParentFocusGained(View* focusedView) override;
