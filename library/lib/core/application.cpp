@@ -836,6 +836,10 @@ void Application::exit()
     exitEvent.fire();
     Logger::info("Exiting...");
 
+    // The async thread first: a task still running must not reach views
+    // or textures freed below
+    Threading::stop();
+
     Application::clear();
 
     // Free views deletion pool
@@ -847,8 +851,6 @@ void Application::exit()
         for (auto view : pendingViews)
             delete view;
     }
-
-    Threading::stop();
 
     exitDoneEvent.fire();
 
