@@ -134,10 +134,10 @@ BRLS_TEST(confirm_dialog_opens_and_closes)
 BRLS_TEST(touch_opens_a_tab)
 {
     DemoHarness h;
-    BRLS_CHECK(h.tapView(h.findText("Settings")));
-    BRLS_CHECK(h.hasText("Radio cell"));
+    BRLS_CHECK(h.tapView(h.findText("Layout and alignment")));
+    BRLS_CHECK(h.hasText("alignItems: center"));
     BRLS_CHECK(brls::Application::getInputType() == brls::InputType::TOUCH);
-    BRLS_CHECK(h.matchesReference("settings_tab"));
+    BRLS_CHECK(h.matchesReference("layout_tab"));
 }
 
 BRLS_TEST(window_resized)
