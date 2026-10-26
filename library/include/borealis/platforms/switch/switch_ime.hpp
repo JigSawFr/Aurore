@@ -27,6 +27,9 @@ class SwitchImeManager : public ImeManager
     bool openForText(std::function<void(std::string)> f, std::string headerText = "",
         std::string subText = "", int maxStringLength = 32, std::string initialText = "",
         int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE) override;
+    bool openForPassword(std::function<void(std::string)> f, std::string headerText = "",
+        std::string subText = "", int maxStringLength = 32, std::string initialText = "",
+        int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE) override;
 
     bool openForNumber(std::function<void(long)> f, std::string headerText = "",
         std::string subText = "", int maxStringLength = 18, std::string initialText = "",

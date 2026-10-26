@@ -47,6 +47,18 @@ class ImeManager
         int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE)
         = 0;
 
+    /**
+     * The keyboard for a password or a PIN: what is typed is not shown
+     * (the Switch's password keyboard). Where the platform has no such
+     * keyboard, the text one.
+     */
+    virtual bool openForPassword(std::function<void(std::string)> f, std::string headerText = "",
+        std::string subText = "", int maxStringLength = 32, std::string initialText = "",
+        int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE)
+    {
+        return openForText(f, headerText, subText, maxStringLength, initialText, kbdDisableBitmask);
+    }
+
     virtual bool openForNumber(std::function<void(long)> f, std::string headerText = "",
         std::string subText = "", int maxStringLength = 18, std::string initialText = "",
         std::string leftButton = "", std::string rightButton = "",

@@ -107,6 +107,31 @@ bool SwitchImeManager::openForText(std::function<void(std::string)> f, std::stri
     return false;
 }
 
+bool SwitchImeManager::openForPassword(std::function<void(std::string)> f, std::string headerText,
+    std::string subText, int maxStringLength, std::string initialText,
+    int kbdDisableBitmask)
+{
+    SwkbdConfig config = createSwkbdBaseConfig(headerText, subText, maxStringLength, initialText);
+
+    // The system's password keyboard: what is typed is hidden
+    swkbdConfigMakePresetPassword(&config);
+    swkbdConfigSetHeaderText(&config, headerText.c_str());
+    swkbdConfigSetSubText(&config, subText.c_str());
+    swkbdConfigSetStringLenMax(&config, maxStringLength);
+    swkbdConfigSetKeySetDisableBitmask(&config, getSwkbdKeyDisableBitmask(kbdDisableBitmask));
+
+    char buffer[0x100];
+    bool shown = R_SUCCEEDED(swkbdShow(&config, buffer, 0x100));
+
+    swkbdClose(&config);
+
+    if (!shown)
+        return false;
+
+    f(buffer);
+    return true;
+}
+
 bool SwitchImeManager::openForNumber(std::function<void(long)> f, std::string headerText,
     std::string subText, int maxStringLength, std::string initialText,
     std::string leftButton, std::string rightButton,
