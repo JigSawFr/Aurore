@@ -92,6 +92,7 @@ void installCadranHooks()
 int main(int argc, char* argv[])
 {
     // We recommend to use INFO for real apps
+    std::string themeFile;
     for (int i = 1; i < argc; i++) {
         if (std::strcmp(argv[i], "-d") == 0) { // Set log level
             brls::Logger::setLogLevel(brls::LogLevel::LOG_DEBUG);
@@ -100,6 +101,8 @@ int main(int argc, char* argv[])
             brls::Logger::setLogOutput(std::fopen(path, "w+"));
         } else if (std::strcmp(argv[i], "-v") == 0) {
             brls::Application::enableDebuggingView(true);
+        } else if (std::strcmp(argv[i], "-t") == 0 && i + 1 < argc) { // Theme file
+            themeFile = argv[++i];
         } else if (std::strcmp(argv[i], "-r") == 0) { // Redraw on demand
             brls::Application::setRedrawOnDemand(true);
         }
@@ -118,6 +121,10 @@ int main(int argc, char* argv[])
     }
 
     brls::Application::createWindow("demo/title"_i18n);
+
+    brls::ThemeVariant variant;
+    if (!themeFile.empty() && brls::Theme::loadFile(themeFile, &variant))
+        brls::Application::getPlatform()->setThemeVariant(variant);
 
     // Have the application register an action on every activity that will quit when you press BUTTON_START
     brls::Application::setGlobalQuit(false);
