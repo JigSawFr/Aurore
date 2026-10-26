@@ -30,7 +30,7 @@
 #include <borealis/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <fmt/chrono.h>
 
 #include <borealis/core/event.hpp>
@@ -134,7 +134,7 @@ class Logger
         catch (const std::exception& e)
         {
             // will be printed after the first fmt::print (so after the log tag)
-            printf("! Invalid log format string: \"%s\": %s\n", fmt::basic_string_view<char>(format).data(), e.what());
+            printf("! Invalid log format string: \"%s\": %s\n", format.get().data(), e.what());
         }
 
         // Flush on every platform: once the output is not a terminal (nxlink
