@@ -1,0 +1,4 @@
+# A theme in three lines: the rest is derived from the accent.
+name = Mint
+inherit = dark
+accent = #3ddc97

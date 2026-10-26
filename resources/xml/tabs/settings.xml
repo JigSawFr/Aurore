@@ -71,6 +71,23 @@
             <brls:RadioCell/>
             <brls:RadioCell/>
 
+            <brls:Header
+                width="auto"
+                height="auto"
+                title="Themes"
+                subtitle="Aurore's presets, then resources/themes: used at once"
+                marginTop="40"/>
+
+            <brls:BooleanCell
+                id="themeDark"/>
+
+            <brls:Box
+                id="themes"
+                width="auto"
+                height="auto"
+                axis="column"
+                alignItems="stretch"/>
+
         </brls:Box>
 
     </brls:ScrollingFrame>

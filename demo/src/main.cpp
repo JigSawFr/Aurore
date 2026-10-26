@@ -21,6 +21,7 @@
 
 #include <borealis.hpp>
 #include <borealis/cadran.hpp>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -48,9 +49,10 @@ namespace
 // The tab shown: its position in the sidebar, separators included.
 int shownTab = 0;
 
-// What Cadran, Aurore's look, asks of the demo: the rail's icons, and the
-// main screen built again on the tab shown when the language or the theme
-// changes (Language & theme, in the header or on the Cadran tab).
+// What Cadran, Aurore's look, asks of the demo: the rail's icons, the main
+// screen built again on the tab shown when the language changes (Language &
+// theme, in the header or on the Cadran tab), and the folder of the theme
+// files the palette picker lists after Aurore's presets.
 void installCadranHooks()
 {
     static ui::Prefs prefs;   // not saved: the demo starts in the defaults
@@ -60,6 +62,7 @@ void installCadranHooks()
     ui::use_prefs(prefs);
 
     ui::hooks::Hooks& h = ui::hooks::get();
+    h.themes_dir        = []() { return std::string("@res/themes"); };
     h.rail_icons        = []()
     {
         return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "", "activity", "gamepad",
@@ -88,12 +91,41 @@ void installCadranHooks()
             if (items[i] == item)
                 shownTab = (int)i; });
 }
+
+// --check-themes: each preset and each theme file of `folder`, its errors
+// and its warnings (contrast included); 1 when any has some.
+int checkThemeFiles(const std::string& folder)
+{
+    std::vector<brls::ThemeInfo> themes = brls::Theme::builtinThemes();
+    for (brls::ThemeInfo& info : brls::Theme::listThemes(folder))
+        themes.push_back(std::move(info));
+    int status = EXIT_SUCCESS;
+    for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })
+        for (const std::string& warning : brls::Theme::checkContrast(variant))
+        {
+            std::printf("default %s: %s\n", variant == brls::ThemeVariant::LIGHT ? "light" : "dark", warning.c_str());
+            status = EXIT_FAILURE;
+        }
+    for (const brls::ThemeInfo& info : themes)
+    {
+        std::printf("%s (%s): %s%s%s\n", info.name.c_str(), info.path.c_str(), info.light ? "light " : "",
+            info.dark ? "dark " : "", info.errors.empty() && info.warnings.empty() ? "ok" : "");
+        for (const std::string& error : info.errors)
+            std::printf("  error: %s\n", error.c_str());
+        for (const std::string& warning : info.warnings)
+            std::printf("  warning: %s\n", warning.c_str());
+        if (!info.errors.empty() || !info.warnings.empty())
+            status = EXIT_FAILURE;
+    }
+    return status;
+}
 }
 
 int main(int argc, char* argv[])
 {
     // We recommend to use INFO for real apps
     std::string themeFile;
+    const char* checkThemes = nullptr;
     for (int i = 1; i < argc; i++) {
         if (std::strcmp(argv[i], "-d") == 0) { // Set log level
             brls::Logger::setLogLevel(brls::LogLevel::LOG_DEBUG);
@@ -104,6 +136,8 @@ int main(int argc, char* argv[])
             brls::Application::enableDebuggingView(true);
         } else if (std::strcmp(argv[i], "-t") == 0 && i + 1 < argc) { // Theme file
             themeFile = argv[++i];
+        } else if (std::strcmp(argv[i], "--check-themes") == 0) { // Check the presets and a folder, then quit
+            checkThemes = (i + 1 < argc) ? argv[++i] : "@res/themes";
         } else if (std::strcmp(argv[i], "-r") == 0) { // Redraw on demand
             brls::Application::setRedrawOnDemand(true);
         }
@@ -122,6 +156,14 @@ int main(int argc, char* argv[])
     }
 
     brls::Application::createWindow("demo/title"_i18n);
+
+    // Out at once: nothing of the app to close
+    if (checkThemes)
+    {
+        int status = checkThemeFiles(checkThemes);
+        std::fflush(stdout);
+        std::_Exit(status);
+    }
 
     brls::ThemeVariant variant;
     if (!themeFile.empty() && brls::Theme::loadFile(themeFile, &variant))
