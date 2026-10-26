@@ -2017,7 +2017,10 @@ View* View::createFromXMLResource(std::string name)
     }
 
 #ifdef USE_LIBROMFS
-    return View::createFromXMLString(romfs::get("xml/" + name).string());
+    View::currentXMLResource = "xml/" + name;
+    View* view               = View::createFromXMLString(romfs::get("xml/" + name).string());
+    View::currentXMLResource.clear();
+    return view;
 #else
     return View::createFromXMLFile(std::string(BRLS_RESOURCES) + "xml/" + name);
 #endif
@@ -2032,7 +2035,7 @@ View* View::createFromXMLString(std::string_view xml)
         tinyxml2::XMLError error = document->Parse(xml.data());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
-            fatal("Invalid XML when creating View from XML: error " + std::to_string(error));
+            fatal("Invalid XML when creating View from XML: " + View::describeXMLError(document.get()));
 
         element = document->RootElement();
 
@@ -2053,7 +2056,7 @@ View* View::createFromXMLFile(std::string path)
         tinyxml2::XMLError error = document->LoadFile(path.c_str());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
-            fatal("Unable to load XML file \"" + path + "\": error " + std::to_string(error));
+            fatal("Unable to load XML file: " + View::describeXMLError(document.get(), path));
 
         element = document->RootElement();
 
@@ -2705,6 +2708,18 @@ std::shared_ptr<tinyxml2::XMLDocument> View::getXMLCache(std::string_view path)
     if (!doc)
         doc = std::make_shared<tinyxml2::XMLDocument>();
     return doc;
+}
+
+std::string View::currentXMLResource;
+
+std::string View::describeXMLError(tinyxml2::XMLDocument* document, const std::string& source)
+{
+    std::string where = source.empty() ? View::currentXMLResource : source;
+    if (where.empty())
+        where = "XML string";
+
+    // ErrorStr() names the error, its id, the line and what tinyxml2 found there
+    return where + ": " + document->ErrorStr();
 }
 
 void View::setWireframeEnabled(bool wireframe)
