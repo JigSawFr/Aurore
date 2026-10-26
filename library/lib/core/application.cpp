@@ -28,6 +28,7 @@
 #include <borealis/core/application.hpp>
 #include <borealis/views/dialog.hpp>
 #include <borealis/core/font.hpp>
+#include <borealis/core/hot_reload.hpp>
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/thread.hpp>
@@ -111,6 +112,11 @@ bool Application::init()
 #endif
     if (const char* inspector = std::getenv("BRLS_INSPECTOR"))
         Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
+    if (const char* hotReload = std::getenv("BRLS_HOT_RELOAD"))
+    {
+        if (std::strcmp(hotReload, "0") != 0)
+            HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
+    }
 
     Application::inited = true;
 
@@ -240,6 +246,8 @@ bool Application::internalMainLoop()
 
     // Run sync functions
     Threading::performSyncTasks();
+
+    HotReload::poll();
 
     // Trigger RunLoop subscribers
     runLoopEvent.fire();
@@ -1044,6 +1052,141 @@ bool Application::isInspectorEnabled()
     return Inspector::isEnabled();
 }
 
+void Application::setHotReload(bool enabled, const std::string& resourcesDir)
+{
+    HotReload::setEnabled(enabled, resourcesDir);
+}
+
+bool Application::isHotReload()
+{
+    return HotReload::isEnabled();
+}
+
+// The positions of a view and its parents in their parents' children, from
+// the root down: where to find its like in the same tree made again
+static std::vector<size_t> pathInTree(View* root, View* view)
+{
+    std::vector<size_t> path;
+    while (view && view != root)
+    {
+        Box* parent = view->hasParent() ? view->getParent() : nullptr;
+        if (!parent)
+            return {};
+        auto& children = parent->getChildren();
+        auto it        = std::find(children.begin(), children.end(), view);
+        if (it == children.end())
+            return {};
+        path.insert(path.begin(), (size_t)(it - children.begin()));
+        view = parent;
+    }
+    if (view != root)
+        return {};
+    return path;
+}
+
+static View* viewAtPath(View* root, const std::vector<size_t>& path)
+{
+    View* view = root;
+    for (size_t index : path)
+    {
+        Box* box = dynamic_cast<Box*>(view);
+        if (!box || index >= box->getChildren().size())
+            return nullptr;
+        view = box->getChildren()[index];
+    }
+    return view;
+}
+
+static void findActiveSidebarItems(View* view, std::vector<View*>* items)
+{
+    if (auto* item = dynamic_cast<SidebarItem*>(view))
+    {
+        if (item->isActive())
+            items->push_back(item);
+    }
+    if (Box* box = dynamic_cast<Box*>(view))
+        for (View* child : box->getChildren())
+            findActiveSidebarItems(child, items);
+}
+
+bool Application::rebuildActivity()
+{
+    if (Application::activitiesStack.empty())
+        return false;
+
+    Activity* activity = Application::activitiesStack.back();
+    View* old          = activity->getContentView();
+
+    // The tabs shown, then the focus, to be found again in the new content
+    std::vector<std::vector<size_t>> restore;
+    if (old)
+    {
+        std::vector<View*> items;
+        findActiveSidebarItems(old, &items);
+        for (View* item : items)
+            restore.push_back(pathInTree(old, item));
+        if (Application::currentFocus && Application::currentFocus->getParentActivity() == activity)
+            restore.push_back(pathInTree(old, Application::currentFocus));
+    }
+
+    View* fresh         = nullptr;
+    HotReload::building = activity;
+    try
+    {
+        fresh = activity->createContentView();
+    }
+    catch (const std::exception& e)
+    {
+        HotReload::building = nullptr;
+        Logger::error("rebuild: {} kept as it was: {}", old ? old->describe() : "the activity", e.what());
+        return false;
+    }
+
+    if (!fresh || fresh == old)
+    {
+        HotReload::building = nullptr;
+        Logger::warning("rebuild: the activity on top was given its view, it cannot make it again");
+        return false;
+    }
+
+    activity->setContentView(fresh);
+    try
+    {
+        activity->onContentAvailable();
+    }
+    catch (const std::exception& e)
+    {
+        Logger::error("rebuild: onContentAvailable: {}", e.what());
+    }
+    HotReload::building = nullptr;
+    activity->resizeToFitWindow();
+
+    if (Application::globalQuitEnabled)
+        Application::gloablQuitIdentifier = activity->registerExitAction();
+
+    activity->willAppear(true);
+    try
+    {
+        // A tab is made when it takes the focus: its own XML may throw here
+        Application::giveFocus(activity->getDefaultFocus());
+        for (const auto& path : restore)
+        {
+            if (path.empty())
+                continue;
+            if (View* view = viewAtPath(fresh, path))
+                Application::giveFocus(view);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        Logger::error("rebuild: {}", e.what());
+    }
+
+    Application::requestRedraw();
+    Logger::info("rebuild: {} made again", fresh->describe());
+    return true;
+}
+
 void Application::setGlobalQuit(bool enabled)
 {
     Application::globalQuitEnabled = enabled;
@@ -1214,8 +1357,10 @@ void Application::pushActivity(Activity* activity, TransitionAnimation animation
     }
 
     // Create the activity content view
+    HotReload::building = activity;
     activity->setContentView(activity->createContentView());
     activity->onContentAvailable();
+    HotReload::building = nullptr;
     activity->resizeToFitWindow();
 
     if (!Application::activitiesStack.empty())

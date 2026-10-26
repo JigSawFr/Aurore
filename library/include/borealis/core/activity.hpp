@@ -75,6 +75,12 @@ class Activity
     View* getContentView();
 
     /**
+     * Counts the content views set (setContentView): what views were bound
+     * to (BRLS_BIND) is looked up again in a content made anew.
+     */
+    unsigned getContentGeneration() const { return this->contentGeneration; }
+
+    /**
      * Returns the view with the corresponding id, or nullptr
      * if it hasn't been found in the activity.
      */
@@ -164,6 +170,7 @@ class Activity
   private:
     View* constructorView = nullptr;
     View* contentView     = nullptr;
+    unsigned contentGeneration = 0;
 };
 
 } // namespace brls

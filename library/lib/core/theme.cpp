@@ -15,6 +15,7 @@
     limitations under the License.
 */
 
+#include <borealis/core/hot_reload.hpp>
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/style.hpp>
@@ -389,6 +390,7 @@ bool Theme::load(const std::string& text, ThemeVariant* variant)
 
 bool Theme::loadFile(const std::string& path, ThemeVariant* variant)
 {
+    HotReload::noteThemeFile(path);
     std::ifstream file(path);
     if (!file)
     {

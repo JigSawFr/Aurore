@@ -20,6 +20,7 @@
 
 #include <borealis/core/application.hpp>
 #include <borealis/core/box.hpp>
+#include <borealis/core/hot_reload.hpp>
 #include <borealis/core/util.hpp>
 #include <cmath>
 #include <fstream>
@@ -643,6 +644,10 @@ void Box::inflateFromXMLString(std::string_view xml)
 
 void Box::inflateFromXMLRes(const std::string& name)
 {
+    std::string disk = HotReload::diskResource("@res/" + name);
+    if (!disk.empty())
+        return Box::inflateFromXMLFile(disk);
+
     // Check if custom xml file exists
     if (!View::CUSTOM_RESOURCES_PATH.empty() && std::ifstream { View::CUSTOM_RESOURCES_PATH + name }.good())
     {
@@ -660,6 +665,8 @@ void Box::inflateFromXMLRes(const std::string& name)
 
 void Box::inflateFromXMLFile(const std::string& path)
 {
+    HotReload::noteXMLFile(path);
+
     // Load XML
     std::shared_ptr<tinyxml2::XMLDocument> document = getXMLCache(path);
     tinyxml2::XMLElement* element = document->RootElement();

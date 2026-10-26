@@ -418,6 +418,28 @@ class Application
     static void setInspectorEnabled(bool enabled);
     static bool isInspectorEnabled();
 
+    /**
+     * Hot reload, on a desktop (docs/hot_reload.md): the XML files the
+     * activity on top was built from, and the files read by
+     * Theme::loadFile(), are watched, and the activity is built again when
+     * one of them changes (the focus is put back where it was when it can
+     * be). `resourcesDir`, when given, is a resources folder (the app's
+     * sources' `resources/`) the XML files are read from in place of the
+     * ones built in (libromfs) or copied next to the app. Off by default;
+     * `BRLS_HOT_RELOAD=1`, or `BRLS_HOT_RELOAD=<resources folder>`, in the
+     * environment turns it on at init(). Does nothing on the consoles.
+     */
+    static void setHotReload(bool enabled, const std::string& resourcesDir = "");
+    static bool isHotReload();
+
+    /**
+     * Builds the content of the activity on top again from its
+     * createContentView(), as hot reload does. False when it cannot (an
+     * activity given its view in its constructor) or the new content
+     * throws while being made, the old one then staying.
+     */
+    static bool rebuildActivity();
+
     inline static void enableDebuggingView(bool enable)
     {
         debuggingViewEnabled = enable;

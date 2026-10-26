@@ -1155,6 +1155,13 @@ class View
     static std::shared_ptr<tinyxml2::XMLDocument> getXMLCache(std::string_view path);
 
     /**
+     * Drops the cached document of an XML file, which is then read again
+     * (hot reload). The document stays in memory: views made from it may
+     * still point into it.
+     */
+    static void forgetXMLCache(const std::string& path);
+
+    /**
      * Returns if the given XML attribute name is valid for that view.
      */
     bool isXMLAttributeValid(std::string attributeName);

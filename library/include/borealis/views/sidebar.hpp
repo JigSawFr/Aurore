@@ -60,6 +60,7 @@ class SidebarItem : public Box
     void setLabel(std::string label);
 
     void setActive(bool active);
+    bool isActive() const { return this->active; }
 
     GenericEvent* getActiveEvent();
 
