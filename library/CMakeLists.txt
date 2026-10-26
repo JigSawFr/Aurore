@@ -27,9 +27,43 @@ endif ()
 
 option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
 
+# fmt, tinyxml2, GLFW and SDL2 from the system when find_package() finds
+# them, downloaded at configure time otherwise, instead of the copies in
+# lib/extern (for packagers). nanovg, yoga and the others stay vendored.
+option(AURORE_FETCH_DEPS "Use fmt, tinyxml2, GLFW and SDL2 from the system or downloaded (CMake 3.24+)" OFF)
+if (AURORE_FETCH_DEPS)
+    if (CMAKE_VERSION VERSION_LESS 3.24)
+        message(FATAL_ERROR "AURORE_FETCH_DEPS needs CMake 3.24 or later (FIND_PACKAGE_ARGS)")
+    endif ()
+    include(FetchContent)
+    # The versions of the vendored copies
+    FetchContent_Declare(fmt
+            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+            GIT_TAG 12.2.0
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS 10)
+    FetchContent_Declare(tinyxml2
+            GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
+            GIT_TAG 11.0.0
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS)
+    # The vendored GLFW is xfangfang's fork, for its fixes
+    FetchContent_Declare(glfw
+            GIT_REPOSITORY https://github.com/xfangfang/glfw.git
+            GIT_TAG 892256c3f630739fb02552544b8d83240883ec8a
+            FIND_PACKAGE_ARGS NAMES glfw3)
+    FetchContent_Declare(SDL2
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-2.32.10
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS)
+endif ()
+
 # fmt
 if (USE_SYSTEM_FMT)
   find_package(fmt REQUIRED)
+elseif (AURORE_FETCH_DEPS)
+  FetchContent_MakeAvailable(fmt)
 else()
   if (AURORE_INSTALL)
     set(FMT_INSTALL ON CACHE BOOL "" FORCE)
@@ -80,6 +114,10 @@ if (USE_SYSTEM_TINYXML2)
 
     list(APPEND BOREALIS_INCLUDE ${tinyxml2_INCLUDE_DIRS})
     list(APPEND BRLS_PLATFORM_LIBS tinyxml2::tinyxml2)
+elseif (AURORE_FETCH_DEPS)
+    set(tinyxml2_BUILD_TESTING OFF)
+    FetchContent_MakeAvailable(tinyxml2)
+    list(APPEND BRLS_PLATFORM_LIBS tinyxml2::tinyxml2)
 else()
     add_library(tinyxml2 STATIC ${BOREALIS_PATH}/lib/extern/tinyxml2/tinyxml2.cpp)
     target_include_directories(tinyxml2 SYSTEM PUBLIC
@@ -105,6 +143,15 @@ if (PLATFORM_DESKTOP)
             message(STATUS "Find SDL2: ${SDL2_INCLUDE_DIR}, ${SDL2_LIBRARIES}")
             list(APPEND BRLS_PLATFORM_LIBS ${SDL2_LIBRARIES})
             list(APPEND BOREALIS_INCLUDE ${SDL2_INCLUDE_DIRS})
+        elseif (AURORE_FETCH_DEPS)
+            set(BUILD_SHARED_LIBS OFF)
+            set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
+            FetchContent_MakeAvailable(SDL2)
+            if (sdl2_SOURCE_DIR)
+                list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
+            else ()
+                list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2 SDL2::SDL2main)
+            endif ()
         else ()
             set(BUILD_SHARED_LIBS OFF)
             set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
@@ -119,6 +166,11 @@ if (PLATFORM_DESKTOP)
     else ()
         if (USE_SYSTEM_GLFW)
             find_package(glfw3 REQUIRED)
+        elseif (AURORE_FETCH_DEPS)
+            set(GLFW_BUILD_DOCS OFF)
+            set(GLFW_BUILD_EXAMPLES OFF)
+            set(GLFW_BUILD_TESTS OFF)
+            FetchContent_MakeAvailable(glfw)
         else ()
             set(GLFW_BUILD_DOCS OFF)
             add_subdirectory(${BOREALIS_PATH}/lib/extern/glfw ${BRLS_EXTERN_EXCLUDE})
@@ -383,7 +435,7 @@ target_include_directories(borealis PUBLIC
 # The headers of other projects shipped in include/borealis/extern, before
 # the ones found on the system
 set(BRLS_EXTERN_INCLUDE extern extern/nanovg extern/qrcodegen)
-if (NOT USE_SYSTEM_TINYXML2)
+if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
     list(APPEND BRLS_EXTERN_INCLUDE extern/tinyxml2)
 endif ()
 foreach (dir ${BRLS_EXTERN_INCLUDE})
@@ -398,7 +450,7 @@ if (BOREALIS_DKSH_INCLUDE)
     target_include_directories(borealis PRIVATE ${BOREALIS_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
-foreach (dep fmt tweeny yogacore glfw SDL2-static SDL2main ${LIBROMFS_LIBRARY})
+foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main ${LIBROMFS_LIBRARY})
     if (TARGET ${dep})
         get_target_property(dep_imported ${dep} IMPORTED)
         get_target_property(dep_include ${dep} INTERFACE_INCLUDE_DIRECTORIES)
