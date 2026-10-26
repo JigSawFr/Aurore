@@ -389,6 +389,16 @@ void nvgDeleteInternal(NVGcontext* ctx)
 	free(ctx);
 }
 
+// The counters of the frame under way (the frame before once it has ended),
+// until the next nvgBeginFrame resets them. Aurore's inspector shows them.
+void nvgDebugGetStats(NVGcontext* ctx, int* draws, int* fillTris, int* strokeTris, int* textTris)
+{
+	*draws = ctx->drawCallCount;
+	*fillTris = ctx->fillTriCount;
+	*strokeTris = ctx->strokeTriCount;
+	*textTris = ctx->textTriCount;
+}
+
 void nvgBeginFrame(NVGcontext* ctx, float windowWidth, float windowHeight, float devicePixelRatio)
 {
 /*	printf("Tris: draws:%d  fill:%d  stroke:%d  text:%d  TOT:%d\n",

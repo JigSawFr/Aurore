@@ -887,6 +887,10 @@ class View
         this->borderColor = color;
     }
 
+    ViewBackground getBackground() const { return this->background; }
+    NVGcolor getBackgroundColor() const { return this->backgroundColor; }
+    NVGcolor getBorderColor() const { return this->borderColor; }
+
     /**
      * Sets the view shape border thickness.
      */

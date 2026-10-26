@@ -347,6 +347,9 @@ elseif (BOREALIS_USE_GXM)
     endif ()
 endif ()
 list(APPEND BRLS_PLATFORM_OPTION -D${BOREALIS_DRIVER})
+if (BRLS_INSPECTOR)
+    list(APPEND BRLS_PLATFORM_OPTION -DBRLS_INSPECTOR)
+endif ()
 message(STATUS "borealis driver ${BOREALIS_DRIVER}")
 
 # borealis Library

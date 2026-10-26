@@ -69,6 +69,10 @@ option(BRLS_UNITY_BUILD "Unity build" OFF)
 
 option(BRLS_FONTSTASH_STREAM "fontstash use stream" OFF)
 
+# The built-in inspector (F12, or L3 + R3) on from the start, for debug builds
+# (Application::setInspectorEnabled does it at run time)
+option(BRLS_INSPECTOR "Built-in inspector on" OFF)
+
 if (NOT DEFINED APP_PLATFORM_INCLUDE)
     set(APP_PLATFORM_INCLUDE)
 endif ()

@@ -29,6 +29,7 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/input.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
@@ -174,6 +175,16 @@ void View::frame(FrameContext* ctx)
     if (this->visibility != Visibility::VISIBLE)
         return;
 
+    // The inspector notes what its selected view, and not its children,
+    // looks up in the theme and the style
+    View* const inspected = Inspector::recordTarget;
+    bool wasRecording     = false;
+    if (inspected)
+    {
+        wasRecording         = Inspector::recording;
+        Inspector::recording = inspected == this;
+    }
+
     Style style    = Application::getStyle();
     Theme oldTheme = ctx->theme;
 
@@ -237,6 +248,9 @@ void View::frame(FrameContext* ctx)
         ctx->theme = oldTheme;
 
     nvgRestore(ctx->vg);
+
+    if (inspected)
+        Inspector::recording = wasRecording;
 }
 
 void View::frameHighlight(FrameContext* ctx)
@@ -1374,9 +1388,19 @@ void View::invalidate()
         YGNodeMarkDirty(this->ygNode);
 
     if (this->hasParent() && !this->detached)
+    {
         this->getParent()->invalidate();
-    else
+    }
+    else if (Inspector::isOpen())
+    {
+        Time start = getCPUTimeUsec();
         YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
+        Inspector::addLayoutTime(getCPUTimeUsec() - start);
+    }
+    else
+    {
+        YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
+    }
 }
 
 Rect View::getFrame()

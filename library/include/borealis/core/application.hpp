@@ -406,6 +406,18 @@ class Application
         return inputType;
     }
 
+    /**
+     * The built-in inspector (docs/inspector.md): F12 on a keyboard, or
+     * both sticks pressed in together (L3 + R3) on a controller, opens it
+     * over the screen with the view tree, the focus chain, the yoga box and
+     * the theme values of a view, and the frame's timings. Off by default;
+     * the BRLS_INSPECTOR CMake option, or BRLS_INSPECTOR=1 in the
+     * environment on a desktop, turns it on at init(). Closed, it only
+     * watches for its toggle.
+     */
+    static void setInspectorEnabled(bool enabled);
+    static bool isInspectorEnabled();
+
     inline static void enableDebuggingView(bool enable)
     {
         debuggingViewEnabled = enable;

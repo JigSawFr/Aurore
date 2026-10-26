@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <cmath>
 #include <yoga/YGNode.h>
 #include <yoga/event/event.h>
@@ -27,6 +28,7 @@
 #include <borealis/core/application.hpp>
 #include <borealis/views/dialog.hpp>
 #include <borealis/core/font.hpp>
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/thread.hpp>
 #include <borealis/core/time.hpp>
@@ -102,6 +104,13 @@ bool Application::init()
         cadran::start();
 
     Threading::start();
+
+    // Debugging aids, off unless asked for
+#ifdef BRLS_INSPECTOR
+    Inspector::setEnabled(true);
+#endif
+    if (const char* inspector = std::getenv("BRLS_INSPECTOR"))
+        Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
 
     Application::inited = true;
 
@@ -362,6 +371,10 @@ void Application::processInput()
         for (int i = 0; i < ControllerButton::_BUTTON_MAX; i++)
             controllerState.buttons[i] = swapKeys[i];
     }
+
+    // Its toggle, and the whole controller while it is browsing
+    if (Inspector::isEnabled())
+        Inspector::processInput(inputManager, &controllerState);
 
     std::vector<TouchState> touchState;
     for (auto& i : rawTouch)
@@ -879,6 +892,14 @@ void Application::frame()
 {
     VideoContext* videoContext = Application::platform->getVideoContext();
 
+    const bool inspect = Inspector::isOpen();
+    Time drawStart     = 0;
+    if (inspect)
+    {
+        Inspector::beginFrame();
+        drawStart = getCPUTimeUsec();
+    }
+
     // Frame context
     FrameContext frameContext = FrameContext();
 
@@ -961,11 +982,27 @@ void Application::frame()
         debugLayer->frame(&frameContext);
     }
 
+    Time flushStart = 0;
+    if (inspect)
+    {
+        Inspector::draw(&frameContext, getCPUTimeUsec() - drawStart);
+        flushStart = getCPUTimeUsec();
+    }
+
     // End frame
     nvgResetTransform(Application::getNVGContext()); // scale
     nvgEndFrame(Application::getNVGContext());
 
-    Application::platform->getVideoContext()->endFrame();
+    if (inspect)
+    {
+        Time presentStart = getCPUTimeUsec();
+        Application::platform->getVideoContext()->endFrame();
+        Inspector::endFrame(presentStart - flushStart, getCPUTimeUsec() - presentStart);
+    }
+    else
+    {
+        Application::platform->getVideoContext()->endFrame();
+    }
     postFrameEvent.fire();
 }
 
@@ -995,6 +1032,16 @@ void Application::exit()
 
     delete Application::notificationManager;
     delete Application::platform;
+}
+
+void Application::setInspectorEnabled(bool enabled)
+{
+    Inspector::setEnabled(enabled);
+}
+
+bool Application::isInspectorEnabled()
+{
+    return Inspector::isEnabled();
 }
 
 void Application::setGlobalQuit(bool enabled)
@@ -1072,6 +1119,7 @@ void Application::setHighlightIdleFade(bool fade)
 
 void Application::forgetView(View* view)
 {
+    Inspector::forgetView(view);
     if (Application::currentFocus == view)
         Application::currentFocus = nullptr;
     if (Application::repetitionOldFocus == view)

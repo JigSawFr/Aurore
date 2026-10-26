@@ -126,6 +126,9 @@ int main(int argc, char* argv[])
     if (!themeFile.empty() && brls::Theme::loadFile(themeFile, &variant))
         brls::Application::getPlatform()->setThemeVariant(variant);
 
+    // The inspector: F12, or L3 + R3 on a controller (docs/inspector.md)
+    brls::Application::setInspectorEnabled(true);
+
     // Have the application register an action on every activity that will quit when you press BUTTON_START
     brls::Application::setGlobalQuit(false);
 

@@ -275,7 +275,10 @@ jobs:
             ./build/aurore_demo > demo.log 2>&1 &
             pid=$!
             sleep 10
-            for key in Down Down Down Down Down Down Return Escape Up Up Right Right Down Left Left; do
+            # F12 opens the inspector, follows the focus, browses the tree
+            # and closes it
+            for key in Down Down Down Down Down Down Return Escape Up Up Right Right Down Left Left \
+                F12 Down Down F12 Down Down Up Left Right Return Escape F12 Down F12 F12; do
               xdotool key $key
               sleep 0.5
             done

@@ -169,6 +169,9 @@ void nvgCancelFrame(NVGcontext* ctx);
 // Ends drawing flushing remaining render state.
 void nvgEndFrame(NVGcontext* ctx);
 
+// Draw calls and triangles (fills, strokes, text) submitted since nvgBeginFrame.
+void nvgDebugGetStats(NVGcontext* ctx, int* draws, int* fillTris, int* strokeTris, int* textTris);
+
 //
 // Composite operation
 //

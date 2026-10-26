@@ -16,6 +16,7 @@
     limitations under the License.
 */
 
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/util.hpp>
 #include <stdexcept>
@@ -177,7 +178,10 @@ float StyleValues::getMetric(const std::string& name)
         return 0;
     }
 
-    return this->values[name];
+    float metric = this->values[name];
+    if (Inspector::recording)
+        Inspector::recordMetric(name, metric);
+    return metric;
 }
 
 Style::Style(StyleValues* values)
