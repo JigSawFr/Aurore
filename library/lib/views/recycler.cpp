@@ -237,6 +237,14 @@ void RecyclerFrame::reloadData()
     if (!layouted)
         return;
 
+    // The cells are queued for reuse, not freed: a focus left on one would
+    // follow it to whatever row it shows next. It is given back below to the
+    // list's selected cell.
+    bool focusHere = false;
+    for (View* v = Application::getCurrentFocus(); v; v = v->getParent())
+        if (v == this->contentBox)
+            focusHere = true;
+
     auto children = this->contentBox->getChildren();
     for (auto const& child : children)
     {
@@ -268,6 +276,12 @@ void RecyclerFrame::reloadData()
         }
 
         selectRowAt(defaultCellFocus, false);
+    }
+
+    if (focusHere)
+    {
+        View* focus = this->contentBox->getDefaultFocus();
+        Application::giveFocus(focus ? focus : this->getDefaultFocus());
     }
 }
 
@@ -307,6 +321,22 @@ RecyclerCell* RecyclerFrame::dequeueReusableCell(std::string identifier)
 // TODO: Implement it normally
 void RecyclerFrame::selectRowAt(IndexPath indexPath, bool animated)
 {
+    if (!dataSource || this->cacheFramesData.empty())
+        return;
+
+    // A section or row out of the data (a Dropdown with no selection, a list
+    // that shrank) would read past the cached frames: keep to the last one
+    size_t sections = dataSource->numberOfSections(this);
+    if (sections == 0)
+        return;
+    if (indexPath.section >= sections)
+        indexPath.section = sections - 1;
+    int rows = dataSource->numberOfRows(this, indexPath.section);
+    if (indexPath.row >= rows)
+        indexPath.row = rows - 1;
+    if (indexPath.row < -1)
+        indexPath.row = -1;
+
     size_t count    = 0;
     float offset = 0;
 
