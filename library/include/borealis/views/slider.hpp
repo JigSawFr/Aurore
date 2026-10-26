@@ -43,6 +43,23 @@ class Slider : public Box
 
     void setStep(float step);
 
+    /**
+     * When above 0, the D-pad moves the slider by this much a press (held,
+     * it repeats), on a grid of that step, instead of gliding at `step` a
+     * second. 0 by default.
+     */
+    void setDiscreteStep(float step);
+
+    /**
+     * Fired with the value once the user lets go (the D-pad released, the
+     * finger lifted), where getProgressEvent fires at every change: to save
+     * or apply a value only once it is chosen.
+     */
+    Event<float>* getInputProgressEvent();
+
+    // Whether the user is moving it now (D-pad held, finger down)
+    bool isProgressing();
+
     void setPointerSize(float size);
 
     static View* create();
@@ -53,11 +70,15 @@ class Slider : public Box
     Rectangle* pointer;
 
     Event<float> progressEvent;
+    Event<float> inputProgressEvent;
+    float discreteStep = 0;
+    bool progressing   = false;
 
     float progress = 1;
     float step = 0.5f;
 
     void buttonsProcessing();
+    void moveByStep(int direction);
     void updateUI();
 };
 
