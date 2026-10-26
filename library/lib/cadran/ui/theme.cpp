@@ -46,13 +46,18 @@ void use_font_for(const std::string& locale)
     // the pinyin letters é, è, ê… as full-width glyphs ("prot é g é e"), and a
     // full-width "·" and "…". Chinese keeps it: the han in its own style. The
     // default font is looked up for each new label.
+    // Traditional Chinese takes its own font: the Simplified one draws the
+    // characters both share in their mainland forms.
     static const int chinese = brls::Application::getFont(brls::FONT_CHINESE_SIMPLIFIED);   // as loaded
-    static bool latin = false;   // what the name holds now (the Chinese font at start)
-    const bool want_latin = !text::starts_with(locale, "zh");
-    if (want_latin == latin) return;
-    if (register_default(want_latin ? PlSharedFontType_Standard : PlSharedFontType_ChineseSimplified,
-                         want_latin ? chinese : brls::FONT_INVALID))
-        latin = want_latin;
+    static PlSharedFontType current = PlSharedFontType_ChineseSimplified;   // what the name holds now
+    const bool traditional = text::starts_with(locale, "zh-Hant") || text::starts_with(locale, "zh-TW")
+                          || text::starts_with(locale, "zh-HK");
+    const PlSharedFontType want = !text::starts_with(locale, "zh") ? PlSharedFontType_Standard
+                                : traditional                      ? PlSharedFontType_ChineseTraditional
+                                                                   : PlSharedFontType_ChineseSimplified;
+    if (want == current) return;
+    if (register_default(want, want == PlSharedFontType_ChineseSimplified ? brls::FONT_INVALID : chinese))
+        current = want;
 #else
     (void)locale;
 #endif

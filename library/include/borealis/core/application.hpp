@@ -196,6 +196,12 @@ class Application
      */
     static int getFont(std::string fontName);
 
+    /**
+     * Glyphs missing from the font loaded as `font` are looked up in the one
+     * loaded as `fallback`. False when either is not loaded.
+     */
+    static bool addFontFallback(const std::string& font, const std::string& fallback);
+
     static int getDefaultFont();
 
     static void notify(const std::string& text, View* leading = nullptr);

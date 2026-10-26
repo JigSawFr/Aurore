@@ -271,6 +271,34 @@ const ControllerState& Application::getControllerState()
     return controllerState;
 }
 
+// A stick pushed on a diagonal turns both of its axes into navigation
+// buttons, and the focus then moved twice in one frame (up, then right).
+// Only the direction the stick leans to most is kept, unless the other one
+// also comes from the D-pad.
+static void keepDominantStickDirection(ControllerState* state)
+{
+    const float threshold = 0.5f;
+    float x = std::max(std::fabs(state->axes[LEFT_X]), std::fabs(state->axes[RIGHT_X]));
+    float y = std::max(std::fabs(state->axes[LEFT_Y]), std::fabs(state->axes[RIGHT_Y]));
+    if (x <= threshold || y <= threshold)
+        return;
+
+    if (x > y)
+    {
+        if (!state->buttons[BUTTON_UP])
+            state->buttons[BUTTON_NAV_UP] = false;
+        if (!state->buttons[BUTTON_DOWN])
+            state->buttons[BUTTON_NAV_DOWN] = false;
+    }
+    else
+    {
+        if (!state->buttons[BUTTON_LEFT])
+            state->buttons[BUTTON_NAV_LEFT] = false;
+        if (!state->buttons[BUTTON_RIGHT])
+            state->buttons[BUTTON_NAV_RIGHT] = false;
+    }
+}
+
 void Application::processInput()
 {
     static ControllerState oldControllerState = {};
@@ -284,6 +312,7 @@ void Application::processInput()
     inputManager->updateTouchStates(&rawTouch);
     inputManager->updateMouseStates(&rawMouse);
     inputManager->updateUnifiedControllerState(&controllerState);
+    keepDominantStickDirection(&controllerState);
 
     if (isSwapInputKeys())
     {
@@ -1317,6 +1346,15 @@ int Application::getFont(std::string fontName)
         return FONT_INVALID;
 
     return Application::fontStash[fontName];
+}
+
+bool Application::addFontFallback(const std::string& font, const std::string& fallback)
+{
+    int base  = Application::getFont(font);
+    int other = Application::getFont(fallback);
+    if (base == FONT_INVALID || other == FONT_INVALID || base == other)
+        return false;
+    return nvgAddFallbackFontId(Application::getNVGContext(), base, other) != 0;
 }
 
 int Application::getDefaultFont()

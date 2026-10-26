@@ -88,25 +88,22 @@ GLFWPlatform::GLFWPlatform()
         auto pos = lang.find_last_of('-');
         this->locale = lang.substr(0, pos);
 #elif defined(__linux__)
-        char* langEnv = getenv("LANG");
-        /* fallback languages */
-        if (!langEnv) langEnv = getenv("LANGUAGE");
+        // The variables in the order the C library reads them (LANGUAGE
+        // may list several, "fr:en": the first one)
+        const char* langEnv = nullptr;
+        for (const char* var : { "LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG" })
+        {
+            const char* value = getenv(var);
+            if (value && *value && strcmp(value, "C") != 0 && strcmp(value, "POSIX") != 0)
+            {
+                langEnv = value;
+                break;
+            }
+        }
         if (langEnv) {
-            std::unordered_map<std::string, std::string> lang2brls = {
-                { "zh_CN", LOCALE_ZH_HANS },
-                { "zh_TW", LOCALE_ZH_HANT },
-                { "ja_JP", LOCALE_JA },
-                { "ko_KR", LOCALE_Ko },
-                { "it_IT", LOCALE_IT }
-            };
-            char *ptr = strchr(langEnv, '.');
-            if (ptr) *ptr = '\0';
-
-            ptr = strchr(langEnv, '@');
-            if (ptr) *ptr = '\0';
-
             std::string lang = langEnv;
-            this->locale = lang2brls.count(lang) ? lang2brls[lang] : LOCALE_EN_US;
+            lang = lang.substr(0, lang.find(':'));
+            this->locale = localeFromSystem(lang);
         }
 #endif
         brls::Logger::info("Auto detect app locale: {}", this->locale);
