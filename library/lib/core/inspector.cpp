@@ -719,7 +719,7 @@ void Inspector::draw(FrameContext* ctx, Time viewsTime)
     int draws = 0, fill = 0, stroke = 0, textTris = 0;
     nvgDebugGetStats(vg, &draws, &fill, &stroke, &textTris);
 
-    Time now = getCPUTimeUsec();
+    Time now = getRealTimeUsec();
     if (lastDraw != 0)
     {
         Sample& s   = history[historyEnd];

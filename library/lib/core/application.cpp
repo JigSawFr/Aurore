@@ -960,7 +960,7 @@ void Application::frame(bool present)
     if (inspect)
     {
         Inspector::beginFrame();
-        drawStart = getCPUTimeUsec();
+        drawStart = getRealTimeUsec();
     }
 
     // Frame context
@@ -1048,8 +1048,8 @@ void Application::frame(bool present)
     Time flushStart = 0;
     if (inspect)
     {
-        Inspector::draw(&frameContext, getCPUTimeUsec() - drawStart);
-        flushStart = getCPUTimeUsec();
+        Inspector::draw(&frameContext, getRealTimeUsec() - drawStart);
+        flushStart = getRealTimeUsec();
     }
 
     // End frame
@@ -1065,9 +1065,9 @@ void Application::frame(bool present)
 
     if (inspect)
     {
-        Time presentStart = getCPUTimeUsec();
+        Time presentStart = getRealTimeUsec();
         videoContext->endFrame();
-        Inspector::endFrame(presentStart - flushStart, getCPUTimeUsec() - presentStart);
+        Inspector::endFrame(presentStart - flushStart, getRealTimeUsec() - presentStart);
     }
     else
     {
