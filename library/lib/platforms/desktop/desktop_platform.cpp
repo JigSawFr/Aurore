@@ -379,6 +379,93 @@ void dbusUnInhibit(DBusConnection* connection, uint32_t cookie)
     }
 }
 
+std::string portalInhibit(DBusConnection* connection, const std::string& reason)
+{
+    constexpr const char* service   = "org.freedesktop.portal.Desktop";
+    constexpr const char* path      = "/org/freedesktop/portal/desktop";
+    constexpr const char* interface = "org.freedesktop.portal.Inhibit";
+    constexpr dbus_uint32_t idle    = 8;
+
+    DBusMessage* msg = dbus_message_new_method_call(service, path, interface, "Inhibit");
+    if (!msg)
+    {
+        Logger::error("Portal cannot create idle inhibitor call");
+        return {};
+    }
+
+    DBusMessageIter args;
+    DBusMessageIter options;
+    DBusMessageIter entry;
+    DBusMessageIter variant;
+    const char* parentWindow = "";
+    const char* reasonKey    = "reason";
+    const char* reasonValue  = reason.c_str();
+
+    dbus_message_iter_init_append(msg, &args);
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &parentWindow);
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_UINT32, &idle);
+    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "{sv}", &options);
+    dbus_message_iter_open_container(&options, DBUS_TYPE_DICT_ENTRY, nullptr, &entry);
+    dbus_message_iter_append_basic(&entry, DBUS_TYPE_STRING, &reasonKey);
+    dbus_message_iter_open_container(&entry, DBUS_TYPE_VARIANT, "s", &variant);
+    dbus_message_iter_append_basic(&variant, DBUS_TYPE_STRING, &reasonValue);
+    dbus_message_iter_close_container(&entry, &variant);
+    dbus_message_iter_close_container(&options, &entry);
+    dbus_message_iter_close_container(&args, &options);
+
+    DBusError error;
+    dbus_error_init(&error);
+    DBusMessage* reply = dbus_connection_send_with_reply_and_block(
+        connection, msg, DBUS_TIMEOUT_USE_DEFAULT, &error);
+    dbus_message_unref(msg);
+    if (!reply)
+    {
+        Logger::error("Portal idle inhibitor failed: {}/{}", error.name, error.message);
+        dbus_error_free(&error);
+        return {};
+    }
+
+    const char* requestPath = nullptr;
+    if (!dbus_message_get_args(reply, &error, DBUS_TYPE_OBJECT_PATH, &requestPath, DBUS_TYPE_INVALID))
+    {
+        Logger::error("Portal cannot parse idle inhibitor reply: {}/{}", error.name, error.message);
+        dbus_error_free(&error);
+        dbus_message_unref(reply);
+        return {};
+    }
+
+    std::string result = requestPath;
+    dbus_message_unref(reply);
+    Logger::info("Portal idle inhibitor enabled");
+    return result;
+}
+
+void portalUnInhibit(DBusConnection* connection, const std::string& requestPath)
+{
+    DBusMessage* msg = dbus_message_new_method_call(
+        "org.freedesktop.portal.Desktop", requestPath.c_str(), "org.freedesktop.portal.Request", "Close");
+    if (!msg)
+    {
+        Logger::error("Portal cannot create idle uninhibitor call");
+        return;
+    }
+
+    DBusError error;
+    dbus_error_init(&error);
+    DBusMessage* reply = dbus_connection_send_with_reply_and_block(
+        connection, msg, DBUS_TIMEOUT_USE_DEFAULT, &error);
+    dbus_message_unref(msg);
+    if (!reply)
+    {
+        Logger::error("Portal idle uninhibitor failed: {}/{}", error.name, error.message);
+        dbus_error_free(&error);
+        return;
+    }
+
+    dbus_message_unref(reply);
+    Logger::info("Portal idle inhibitor disabled");
+}
+
 static std::unique_ptr<DBusConnection, std::function<void(DBusConnection*)>> dbus_conn(connectSessionBus(),
     closeSessionBus);
 #endif
@@ -639,6 +726,8 @@ void DesktopPlatform::disableScreenDimming(bool disable, const std::string& reas
 #ifdef __SDL2__
 #elif defined(__linux__)
         inhibitCookie = dbusInhibit(dbus_conn.get(), app, reason);
+        if (inhibitCookie == 0)
+            inhibitRequestPath = portalInhibit(dbus_conn.get(), reason);
 #elif __APPLE__
         std::string sleepReason           = app + " " + reason;
         CFStringRef reasonForActivity     = ::CFStringCreateWithCString(kCFAllocatorDefault, sleepReason.c_str(),
@@ -655,7 +744,15 @@ void DesktopPlatform::disableScreenDimming(bool disable, const std::string& reas
 #ifdef __SDL2__
 #elif defined(__linux__)
         if (inhibitCookie != 0)
+        {
             dbusUnInhibit(dbus_conn.get(), inhibitCookie);
+            inhibitCookie = 0;
+        }
+        if (!inhibitRequestPath.empty())
+        {
+            portalUnInhibit(dbus_conn.get(), inhibitRequestPath);
+            inhibitRequestPath.clear();
+        }
 #elif __APPLE__
         IOPMAssertionRelease(assertionID);
 #elif _WIN32

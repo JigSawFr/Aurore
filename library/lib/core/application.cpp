@@ -966,6 +966,7 @@ void Application::frame()
     nvgEndFrame(Application::getNVGContext());
 
     Application::platform->getVideoContext()->endFrame();
+    postFrameEvent.fire();
 }
 
 void Application::exit()
@@ -1247,6 +1248,7 @@ void Application::clear()
         delete activity;
     }
 
+    Application::focusStack.clear();
     Application::activitiesStack.clear();
     Application::focusStack.clear();
     Application::currentFocus       = nullptr;
@@ -1406,14 +1408,29 @@ std::string* Application::getCommonFooter()
     return &Application::commonFooter;
 }
 
+void Application::setMaximumUIScale(float scale)
+{
+    Application::maximumUIScale = scale > 0.0f ? scale : 0.0f;
+}
+
+float Application::getMaximumUIScale()
+{
+    return Application::maximumUIScale;
+}
+
 void Application::setWindowSize(int width, int height)
 {
     Application::windowWidth  = width;
     Application::windowHeight = height;
 
     // Rescale UI
-    Application::windowScale   = (float)width / (float)ORIGINAL_WINDOW_WIDTH;
-    Application::contentWidth  = (float)ORIGINAL_WINDOW_WIDTH;
+    float uncappedWindowScale = (float)width / (float)ORIGINAL_WINDOW_WIDTH;
+    bool uiScaleIsCapped = Application::maximumUIScale > 0.0f
+        && uncappedWindowScale > Application::maximumUIScale;
+
+    Application::windowScale  = uiScaleIsCapped ? Application::maximumUIScale : uncappedWindowScale;
+    // Uncapped, the content keeps its design width exactly
+    Application::contentWidth  = uiScaleIsCapped ? std::ceil((float)width / Application::windowScale) : (float)ORIGINAL_WINDOW_WIDTH;
     Application::contentHeight = std::ceil((float)height / Application::windowScale);
 
     for (Activity* activity : Application::activitiesStack)
@@ -1479,6 +1496,11 @@ Event<InputType>* Application::getGlobalInputTypeChangeEvent()
 VoidEvent* Application::getRunLoopEvent()
 {
     return &Application::runLoopEvent;
+}
+
+VoidEvent* Application::getPostFrameEvent()
+{
+    return &Application::postFrameEvent;
 }
 
 VoidEvent* Application::getExitEvent()

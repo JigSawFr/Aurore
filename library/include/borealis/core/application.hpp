@@ -238,6 +238,7 @@ class Application
     static void crash(std::string text);
 
     static void quit();
+    static void clear();
 
     /**
      * Blocks any and all user inputs
@@ -258,6 +259,14 @@ class Application
     static std::string* getCommonFooter();
 
     inline static float windowScale;
+    inline static float maximumUIScale = 0.0f;
+
+    /**
+     * Caps how large the UI is allowed to grow relative to the design size.
+     * Set to 0 to disable the cap.
+     */
+    static void setMaximumUIScale(float scale);
+    static float getMaximumUIScale();
 
     /**
      * Sets whether BUTTON_START will globally be used to close the application.
@@ -356,6 +365,7 @@ class Application
     static VoidEvent* getGlobalHintsUpdateEvent();
     static Event<InputType>* getGlobalInputTypeChangeEvent();
     static VoidEvent* getRunLoopEvent();
+    static VoidEvent* getPostFrameEvent();
     static VoidEvent* getExitEvent();
     static VoidEvent* getExitDoneEvent();
     static VoidEvent* getWindowSizeChangedEvent();
@@ -508,6 +518,7 @@ class Application
     inline static VoidEvent globalHintsUpdateEvent;
     inline static Event<InputType> globalInputTypeChangeEvent;
     inline static VoidEvent runLoopEvent;
+    inline static VoidEvent postFrameEvent;
     inline static VoidEvent exitEvent;
     inline static VoidEvent exitDoneEvent;
     inline static VoidEvent windowSizeChangedEvent;
@@ -520,7 +531,6 @@ class Application
     static void navigate(FocusDirection direction, bool repeating);
 
     static void frame();
-    static void clear();
     static void exit();
 
     /**
