@@ -42,7 +42,7 @@ brls::Application::createWindow("my_app/title"_i18n);
 - **Dialogs and sheets** (`ui.hpp`, `cadran_modal.hpp`, `action_sheet.hpp`): confirmations (dangerous ones in coral), notices, checklists, hold-to-confirm, failures with a report button, lists of values (rows, grids, several marked), lists of actions with icons, details, groups and switches, the keyboard.
 - **Toasts** (`ui::notify`, `ui::refuse`, `ui::error`): news, done, refused, each with its icon.
 - **Views** (`cadran/view/`): `CadranIcon` (about 60 vector icons), `CadranDigits`, `FooterHints`, `HeaderSetting`, `LoadingBar`, `MarkdownView` (headings, lists, tables, alerts, emoji), `QrView`, `ScrollView`, `VersionBadge`.
-- **Live preferences** (`live_prefs.hpp`, `text_size.hpp`, `effects.hpp`, `motion.hpp`): every screen built again in the new language or theme, the focus kept; larger text on a TV; lighter effects on battery or when asked.
+- **Live preferences** (`live_prefs.hpp`, `text_size.hpp`, `effects.hpp`, `motion.hpp`): every screen built again in the new language or theme, the focus kept; larger text on a TV; lighter effects on battery or when asked. The text size and the reduced effects go through the core (`brls::Application::setTextScale`, `getReduceMotion`, docs/styles.md), so views that are not Cadran's follow them too.
 - **Helpers** (`ui.hpp`, `format_text.hpp`, `cadran/util/`): showing and hiding views with the focus, batched layout, durations and days in the language, text and UTF-8 helpers, a Markdown parser.
 
 ## Testing an app with it
