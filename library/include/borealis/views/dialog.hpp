@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <borealis/views/label.hpp>
+
 #include <borealis/core/bind.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/views/applet_frame.hpp>
@@ -52,7 +54,9 @@ class Dialog : public Box
     void rebuildButtons();
     void buttonClick(DialogButton* button);
 
-    bool cancelable = true;
+    bool cancelable           = true;
+    bool dismissOnButtonClick = true;
+    Label* textLabel          = nullptr; // the text of Dialog(text)
 
   protected:
     BRLS_BIND(Button, button1, "brls/dialog/button1");
@@ -87,6 +91,30 @@ class Dialog : public Box
      */
     void setCancelable(bool cancelable);
     void setCloseCallback(std::function<void(void)> cb);
+
+    /**
+     * The text of a dialog made with Dialog(text), changed while it is open
+     * (a progress, a countdown). Nothing for a dialog with its own view.
+     */
+    void setText(const std::string& text);
+    std::string getText();
+
+    /**
+     * Relabels the button at `index` (0 to 2, in the order they were added).
+     */
+    void setButtonText(size_t index, const std::string& label);
+
+    /**
+     * When false, a button runs its callback and leaves the dialog open (it
+     * closes it with close() when it is done): a dialog that shows progress,
+     * a button that retries. True by default.
+     */
+    void setDismissOnButtonClick(bool dismiss);
+
+    bool isCancelable() const
+    {
+        return cancelable;
+    }
 
     virtual void open();
     void close(std::function<void(void)> cb = [] {});

@@ -155,6 +155,7 @@ Dialog::Dialog(std::string text)
     Style style = Application::getStyle();
 
     Label* label = new Label();
+    this->textLabel = label;
     label->setText(text);
     label->setFontSize(style["brls/dialog/fontSize"]);
     label->setHorizontalAlign(HorizontalAlign::CENTER);
@@ -252,9 +253,43 @@ void Dialog::rebuildButtons()
 
 void Dialog::buttonClick(DialogButton* button)
 {
+    if (!this->dismissOnButtonClick)
+    {
+        if (button->cb)
+            button->cb();
+        return;
+    }
+
     dismiss([button] {
-        button->cb();
+        if (button->cb)
+            button->cb();
     });
+}
+
+void Dialog::setText(const std::string& text)
+{
+    if (this->textLabel)
+        this->textLabel->setText(text);
+}
+
+std::string Dialog::getText()
+{
+    return this->textLabel ? this->textLabel->getFullText() : "";
+}
+
+void Dialog::setButtonText(size_t index, const std::string& label)
+{
+    if (index >= this->buttons.size())
+        return;
+
+    this->buttons[index]->label = label;
+    Button* buttons[] = { this->button1, this->button2, this->button3 };
+    buttons[index]->setText(label);
+}
+
+void Dialog::setDismissOnButtonClick(bool dismiss)
+{
+    this->dismissOnButtonClick = dismiss;
 }
 
 AppletFrame* Dialog::getAppletFrame()
