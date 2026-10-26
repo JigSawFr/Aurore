@@ -636,7 +636,7 @@ class Application
     inline static uint64_t drawnFrames     = 0;
     inline static bool redrawDebug         = false;
     inline static uint64_t missedRedraws   = 0;
-    inline static Rect missedRedrawArea;
+    static Rect missedRedrawArea;
     inline static std::vector<unsigned char> presentedPixels;
     inline static int presentedWidth = 0, presentedHeight = 0;
     inline static int deactivatedFPS       = 5; // FPS 5

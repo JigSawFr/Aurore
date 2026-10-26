@@ -1189,6 +1189,8 @@ uint64_t Application::getMissedRedrawCount()
     return Application::missedRedraws;
 }
 
+Rect Application::missedRedrawArea;
+
 Rect Application::getLastMissedRedrawArea()
 {
     return Application::missedRedrawArea;
