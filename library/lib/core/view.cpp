@@ -2576,12 +2576,13 @@ View* View::hitTest(Point point)
 
 std::shared_ptr<tinyxml2::XMLDocument> View::getXMLCache(std::string_view path)
 {
-    static std::unordered_map<size_t, std::shared_ptr<tinyxml2::XMLDocument>> xmlCache;
-    const size_t hash = std::hash<std::string>{}(path.data());
-    if (xmlCache.count(hash) == 0) {
-        xmlCache[hash] = std::make_shared<tinyxml2::XMLDocument>();
-    }
-    return xmlCache[hash];
+    // Keyed by the path itself: two paths with the same hash would have
+    // shared a document. (string_view::data() is not null-terminated either.)
+    static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>> xmlCache;
+    auto& doc = xmlCache[std::string(path)];
+    if (!doc)
+        doc = std::make_shared<tinyxml2::XMLDocument>();
+    return doc;
 }
 
 void View::setWireframeEnabled(bool wireframe)
