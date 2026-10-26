@@ -1106,7 +1106,7 @@ class View
      * method. You can have multiple attributes registered with the same
      * name but different types / handlers, except if the type is string.
      *
-     * The method will be called if the attribute has an integer, float, @style or "px" value.
+     * The method will be called if the attribute has an integer, float, `@style` or "px" value.
      */
     void registerFloatXMLAttribute(std::string name, FloatAttributeHandler handler);
 
@@ -1115,7 +1115,7 @@ class View
      * method. You can have multiple attributes registered with the same
      * name but different types / handlers, except if the type is string.
      *
-     * The method will be called if the attribute has a string or @i18n value.
+     * The method will be called if the attribute has a string or `@i18n` value.
      *
      * If you use string as a type, you can only have one handler for the attribute.
      */
@@ -1127,7 +1127,7 @@ class View
      * name but different types / handlers, except if the type is string.
      *
      * The method will be called if the attribute has a color value ("#XXXXXX" or "#XXXXXXXX")
-     * or a @theme value.
+     * or a `@theme` value.
      */
     void registerColorXMLAttribute(std::string name, ColorAttributeHandler handler);
 

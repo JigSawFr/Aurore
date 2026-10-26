@@ -175,6 +175,8 @@ cmake --build build_pc
 ./build_pc/aurore_demo
 ```
 
+New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
+
 For the other platforms, upstream's wiki has the toolchains and the commands:
 
 - 🖥️ [Windows, macOS, Linux](https://github.com/xfangfang/borealis/wiki/Windows-macOS-Linux)

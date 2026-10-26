@@ -287,7 +287,7 @@ class Application
      * Set the swap interval
      * Must be called after createWindow. On some platforms, it is impossible to set it back
      * to 0 after setting it to a non-zero values, so you can use
-     * `VideoContext::swapInterval = 0;` (#include "borealis/core/video.hpp") before creating the window.
+     * `VideoContext::swapInterval = 0;` (`#include "borealis/core/video.hpp"`) before creating the window.
      *
      * Test results:
      *
