@@ -1,0 +1,15 @@
+{
+    "title": "My App",
+    "tabs": {
+        "home": "Home",
+        "about": "About"
+    },
+    "home": {
+        "hello": "Hello from Aurore!",
+        "click": "Click me",
+        "clicked": "Clicked {} times"
+    },
+    "about": {
+        "text": "Built with Aurore, under the GPLv3."
+    }
+}

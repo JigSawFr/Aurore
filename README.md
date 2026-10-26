@@ -150,7 +150,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 
 ## 📦 Use it in your project
 
-1. Build your project as **C++17**, without `-fno-rtti` or `-fno-exceptions`.
+1. Build your project as **C++20**, without `-fno-rtti` or `-fno-exceptions`.
 2. Add Aurore as a submodule:
 
    ```sh
@@ -161,7 +161,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 3. Copy its `resources` folder to the root of your project.
 
 > [!TIP]
-> Starting from scratch? Upstream's [**template**](https://github.com/xfangfang/borealis_template) has the build files for every platform; point its submodule here.
+> Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.
 
 ## 🛠️ Build the demo
 
