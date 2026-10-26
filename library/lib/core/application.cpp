@@ -1340,6 +1340,15 @@ int Application::getFont(std::string fontName)
     return Application::fontStash[fontName];
 }
 
+bool Application::addFontFallback(const std::string& font, const std::string& fallback)
+{
+    int base  = Application::getFont(font);
+    int other = Application::getFont(fallback);
+    if (base == FONT_INVALID || other == FONT_INVALID || base == other)
+        return false;
+    return nvgAddFallbackFontId(Application::getNVGContext(), base, other) != 0;
+}
+
 int Application::getDefaultFont()
 {
     // Looked up for each label, not once: an app may register another font
