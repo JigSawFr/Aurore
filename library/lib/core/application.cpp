@@ -246,12 +246,17 @@ bool Application::internalMainLoop()
 
     if (Application::limitedFrameTime > 0)
     {
-        Time deltaTime = getCPUTimeUsec() - frameStartTime;
-        Time interval  = Application::limitedFrameTime - deltaTime;
-        if (interval > 0)
-        {
-            std::this_thread::sleep_for(std::chrono::microseconds(interval));
-        }
+        // Frames start on a schedule of their own, one every limitedFrameTime:
+        // sleeping what was left of each frame let the oversleeps add up (and
+        // a limit of 60 gave 57 or 58). A schedule more than 4 frames late
+        // (a long load) starts again from now rather than racing to catch up.
+        static Time deadline = 0;
+        Time now             = getCPUTimeUsec();
+        if (deadline == 0 || now - deadline > 4 * Application::limitedFrameTime)
+            deadline = now;
+        deadline += Application::limitedFrameTime;
+        if (deadline > now)
+            std::this_thread::sleep_for(std::chrono::microseconds(deadline - now));
     }
 
     return true;
@@ -263,9 +268,11 @@ void Application::updateFPS()
     static size_t index = 0;
 
     index++;
-    // update FPS every second
-    if (Application::frameStartTime - start > 1000000) {
-        Application::globalFPS = index;
+    // update FPS every second, from the time that really went by (the
+    // frames of slightly more than a second are not a second's worth)
+    Time elapsed = Application::frameStartTime - start;
+    if (elapsed > 1000000) {
+        Application::globalFPS = (size_t)((double)index * 1000000.0 / (double)elapsed + 0.5);
         start = Application::frameStartTime;
         index = 0;
     }
@@ -681,6 +688,11 @@ bool Application::hasActiveEvent()
 #else
     if (!Application::deactivatedBehavior || activeEvent || Application::frameStartTime - lastActiveTime < Application::deactivatedTime)
         return true;
+    // An animation under way (not a timer that never ends, a clock) keeps
+    // the frames coming: idle, it was drawn at the idle rate, in jerks.
+    for (Ticking* ticking : Ticking::runningTickings)
+        if (dynamic_cast<FiniteTicking*>(ticking))
+            return true;
     return false;
 #endif
 }
