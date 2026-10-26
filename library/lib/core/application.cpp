@@ -802,7 +802,11 @@ void Application::frame()
         view->frame(&frameContext);
     }
 
-    if (currentFocus && Application::getInputType() != InputType::TOUCH)
+    // Only a focus on the activity on top is highlighted: one pushed with
+    // nothing focusable yet (its content still coming) would otherwise show
+    // the screen below's highlight floating over it
+    if (currentFocus && Application::getInputType() != InputType::TOUCH
+        && (activitiesStack.empty() || currentFocus->getParentActivity() == activitiesStack.back()))
     {
         currentFocus->frameHighlight(&frameContext);
     }
