@@ -1156,6 +1156,19 @@ class View
     bool isXMLAttributeValid(std::string attributeName);
 
     /**
+     * Describes the document's parse error for a fatal message: where it comes
+     * from (the path, or the resource being loaded), the line and tinyxml2's
+     * own text.
+     */
+    static std::string describeXMLError(tinyxml2::XMLDocument* document, const std::string& source = "");
+
+    /**
+     * The XML resource being loaded, named in the parse errors of a document
+     * given as a string.
+     */
+    static std::string currentXMLResource;
+
+    /**
      * Sets the maximum number of allowed children XML elements
      * when using a view of that class in an XML file.
      */
