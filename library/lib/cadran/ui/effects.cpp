@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <borealis/core/application.hpp>
+
 #include <borealis/cadran/ui/prefs.hpp>
 #include <borealis/cadran/ui/text_size.hpp>
 
@@ -34,6 +36,8 @@ bool motion()
     // they are taken (the same flag holds the focus highlight still).
     static const bool still = ui::env_flag("STILL_FOCUS");
     if (still) return false;
+    // The app's own reduced motion (brls::Application::setReduceMotion).
+    if (brls::Application::isReduceMotionSet()) return false;
     const std::string& setting = ui::prefs().effects;
     if (setting == "reduced") return false;
     return setting != "auto" || !in_hand();

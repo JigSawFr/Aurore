@@ -1,0 +1,13 @@
+{
+    "role": {
+        "button": "按钮",
+        "header": "标题",
+        "image": "图像",
+        "toggle": "开关",
+        "slider": "滑块",
+        "text_field": "文本框",
+        "tab": "标签页",
+        "list": "列表"
+    },
+    "disabled": "已停用"
+}

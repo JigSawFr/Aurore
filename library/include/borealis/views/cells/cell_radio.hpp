@@ -46,6 +46,16 @@ class RadioCell : public RecyclerCell
 
     static View* create();
 
+    bool setBoundText(const std::string& text) override
+    {
+        this->title->setText(text);
+        return true;
+    }
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::CELL; }
+    std::string getDefaultAccessibilityLabel() override { return this->title->getFullText(); }
+
   private:
     bool selected = false;
 };

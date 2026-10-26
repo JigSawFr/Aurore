@@ -1,0 +1,13 @@
+{
+    "role": {
+        "button": "버튼",
+        "header": "제목",
+        "image": "이미지",
+        "toggle": "스위치",
+        "slider": "슬라이더",
+        "text_field": "텍스트 필드",
+        "tab": "탭",
+        "list": "목록"
+    },
+    "disabled": "비활성화됨"
+}

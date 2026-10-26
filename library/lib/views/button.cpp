@@ -164,6 +164,7 @@ void Button::setStyle(const ButtonStyle* style)
 void Button::setState(ButtonState state)
 {
     this->state = state;
+    this->setStyleState(StyleState::DISABLED, state == ButtonState::DISABLED);
     this->applyStyle();
     this->setActionsAvailable(state == ButtonState::ENABLED);
 }
@@ -193,6 +194,31 @@ void Button::setFontSize(float value)
 std::string Button::getText()
 {
     return label->getFullText();
+}
+
+bool Button::getStyleProperty(const std::string& name, StyleValue* value)
+{
+    if (name != "textColor")
+        return Box::getStyleProperty(name, value);
+    *value = StyleValue::of(this->label->getTextColor());
+    return true;
+}
+
+bool Button::setStyleProperty(const std::string& name, const StyleValue& value)
+{
+    if (name != "textColor")
+        return Box::setStyleProperty(name, value);
+    if (value.type != StyleValue::Type::COLOR)
+        return false;
+    if (!this->transitionStyle("textColor", value))
+        this->label->setTextColor(value.color);
+    return true;
+}
+
+bool Button::setBoundText(const std::string& text)
+{
+    this->setText(text);
+    return true;
 }
 
 View* Button::create()

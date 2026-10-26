@@ -18,6 +18,7 @@
 #pragma once
 
 #include <borealis/core/animation.hpp>
+#include <borealis/core/observable.hpp>
 #include <borealis/core/timer.hpp>
 #include <borealis/core/view.hpp>
 #ifdef OPENCC
@@ -99,7 +100,8 @@ class Label : public View
     // Every label drawn `scale` times its size (1 by default), but those
     // that keep theirs (setFontScaled(false)). It can change at any time:
     // the labels then need laying out again (their nodes marked dirty).
-    // getFontSize() gives the size asked.
+    // getFontSize() gives the size asked. Application::setTextScale does
+    // both.
     static void setFontScale(float scale);
     static float getFontScale();
     void setFontScaled(bool scaled);
@@ -132,6 +134,15 @@ class Label : public View
     NVGcolor getTextColor();
 
     std::string getFullText();
+
+    bool getStyleProperty(const std::string& name, StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const StyleValue& value) override;
+    bool setBoundText(const std::string& text) override;
+    void onTextScaleChanged() override;
+
+    // Its own Observable: the label shows its value, now and at each change,
+    // as long as it lives.
+    void bindText(Observable<std::string>& text);
     // The text as laid out does not fit: it is drawn cut, with an ellipsis.
     bool isTruncated();
 
@@ -181,6 +192,9 @@ class Label : public View
     void setCursor(int cursor);
 
   protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::LABEL; }
+    std::string getDefaultAccessibilityLabel() override { return this->getFullText(); }
+
     std::string truncatedText;
     std::string fullText;
 

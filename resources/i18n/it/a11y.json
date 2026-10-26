@@ -1,0 +1,13 @@
+{
+    "role": {
+        "button": "pulsante",
+        "header": "intestazione",
+        "image": "immagine",
+        "toggle": "interruttore",
+        "slider": "cursore",
+        "text_field": "campo di testo",
+        "tab": "scheda",
+        "list": "elenco"
+    },
+    "disabled": "disattivato"
+}

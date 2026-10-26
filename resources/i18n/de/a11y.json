@@ -1,0 +1,13 @@
+{
+    "role": {
+        "button": "Schaltfläche",
+        "header": "Überschrift",
+        "image": "Bild",
+        "toggle": "Schalter",
+        "slider": "Schieberegler",
+        "text_field": "Textfeld",
+        "tab": "Tab",
+        "list": "Liste"
+    },
+    "disabled": "deaktiviert"
+}

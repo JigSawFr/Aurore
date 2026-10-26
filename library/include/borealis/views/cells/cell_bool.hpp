@@ -54,6 +54,9 @@ class BooleanCell : public DetailCell
 
     void updateUI();
     void scaleTick();
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::TOGGLE; }
 };
 
 } // namespace brls
