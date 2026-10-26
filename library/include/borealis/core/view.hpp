@@ -393,6 +393,12 @@ class View
     }
 
   public:
+    /**
+     * Whether the highlight's border glides from the view that had the focus
+     * to the next one (140 ms), rather than jumping. On by default.
+     */
+    static void setHighlightGlide(bool glide);
+
     static constexpr float AUTO = NAN;
 
     inline static std::string CUSTOM_RESOURCES_PATH;
