@@ -1259,6 +1259,12 @@ class View
     void setActionAvailable(enum ControllerButton button, bool available);
     void setActionsAvailable(bool available) const;
 
+    /**
+     * Shows or hides the hint of the action on `button` (the action still
+     * works), as registerAction's `hidden` but while the view lives.
+     */
+    void setActionHidden(enum ControllerButton button, bool hidden);
+
     void resetClickAnimation();
     void playClickAnimation(bool reverse = false, bool animateBack = true, bool force = false);
 
