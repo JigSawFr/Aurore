@@ -117,13 +117,14 @@ elseif (PLATFORM_PSV)
             FILE ${PSV_ASSETS_FILES}
     )
 elseif (PLATFORM_PS4)
-    # There is no `add_self` and `add_pkg` functions without pacbrew toolchain.
+    # There is no `add_self` function without pacbrew toolchain.
     # We can install the OpenOrbits SDK so that the IDE can provide some basic code prompts,
     # but compilation is done through the pacbrew Docker container as pacbrew only supports Linux.
     if (PS4)
         # Defined by pacbrew toolchain
         add_self(${PROJECT_NAME})
-        add_pkg(${PROJECT_NAME}
+        # ps4_pkg: the toolchain's add_pkg, fixed for directories like i18n/es and i18n/es-419
+        ps4_pkg(${PROJECT_NAME}
                 # Put all the resources inside `<build dir>/ps4` directory, and access through `/app0/...`
                 # eg: `cmake-build/ps4/resources/icon.png` -> `/app0/resources/icon.png`
                 ${CMAKE_BINARY_DIR}/ps4
