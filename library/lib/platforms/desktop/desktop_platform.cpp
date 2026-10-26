@@ -228,6 +228,14 @@ static INHIBIT_TYPE systemType = NONE;
 
 static inline void probeInhibitor(DBusConnection* conn)
 {
+    // No session bus (a headless run, a container): libdbus asserts on a
+    // null connection and aborts the program
+    if (!conn)
+    {
+        Logger::warning("No D-Bus session: the screen may dim while the app runs");
+        return;
+    }
+
     for (int i = FDO_SS; i < NONE; ++i)
     {
         if (dbus_bus_name_has_owner(conn, dbus_service[i], NULL))

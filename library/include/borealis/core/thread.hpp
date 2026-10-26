@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <condition_variable>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -51,7 +52,7 @@ typedef std::vector<DelayOperation>::iterator DelayOperationIterator;
  *
  * It's a shortcut for brls::Application::sync(&func);
  */
-extern void sync(const std::function<void()>& func);
+extern void sync(std::function<void()> func);
 
 /**
  * Enqueue a function to be executed in
@@ -59,9 +60,9 @@ extern void sync(const std::function<void()>& func);
  *
  * It's a shortcut for brls::Application::async(&func);
  */
-extern void async(const std::function<void()>& func);
+extern void async(std::function<void()> func);
 
-extern size_t delay(long milliseconds, const std::function<void()>& func);
+extern size_t delay(long milliseconds, std::function<void()> func);
 
 extern void cancelDelay(size_t iter);
 
@@ -77,15 +78,15 @@ class Threading
      * Borealis is not thread-safe, and sync() provides a mechanism
      * for queuing up UI-related state changes from other threads.
      */
-    static void sync(const std::function<void()>& func);
+    static void sync(std::function<void()> func);
 
     /**
      * Enqueue a function to be executed in
      * parallel with application's main thread.
      */
-    static void async(const std::function<void()>& func);
+    static void async(std::function<void()> func);
 
-    static size_t delay(long milliseconds, const std::function<void()>& func);
+    static size_t delay(long milliseconds, std::function<void()> func);
 
     static void cancelDelay(size_t iter);
 
@@ -113,6 +114,7 @@ class Threading
 
     inline static std::mutex m_async_mutex;
     inline static std::vector<std::function<void()>> m_async_tasks;
+    inline static std::condition_variable m_async_cv;
 
     inline static std::mutex m_delay_mutex;
     inline static std::vector<DelayOperation> m_delay_tasks;

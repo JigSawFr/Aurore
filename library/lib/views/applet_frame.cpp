@@ -119,7 +119,12 @@ AppletFrame::AppletFrame()
     this->registerAction(
         "hints/back"_i18n, BUTTON_B, [this](View* view)
         {
-            this->contentViewStack.back()->dismiss();
+            // A frame given its content by setContentView alone has an
+            // empty stack: dismiss the frame itself
+            if (this->contentViewStack.empty())
+                this->dismiss();
+            else
+                this->contentViewStack.back()->dismiss();
             return true; },
         false, false, SOUND_BACK);
 }
@@ -189,7 +194,8 @@ void AppletFrame::popContentView(std::function<void(void)> cb)
     View* newView = contentViewStack.back();
     setContentView(newView);
     Application::giveFocus(newView);
-    cb();
+    if (cb)
+        cb();
 
     lastView->freeView();
 }

@@ -18,6 +18,7 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/platforms/sdl/sdl_input.hpp>
+#include <mutex>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -348,6 +349,9 @@ static const size_t SDL_AXIS_MAPPING[SDL_GAMEPAD_AXIS_MAX] = {
 };
 
 std::vector<std::pair<SDL_JoystickID, SDL_GameController*>> controllers;
+// The event watcher can run on another thread than the one reading the
+// controllers (hot-plug on some platforms)
+static std::recursive_mutex controllersMutex;
 
 static int mouseButtons[3] = { 0 };
 
@@ -385,6 +389,7 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
 {
     if (event->type == SDL_CONTROLLERDEVICEADDED)
     {
+        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
         SDL_GameController* controller = SDL_GameControllerOpen(event->cdevice.which);
         if (controller)
         {
@@ -410,6 +415,7 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
         // For SDL_CONTROLLERDEVICEREMOVED, event->cdevice.which is already the instance ID
         SDL_JoystickID jid = event->cdevice.which;
         Logger::info("Controller disconnected: {}", jid);
+        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
         auto it = std::find_if(controllers.begin(), controllers.end(), [jid](auto x) {
             return x.first == jid;
         });
@@ -454,11 +460,30 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
     int controllersCount = SDL_NumJoysticks();
     brls::Logger::info("joystick num: {}", controllersCount);
 
-    for (int i = 0; i < controllersCount; i++)
     {
-        SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(i);
-        Logger::info("sdl: joystick {}: \"{}\"", jid, SDL_JoystickNameForIndex(i));
-        controllers.push_back({ jid, SDL_GameControllerOpen(i) });
+        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+        for (int i = 0; i < controllersCount; i++)
+        {
+            SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(i);
+            Logger::info("sdl: joystick {}: \"{}\"", jid, SDL_JoystickNameForIndex(i));
+
+            // A joystick SDL has no mapping for is not a game controller,
+            // and opening it as one fails: it was kept as a null controller
+            if (!SDL_IsGameController(i))
+            {
+                char guid[33];
+                SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i), guid, sizeof(guid));
+                Logger::warning("sdl: joystick {} has no controller mapping (GUID {})", jid, guid);
+                continue;
+            }
+            SDL_GameController* controller = SDL_GameControllerOpen(i);
+            if (!controller)
+            {
+                Logger::warning("sdl: joystick {} could not be opened: {}", jid, SDL_GetError());
+                continue;
+            }
+            controllers.push_back({ jid, controller });
+        }
     }
 
     SDL_AddEventWatch(sdlEventWatcher, this->window);
@@ -476,14 +501,19 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
 
 SDLInputManager::~SDLInputManager()
 {
+    SDL_DelEventWatch(sdlEventWatcher, this->window);
+
+    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
     for (auto i : controllers)
     {
         SDL_GameControllerClose(i.second);
     }
+    controllers.clear();
 }
 
 short SDLInputManager::getControllersConnectedCount()
 {
+    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
     return controllers.size();
 }
 
@@ -495,6 +525,7 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
     for (float& axe : state->axes)
         axe = 0;
 
+    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
     // updateControllerState takes a position in the list, not an instance ID
     for (size_t index = 0; index < controllers.size(); index++)
     {
@@ -555,6 +586,7 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
 
 void SDLInputManager::updateControllerState(ControllerState* state, int controller)
 {
+    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
     if ((int)controllers.size() <= controller) return;
 
     SDL_GameController* c = controllers[controller].second;
@@ -648,6 +680,7 @@ void SDLInputManager::runloopStart()
 
 void SDLInputManager::sendRumble(unsigned short controller, unsigned short lowFreqMotor, unsigned short highFreqMotor)
 {
+    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
     if (controllers.size() <= controller) return;
     SDL_GameController* c = controllers[controller].second;
 

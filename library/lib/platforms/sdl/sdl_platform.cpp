@@ -228,6 +228,14 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         brls::Application::getWindowFocusChangedEvent()->fire(true);
 
     }
+    else if (event->type == SDL_APP_TERMINATING)
+    {
+        // OS 正要杀我们（Android swipe-to-recents / iOS 强杀）。在这个窗口期主动走
+        // 清理路径，让 MPVCore::clean() + mpv_terminate_destroy 有机会释放
+        // MediaCodec / Surface 等底层资源，避免 Tegra 驱动层 slot 泄漏。
+        brls::Application::quit();
+        return false;
+    }
 #endif
     else if (event->type != SDL_POLLSENTINEL)
     {

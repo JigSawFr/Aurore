@@ -102,16 +102,22 @@ class Logger
         std::time_t tt = std::chrono::system_clock::to_time_t(now);
         std::tm time_tm = *std::localtime(&tt);
 #endif
-        std::string log = fmt::format(format, std::forward<Args>(args)...);
-
         std::unique_lock<std::mutex> lock;
         if (Logger::threadSafeLogging)
             lock = std::unique_lock { logMtx };
 
+        std::FILE* out = resolveLogOutput();
+
         try
         {
+            // In C++17 fmt checks the format string when the line is
+            // written, not when it is compiled: a wrong one throws here,
+            // caught below rather than ending the program.
+            std::string log = fmt::format(format, std::forward<Args>(args)...);
+
 #ifdef IOS
-            fmt::print(logOut, "{:%H:%M:%S}.{:03d} {} {}\n", time_tm, (int)ms, color, log);
+            if (out)
+                fmt::print(out, "{:%H:%M:%S}.{:03d} {} {}\n", time_tm, (int)ms, color, log);
 #elif defined(ANDROID)
             __android_log_print(6 - (int)level, "borealis", "%02d:%02d:%02d.%03d %s\n", time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec, (int)ms, log.c_str());
 #elif defined(__PSV__)
@@ -119,7 +125,8 @@ class Logger
 #elif defined(PS4)
             sceKernelDebugOutText(0, fmt::format("{:02d}:{:02d}:{:02d}.{:03d}\033{}[{}]\033[0m {}\n", lt.hour, lt.minute, lt.second, (int)ms, color, prefix, log).c_str());
 #else
-            fmt::print(logOut, "{:%H:%M:%S}.{:03d}\033{}[{}]\033[0m {}\n", time_tm, (int)ms, color, prefix, log);
+            if (out)
+                fmt::print(out, "{:%H:%M:%S}.{:03d}\033{}[{}]\033[0m {}\n", time_tm, (int)ms, color, prefix, log);
 #endif
 
             logEvent.fire(now, level, log);
@@ -133,7 +140,8 @@ class Logger
         // Flush on every platform: once the output is not a terminal (nxlink
         // socket, file, pipe) stdio buffers it fully, and the lines a crash
         // leaves in the buffer are the ones needed to diagnose it.
-        fflush(logOut);
+        if (out)
+            fflush(out);
     }
 
     template <typename... Args>
@@ -175,7 +183,20 @@ class Logger
     inline static std::mutex logMtx;
     inline static bool threadSafeLogging = true;
     inline static Event<TimePoint, LogLevel, std::string> logEvent;
-    inline static std::FILE *logOut = stdout;
+    // Resolved on first use, not by a static initialiser: on newlib
+    // (devkitPro) stdout can still be null when statics are initialised.
+    static std::FILE* resolveLogOutput()
+    {
+        if (!logOutSet)
+        {
+            logOut   = stdout;
+            logOutSet = true;
+        }
+        return logOut;
+    }
+
+    inline static std::FILE *logOut = nullptr;
+    inline static bool logOutSet    = false;
     inline static LogLevel logLevel = LogLevel::LOG_INFO;
 };
 

@@ -184,7 +184,11 @@ void Sidebar::addItem(std::string label, GenericEvent::Callback focusCallback)
 
 SidebarItem* Sidebar::getItem(int position)
 {
-    return dynamic_cast<SidebarItem*>(this->contentBox->getChildren()[position]);
+    auto& children = this->contentBox->getChildren();
+    if (position < 0 || (size_t)position >= children.size())
+        return nullptr;
+    // nullptr for a separator
+    return dynamic_cast<SidebarItem*>(children[position]);
 }
 
 void Sidebar::addSeparator()

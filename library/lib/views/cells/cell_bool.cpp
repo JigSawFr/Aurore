@@ -45,22 +45,50 @@ void BooleanCell::setOn(bool on, bool animated)
 {
     this->state = on;
 
-    if (animated)
-    {
-        scale.stop();
-        scale.reset(1);
-        scale.addStep(0.8f, 100, EasingFunction::quadraticOut);
-        scale.addStep(1, 100, EasingFunction::quadraticIn);
-        scale.setTickCallback([this]
-            { this->scaleTick(); });
-        scale.setEndCallback([this](bool finished)
-            { if (finished) updateUI(); });
-        scale.start();
-    }
+    // Cancel any previous bounce without letting its completion callback
+    // mutate the view during a new state change. Its size is put back only
+    // if a bounce was under way; otherwise the size it has now is the one to
+    // keep (a style or XML may have set it since the cell was made).
+    bool bouncing = scale.isRunning();
+    scale.setEndCallback([](bool finished) {});
+    scale.setTickCallback([]() {});
+    scale.stop();
+    scale.reset(1.0f);
+    if (bouncing)
+        detail->setFontSize(baseDetailTextSize);
     else
+        baseDetailTextSize = detail->getFontSize();
+
+    if (!animated)
     {
         updateUI();
+        return;
     }
+
+    scale.addStep(0.8f, 60, EasingFunction::quadraticOut);
+    scale.setTickCallback([this] {
+        this->scaleTick();
+    });
+    scale.setEndCallback([this](bool finished) {
+        if (!finished)
+            return;
+
+        updateUI();
+
+        scale.reset(0.8f);
+        scale.addStep(1.0f, 60, EasingFunction::quadraticIn);
+        scale.setTickCallback([this] {
+            this->scaleTick();
+        });
+        scale.setEndCallback([this](bool finished) {
+            if (!finished)
+                return;
+
+            detail->setFontSize(baseDetailTextSize);
+        });
+        scale.start();
+    });
+    scale.start();
 }
 
 void BooleanCell::updateUI()

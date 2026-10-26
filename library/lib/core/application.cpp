@@ -836,6 +836,10 @@ void Application::exit()
     exitEvent.fire();
     Logger::info("Exiting...");
 
+    // The async thread first: a task still running must not reach views
+    // or textures freed below
+    Threading::stop();
+
     Application::clear();
 
     // Free views deletion pool
@@ -847,8 +851,6 @@ void Application::exit()
         for (auto view : pendingViews)
             delete view;
     }
-
-    Threading::stop();
 
     exitDoneEvent.fire();
 
@@ -974,6 +976,10 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
 
         Application::focusStack.pop_back();
     }
+    else if (toShow)
+    {
+        Application::giveFocus(toShow->getContentView());
+    }
 
     // Hide animation (and show previous activity, if any)
     last->hide([last, cb, free]()
@@ -985,10 +991,12 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
                 break;
             }
         }
-        cb();
-        brls::Logger::debug("Start delete top activity");
-        if(free) delete last;
-        brls::Logger::debug("Top activity deleted");
+        if (cb)
+            cb();
+        // Deleted after this frame's animations: this callback runs while
+        // they update, and the activity owns some of them.
+        if (free)
+            brls::sync([last]() { delete last; });
 
         Application::unblockInputs(); },
         fade, last->getShowAnimationDuration(animation));

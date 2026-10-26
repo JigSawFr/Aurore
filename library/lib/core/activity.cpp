@@ -42,6 +42,9 @@ void Activity::setContentView(View* view)
     }
 
     this->contentView = view;
+    if (!view)
+        return;
+
     this->contentView->setParentActivity(this);
     // willAppear is only called when the activity is pushed onto the stack
 
@@ -63,7 +66,10 @@ View* Activity::createContentView()
 
 float Activity::getShowAnimationDuration(TransitionAnimation animation)
 {
-    return contentView->getShowAnimationDuration(animation);
+    if (!this->contentView)
+        return 0;
+
+    return this->contentView->getShowAnimationDuration(animation);
 }
 
 void Activity::onWindowSizeChanged()
