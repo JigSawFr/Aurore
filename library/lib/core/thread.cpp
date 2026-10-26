@@ -101,6 +101,11 @@ void Threading::cancelDelay(size_t iter)
     m_delay_cancel_set.insert(iter);
 }
 
+void Threading::setSyncTaskBudget(uint64_t microseconds)
+{
+    m_sync_budget = microseconds;
+}
+
 void Threading::performSyncTasks()
 {
     std::vector<std::function<void()>> local;
@@ -113,11 +118,12 @@ void Threading::performSyncTasks()
     if (!local.empty())
         Application::requestRedraw();
 
-    for (auto& f : local)
+    auto start = std::chrono::steady_clock::now();
+    for (size_t i = 0; i < local.size(); i++)
     {
         try
         {
-            f();
+            local[i]();
         }
         catch (std::exception& e)
         {
@@ -126,6 +132,15 @@ void Threading::performSyncTasks()
         catch (...)
         {
             brls::Logger::error("error: performSyncTasks: unknown exception");
+        }
+
+        // Over the budget: the tasks left go back first in the queue
+        if (m_sync_budget > 0 && i + 1 < local.size()
+            && (uint64_t)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start).count() >= m_sync_budget)
+        {
+            std::lock_guard<std::mutex> guard(m_sync_mutex);
+            m_sync_functions.insert(m_sync_functions.begin(), std::make_move_iterator(local.begin() + i + 1), std::make_move_iterator(local.end()));
+            break;
         }
     }
 
