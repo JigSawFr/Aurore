@@ -44,7 +44,16 @@ void SwitchFontLoader::loadFonts()
     if (access(USER_FONT_PATH.c_str(), F_OK) != -1)
     {
         brls::Logger::info("Load custom font: {}", USER_FONT_PATH);
-        this->loadFontFromFile(FONT_CHINESE_SIMPLIFIED, USER_FONT_PATH);
+        if (this->loadFontFromFile(FONT_CHINESE_SIMPLIFIED, USER_FONT_PATH))
+            nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont(FONT_REGULAR));
+        else
+        {
+            // A custom font that cannot be read: the system's one instead
+            Logger::error("switch: could not load the custom font {}", USER_FONT_PATH);
+            rc = plGetSharedFontByType(&font, PlSharedFontType_ChineseSimplified);
+            if (R_SUCCEEDED(rc) && Application::loadFontFromMemory(FONT_CHINESE_SIMPLIFIED, font.address, font.size, false))
+                nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont(FONT_REGULAR));
+        }
     }
     else
     {
@@ -53,7 +62,14 @@ void SwitchFontLoader::loadFonts()
         if (R_SUCCEEDED(rc) && Application::loadFontFromMemory(FONT_CHINESE_SIMPLIFIED, font.address, font.size, false))
             nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont(FONT_REGULAR));
         else
+        {
             Logger::error("switch: could not load Chinese Simplified shared font: {:#x}", rc);
+            // Every label is drawn with this font's name: without it no text
+            // at all would show. The Standard font takes its place.
+            rc = plGetSharedFontByType(&font, PlSharedFontType_Standard);
+            if (R_SUCCEEDED(rc))
+                Application::loadFontFromMemory(FONT_CHINESE_SIMPLIFIED, font.address, font.size, false);
+        }
     }
 
     // Simplified Chinese ext
