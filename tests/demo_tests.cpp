@@ -19,6 +19,9 @@
 // BRLS_TEST_UPDATE=1 writes them again.
 
 #include <borealis.hpp>
+#include <borealis/cadran/ui/live_prefs.hpp>
+#include <borealis/cadran/ui/prefs.hpp>
+#include <borealis/cadran/ui/ui.hpp>
 #include <borealis/test/harness.hpp>
 
 #include <cmath>
@@ -229,6 +232,48 @@ BRLS_TEST(theme_change_draws_at_once_on_demand)
     brls::Theme::reset();
     h.step();
     BRLS_CHECK(brls::Application::getDrawnFrameCount() > drawn);
+}
+
+BRLS_TEST(theme_picker_follows_a_one_variant_palette)
+{
+    DemoHarness h;
+    ui::prefs().theme      = "dark";
+    ui::prefs().theme_file = "builtin:high-contrast-light";
+    live_prefs::apply_theme();
+    h.settle();
+    // The palette has the light variant only: shown, and what is saved
+    BRLS_CHECK(brls::Application::getThemeVariant() == brls::ThemeVariant::LIGHT);
+    BRLS_CHECK_EQ(ui::prefs().theme, std::string("light"));
+
+    // Dark asked for: the palette's counterpart, in the dark variant
+    ui::pick_theme();
+    h.settle();
+    BRLS_CHECK(h.focusByText("Dark"));
+    h.tap(brls::BUTTON_A);
+    h.settle();
+    BRLS_CHECK_EQ(ui::prefs().theme, std::string("dark"));
+    BRLS_CHECK_EQ(ui::prefs().theme_file, std::string("builtin:high-contrast-dark"));
+    BRLS_CHECK(brls::Application::getThemeVariant() == brls::ThemeVariant::DARK);
+
+    // A light-only palette picked: its variant
+    ui::prefs().theme_file = "";
+    live_prefs::apply_theme();
+    ui::pick_palette();
+    h.settle();
+    BRLS_CHECK(h.focusByText("Sand"));
+    h.tap(brls::BUTTON_A);
+    h.settle();
+    BRLS_CHECK_EQ(ui::prefs().theme, std::string("light"));
+    BRLS_CHECK(brls::Application::getThemeVariant() == brls::ThemeVariant::LIGHT);
+
+    // Dark again: Sand has no counterpart, back to the boards' palettes
+    ui::pick_theme();
+    h.settle();
+    BRLS_CHECK(h.focusByText("Dark"));
+    h.tap(brls::BUTTON_A);
+    h.settle();
+    BRLS_CHECK_EQ(ui::prefs().theme_file, std::string(""));
+    BRLS_CHECK(brls::Application::getThemeVariant() == brls::ThemeVariant::DARK);
 }
 
 BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
