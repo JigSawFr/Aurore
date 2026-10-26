@@ -109,6 +109,7 @@ class HScrollingFrame : public Box
 
     ScrollingBehavior behavior = ScrollingBehavior::NATURAL;
     bool naturalScrollingCanScroll = false;
+    bool isRubberBanding           = false; ///< true while finger is dragging past a scroll boundary or snap-back is animating
     void naturalScrollingBehaviour();
     void naturalScrollingButtonProcessing(FocusDirection focusDirection, bool* repeat);
     View* findLeftMostFocusableView();

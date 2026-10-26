@@ -590,7 +590,7 @@ static bool highlightGlide          = true;
 static const View* glideLastView    = nullptr;
 static float glideLast[4]           = { 0, 0, 0, 0 };
 static float glideFrom[4]           = { 0, 0, 0, 0 };
-static Time glideLastDrawn          = 0;
+static uint64_t glideLastFrame      = 0; // the frame it was drawn on
 static Time glideStart              = 0;
 static bool gliding                 = false;
 static constexpr Time GLIDE_TIME_MS = 140;
@@ -623,9 +623,10 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         Time now = getCPUTimeUsec() / 1000;
         if (this != glideLastView)
         {
-            // From where the border was drawn last, if it was a moment ago
-            // (not after a while in touch mode, or on another screen)
-            gliding = highlightGlide && glideLastView && now - glideLastDrawn < 200;
+            // From where the border was drawn last, if that was on the frame
+            // drawn before (not after a while in touch mode, or on another
+            // screen; a frame skipped by redraw on demand does not count)
+            gliding = highlightGlide && glideLastView && glideLastFrame + 1 >= Application::getDrawnFrameCount();
             if (gliding)
             {
                 std::copy(std::begin(glideLast), std::end(glideLast), std::begin(glideFrom));
@@ -637,6 +638,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         if (gliding)
         {
             float t = (float)(now - glideStart) / (float)GLIDE_TIME_MS;
+            Application::requestRedraw();
             if (t >= 1.0f)
             {
                 gliding = false;
@@ -655,7 +657,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         glideLast[1]   = y;
         glideLast[2]   = width;
         glideLast[3]   = height;
-        glideLastDrawn = now;
+        glideLastFrame = Application::getDrawnFrameCount();
     }
 
     // Shake animation
@@ -663,6 +665,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
     {
         Time curTime = getCPUTimeUsec() / 1000;
         Time t       = (curTime - highlightShakeStart) / 10;
+        Application::requestRedraw();
 
         if (t >= style["brls/animations/highlight_shake"])
         {
@@ -1365,6 +1368,8 @@ void View::setAlignSelf(AlignSelf alignSelf)
 
 void View::invalidate()
 {
+    Application::requestRedraw();
+
     if (YGNodeHasMeasureFunc(this->ygNode))
         YGNodeMarkDirty(this->ygNode);
 
@@ -2012,7 +2017,10 @@ View* View::createFromXMLResource(std::string name)
     }
 
 #ifdef USE_LIBROMFS
-    return View::createFromXMLString(romfs::get("xml/" + name).string());
+    View::currentXMLResource = "xml/" + name;
+    View* view               = View::createFromXMLString(romfs::get("xml/" + name).string());
+    View::currentXMLResource.clear();
+    return view;
 #else
     return View::createFromXMLFile(std::string(BRLS_RESOURCES) + "xml/" + name);
 #endif
@@ -2027,7 +2035,7 @@ View* View::createFromXMLString(std::string_view xml)
         tinyxml2::XMLError error = document->Parse(xml.data());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
-            fatal("Invalid XML when creating View from XML: error " + std::to_string(error));
+            fatal("Invalid XML when creating View from XML: " + View::describeXMLError(document.get()));
 
         element = document->RootElement();
 
@@ -2048,7 +2056,7 @@ View* View::createFromXMLFile(std::string path)
         tinyxml2::XMLError error = document->LoadFile(path.c_str());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
-            fatal("Unable to load XML file \"" + path + "\": error " + std::to_string(error));
+            fatal("Unable to load XML file: " + View::describeXMLError(document.get(), path));
 
         element = document->RootElement();
 
@@ -2700,6 +2708,18 @@ std::shared_ptr<tinyxml2::XMLDocument> View::getXMLCache(std::string_view path)
     if (!doc)
         doc = std::make_shared<tinyxml2::XMLDocument>();
     return doc;
+}
+
+std::string View::currentXMLResource;
+
+std::string View::describeXMLError(tinyxml2::XMLDocument* document, const std::string& source)
+{
+    std::string where = source.empty() ? View::currentXMLResource : source;
+    if (where.empty())
+        where = "XML string";
+
+    // ErrorStr() names the error, its id, the line and what tinyxml2 found there
+    return where + ": " + document->ErrorStr();
 }
 
 void View::setWireframeEnabled(bool wireframe)

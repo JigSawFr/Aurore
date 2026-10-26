@@ -325,6 +325,33 @@ class Application
     static int getDeactivatedFPS();
     static double getDeactivatedFrameTime();
 
+    /**
+     * Redraw on demand: a frame is drawn only when something may have changed
+     * on screen (an input, a running animation, a sync or delayed task that
+     * ran, a view's layout invalidated, a window resized, or requestRedraw()),
+     * and at least once a second. On the other frames the inputs are still
+     * read, but nothing is drawn or presented, which saves most of the CPU
+     * and GPU time of an idle screen.
+     *
+     * A view that changes how it looks without any of these (a colour set
+     * from a timer of its own...) calls requestRedraw().
+     *
+     * default is false: every frame is drawn.
+     */
+    static void setRedrawOnDemand(bool enabled);
+    static bool isRedrawOnDemand();
+
+    /**
+     * Asks for the next frames to be drawn, with redraw on demand.
+     */
+    static void requestRedraw();
+
+    /**
+     * Number of frames drawn since the start (frames skipped by redraw on
+     * demand are not counted).
+     */
+    static uint64_t getDrawnFrameCount();
+
     static GenericEvent* getGlobalFocusChangeEvent();
     static VoidEvent* getGlobalHintsUpdateEvent();
     static Event<InputType>* getGlobalInputTypeChangeEvent();
@@ -468,6 +495,10 @@ class Application
     inline static Time lastActiveTime      = 0;
     inline static Time lastInputTime       = 0;
     inline static bool highlightIdleFade   = false;
+    inline static bool redrawOnDemand      = false;
+    inline static int redrawFrames         = 2; // frames still to draw
+    inline static Time lastDrawTime        = 0;
+    inline static uint64_t drawnFrames     = 0;
     inline static int deactivatedFPS       = 5; // FPS 5
     inline static int deactivatedTime      = 5000000; // 5s
 
