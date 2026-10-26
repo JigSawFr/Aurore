@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+@AURORE_DEPENDENCIES@
+include("${CMAKE_CURRENT_LIST_DIR}/AuroreTargets.cmake")
+
+check_required_components(Aurore)
