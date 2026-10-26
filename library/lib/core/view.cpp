@@ -28,7 +28,9 @@
 #include <borealis/core/animation.hpp>
 #include <borealis/core/application.hpp>
 #include <borealis/core/box.hpp>
+#include <borealis/core/hot_reload.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/input.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
@@ -174,6 +176,16 @@ void View::frame(FrameContext* ctx)
     if (this->visibility != Visibility::VISIBLE)
         return;
 
+    // The inspector notes what its selected view, and not its children,
+    // looks up in the theme and the style
+    View* const inspected = Inspector::recordTarget;
+    bool wasRecording     = false;
+    if (inspected)
+    {
+        wasRecording         = Inspector::recording;
+        Inspector::recording = inspected == this;
+    }
+
     // State styles changed since the last frame: applied after the focus
     // and press handlers have all run, whatever their order.
     this->applyPendingStyles();
@@ -241,6 +253,9 @@ void View::frame(FrameContext* ctx)
         ctx->theme = oldTheme;
 
     nvgRestore(ctx->vg);
+
+    if (inspected)
+        Inspector::recording = wasRecording;
 }
 
 void View::frameHighlight(FrameContext* ctx)
@@ -1387,9 +1402,19 @@ void View::invalidate()
         YGNodeMarkDirty(this->ygNode);
 
     if (this->hasParent() && !this->detached)
+    {
         this->getParent()->invalidate();
-    else
+    }
+    else if (Inspector::isOpen())
+    {
+        Time start = getCPUTimeUsec();
         YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
+        Inspector::addLayoutTime(getCPUTimeUsec() - start);
+    }
+    else
+    {
+        YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
+    }
 }
 
 Rect View::getFrame()
@@ -2055,6 +2080,10 @@ bool View::isXMLAttributeValid(std::string attributeName)
 
 View* View::createFromXMLResource(std::string name)
 {
+    std::string disk = HotReload::diskResource("@res/xml/" + name);
+    if (!disk.empty())
+        return View::createFromXMLFile(disk);
+
     // Check if custom xml file exists
     if (!View::CUSTOM_RESOURCES_PATH.empty() && std::ifstream { View::CUSTOM_RESOURCES_PATH + "xml/" + name }.good())
     {
@@ -2094,6 +2123,7 @@ View* View::createFromXMLString(std::string_view xml)
 
 View* View::createFromXMLFile(std::string path)
 {
+    HotReload::noteXMLFile(path);
     std::shared_ptr<tinyxml2::XMLDocument> document = getXMLCache(path);
     tinyxml2::XMLElement* element = document->RootElement();
 
@@ -2133,10 +2163,14 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
 
         if (xmlAttribute)
         {
+            std::string disk = HotReload::diskResource(xmlAttribute->Value());
+            if (!disk.empty())
+                view = View::createFromXMLFile(disk);
+            else
 #ifdef USE_LIBROMFS
-            view = View::createFromXMLString(romfs::get(View::getFilePathXMLAttributeValue(xmlAttribute->Value())).string());
+                view = View::createFromXMLString(romfs::get(View::getFilePathXMLAttributeValue(xmlAttribute->Value())).string());
 #else
-            view = View::createFromXMLFile(View::getFilePathXMLAttributeValue(xmlAttribute->Value()));
+                view = View::createFromXMLFile(View::getFilePathXMLAttributeValue(xmlAttribute->Value()));
 #endif
         }
         else
@@ -2778,15 +2812,30 @@ View* View::hitTest(Point point)
     return nullptr;
 }
 
+// Keyed by the path itself: two paths with the same hash would have
+// shared a document. (string_view::data() is not null-terminated either.)
+static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>>& xmlCache()
+{
+    static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>> cache;
+    return cache;
+}
+
 std::shared_ptr<tinyxml2::XMLDocument> View::getXMLCache(std::string_view path)
 {
-    // Keyed by the path itself: two paths with the same hash would have
-    // shared a document. (string_view::data() is not null-terminated either.)
-    static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>> xmlCache;
-    auto& doc = xmlCache[std::string(path)];
+    auto& doc = xmlCache()[std::string(path)];
     if (!doc)
         doc = std::make_shared<tinyxml2::XMLDocument>();
     return doc;
+}
+
+void View::forgetXMLCache(const std::string& path)
+{
+    static std::vector<std::shared_ptr<tinyxml2::XMLDocument>> retired;
+    auto it = xmlCache().find(path);
+    if (it == xmlCache().end())
+        return;
+    retired.push_back(it->second);
+    xmlCache().erase(it);
 }
 
 std::string View::currentXMLResource;

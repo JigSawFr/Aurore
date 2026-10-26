@@ -80,6 +80,10 @@ option(USE_FREETYPE "fontstash renders glyphs with FreeType" OFF)
 # Arabic letters, with GNU FriBidi (LGPL-2.1+): brls::bidiVisual().
 option(USE_FRIBIDI "labels reorder right-to-left text with FriBidi" OFF)
 
+# The built-in inspector (F12, or L3 + R3) on from the start, for debug builds
+# (Application::setInspectorEnabled does it at run time)
+option(BRLS_INSPECTOR "Built-in inspector on" OFF)
+
 if (NOT DEFINED APP_PLATFORM_INCLUDE)
     set(APP_PLATFORM_INCLUDE)
 endif ()

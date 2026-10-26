@@ -15,6 +15,8 @@
     limitations under the License.
 */
 
+#include <borealis/core/hot_reload.hpp>
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/theme.hpp>
@@ -168,7 +170,10 @@ NVGcolor ThemeValues::getColor(const std::string& name)
     if (this->values.count(name) == 0)
         fatal("Unknown theme value \"" + name + "\" in size: " + std::to_string(this->values.size()));
 
-    return this->values[name];
+    NVGcolor color = this->values[name];
+    if (Inspector::recording)
+        Inspector::recordColor(name, color);
+    return color;
 }
 
 bool ThemeValues::hasColor(const std::string& name) const
@@ -385,6 +390,7 @@ bool Theme::load(const std::string& text, ThemeVariant* variant)
 
 bool Theme::loadFile(const std::string& path, ThemeVariant* variant)
 {
+    HotReload::noteThemeFile(path);
     std::ifstream file(path);
     if (!file)
     {

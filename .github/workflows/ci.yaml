@@ -275,7 +275,10 @@ jobs:
             ./build/aurore_demo > demo.log 2>&1 &
             pid=$!
             sleep 10
-            for key in Down Down Down Down Down Down Return Escape Up Up Right Right Down Left Left; do
+            # F12 opens the inspector, follows the focus, browses the tree
+            # and closes it
+            for key in Down Down Down Down Down Down Return Escape Up Up Right Right Down Left Left \
+                F12 Down Down F12 Down Down Up Left Right Return Escape F12 Down F12 F12; do
               xdotool key $key
               sleep 0.5
             done
@@ -285,3 +288,22 @@ jobs:
       - name: Demo log
         if: always()
         run: cat demo.log || true
+
+  docs:
+    name: API reference (Doxygen)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Install Doxygen
+        run: |
+          sudo apt update -y
+          sudo apt install -y --no-install-recommends doxygen
+      - name: Build the reference
+        # Fails on a warning (WARN_AS_ERROR in docs/Doxyfile)
+        run: doxygen docs/Doxyfile
+      - name: Upload the reference
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: aurore-api-reference
+          path: build_docs/html

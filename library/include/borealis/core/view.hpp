@@ -895,6 +895,10 @@ class View
         this->borderColor = color;
     }
 
+    ViewBackground getBackground() const { return this->background; }
+    NVGcolor getBackgroundColor() const { return this->backgroundColor; }
+    NVGcolor getBorderColor() const { return this->borderColor; }
+
     /**
      * Sets the view shape border thickness.
      */
@@ -1114,7 +1118,7 @@ class View
      * method. You can have multiple attributes registered with the same
      * name but different types / handlers, except if the type is string.
      *
-     * The method will be called if the attribute has an integer, float, @style or "px" value.
+     * The method will be called if the attribute has an integer, float, `@style` or "px" value.
      */
     void registerFloatXMLAttribute(std::string name, FloatAttributeHandler handler);
 
@@ -1123,7 +1127,7 @@ class View
      * method. You can have multiple attributes registered with the same
      * name but different types / handlers, except if the type is string.
      *
-     * The method will be called if the attribute has a string or @i18n value.
+     * The method will be called if the attribute has a string or `@i18n` value.
      *
      * If you use string as a type, you can only have one handler for the attribute.
      */
@@ -1135,7 +1139,7 @@ class View
      * name but different types / handlers, except if the type is string.
      *
      * The method will be called if the attribute has a color value ("#XXXXXX" or "#XXXXXXXX")
-     * or a @theme value.
+     * or a `@theme` value.
      */
     void registerColorXMLAttribute(std::string name, ColorAttributeHandler handler);
 
@@ -1161,6 +1165,13 @@ class View
      * Get the XML document for the XML file, creating a new one if none is cached.
      */
     static std::shared_ptr<tinyxml2::XMLDocument> getXMLCache(std::string_view path);
+
+    /**
+     * Drops the cached document of an XML file, which is then read again
+     * (hot reload). The document stays in memory: views made from it may
+     * still point into it.
+     */
+    static void forgetXMLCache(const std::string& path);
 
     /**
      * Returns if the given XML attribute name is valid for that view.

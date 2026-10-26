@@ -16,6 +16,7 @@
 
 #include <borealis/core/activity.hpp>
 #include <borealis/core/application.hpp>
+#include <borealis/core/hot_reload.hpp>
 #include <borealis/core/i18n.hpp>
 
 using namespace brls::literals;
@@ -42,6 +43,7 @@ void Activity::setContentView(View* view)
     }
 
     this->contentView = view;
+    this->contentGeneration++;
     if (!view)
         return;
 
@@ -204,6 +206,9 @@ View* Activity::getView(std::string id)
 
 Activity::~Activity()
 {
+    if (HotReload::isEnabled())
+        HotReload::forgetActivity(this);
+
     if (this->contentView)
     {
         this->contentView->willDisappear();

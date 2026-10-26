@@ -196,6 +196,8 @@ cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 
 With the resources built in (`USE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
 
+New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
+
 For the other platforms, upstream's wiki has the toolchains and the commands:
 
 - 🖥️ [Windows, macOS, Linux](https://github.com/xfangfang/borealis/wiki/Windows-macOS-Linux)

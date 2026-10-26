@@ -336,7 +336,7 @@ class Application
      * Set the swap interval
      * Must be called after createWindow. On some platforms, it is impossible to set it back
      * to 0 after setting it to a non-zero values, so you can use
-     * `VideoContext::swapInterval = 0;` (#include "borealis/core/video.hpp") before creating the window.
+     * `VideoContext::swapInterval = 0;` (`#include "borealis/core/video.hpp"`) before creating the window.
      *
      * Test results:
      *
@@ -454,6 +454,40 @@ class Application
     {
         return inputType;
     }
+
+    /**
+     * The built-in inspector (docs/inspector.md): F12 on a keyboard, or
+     * both sticks pressed in together (L3 + R3) on a controller, opens it
+     * over the screen with the view tree, the focus chain, the yoga box and
+     * the theme values of a view, and the frame's timings. Off by default;
+     * the BRLS_INSPECTOR CMake option, or BRLS_INSPECTOR=1 in the
+     * environment on a desktop, turns it on at init(). Closed, it only
+     * watches for its toggle.
+     */
+    static void setInspectorEnabled(bool enabled);
+    static bool isInspectorEnabled();
+
+    /**
+     * Hot reload, on a desktop (docs/hot_reload.md): the XML files the
+     * activity on top was built from, and the files read by
+     * Theme::loadFile(), are watched, and the activity is built again when
+     * one of them changes (the focus is put back where it was when it can
+     * be). `resourcesDir`, when given, is a resources folder (the app's
+     * sources' `resources/`) the XML files are read from in place of the
+     * ones built in (libromfs) or copied next to the app. Off by default;
+     * `BRLS_HOT_RELOAD=1`, or `BRLS_HOT_RELOAD=<resources folder>`, in the
+     * environment turns it on at init(). Does nothing on the consoles.
+     */
+    static void setHotReload(bool enabled, const std::string& resourcesDir = "");
+    static bool isHotReload();
+
+    /**
+     * Builds the content of the activity on top again from its
+     * createContentView(), as hot reload does. False when it cannot (an
+     * activity given its view in its constructor) or the new content
+     * throws while being made, the old one then staying.
+     */
+    static bool rebuildActivity();
 
     inline static void enableDebuggingView(bool enable)
     {
