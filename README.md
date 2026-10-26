@@ -101,6 +101,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A label tells when it is cut with "…" | `Label::isTruncated` |
 | A wrapped line no longer starts with a space; a no-break space keeps words together | — |
 | The default font looked up for each new label | — |
+| FreeType instead of stb_truetype, hinted (an option) | `-DUSE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
+| Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
+| Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DUSE_FRIBIDI=ON` · `brls::bidiVisual()` |
 
 **Languages**
 
@@ -143,6 +146,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | XML attribute handlers registered the first time one is used | 200 labels built in code: 3–6 → under 1 ms |
 | Cached textures freed once nothing uses them | — |
 | Views queued while the deletion pool drains kept; each recycling list checks its own width | — |
+| Text measures kept per text and style (`nvgTextBounds`, `nvgTextBoxBounds`) | a measure: 2.1 → 0.18 µs; 95% of the demo's answered from the cache |
 
 Each commit says what it changes, why, and where it comes from: `git log 5f08b28..`.
 

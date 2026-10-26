@@ -18,6 +18,7 @@
 #include <yoga/YGNode.h>
 
 #include <borealis/core/application.hpp>
+#include <borealis/core/bidi.hpp>
 #include <borealis/core/font.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/util.hpp>
@@ -401,8 +402,14 @@ std::string Label::STConverter(const std::string& text)
     return text;
 }
 
-void Label::setText(const std::string& text)
+void Label::setText(const std::string& logicalText)
 {
+#ifdef BRLS_USE_FRIBIDI
+    // Measured and drawn in display order
+    const std::string text = bidiVisual(logicalText);
+#else
+    const std::string& text = logicalText;
+#endif
 #ifdef OPENCC
     static bool trans = Application::getLocale() == LOCALE_ZH_HANT || Application::getLocale() == LOCALE_ZH_TW;
     if (trans && OPENCC_ON)

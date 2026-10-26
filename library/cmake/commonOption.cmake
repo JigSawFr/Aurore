@@ -71,6 +71,15 @@ option(BRLS_UNITY_BUILD "Unity build" OFF)
 
 option(BRLS_FONTSTASH_STREAM "fontstash use stream" OFF)
 
+# Rasterize glyphs with FreeType instead of stb_truetype: hinted text and
+# colour emoji (CBDT/CBLC, sbix and COLR fonts). The system FreeType on
+# desktop, devkitPro's switch-freetype on Switch.
+option(USE_FREETYPE "fontstash renders glyphs with FreeType" OFF)
+
+# Labels put right-to-left text (Hebrew, Arabic) in reading order and join
+# Arabic letters, with GNU FriBidi (LGPL-2.1+): brls::bidiVisual().
+option(USE_FRIBIDI "labels reorder right-to-left text with FriBidi" OFF)
+
 if (NOT DEFINED APP_PLATFORM_INCLUDE)
     set(APP_PLATFORM_INCLUDE)
 endif ()
