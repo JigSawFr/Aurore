@@ -241,3 +241,47 @@ jobs:
         with:
           name: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
           path: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}.tar.gz
+  linux-run:
+    name: linux (demo run, ASan + UBSan)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols xorg-dev xvfb xdotool dbus
+      - name: Build
+        env:
+          CFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer
+          CXXFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer
+          LDFLAGS: -fsanitize=address,undefined
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON -DUSE_LIBROMFS=ON
+          make -C build -j$(nproc)
+      - name: Run the demo
+        env:
+          # The demo is stopped from outside, so leaks at exit are not reported
+          ASAN_OPTIONS: detect_leaks=0:abort_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: |
+          # Walks the tabs with the keyboard for a while, then stops the demo:
+          # it passes if it was still running (a crash or a sanitizer report
+          # ends it before)
+          dbus-run-session -- xvfb-run -a -s "-screen 0 1280x720x24" bash -c '
+            ./build/aurore_demo > demo.log 2>&1 &
+            pid=$!
+            sleep 10
+            for key in Down Down Down Down Down Down Return Escape Up Up Right Right Down Left Left; do
+              xdotool key $key
+              sleep 0.5
+            done
+            sleep 3
+            if kill -0 $pid 2> /dev/null; then kill $pid; wait $pid; exit 0; fi
+            wait $pid; echo "demo ended on its own: $?"; exit 1'
+      - name: Demo log
+        if: always()
+        run: cat demo.log || true
