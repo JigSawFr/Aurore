@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <borealis/core/application.hpp>
+#include <borealis/views/dialog.hpp>
 #include <borealis/core/font.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/thread.hpp>
@@ -69,8 +70,11 @@
 namespace brls
 {
 
+static std::thread::id mainThreadId;
+
 bool Application::init()
 {
+    mainThreadId = std::this_thread::get_id();
     Application::inited        = false;
     Application::quitRequested = false;
 
@@ -1186,7 +1190,26 @@ bool Application::loadFontFromMemory(std::string fontName, void* address, size_t
 
 void Application::crash(std::string text)
 {
-    // To be implemented
+    // A dialog that cannot be dismissed, its one button quitting. Shown from
+    // the main thread, and whatever blocks the input released: a crash in
+    // the middle of a transition must not leave the screen unusable.
+    auto show = [text]()
+    {
+        Logger::error("crash: {}", text);
+        Application::blockInputsTokens = 0;
+        Application::muteSounds        = false;
+
+        Dialog* dialog = new Dialog(text);
+        dialog->setCancelable(false);
+        dialog->addButton("hints/exit"_i18n, []()
+            { Application::quit(); });
+        dialog->open();
+    };
+
+    if (std::this_thread::get_id() == mainThreadId)
+        show();
+    else
+        brls::sync(show);
 }
 
 void Application::blockInputs(bool muteSounds)

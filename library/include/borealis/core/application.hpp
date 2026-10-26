@@ -216,6 +216,11 @@ class Application
     /**
      * "Crashes" the app (displays a fullscreen CrashFrame)
      */
+    /**
+     * Shows `text` in a dialog that cannot be dismissed, with one button that
+     * quits the app: for an error the app cannot go on after. Can be called
+     * from any thread.
+     */
     static void crash(std::string text);
 
     static void quit();
