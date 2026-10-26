@@ -138,7 +138,8 @@ const char* note_icon(const std::string& paragraph, bool* warn)
     *warn = false;
     for (const NoteKind& k : note_kinds()) {
         // Read each time: the language may have changed since (live_prefs).
-        const std::string text = brls::getStr(k.key);
+        // Raw: a text with a "{}" to fill would not format without its value.
+        const std::string text = brls::internal::getRawStr(k.key);
         if (starts_with(paragraph, text.substr(0, text.find("{}")))) {
             *warn = k.warn;
             return k.icon;
