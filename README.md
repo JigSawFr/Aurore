@@ -178,6 +178,18 @@ cmake --build build_pc
 ./build_pc/aurore_demo
 ```
 
+With CMake 3.21 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>`:
+
+```sh
+cmake --preset desktop-glfw        # or desktop-sdl
+cmake --build --preset desktop-glfw
+./build/desktop-glfw/aurore_demo
+
+export DEVKITPRO=/opt/devkitpro    # Switch: switch-deko3d or switch-gl (OpenGL)
+cmake --preset switch-deko3d
+cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
+```
+
 For the other platforms, upstream's wiki has the toolchains and the commands:
 
 - 🖥️ [Windows, macOS, Linux](https://github.com/xfangfang/borealis/wiki/Windows-macOS-Linux)
