@@ -544,7 +544,7 @@ static bool highlightGlide          = true;
 static const View* glideLastView    = nullptr;
 static float glideLast[4]           = { 0, 0, 0, 0 };
 static float glideFrom[4]           = { 0, 0, 0, 0 };
-static Time glideLastDrawn          = 0;
+static uint64_t glideLastFrame      = 0; // the frame it was drawn on
 static Time glideStart              = 0;
 static bool gliding                 = false;
 static constexpr Time GLIDE_TIME_MS = 140;
@@ -577,9 +577,10 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         Time now = getCPUTimeUsec() / 1000;
         if (this != glideLastView)
         {
-            // From where the border was drawn last, if it was a moment ago
-            // (not after a while in touch mode, or on another screen)
-            gliding = highlightGlide && glideLastView && now - glideLastDrawn < 200;
+            // From where the border was drawn last, if that was on the frame
+            // drawn before (not after a while in touch mode, or on another
+            // screen; a frame skipped by redraw on demand does not count)
+            gliding = highlightGlide && glideLastView && glideLastFrame + 1 >= Application::getDrawnFrameCount();
             if (gliding)
             {
                 std::copy(std::begin(glideLast), std::end(glideLast), std::begin(glideFrom));
@@ -591,6 +592,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         if (gliding)
         {
             float t = (float)(now - glideStart) / (float)GLIDE_TIME_MS;
+            Application::requestRedraw();
             if (t >= 1.0f)
             {
                 gliding = false;
@@ -609,7 +611,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         glideLast[1]   = y;
         glideLast[2]   = width;
         glideLast[3]   = height;
-        glideLastDrawn = now;
+        glideLastFrame = Application::getDrawnFrameCount();
     }
 
     // Shake animation
@@ -617,6 +619,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
     {
         Time curTime = getCPUTimeUsec() / 1000;
         Time t       = (curTime - highlightShakeStart) / 10;
+        Application::requestRedraw();
 
         if (t >= style["brls/animations/highlight_shake"])
         {
@@ -1311,6 +1314,8 @@ void View::setAlignSelf(AlignSelf alignSelf)
 
 void View::invalidate()
 {
+    Application::requestRedraw();
+
     if (YGNodeHasMeasureFunc(this->ygNode))
         YGNodeMarkDirty(this->ygNode);
 

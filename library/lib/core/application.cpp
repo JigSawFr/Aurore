@@ -205,8 +205,25 @@ bool Application::internalMainLoop()
 #endif
     Ticking::updateTickings();
 
-    // Render
-    Application::frame();
+    // Render: every frame, or with redraw on demand only when something
+    // asked for it (and at least once a second, for what changes without
+    // telling: a clock, a battery...)
+    bool draw = true;
+    if (Application::redrawOnDemand)
+    {
+        if (!Ticking::runningTickings.empty())
+            Application::requestRedraw();
+        draw = Application::redrawFrames > 0 || Application::frameStartTime - Application::lastDrawTime >= 1000000;
+    }
+
+    if (draw)
+    {
+        Application::frame();
+        Application::lastDrawTime = Application::frameStartTime;
+        Application::drawnFrames++;
+        if (Application::redrawFrames > 0)
+            Application::redrawFrames--;
+    }
 
     // Run sync functions
     Threading::performSyncTasks();
@@ -243,6 +260,12 @@ bool Application::internalMainLoop()
 
     if (!Application::currentFocus && !Application::activitiesStack.empty())
         Application::giveFocus(Application::activitiesStack.back()->getContentView());
+
+    // A frame not drawn is not presented either, so nothing waits for the
+    // display: the loop waits a frame's time instead (the limiter below does
+    // when it is set)
+    if (!draw && Application::limitedFrameTime <= 0)
+        std::this_thread::sleep_for(std::chrono::microseconds(16667));
 
     if (Application::limitedFrameTime > 0)
     {
@@ -401,6 +424,9 @@ void Application::processInput()
         }
     }
     currentTouchState = touchState;
+    for (auto& i : touchState)
+        if (i.phase != TouchPhase::NONE)
+            Application::requestRedraw();
 
     MouseState mouseState = InputManager::computeMouseState(rawMouse, currentMouseState);
 
@@ -408,6 +434,7 @@ void Application::processInput()
     {
         Application::setInputType(InputType::TOUCH);
         Application::setDrawCoursor(true);
+        Application::requestRedraw();
     }
 
     if (mouseState.scroll.x == 0 && mouseState.scroll.y == 0 && mouseState.leftButton == TouchPhase::NONE && mouseState.middleButton == TouchPhase::NONE && mouseState.rightButton == TouchPhase::NONE)
@@ -460,6 +487,16 @@ void Application::processInput()
         }
     }
 
+    // A button held (a slider moving) or just let go changes the screen
+    for (int i = 0; i < _BUTTON_MAX; i++)
+    {
+        if (controllerState.buttons[i] || oldControllerState.buttons[i])
+        {
+            Application::requestRedraw();
+            break;
+        }
+    }
+
     oldControllerState = controllerState;
 
     // Trigger keyboard events
@@ -490,6 +527,7 @@ void Application::processInput()
 
         if (watchedKey.pressed)
         {
+            Application::requestRedraw();
             repeating = watchedKey.repeatingStop > 0 && cpuTime > watchedKey.repeatingStop;
 
             if (repeating)
@@ -727,8 +765,34 @@ bool Application::hasActiveEvent()
 #endif
 }
 
+void Application::setRedrawOnDemand(bool enabled)
+{
+    Application::redrawOnDemand = enabled;
+    Application::requestRedraw();
+}
+
+bool Application::isRedrawOnDemand()
+{
+    return Application::redrawOnDemand;
+}
+
+void Application::requestRedraw()
+{
+    // This frame if it is not drawn yet, and the next one, for a change made
+    // after this frame's drawing
+    Application::redrawFrames = 2;
+}
+
+uint64_t Application::getDrawnFrameCount()
+{
+    return Application::drawnFrames;
+}
+
 void Application::setActiveEvent(bool value)
 {
+    if (value)
+        Application::requestRedraw();
+
 #ifndef __SWITCH__
     Application::activeEvent = value;
     if (value)
@@ -865,6 +929,8 @@ void Application::frame()
         {
             float idle           = (float)(getCPUTimeUsec() - Application::lastInputTime) / 1000.0f;
             float highlightAlpha = idle < 800.0f ? 1.0f : std::max(0.0f, 1.0f - (idle - 800.0f) / 400.0f);
+            if (idle < 1200.0f)
+                Application::requestRedraw(); // until faded out
             if (highlightAlpha > 0.0f)
             {
                 nvgSave(frameContext.vg);
@@ -1299,6 +1365,7 @@ void Application::setWindowSize(int width, int height)
 
 void Application::onWindowResized(int width, int height)
 {
+    Application::requestRedraw();
     // Trigger event when Window size is stable
     static size_t iter = 0;
     brls::cancelDelay(iter);

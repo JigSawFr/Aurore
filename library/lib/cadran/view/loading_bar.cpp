@@ -72,7 +72,10 @@ void LoadingBar::draw(NVGcontext* vg, float x, float y, float width, float heigh
     nvgFillColor(vg, this->a(this->brand ? TRACK : theme["cadran/well"]));
     nvgFill(vg);
 
-    const float value = this->drawn(brls::getCPUTimeUsec());
+    const brls::Time now = brls::getCPUTimeUsec();
+    const float value = this->drawn(now);
+    // Still moving: the next frames are drawn too (redraw on demand)
+    if (this->since && now - this->since < (brls::Time)this->duration) brls::Application::requestRedraw();
     if (value <= 0.0f) return;
     const float w = std::max(height, width * value);
     // Teal, lighter toward its end: the end that moves.

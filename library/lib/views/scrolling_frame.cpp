@@ -133,6 +133,8 @@ void ScrollingFrame::updateScrollingIndicatior()
             lastScrollTime      = now;
         }
         Time still = now - lastScrollTime;
+        if (still <= 900)
+            Application::requestRedraw(); // still showing or fading
         if (still > 900)
             alpha = 0;
         else if (still > 600)
