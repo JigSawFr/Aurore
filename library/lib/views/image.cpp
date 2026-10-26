@@ -302,12 +302,6 @@ void Image::invalidateImageBounds()
 
 size_t Image::checkCache(const std::string& path)
 {
-    if (this->texture > 0)
-    {
-        brls::TextureCache::instance().removeCache(this->texture);
-        brls::Logger::verbose("cache remove: {} {}", path, this->texture);
-    }
-
     int tex = brls::TextureCache::instance().getCache(path);
     if (tex > 0)
     {
@@ -321,15 +315,21 @@ size_t Image::checkCache(const std::string& path)
 
 void Image::setImageFromRes(const std::string& path)
 {
-    // Let TextureCache to manage when to delete texture
-    this->setFreeTexture(false);
-
 #ifdef USE_LIBROMFS
+    // TextureCache decides when the texture is deleted (the previous one is
+    // released by innerSetImage as it was held, before the flag changes)
     if (checkCache("@res/" + path) > 0)
+    {
+        this->setFreeTexture(false);
         return;
+    }
     auto image = romfs::get(path);
-    this->setImageFromMem((unsigned char*)image.data(), (int)image.size());
-    TextureCache::instance().addCache("@res/" + path, this->texture);
+    int tex    = nvgCreateImageMem(Application::getNVGContext(), this->getImageFlags(), (unsigned char*)image.data(), (int)image.size());
+    if (tex == 0)
+        return;
+    innerSetImage(tex);
+    this->setFreeTexture(false);
+    TextureCache::instance().addCache("@res/" + path, tex);
 #else
     this->setImageFromFile(std::string(BRLS_RESOURCES) + path);
 #endif
@@ -350,19 +350,27 @@ int Image::getImageFlags()
 
 void Image::setImageFromFile(const std::string& path)
 {
-    // Let TextureCache to manage when to delete texture
-    this->setFreeTexture(false);
-
 #ifdef USE_LIBROMFS
     if (path.rfind("@res/", 0) == 0)
         return this->setImageFromRes(path.substr(5));
 #endif
+    // TextureCache decides when the texture is deleted (the previous one is
+    // released by innerSetImage as it was held, before the flag changes)
     if (checkCache(path) > 0)
+    {
+        this->setFreeTexture(false);
         return;
+    }
 
     // Load texture
     int tex = nvgCreateImage(Application::getNVGContext(), path.c_str(), this->getImageFlags());
+    if (tex == 0)
+    {
+        Logger::error("Cannot load image: {}", path);
+        return;
+    }
     innerSetImage(tex);
+    this->setFreeTexture(false);
 
     // Save cache
     TextureCache::instance().addCache(path, tex);
@@ -372,8 +380,30 @@ void Image::setImageFromMem(const unsigned char* data, int size)
 {
     NVGcontext* vg = Application::getNVGContext();
 
-    // Load texture
-    innerSetImage(nvgCreateImageMem(vg, 0, const_cast<unsigned char*>(data), size));
+    // Load texture: this image owns it (nothing else would delete it)
+    int tex = nvgCreateImageMem(vg, this->getImageFlags(), const_cast<unsigned char*>(data), size);
+    if (tex == 0)
+    {
+        Logger::error("Cannot load image from memory ({} bytes)", size);
+        return;
+    }
+    innerSetImage(tex);
+    this->setFreeTexture(true);
+}
+
+void Image::releaseTexture()
+{
+    if (this->texture == 0)
+        return;
+
+    // An owned texture is deleted; one from TextureCache (or the app's) is
+    // handed back to the cache, which ignores a texture it does not hold
+    if (this->freeTexture)
+        nvgDeleteImage(Application::getNVGContext(), this->texture);
+    else
+        TextureCache::instance().removeCache(this->texture);
+
+    this->texture = 0;
 }
 
 void Image::setImageAsync(std::function<void(std::function<void(const std::string&, size_t length)>)> cb)
@@ -398,9 +428,12 @@ void Image::innerSetImage(int tex)
 
     NVGcontext* vg = Application::getNVGContext();
 
-    // Free the old texture if necessary
-    if (this->texture != 0 && this->freeTexture)
-        nvgDeleteImage(vg, this->texture);
+    // Release the old texture as it was held (owned or cached); the same
+    // texture again (a cache hit on the path already shown) is kept
+    if (this->texture != tex)
+        this->releaseTexture();
+    else if (!this->freeTexture)
+        TextureCache::instance().removeCache(this->texture); // the hit counted it once more
 
     // Set the new texture
     this->texture = tex;
@@ -415,13 +448,9 @@ void Image::innerSetImage(int tex)
 
 void Image::clear()
 {
-    if (this->texture == 0)
-        return;
-
-    if (this->freeTexture)
-        nvgDeleteImage(Application::getNVGContext(), this->texture);
-
-    this->texture = 0;
+    // A cached texture is handed back too: it was never released, so the
+    // cache could never free it
+    this->releaseTexture();
 }
 
 void Image::setScalingType(ImageScalingType scalingType)
@@ -463,10 +492,7 @@ float Image::getOriginalImageHeight()
 
 Image::~Image()
 {
-    if (this->freeTexture && this->texture != 0)
-        nvgDeleteImage(Application::getNVGContext(), this->texture);
-    else
-        TextureCache::instance().removeCache(this->texture);
+    this->releaseTexture();
 }
 
 View* Image::create()

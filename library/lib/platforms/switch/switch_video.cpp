@@ -54,7 +54,7 @@ SwitchVideoContext::SwitchVideoContext()
 
     // Init deko
     this->device = dk::DeviceMaker {}.create();
-    this->queue  = dk::QueueMaker { this->device }.setFlags(DkQueueFlags_Graphics).create();
+    this->queue  = dk::QueueMaker { this->device }.setFlags(DkQueueFlags_Graphics | DkQueueFlags_HighPrio | DkQueueFlags_DisableZcull).create();
 
     this->imagesPool.emplace(device, DkMemBlockFlags_GpuCached | DkMemBlockFlags_Image, IMAGES_POOL_SIZE);
     this->codePool.emplace(device, DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached | DkMemBlockFlags_Code, CODE_POOL_SIZE);

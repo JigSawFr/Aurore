@@ -184,6 +184,9 @@ namespace nvg {
 
             u32 m_next_texture_id = 1;
             std::vector<std::shared_ptr<Texture>> m_textures;
+            /* Textures deleted while the GPU may still draw with them (the
+               frame submitted last): freed once it is done, in Flush. */
+            std::vector<std::shared_ptr<Texture>> m_textures_to_free;
             CDescriptorSet<MaxImages> m_image_descriptor_set;
             CDescriptorSet<SamplerType_Total> m_sampler_descriptor_set;
             std::array<DescriptorOwner, MaxImages> m_image_descriptor_owners;
