@@ -72,10 +72,23 @@ void Event<Ts...>::clear()
 template <typename... Ts>
 bool Event<Ts...>::fire(Ts... args)
 {
-    for (Callback cb : this->callbacks)
+    if (this->callbacks.empty())
+        return false;
+
+    // A callback may subscribe or unsubscribe (itself or another one) while
+    // the event fires: walk a copy, never the list being changed.
+    if (this->callbacks.size() == 1)
+    {
+        Callback cb = this->callbacks.front();
+        cb(args...);
+        return true;
+    }
+
+    CallbacksList snapshot = this->callbacks;
+    for (Callback& cb : snapshot)
         cb(args...);
 
-    return !this->callbacks.empty();
+    return true;
 }
 
 }; // namespace brls
