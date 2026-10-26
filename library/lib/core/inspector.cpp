@@ -201,7 +201,7 @@ namespace inspector_detail
         }
     }
 
-    std::string edges(YGNodeRef node, float (*get)(YGNodeRef, YGEdge))
+    std::string edges(YGNodeConstRef node, float (*get)(YGNodeConstRef, YGEdge))
     {
         float top = get(node, YGEdgeTop), right = get(node, YGEdgeRight);
         float bottom = get(node, YGEdgeBottom), left = get(node, YGEdgeLeft);
