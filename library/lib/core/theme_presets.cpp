@@ -33,6 +33,7 @@ author = Aurore
 version = 1
 description = White on black, a yellow focus: the most legible dark look.
 inherit = dark
+counterpart = high-contrast-light
 
 background = #000000
 surface = #000000
@@ -70,6 +71,7 @@ author = Aurore
 version = 1
 description = Black on white, a deep blue focus: the most legible light look.
 inherit = light
+counterpart = high-contrast-dark
 
 background = #ffffff
 surface = #ffffff

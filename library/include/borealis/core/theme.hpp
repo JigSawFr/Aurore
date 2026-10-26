@@ -71,6 +71,11 @@ struct ThemeInfo
     std::string description;
     std::string backgroundImage; // its background_image, "" without one
 
+    // For a file that styles one variant, the theme file of the other one
+    // (`counterpart`, as given to loadFile; "" without one): what a picker
+    // switches to when the other variant is asked for.
+    std::string counterpart;
+
     // The variants it styles: one when it inherits light or dark, both when
     // it has [light] and [dark] (it then follows the system's mode).
     bool light = false;
@@ -96,6 +101,7 @@ struct ThemeInfo
     bool ok() const { return this->errors.empty(); }
     // The variant to show it in when it styles one only.
     ThemeVariant variant() const { return this->light && !this->dark ? ThemeVariant::LIGHT : ThemeVariant::DARK; }
+    bool styles(ThemeVariant variant) const { return variant == ThemeVariant::LIGHT ? this->light : this->dark; }
 };
 
 /**

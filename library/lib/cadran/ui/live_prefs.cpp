@@ -92,14 +92,18 @@ void start()
 
 void apply_theme()
 {
-    const ui::Prefs& p = ui::prefs();
+    ui::Prefs& p = ui::prefs();
     brls::ThemeVariant variant = p.theme == "dark"    ? brls::ThemeVariant::DARK
                                : p.theme == "light" ? brls::ThemeVariant::LIGHT
                                                     : s_system_theme;
     if (p.theme_file.empty() || !brls::Theme::loadFile(p.theme_file)) brls::Theme::reset();
-    // A file for one variant only: that one.
-    if (!brls::Theme::styles(variant))
+    // A file for one variant only: that one, which the header's button and
+    // the pickers then show too (the pickers keep the two in step; older
+    // preferences may not).
+    if (!brls::Theme::styles(variant)) {
         variant = variant == brls::ThemeVariant::DARK ? brls::ThemeVariant::LIGHT : brls::ThemeVariant::DARK;
+        if (p.theme != "system") p.theme = variant == brls::ThemeVariant::DARK ? "dark" : "light";
+    }
     brls::Application::getPlatform()->setThemeVariant(variant);
 }
 

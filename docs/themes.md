@@ -23,6 +23,11 @@ description = Deep blue, a sky-blue accent.
 # "builtin:<id>" for a preset). Without it: dark.
 inherit = dark
 
+# For a file that styles one variant: the file of the other one (next to
+# this one, or a preset's id), which a picker switches to when that other
+# variant is asked for
+counterpart = ocean-day.theme
+
 # The palette: a few colours, every key derived from them
 background = #0a1a2f
 surface = #10263f
@@ -52,6 +57,7 @@ brls/highlight/stroke_width = 6
 
 - **Colours**: `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(r, g, b)`, `rgba(r, g, b, a)` (a from 0 to 1).
 - **Variants**: a file styles the variant it inherits (`inherit = light` or `dark`, dark by default), or both when it has `[light]` and `[dark]` sections; it then follows the system's mode (or the app's light/dark setting). The variant a file does not style stays as it is without a file.
+- **`counterpart`**, for a file that styles one variant only: the file (or preset) with the other variant, the same look in light or dark. A picker asked for the variant this file lacks switches to it (Cadran's does, below); `--check-themes` reports a counterpart that cannot be read or lacks that variant.
 - **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets; loops stop after 8 levels.
 - **Later lines win**; palette values are derived first, then `[colors]`, then `[light]`/`[dark]`, so an explicit key always beats the derived one.
 - **Errors never stop the file**: a line that cannot be read (a bad colour, an unknown section, a missing include) is skipped and reported, with its file and line number. An unknown key is kept (an app's own keys are fine) and reported as a warning, in case it is a typo.
@@ -135,8 +141,8 @@ Built into the library (`library/lib/core/theme_presets.cpp`), every app has the
 
 | Id | Variants | What |
 | --- | --- | --- |
-| `high-contrast-dark` | dark | White on black, a yellow focus ring, a thicker ring |
-| `high-contrast-light` | light | Black on white, a deep blue focus ring, a thicker ring |
+| `high-contrast-dark` | dark | White on black, a yellow focus ring, a thicker ring; counterpart `high-contrast-light` |
+| `high-contrast-light` | light | Black on white, a deep blue focus ring, a thicker ring; counterpart `high-contrast-dark` |
 | `ocean` | dark | Deep blue, a sky-blue accent |
 | `amethyst` | light and dark | Violet, following the system's mode |
 | `sand` | light | Warm paper, a terracotta accent |
@@ -170,7 +176,7 @@ brls::Theme::checkContrast(variant);        // the pairs under their minimum
 brls::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
 ```
 
-`ThemeInfo` has `path`, `id`, `name`, `author`, `version`, `description`, `backgroundImage`, `light`/`dark` (the variants it styles), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`); a file's `@include`s are best named `*.inc`, so that they are not listed.
+`ThemeInfo` has `path`, `id`, `name`, `author`, `version`, `description`, `backgroundImage`, `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`); a file's `@include`s are best named `*.inc`, so that they are not listed.
 
 ### Colours that follow the theme
 
@@ -188,7 +194,14 @@ With Cadran (PlayGuard, PlayShelf), everything is there:
 
 1. Keep `ui::Prefs::theme_file` in the app's settings, next to `theme` ("" for the boards' palettes, `builtin:<id>`, or a path), and hand the prefs over with `ui::use_prefs()` as today.
 2. Say where the user's own files are: `ui::hooks::get().themes_dir = [] { return std::string("sdmc:/config/myapp/themes"); };` (on the desktop, a folder next to the settings). The folder may not exist: the picker then offers the presets only.
-3. That is all: `ui::pick_theme()` (the header's button, Preferences) ends with a **Palette** row opening `ui::pick_palette()`: Default, the presets, then the folder's readable files (a broken one is logged and left out). `ui::palette_name()` is the choice saved, for a tile. The choice is saved through `save_prefs` and applied at once (`live_prefs::apply_theme()`), a file that styles one variant only taking it.
+3. That is all: `ui::pick_theme()` (the header's button, Preferences) ends with a **Palette** row opening `ui::pick_palette()`: Default, the presets, then the folder's readable files (a broken one is logged and left out). `ui::palette_name()` is the choice saved, for a tile. The choice is saved through `save_prefs` and applied at once (`live_prefs::apply_theme()`).
+
+A palette that styles one variant only decides the variant, and the header's button always shows the variant on screen:
+
+- Picking such a palette switches to its variant (`ui::Prefs::theme` becomes `light` or `dark`, whatever it was).
+- Picking the other variant (Dark with *High contrast light*) switches the palette too: to the file's `counterpart` when it has that variant (*High contrast dark*), else back to Default, the boards' palettes, which have both. The theme picker says so beforehand: such a row shows the palette it will switch to.
+- System keeps the palette, shown in its own variant whatever the system's mode.
+- Preferences saved before this rule (Dark with a light-only palette) show the palette's variant, and `theme` is corrected when they are applied.
 
 Without Cadran, the same in a few lines: list `Theme::builtinThemes()` and `Theme::listThemes(folder)` in cells (the demo's Settings tab does it, `demo/src/tab/settings_tab.cpp`, with each theme's colours as swatches), call `Theme::loadFile(info.path, &variant)` and `setThemeVariant(variant)` on a click, save `info.path`, and load it again at start-up (after the app's own `addColor` calls).
 

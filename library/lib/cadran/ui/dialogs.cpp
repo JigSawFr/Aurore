@@ -495,29 +495,55 @@ void theme_chosen(std::function<void()> after)
     live_prefs::apply_theme();
     if (after) after();
 }
+
+std::string name_of(const std::string& file)
+{
+    if (!file.empty())
+        for (const brls::ThemeInfo& info : theme_files())
+            if (info.path == file) return info.name;
+    return "cadran/tools/palettes/default"_i18n;
+}
+
+// The palette to show `variant` in: the one in use when it has that
+// variant; else the counterpart it names, when that one has it; else the
+// boards' own, which have both.
+std::string palette_for(brls::ThemeVariant variant)
+{
+    const std::string& file = ui::prefs().theme_file;
+    if (file.empty()) return file;
+    const brls::ThemeInfo info = brls::Theme::inspect(file);
+    if (info.styles(variant)) return file;
+    if (!info.counterpart.empty() && brls::Theme::inspect(info.counterpart).styles(variant)) return info.counterpart;
+    return "";
+}
+
+brls::ThemeVariant variant_of(const std::string& theme)
+{
+    return theme == "light" ? brls::ThemeVariant::LIGHT : brls::ThemeVariant::DARK;
+}
 }   // namespace
 
 std::string palette_name()
 {
-    const std::string& file = ui::prefs().theme_file;
-    if (file.empty()) return "cadran/tools/palettes/default"_i18n;
-    for (const brls::ThemeInfo& info : theme_files())
-        if (info.path == file) return info.name;
-    return "cadran/tools/palettes/default"_i18n;
+    return name_of(ui::prefs().theme_file);
 }
 
 void pick_palette(std::function<void()> after)
 {
     const std::vector<brls::ThemeInfo> files = theme_files();
     std::vector<std::string> labels = { "cadran/tools/palettes/default"_i18n }, paths = { "" };
+    // A palette with one variant switches to it ("" : both, the variant kept).
+    std::vector<std::string> only = { "" };
     int selected = 0;
     for (const brls::ThemeInfo& info : files) {
         if (info.path == ui::prefs().theme_file) selected = (int)labels.size();
         labels.push_back(info.name);
         paths.push_back(info.path);
+        only.push_back(info.light == info.dark ? "" : info.light ? "light" : "dark");
     }
-    pick("cadran/tools/palette"_i18n, labels, selected, [after, paths](int i) {
+    pick("cadran/tools/palette"_i18n, labels, selected, [after, paths, only](int i) {
         ui::prefs().theme_file = paths[i];
+        if (!only[i].empty()) ui::prefs().theme = only[i];
         theme_chosen(after);
     });
 }
@@ -527,7 +553,10 @@ void pick_theme(std::function<void()> after)
     std::vector<std::string> labels, details;
     for (const char* t : ui::THEMES) {
         labels.push_back(brls::getStr(std::string("cadran/tools/themes/") + t));
-        details.push_back("");
+        // A variant the palette has not: the palette it switches to.
+        const std::string theme = t;
+        const std::string file = theme == "system" ? ui::prefs().theme_file : palette_for(variant_of(theme));
+        details.push_back(file != ui::prefs().theme_file ? name_of(file) : "");
     }
     // Its colours, after the variants: a picker of their own.
     labels.push_back("cadran/tools/palette"_i18n);
@@ -540,11 +569,14 @@ void pick_theme(std::function<void()> after)
             pick_palette(after);
             return;
         }
-        if (ui::prefs().theme == ui::THEMES[i]) {
+        const std::string theme = ui::THEMES[i];
+        const std::string file = theme == "system" ? ui::prefs().theme_file : palette_for(variant_of(theme));
+        if (ui::prefs().theme == theme && ui::prefs().theme_file == file) {
             if (after) after();
             return;
         }
-        ui::prefs().theme = ui::THEMES[i];
+        ui::prefs().theme = theme;
+        ui::prefs().theme_file = file;
         theme_chosen(after);
     }, true, details, icons);
 }

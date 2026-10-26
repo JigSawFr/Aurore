@@ -804,6 +804,7 @@ struct ParsedTheme
 {
     std::string name, author, version, description;
     std::string inherit;
+    std::string counterpart;     // its path, from the file's folder
     std::string backgroundImage; // its path, from the file's folder
     std::vector<std::string> files; // the files it includes and inherits, read
     bool lightSection = false, darkSection = false;
@@ -907,7 +908,9 @@ static void parseThemeText(const std::string& text, const std::string& directory
             continue;
         }
 
-        if (section.empty() && (key == "name" || key == "author" || key == "version" || key == "description" || key == "inherit"))
+        if (section.empty()
+            && (key == "name" || key == "author" || key == "version" || key == "description" || key == "inherit"
+                || key == "counterpart"))
         {
             // An included file's own are not this one's
             if (!root)
@@ -920,6 +923,8 @@ static void parseThemeText(const std::string& text, const std::string& directory
                 out->version = value;
             else if (key == "description")
                 out->description = value;
+            else if (key == "counterpart")
+                out->counterpart = resolvePath(value, directory);
             else
                 out->inherit = value;
             continue;
@@ -1188,10 +1193,28 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path)
     info.light       = theme.light;
     info.dark        = theme.dark;
     info.backgroundImage = theme.backgroundImage;
+    info.counterpart = theme.counterpart;
     info.lightPreview = previewOf(Theme::getLightTheme().getValues()->getBaseColors(), resolved.overlay[0]);
     info.darkPreview  = previewOf(Theme::getDarkTheme().getValues()->getBaseColors(), resolved.overlay[1]);
     info.errors      = theme.errors;
     info.warnings    = resolved.warnings;
+
+    // The counterpart must have the variant this one has not
+    if (!theme.counterpart.empty())
+    {
+        std::string other;
+        if (theme.light == theme.dark)
+            info.errors.push_back("counterpart: only for a file that styles one variant");
+        else if (!readThemeText(theme.counterpart, &other))
+            info.errors.push_back("counterpart: cannot read " + theme.counterpart);
+        else
+        {
+            ParsedTheme counterpart = parseTheme(other, directoryOf(theme.counterpart));
+            if (!(theme.light ? counterpart.dark : counterpart.light))
+                info.errors.push_back(std::string("counterpart: ") + theme.counterpart + " has no " + (theme.light ? "dark" : "light")
+                    + " variant");
+        }
+    }
     return info;
 }
 
