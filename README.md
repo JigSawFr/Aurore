@@ -190,6 +190,8 @@ cmake --preset switch-deko3d
 cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 ```
 
+With the resources built in (`USE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
+
 For the other platforms, upstream's wiki has the toolchains and the commands:
 
 - 🖥️ [Windows, macOS, Linux](https://github.com/xfangfang/borealis/wiki/Windows-macOS-Linux)
