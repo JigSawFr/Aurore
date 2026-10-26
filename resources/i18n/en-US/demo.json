@@ -6,6 +6,7 @@
         "components": "Basic components",
         "transform": "Transform test",
         "text": "Text test",
+        "scripts": "Emoji and scripts",
         "scroll": "Scroll test",
         "layout": "Layout and alignment",
         "pokedex": "Pokedex",

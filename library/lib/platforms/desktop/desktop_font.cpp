@@ -149,6 +149,37 @@ void DesktopFontLoader::loadFonts()
     {
         nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont(FONT_EMOJI));
     }
+#ifdef BRLS_USE_FREETYPE
+    // FreeType draws colour emoji: the system's font, when the app gives none
+    else if (USER_EMOJI_PATH.empty())
+    {
+#if defined(__APPLE__) && !defined(IOS)
+        std::vector<std::string> emojiFonts = { "/System/Library/Fonts/Apple Color Emoji.ttc" };
+#elif defined(_WIN32)
+        std::vector<std::string> emojiFonts = { prefix + "seguiemj.ttf" };
+#elif defined(ANDROID)
+        std::vector<std::string> emojiFonts = { "/system/fonts/NotoColorEmoji.ttf" };
+#elif defined(__linux__)
+        std::vector<std::string> emojiFonts = {
+            "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+            "/usr/share/fonts/noto/NotoColorEmoji.ttf",
+            "/usr/share/fonts/google-noto-emoji/NotoColorEmoji.ttf",
+            "/usr/share/fonts/TTF/NotoColorEmoji.ttf",
+        };
+#else
+        std::vector<std::string> emojiFonts;
+#endif
+        for (auto& path : emojiFonts)
+        {
+            if (loadFont(FONT_EMOJI, path))
+            {
+                nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont(FONT_EMOJI));
+                brls::Logger::info("Using emoji font: {}", path);
+                break;
+            }
+        }
+    }
+#endif
 
     // bottom bar icons
     if (loadFont(FONT_SWITCH_ICONS, USER_ICON_PATH))
