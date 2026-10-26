@@ -349,7 +349,8 @@ message(STATUS "borealis driver ${BOREALIS_DRIVER}")
 # borealis Library
 add_library(borealis STATIC ${BOREALIS_SRC})
 set_target_properties(borealis PROPERTIES
-        CXX_STANDARD 17
+        CXX_STANDARD 20
+        CXX_STANDARD_REQUIRED ON
         UNITY_BUILD ${BRLS_UNITY_BUILD}
 )
 set_source_files_properties(${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwin.mm PROPERTIES
@@ -358,6 +359,8 @@ target_include_directories(borealis PUBLIC ${BOREALIS_INCLUDE})
 if (BOREALIS_DKSH_INCLUDE)
     target_include_directories(borealis PRIVATE ${BOREALIS_DKSH_INCLUDE})
 endif ()
+# The projects that link the library build with C++20 too, so its headers can use it
+target_compile_features(borealis PUBLIC cxx_std_20)
 target_link_libraries(borealis fmt tweeny yogacore ${BRLS_PLATFORM_LIBS})
 target_compile_options(borealis PUBLIC
         -DBRLS_RESOURCES=${BRLS_PLATFORM_RESOURCES_PATH}
