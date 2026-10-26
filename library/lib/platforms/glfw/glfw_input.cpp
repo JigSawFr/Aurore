@@ -59,8 +59,6 @@ static const size_t GLFW_AXIS_MAPPING[GLFW_GAMEPAD_AXIS_MAX] = {
     RIGHT_Z,
 };
 
-static short controllersCount = 0;
-
 static void glfwJoystickCallback(int jid, int event)
 {
     if (event == GLFW_CONNECTED)
@@ -71,14 +69,10 @@ static void glfwJoystickCallback(int jid, int event)
         {
             Logger::info("glfw: joystick {} is gamepad: \"{}\"", jid, glfwGetGamepadName(jid));
         }
-
-        controllersCount++;
     }
     else if (event == GLFW_DISCONNECTED)
     {
         Logger::info("glfw: joystick {} disconnected", jid);
-
-        controllersCount--;
     }
     Application::setActiveEvent(true);
 }
@@ -231,7 +225,13 @@ GLFWInputManager::GLFWInputManager(GLFWwindow* window)
 
 short GLFWInputManager::getControllersConnectedCount()
 {
-    return controllersCount;
+    // Counted now rather than by the callback: the controllers already
+    // plugged in at start-up raise no connection event
+    short count = 0;
+    for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
+        if (glfwJoystickPresent(jid))
+            count++;
+    return count;
 }
 
 void GLFWInputManager::updateUnifiedControllerState(ControllerState* state)
