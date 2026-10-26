@@ -397,6 +397,28 @@ void Image::setImageFromMem(const unsigned char* data, int size)
     this->setFreeTexture(true);
 }
 
+void Image::setImageFromRGBA(const unsigned char* pixels, int width, int height)
+{
+    this->asyncGeneration++;
+    NVGcontext* vg = Application::getNVGContext();
+
+    // Its own texture, of the same size: updated in place
+    if (this->texture != 0 && this->freeTexture && (int)this->originalImageWidth == width && (int)this->originalImageHeight == height)
+    {
+        nvgUpdateImage(vg, this->texture, pixels);
+        return;
+    }
+
+    int tex = nvgCreateImageRGBA(vg, width, height, this->getImageFlags(), pixels);
+    if (tex == 0)
+    {
+        Logger::error("Cannot create a {}×{} image", width, height);
+        return;
+    }
+    innerSetImage(tex);
+    this->setFreeTexture(true);
+}
+
 void Image::setImageFromFileAsync(const std::string& path)
 {
 #ifdef USE_LIBROMFS

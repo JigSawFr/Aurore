@@ -114,6 +114,14 @@ class Image : public View
      */
     void setImageFromMem(const unsigned char* data, int size);
 
+    /**
+     * Sets the image from raw RGBA pixels (width × height × 4 bytes), for an
+     * image made by the app (a QR code, a video frame, a thumbnail it
+     * decoded). Pixels of the same size as the image shown replace its own
+     * texture's in place, without making a new one.
+     */
+    void setImageFromRGBA(const unsigned char* pixels, int width, int height);
+
     virtual void innerSetImage(int texture);
 
     void setImageAsync(std::function<void(std::function<void(const std::string&, size_t length)>)> cb);
