@@ -626,11 +626,14 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         float gradientX, gradientY, color;
         getHighlightAnimation(&gradientX, &gradientY, &color);
 
+        // The border pulses between the two highlight colours. (Since the
+        // 2.0 rewrite both terms used color1, so it never pulsed.)
         NVGcolor highlightColor1 = theme["brls/highlight/color1"];
+        NVGcolor highlightColor2 = theme["brls/highlight/color2"];
 
-        NVGcolor pulsationColor = RGBAf((color * highlightColor1.r) + (1 - color) * highlightColor1.r,
-            (color * highlightColor1.g) + (1 - color) * highlightColor1.g,
-            (color * highlightColor1.b) + (1 - color) * highlightColor1.b,
+        NVGcolor pulsationColor = RGBAf((color * highlightColor1.r) + (1 - color) * highlightColor2.r,
+            (color * highlightColor1.g) + (1 - color) * highlightColor2.g,
+            (color * highlightColor1.b) + (1 - color) * highlightColor2.b,
             alpha);
 
         NVGcolor borderColor = theme["brls/highlight/color2"];
