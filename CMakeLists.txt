@@ -138,6 +138,8 @@ elseif (PLATFORM_PS4)
     add_custom_target(${PROJECT_NAME}.data
         COMMAND "${CMAKE_COMMAND}" -E copy_directory ${CMAKE_SOURCE_DIR}/ps4 ${CMAKE_BINARY_DIR}/ps4
         COMMAND "${CMAKE_COMMAND}" -E copy_directory ${PROJECT_RESOURCES} ${CMAKE_BINARY_DIR}/ps4/resources
+        # Not for the package (PkgTool cannot place them)
+        COMMAND "${CMAKE_COMMAND}" -E rm -f ${CMAKE_BINARY_DIR}/ps4/resources/.gitignore ${CMAKE_BINARY_DIR}/ps4/sce_module/.gitignore
     )
     add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}.data)
 elseif (PLATFORM_SWITCH)
