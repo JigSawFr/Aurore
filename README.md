@@ -149,6 +149,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A wrapped line no longer starts with a space; a no-break space keeps words together | — |
 | The default font looked up for each new label | — |
 | FreeType instead of stb_truetype, hinted (an option) | `-DUSE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
+| stb_truetype: a glyph read within its own data, a font's tables within the font (CVE-2026-18497); fonts still from trusted sources | — |
 | Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
 | Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DUSE_FRIBIDI=ON` · `brls::bidiVisual()` |
 

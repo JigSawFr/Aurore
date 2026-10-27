@@ -15,16 +15,20 @@
 */
 
 // Pictures larger than NVG_MAX_IMAGE_PIXELS are refused from their header,
-// on every path that decodes one, before anything large is allocated
+// on every path that decodes one, before anything large is allocated; a
+// font whose glyph runs past its data is refused too (stb_truetype)
 
 #include <borealis.hpp>
 #include <borealis/core/theme_image.hpp>
 #include <borealis/test/harness.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 #include <thread>
 #include <vector>
@@ -32,6 +36,8 @@
 #ifdef __unix__
 #include <sys/resource.h>
 #endif
+
+#include "stb_truetype.h"
 
 using brls::test::Harness;
 
@@ -284,6 +290,162 @@ BRLS_TEST(downscale_keeps_the_colour_over_wide_spans)
     BRLS_CHECK_EQ(picture->width, 4);
     BRLS_CHECK_EQ(picture->height, 1);
     BRLS_CHECK(picture->mean.r > 0.99f && picture->mean.g > 0.99f && picture->mean.b > 0.99f);
+}
+
+namespace
+{
+
+uint32_t readBe(const std::vector<unsigned char>& data, size_t at, int bytes)
+{
+    uint32_t value = 0;
+    for (int i = 0; i < bytes; i++)
+        value = value << 8 | data[at + i];
+    return value;
+}
+
+void writeBe(std::vector<unsigned char>& data, size_t at, int bytes, uint32_t value)
+{
+    for (int i = bytes - 1; i >= 0; i--, value >>= 8)
+        data[at + i] = value & 0xff;
+}
+
+// Where the table `tag` starts, its length in *length
+size_t tableOf(const std::vector<unsigned char>& font, const char* tag, uint32_t* length = nullptr)
+{
+    int count = (int)readBe(font, 4, 2);
+    for (int i = 0; i < count; i++)
+    {
+        size_t record = 12 + 16 * i;
+        if (std::memcmp(font.data() + record, tag, 4) == 0)
+        {
+            if (length)
+                *length = readBe(font, record + 12, 4);
+            return readBe(font, record + 8, 4);
+        }
+    }
+    return 0;
+}
+
+std::vector<unsigned char> readFile(const std::string& path)
+{
+    std::ifstream in(path, std::ios::binary);
+    return std::vector<unsigned char>(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+}
+
+} // namespace
+
+// Draws "A" in two fonts, side by side, white on black
+class TwoGlyphs : public brls::View
+{
+  public:
+    TwoGlyphs(int left, int right)
+        : left(left)
+        , right(right)
+    {
+        setWidth(400);
+        setHeight(200);
+    }
+
+    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx) override
+    {
+        nvgBeginPath(vg);
+        nvgRect(vg, x, y, width, height);
+        nvgFillColor(vg, nvgRGB(0, 0, 0));
+        nvgFill(vg);
+        nvgFontSize(vg, 150);
+        nvgFillColor(vg, nvgRGB(255, 255, 255));
+        nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+        nvgFontFaceId(vg, left);
+        nvgText(vg, x + 20, y + 20, "A", nullptr);
+        nvgFontFaceId(vg, right);
+        nvgText(vg, x + 220, y + 20, "A", nullptr);
+    }
+
+  private:
+    int left, right;
+};
+
+BRLS_TEST(glyph_running_past_its_data_is_refused)
+{
+    // Kept after the harness: fontstash holds on to the fonts it loaded
+    std::vector<unsigned char> good = readFile(std::string(AURORE_SOURCE_RESOURCES) + "font/sora_bold_latin.ttf");
+    std::vector<unsigned char> bad  = good;
+    BRLS_CHECK(good.size() > 1000);
+    stbtt_fontinfo info;
+    BRLS_CHECK(stbtt_InitFont(&info, bad.data(), 0));
+    int glyph = stbtt_FindGlyphIndex(&info, 'A');
+    BRLS_CHECK(glyph > 0);
+
+    // 'A' cut after its header, which still says one contour of 4 points:
+    // the points that follow, past its data, would make a square over its box
+    bool shortLoca = readBe(bad, tableOf(bad, "head") + 50, 2) == 0;
+    size_t loca    = tableOf(bad, "loca");
+    size_t glyf    = tableOf(bad, "glyf");
+    size_t entry   = loca + glyph * (shortLoca ? 2 : 4);
+    size_t start   = glyf + readBe(bad, entry, shortLoca ? 2 : 4) * (shortLoca ? 2 : 1);
+    int16_t x0 = (int16_t)readBe(bad, start + 2, 2), y0 = (int16_t)readBe(bad, start + 4, 2);
+    int16_t x1 = (int16_t)readBe(bad, start + 6, 2), y1 = (int16_t)readBe(bad, start + 8, 2);
+    writeBe(bad, start, 2, 1); // one contour
+    writeBe(bad, start + 10, 2, 3); // its last point
+    writeBe(bad, start + 12, 2, 0); // no instruction
+    size_t end = start + 14 - glyf;
+    writeBe(bad, entry + (shortLoca ? 2 : 4), shortLoca ? 2 : 4, (uint32_t)(shortLoca ? end / 2 : end));
+    size_t past = start + 14;
+    for (int i = 0; i < 4; i++)
+        bad[past++] = 1; // on the curve, 16-bit coordinates
+    for (int dx : { (int)x0, x1 - x0, 0, x0 - x1 })
+        writeBe(bad, (past += 2) - 2, 2, (uint16_t)dx);
+    for (int dy : { (int)y0, 0, y1 - y0, 0 })
+        writeBe(bad, (past += 2) - 2, 2, (uint16_t)dy);
+
+    Harness harness;
+    NVGcontext* vg = brls::Application::getNVGContext();
+    int goodFont   = nvgCreateFontMem(vg, "limits-glyph-good", good.data(), (int)good.size(), 0);
+    int badFont    = nvgCreateFontMem(vg, "limits-glyph-bad", bad.data(), (int)bad.size(), 0);
+    BRLS_CHECK(goodFont >= 0 && badFont >= 0);
+    harness.push(new brls::Activity(new TwoGlyphs(badFont, goodFont)));
+    harness.settle();
+
+    // Lit pixels under each "A": the cut glyph draws nothing
+    brls::test::Image shot = harness.screenshot();
+    int lit[2]             = { 0, 0 };
+    for (int y = 0; y < std::min(shot.height, 200); y++)
+        for (int x = 0; x < std::min(shot.width, 400); x++)
+            if (shot.rgba[((size_t)y * shot.width + x) * 4] > 128)
+                lit[x < 200 ? 0 : 1]++;
+    BRLS_CHECK(lit[1] > 500);
+    BRLS_CHECK_EQ(lit[0], 0);
+}
+
+BRLS_TEST(font_tables_past_the_data_are_refused)
+{
+    // Kept after the harness: fontstash holds on to the fonts it loaded
+    std::vector<unsigned char> font = readFile(std::string(AURORE_SOURCE_RESOURCES) + "font/sora_bold_latin.ttf");
+    std::vector<unsigned char> good = font, longer = font, past = font;
+    Harness harness;
+    NVGcontext* vg = brls::Application::getNVGContext();
+    BRLS_CHECK(nvgCreateFontMem(vg, "limits-good", good.data(), (int)good.size(), 0) >= 0);
+
+    // The glyf table said longer than the file
+    int count = (int)readBe(longer, 4, 2);
+    for (int i = 0; i < count; i++)
+        if (std::memcmp(longer.data() + 12 + 16 * i, "glyf", 4) == 0)
+            writeBe(longer, 12 + 16 * i + 12, 4, (uint32_t)longer.size());
+    BRLS_CHECK(nvgCreateFontMem(vg, "limits-longer", longer.data(), (int)longer.size(), 0) < 0);
+
+    // A glyph (loca) past the end of the glyf table
+    uint32_t glyfLength = 0;
+    tableOf(past, "glyf", &glyfLength);
+    bool shortLoca = readBe(past, tableOf(past, "head") + 50, 2) == 0;
+    size_t loca    = tableOf(past, "loca");
+    if (shortLoca)
+        writeBe(past, loca + 2, 2, (glyfLength + 64) / 2);
+    else
+        writeBe(past, loca + 4, 4, glyfLength + 64);
+    BRLS_CHECK(nvgCreateFontMem(vg, "limits-past", past.data(), (int)past.size(), 0) < 0);
+
+    // Too short to hold a header
+    BRLS_CHECK(nvgCreateFontMem(vg, "limits-short", font.data(), 8, 0) < 0);
 }
 
 int main(int argc, char** argv)
