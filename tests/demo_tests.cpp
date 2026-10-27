@@ -1014,6 +1014,67 @@ BRLS_TEST(theme_decor_header_backdrop)
     BRLS_CHECK(h.screenshot().at(640, 4)[0] < 120);
 }
 
+// The demo's Winter theme (a folder: resources/themes/winter): its strips
+// and the sidebar's frost behind the main screen, its particles held still
+// (reduced motion) so the reference does not depend on when
+static void winterScreen(brls::ThemeVariant variant, const char* reference)
+{
+    DemoHarness h;
+    brls::Application::setReduceMotion(true);
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/winter/theme.theme"));
+    brls::Application::getPlatform()->setThemeVariant(variant);
+    h.step();
+    while (brls::ThemeImages::decoding() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    h.settle();
+    BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP));
+    BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::BOTTOM));
+    BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::SIDEBAR));
+    BRLS_CHECK(brls::ThemeDecorations::particleCount() > 0 && !brls::ThemeDecorations::particlesRunning());
+    BRLS_CHECK(h.matchesReference(reference));
+}
+
+BRLS_TEST(theme_decor_dark)
+{
+    winterScreen(brls::ThemeVariant::DARK, "theme_decor_dark");
+}
+
+BRLS_TEST(theme_decor_light)
+{
+    winterScreen(brls::ThemeVariant::LIGHT, "theme_decor_light");
+}
+
+// Decorations still loading, particles running, motion going on and off
+// while the theme changes: nothing drawn late, nothing freed twice (run
+// under the sanitizers too)
+BRLS_TEST(theme_decor_switches_back_and_forth)
+{
+    DemoHarness h;
+    const char* themes[] = { "@res/themes/winter/theme.theme", "builtin:new-year", "@res/themes/aurora/theme.theme",
+        "builtin:halloween", "" };
+    for (int round = 0; round < 20; round++)
+    {
+        const char* theme = themes[round % 5];
+        if (*theme)
+            BRLS_CHECK(brls::Theme::loadFile(theme));
+        else
+            brls::Theme::reset();
+        brls::Application::getPlatform()->setThemeVariant(round % 3 ? brls::ThemeVariant::DARK : brls::ThemeVariant::LIGHT);
+        brls::Application::setReduceMotion(round % 4 == 3);
+        h.step(round % 2 ? 1 : 3);
+    }
+    brls::Application::setReduceMotion(false);
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/winter/theme.theme"));
+    h.step();
+    while (brls::ThemeImages::decoding() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    h.settle();
+    BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP) && brls::ThemeDecorations::particlesRunning());
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK(!brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP) && !brls::ThemeDecorations::particlesRunning());
+}
+
 // A translucent dialog over a theme's picture shows the picture, not the
 // screen behind it
 BRLS_TEST(theme_decor_dialog_over_a_picture)

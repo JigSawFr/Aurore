@@ -1,0 +1,31 @@
+# A theme folder with decorations: icicles along the top of the screen, a
+# snowdrift along its bottom, frost on the sidebar and the dialogs, snow
+# falling behind the screens. The pictures are drawn by
+# tools/make_winter_decor.py. Built on the Winter preset, which gives the
+# colours (and already lets snow fall).
+name = Winter
+author = Aurore demo
+version = 1.0
+description = Icicles, a snowdrift and frost over the Winter preset.
+icon = snowflake
+inherit = builtin:winter
+
+decor.top_fit = tile
+decor.bottom_fit = tile
+backdrop.sidebar_fit = tile
+backdrop.dialog_fit = tile
+backdrop.dialog_opacity = 0.6
+particles = snow
+particles_density = medium
+
+[light]
+decor.top = icicles-day.png
+decor.bottom = drift-day.png
+backdrop.sidebar = frost-day.png
+backdrop.dialog = frost-day.png
+
+[dark]
+decor.top = icicles-night.png
+decor.bottom = drift-night.png
+backdrop.sidebar = frost-night.png
+backdrop.dialog = frost-night.png
