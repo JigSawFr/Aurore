@@ -81,6 +81,8 @@ brls_add_tests(my_app_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/tests/referen
 
 `brls_add_tests` registers each case with `ctest` (read from `--list` when `ctest` runs), with the references folder and `<build>/test-output` for what the tests got. The app's `main()` stays out of the test executable: what it does before and after `createWindow()` goes in functions the tests call too (the demo's `demo/src/demo_app.cpp`).
 
+An Aurore installed with `-DAURORE_INSTALL=ON -DBRLS_BUILD_TESTS=ON` installs the harness too: after `find_package(Aurore)`, `Aurore::test` and `brls_add_tests` are there.
+
 A smoke scenario of an Xvfb script (start, press keys, wait, grab the screen, compare) becomes a case: `h.tap(brls::BUTTON_DOWN, 3)` for the key presses, `h.settle()` for the waits, `matchesReference` for the grab and the comparison, `focusText()` and `cutTexts()` for what was read in the log and in `cut_text.txt`.
 
 ## The demo's tests
@@ -90,6 +92,8 @@ cmake -B build -G Ninja -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW -DAURORE_
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+Without `AURORE_LIBROMFS` they run too: the build copies `resources/` to `build/tests/`, where `ctest` runs them. With CMake 3.25 or later, `cmake --workflow --preset tests` configures, builds and runs them in `build/tests`.
 
 `tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
 

@@ -26,6 +26,15 @@ add_test(NAME aurore_bench COMMAND aurore_bench --check ${CMAKE_CURRENT_SOURCE_D
 add_executable(aurore-preview preview.cpp)
 target_link_libraries(aurore-preview PRIVATE aurore_demo_views Aurore::test)
 add_test(NAME aurore_preview
-        COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
+        COMMAND aurore-preview ${PROJECT_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
 set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)
+
+# Without libromfs the programs read ./resources/: a copy where ctest runs them
+if (NOT USE_LIBROMFS)
+    add_custom_target(aurore_tests_resources
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources)
+    foreach (target aurore_tests aurore_image_limits_tests aurore_bench aurore-preview)
+        add_dependencies(${target} aurore_tests_resources)
+    endforeach ()
+endif ()

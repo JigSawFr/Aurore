@@ -143,11 +143,12 @@ else()
     list(APPEND BRLS_PLATFORM_LIBS tinyxml2)
 endif()
 
-# dbus
-if (UNIX AND NOT APPLE AND NOT USE_SDL2)
-    find_package(DBus)
-    list(APPEND BOREALIS_INCLUDE ${DBUS_INCLUDE_DIRS})
-    list(APPEND BRLS_PLATFORM_LIBS ${DBUS_LIBRARIES})
+# dbus (Linux with GLFW: keeps the screen saver off). An imported target,
+# so the installed package names no path of this machine.
+if (PLATFORM_DESKTOP AND UNIX AND NOT APPLE AND NOT USE_SDL2)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
+    list(APPEND BRLS_PLATFORM_LIBS PkgConfig::DBUS)
 endif ()
 
 if (PLATFORM_DESKTOP)
@@ -546,46 +547,22 @@ if (BRLS_BUILD_TESTS)
         # A context without any window system (Mesa's surfaceless EGL)
         find_package(OpenGL COMPONENTS EGL)
         if (OpenGL_EGL_FOUND)
-            # The library itself: OpenGL::EGL is only visible in this directory,
-            # and a static library hands its link dependencies to its users
+            # The library's path here, OpenGL::EGL for an installed copy:
+            # the imported target is only visible in this directory, and a
+            # static library hands its link dependencies to its users
             target_include_directories(aurore_test SYSTEM PRIVATE ${OPENGL_EGL_INCLUDE_DIRS})
-            target_link_libraries(aurore_test PRIVATE ${OPENGL_egl_LIBRARY})
+            target_link_libraries(aurore_test PRIVATE
+                    $<BUILD_INTERFACE:${OPENGL_egl_LIBRARY}> $<INSTALL_INTERFACE:OpenGL::EGL>)
+            set(AURORE_TEST_EGL ON)
             target_compile_definitions(aurore_test PRIVATE BRLS_HEADLESS_EGL)
         else ()
             message(WARNING "EGL not found (libegl-dev): the test harness will need an X server (a hidden GLFW window)")
         endif ()
     endif ()
 
-    # Registers each case of a test executable (brls::test::runTests) with
-    # ctest, read from `<target> --list` when ctest runs. REFERENCES: the
-    # folder of the reference screenshots; what the tests get goes to
-    # <build dir>/test-output.
-    function(brls_add_tests target)
-        cmake_parse_arguments(ARG "" "REFERENCES" "" ${ARGN})
-        set(script "${CMAKE_CURRENT_BINARY_DIR}/${target}_cases.cmake")
-        set(env "BRLS_TEST_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/test-output")
-        if (ARG_REFERENCES)
-            set(env "${env};BRLS_TEST_REFERENCES=${ARG_REFERENCES}")
-        endif ()
-        file(GENERATE OUTPUT "${script}" CONTENT "
-execute_process(COMMAND \"$<TARGET_FILE:${target}>\" --list OUTPUT_VARIABLE cases RESULT_VARIABLE result)
-if (NOT result EQUAL 0)
-    add_test(${target}_not_built \"$<TARGET_FILE:${target}>\" --list)
-    return()
+    include(${BOREALIS_PATH}/cmake/AuroreTesting.cmake)
 endif ()
-# The names only, not what the program logged
-string(REGEX MATCHALL \"brls-test: [A-Za-z0-9_]+\" cases \"\${cases}\")
-list(TRANSFORM cases REPLACE \"^brls-test: \" \"\")
-foreach (case IN LISTS cases)
-    if (case)
-        add_test(${target}.\${case} \"$<TARGET_FILE:${target}>\" \${case})
-        set_tests_properties(${target}.\${case} PROPERTIES
-            WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\"
-            ENVIRONMENT \"${env}\"
-            TIMEOUT 300)
-    endif ()
-endforeach ()
-")
-        set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES "${script}")
-    endfunction()
+
+if (AURORE_INSTALL)
+    include(${BOREALIS_PATH}/cmake/install.cmake)
 endif ()
