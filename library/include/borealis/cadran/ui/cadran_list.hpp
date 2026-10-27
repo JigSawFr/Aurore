@@ -16,6 +16,7 @@
 #pragma once
 
 #include <borealis.hpp>
+#include <borealis/cadran/view/cadran_icon.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -121,6 +122,8 @@ class List
     // The same with a picture in its icon's place (a resource, "img/…png":
     // a language's flag), drawn as it is, without the square.
     static void row_image(brls::DetailCell* cell, const std::string& image);
+    // The same with a swatch of colours in its icon's place (CadranSwatch).
+    static void row_swatch(brls::DetailCell* cell, const CadranSwatch::Colors& colors);
     // A row's icon (row()'s, at its start) changed: another `icon` (nullptr:
     // the same), in `color_key`, on `square_key` (nullptr: the usual square).
     static void recolor_icon(brls::DetailCell* cell, const char* icon, const char* color_key,

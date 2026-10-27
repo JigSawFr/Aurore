@@ -1,8 +1,9 @@
 // The sheets of ui.hpp: pick_actions(), pick() and pick_marked() in the
 // Cadran look. A header (an image when there is one, the title, what it is
 // about now), then the lines in cards, a section's kicker above each group;
-// each line its icon in a soft square, its label and, at its end, what is
-// set now, a switch, or the check of the value chosen; removals in coral.
+// each line its icon in a soft square (or a swatch of colours), its label
+// and, at its end, what is set now, a switch, or the check of the value
+// chosen; removals in coral.
 // It sits where borealis' Dropdown did (880 px wide, above the hints), over
 // the screen it was opened from, as tall as its lines (the rest scrolls);
 // B, or a touch outside it, closes it.
@@ -10,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <yoga/Yoga.h>
 
 #include <borealis/cadran/ui/action_sheet.hpp>
@@ -55,6 +57,7 @@ struct Line
     std::string label, detail, group;
     std::string icon;          // a Cadran icon's name; empty: none
     std::string image;         // a picture in the icon's place (pick()'s `icons`)
+    std::optional<Swatch> swatch;   // colours in the icon's place (pick()'s `swatches`)
     Choice::Tone tone = Choice::Tone::PLAIN;
     int  toggle = -1;          // a switch: 0 off, 1 on; -1 none
     bool checked = false;      // the value chosen (pick())
@@ -305,7 +308,8 @@ class Sheet : public brls::Box
             cell->setText(l.label);
             cell->setDetailText(l.detail);
         }
-        if (!l.image.empty()) cadran::List::row_image(cell, l.image);
+        if (l.swatch) cadran::List::row_swatch(cell, *l.swatch);
+        else if (!l.image.empty()) cadran::List::row_image(cell, l.image);
         else cadran::List::row(cell, l.icon.empty() ? nullptr : l.icon.c_str());
         if (l.toggle < 0) {
             cell->detail->setMaxWidth(340);
@@ -363,7 +367,7 @@ void open(const std::string& title, const std::string& subtitle, int image, std:
 
 std::vector<Line> value_lines(const std::vector<std::string>& values, const std::vector<std::string>& details,
                               std::function<bool(size_t)> checked, std::function<void(int)> on_pick,
-                              const std::vector<std::string>& icons = {})
+                              const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {})
 {
     std::vector<Line> lines;
     auto pick = std::make_shared<std::function<void(int)>>(std::move(on_pick));
@@ -374,6 +378,7 @@ std::vector<Line> value_lines(const std::vector<std::string>& values, const std:
         // A picture ("img/…png") or a Cadran icon's name.
         const std::string icon = i < icons.size() ? icons[i] : "";
         (icon.rfind("img/", 0) == 0 ? l.image : l.icon) = icon;
+        if (i < swatches.size()) l.swatch = swatches[i];
         l.checked = checked(i);
         const int index = (int)i;
         l.run = [pick, index]() {
@@ -409,12 +414,12 @@ void pick_actions(const std::string& title, const std::vector<Choice>& choices, 
 
 void pick(const std::string& title, const std::vector<std::string>& values, int selected,
           std::function<void(int)> on_pick, bool checked, const std::vector<std::string>& details,
-          const std::vector<std::string>& icons)
+          const std::vector<std::string>& icons, const std::vector<Swatch>& swatches)
 {
     const size_t focus = selected < 0 ? 0 : (size_t)selected;
     open(title, "", 0,
          value_lines(values, details, [checked, focus](size_t i) { return checked && i == focus; }, std::move(on_pick),
-                     icons),
+                     icons, swatches),
          focus);
 }
 

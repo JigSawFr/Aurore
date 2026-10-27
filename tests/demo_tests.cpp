@@ -420,6 +420,29 @@ BRLS_TEST(seasonal_palette_shows_the_motif_of_the_date)
     }
 }
 
+// The palette picker, a swatch of its colours in each row's icon place
+static void pickPalette(const char* theme, const char* reference)
+{
+    DemoHarness h;
+    ui::prefs().theme = theme;
+    live_prefs::apply_theme();
+    h.settle();
+    ui::pick_palette();
+    h.settle();
+    BRLS_CHECK(h.hasText("Ocean"));
+    BRLS_CHECK(h.matchesReference(reference));
+}
+
+BRLS_TEST(palette_picker_shows_swatches)
+{
+    pickPalette("dark", "palette_picker");
+}
+
+BRLS_TEST(palette_picker_shows_swatches_light)
+{
+    pickPalette("light", "palette_picker_light");
+}
+
 BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
 {
     Harness h;

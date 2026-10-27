@@ -45,3 +45,29 @@ class CadranIcon : public brls::View
     NVGcolor color;
     brls::Time pop_since = 0;   // pop(): when it began (µs), 0 at rest
 };
+
+// A few colours shown in an icon's place, the size of a row's icon square
+// (cadran::List::row): a palette's in its picker (ui::pick()'s `swatches`).
+// A rounded square of `background`, `ring` as a border inside it, `motif`
+// (a CadranIcon's name; "sparkle" when it has none or an unknown one) in
+// `ink`; around it a hairline in the theme's cadran/line, so that a dark
+// swatch still shows on a dark sheet.
+class CadranSwatch : public brls::View
+{
+  public:
+    struct Colors
+    {
+        NVGcolor background;
+        NVGcolor ring;
+        NVGcolor ink;
+        std::string motif;
+    };
+
+    explicit CadranSwatch(Colors colors);
+
+    void draw(NVGcontext* vg, float x, float y, float width, float height,
+              brls::Style style, brls::FrameContext* ctx) override;
+
+  private:
+    Colors colors;
+};

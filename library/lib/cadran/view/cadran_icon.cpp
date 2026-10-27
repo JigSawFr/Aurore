@@ -1,7 +1,9 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <borealis/cadran/view/cadran_icon.hpp>
 
+#include <algorithm>
 #include <cmath>
+#include <utility>
 
 #include <borealis/cadran/ui/effects.hpp>
 #include <borealis/cadran/ui/hooks.hpp>
@@ -519,3 +521,41 @@ bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, flo
 }
 
 brls::View* CadranIcon::create() { return new CadranIcon(); }
+
+CadranSwatch::CadranSwatch(Colors value) : colors(std::move(value))
+{
+    this->setWidth(36);
+    this->setHeight(36);
+    this->setFocusable(false);
+}
+
+void CadranSwatch::draw(NVGcontext* vg, float x, float y, float width, float height,
+                        brls::Style style, brls::FrameContext* ctx)
+{
+    (void)style;
+    (void)ctx;
+    const float corner = std::min(width, height) * 0.28f;
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, x, y, width, height, corner);
+    nvgFillColor(vg, this->colors.background);
+    nvgFill(vg);
+    // The surface as a ring inside the square
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, x + 3.25f, y + 3.25f, width - 6.5f, height - 6.5f, corner - 2.5f);
+    nvgStrokeColor(vg, this->colors.ring);
+    nvgStrokeWidth(vg, 2.5f);
+    nvgStroke(vg);
+    // The hairline, in the sheet's own colours
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, x + 0.5f, y + 0.5f, width - 1, height - 1, corner - 0.5f);
+    nvgStrokeColor(vg, brls::Application::getTheme()["cadran/line"]);
+    nvgStrokeWidth(vg, 1);
+    nvgStroke(vg);
+
+    const float side = std::min(width, height) * 0.55f;
+    nvgSave(vg);
+    nvgTranslate(vg, x + (width - side) / 2, y + (height - side) / 2);
+    if (this->colors.motif.empty() || !CadranIcon::glyph(vg, this->colors.motif, this->colors.ink, side, side))
+        CadranIcon::glyph(vg, "sparkle", this->colors.ink, side, side);
+    nvgRestore(vg);
+}
