@@ -32,6 +32,7 @@ const std::vector<BuiltinTheme>& builtinThemeTexts()
         { "high-contrast-dark", R"theme(
 name = @i18n/themes/presets/high_contrast_dark
 author = Aurore
+icon = contrast
 version = 1
 description = White on black, a yellow focus: the most legible dark look.
 inherit = dark
@@ -70,6 +71,7 @@ brls/highlight/stroke_width = 6
         { "high-contrast-light", R"theme(
 name = @i18n/themes/presets/high_contrast_light
 author = Aurore
+icon = contrast
 version = 1
 description = Black on white, a deep blue focus: the most legible light look.
 inherit = light
@@ -107,6 +109,7 @@ brls/highlight/stroke_width = 6
         { "ocean", R"theme(
 name = @i18n/themes/presets/ocean
 author = Aurore
+icon = wave
 version = 1
 description = Deep blue, a sky-blue accent.
 inherit = dark
@@ -120,6 +123,7 @@ accent = #3fa7ff
         { "amethyst", R"theme(
 name = @i18n/themes/presets/amethyst
 author = Aurore
+icon = gem
 version = 1
 description = Violet, light or dark as the system is.
 
@@ -139,6 +143,7 @@ accent = #a98bff
         { "sand", R"theme(
 name = @i18n/themes/presets/sand
 author = Aurore
+icon = dune
 version = 1
 description = Warm paper, a terracotta accent.
 inherit = light
@@ -158,6 +163,7 @@ accent = #b34a2b
         { "winter", R"theme(
 name = @i18n/themes/presets/winter
 author = Aurore
+icon = snowflake
 version = 1
 description = Frost and silver: ice-blue on a cold slate night, or glacier blue on frost.
 
@@ -213,6 +219,7 @@ cadran/avatar3 = #7fd4ff
         { "valentine", R"theme(
 name = @i18n/themes/presets/valentine
 author = Aurore
+icon = heart
 version = 1
 description = Rose and wine: a crimson accent, a focus pulsing from red to blush.
 
@@ -268,6 +275,7 @@ cadran/avatar3 = #ffd88a
         { "lunar-new-year", R"theme(
 name = @i18n/themes/presets/lunar_new_year
 author = Aurore
+icon = lantern
 version = 1
 description = Red lacquer and gold, jade for the details, lanterns glowing behind.
 
@@ -323,6 +331,7 @@ cadran/avatar3 = #ff8c9e
         { "spring", R"theme(
 name = @i18n/themes/presets/spring
 author = Aurore
+icon = blossom
 version = 1
 description = Cherry blossoms: blush and leaf green by day, pink petals at night.
 
@@ -378,6 +387,7 @@ cadran/avatar3 = #ffd7a8
         { "summer", R"theme(
 name = @i18n/themes/presets/summer
 author = Aurore
+icon = sun
 version = 1
 description = Sun and lagoon by day, a sunset over a warm night.
 
@@ -433,6 +443,7 @@ cadran/avatar3 = #aed581
         { "autumn", R"theme(
 name = @i18n/themes/presets/autumn
 author = Aurore
+icon = leaf
 version = 1
 description = Maple and amber leaves on linen, or on dark bark.
 
@@ -488,6 +499,7 @@ cadran/avatar3 = #d9a07a
         { "halloween", R"theme(
 name = @i18n/themes/presets/halloween
 author = Aurore
+icon = pumpkin
 version = 1
 description = Pumpkin and candlelight on a violet night; by day, moonlit lilac.
 
@@ -544,6 +556,7 @@ cadran/avatar3 = #f3ead8
         { "christmas", R"theme(
 name = @i18n/themes/presets/christmas
 author = Aurore
+icon = tree
 version = 1
 description = Pine, cranberry and gold; the focus twinkles like the tree's lights.
 
@@ -600,6 +613,7 @@ cadran/avatar3 = #9fd8ff
         { "new-year", R"theme(
 name = @i18n/themes/presets/new_year
 author = Aurore
+icon = firework
 version = 1
 description = Midnight and champagne: gold and silver sparkling in the focus.
 

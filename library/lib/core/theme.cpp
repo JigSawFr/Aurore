@@ -803,6 +803,7 @@ struct ParsedTheme
     std::string inherit;
     std::string counterpart;     // its path, from the file's folder
     std::string backgroundImage; // its path, from the file's folder
+    std::string icon;
     std::vector<std::string> files; // the files it includes and inherits, read
     bool lightSection = false, darkSection = false;
     bool light = false, dark = false;
@@ -905,6 +906,13 @@ static void parseThemeText(const std::string& text, const std::string& directory
             continue;
         }
 
+        if (section.empty() && key == "icon")
+        {
+            // As background_image: an included file's counts, an inherited one's too
+            out->icon = value;
+            continue;
+        }
+
         if (section.empty()
             && (key == "name" || key == "author" || key == "version" || key == "description" || key == "inherit"
                 || key == "counterpart"))
@@ -980,6 +988,8 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
     theme->metrics.insert(theme->metrics.begin(), parent.metrics.begin(), parent.metrics.end());
     if (theme->backgroundImage.empty())
         theme->backgroundImage = parent.backgroundImage;
+    if (theme->icon.empty())
+        theme->icon = parent.icon;
     theme->errors.insert(theme->errors.begin(), parent.errors.begin(), parent.errors.end());
     theme->light = parent.light || theme->lightSection;
     theme->dark  = parent.dark || theme->darkSection;
@@ -1208,6 +1218,7 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path)
     info.light       = theme.light;
     info.dark        = theme.dark;
     info.backgroundImage = theme.backgroundImage;
+    info.icon        = theme.icon;
     info.counterpart = theme.counterpart;
     info.lightPreview = previewOf(Theme::getLightTheme().getValues()->getBaseColors(), resolved.overlay[0]);
     info.darkPreview  = previewOf(Theme::getDarkTheme().getValues()->getBaseColors(), resolved.overlay[1]);

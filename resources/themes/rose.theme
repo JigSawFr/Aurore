@@ -4,6 +4,7 @@ name = Rose
 author = Aurore demo
 version = 1.0
 description = Pink and plum, light or dark.
+icon = blossom
 
 @include shared.inc
 

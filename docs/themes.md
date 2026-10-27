@@ -18,6 +18,8 @@ name = Ocean
 author = Aurore
 version = 1
 description = Deep blue, a sky-blue accent.
+# The motif a picker shows it with: a Cadran icon's name
+icon = wave
 
 # What it builds on: light, dark, another file (next to this one, or
 # "builtin:<id>" for a preset). Without it: dark.
@@ -58,6 +60,7 @@ brls/highlight/stroke_width = 6
 - **Colours**: `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(r, g, b)`, `rgba(r, g, b, a)` (a from 0 to 1).
 - **Variants**: a file styles the variant it inherits (`inherit = light` or `dark`, dark by default), or both when it has `[light]` and `[dark]` sections; it then follows the system's mode (or the app's light/dark setting). The variant a file does not style stays as it is without a file.
 - **`counterpart`**, for a file that styles one variant only: the file (or preset) with the other variant, the same look in light or dark. A picker asked for the variant this file lacks switches to it (Cadran's does, below); `--check-themes` reports a counterpart that cannot be read or lacks that variant.
+- **`icon`**: the Cadran icon (`cadran/view/cadran_icon.hpp`) a picker shows the file with: Cadran's palette picker draws it in the file's accent on a swatch of its background and surface. The motifs drawn for palettes: `snowflake`, `heart`, `lantern`, `blossom`, `sun`, `wave`, `leaf`, `pumpkin`, `tree`, `firework`, `gem`, `dune`, `contrast`, `moon`, `bolt`, `sparkle`; any other icon of the list works too. Inherited, and an `@include`d file's counts, as `background_image`. Without one (or with a name Cadran does not know), `sparkle`.
 - **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets; loops stop after 8 levels.
 - **Later lines win**; palette values are derived first, then `[colors]`, then `[light]`/`[dark]`, so an explicit key always beats the derived one.
 - **Errors never stop the file**: a line that cannot be read (a bad colour, an unknown section, a missing include) is skipped and reported, with its file and line number. An unknown key is kept (an app's own keys are fine) and reported as a warning, in case it is a typo.
@@ -139,15 +142,15 @@ Not keys, on purpose: the app's logo (`CadranIcon` "mark", the app's own drawing
 
 Built into the library (`library/lib/core/theme_presets.cpp`), every app has them: `builtin:<id>`, listed by `Theme::builtinThemes()`, their names translated (`resources/i18n/*/themes.json`). Each passes the contrast check.
 
-| Id | Variants | What |
-| --- | --- | --- |
-| `high-contrast-dark` | dark | White on black, a yellow focus ring, a thicker ring; counterpart `high-contrast-light` |
-| `high-contrast-light` | light | Black on white, a deep blue focus ring, a thicker ring; counterpart `high-contrast-dark` |
-| `ocean` | dark | Deep blue, a sky-blue accent |
-| `amethyst` | light and dark | Violet, following the system's mode |
-| `sand` | light | Warm paper, a terracotta accent |
-| `winter`, `valentine`, `lunar-new-year`, `spring`, `summer`, `autumn`, `halloween`, `christmas`, `new-year` | light and dark | The seasons and the feasts of the year, below |
-| `seasonal` | light and dark | The one of the day, by the calendar, below |
+| Id | Variants | Motif (`icon`) | What |
+| --- | --- | --- | --- |
+| `high-contrast-dark` | dark | `contrast` | White on black, a yellow focus ring, a thicker ring; counterpart `high-contrast-light` |
+| `high-contrast-light` | light | `contrast` | Black on white, a deep blue focus ring, a thicker ring; counterpart `high-contrast-dark` |
+| `ocean` | dark | `wave` | Deep blue, a sky-blue accent |
+| `amethyst` | light and dark | `gem` | Violet, following the system's mode |
+| `sand` | light | `dune` | Warm paper, a terracotta accent |
+| `winter`, `valentine`, `lunar-new-year`, `spring`, `summer`, `autumn`, `halloween`, `christmas`, `new-year` | light and dark | `snowflake`, `heart`, `lantern`, `blossom`, `sun`, `leaf`, `pumpkin`, `tree`, `firework` | The seasons and the feasts of the year, below |
+| `seasonal` | light and dark | the one of the day's | The one of the day, by the calendar, below |
 
 A preset is also a starting point: `inherit = builtin:ocean`, then the keys to change.
 
@@ -169,7 +172,7 @@ Each season has both variants and keeps the roles of every theme (the accent for
 
 #### Seasonal
 
-`builtin:seasonal` is the preset of the day: a picker lists it like the others (*Seasonal*, Cadran's palette picker included), and an app that saves it gets Halloween at the end of October and Christmas in December without doing anything. It reads the local date, and the main loop looks again once a minute (`Theme::followCalendar()`): the day a season begins, the screens change at midnight, or as soon as the console wakes up. Every season has both variants, so the variant stays as it is. `Theme::seasonalTheme(time)` says which preset a date has (`"builtin:halloween"`), for a tile or a test.
+`builtin:seasonal` is the preset of the day: a picker lists it like the others (*Seasonal*, Cadran's palette picker included), and an app that saves it gets Halloween at the end of October and Christmas in December without doing anything. It reads the local date, and the main loop looks again once a minute (`Theme::followCalendar()`): the day a season begins, the screens change at midnight, or as soon as the console wakes up. Every season has both variants, so the variant stays as it is. `Theme::seasonalTheme(time)` says which preset a date has (`"builtin:halloween"`), for a tile or a test. It inherits that preset, so its `ThemeInfo` (its `icon`, its previews) is the season's: its row in Cadran's palette picker shows a snowflake in January and a pumpkin at Halloween.
 
 The days are in one table (`SEASONS`, `library/lib/core/theme_presets.cpp`), both ends included, the first range a date falls in winning:
 
@@ -214,7 +217,7 @@ brls::Theme::checkContrast(variant);        // the pairs under their minimum
 brls::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
 ```
 
-`ThemeInfo` has `path`, `id`, `name`, `author`, `version`, `description`, `backgroundImage`, `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`); a file's `@include`s are best named `*.inc`, so that they are not listed.
+`ThemeInfo` has `path`, `id`, `name`, `author`, `version`, `description`, `backgroundImage`, `icon` (its `icon`, "" without one), `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`); a file's `@include`s are best named `*.inc`, so that they are not listed.
 
 ### Colours that follow the theme
 
@@ -232,7 +235,7 @@ With Cadran (PlayGuard, PlayShelf), everything is there:
 
 1. Keep `ui::Prefs::theme_file` in the app's settings, next to `theme` ("" for the boards' palettes, `builtin:<id>`, or a path), and hand the prefs over with `ui::use_prefs()` as today.
 2. Say where the user's own files are: `ui::hooks::get().themes_dir = [] { return std::string("sdmc:/config/myapp/themes"); };` (on the desktop, a folder next to the settings). The folder may not exist: the picker then offers the presets only.
-3. That is all: `ui::pick_theme()` (the header's button, Preferences) ends with a **Palette** row opening `ui::pick_palette()`: Default, the presets, then the folder's readable files (a broken one is logged and left out). `ui::palette_name()` is the choice saved, for a tile. The choice is saved through `save_prefs` and applied at once (`live_prefs::apply_theme()`).
+3. That is all: `ui::pick_theme()` (the header's button, Preferences) ends with a **Palette** row opening `ui::pick_palette()`: Default, the presets, then the folder's readable files (a broken one is logged and left out), each row with a swatch of its colours (its background, its surface as a ring, its `icon` in its accent; in the variant on screen when the palette styles it, else in the one it styles; Default's, the app's own colours and a palette). `ui::palette_name()` is the choice saved, for a tile. The choice is saved through `save_prefs` and applied at once (`live_prefs::apply_theme()`).
 
 A palette that styles one variant only decides the variant, and the header's button always shows the variant on screen:
 

@@ -17,6 +17,7 @@
 #include <borealis/cadran/ui/cadran_text.hpp>
 #include <borealis/cadran/ui/guarded.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
+#include <borealis/cadran/view/cadran_icon.hpp>
 
 namespace ui
 {
@@ -125,10 +126,15 @@ void add_cancel(brls::Dialog* dialog, std::function<void()> cancel);
 // `checked` is false (a list of things to do, not of values). `details`, when
 // given, says more about each row, after its label and quieter; `icons`, what
 // goes before each row's label: a Cadran icon's name ("moon"), or a picture
-// (a resource, "img/…png", drawn as it is); empty: none.
+// (a resource, "img/…png", drawn as it is); empty: none. `swatches`, when
+// given, a sample of colours in the icon's place instead, for the rows it
+// has (a palette's, as pick_palette() shows them): its background in a
+// rounded square, its ring inside, its motif (a Cadran icon's name) in its
+// ink, a hairline of the theme's cadran/line around it (CadranSwatch).
+using Swatch = CadranSwatch::Colors;
 void pick(const std::string& title, const std::vector<std::string>& values, int selected,
           std::function<void(int)> on_pick, bool checked = true, const std::vector<std::string>& details = {},
-          const std::vector<std::string>& icons = {});
+          const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {});
 // The same as tiles, `columns` to a row, each its Cadran icon (`icons`, a
 // name) large above its label: a few values that read better side by side
 // (the tabs of Start on).

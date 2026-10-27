@@ -71,6 +71,9 @@ struct ThemeInfo
     std::string version;
     std::string description;
     std::string backgroundImage; // its background_image, "" without one
+    // Its `icon`, the Cadran icon a picker shows it with ("snowflake"...),
+    // "" without one
+    std::string icon;
 
     // For a file that styles one variant, the theme file of the other one
     // (`counterpart`, as given to loadFile; "" without one): what a picker

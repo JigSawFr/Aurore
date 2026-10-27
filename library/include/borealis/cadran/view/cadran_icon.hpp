@@ -7,7 +7,8 @@
 // unlock, phone, trash, server, pin, refresh, history, restore, save, upload,
 // language, contrast, home, bolt, sparkle, bell, chip, code, heart, folder,
 // file, flag, gamepad, calendar, alert, pencil, pencil-off, tag, user, sun, tv,
-// text-normal, text-large.
+// text-normal, text-large; for the palettes (theme files' `icon`): snowflake,
+// lantern, blossom, wave, leaf, pumpkin, tree, firework, gem, dune, palette.
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
@@ -34,8 +35,39 @@ class CadranIcon : public brls::View
 
     static brls::View* create();
 
+    // Draws the icon `name` in `color`, filling a `width` by `height` box at
+    // the origin (nvgTranslate first): what a view of its own draws in an
+    // icon's place. False when no icon has that name (nothing drawn).
+    static bool glyph(NVGcontext* vg, const std::string& name, NVGcolor color, float width, float height);
+
   private:
     std::string icon = "today";
     NVGcolor color;
     brls::Time pop_since = 0;   // pop(): when it began (µs), 0 at rest
+};
+
+// A few colours shown in an icon's place, the size of a row's icon square
+// (cadran::List::row): a palette's in its picker (ui::pick()'s `swatches`).
+// A rounded square of `background`, `ring` as a border inside it, `motif`
+// (a CadranIcon's name; "sparkle" when it has none or an unknown one) in
+// `ink`; around it a hairline in the theme's cadran/line, so that a dark
+// swatch still shows on a dark sheet.
+class CadranSwatch : public brls::View
+{
+  public:
+    struct Colors
+    {
+        NVGcolor background;
+        NVGcolor ring;
+        NVGcolor ink;
+        std::string motif;
+    };
+
+    explicit CadranSwatch(Colors colors);
+
+    void draw(NVGcontext* vg, float x, float y, float width, float height,
+              brls::Style style, brls::FrameContext* ctx) override;
+
+  private:
+    Colors colors;
 };

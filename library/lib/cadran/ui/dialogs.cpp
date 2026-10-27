@@ -521,6 +521,32 @@ brls::ThemeVariant variant_of(const std::string& theme)
 {
     return theme == "light" ? brls::ThemeVariant::LIGHT : brls::ThemeVariant::DARK;
 }
+
+// A palette's row in its picker: its own colours, in the variant on screen
+// when it styles it, else in the one it styles; its motif in its accent.
+ui::Swatch swatch_of(const brls::ThemeInfo& info)
+{
+    const brls::ThemeVariant shown = brls::Application::getThemeVariant();
+    const brls::ThemeVariant variant = info.styles(shown) ? shown : info.variant();
+    const brls::ThemeInfo::Preview& p = variant == brls::ThemeVariant::LIGHT ? info.lightPreview : info.darkPreview;
+    return { p.background, p.surface, p.accent, info.icon };
+}
+
+// Default's: the app's own colours (without a theme file), a palette.
+ui::Swatch default_swatch()
+{
+    const auto& base = brls::Theme::get(brls::Application::getThemeVariant()).getValues()->getBaseColors();
+    auto color = [&base](const char* key, const char* fallback) {
+        for (const char* name : { key, fallback }) {
+            auto it = base.find(name);
+            if (it != base.end()) return it->second;
+        }
+        return nvgRGB(0, 0, 0);
+    };
+    // The keys of ThemeInfo's previews (core/theme.cpp)
+    return { color("brls/background", "brls/clear"), color("cadran/surf", "brls/highlight/background"),
+             color("brls/sidebar/active_item", "brls/accent"), "palette" };
+}
 }   // namespace
 
 std::string palette_name()
@@ -534,18 +560,20 @@ void pick_palette(std::function<void()> after)
     std::vector<std::string> labels = { "cadran/tools/palettes/default"_i18n }, paths = { "" };
     // A palette with one variant switches to it ("" : both, the variant kept).
     std::vector<std::string> only = { "" };
+    std::vector<ui::Swatch> swatches = { default_swatch() };
     int selected = 0;
     for (const brls::ThemeInfo& info : files) {
         if (info.path == ui::prefs().theme_file) selected = (int)labels.size();
         labels.push_back(info.name);
         paths.push_back(info.path);
         only.push_back(info.light == info.dark ? "" : info.light ? "light" : "dark");
+        swatches.push_back(swatch_of(info));
     }
     pick("cadran/tools/palette"_i18n, labels, selected, [after, paths, only](int i) {
         ui::prefs().theme_file = paths[i];
         if (!only[i].empty()) ui::prefs().theme = only[i];
         theme_chosen(after);
-    });
+    }, true, {}, {}, swatches);
 }
 
 void pick_theme(std::function<void()> after)
