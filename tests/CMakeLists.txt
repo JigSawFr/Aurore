@@ -11,6 +11,12 @@ add_executable(aurore_tests demo_tests.cpp)
 target_link_libraries(aurore_tests PRIVATE aurore_demo_views Aurore::test)
 brls_add_tests(aurore_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/references)
 
+# Pictures too large are refused before they are decoded
+add_executable(aurore_image_limits_tests image_limits_tests.cpp)
+target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
+target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+brls_add_tests(aurore_image_limits_tests)
+
 # The main loop's cost on the demo (Profiler), checked against a baseline
 add_executable(aurore_bench bench.cpp)
 target_link_libraries(aurore_bench PRIVATE aurore_demo_views Aurore::test)
