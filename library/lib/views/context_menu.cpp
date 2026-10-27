@@ -33,7 +33,7 @@ namespace
 {
     constexpr float ITEM_HEIGHT  = 52;
     constexpr float ICON_SIZE    = 24;
-    constexpr float PANEL_WIDTH  = 340;
+    constexpr float MENU_WIDTH   = 340;
     constexpr float PANEL_MARGIN = 16; // from the screen's edges
     constexpr float ANCHOR_GAP   = 8;
 
@@ -108,7 +108,7 @@ ContextMenu::ContextMenu(View* anchor)
 
     this->panel = new Box(Axis::COLUMN);
     this->panel->setPositionType(PositionType::ABSOLUTE);
-    this->panel->setWidth(PANEL_WIDTH);
+    this->panel->setWidth(MENU_WIDTH);
     this->panel->setPadding(8);
     this->panel->setCornerRadius(16);
     this->panel->setThemeColor("backgroundColor", "brls/background");

@@ -225,7 +225,7 @@ static NVGcolor over(NVGcolor top, NVGcolor under)
     return color;
 }
 
-static bool sameColor(NVGcolor a, NVGcolor b)
+static bool sameRgba(NVGcolor a, NVGcolor b)
 {
     return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
 }
@@ -503,7 +503,7 @@ ThemeValues::ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>>
 void ThemeValues::addColor(const std::string& name, NVGcolor color)
 {
     auto it = this->base.find(name);
-    if (it != this->base.end() && sameColor(it->second, color))
+    if (it != this->base.end() && sameRgba(it->second, color))
         return;
     this->base[name] = color;
     if (this->overlay.count(name) == 0)
