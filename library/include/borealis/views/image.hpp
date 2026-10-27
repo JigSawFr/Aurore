@@ -18,7 +18,10 @@
 
 #pragma once
 
+#include <borealis/core/event.hpp>
+#include <borealis/core/theme.hpp>
 #include <borealis/core/view.hpp>
+#include <memory>
 
 namespace brls
 {
@@ -122,6 +125,16 @@ class Image : public View
      */
     void setImageFromRGBA(const unsigned char* pixels, int width, int height);
 
+    /**
+     * Shows the picture of the image slot `key` (Theme::addImageSlot): the
+     * theme's, else the app's fallback, and follows the theme as it changes
+     * (the new picture shown once loaded; none: the image is cleared). XML:
+     * themeImage="playguard/loading/art". Another setImage* call, or "",
+     * stops following it.
+     */
+    void setThemeImage(const std::string& key);
+    const std::string& getThemeImage() const { return this->themeImageKey; }
+
     virtual void innerSetImage(int texture);
 
     void setImageAsync(std::function<void(std::function<void(const std::string&, size_t length)>)> cb);
@@ -186,6 +199,21 @@ class Image : public View
 
     // Deletes the texture if owned, or hands it back to TextureCache
     void releaseTexture();
+
+  private:
+    // setThemeImage: the slot followed, the picture shown, the one loading
+    std::string themeImageKey;
+    std::shared_ptr<ThemeImage> themeImage;
+    std::shared_ptr<ThemeImage> themeImagePending;
+    bool settingThemeImage = false;
+    bool followingTheme    = false;
+    // Gone with the view: an event firing from a copy of its callbacks
+    // does not call a view deleted meanwhile
+    std::shared_ptr<char> themeToken;
+    Event<ThemeVariant>::Subscription themeChanged;
+    Event<const ThemeImage*>::Subscription themeImageLoaded;
+    void refreshThemeImage();
+    void stopFollowingTheme();
 };
 
 } // namespace brls

@@ -90,6 +90,9 @@ namespace demo
 void installHooks()
 {
     installCadranHooks();
+    // A picture of the demo's a theme may replace (image.demo/about/art):
+    // the About tab's, drawn by a brls::Image that follows the theme
+    brls::Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512);
 }
 
 void registerViews()

@@ -9,11 +9,17 @@
 // file, flag, gamepad, calendar, alert, pencil, pencil-off, tag, user, sun, tv,
 // text-normal, text-large; for the palettes (theme files' `icon`): snowflake,
 // lantern, blossom, wave, leaf, pumpkin, tree, firework, gem, dune, palette.
+// A theme replaces "mark" with its `logo`, and any other icon with its
+// `icon.<name>` picture, drawn as is or as a mask in the icon's colour
+// (docs/themes.md, "Logos and images").
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <borealis.hpp>
+#include <borealis/core/theme_image.hpp>
+#include <memory>
 #include <string>
+#include <vector>
 
 class CadranIcon : public brls::View
 {
@@ -38,7 +44,12 @@ class CadranIcon : public brls::View
     // Draws the icon `name` in `color`, filling a `width` by `height` box at
     // the origin (nvgTranslate first): what a view of its own draws in an
     // icon's place. False when no icon has that name (nothing drawn).
+    // The theme's picture for it when it has one (fitted in the box, its
+    // ratio kept), once loaded; else the drawing.
     static bool glyph(NVGcontext* vg, const std::string& name, NVGcolor color, float width, float height);
+
+    // Every icon's name but "mark" (what a theme's icon.<name> may replace).
+    static const std::vector<std::string>& names();
 
   private:
     std::string icon = "today";
@@ -52,6 +63,10 @@ class CadranIcon : public brls::View
 // (a CadranIcon's name; "sparkle" when it has none or an unknown one) in
 // `ink`; around it a hairline in the theme's cadran/line, so that a dark
 // swatch still shows on a dark sheet.
+// With a `picture` (a theme's preview), that picture instead, cover-fitted
+// in the rounded square with the hairline: decoded on the async thread
+// when the swatch is made (ThemeImages), the colours shown until it is
+// ready, or when it cannot be read; freed with the swatch.
 class CadranSwatch : public brls::View
 {
   public:
@@ -61,6 +76,7 @@ class CadranSwatch : public brls::View
         NVGcolor ring;
         NVGcolor ink;
         std::string motif;
+        std::string picture;   // "": the colours
     };
 
     explicit CadranSwatch(Colors colors);
@@ -70,4 +86,5 @@ class CadranSwatch : public brls::View
 
   private:
     Colors colors;
+    std::shared_ptr<brls::ThemeImage> preview;
 };

@@ -1,0 +1,36 @@
+# A theme folder with its own logo, icons and preview, and a picture for an
+# image slot the demo declares (docs/themes.md, "Logos and images"). The
+# pictures are drawn by tools/make_prism_pictures.py.
+name = Prism
+author = Aurore demo
+version = 1.0
+description = Light split into its colours: a logo, icons and a picture of its own.
+icon = gem
+
+# Its thumbnail in a picker, instead of a swatch of its colours
+preview = preview.png
+
+# Cadran's icons: two masks drawn in the icon's colour (the rail's ink, the
+# focus's...), one picture in colour, drawn as it is
+icon.settings = icons/settings.png
+icon.settings.tint = true
+icon.info = icons/info.png
+icon.info.tint = true
+icon.gamepad = icons/gamepad.png
+
+# The demo's About tab picture (Theme::addImageSlot("demo/about/art", ...))
+image.demo/about/art = about.png
+
+[light]
+background = #f6f4fb
+surface = #ffffff
+text = #221d33
+accent = #6a3fd1
+logo = logo-light.png
+
+[dark]
+background = #14111f
+surface = #1e1a2e
+text = #f1eefa
+accent = #b48cff
+logo = logo-dark.png

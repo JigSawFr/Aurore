@@ -23,6 +23,8 @@
 #include <cstdint>
 #include <ctime>
 #include <initializer_list>
+#include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -86,6 +88,32 @@ struct ThemeBackground
 
     bool hasImage() const { return !this->image.empty(); }
 };
+
+// A Cadran icon a theme draws as a picture (icon.<name>, docs/themes.md)
+struct ThemeIcon
+{
+    std::string image; // its path (Theme::resolveAsset)
+    // icon.<name>.tint: the picture is a mask, drawn in the icon's colour
+    // (ThemeImageOptions::mask); else drawn as is
+    bool tint = false;
+
+    bool operator==(const ThemeIcon&) const = default;
+};
+
+// A variant's pictures besides its background, as a theme file sets them
+// (docs/themes.md, "Logos and images"): paths made by Theme::resolveAsset
+struct ThemePictures
+{
+    std::string logo;    // logo: the app's mark, "" for the app's own
+    std::string preview; // preview: the theme's thumbnail in a picker
+    std::map<std::string, ThemeIcon> icons;    // icon.<name>, by icon name
+    std::map<std::string, std::string> images; // image.<key>, by image slot
+
+    bool empty() const { return this->logo.empty() && this->preview.empty() && this->icons.empty() && this->images.empty(); }
+    bool operator==(const ThemePictures&) const = default;
+};
+
+struct ThemeImage;
 
 // ---------------------------------------------------------------------------
 // Decorations (docs/themes.md, Decorations): pictures over the surfaces of
@@ -213,6 +241,14 @@ struct ThemeInfo
     const ThemeBackground& background(ThemeVariant variant) const
     {
         return variant == ThemeVariant::LIGHT ? this->lightBackground : this->darkBackground;
+    }
+
+    // Each variant's logo, icons, preview and image slots' pictures
+    ThemePictures lightPictures;
+    ThemePictures darkPictures;
+    const ThemePictures& pictures(ThemeVariant variant) const
+    {
+        return variant == ThemeVariant::LIGHT ? this->lightPictures : this->darkPictures;
     }
 
     // Each variant's decorations (backdrops, strips, particles)
@@ -360,6 +396,59 @@ class Theme
      */
     static bool resolveAsset(const std::string& name, const std::string& directory, const std::string& root,
         std::string* path, std::string* error);
+
+    /**
+     * The logo, icons, preview and image slots' pictures of `variant` with
+     * the file in use (none without a file, or for a variant it does not
+     * style): paths, nothing loaded.
+     */
+    static ThemePictures getPictures(ThemeVariant variant);
+
+    /**
+     * The icons a theme may draw as pictures (`icon.<name> = file.png`): any
+     * other name is a warning. Cadran adds its own (CadranIcon).
+     */
+    static void addIconNames(const std::vector<std::string>& names);
+
+    /**
+     * Declares an image slot: a picture of the app's that a theme may
+     * replace (`image.<key> = file.png`), "playguard/loading/art". `fallback`
+     * is the app's own picture ("@res/img/art.png", a file; "" for none),
+     * `maxSide` the largest side it is made at (0: 1920 x 1080). Before the
+     * theme file is loaded: a theme naming a slot not declared is warned
+     * about. Declared again, the new fallback replaces the old one.
+     */
+    static void addImageSlot(const std::string& key, const std::string& fallback = "", int maxSide = 0);
+
+    /**
+     * The image slots declared, sorted.
+     */
+    static std::vector<std::string> getImageSlots();
+
+    /**
+     * The picture of the image slot `key` now (UI thread): the theme's for
+     * the variant in use, else the slot's fallback (also when the theme's
+     * cannot be read); nullptr for neither, or a slot not declared. Loaded
+     * on the async thread (ThemeImages): it may still be LOADING, and
+     * ThemeImages::getLoadedEvent() says when it is ready. Kept while the
+     * theme and the variant stay; a view keeping it gets the new one on
+     * Application::getThemeChangedEvent() (brls::Image::setThemeImage does).
+     */
+    static std::shared_ptr<ThemeImage> image(const std::string& key);
+
+    /**
+     * The theme's logo for the variant in use (UI thread), nullptr without
+     * one: for an app that draws its logo itself (Cadran's mark draws it).
+     * Made at most ThemeImages::LOGO_SIZE; ThemeImage::draw with CONTAIN.
+     */
+    static std::shared_ptr<ThemeImage> logo();
+
+    /**
+     * The theme's picture for the icon `name` in the variant in use (UI
+     * thread), nullptr without one; `tint` says whether it is a mask, drawn
+     * in the icon's colour. Made at most ThemeImages::ICON_SIZE.
+     */
+    static std::shared_ptr<ThemeImage> icon(const std::string& name, bool* tint = nullptr);
 
     /**
      * A key of a surface (a card, a panel) drawn over the screens'

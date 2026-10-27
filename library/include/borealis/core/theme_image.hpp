@@ -19,6 +19,7 @@
 #include <nanovg.h>
 
 #include <borealis/core/event.hpp>
+#include <borealis/core/theme.hpp>
 #include <functional>
 #include <memory>
 #include <string>
@@ -27,9 +28,22 @@ namespace brls
 {
 
 /**
- * A picture a theme file names (its background_image; what decorates it,
- * its logos): a texture made from it, at most MAX_WIDTH x MAX_HEIGHT.
- * Only the UI thread reads or changes it.
+ * How a picture is made into a texture: ThemeImages::load's options.
+ */
+struct ThemeImageOptions
+{
+    int flags   = 0; // NVG_IMAGE_* (NVG_IMAGE_REPEATX...)
+    int maxSide = 0; // made smaller to fit in maxSide x maxSide; 0: MAX_WIDTH x MAX_HEIGHT
+    // A mask: white, its alpha the picture's, to be tinted when drawn (a
+    // picture with no transparent pixel: its dark parts, by luminance)
+    bool mask = false;
+};
+
+/**
+ * A picture a theme file names (its background_image, its logo, icons,
+ * preview, an app's image slots): a texture made from it, at most
+ * MAX_WIDTH x MAX_HEIGHT (or its options' maxSide). Only the UI thread
+ * reads or changes it.
  */
 struct ThemeImage
 {
@@ -42,12 +56,25 @@ struct ThemeImage
 
     std::string path; // as Theme::resolveAsset() made it
     int flags   = 0;  // NVG_IMAGE_* it was made with
+    int maxSide = 0;  // its ThemeImageOptions
+    bool mask   = false;
     State state = State::LOADING;
     int texture = 0; // 0 until READY
     int width = 0, height = 0; // the texture's, after downscaling
     NVGcolor mean {};          // its average colour, opaque, once READY
 
     bool ready() const { return this->state == State::READY; }
+
+    /**
+     * Draws it in the box x, y, width, height: CONTAIN fits it whole,
+     * centred, its ratio kept; COVER fills the box, centred, cut at its
+     * edges, within a rounded rectangle of `corner`; TILE and CENTER as
+     * background_fit says. `tint` (a mask's colour, ThemeImageOptions::mask)
+     * multiplies its pixels; else drawn as is, at `alpha`. False, nothing
+     * drawn, while it is not ready.
+     */
+    bool draw(NVGcontext* vg, float x, float y, float width, float height, BackgroundFit fit,
+        const NVGcolor* tint = nullptr, float alpha = 1.0f, float corner = 0.0f) const;
 
     ThemeImage() = default;
     ThemeImage(const ThemeImage&) = delete;
@@ -76,12 +103,24 @@ class ThemeImages
   public:
     static constexpr int MAX_WIDTH  = 1920;
     static constexpr int MAX_HEIGHT = 1080;
+    // The largest side of a theme's logo, of its icons and of its preview
+    // (ThemeImageOptions::maxSide): what the screens draw them at, with room
+    // for a 1080p screen
+    static constexpr int LOGO_SIZE    = 256;
+    static constexpr int ICON_SIZE    = 128;
+    static constexpr int PREVIEW_SIZE = 128;
 
     /**
      * The image at `path`, made with `flags` (NVG_IMAGE_REPEATX...):
      * loading, or ready when someone holds it already. From the UI thread.
      */
     static std::shared_ptr<ThemeImage> load(const std::string& path, int flags = 0);
+
+    /**
+     * The same, with its size cap and mask (ThemeImageOptions): shared by
+     * path and options.
+     */
+    static std::shared_ptr<ThemeImage> load(const std::string& path, const ThemeImageOptions& options);
 
     /**
      * Fired on the UI thread when an image loaded with load() is ready or

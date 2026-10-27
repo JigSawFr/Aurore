@@ -930,9 +930,19 @@ struct BackgroundSpec
     std::optional<float> surfaceOpacity;
 };
 
+// The logo, icons, preview and image slots' pictures as a file writes them,
+// for every variant it styles or one: by key ("logo", "preview",
+// "icon.<name>", "image.<slot>"), "" for none; what it does not say is
+// unset (and inherited)
+struct PictureSpec
+{
+    std::map<std::string, std::string> files;
+    std::map<std::string, bool> tints; // icon.<name>.tint, by icon name
+};
+
 // The decorations as a file writes them, as BackgroundSpec: what it does
 // not say is unset (and inherited)
-struct PictureSpec
+struct DecorPictureSpec
 {
     std::optional<std::string> image; // its path; "" for none
     std::optional<BackgroundFit> fit;
@@ -942,7 +952,7 @@ struct PictureSpec
 
 struct DecorSpec
 {
-    PictureSpec pictures[THEME_AREA_COUNT];
+    DecorPictureSpec pictures[THEME_AREA_COUNT];
     std::optional<ParticleKind> kind;
     std::optional<float> density;
     std::optional<float> speed;
@@ -959,6 +969,7 @@ struct ParsedTheme
     std::string icon;
     // [0]: every variant the file styles, [1] the light one, [2] the dark
     BackgroundSpec background[3];
+    PictureSpec pictures[3]; // as background
     DecorSpec decor[3]; // as background
     std::vector<std::string> files; // the files it includes and inherits, read
     bool lightSection = false, darkSection = false;
@@ -984,6 +995,128 @@ static bool parseFit(const std::string& value, BackgroundFit* fit)
             return true;
         }
     return false;
+}
+
+// Logos and images (docs/themes.md, "Logos and images")
+
+static const char* ICON_PREFIX  = "icon.";
+static const char* IMAGE_PREFIX = "image.";
+static const char* TINT_SUFFIX  = ".tint";
+
+static bool isPictureKey(const std::string& key)
+{
+    return key == "logo" || key == "preview" || (startsWith(key, ICON_PREFIX) && key.size() > 5)
+        || (startsWith(key, IMAGE_PREFIX) && key.size() > 6);
+}
+
+// One line of them: false, with the reason in `error`, when it is skipped
+static bool parsePictureKey(const std::string& key, const std::string& value, const std::string& directory,
+    const std::string& assets, PictureSpec* out, std::string* error)
+{
+    if (startsWith(key, ICON_PREFIX) && endsWith(key, TINT_SUFFIX))
+    {
+        std::string name = key.substr(5, key.size() - 5 - 5);
+        if (name.empty())
+        {
+            *error = "unknown key " + key;
+            return false;
+        }
+        if (value == "true" || value == "yes" || value == "1")
+            out->tints[name] = true;
+        else if (value == "false" || value == "no" || value == "0")
+            out->tints[name] = false;
+        else
+        {
+            *error = key + " is true or false, not " + value;
+            return false;
+        }
+        return true;
+    }
+    if (value == "none")
+    {
+        out->files[key] = "";
+        return true;
+    }
+    std::string path, why;
+    if (!Theme::resolveAsset(value, directory, assets, &path, &why))
+    {
+        *error = key + " " + why;
+        return false;
+    }
+    out->files[key] = path;
+    return true;
+}
+
+// As inheritBackground, key by key
+static void inheritPictures(PictureSpec* own, const PictureSpec* parent)
+{
+    auto inherit = [&](auto member)
+    {
+        auto everyVariant = own[0].*member; // this file's, before the inherited ones
+        for (auto& [key, value] : parent[0].*member)
+            if (!everyVariant.count(key))
+                (own[0].*member).emplace(key, value);
+        for (int slot : { 1, 2 })
+            for (auto& [key, value] : parent[slot].*member)
+                if (!everyVariant.count(key))
+                    (own[slot].*member).emplace(key, value);
+    };
+    inherit(&PictureSpec::files);
+    inherit(&PictureSpec::tints);
+}
+
+static std::vector<std::string> iconNames; // Theme::addIconNames, sorted
+
+namespace
+{
+struct ImageSlot
+{
+    std::string fallback;
+    int maxSide = 0;
+};
+}
+static std::map<std::string, ImageSlot> imageSlots; // Theme::addImageSlot
+
+// Variant `v`'s (0 light, 1 dark): its own lines, else those for every
+// variant; what names an icon or a slot nobody declared is warned about
+static ThemePictures resolvePictures(const PictureSpec* spec, int v, std::vector<std::string>* warnings)
+{
+    std::map<std::string, std::string> files = spec[v + 1].files;
+    files.insert(spec[0].files.begin(), spec[0].files.end());
+    std::map<std::string, bool> tints = spec[v + 1].tints;
+    tints.insert(spec[0].tints.begin(), spec[0].tints.end());
+
+    ThemePictures pictures;
+    for (auto& [key, path] : files)
+    {
+        if (key == "logo")
+            pictures.logo = path;
+        else if (key == "preview")
+            pictures.preview = path;
+        else if (startsWith(key, ICON_PREFIX))
+        {
+            std::string name = key.substr(5);
+            if (!std::binary_search(iconNames.begin(), iconNames.end(), name))
+                warnings->push_back(key + ": no icon has that name (kept)");
+            if (!path.empty())
+                pictures.icons[name] = ThemeIcon { path, tints.count(name) && tints[name] };
+        }
+        else
+        {
+            std::string slot = key.substr(6);
+            if (!imageSlots.count(slot))
+            {
+                std::string declared;
+                for (auto& [each, value] : imageSlots)
+                    declared += (declared.empty() ? "" : ", ") + each;
+                warnings->push_back(key + ": the app has no such image slot (kept); "
+                    + (declared.empty() ? std::string("it declares none") : "its slots: " + declared));
+            }
+            if (!path.empty())
+                pictures.images[slot] = path;
+        }
+    }
+    return pictures;
 }
 
 // ---------------------------------------------------------------------------
@@ -1054,7 +1187,7 @@ static bool parseDecorLine(const std::string& key, const std::string& value, con
         const std::string prefix = DECOR_PICTURES[i];
         if (!startsWith(key, prefix) || (key.size() > prefix.size() && key[prefix.size()] != '_'))
             continue;
-        PictureSpec& picture = decor->pictures[i];
+        DecorPictureSpec& picture = decor->pictures[i];
         const std::string property = key.substr(prefix.size());
         bool strip = i >= (int)ThemeArea::TOP - 1;
         if (property.empty())
@@ -1157,12 +1290,12 @@ static void inheritDecor(DecorSpec* own, const DecorSpec* parent)
     };
     for (int i = 0; i < THEME_AREA_COUNT; i++)
     {
-        PictureSpec mine[3]         = { own[0].pictures[i], own[1].pictures[i], own[2].pictures[i] };
-        const PictureSpec theirs[3] = { parent[0].pictures[i], parent[1].pictures[i], parent[2].pictures[i] };
-        inherit(mine, theirs, &PictureSpec::image);
-        inherit(mine, theirs, &PictureSpec::fit);
-        inherit(mine, theirs, &PictureSpec::opacity);
-        inherit(mine, theirs, &PictureSpec::height);
+        DecorPictureSpec mine[3]         = { own[0].pictures[i], own[1].pictures[i], own[2].pictures[i] };
+        const DecorPictureSpec theirs[3] = { parent[0].pictures[i], parent[1].pictures[i], parent[2].pictures[i] };
+        inherit(mine, theirs, &DecorPictureSpec::image);
+        inherit(mine, theirs, &DecorPictureSpec::fit);
+        inherit(mine, theirs, &DecorPictureSpec::opacity);
+        inherit(mine, theirs, &DecorPictureSpec::height);
         for (int slot = 0; slot < 3; slot++)
             own[slot].pictures[i] = mine[slot];
     }
@@ -1181,8 +1314,8 @@ static ThemeDecor resolveDecor(const DecorSpec* spec, int v)
     const DecorSpec& all = spec[0];
     for (int i = 0; i < THEME_AREA_COUNT; i++)
     {
-        const PictureSpec& mine  = own.pictures[i];
-        const PictureSpec& every = all.pictures[i];
+        const DecorPictureSpec& mine  = own.pictures[i];
+        const DecorPictureSpec& every = all.pictures[i];
         ThemePicture& picture    = decor.pictures[i];
         picture.image            = mine.image.value_or(every.image.value_or(""));
         picture.fit              = mine.fit.value_or(every.fit.value_or(BackgroundFit::COVER));
@@ -1325,6 +1458,16 @@ static void parseThemeText(const std::string& text, const std::string& directory
             continue;
         }
 
+        // Logos and images, for every variant or one
+        if ((section.empty() || section == "light" || section == "dark") && isPictureKey(key))
+        {
+            std::string error;
+            PictureSpec& pictures = out->pictures[section == "light" ? 1 : section == "dark" ? 2 : 0];
+            if (!parsePictureKey(key, value, directory, assets, &pictures, &error))
+                out->errors.push_back(where(number) + ": " + error);
+            continue;
+        }
+
         // The decorations, as the background
         if ((section.empty() || section == "light" || section == "dark") && isDecorKey(key))
         {
@@ -1436,6 +1579,7 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
     }
     theme->metrics.insert(theme->metrics.begin(), parent.metrics.begin(), parent.metrics.end());
     inheritBackground(theme->background, parent.background);
+    inheritPictures(theme->pictures, parent.pictures);
     inheritDecor(theme->decor, parent.decor);
     if (theme->icon.empty())
         theme->icon = parent.icon;
@@ -1454,6 +1598,7 @@ struct ResolvedTheme
     ColorMap overlay[2]; // [0] light, [1] dark; empty for a variant not styled
     MetricMap metrics;
     ThemeBackground background[2]; // as overlay; no image for a variant not styled
+    ThemePictures pictures[2];     // as background
     ThemeDecor decor[2];           // as background
     std::vector<std::string> warnings;
 };
@@ -1524,7 +1669,8 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = 
         NVGcolor backdrop = known ? backdropOf(all, background, mean) : NVGcolor {};
         for (const std::string& warning : checkColors(all, known ? &backdrop : nullptr))
             resolved.warnings.push_back(std::string(name) + ": " + warning);
-        resolved.overlay[v] = std::move(overlay);
+        resolved.overlay[v]  = std::move(overlay);
+        resolved.pictures[v] = resolvePictures(theme.pictures, v, &resolved.warnings);
     }
     for (auto& [key, metric] : theme.metrics)
     {
@@ -1556,6 +1702,8 @@ static std::string currentPath;
 static std::string currentText;                  // its text, as read
 static std::unique_ptr<ParsedTheme> currentTheme; // the file in use
 static ThemeBackground currentBackground[2];       // its backgrounds, [0] light
+static ThemePictures currentPictures[2];           // its logos and images, [0] light
+static uint64_t picturesGeneration = 1;            // bumped when they change
 static ThemeDecor currentDecor[2];                 // its decorations, [0] light
 static std::time_t calendarMinute = -1;          // when followCalendar() last looked
 static bool reapplying = false;
@@ -1567,6 +1715,12 @@ static void useOverlays(const ResolvedTheme& resolved)
     getStyle().getValues()->setOverlay(resolved.metrics);
     currentBackground[0] = resolved.background[0];
     currentBackground[1] = resolved.background[1];
+    if (!(currentPictures[0] == resolved.pictures[0] && currentPictures[1] == resolved.pictures[1]))
+    {
+        currentPictures[0] = resolved.pictures[0];
+        currentPictures[1] = resolved.pictures[1];
+        picturesGeneration++;
+    }
     currentDecor[0]      = resolved.decor[0];
     currentDecor[1]      = resolved.decor[1];
     generation++;
@@ -1757,6 +1911,8 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
     info.lightDecor      = resolved.decor[0];
     info.darkDecor       = resolved.decor[1];
     info.icon        = theme.icon;
+    info.lightPictures = resolved.pictures[0];
+    info.darkPictures  = resolved.pictures[1];
     info.counterpart = theme.counterpart;
     info.lightPreview = previewOf(Theme::getLightTheme().getValues()->getBaseColors(), resolved.overlay[0]);
     info.darkPreview  = previewOf(Theme::getDarkTheme().getValues()->getBaseColors(), resolved.overlay[1]);
@@ -1774,6 +1930,23 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
             info.errors.push_back(error);
     }
 
+    // So must its logos and images
+    for (const ThemePictures* pictures : { &info.lightPictures, &info.darkPictures })
+    {
+        std::vector<std::pair<std::string, std::string>> named = { { "logo", pictures->logo }, { "preview", pictures->preview } };
+        for (auto& [name, icon] : pictures->icons)
+            named.emplace_back(ICON_PREFIX + name, icon.image);
+        for (auto& [slot, path] : pictures->images)
+            named.emplace_back(IMAGE_PREFIX + slot, path);
+        for (auto& [key, path] : named)
+        {
+            NVGcolor mean;
+            std::string error = key + ": cannot read " + path;
+            bool readable     = decodePictures ? ThemeImages::meanColor(path, &mean) : ThemeImages::exists(path);
+            if (!path.empty() && !readable && std::find(info.errors.begin(), info.errors.end(), error) == info.errors.end())
+                info.errors.push_back(error);
+        }
+    }
     // Its decorations' pictures too
     for (const ThemeDecor* decor : { &info.lightDecor, &info.darkDecor })
         for (int i = 0; i < THEME_AREA_COUNT; i++)
@@ -1885,6 +2058,104 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory, bool deco
 std::string Theme::seasonalTheme(std::time_t when)
 {
     return std::string(BUILTIN_PREFIX) + seasonalThemeId(when);
+}
+
+ThemePictures Theme::getPictures(ThemeVariant variant)
+{
+    return currentPictures[variant == ThemeVariant::LIGHT ? 0 : 1];
+}
+
+void Theme::addIconNames(const std::vector<std::string>& names)
+{
+    iconNames.insert(iconNames.end(), names.begin(), names.end());
+    std::sort(iconNames.begin(), iconNames.end());
+    iconNames.erase(std::unique(iconNames.begin(), iconNames.end()), iconNames.end());
+}
+
+void Theme::addImageSlot(const std::string& key, const std::string& fallback, int maxSide)
+{
+    imageSlots[key] = ImageSlot { fallback, maxSide };
+    picturesGeneration++; // its fallback may have changed
+}
+
+std::vector<std::string> Theme::getImageSlots()
+{
+    std::vector<std::string> keys;
+    for (auto& [key, slot] : imageSlots)
+        keys.push_back(key);
+    return keys;
+}
+
+// The pictures loaded for the theme and the variant in use, by key: dropped
+// (and freed with their last holder) when either changes
+static std::map<std::string, std::shared_ptr<ThemeImage>> heldPictures;
+static uint64_t heldGeneration = 0;
+static int heldVariant         = -1;
+
+static std::shared_ptr<ThemeImage> heldPicture(const std::string& key, const std::string& path, const ThemeImageOptions& options)
+{
+    int variant = Application::getPlatform() && Application::getThemeVariant() == ThemeVariant::LIGHT ? 0 : 1;
+    if (heldGeneration != picturesGeneration || heldVariant != variant)
+    {
+        heldPictures.clear();
+        heldGeneration = picturesGeneration;
+        heldVariant    = variant;
+    }
+    if (path.empty())
+        return nullptr;
+    std::shared_ptr<ThemeImage>& held = heldPictures[key];
+    if (!held || held->path != path)
+        held = ThemeImages::load(path, options);
+    return held;
+}
+
+static const ThemePictures& picturesInUse()
+{
+    return currentPictures[Application::getPlatform() && Application::getThemeVariant() == ThemeVariant::LIGHT ? 0 : 1];
+}
+
+std::shared_ptr<ThemeImage> Theme::logo()
+{
+    ThemeImageOptions options;
+    options.flags   = NVG_IMAGE_GENERATE_MIPMAPS;
+    options.maxSide = ThemeImages::LOGO_SIZE;
+    return heldPicture("logo", picturesInUse().logo, options);
+}
+
+std::shared_ptr<ThemeImage> Theme::icon(const std::string& name, bool* tint)
+{
+    const ThemePictures& pictures = picturesInUse();
+    if (pictures.icons.empty())
+        return nullptr;
+    auto it = pictures.icons.find(name);
+    if (it == pictures.icons.end())
+        return nullptr;
+    if (tint)
+        *tint = it->second.tint;
+    ThemeImageOptions options;
+    options.flags   = NVG_IMAGE_GENERATE_MIPMAPS;
+    options.maxSide = ThemeImages::ICON_SIZE;
+    options.mask    = it->second.tint;
+    return heldPicture(ICON_PREFIX + name, it->second.image, options);
+}
+
+std::shared_ptr<ThemeImage> Theme::image(const std::string& key)
+{
+    auto slot = imageSlots.find(key);
+    if (slot == imageSlots.end())
+        return nullptr;
+    ThemeImageOptions options;
+    options.maxSide = slot->second.maxSide;
+    const ThemePictures& pictures = picturesInUse();
+    auto it = pictures.images.find(key);
+    if (it != pictures.images.end())
+    {
+        std::shared_ptr<ThemeImage> image = heldPicture(IMAGE_PREFIX + key, it->second, options);
+        if (image && image->state != ThemeImage::State::FAILED)
+            return image;
+    }
+    // The app's own
+    return heldPicture("fallback." + key, slot->second.fallback, options);
 }
 
 std::vector<ThemeInfo> Theme::builtinThemes()
