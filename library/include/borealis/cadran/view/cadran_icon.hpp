@@ -7,7 +7,8 @@
 // unlock, phone, trash, server, pin, refresh, history, restore, save, upload,
 // language, contrast, home, bolt, sparkle, bell, chip, code, heart, folder,
 // file, flag, gamepad, calendar, alert, pencil, pencil-off, tag, user, sun, tv,
-// text-normal, text-large.
+// text-normal, text-large; for the palettes (theme files' `icon`): snowflake,
+// lantern, blossom, wave, leaf, pumpkin, tree, firework, gem, dune, palette.
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
@@ -33,6 +34,11 @@ class CadranIcon : public brls::View
               brls::Style style, brls::FrameContext* ctx) override;
 
     static brls::View* create();
+
+    // Draws the icon `name` in `color`, filling a `width` by `height` box at
+    // the origin (nvgTranslate first): what a view of its own draws in an
+    // icon's place. False when no icon has that name (nothing drawn).
+    static bool glyph(NVGcontext* vg, const std::string& name, NVGcolor color, float width, float height);
 
   private:
     std::string icon = "today";

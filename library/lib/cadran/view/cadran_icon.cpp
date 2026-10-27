@@ -93,19 +93,27 @@ void CadranIcon::draw(NVGcontext* vg, float x, float y, float width, float heigh
             nvgTranslate(vg, -width / 2.0f, -height / 2.0f);
         }
     }
-    if (this->icon == "mark") {
+    glyph(vg, this->icon, this->color, width, height);
+    nvgRestore(vg);
+}
+
+bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, float width, float height)
+{
+    if (i == "mark") {
+        nvgSave(vg);
         mark(vg, width, height);
         nvgRestore(vg);
-        return;
+        return true;
     }
+    nvgSave(vg);
     // The boards' icons: a 24-unit box, 2.2-unit round strokes.
     nvgScale(vg, width / 24.0f, height / 24.0f);
-    nvgStrokeColor(vg, this->color);
-    nvgFillColor(vg, this->color);
+    nvgStrokeColor(vg, color);
+    nvgFillColor(vg, color);
     nvgStrokeWidth(vg, 2.2f);
     nvgLineCap(vg, NVG_ROUND);
     nvgLineJoin(vg, NVG_ROUND);
-    const std::string& i = this->icon;
+    bool known = true;
     if (i == "today") {
         nvgBeginPath(vg); nvgCircle(vg, 12, 12, 9); nvgStroke(vg);
         nvgBeginPath(vg); nvgMoveTo(vg, 10, 9); nvgLineTo(vg, 15, 12); nvgLineTo(vg, 10, 15); nvgClosePath(vg);
@@ -389,8 +397,125 @@ void CadranIcon::draw(NVGcontext* vg, float x, float y, float width, float heigh
     } else if (i == "user") {
         nvgBeginPath(vg); nvgCircle(vg, 12, 8, 4); nvgStroke(vg);
         nvgBeginPath(vg); nvgMoveTo(vg, 4, 21); nvgQuadTo(vg, 4, 14, 12, 14); nvgQuadTo(vg, 20, 14, 20, 21); nvgStroke(vg);
+    } else if (i == "snowflake") {
+        // Winter: six arms, a chevron near each tip.
+        nvgBeginPath(vg);
+        for (int k = 0; k < 6; k++) {
+            const float a = (float)k * NVG_PI / 3 - NVG_PI / 2;
+            const float bx = 12 + std::cos(a) * 5.5f, by = 12 + std::sin(a) * 5.5f;
+            nvgMoveTo(vg, 12, 12); nvgLineTo(vg, 12 + std::cos(a) * 9.5f, 12 + std::sin(a) * 9.5f);
+            nvgMoveTo(vg, bx + std::cos(a - 0.85f) * 3, by + std::sin(a - 0.85f) * 3);
+            nvgLineTo(vg, bx, by);
+            nvgLineTo(vg, bx + std::cos(a + 0.85f) * 3, by + std::sin(a + 0.85f) * 3);
+        }
+        nvgStroke(vg);
+    } else if (i == "lantern") {
+        // The Lunar New Year: a paper lantern, wider than tall, its ribs and
+        // caps, the tassel below.
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, 7.5f, 5.5f); nvgBezierTo(vg, 0.5f, 7, 0.5f, 16, 7.5f, 17.5f); nvgLineTo(vg, 16.5f, 17.5f);
+        nvgBezierTo(vg, 23.5f, 16, 23.5f, 7, 16.5f, 5.5f); nvgClosePath(vg);
+        nvgMoveTo(vg, 9.5f, 5.5f); nvgBezierTo(vg, 6, 8, 6, 15, 9.5f, 17.5f);
+        nvgMoveTo(vg, 14.5f, 5.5f); nvgBezierTo(vg, 18, 8, 18, 15, 14.5f, 17.5f);
+        nvgMoveTo(vg, 12, 20); nvgLineTo(vg, 12, 23);
+        nvgStroke(vg);
+        nvgBeginPath(vg); nvgRoundedRect(vg, 6, 2.6f, 12, 2.8f, 1); nvgRoundedRect(vg, 6, 17.4f, 12, 2.8f, 1); nvgFill(vg);
+    } else if (i == "blossom") {
+        // Spring: five round petals around a dot, notched between them.
+        constexpr float R = 5.5f, r = 4.0f;
+        const float half = NVG_PI / 5;
+        // Where two petals' circles meet outside
+        const float meet = R * std::cos(half) + std::sqrt(r * r - R * std::sin(half) * R * std::sin(half));
+        nvgBeginPath(vg);
+        for (int k = 0; k < 5; k++) {
+            const float a = (float)k * 2 * half - NVG_PI / 2;
+            const float px = 12 + std::cos(a) * R, py = 12 + std::sin(a) * R;
+            const float from = std::atan2(12 + std::sin(a - half) * meet - py, 12 + std::cos(a - half) * meet - px);
+            const float to = std::atan2(12 + std::sin(a + half) * meet - py, 12 + std::cos(a + half) * meet - px);
+            nvgArc(vg, px, py, r, from, to, NVG_CW);
+        }
+        nvgClosePath(vg); nvgStroke(vg);
+        nvgBeginPath(vg); nvgCircle(vg, 12, 12, 2); nvgFill(vg);
+    } else if (i == "wave") {
+        // The sea: three rows of waves.
+        nvgBeginPath(vg);
+        for (float y : { 7.0f, 12.0f, 17.0f }) {
+            nvgMoveTo(vg, 3, y);
+            for (int k = 0; k < 4; k++)
+                nvgQuadTo(vg, 5.25f + 4.5f * (float)k, y + (k % 2 ? 2.5f : -2.5f), 7.5f + 4.5f * (float)k, y);
+        }
+        nvgStroke(vg);
+    } else if (i == "leaf") {
+        // Autumn: a leaf, its midrib and stem.
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, 6, 18); nvgBezierTo(vg, 4, 10, 10, 4, 20, 4);
+        nvgBezierTo(vg, 20, 14, 14, 20, 6, 18); nvgClosePath(vg);
+        nvgMoveTo(vg, 3, 21); nvgLineTo(vg, 15, 9);
+        nvgStroke(vg);
+    } else if (i == "pumpkin") {
+        // Halloween: a squat ribbed pumpkin and its curled stem.
+        nvgBeginPath(vg); nvgEllipse(vg, 12, 14.5f, 9.5f, 6.5f); nvgStroke(vg);
+        nvgBeginPath(vg); nvgEllipse(vg, 12, 14.5f, 3.8f, 6.5f); nvgStroke(vg);
+        nvgBeginPath(vg); nvgMoveTo(vg, 12, 8); nvgQuadTo(vg, 12, 4.5f, 15.5f, 3.5f); nvgStroke(vg);
+    } else if (i == "tree") {
+        // Christmas: a fir of three tiers on its trunk.
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, 12, 2); nvgLineTo(vg, 16, 7.5f); nvgLineTo(vg, 14, 7.5f); nvgLineTo(vg, 18, 13);
+        nvgLineTo(vg, 15.5f, 13); nvgLineTo(vg, 19.5f, 18.5f); nvgLineTo(vg, 4.5f, 18.5f); nvgLineTo(vg, 8.5f, 13);
+        nvgLineTo(vg, 6, 13); nvgLineTo(vg, 10, 7.5f); nvgLineTo(vg, 8, 7.5f); nvgClosePath(vg);
+        nvgMoveTo(vg, 12, 18.5f); nvgLineTo(vg, 12, 22);
+        nvgStroke(vg);
+    } else if (i == "firework") {
+        // New Year's Eve: a burst, long and short rays from a spark, no disc
+        // (not the sun).
+        nvgBeginPath(vg);
+        for (int k = 0; k < 8; k++) {
+            const float a = (float)k * NVG_PI / 4 - NVG_PI / 2;
+            const float from = k % 2 ? 4.5f : 3.5f, to = k % 2 ? 7.0f : 9.5f;
+            nvgMoveTo(vg, 12 + std::cos(a) * from, 12 + std::sin(a) * from);
+            nvgLineTo(vg, 12 + std::cos(a) * to, 12 + std::sin(a) * to);
+        }
+        nvgStroke(vg);
+        nvgBeginPath(vg);
+        nvgCircle(vg, 12, 12, 1.3f);
+        for (int k = 1; k < 8; k += 2) {
+            const float a = (float)k * NVG_PI / 4 - NVG_PI / 2;
+            nvgCircle(vg, 12 + std::cos(a) * 9.6f, 12 + std::sin(a) * 9.6f, 1.2f);
+        }
+        nvgFill(vg);
+    } else if (i == "gem") {
+        // Amethyst: a cut stone, its table and facets.
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, 7, 4); nvgLineTo(vg, 17, 4); nvgLineTo(vg, 21.5f, 9.5f); nvgLineTo(vg, 12, 21);
+        nvgLineTo(vg, 2.5f, 9.5f); nvgClosePath(vg);
+        nvgMoveTo(vg, 2.5f, 9.5f); nvgLineTo(vg, 21.5f, 9.5f);
+        nvgMoveTo(vg, 8, 9.5f); nvgLineTo(vg, 12, 4); nvgLineTo(vg, 16, 9.5f);
+        nvgMoveTo(vg, 8, 9.5f); nvgLineTo(vg, 12, 21); nvgLineTo(vg, 16, 9.5f);
+        nvgStroke(vg);
+    } else if (i == "dune") {
+        // Sand: two dunes in a row, the sun above them.
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, 2, 19); nvgBezierTo(vg, 5, 11.5f, 9, 11, 13, 16.5f);
+        nvgBezierTo(vg, 15.5f, 13.5f, 19, 13, 22, 17);
+        nvgMoveTo(vg, 2, 21.5f); nvgLineTo(vg, 22, 21.5f);
+        nvgStroke(vg);
+        nvgBeginPath(vg); nvgCircle(vg, 17.5f, 6.5f, 2.5f); nvgStroke(vg);
+    } else if (i == "palette") {
+        // A painter's palette: colours of one's own.
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, 12, 3); nvgBezierTo(vg, 17, 3, 21, 6.5f, 21, 11);
+        nvgBezierTo(vg, 21, 14.5f, 18, 15, 16, 15); nvgBezierTo(vg, 14, 15, 13.5f, 17, 14.5f, 18.5f);
+        nvgBezierTo(vg, 15.5f, 20, 14.5f, 21, 12, 21); nvgBezierTo(vg, 7, 21, 3, 17, 3, 12);
+        nvgBezierTo(vg, 3, 7, 7, 3, 12, 3); nvgClosePath(vg); nvgStroke(vg);
+        nvgBeginPath(vg);
+        nvgCircle(vg, 8, 10, 1.4f); nvgCircle(vg, 12, 7.3f, 1.4f); nvgCircle(vg, 16.2f, 9.5f, 1.4f);
+        nvgCircle(vg, 7.8f, 14.8f, 1.4f);
+        nvgFill(vg);
+    } else {
+        known = false;
     }
     nvgRestore(vg);
+    return known;
 }
 
 brls::View* CadranIcon::create() { return new CadranIcon(); }
