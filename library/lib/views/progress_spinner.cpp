@@ -123,6 +123,24 @@ void ProgressSpinner::setColor(NVGcolor color)
     this->customBarColor = true;
 }
 
+bool ProgressSpinner::getStyleProperty(const std::string& name, StyleValue* value)
+{
+    if (name != "barColor")
+        return View::getStyleProperty(name, value);
+    *value = StyleValue::of(this->customBarColor ? this->barColor : Application::getTheme()["brls/spinner/bar_color"]);
+    return true;
+}
+
+bool ProgressSpinner::setStyleProperty(const std::string& name, const StyleValue& value)
+{
+    if (name != "barColor")
+        return View::setStyleProperty(name, value);
+    if (value.type != StyleValue::Type::COLOR)
+        return false;
+    this->setColor(value.color);
+    return true;
+}
+
 brls::View* ProgressSpinner::create()
 {
     return new ProgressSpinner();

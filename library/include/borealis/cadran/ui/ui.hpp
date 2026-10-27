@@ -181,10 +181,10 @@ void prompt_text(const std::string& header, const std::string& initial, int max_
 
 // An action that writes stays visible when the app cannot write (a
 // read-only mode), greyed (title and value), so the user sees what exists.
-// `title` / `detail`: the colours when writable. A BooleanCell gets its own
-// colours back from its state.
-void show_writable(brls::DetailCell* cell, bool writable, NVGcolor title, NVGcolor detail);
-void show_writable(brls::DetailCell* cell, bool writable);   // plain text, neutral value
+// `title_key` / `detail_key`: the theme colours when writable. A
+// BooleanCell gets its own colours back from its state.
+void show_writable(brls::DetailCell* cell, bool writable, const char* title_key = "cadran/text",
+                   const char* detail_key = "cadran/text2");
 
 // Hides a view when `visible` is false (Visibility::GONE frees its space).
 // When the hidden view had the focus, the focus moves to the nearest visible
@@ -243,13 +243,18 @@ void open_screen(brls::View* content, const std::string& title);
 
 // The language and theme pickers, shared by Preferences and the main
 // screen's header: save the choice (ui::prefs, through
-// hooks::get().save_prefs) and apply it at once (a language or a
-// theme makes every screen again, live_prefs; the text size runs `after`, a
+// hooks::get().save_prefs) and apply it at once (a language makes every
+// screen again, live_prefs; a theme or the text size runs `after`, a
 // refresh). language_name / theme_name: the choice saved, as text;
 // text_size_name, language_name and theme_name their shorter words on a tile
-// (Preferences).
+// (Preferences). The theme picker ends with the palette's row, which opens
+// pick_palette: the boards' colours, Aurore's presets (brls::Theme::
+// builtinThemes) or the user's theme files (ui::hooks' themes_dir);
+// palette_name, the one saved (ui::Prefs::theme_file), by its name.
 void        pick_language(std::function<void()> after = nullptr);
 void        pick_theme(std::function<void()> after = nullptr);
+void        pick_palette(std::function<void()> after = nullptr);
+std::string palette_name();
 void        pick_text_size(std::function<void()> after = nullptr);
 std::string text_size_name(bool tile = false);
 // The main screen's sidebar (ui::Prefs::rail): open, on its icons, or

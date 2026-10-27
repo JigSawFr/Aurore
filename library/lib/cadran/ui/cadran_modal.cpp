@@ -157,7 +157,6 @@ void cadran::add_note(const std::string& key, const char* icon, bool warn)
 brls::Box* cadran::dialog_body(const std::string& text)
 {
     namespace kit = cadran::kit;
-    brls::Theme theme = brls::Application::getTheme();
     auto* body = new brls::Box(brls::Axis::COLUMN);
     body->setId("cadran_dialog_body");
     body->setAlignItems(brls::AlignItems::STRETCH);
@@ -207,7 +206,7 @@ brls::Box* cadran::dialog_body(const std::string& text)
             rows = cadran_text::group_rows(rows);
             auto* table = new brls::Box(brls::Axis::COLUMN);
             table->setAlignItems(brls::AlignItems::STRETCH);
-            table->setBackgroundColor(theme["cadran/surf2"]);
+            table->setThemeColor("backgroundColor", "cadran/surf2");
             table->setCornerRadius(kit::RADIUS_ROW);
             table->setPadding(12, 20, 12, 20);
             table->setMarginTop(body->getChildren().empty() ? 0 : 18);
@@ -218,7 +217,7 @@ brls::Box* cadran::dialog_body(const std::string& text)
                 row->setPaddingBottom(7);
                 if (i + 1 < rows.size()) {
                     row->setLineBottom(1);
-                    row->setLineColor(theme["cadran/line"]);
+                    row->setThemeColor("lineColor", "cadran/line");
                 }
                 brls::Label* key = kit::label(rows[i].first, kit::TEXT_BODY, "cadran/text2");
                 key->setGrow(1.0f);
@@ -247,8 +246,8 @@ brls::Box* cadran::dialog_body(const std::string& text)
         if (!note.warn) continue;
         auto* card = new brls::Box(brls::Axis::ROW);
         card->setAlignItems(brls::AlignItems::FLEX_START);
-        card->setBackgroundColor(theme["cadran/amber_surf"]);
-        card->setBorderColor(theme["cadran/amber_line"]);
+        card->setThemeColor("backgroundColor", "cadran/amber_surf");
+        card->setThemeColor("borderColor", "cadran/amber_line");
         card->setBorderThickness(1);
         card->setCornerRadius(kit::RADIUS_ROW);
         card->setPadding(12, 18, 12, 16);
@@ -274,7 +273,7 @@ brls::Box* cadran::dialog_body(const std::string& text)
             row->setMarginTop(20);
             row->setPaddingTop(16);
             row->setLineTop(1);
-            row->setLineColor(theme["cadran/line"]);
+            row->setThemeColor("lineColor", "cadran/line");
         } else if (i > 0) {
             row->setMarginTop(12);
         }
@@ -310,13 +309,12 @@ brls::Label* cadran::dialog_title(const std::string& text)
 
 brls::Box* cadran::dialog_badge(const char* icon, const char* color_key, const char* soft_key)
 {
-    brls::Theme theme = brls::Application::getTheme();
     auto* badge = new brls::Box(brls::Axis::ROW);
     badge->setWidth(44);
     badge->setHeight(44);
     badge->setShrink(0);
     badge->setCornerRadius(22);
-    badge->setBackgroundColor(theme[soft_key]);
+    badge->setThemeColor("backgroundColor", soft_key);
     badge->setAlignItems(brls::AlignItems::CENTER);
     badge->setJustifyContent(brls::JustifyContent::CENTER);
     badge->addView(cadran::kit::icon(icon, 22, color_key));
@@ -326,11 +324,10 @@ brls::Box* cadran::dialog_badge(const char* icon, const char* color_key, const c
 void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
 {
     if (!dialog || dialog->getView("cadran_dialog")) return;
-    brls::Theme theme = brls::Application::getTheme();
     brls::AppletFrame* card = dialog->getAppletFrame();
     card->setCornerRadius(kit::RADIUS_MODAL);
-    card->setBackgroundColor(theme["cadran/surf"]);
-    card->setBorderColor(theme["cadran/line"]);
+    card->setThemeColor("backgroundColor", "cadran/surf");
+    card->setThemeColor("borderColor", "cadran/line");
     card->setBorderThickness(1);
     auto* mark = new brls::Box();
     mark->setId("cadran_dialog");
@@ -352,7 +349,7 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
         badge->setHeight(44);
         badge->setShrink(0);
         badge->setCornerRadius(22);
-        badge->setBackgroundColor(theme["cadran/coral_soft"]);
+        badge->setThemeColor("backgroundColor", "cadran/coral_soft");
         badge->setAlignItems(brls::AlignItems::CENTER);
         badge->setJustifyContent(brls::JustifyContent::CENTER);
         badge->setMarginRight(16);
@@ -481,7 +478,6 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
 {
     namespace kit = cadran::kit;
     if (times.empty()) return;
-    brls::Theme theme = brls::Application::getTheme();
     // The time shown: its place in `times`, the first at or after `initial`.
     size_t first = 0;
     while (first + 1 < times.size() && times[first] < initial) first++;
@@ -497,7 +493,7 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     body->addView(up);
     auto* value = new CadranDigits();
     value->setFontSize(56);
-    value->setTextColor(theme["cadran/text"]);
+    value->setThemeColor("textColor", "cadran/text");
     const auto text = [](int t) { return fmt::format("{:02d}:{:02d}", t / 60, t % 60); };
     value->setText(text(times[first]));
     body->addView(value);

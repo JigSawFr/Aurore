@@ -108,6 +108,10 @@
             "system": "Consola",
             "light": "Claro",
             "dark": "Oscuro"
+        },
+        "palette": "Paleta",
+        "palettes": {
+            "default": "Predeterminada"
         }
     }
 }

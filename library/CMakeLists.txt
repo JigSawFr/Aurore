@@ -4,7 +4,7 @@ include(GNUInstallDirs)
 set(BOREALIS_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(BOREALIS_SOURCE)
 set(BOREALIS_SRC)
-# The usage requirements of the borealis target, filled in below. Headers of
+# The usage requirements of the aurore target, filled in below. Headers of
 # other projects are system headers: their warnings are not the library's.
 set(BOREALIS_INCLUDE)
 set(BRLS_PLATFORM_LIBS)
@@ -78,9 +78,11 @@ else()
   add_subdirectory(${BOREALIS_PATH}/lib/extern/tweeny ${BRLS_EXTERN_EXCLUDE})
 endif()
 
-# yoga
+# yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
 add_subdirectory(${BOREALIS_PATH}/lib/extern/yoga/yoga EXCLUDE_FROM_ALL)
-target_compile_options(yogacore PRIVATE -fvisibility=default)
+target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
+# C++20 library parts Yoga 3 needs that some toolchains' libraries lack
+target_compile_options(yogacore PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/yoga_std_compat.h)
 
 # opencc
 if (BRLS_USE_OPENCC)
@@ -331,7 +333,7 @@ else ()
     message(FATAL_ERROR "Please set build target. Example: -DPLATFORM_DESKTOP=ON or -DPLATFORM_SWITCH=ON")
 endif ()
 
-# borealis c/cpp source
+# aurore c/cpp source
 list(APPEND BOREALIS_SOURCE
         ${BOREALIS_PATH}/lib/core
         ${BOREALIS_PATH}/lib/core/touch
@@ -358,7 +360,31 @@ if (BRLS_FONTSTASH_STREAM)
         PROPERTIES
         COMPILE_DEFINITIONS "FONTSTASH_STREAM_IMPLEMENTATION"
     )
-    message(STATUS "borealis fontstash use stream")
+    message(STATUS "aurore: fontstash use stream")
+endif ()
+if (USE_FREETYPE)
+    if (BRLS_FONTSTASH_STREAM)
+        message(FATAL_ERROR "USE_FREETYPE cannot be combined with BRLS_FONTSTASH_STREAM")
+    endif ()
+    if (PLATFORM_SWITCH)
+        # switch-freetype links bz2, png, zlib and harfbuzz: pkg-config knows them
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(BRLS_FREETYPE REQUIRED IMPORTED_TARGET freetype2)
+        list(APPEND BRLS_PLATFORM_LIBS PkgConfig::BRLS_FREETYPE)
+    else ()
+        find_package(Freetype REQUIRED)
+        list(APPEND BRLS_PLATFORM_LIBS Freetype::Freetype)
+    endif ()
+    set_property(SOURCE ${BOREALIS_PATH}/lib/extern/nanovg/nanovg.c APPEND PROPERTY COMPILE_DEFINITIONS FONS_USE_FREETYPE)
+    list(APPEND BRLS_PUBLIC_DEFINITIONS BRLS_USE_FREETYPE)
+    message(STATUS "aurore: fontstash uses FreeType")
+endif ()
+if (USE_FRIBIDI)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(BRLS_FRIBIDI REQUIRED IMPORTED_TARGET fribidi)
+    list(APPEND BRLS_PLATFORM_LIBS PkgConfig::BRLS_FRIBIDI)
+    list(APPEND BRLS_PUBLIC_DEFINITIONS BRLS_USE_FRIBIDI)
+    message(STATUS "aurore: labels reorder right-to-left text with FriBidi")
 endif ()
 if (PLATFORM_SWITCH AND BOREALIS_USE_DEKO3D)
     file(GLOB_RECURSE NANOVG_PLATFORM_SRC ${BOREALIS_PATH}/lib/extern/nanovg/*.cpp)
@@ -402,7 +428,7 @@ foreach (lib ${BOREALIS_SOURCE})
     list(APPEND BOREALIS_SRC ${TEMP_SRC})
 endforeach (lib)
 
-# borealis 图形 driver
+# aurore 图形 driver
 set(BOREALIS_DRIVER BOREALIS_USE_OPENGL)
 if (BOREALIS_USE_METAL)
     set(BOREALIS_DRIVER BOREALIS_USE_METAL)
@@ -417,22 +443,24 @@ elseif (BOREALIS_USE_GXM)
     endif ()
 endif ()
 list(APPEND BRLS_PUBLIC_DEFINITIONS ${BOREALIS_DRIVER})
-message(STATUS "borealis driver ${BOREALIS_DRIVER}")
+if (BRLS_INSPECTOR)
+    list(APPEND BRLS_PRIVATE_DEFINITIONS BRLS_INSPECTOR)
+endif ()
+message(STATUS "aurore: driver ${BOREALIS_DRIVER}")
 
-# borealis Library
-add_library(borealis STATIC ${BOREALIS_SRC})
-add_library(Aurore::aurore ALIAS borealis)
-set_target_properties(borealis PROPERTIES
+# The library: target aurore, Aurore::aurore for the apps
+add_library(aurore STATIC ${BOREALIS_SRC})
+add_library(Aurore::aurore ALIAS aurore)
+set_target_properties(aurore PROPERTIES
         CXX_STANDARD 20
         CXX_STANDARD_REQUIRED ON
         UNITY_BUILD ${BRLS_UNITY_BUILD}
         # No C++20 modules: no dependency scanning step (CMake >= 3.28)
         CXX_SCAN_FOR_MODULES OFF
-        EXPORT_NAME aurore
 )
 set_source_files_properties(${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwin.mm PROPERTIES
         SKIP_UNITY_BUILD_INCLUSION ON)
-target_include_directories(borealis PUBLIC
+target_include_directories(aurore PUBLIC
         $<BUILD_INTERFACE:${BOREALIS_PATH}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 # The headers of other projects shipped in include/borealis/extern, before
@@ -442,15 +470,15 @@ if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
     list(APPEND BRLS_EXTERN_INCLUDE extern/tinyxml2)
 endif ()
 foreach (dir ${BRLS_EXTERN_INCLUDE})
-    target_include_directories(borealis SYSTEM PUBLIC
+    target_include_directories(aurore SYSTEM PUBLIC
             $<BUILD_INTERFACE:${BOREALIS_PATH}/include/borealis/${dir}>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/borealis/${dir}>)
 endforeach ()
 if (BOREALIS_INCLUDE)
-    target_include_directories(borealis SYSTEM PUBLIC ${BOREALIS_INCLUDE})
+    target_include_directories(aurore SYSTEM PUBLIC ${BOREALIS_INCLUDE})
 endif ()
 if (BOREALIS_DKSH_INCLUDE)
-    target_include_directories(borealis PRIVATE ${BOREALIS_DKSH_INCLUDE})
+    target_include_directories(aurore PRIVATE ${BOREALIS_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
 foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main ${LIBROMFS_LIBRARY})
@@ -463,27 +491,87 @@ foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main ${LIBROMFS_L
     endif ()
 endforeach ()
 # The projects that link the library build with C++20 too, so its headers can use it
-target_compile_features(borealis PUBLIC cxx_std_20)
-target_link_libraries(borealis
+target_compile_features(aurore PUBLIC cxx_std_20)
+target_link_libraries(aurore
         PUBLIC fmt::fmt tweeny yogacore ${BRLS_PLATFORM_LIBS}
         PRIVATE ${BRLS_PRIVATE_LIBS})
 list(REMOVE_DUPLICATES BRLS_PUBLIC_DEFINITIONS)
-target_compile_definitions(borealis
+target_compile_definitions(aurore
         PUBLIC
         BRLS_RESOURCES=${BRLS_PLATFORM_RESOURCES_PATH}
-        YG_ENABLE_EVENTS
         ${BRLS_PUBLIC_DEFINITIONS}
         PRIVATE
         ${BRLS_PRIVATE_DEFINITIONS})
 # Public: apps rely on them for --gc-sections to drop what they do not use
-target_compile_options(borealis PUBLIC
+target_compile_options(aurore PUBLIC
         -ffunction-sections
         -fdata-sections
         ${BRLS_PUBLIC_OPTIONS})
 if (PLATFORM_DESKTOP)
-    target_compile_options(borealis PRIVATE -Wall)
+    target_compile_options(aurore PRIVATE -Wall)
 endif ()
 
 if (AURORE_INSTALL)
     include(${BOREALIS_PATH}/cmake/install.cmake)
+endif ()
+
+# Test harness: a headless platform and brls::test::Harness (include/borealis/test/,
+# docs/testing.md), for an app's tests to link: target Aurore::test
+if (BRLS_BUILD_TESTS)
+    if (NOT PLATFORM_DESKTOP OR NOT BOREALIS_DRIVER STREQUAL "BOREALIS_USE_OPENGL" OR USE_GL2 OR USE_GLES2 OR USE_GLES3)
+        message(FATAL_ERROR "BRLS_BUILD_TESTS needs the desktop platform with the OpenGL 3 driver (the default)")
+    endif ()
+    add_library(aurore_test STATIC
+            ${BOREALIS_PATH}/lib/test/headless_platform.cpp
+            ${BOREALIS_PATH}/lib/test/harness.cpp)
+    add_library(Aurore::test ALIAS aurore_test)
+    set_target_properties(aurore_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+    target_link_libraries(aurore_test PUBLIC aurore)
+    # stb_image_write, for the screenshots
+    target_include_directories(aurore_test PRIVATE ${BOREALIS_PATH}/lib/extern/glfw/deps)
+    if (UNIX AND NOT APPLE)
+        # A context without any window system (Mesa's surfaceless EGL)
+        find_package(OpenGL COMPONENTS EGL)
+        if (OpenGL_EGL_FOUND)
+            # The library itself: OpenGL::EGL is only visible in this directory,
+            # and a static library hands its link dependencies to its users
+            target_include_directories(aurore_test SYSTEM PRIVATE ${OPENGL_EGL_INCLUDE_DIRS})
+            target_link_libraries(aurore_test PRIVATE ${OPENGL_egl_LIBRARY})
+            target_compile_definitions(aurore_test PRIVATE BRLS_HEADLESS_EGL)
+        else ()
+            message(WARNING "EGL not found (libegl-dev): the test harness will need an X server (a hidden GLFW window)")
+        endif ()
+    endif ()
+
+    # Registers each case of a test executable (brls::test::runTests) with
+    # ctest, read from `<target> --list` when ctest runs. REFERENCES: the
+    # folder of the reference screenshots; what the tests get goes to
+    # <build dir>/test-output.
+    function(brls_add_tests target)
+        cmake_parse_arguments(ARG "" "REFERENCES" "" ${ARGN})
+        set(script "${CMAKE_CURRENT_BINARY_DIR}/${target}_cases.cmake")
+        set(env "BRLS_TEST_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/test-output")
+        if (ARG_REFERENCES)
+            set(env "${env};BRLS_TEST_REFERENCES=${ARG_REFERENCES}")
+        endif ()
+        file(GENERATE OUTPUT "${script}" CONTENT "
+execute_process(COMMAND \"$<TARGET_FILE:${target}>\" --list OUTPUT_VARIABLE cases RESULT_VARIABLE result)
+if (NOT result EQUAL 0)
+    add_test(${target}_not_built \"$<TARGET_FILE:${target}>\" --list)
+    return()
+endif ()
+# The names only, not what the program logged
+string(REGEX MATCHALL \"brls-test: [A-Za-z0-9_]+\" cases \"\${cases}\")
+list(TRANSFORM cases REPLACE \"^brls-test: \" \"\")
+foreach (case IN LISTS cases)
+    if (case)
+        add_test(${target}.\${case} \"$<TARGET_FILE:${target}>\" \${case})
+        set_tests_properties(${target}.\${case} PROPERTIES
+            WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\"
+            ENVIRONMENT \"${env}\")
+    endif ()
+endforeach ()
+")
+        set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES "${script}")
+    endfunction()
 endif ()

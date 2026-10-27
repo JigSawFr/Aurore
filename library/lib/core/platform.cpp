@@ -44,6 +44,9 @@ namespace brls
 
 Platform* Platform::createPlatform()
 {
+    if (Platform::factory)
+        return Platform::factory();
+
 #if defined(__SWITCH__)
     return new SwitchPlatform();
 #elif defined(ANDROID)

@@ -35,7 +35,8 @@ struct DelayOperation
 #ifdef PS4
     uint64_t startPoint;
 #else
-    std::chrono::high_resolution_clock::time_point startPoint;
+    // getCPUTimeUsec(): the test harness' simulated clock when it runs
+    int64_t startPoint;
 #endif
     long delayMilliseconds;
     size_t index;
@@ -111,6 +112,13 @@ class Threading
         return &m_sync_functions;
     }
 
+    /**
+     * True when no task is queued with sync() or async() and none is
+     * running on the async thread (delay()s are not counted). The test
+     * harness waits for it before it calls a screen settled.
+     */
+    static bool isIdle();
+
     static std::vector<std::function<void()>>* getAsyncTasks()
     {
         std::lock_guard<std::mutex> guard(m_async_mutex);
@@ -125,6 +133,7 @@ class Threading
     inline static std::mutex m_async_mutex;
     inline static std::vector<std::function<void()>> m_async_tasks;
     inline static std::condition_variable m_async_cv;
+    inline static int m_async_running = 0; // under m_async_mutex
 
     inline static std::mutex m_delay_mutex;
     inline static std::vector<DelayOperation> m_delay_tasks;

@@ -855,3 +855,119 @@ std::string View::getAccessibilityDescription()
 }
 
 } // namespace brls
+
+namespace brls
+{
+
+// ---------------------------------------------------------------------------
+// Theme colours
+// ---------------------------------------------------------------------------
+
+static bool sameColor(NVGcolor a, NVGcolor b)
+{
+    return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+}
+
+bool View::setThemeColor(const std::string& property, const std::string& key)
+{
+    if (key.empty())
+    {
+        if (this->themeColors)
+        {
+            auto& colors = *this->themeColors;
+            colors.erase(std::remove_if(colors.begin(), colors.end(),
+                             [&property](const ThemeColor& color) { return color.property == property; }),
+                colors.end());
+        }
+        return true;
+    }
+
+    StyleValue current;
+    if (!this->getStyleProperty(property, &current) || current.type != StyleValue::Type::COLOR)
+    {
+        Logger::error("theme: {} has no colour {}", this->describe(), property);
+        return false;
+    }
+    Theme theme = Application::getTheme();
+    if (!theme.hasColor(key))
+    {
+        Logger::error("theme: unknown colour {} ({} of {})", key, property, this->describe());
+        return false;
+    }
+
+    NVGcolor color = theme[key];
+    if (!this->themeColors)
+        this->themeColors = std::make_unique<std::vector<ThemeColor>>();
+    ThemeColor* entry = nullptr;
+    for (auto& themeColor : *this->themeColors)
+        if (themeColor.property == property)
+            entry = &themeColor;
+    if (!entry)
+    {
+        this->themeColors->push_back({ property, key, color });
+        entry = &this->themeColors->back();
+    }
+    entry->key     = key;
+    entry->applied = color;
+    this->setStyleProperty(property, StyleValue::of(color));
+    return true;
+}
+
+std::string View::getThemeColor(const std::string& property)
+{
+    if (this->themeColors)
+        for (auto& themeColor : *this->themeColors)
+            if (themeColor.property == property)
+                return themeColor.key;
+    return "";
+}
+
+void View::onThemeChanged()
+{
+    if (this->extras && !this->extras->stateStyles.empty())
+        this->extras->stylesDirty = true;
+    if (!this->themeColors)
+        return;
+
+    Theme theme = Application::getTheme();
+    auto& colors = *this->themeColors;
+    for (auto it = colors.begin(); it != colors.end();)
+    {
+        StyleValue current;
+        bool readable = this->getStyleProperty(it->property, &current);
+        // Mid-transition, the property is on its way to the transition's end;
+        // under a state style, the state's colour hides the one set before
+        Extras::Styled* styled = nullptr;
+        if (this->extras)
+        {
+            if (Extras::Running* run = this->extras->findRunning(it->property))
+                if (run->progress.isRunning())
+                    current = run->to;
+            for (auto& entry : this->extras->styled)
+                if (entry.property == it->property && entry.driven)
+                    styled = &entry;
+        }
+        if (styled)
+            current = styled->base;
+
+        // Changed by the app since: its own colour stays
+        if (!readable || !sameColor(current.color, it->applied) || !theme.hasColor(it->key))
+        {
+            it = colors.erase(it);
+            continue;
+        }
+
+        NVGcolor color = theme[it->key];
+        it->applied    = color;
+        if (!sameColor(color, current.color))
+        {
+            if (styled)
+                styled->base = StyleValue::of(color);
+            else
+                this->setStyleProperty(it->property, StyleValue::of(color));
+        }
+        ++it;
+    }
+}
+
+} // namespace brls

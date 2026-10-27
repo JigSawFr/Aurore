@@ -1,0 +1,9 @@
+{
+    "presets": {
+        "high_contrast_dark": "Высокий контраст, тёмная",
+        "high_contrast_light": "Высокий контраст, светлая",
+        "ocean": "Океан",
+        "amethyst": "Аметист",
+        "sand": "Песок"
+    }
+}

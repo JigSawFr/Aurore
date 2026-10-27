@@ -34,7 +34,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - 🧱 **Flexbox layout** — every view is laid out by [Yoga](https://github.com/facebook/yoga), described in XML, code only where it matters.
 - 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM), scaled for a TV.
 - 🧩 **Ready-made components** — tabs, lists that recycle their cells, settings cells, dialogs, toasts, sliders, images, all restyled by a theme.
-- 🌗 **Light and dark themes**, and translations in one JSON catalogue per language.
+- 🌗 **Light and dark themes, theme files and presets** (high contrast included) switched while the app runs ([docs/themes.md](docs/themes.md)), and translations in one JSON catalogue per language.
 - 🧰 **The toolbox** — logger, animations, timers, background tasks, storage.
 
 <details>
@@ -69,7 +69,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 ## 🌟 What Aurore adds
 
-- 📐 **Layout** — `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; a radius per corner; horizontal gradients.
+- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients.
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
 - 🎯 **Focus and hints** — no focus lost in hidden or destroyed views; optional and steady footer hints.
@@ -86,6 +86,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | --- | --- |
 | Gaps between a box's children | `gap`, `rowGap`, `columnGap` (XML) · `Box::setGap`, `setRowGap`, `setColumnGap` |
 | Wrapping boxes, focus moving across their lines | `flexWrap="wrap"` · `Box::setWrap` |
+| Yoga 3.2, standard CSS flexbox | `Application::getYogaConfig()` |
+| Width and height measured with or without padding and border | `boxSizing="borderBox"` (default) or `"contentBox"` · `View::setBoxSizing` |
+| A view whose position offsets are ignored and that absolute children skip to find their reference | `positionType="static"` · `PositionType::STATIC` |
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
@@ -101,6 +104,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A label tells when it is cut with "…" | `Label::isTruncated` |
 | A wrapped line no longer starts with a space; a no-break space keeps words together | — |
 | The default font looked up for each new label | — |
+| FreeType instead of stb_truetype, hinted (an option) | `-DUSE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
+| Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
+| Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DUSE_FRIBIDI=ON` · `brls::bidiVisual()` |
 
 **Languages**
 
@@ -143,6 +149,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | XML attribute handlers registered the first time one is used | 200 labels built in code: 3–6 → under 1 ms |
 | Cached textures freed once nothing uses them | — |
 | Views queued while the deletion pool drains kept; each recycling list checks its own width | — |
+| Text measures kept per text and style (`nvgTextBounds`, `nvgTextBoxBounds`) | a measure: 2.1 → 0.18 µs; 95% of the demo's answered from the cache |
 
 Each commit says what it changes, why, and where it comes from: `git log 5f08b28..`.
 
@@ -150,7 +157,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 
 ## 📦 Use it in your project
 
-1. Build your project as **C++17**, without `-fno-rtti` or `-fno-exceptions`.
+1. Build your project as **C++20**, without `-fno-rtti` or `-fno-exceptions`.
 2. Add Aurore as a submodule:
 
    ```sh
@@ -159,12 +166,12 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
    ```
 
 3. Copy its `resources` folder to the root of your project.
-4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore` (the old `borealis` target name still works). It brings its include directories, definitions and dependencies with it.
+4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `USE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
 > [!TIP]
-> Starting from scratch? Upstream's [**template**](https://github.com/xfangfang/borealis_template) has the build files for every platform; point its submodule here.
+> Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.
 
 ## 🛠️ Build the demo
 
@@ -191,6 +198,8 @@ cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 ```
 
 With the resources built in (`USE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
+
+New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
 For the other platforms, upstream's wiki has the toolchains and the commands:
 

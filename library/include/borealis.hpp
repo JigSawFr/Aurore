@@ -24,6 +24,7 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/assets.hpp>
 #include <borealis/core/audio.hpp>
+#include <borealis/core/bidi.hpp>
 #include <borealis/core/bind.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/core/event.hpp>
@@ -35,6 +36,7 @@
 #include <borealis/core/input.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/platform.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/task.hpp>
 #include <borealis/core/theme.hpp>
@@ -47,14 +49,17 @@
 // Views
 #include <borealis/views/applet_frame.hpp>
 #include <borealis/views/button.hpp>
+#include <borealis/views/context_menu.hpp>
 #include <borealis/views/dialog.hpp>
 #include <borealis/views/dropdown.hpp>
 #include <borealis/views/header.hpp>
+#include <borealis/views/icon_button.hpp>
 #include <borealis/views/image.hpp>
 #include <borealis/views/label.hpp>
 #include <borealis/views/progress_spinner.hpp>
 #include <borealis/views/rectangle.hpp>
 #include <borealis/views/recycler.hpp>
+#include <borealis/views/recycling_grid.hpp>
 #include <borealis/views/scrolling_frame.hpp>
 #include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/sidebar.hpp>
@@ -73,6 +78,7 @@
 #include <borealis/views/cells/cell_slider.hpp>
 
 // Gestures
+#include <borealis/core/touch/long_press_gesture.hpp>
 #include <borealis/core/touch/pan_gesture.hpp>
 #include <borealis/core/touch/scroll_gesture.hpp>
 #include <borealis/core/touch/tap_gesture.hpp>

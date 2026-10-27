@@ -18,12 +18,15 @@
 
 namespace
 {
+// The swatch's colours: theme keys (demo_app.cpp), so a theme can change them
+const char* const SWATCHES[] = { "demo/swatch/teal", "demo/swatch/orange", "demo/swatch/red", "demo/swatch/blue" };
+
 // The model the tab's bind= attributes read: it lives as long as the app,
 // the tab may be built again (a new language or theme).
 struct StylesModel
 {
     brls::Observable<int> counter { 0 };
-    brls::Observable<NVGcolor> swatch { nvgRGB(46, 196, 182) };
+    brls::Observable<NVGcolor> swatch;
     brls::Observable<bool> even { true };
     brls::Observable<std::string> announced { "Move the focus: what a screen reader would say shows here." };
     brls::DataModel model;
@@ -34,6 +37,14 @@ struct StylesModel
         model.add("swatch", swatch);
         model.add("even", even);
         model.add("announced", announced);
+
+        this->updateSwatch();
+        brls::Application::getThemeChangedEvent()->subscribe([this](brls::ThemeVariant) { this->updateSwatch(); });
+    }
+
+    void updateSwatch()
+    {
+        swatch = brls::Application::getTheme()[SWATCHES[counter.get() % 4]];
     }
 };
 
@@ -42,8 +53,6 @@ StylesModel& stylesModel()
     static StylesModel model;
     return model;
 }
-
-const NVGcolor SWATCHES[] = { nvgRGB(46, 196, 182), nvgRGB(255, 159, 28), nvgRGB(231, 29, 54), nvgRGB(58, 123, 213) };
 }
 
 StylesTab::StylesTab()
@@ -72,8 +81,8 @@ StylesTab::StylesTab()
     this->increment->registerClickAction([](brls::View*) {
         StylesModel& data = stylesModel();
         data.counter = data.counter.get() + 1;
-        data.swatch  = SWATCHES[data.counter.get() % 4];
-        data.even    = data.counter.get() % 2 == 0;
+        data.updateSwatch();
+        data.even = data.counter.get() % 2 == 0;
         return true;
     });
 

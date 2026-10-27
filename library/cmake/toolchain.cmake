@@ -16,7 +16,7 @@ function(check_libromfs_generator)
 endfunction()
 
 # Definitions the choices below make: the library gives them to the targets
-# that link it (target_compile_definitions(borealis PUBLIC ...))
+# that link it (target_compile_definitions(aurore PUBLIC ...))
 set(BRLS_TOOLCHAIN_DEFINITIONS)
 
 if (PLATFORM_DESKTOP)

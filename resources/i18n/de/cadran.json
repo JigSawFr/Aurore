@@ -108,6 +108,10 @@
             "system": "System",
             "light": "Hell",
             "dark": "Dunkel"
+        },
+        "palette": "Farbpalette",
+        "palettes": {
+            "default": "Standard"
         }
     }
 }

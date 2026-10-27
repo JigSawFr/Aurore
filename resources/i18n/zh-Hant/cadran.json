@@ -108,6 +108,10 @@
             "system": "依系統",
             "light": "淺色",
             "dark": "深色"
+        },
+        "palette": "配色",
+        "palettes": {
+            "default": "預設"
         }
     }
 }

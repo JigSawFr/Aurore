@@ -86,6 +86,7 @@ class BoundView
 
     View* ownerView         = nullptr;
     Activity* ownerActivity = nullptr;
+    unsigned generation     = 0;
 
     /**
      * Resolve the view pointer by id.
@@ -97,6 +98,10 @@ class BoundView
      */
     void resolve()
     {
+        // An activity's content made again (hot reload) has views of its own
+        if (this->view && this->ownerActivity && this->generation != this->ownerActivity->getContentGeneration())
+            this->view = nullptr;
+
         if (this->view)
             return;
 
@@ -111,7 +116,8 @@ class BoundView
         // Then resolve by owner view
         else if (this->ownerActivity)
         {
-            this->view = (T*)this->ownerActivity->getView(this->id);
+            this->view       = (T*)this->ownerActivity->getView(this->id);
+            this->generation = this->ownerActivity->getContentGeneration();
 
             if (!this->view)
                 throw ViewNotFoundException(this->ownerActivity, this->id);

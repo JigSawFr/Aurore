@@ -41,7 +41,7 @@ end
 
 
 add_requires("tinyxml2")
-add_requires("yoga")
+add_requires("yoga 3.2.1")
 add_requires("stb")
 add_requires("nanovg")
 add_requires("nlohmann_json")
@@ -49,8 +49,7 @@ add_requires("fmt")
 add_requires("tweeny")
 
 add_defines(
-    'BRLS_RESOURCES="./resources/"',
-    "YG_ENABLE_EVENTS"
+    'BRLS_RESOURCES="./resources/"'
 )
 
 if get_config("driver") == "opengl" then
@@ -68,7 +67,7 @@ elseif get_config("window") == "glfw" then
     add_requires("xfangfang_glfw")
 end
 
-target("borealis")
+target("aurore")
     set_kind("static")
     -- set_kind("shared")
     add_includedirs("library/include")
@@ -138,7 +137,7 @@ target("demo")
     if get_config("window") == "sdl" then
         add_packages("sdl2")
     end
-    add_deps("borealis")
+    add_deps("aurore")
     on_config(function (target)
         local cmakefile = io.readfile("CMakeLists.txt")
         target:set("configvar", "VERSION_MAJOR", string.match(cmakefile, "set%(VERSION_MAJOR \"(%d)\"%)"))

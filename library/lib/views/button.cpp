@@ -91,7 +91,6 @@ Button::Button()
 void Button::applyStyle()
 {
     Style style = Application::getStyle();
-    Theme theme = Application::getTheme();
 
     this->setShadowType(this->style->shadowType);
     this->setHideHighlightBackground(this->style->hideHighlightBackground);
@@ -127,17 +126,25 @@ void Button::applyStyle()
     }
 
     if (backgroundColor != "")
-        this->setBackgroundColor(theme[backgroundColor]);
+        this->setThemeColor("backgroundColor", backgroundColor);
     else
+    {
+        this->setThemeColor("backgroundColor", "");
         this->setBackground(ViewBackground::NONE);
+    }
 
     if (textColorOverritten)
+    {
+        this->label->setThemeColor("textColor", "");
         this->label->setTextColor(this->textColor);
+    }
     else
-        this->label->setTextColor(theme[textColor]);
+        this->label->setThemeColor("textColor", textColor);
 
     if (this->getBorderThickness() > 0.0f)
-        this->setBorderColor(theme[borderColor]);
+        this->setThemeColor("borderColor", borderColor);
+    else
+        this->setThemeColor("borderColor", "");
 }
 
 void Button::onFocusGained()

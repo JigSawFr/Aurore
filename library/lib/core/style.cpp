@@ -16,6 +16,7 @@
     limitations under the License.
 */
 
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/util.hpp>
 #include <stdexcept>
@@ -162,12 +163,28 @@ Style getStyle()
 StyleValues::StyleValues(std::initializer_list<std::pair<std::string, float>> list)
 {
     for (std::pair<std::string, float> metric : list)
-        this->values.insert(metric);
+        this->base.insert(metric);
+    this->values = this->base;
 }
 
 void StyleValues::addMetric(const std::string& name, float metric)
 {
-    this->values[name] = metric;
+    this->base[name] = metric;
+    if (this->overlay.count(name) == 0)
+        this->values[name] = metric;
+}
+
+bool StyleValues::hasMetric(const std::string& name) const
+{
+    return this->values.count(name) > 0;
+}
+
+void StyleValues::setOverlay(const std::unordered_map<std::string, float>& overlay)
+{
+    this->overlay = overlay;
+    this->values  = this->base;
+    for (auto& [name, metric] : overlay)
+        this->values[name] = metric;
 }
 
 float StyleValues::getMetric(const std::string& name)
@@ -177,7 +194,10 @@ float StyleValues::getMetric(const std::string& name)
         return 0;
     }
 
-    return this->values[name];
+    float metric = this->values[name];
+    if (Inspector::recording)
+        Inspector::recordMetric(name, metric);
+    return metric;
 }
 
 Style::Style(StyleValues* values)
@@ -188,6 +208,11 @@ Style::Style(StyleValues* values)
 float Style::getMetric(const std::string& name)
 {
     return this->values->getMetric(name);
+}
+
+bool Style::hasMetric(const std::string& name)
+{
+    return this->values->hasMetric(name);
 }
 
 void Style::addMetric(const std::string& name, float metric)

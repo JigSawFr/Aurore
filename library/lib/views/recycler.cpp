@@ -24,7 +24,7 @@ namespace brls
 RecyclerCell::RecyclerCell()
 {
     this->setLineBottom(1);
-    this->setLineColor(Application::getTheme()["brls/sidebar/separator"]);
+    this->showSeparator(true);
 
     setHeight(Application::getStyle()["brls/dropdown/listItemHeight"]);
 
@@ -37,7 +37,7 @@ RecyclerCell::RecyclerCell()
 
     subscription = Application::getGlobalInputTypeChangeEvent()->subscribe([this](InputType type) {
         bool isTouch = type == InputType::TOUCH;
-        this->setLineColor((!isTouch && this->focused) ? TRANSPARENT : Application::getTheme()["brls/sidebar/separator"]);
+        this->showSeparator(isTouch || !this->focused);
     });
 
     this->addGestureRecognizer(new TapGestureRecognizer(this));
@@ -66,8 +66,19 @@ void RecyclerCell::onFocusGained()
 
     Box::onFocusGained();
 
-    bool isTouch = Application::getInputType() == InputType::TOUCH;
-    this->setLineColor(!isTouch ? TRANSPARENT : Application::getTheme()["brls/sidebar/separator"]);
+    this->showSeparator(Application::getInputType() == InputType::TOUCH);
+}
+
+// The separator lines, hidden under the focus highlight
+void RecyclerCell::showSeparator(bool show)
+{
+    if (show)
+        this->setThemeColor("lineColor", "brls/sidebar/separator");
+    else
+    {
+        this->setThemeColor("lineColor", "");
+        this->setLineColor(TRANSPARENT);
+    }
 }
 
 void RecyclerCell::onFocusLost()
@@ -75,7 +86,7 @@ void RecyclerCell::onFocusLost()
     // Called when a child of ours losts focused, in that case it's the Image
 
     Box::onFocusLost();
-    this->setLineColor(Application::getTheme()["brls/sidebar/separator"]);
+    this->showSeparator(true);
 }
 
 RecyclerHeader::RecyclerHeader()
@@ -554,6 +565,15 @@ void RecyclerFrame::removeCell(View* view)
     view->willDisappear(true);
 
     this->invalidate();
+}
+
+// The cells kept for reuse too: they come back in the theme drawn now
+void RecyclerFrame::onThemeChanged()
+{
+    ScrollingFrame::onThemeChanged();
+    for (auto& [identifier, cells] : this->queueMap)
+        for (RecyclerCell* cell : *cells)
+            cell->onThemeChanged();
 }
 
 void RecyclerFrame::onLayout()

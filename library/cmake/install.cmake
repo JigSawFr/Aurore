@@ -3,7 +3,7 @@
 #   find_package(Aurore REQUIRED)
 #   target_link_libraries(app PRIVATE Aurore::aurore)
 #
-# Included from library/CMakeLists.txt once the borealis target exists.
+# Included from library/CMakeLists.txt once the aurore target exists.
 # Desktop only: the consoles build the library with the app.
 
 if (NOT PLATFORM_DESKTOP)
@@ -16,7 +16,7 @@ endif ()
 include(CMakePackageConfigHelpers)
 
 set(AURORE_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Aurore)
-set(AURORE_EXPORTED borealis yogacore)
+set(AURORE_EXPORTED aurore yogacore)
 if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
     list(APPEND AURORE_EXPORTED tinyxml2)
 endif ()

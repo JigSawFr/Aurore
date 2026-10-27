@@ -169,6 +169,9 @@ void nvgCancelFrame(NVGcontext* ctx);
 // Ends drawing flushing remaining render state.
 void nvgEndFrame(NVGcontext* ctx);
 
+// Draw calls and triangles (fills, strokes, text) submitted since nvgBeginFrame.
+void nvgDebugGetStats(NVGcontext* ctx, int* draws, int* fillTris, int* strokeTris, int* textTris);
+
 //
 // Composite operation
 //
@@ -639,6 +642,15 @@ void nvgTextMetrics(NVGcontext* ctx, float* ascender, float* descender, float* l
 int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, float breakRowWidth, NVGtextRow* rows, int maxRows);
 
 void nvgFontQuality(NVGcontext* ctx, float quality);
+
+// nvgTextBounds() and nvgTextBoxBounds() keep what they measured, keyed by the
+// text and every state it depends on (font, size, spacing, blur, alignment,
+// line height, break width, scale); adding a font or a fallback empties it.
+// On by default. Since the context was created: the measures answered from
+// the cache (hits) and those fontstash made (misses, cache on or off).
+void nvgTextCacheEnable(NVGcontext* ctx, int enabled);
+void nvgTextCacheClear(NVGcontext* ctx);
+void nvgTextCacheStats(NVGcontext* ctx, int* hits, int* misses);
 
 // Work like nvgFill, but only supports drawing image with alpha channels.
 // The image is used to create a stencil buffer, which will be used for subsequent drawing operations,

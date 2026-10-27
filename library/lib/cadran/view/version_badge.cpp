@@ -31,9 +31,9 @@ VersionBadge::VersionBadge()
 
     // The tag: filled (the amber of the warnings, or the notes' grey for a
     // release), the version in the background's colour.
-    const NVGcolor ink = release ? cadran::kit::color("cadran/text3") : cadran::kit::color("cadran/amber");
+    const char* ink = release ? "cadran/text3" : "cadran/amber";
     auto* tag = new brls::Box(brls::Axis::ROW);
-    tag->setBackgroundColor(ink);
+    tag->setThemeColor("backgroundColor", ink);
     tag->setCornerRadius(4);
     tag->setPadding(2, 8, 2, 8);
     auto* number = new brls::Label();
@@ -41,7 +41,7 @@ VersionBadge::VersionBadge()
     number->setFontSize(18);
     number->setFontScaled(false);   // a tag: the same size with the larger text
     number->setSingleLine(true);
-    number->setTextColor(brls::Application::getTheme()["brls/background"]);
+    number->setThemeColor("textColor", "brls/background");
     tag->addView(number);
     this->addView(tag);
     if (release || commit.empty()) return;
@@ -51,7 +51,7 @@ VersionBadge::VersionBadge()
     text->setSingleLine(true);
     text->setMarginLeft(10);
     text->setText(commit);
-    text->setTextColor(ink);
+    text->setThemeColor("textColor", ink);
     this->addView(text);
 }
 

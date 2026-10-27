@@ -88,8 +88,7 @@ NotificationManager::~NotificationManager()
 Notification::Notification(const std::string& text, View* leading)
 {
     auto style    = Application::getStyle();
-    Theme theme   = Application::getTheme();
-    this->setBackgroundColor(theme["brls/notification/background"]);
+    this->setThemeColor("backgroundColor", "brls/notification/background");
     this->setCornerRadius(style.getMetric("brls/notification/corner_radius"));
     this->setMarginBottom(style.getMetric("brls/notification/spacing"));
     float padding = style.getMetric("brls/notification/padding");
@@ -98,7 +97,7 @@ Notification::Notification(const std::string& text, View* leading)
     this->setWidth(width);
     this->label = new Label();
     this->label->setText(text);
-    this->label->setTextColor(theme["brls/notification/text"]);
+    this->label->setThemeColor("textColor", "brls/notification/text");
     if (leading) {
         // The text beside it, wrapping in what is left.
         this->setAlignItems(AlignItems::CENTER);

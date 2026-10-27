@@ -30,15 +30,16 @@ class BatteryWidget : public Box
     BatteryWidget();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
+    void onThemeChanged() override;
     static View* create();
 
   private:
-    Image* back;
-    Rectangle* level;
+    // None where the platform shows no battery level
+    Image* back      = nullptr;
+    Rectangle* level = nullptr;
     Platform* platform;
 
     void applyBackTheme(ThemeVariant theme);
-    void applyLevelTheme(ThemeVariant theme);
 
     void updateState();
     inline static bool isBatteryCharging = false;

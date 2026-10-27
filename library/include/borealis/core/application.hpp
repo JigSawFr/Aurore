@@ -107,6 +107,12 @@ class Application
     static Platform* getPlatform();
     static AudioPlayer* getAudioPlayer();
 
+    /**
+     * The Yoga configuration every view's node is created with
+     * (web defaults, yoga's messages in the log).
+     */
+    static YGConfig* getYogaConfig();
+
     static NVGcontext* getNVGContext();
     inline static float contentWidth, contentHeight;
 
@@ -242,6 +248,15 @@ class Application
     static Theme getTheme();
     static ThemeVariant getThemeVariant();
 
+    /**
+     * Fired when the theme changed: another variant
+     * (Platform::setThemeVariant), a theme file (Theme::loadFile,
+     * Theme::reset) or a colour changed (Theme::addColor). Checked once a
+     * frame, before it is drawn; by then every view of the screens took the
+     * change (View::onThemeChanged). For what keeps colours of its own.
+     */
+    static Event<ThemeVariant>* getThemeChangedEvent();
+
     static ImeManager* getImeManager();
 
     /**
@@ -336,7 +351,7 @@ class Application
      * Set the swap interval
      * Must be called after createWindow. On some platforms, it is impossible to set it back
      * to 0 after setting it to a non-zero values, so you can use
-     * `VideoContext::swapInterval = 0;` (#include "borealis/core/video.hpp") before creating the window.
+     * `VideoContext::swapInterval = 0;` (`#include "borealis/core/video.hpp"`) before creating the window.
      *
      * Test results:
      *
@@ -410,6 +425,26 @@ class Application
      */
     static uint64_t getDrawnFrameCount();
 
+    /**
+     * Debugging redraw on demand: each frame it skips is drawn all the same,
+     * without being presented, and compared with the last frame presented.
+     * A difference is something that changed on screen without asking for a
+     * redraw (a missing invalidate() or requestRedraw()): it is logged as a
+     * warning, with the area and the views drawn there (once per area).
+     * Reads every frame back: slow, and OpenGL drivers only. Off by default;
+     * BRLS_REDRAW_DEBUG=1 in the environment turns it on (desktop).
+     */
+    static void setRedrawDebug(bool enabled);
+    static bool isRedrawDebug();
+
+    /**
+     * With setRedrawDebug(): the number of skipped frames found different
+     * from the last frame presented, and the last such area, in the views'
+     * coordinates.
+     */
+    static uint64_t getMissedRedrawCount();
+    static Rect getLastMissedRedrawArea();
+
     static GenericEvent* getGlobalFocusChangeEvent();
     static VoidEvent* getGlobalHintsUpdateEvent();
     static Event<InputType>* getGlobalInputTypeChangeEvent();
@@ -454,6 +489,40 @@ class Application
     {
         return inputType;
     }
+
+    /**
+     * The built-in inspector (docs/inspector.md): F12 on a keyboard, or
+     * both sticks pressed in together (L3 + R3) on a controller, opens it
+     * over the screen with the view tree, the focus chain, the yoga box and
+     * the theme values of a view, and the frame's timings. Off by default;
+     * the BRLS_INSPECTOR CMake option, or BRLS_INSPECTOR=1 in the
+     * environment on a desktop, turns it on at init(). Closed, it only
+     * watches for its toggle.
+     */
+    static void setInspectorEnabled(bool enabled);
+    static bool isInspectorEnabled();
+
+    /**
+     * Hot reload, on a desktop (docs/hot_reload.md): the XML files the
+     * activity on top was built from, and the files read by
+     * Theme::loadFile(), are watched, and the activity is built again when
+     * one of them changes (the focus is put back where it was when it can
+     * be). `resourcesDir`, when given, is a resources folder (the app's
+     * sources' `resources/`) the XML files are read from in place of the
+     * ones built in (libromfs) or copied next to the app. Off by default;
+     * `BRLS_HOT_RELOAD=1`, or `BRLS_HOT_RELOAD=<resources folder>`, in the
+     * environment turns it on at init(). Does nothing on the consoles.
+     */
+    static void setHotReload(bool enabled, const std::string& resourcesDir = "");
+    static bool isHotReload();
+
+    /**
+     * Builds the content of the activity on top again from its
+     * createContentView(), as hot reload does. False when it cannot (an
+     * activity given its view in its constructor) or the new content
+     * throws while being made, the old one then staying.
+     */
+    static bool rebuildActivity();
 
     inline static void enableDebuggingView(bool enable)
     {
@@ -565,6 +634,11 @@ class Application
     inline static int redrawFrames         = 2; // frames still to draw
     inline static Time lastDrawTime        = 0;
     inline static uint64_t drawnFrames     = 0;
+    inline static bool redrawDebug         = false;
+    inline static uint64_t missedRedraws   = 0;
+    static Rect missedRedrawArea;
+    inline static std::vector<unsigned char> presentedPixels;
+    inline static int presentedWidth = 0, presentedHeight = 0;
     inline static int deactivatedFPS       = 5; // FPS 5
     inline static int deactivatedTime      = 5000000; // 5s
 
@@ -581,12 +655,26 @@ class Application
     inline static VoidEvent windowCreationDoneEvent;
     inline static VoidEvent windowShouldCloseEvent;
     inline static Event<bool> windowFocusChangedEvent;
+    inline static Event<ThemeVariant> themeChangedEvent;
+
+    // The theme the screens were last told about
+    inline static uint64_t themeGeneration   = 0;
+    inline static ThemeVariant themeVariant = ThemeVariant::DARK;
+    static void checkThemeChanged();
+
+    // The theme file's background_image: its texture (0: none)
+    inline static std::string themeBackgroundPath;
+    inline static int themeBackground = 0;
+    static void loadThemeBackground();
+    static void drawThemeBackground(NVGcontext* vg);
 
     inline static std::unordered_map<std::string, XMLViewCreator> xmlViewsRegister;
 
     static void navigate(FocusDirection direction, bool repeating);
 
-    static void frame();
+    // present: false draws the frame without presenting it (redraw debug)
+    static void frame(bool present = true);
+    static void checkSkippedFrame();
     static void exit();
 
     /**

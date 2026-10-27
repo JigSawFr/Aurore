@@ -99,6 +99,7 @@ namespace tinyxml2
     class XMLElement;
 }
 struct YGNode;
+struct YGConfig;
 
 namespace brls
 {
@@ -150,6 +151,14 @@ enum class PositionType
 {
     RELATIVE, // position attributes offset the view from the base layout
     ABSOLUTE, // position attributes set the absolute coordinates of the view
+    STATIC, // position attributes are ignored, and absolute children are placed against an ancestor that is not static
+};
+
+// What the width and height of a view measure
+enum class BoxSizing
+{
+    BORDER_BOX, // the whole view, padding and border included
+    CONTENT_BOX, // the content only, padding and border are added to it
 };
 
 // The animation to play when
@@ -388,6 +397,8 @@ class View
     {
         return this->a(nvgRGBAf(r, g, b, a));
     }
+
+    NVGcolor shadowColor(NVGcolor color, float opacity);
 
     /**
      * Should the hint alpha be animated when
@@ -813,6 +824,13 @@ class View
      */
     void setAlignSelf(AlignSelf align);
 
+    /**
+     * Sets what the width and height of the view measure.
+     *
+     * Default is BORDER_BOX.
+     */
+    void setBoxSizing(BoxSizing sizing);
+
     // -----------------------------------------------------------
     // Styling and view shape properties
     // -----------------------------------------------------------
@@ -894,6 +912,10 @@ class View
             return;
         this->borderColor = color;
     }
+
+    ViewBackground getBackground() const { return this->background; }
+    NVGcolor getBackgroundColor() const { return this->backgroundColor; }
+    NVGcolor getBorderColor() const { return this->borderColor; }
 
     /**
      * Sets the view shape border thickness.
@@ -1114,7 +1136,7 @@ class View
      * method. You can have multiple attributes registered with the same
      * name but different types / handlers, except if the type is string.
      *
-     * The method will be called if the attribute has an integer, float, @style or "px" value.
+     * The method will be called if the attribute has an integer, float, `@style` or "px" value.
      */
     void registerFloatXMLAttribute(std::string name, FloatAttributeHandler handler);
 
@@ -1123,7 +1145,7 @@ class View
      * method. You can have multiple attributes registered with the same
      * name but different types / handlers, except if the type is string.
      *
-     * The method will be called if the attribute has a string or @i18n value.
+     * The method will be called if the attribute has a string or `@i18n` value.
      *
      * If you use string as a type, you can only have one handler for the attribute.
      */
@@ -1135,7 +1157,7 @@ class View
      * name but different types / handlers, except if the type is string.
      *
      * The method will be called if the attribute has a color value ("#XXXXXX" or "#XXXXXXXX")
-     * or a @theme value.
+     * or a `@theme` value.
      */
     void registerColorXMLAttribute(std::string name, ColorAttributeHandler handler);
 
@@ -1161,6 +1183,13 @@ class View
      * Get the XML document for the XML file, creating a new one if none is cached.
      */
     static std::shared_ptr<tinyxml2::XMLDocument> getXMLCache(std::string_view path);
+
+    /**
+     * Drops the cached document of an XML file, which is then read again
+     * (hot reload). The document stays in memory: views made from it may
+     * still point into it.
+     */
+    static void forgetXMLCache(const std::string& path);
 
     /**
      * Returns if the given XML attribute name is valid for that view.
@@ -1759,6 +1788,32 @@ class View
      */
     virtual void onTextScaleChanged() {}
 
+    /**
+     * Draws the style property `property` (backgroundColor, textColor…, see
+     * getStyleProperty) in the theme colour `key` ("brls/text"), now and
+     * again each time the theme changes (a theme file, the light or dark
+     * variant). XML does it for every "@theme/…" colour. A colour the app
+     * sets on the property afterwards (setTextColor…) replaces the key.
+     * An empty key only forgets the property's key (the colour stays).
+     * Returns false for a property the view does not have or an unknown key.
+     */
+    bool setThemeColor(const std::string& property, const std::string& key);
+
+    /**
+     * The key setThemeColor gave `property`, "" when it has none.
+     */
+    std::string getThemeColor(const std::string& property);
+
+    /**
+     * Called on every view of the screens when the theme changes
+     * (Application::getThemeChangedEvent): the colours given by key
+     * (setThemeColor) take their new values, the state styles read their
+     * "@theme/" values again. A view that keeps other colours of its own
+     * looks them up again here, then calls the base. A Box goes on to its
+     * children.
+     */
+    virtual void onThemeChanged();
+
   protected:
     /**
      * The view's own role and label when the app gave none.
@@ -1796,6 +1851,16 @@ class View
     bool bindOne(const std::string& property, const std::string& path, Activity* activity);
     static bool parseStyleValue(const std::string& text, StyleValue::Type type, StyleValue* value);
     static unsigned pendingBindings;
+
+    // setThemeColor's: the property, its key, and the colour set last (to
+    // tell the app's own changes from ours)
+    struct ThemeColor
+    {
+        std::string property;
+        std::string key;
+        NVGcolor applied;
+    };
+    std::unique_ptr<std::vector<ThemeColor>> themeColors;
 };
 
 } // namespace brls

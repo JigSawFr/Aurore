@@ -17,17 +17,22 @@
     limitations under the License.
 */
 
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <cmath>
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
 #include <yoga/event/event.h>
 
 #include <algorithm>
 #include <borealis/core/application.hpp>
 #include <borealis/views/dialog.hpp>
 #include <borealis/core/font.hpp>
+#include <borealis/core/hot_reload.hpp>
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/thread.hpp>
 #include <borealis/core/time.hpp>
 #include <borealis/core/util.hpp>
@@ -41,10 +46,12 @@
 #include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/header.hpp>
 #include <borealis/views/hint.hpp>
+#include <borealis/views/icon_button.hpp>
 #include <borealis/views/image.hpp>
 #include <borealis/views/progress_spinner.hpp>
 #include <borealis/views/rectangle.hpp>
 #include <borealis/views/recycler.hpp>
+#include <borealis/views/recycling_grid.hpp>
 #include <borealis/views/sidebar.hpp>
 #include <borealis/views/slider.hpp>
 #include <borealis/views/tab_frame.hpp>
@@ -54,10 +61,6 @@
 #include <borealis/views/debug_layer.hpp>
 #include <stdexcept>
 #include <string>
-
-#ifndef YG_ENABLE_EVENTS
-#error Please enable Yoga events with the YG_ENABLE_EVENTS define
-#endif
 
 #include <borealis/cadran.hpp>
 #include <chrono>
@@ -103,6 +106,24 @@ bool Application::init()
 
     Threading::start();
 
+    // Debugging aids, off unless asked for
+#ifdef BRLS_INSPECTOR
+    Inspector::setEnabled(true);
+#endif
+    if (const char* inspector = std::getenv("BRLS_INSPECTOR"))
+        Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
+    if (const char* hotReload = std::getenv("BRLS_HOT_RELOAD"))
+    {
+        if (std::strcmp(hotReload, "0") != 0)
+            HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
+    }
+
+#if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+    const char* redrawDebugEnv = std::getenv("BRLS_REDRAW_DEBUG");
+    if (redrawDebugEnv && *redrawDebugEnv && *redrawDebugEnv != '0')
+        Application::setRedrawDebug(true);
+#endif
+
     Application::inited = true;
 
     return true;
@@ -145,19 +166,20 @@ void Application::createWindow(std::string windowTitle)
     Application::title        = windowTitle;
 
     // Init yoga
-    YGConfig* defaultConfig       = YGConfigGetDefault();
-    defaultConfig->setUseWebDefaults(true);
-    using namespace facebook;
+    Application::getYogaConfig();
 
-    facebook::yoga::Event::subscribe([](const YGNode& node, facebook::yoga::Event::Type eventType, facebook::yoga::Event::Data eventData)
+    facebook::yoga::Event::subscribe([](YGNodeConstRef node, facebook::yoga::Event::Type eventType, facebook::yoga::Event::Data eventData)
         {
-        View* view = (View*)node.getContext();
+        View* view = (View*)YGNodeGetContext(node);
 
         if (!view)
             return;
 
         if (eventType == facebook::yoga::Event::NodeLayout)
-            view->onLayout(); });
+        {
+            Profiler::addViewLaidOut();
+            view->onLayout();
+        } });
 
     // Load fonts and setup fallbacks
     Application::platform->getFontLoader()->loadFonts();
@@ -172,6 +194,30 @@ void Application::createWindow(std::string windowTitle)
     Application::getWindowCreationDoneEvent()->fire();
 }
 
+YGConfig* Application::getYogaConfig()
+{
+    // Created on first use: views can be built before the window
+    static YGConfigRef config = []
+    {
+        YGConfigRef config = YGConfigNew();
+        YGConfigSetUseWebDefaults(config, true);
+        // Yoga's messages in the app's log, one line each
+        YGConfigSetLogger(config, [](YGConfigConstRef, YGNodeConstRef, YGLogLevel level, const char* format, va_list args)
+            {
+            char message[512];
+            int length = std::vsnprintf(message, sizeof(message), format, args);
+            if (level == YGLogLevelError || level == YGLogLevelFatal)
+                Logger::error("yoga: {}", message);
+            else if (level == YGLogLevelWarn)
+                Logger::warning("yoga: {}", message);
+            else
+                Logger::debug("yoga: {}", message);
+            return length; });
+        return config;
+    }();
+    return config;
+}
+
 bool Application::mainLoop()
 {
     return Application::platform->runLoop(internalMainLoop);
@@ -182,6 +228,7 @@ bool Application::internalMainLoop()
     Application::updateFPS();
     Application::frameStartTime = getCPUTimeUsec();
     Application::setActiveEvent(false);
+    Profiler::beginFrame();
 
     // Main loop callback
     if (!Application::platform->mainLoopIteration() || Application::quitRequested)
@@ -190,6 +237,7 @@ bool Application::internalMainLoop()
         Application::exit();
         return false;
     }
+    Profiler::endPhase(Profiler::Phase::EVENTS);
 
     // Mouse and touch
     if (Application::blockInputsTokens == 0)
@@ -203,11 +251,18 @@ bool Application::internalMainLoop()
             Application::getAudioPlayer()->play(Sound::SOUND_CLICK_ERROR);
     }
 
+    Profiler::endPhase(Profiler::Phase::INPUT);
+
     // Animations
 #ifndef SIMPLE_HIGHLIGHT
     updateHighlightAnimation();
 #endif
     Ticking::updateTickings();
+
+    // Before deciding whether to draw: a theme change asks for a redraw,
+    // however it was made
+    Application::checkThemeChanged();
+    Profiler::endPhase(Profiler::Phase::UPDATE);
 
     // Render: every frame, or with redraw on demand only when something
     // asked for it (and at least once a second, for what changes without
@@ -228,9 +283,15 @@ bool Application::internalMainLoop()
         if (Application::redrawFrames > 0)
             Application::redrawFrames--;
     }
+    else if (Application::redrawDebug)
+    {
+        Application::checkSkippedFrame();
+    }
 
     // Run sync functions
     Threading::performSyncTasks();
+
+    HotReload::poll();
 
     // Trigger RunLoop subscribers
     runLoopEvent.fire();
@@ -264,6 +325,14 @@ bool Application::internalMainLoop()
 
     if (!Application::currentFocus && !Application::activitiesStack.empty())
         Application::giveFocus(Application::activitiesStack.back()->getContentView());
+
+    Profiler::endPhase(Profiler::Phase::UPDATE);
+    Profiler::endFrame(draw);
+
+    // The simulated clock (the test harness) moves on its own: nothing to
+    // wait for
+    if (isTimeSimulated())
+        return true;
 
     // A frame not drawn is not presented either, so nothing waits for the
     // display: the loop waits a frame's time instead (the limiter below does
@@ -362,6 +431,10 @@ void Application::processInput()
         for (int i = 0; i < ControllerButton::_BUTTON_MAX; i++)
             controllerState.buttons[i] = swapKeys[i];
     }
+
+    // Its toggle, and the whole controller while it is browsing
+    if (Inspector::isEnabled())
+        Inspector::processInput(inputManager, &controllerState);
 
     std::vector<TouchState> touchState;
     for (auto& i : rawTouch)
@@ -884,9 +957,13 @@ bool Application::handleAction(const ActionType type, const int button, const bo
     return !consumedButtons.empty();
 }
 
-void Application::frame()
+void Application::frame(bool present)
 {
     VideoContext* videoContext = Application::platform->getVideoContext();
+
+    const bool inspect = Inspector::isOpen();
+    if (inspect)
+        Inspector::beginFrame();
 
     // Frame context
     FrameContext frameContext = FrameContext();
@@ -903,6 +980,7 @@ void Application::frame()
 
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
+    Application::drawThemeBackground(frameContext.vg);
 
     // Kept from frame to frame: no allocation once it is large enough
     static std::vector<View*> viewsToDraw;
@@ -970,12 +1048,150 @@ void Application::frame()
         debugLayer->frame(&frameContext);
     }
 
+    // A frame drawn only to be compared (checkSkippedFrame) is not profiled
+    if (present && Profiler::isMeasuring())
+    {
+        int draws = 0, fill = 0, stroke = 0, text = 0;
+        nvgDebugGetStats(frameContext.vg, &draws, &fill, &stroke, &text);
+        Profiler::setDrawStats(draws, fill + stroke + text);
+        Profiler::endPhase(Profiler::Phase::DRAW);
+    }
+
+    if (inspect)
+    {
+        Inspector::draw(&frameContext);
+        if (present)
+            Profiler::endPhase(Profiler::Phase::INSPECTOR);
+    }
+
     // End frame
     nvgResetTransform(Application::getNVGContext()); // scale
     nvgEndFrame(Application::getNVGContext());
 
-    Application::platform->getVideoContext()->endFrame();
+    if (!present)
+        return;
+    Profiler::endPhase(Profiler::Phase::FLUSH);
+
+    if (Application::redrawDebug)
+        videoContext->readPixels(&Application::presentedPixels, &Application::presentedWidth, &Application::presentedHeight);
+
+    videoContext->endFrame();
+    Profiler::endPhase(Profiler::Phase::SWAP);
     postFrameEvent.fire();
+}
+
+// The views drawn over `area` with nothing of theirs drawn over it: the
+// deepest ones (a label rather than the list it is in)
+static void collectViewsIn(View* view, const Rect& area, std::vector<View*>* found)
+{
+    if (!view || view->getVisibility() != Visibility::VISIBLE)
+        return;
+    Rect frame = view->getFrame();
+    if (frame.getMaxX() <= area.getMinX() || frame.getMinX() >= area.getMaxX() || frame.getMaxY() <= area.getMinY() || frame.getMinY() >= area.getMaxY())
+        return;
+    size_t before = found->size();
+    if (auto* box = dynamic_cast<Box*>(view))
+        for (View* child : box->getChildren())
+            collectViewsIn(child, area, found);
+    if (found->size() == before)
+        found->push_back(view);
+}
+
+void Application::checkSkippedFrame()
+{
+    if (Application::presentedPixels.empty())
+        return;
+
+    // Drawn as it would be: what draw() asks for while at it is not this
+    // frame's business
+    int redrawFramesBefore = Application::redrawFrames;
+    Application::frame(false);
+    Application::redrawFrames = redrawFramesBefore;
+
+    std::vector<unsigned char> pixels;
+    int width = 0, height = 0;
+    bool read = Application::platform->getVideoContext()->readPixels(&pixels, &width, &height);
+    if (!read || width != Application::presentedWidth || height != Application::presentedHeight)
+        return;
+
+    int minX = width, minY = height, maxX = -1, maxY = -1;
+    size_t differing = 0;
+    for (int y = 0; y < height; y++)
+    {
+        const unsigned char* a = pixels.data() + (size_t)y * width * 4;
+        const unsigned char* b = Application::presentedPixels.data() + (size_t)y * width * 4;
+        for (int x = 0; x < width; x++, a += 4, b += 4)
+        {
+            if (std::abs(a[0] - b[0]) > 2 || std::abs(a[1] - b[1]) > 2 || std::abs(a[2] - b[2]) > 2)
+            {
+                differing++;
+                minX = std::min(minX, x);
+                minY = std::min(minY, y);
+                maxX = std::max(maxX, x);
+                maxY = std::max(maxY, y);
+            }
+        }
+    }
+    if (differing == 0)
+        return;
+
+    float scale = Application::windowScale > 0 ? Application::windowScale : 1.0f;
+    Rect area(minX / scale, minY / scale, (maxX + 1 - minX) / scale, (maxY + 1 - minY) / scale);
+    Application::missedRedraws++;
+    bool sameArea = Application::missedRedrawArea.getMinX() == area.getMinX() && Application::missedRedrawArea.getMinY() == area.getMinY()
+        && Application::missedRedrawArea.getWidth() == area.getWidth() && Application::missedRedrawArea.getHeight() == area.getHeight();
+    Application::missedRedrawArea = area;
+    if (sameArea)
+        return;
+
+    std::vector<View*> views;
+    for (size_t i = Application::activitiesStack.size(); i > 0; i--)
+    {
+        Activity* activity = Application::activitiesStack[i - 1];
+        collectViewsIn(activity->getContentView(), area, &views);
+        if (!activity->isTranslucent())
+            break;
+    }
+    // The smallest first: the most likely to have changed on its own
+    std::stable_sort(views.begin(), views.end(), [](View* a, View* b)
+        { return a->getWidth() * a->getHeight() < b->getWidth() * b->getHeight(); });
+    std::string described;
+    if (Application::currentFocus)
+    {
+        Rect focus = Application::currentFocus->getFrame();
+        if (focus.getMaxX() > area.getMinX() && focus.getMinX() < area.getMaxX() && focus.getMaxY() > area.getMinY() && focus.getMinY() < area.getMaxY())
+            described = "the focused " + Application::currentFocus->describe() + " (its highlight?), ";
+    }
+    for (size_t i = 0; i < views.size() && i < 4; i++)
+        described += (i ? ", " : "") + views[i]->describe();
+    if (views.size() > 4)
+        described += fmt::format(" and {} more", views.size() - 4);
+    Logger::warning("redraw debug: a skipped frame differs from the last one presented ({} pixels in {:.0f},{:.0f} {:.0f}x{:.0f}): no redraw asked for {}",
+        differing, area.getMinX(), area.getMinY(), area.getWidth(), area.getHeight(), described.empty() ? "?" : described);
+}
+
+void Application::setRedrawDebug(bool enabled)
+{
+    Application::redrawDebug = enabled;
+    Application::presentedPixels.clear();
+    Application::requestRedraw();
+}
+
+bool Application::isRedrawDebug()
+{
+    return Application::redrawDebug;
+}
+
+uint64_t Application::getMissedRedrawCount()
+{
+    return Application::missedRedraws;
+}
+
+Rect Application::missedRedrawArea;
+
+Rect Application::getLastMissedRedrawArea()
+{
+    return Application::missedRedrawArea;
 }
 
 void Application::exit()
@@ -1004,6 +1220,151 @@ void Application::exit()
 
     delete Application::notificationManager;
     delete Application::platform;
+}
+
+void Application::setInspectorEnabled(bool enabled)
+{
+    Inspector::setEnabled(enabled);
+}
+
+bool Application::isInspectorEnabled()
+{
+    return Inspector::isEnabled();
+}
+
+void Application::setHotReload(bool enabled, const std::string& resourcesDir)
+{
+    HotReload::setEnabled(enabled, resourcesDir);
+}
+
+bool Application::isHotReload()
+{
+    return HotReload::isEnabled();
+}
+
+// The positions of a view and its parents in their parents' children, from
+// the root down: where to find its like in the same tree made again
+static std::vector<size_t> pathInTree(View* root, View* view)
+{
+    std::vector<size_t> path;
+    while (view && view != root)
+    {
+        Box* parent = view->hasParent() ? view->getParent() : nullptr;
+        if (!parent)
+            return {};
+        auto& children = parent->getChildren();
+        auto it        = std::find(children.begin(), children.end(), view);
+        if (it == children.end())
+            return {};
+        path.insert(path.begin(), (size_t)(it - children.begin()));
+        view = parent;
+    }
+    if (view != root)
+        return {};
+    return path;
+}
+
+static View* viewAtPath(View* root, const std::vector<size_t>& path)
+{
+    View* view = root;
+    for (size_t index : path)
+    {
+        Box* box = dynamic_cast<Box*>(view);
+        if (!box || index >= box->getChildren().size())
+            return nullptr;
+        view = box->getChildren()[index];
+    }
+    return view;
+}
+
+static void findActiveSidebarItems(View* view, std::vector<View*>* items)
+{
+    if (auto* item = dynamic_cast<SidebarItem*>(view))
+    {
+        if (item->isActive())
+            items->push_back(item);
+    }
+    if (Box* box = dynamic_cast<Box*>(view))
+        for (View* child : box->getChildren())
+            findActiveSidebarItems(child, items);
+}
+
+bool Application::rebuildActivity()
+{
+    if (Application::activitiesStack.empty())
+        return false;
+
+    Activity* activity = Application::activitiesStack.back();
+    View* old          = activity->getContentView();
+
+    // The tabs shown, then the focus, to be found again in the new content
+    std::vector<std::vector<size_t>> restore;
+    if (old)
+    {
+        std::vector<View*> items;
+        findActiveSidebarItems(old, &items);
+        for (View* item : items)
+            restore.push_back(pathInTree(old, item));
+        if (Application::currentFocus && Application::currentFocus->getParentActivity() == activity)
+            restore.push_back(pathInTree(old, Application::currentFocus));
+    }
+
+    View* fresh         = nullptr;
+    HotReload::building = activity;
+    try
+    {
+        fresh = activity->createContentView();
+    }
+    catch (const std::exception& e)
+    {
+        HotReload::building = nullptr;
+        Logger::error("rebuild: {} kept as it was: {}", old ? old->describe() : "the activity", e.what());
+        return false;
+    }
+
+    if (!fresh || fresh == old)
+    {
+        HotReload::building = nullptr;
+        Logger::warning("rebuild: the activity on top was given its view, it cannot make it again");
+        return false;
+    }
+
+    activity->setContentView(fresh);
+    try
+    {
+        activity->onContentAvailable();
+    }
+    catch (const std::exception& e)
+    {
+        Logger::error("rebuild: onContentAvailable: {}", e.what());
+    }
+    HotReload::building = nullptr;
+    activity->resizeToFitWindow();
+
+    if (Application::globalQuitEnabled)
+        Application::gloablQuitIdentifier = activity->registerExitAction();
+
+    activity->willAppear(true);
+    try
+    {
+        // A tab is made when it takes the focus: its own XML may throw here
+        Application::giveFocus(activity->getDefaultFocus());
+        for (const auto& path : restore)
+        {
+            if (path.empty())
+                continue;
+            if (View* view = viewAtPath(fresh, path))
+                Application::giveFocus(view);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        Logger::error("rebuild: {}", e.what());
+    }
+
+    Application::requestRedraw();
+    Logger::info("rebuild: {} made again", fresh->describe());
+    return true;
 }
 
 void Application::setGlobalQuit(bool enabled)
@@ -1178,6 +1539,7 @@ void Application::updateHover(Point position, bool inside)
 
 void Application::forgetView(View* view)
 {
+    Inspector::forgetView(view);
     if (Application::hoveredView == view)
         Application::hoveredView = nullptr;
     if (Application::currentFocus == view)
@@ -1274,8 +1636,10 @@ void Application::pushActivity(Activity* activity, TransitionAnimation animation
     }
 
     // Create the activity content view
+    HotReload::building = activity;
     activity->setContentView(activity->createContentView());
     activity->onContentAvailable();
+    HotReload::building = nullptr;
     activity->resizeToFitWindow();
 
     if (!Application::activitiesStack.empty())
@@ -1641,6 +2005,83 @@ Event<bool>* Application::getWindowFocusChangedEvent()
     return &Application::windowFocusChangedEvent;
 }
 
+Event<ThemeVariant>* Application::getThemeChangedEvent()
+{
+    return &Application::themeChangedEvent;
+}
+
+void Application::loadThemeBackground()
+{
+    std::string path = Theme::getBackgroundImage();
+    if (path == Application::themeBackgroundPath)
+        return;
+    NVGcontext* vg = Application::getNVGContext();
+    if (Application::themeBackground)
+        nvgDeleteImage(vg, Application::themeBackground);
+    Application::themeBackground     = 0;
+    Application::themeBackgroundPath = path;
+    if (path.empty())
+        return;
+#ifdef USE_LIBROMFS
+    if (path.rfind("@res/", 0) == 0)
+    {
+        try
+        {
+            auto image                   = romfs::get(path.substr(5));
+            Application::themeBackground = nvgCreateImageMem(vg, 0, (unsigned char*)image.data(), (int)image.size());
+        }
+        catch (const std::exception& e)
+        {
+        }
+    }
+    else
+#endif
+        Application::themeBackground = nvgCreateImage(vg,
+            (path.rfind("@res/", 0) == 0 ? std::string(BRLS_RESOURCES) + path.substr(5) : path).c_str(), 0);
+    if (!Application::themeBackground)
+        Logger::error("theme: cannot load the background image {}", path);
+}
+
+// Covering the window, centred, over the clear colour
+void Application::drawThemeBackground(NVGcontext* vg)
+{
+    if (!Application::themeBackground)
+        return;
+    int width, height;
+    nvgImageSize(vg, Application::themeBackground, &width, &height);
+    if (width <= 0 || height <= 0)
+        return;
+    float scale = std::max(Application::contentWidth / width, Application::contentHeight / height);
+    float w = width * scale, h = height * scale;
+    float x = (Application::contentWidth - w) / 2, y = (Application::contentHeight - h) / 2;
+    nvgBeginPath(vg);
+    nvgRect(vg, 0, 0, Application::contentWidth, Application::contentHeight);
+    nvgFillPaint(vg, nvgImagePattern(vg, x, y, w, h, 0, Application::themeBackground, 1.0f));
+    nvgFill(vg);
+}
+
+void Application::checkThemeChanged()
+{
+    ThemeVariant variant = Application::getThemeVariant();
+    uint64_t generation  = Theme::getGeneration();
+    if (generation == Application::themeGeneration && variant == Application::themeVariant)
+        return;
+    Application::themeGeneration = generation;
+    Application::themeVariant    = variant;
+
+    Application::loadThemeBackground();
+    for (Activity* activity : Application::activitiesStack)
+        if (View* view = activity->getContentView())
+            view->onThemeChanged();
+    Application::notificationManager->onThemeChanged();
+
+    // The console records its clear colour once (deko3d): again
+    Application::platform->setThemeVariant(variant);
+
+    Application::themeChangedEvent.fire(variant);
+    Application::requestRedraw();
+}
+
 int Application::getFont(std::string fontName)
 {
     if (Application::fontStash.count(fontName) == 0)
@@ -1692,9 +2133,12 @@ void Application::registerBuiltInXMLViews()
     Application::registerXMLView("brls:ScrollingFrame", ScrollingFrame::create);
     Application::registerXMLView("brls:HScrollingFrame", HScrollingFrame::create);
     Application::registerXMLView("brls:RecyclerFrame", RecyclerFrame::create);
+    Application::registerXMLView("brls:RecyclingGrid", RecyclingGrid::create);
+    Application::registerXMLView("brls:HRecyclerFrame", HRecyclerFrame::create);
     Application::registerXMLView("brls:Image", Image::create);
     Application::registerXMLView("brls:Padding", Padding::create);
     Application::registerXMLView("brls:Button", Button::create);
+    Application::registerXMLView("brls:IconButton", IconButton::create);
     Application::registerXMLView("brls:CheckBox", CheckBox::create);
     Application::registerXMLView("brls:Hints", Hints::create);
     Application::registerXMLView("brls:Slider", Slider::create);

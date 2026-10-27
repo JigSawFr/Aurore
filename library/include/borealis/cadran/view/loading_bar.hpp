@@ -3,7 +3,7 @@
 // screen's while its list loads, in the theme's colours. The fill eases to each
 // new value instead of jumping (the next step's frames show it moving), or,
 // for the intro, fills at a steady pace over a given time. On the loading
-// screen, brand colours, not the theme's: it looks the same in both themes.
+// screen, the brand's colours (cadran/brand/…), the same in both themes.
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 

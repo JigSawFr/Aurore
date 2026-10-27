@@ -108,6 +108,10 @@
             "system": "Console",
             "light": "Chiaro",
             "dark": "Scuro"
+        },
+        "palette": "Tavolozza",
+        "palettes": {
+            "default": "Predefinita"
         }
     }
 }

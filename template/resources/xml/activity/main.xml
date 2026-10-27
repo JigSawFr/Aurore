@@ -1,0 +1,23 @@
+<brls:AppletFrame>
+    <brls:TabFrame title="@i18n/app/title">
+
+        <brls:Tab label="@i18n/app/tabs/home">
+            <HomeTab />
+        </brls:Tab>
+
+        <brls:Tab label="@i18n/app/tabs/about">
+            <brls:Box
+                axis="column"
+                alignItems="center"
+                justifyContent="center"
+                grow="1">
+
+                <brls:Label
+                    text="@i18n/app/about/text"
+                    horizontalAlign="center" />
+
+            </brls:Box>
+        </brls:Tab>
+
+    </brls:TabFrame>
+</brls:AppletFrame>

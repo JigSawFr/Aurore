@@ -98,17 +98,16 @@ class Sheet : public brls::Box
           int columns = 0)
         : brls::Box(brls::Axis::COLUMN), lines(std::move(choices)), focus(first)
     {
-        brls::Theme theme = brls::Application::getTheme();
         this->setId("cadran_sheet");
-        this->setBackgroundColor(theme["brls/backdrop"]);
+        this->setThemeColor("backgroundColor", "brls/backdrop");
         this->setAlignItems(brls::AlignItems::STRETCH);
         this->addView(sheet_outside(0, true));
 
         auto* panel = new Panel();
         panel->setGrow(1);
         panel->setCornerRadius(cadran::PICKER_CORNER);
-        panel->setBackgroundColor(theme["cadran/surf"]);
-        panel->setBorderColor(theme["cadran/line"]);
+        panel->setThemeColor("backgroundColor", "cadran/surf");
+        panel->setThemeColor("borderColor", "cadran/line");
         panel->setBorderThickness(1);
         panel->setAlignItems(brls::AlignItems::STRETCH);
         brls::Box* head = this->header(title, subtitle, image);
@@ -190,11 +189,10 @@ class Sheet : public brls::Box
 
     brls::Box* header(const std::string& title, const std::string& subtitle, int image)
     {
-        brls::Theme theme = brls::Application::getTheme();
         auto* head = new brls::Box(brls::Axis::ROW);
         head->setAlignItems(brls::AlignItems::CENTER);
         head->setPadding(subtitle.empty() ? 24 : 20, 36, subtitle.empty() ? 20 : 18, image ? 28 : 36);
-        head->setLineColor(theme["cadran/line"]);
+        head->setThemeColor("lineColor", "cadran/line");
         head->setLineBottom(1);
         head->setShrink(0);
         if (image) {
@@ -255,7 +253,6 @@ class Sheet : public brls::Box
 
     brls::DetailCell* tile(const Line& l, size_t index)
     {
-        brls::Theme theme = brls::Application::getTheme();
         auto* cell = new brls::DetailCell();
         cell->setText(l.label);
         cell->setDetailText("");
@@ -272,7 +269,7 @@ class Sheet : public brls::Box
         cell->setLineTop(0);
         cell->setCornerRadius(kit::RADIUS_CARD);
         cell->setHighlightCornerRadius(kit::RADIUS_CARD);
-        cell->setBackgroundColor(theme[l.checked ? "cadran/teal_soft" : "cadran/surf2"]);
+        cell->setThemeColor("backgroundColor", l.checked ? "cadran/teal_soft" : "cadran/surf2");
         cell->title->setGrow(0);
         cell->title->setMarginRight(0);
         cell->title->setFontSize(kit::TEXT_NOTE);
@@ -280,7 +277,7 @@ class Sheet : public brls::Box
         // at the larger text size.
         cell->title->setSingleLine(true);
         cell->title->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-        if (l.checked) cell->title->setTextColor(theme["cadran/teal"]);
+        if (l.checked) cell->title->setThemeColor("textColor", "cadran/teal");
         if (!l.icon.empty()) {
             CadranIcon* icon = kit::icon(l.icon.c_str(), 32, l.checked ? "cadran/teal" : "cadran/text2");
             icon->setMarginBottom(12);
@@ -298,7 +295,6 @@ class Sheet : public brls::Box
 
     brls::DetailCell* line(const Line& l, size_t index)
     {
-        brls::Theme theme = brls::Application::getTheme();
         brls::DetailCell* cell;
         if (l.toggle >= 0) {
             auto* toggle = new brls::BooleanCell();
@@ -327,10 +323,10 @@ class Sheet : public brls::Box
                 break;
             case Choice::Tone::DANGER:
                 tint = "cadran/coral";
-                cell->title->setTextColor(theme["cadran/coral"]);
+                cell->title->setThemeColor("textColor", "cadran/coral");
                 break;
         }
-        if (l.toggle < 0) cell->detail->setTextColor(theme[tint ? tint : "cadran/text2"]);
+        if (l.toggle < 0) cell->detail->setThemeColor("textColor", tint ? tint : "cadran/text2");
         if (tint && !l.icon.empty())
             cadran::List::recolor_icon(cell, nullptr, tint,
                                        l.tone == Choice::Tone::DANGER ? "cadran/coral_soft"
@@ -338,7 +334,7 @@ class Sheet : public brls::Box
                                                                       : "cadran/teal_soft");
         // The value chosen: a soft fill and its check at the end.
         if (l.checked) {
-            cell->setBackgroundColor(theme["cadran/teal_soft"]);
+            cell->setThemeColor("backgroundColor", "cadran/teal_soft");
             cell->setCornerRadius(kit::RADIUS_ROW);
             CadranIcon* check = kit::icon("check", 22, "cadran/teal");
             check->setMarginLeft(l.detail.empty() ? 0 : 14);

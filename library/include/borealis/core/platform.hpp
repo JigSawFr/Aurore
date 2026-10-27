@@ -24,6 +24,7 @@
 #include <borealis/core/input.hpp>
 #include <borealis/core/theme.hpp>
 #include <borealis/core/video.hpp>
+#include <functional>
 #include <string>
 
 namespace brls
@@ -270,11 +271,21 @@ class Platform
     static Platform* createPlatform();
 
     /**
+     * Has createPlatform() return what `factory` makes instead of the build's
+     * own platform (the test harness' headless one). To call before
+     * Application::init(); an empty function goes back to the default.
+     */
+    static void setFactory(std::function<Platform*()> factory) { Platform::factory = std::move(factory); }
+
+    /**
      * App locale, empty for default
      */
     // From the text itself, not LOCALE_AUTO: that is another const string in
     // each file (internal linkage), not yet built when this inline one is.
     static inline std::string APP_LOCALE_DEFAULT = "auto";
+
+  private:
+    static inline std::function<Platform*()> factory;
 };
 
 } // namespace brls

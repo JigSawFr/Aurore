@@ -108,6 +108,10 @@
             "system": "Systeem",
             "light": "Licht",
             "dark": "Donker"
+        },
+        "palette": "Palet",
+        "palettes": {
+            "default": "Standaard"
         }
     }
 }

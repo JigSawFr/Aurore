@@ -1,0 +1,15 @@
+{
+    "title": "Mon appli",
+    "tabs": {
+        "home": "Accueil",
+        "about": "À propos"
+    },
+    "home": {
+        "hello": "Bonjour d’Aurore !",
+        "click": "Cliquez-moi",
+        "clicked": "{} clics"
+    },
+    "about": {
+        "text": "Construite avec Aurore, sous GPLv3."
+    }
+}

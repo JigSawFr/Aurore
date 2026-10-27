@@ -1,0 +1,51 @@
+# The API reference of Aurore's public headers. From the repository's root:
+#
+#     doxygen docs/Doxyfile
+#
+# then open build_docs/html/index.html. Only the settings that differ from
+# doxygen's defaults are here (`doxygen -x docs/Doxyfile` lists them).
+
+PROJECT_NAME           = Aurore
+PROJECT_BRIEF          = "A Switch-like interface for your app, on every screen"
+OUTPUT_DIRECTORY       = build_docs
+
+INPUT                  = docs/getting-started.md \
+                         docs/cadran.md \
+                         docs/inspector.md \
+                         docs/hot_reload.md \
+                         library/include/borealis.hpp \
+                         library/include/borealis
+FILE_PATTERNS          = *.hpp *.h *.md
+RECURSIVE              = YES
+# Bundled libraries and the platforms' internals are not Aurore's API
+EXCLUDE                = library/include/borealis/extern \
+                         library/include/borealis/platforms
+USE_MDFILE_AS_MAINPAGE = docs/getting-started.md
+STRIP_FROM_PATH        = library/include
+STRIP_FROM_INC_PATH    = library/include
+
+# Every class and member, documented or not, without a warning for each one
+# left undocumented: most of borealis' API has no comment of its own
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_NO_PARAMDOC       = NO
+WARN_IF_INCOMPLETE_DOC = NO
+QUIET                  = YES
+# A comment doxygen cannot read fails the build (the CI's docs job)
+WARN_AS_ERROR          = FAIL_ON_WARNINGS
+
+# The macros that declare members, expanded so the members show
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = __cplusplus
+EXPAND_AS_DEFINED      = BRLS_BIND \
+                         CONTENT_FROM_XML_RES \
+                         CONTENT_FROM_XML_FILE \
+                         CONTENT_FROM_XML_STR
+
+GENERATE_LATEX         = NO
+GENERATE_TREEVIEW      = YES
+HAVE_DOT               = NO
+SEARCHENGINE           = YES

@@ -33,6 +33,10 @@
             <StylesTab />
         </brls:Tab>
 
+        <brls:Tab label="@i18n/demo/tabs/scripts" >
+            <brls:View xml="@res/xml/tabs/scripts.xml" />
+        </brls:Tab>
+
         <brls:Separator />
 
         <brls:Tab label="@i18n/demo/tabs/scroll" >
@@ -41,6 +45,10 @@
 
         <brls:Tab label="@i18n/demo/tabs/pokedex">
             <RecyclingListTab />
+        </brls:Tab>
+
+        <brls:Tab label="@i18n/demo/tabs/grid">
+            <GridTab />
         </brls:Tab>
 
         <brls:Separator />

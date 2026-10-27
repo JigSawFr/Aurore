@@ -1,0 +1,9 @@
+{
+    "presets": {
+        "high_contrast_dark": "고대비 다크",
+        "high_contrast_light": "고대비 라이트",
+        "ocean": "오션",
+        "amethyst": "자수정",
+        "sand": "샌드"
+    }
+}

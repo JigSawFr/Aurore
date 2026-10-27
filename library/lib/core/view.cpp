@@ -21,14 +21,18 @@
 #include <cxxabi.h>
 #endif
 #include <tinyxml2.h>
-#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 #include <functional>
 #include <borealis/core/animation.hpp>
 #include <borealis/core/application.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/box.hpp>
+#include <borealis/core/hot_reload.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/input.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
@@ -65,7 +69,7 @@ AppletFrameItem::~AppletFrameItem()
 View::View()
 {
     // Instantiate and prepare YGNode
-    this->ygNode = YGNodeNew();
+    this->ygNode = YGNodeNewWithConfig(Application::getYogaConfig());
     YGNodeSetContext(this->ygNode, this);
 
     YGNodeStyleSetWidthAuto(this->ygNode);
@@ -174,6 +178,16 @@ void View::frame(FrameContext* ctx)
     if (this->visibility != Visibility::VISIBLE)
         return;
 
+    // The inspector notes what its selected view, and not its children,
+    // looks up in the theme and the style
+    View* const inspected = Inspector::recordTarget;
+    bool wasRecording     = false;
+    if (inspected)
+    {
+        wasRecording         = Inspector::recording;
+        Inspector::recording = inspected == this;
+    }
+
     // State styles changed since the last frame: applied after the focus
     // and press handlers have all run, whatever their order.
     this->applyPendingStyles();
@@ -241,6 +255,9 @@ void View::frame(FrameContext* ctx)
         ctx->theme = oldTheme;
 
     nvgRestore(ctx->vg);
+
+    if (inspected)
+        Inspector::recording = wasRecording;
 }
 
 void View::frameHighlight(FrameContext* ctx)
@@ -496,6 +513,14 @@ void View::drawBorder(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
     nvgStroke(vg);
 }
 
+// A shadow's colour (a theme key's, usually black), `opacity` from 0 to 255
+// times the key's own alpha
+NVGcolor View::shadowColor(NVGcolor color, float opacity)
+{
+    auto channel = [](float value) { return (unsigned)std::lround(value * 255.0f); };
+    return RGBA(channel(color.r), channel(color.g), channel(color.b), (unsigned)(opacity * color.a));
+}
+
 void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame)
 {
     float shadowWidth   = 0.0f;
@@ -523,7 +548,7 @@ void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
         frame.getMinX(), frame.getMinY() + shadowWidth,
         frame.getWidth(), frame.getHeight(),
         maxRadius * 2, shadowFeather,
-        RGBA(0, 0, 0, shadowOpacity * alpha), TRANSPARENT);
+        this->shadowColor(ctx->theme["brls/shadow"], shadowOpacity * alpha), TRANSPARENT);
 
     nvgBeginPath(vg);
     nvgRect(
@@ -731,7 +756,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
             x, y + style["brls/highlight/shadow_width"],
             width, height,
             cornerRadius * 2, style["brls/highlight/shadow_feather"],
-            RGBA(0, 0, 0, style["brls/highlight/shadow_opacity"] * alpha), TRANSPARENT);
+            this->shadowColor(theme["brls/highlight/shadow"], style["brls/highlight/shadow_opacity"] * alpha), TRANSPARENT);
 
         nvgBeginPath(vg);
         nvgRect(vg, x - shadowOffset, y - shadowOffset,
@@ -1329,8 +1354,17 @@ void View::setPositionType(PositionType type)
         case PositionType::ABSOLUTE:
             YGNodeStyleSetPositionType(this->ygNode, YGPositionTypeAbsolute);
             break;
+        case PositionType::STATIC:
+            YGNodeStyleSetPositionType(this->ygNode, YGPositionTypeStatic);
+            break;
     }
 
+    this->invalidate();
+}
+
+void View::setBoxSizing(BoxSizing sizing)
+{
+    YGNodeStyleSetBoxSizing(this->ygNode, sizing == BoxSizing::CONTENT_BOX ? YGBoxSizingContentBox : YGBoxSizingBorderBox);
     this->invalidate();
 }
 
@@ -1387,9 +1421,19 @@ void View::invalidate()
         YGNodeMarkDirty(this->ygNode);
 
     if (this->hasParent() && !this->detached)
+    {
         this->getParent()->invalidate();
-    else
+    }
+    else if (Profiler::isMeasuring())
+    {
+        Time start = getRealTimeUsec();
         YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
+        Profiler::addLayout(getRealTimeUsec() - start);
+    }
+    else
+    {
+        YGNodeCalculateLayout(this->ygNode, YGUndefined, YGUndefined, YGDirectionLTR);
+    }
 }
 
 Rect View::getFrame()
@@ -1913,83 +1957,28 @@ bool View::applyXMLAttribute(std::string name, std::string value)
             return false;
         }
     }
-    // Starts with with # -> color
+    // Starts with # -> color
     else if (startsWith(value, "#"))
     {
-        // Parse the color
-        // #RRGGBB format
-        if (value.size() == 7)
-        {
-            unsigned int r = 0, g = 0, b = 0;
-            std::stringstream sr{value.substr(1,2)};
-            sr >> std::hex >> r;
-            std::stringstream sg{value.substr(3,2)};
-            sg >> std::hex >> g;
-            std::stringstream sb{value.substr(5,2)};
-            sb >> std::hex >> b;
-
-            if (sr.fail() || sg.fail() || sb.fail())
-            {
-                return false;
-            }
-            else if (this->colorAttributes.count(name) > 0)
-            {
-                this->colorAttributes[name](nvgRGB(r, g, b));
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        // #RRGGBBAA format
-        else if (value.size() == 9)
-        {
-            unsigned int r = 0, g = 0, b = 0, a = 0;
-            std::stringstream sr{value.substr(1,2)};
-            sr >> std::hex >> r;
-            std::stringstream sg{value.substr(3,2)};
-            sg >> std::hex >> g;
-            std::stringstream sb{value.substr(5,2)};
-            sb >> std::hex >> b;
-            std::stringstream sa{value.substr(7,2)};
-            sa >> std::hex >> a;
-
-            if (sr.fail() || sg.fail() || sb.fail() || sa.fail())
-            {
-                return false;
-            }
-            else if (this->colorAttributes.count(name) > 0)
-            {
-                this->colorAttributes[name](nvgRGBA(r, g, b, a));
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
+        NVGcolor color;
+        if (!Theme::parseColor(value, &color) || this->colorAttributes.count(name) == 0)
             return false;
-        }
+        this->colorAttributes[name](color);
+        return true;
     }
-    // Starts with @theme -> color
+    // Starts with @theme -> a theme colour, kept by key when the attribute
+    // is a style property (it follows the theme)
     else if (startsWith(value, "@theme/"))
     {
-        // Parse the color name
-        std::string colorName = value.substr(7); // length of "@theme/"
-        NVGcolor value        = Application::getTheme()[colorName]; // will throw logic_error if the color doesn't exist
+        std::string key = value.substr(7); // length of "@theme/"
+        StyleValue current;
+        if (this->getStyleProperty(name, &current) && current.type == StyleValue::Type::COLOR)
+            return this->setThemeColor(name, key);
 
-        if (this->colorAttributes.count(name) > 0)
-        {
-            this->colorAttributes[name](value);
-            return true;
-        }
-        else
-        {
+        if (this->colorAttributes.count(name) == 0 || !Application::getTheme().hasColor(key))
             return false;
-        }
+        this->colorAttributes[name](Application::getTheme()[key]);
+        return true;
     }
     // Equals true or false -> bool
     else if (value == "true" || value == "false")
@@ -2055,6 +2044,10 @@ bool View::isXMLAttributeValid(std::string attributeName)
 
 View* View::createFromXMLResource(std::string name)
 {
+    std::string disk = HotReload::diskResource("@res/xml/" + name);
+    if (!disk.empty())
+        return View::createFromXMLFile(disk);
+
     // Check if custom xml file exists
     if (!View::CUSTOM_RESOURCES_PATH.empty() && std::ifstream { View::CUSTOM_RESOURCES_PATH + "xml/" + name }.good())
     {
@@ -2094,6 +2087,7 @@ View* View::createFromXMLString(std::string_view xml)
 
 View* View::createFromXMLFile(std::string path)
 {
+    HotReload::noteXMLFile(path);
     std::shared_ptr<tinyxml2::XMLDocument> document = getXMLCache(path);
     tinyxml2::XMLElement* element = document->RootElement();
 
@@ -2133,10 +2127,14 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
 
         if (xmlAttribute)
         {
+            std::string disk = HotReload::diskResource(xmlAttribute->Value());
+            if (!disk.empty())
+                view = View::createFromXMLFile(disk);
+            else
 #ifdef USE_LIBROMFS
-            view = View::createFromXMLString(romfs::get(View::getFilePathXMLAttributeValue(xmlAttribute->Value())).string());
+                view = View::createFromXMLString(romfs::get(View::getFilePathXMLAttributeValue(xmlAttribute->Value())).string());
 #else
-            view = View::createFromXMLFile(View::getFilePathXMLAttributeValue(xmlAttribute->Value()));
+                view = View::createFromXMLFile(View::getFilePathXMLAttributeValue(xmlAttribute->Value()));
 #endif
         }
         else
@@ -2392,6 +2390,14 @@ void View::registerCommonAttributes()
         {
             { "relative", PositionType::RELATIVE },
             { "absolute", PositionType::ABSOLUTE },
+            { "static", PositionType::STATIC },
+        });
+
+    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+        "boxSizing", BoxSizing, this->setBoxSizing,
+        {
+            { "borderBox", BoxSizing::BORDER_BOX },
+            { "contentBox", BoxSizing::CONTENT_BOX },
         });
 
     // Custom focus routes
@@ -2778,15 +2784,30 @@ View* View::hitTest(Point point)
     return nullptr;
 }
 
+// Keyed by the path itself: two paths with the same hash would have
+// shared a document. (string_view::data() is not null-terminated either.)
+static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>>& xmlCache()
+{
+    static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>> cache;
+    return cache;
+}
+
 std::shared_ptr<tinyxml2::XMLDocument> View::getXMLCache(std::string_view path)
 {
-    // Keyed by the path itself: two paths with the same hash would have
-    // shared a document. (string_view::data() is not null-terminated either.)
-    static std::unordered_map<std::string, std::shared_ptr<tinyxml2::XMLDocument>> xmlCache;
-    auto& doc = xmlCache[std::string(path)];
+    auto& doc = xmlCache()[std::string(path)];
     if (!doc)
         doc = std::make_shared<tinyxml2::XMLDocument>();
     return doc;
+}
+
+void View::forgetXMLCache(const std::string& path)
+{
+    static std::vector<std::shared_ptr<tinyxml2::XMLDocument>> retired;
+    auto it = xmlCache().find(path);
+    if (it == xmlCache().end())
+        return;
+    retired.push_back(it->second);
+    xmlCache().erase(it);
 }
 
 std::string View::currentXMLResource;

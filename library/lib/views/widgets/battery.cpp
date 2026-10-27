@@ -42,7 +42,6 @@ BatteryWidget::BatteryWidget()
     level->detach();
 
     applyBackTheme(platform->getThemeVariant());
-    applyLevelTheme(platform->getThemeVariant());
 
     addView(level);
     addView(back);
@@ -83,26 +82,19 @@ void BatteryWidget::applyBackTheme(ThemeVariant theme)
     }
 }
 
-void BatteryWidget::applyLevelTheme(ThemeVariant theme)
+void BatteryWidget::onThemeChanged()
 {
-    switch (theme)
-    {
-        case ThemeVariant::LIGHT:
-            level->setColor(RGB(0, 0, 0));
-            break;
-        case ThemeVariant::DARK:
-            level->setColor(RGB(255, 255, 255));
-            break;
-    }
+    if (back)
+        applyBackTheme(platform->getThemeVariant());
+    Box::onThemeChanged();
 }
 
 void BatteryWidget::draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx)
 {
+    if (!level)
+        return;
     this->updateState();
-    if (isBatteryCharging)
-        level->setColor(RGB(140, 251, 79));
-    else
-        applyLevelTheme(platform->getThemeVariant());
+    level->setColor(ctx->theme[isBatteryCharging ? "brls/battery/charging" : "brls/battery/level"]);
 
     level->setWidth(BATTERY_MAX_WIDTH * batteryLevel);
     Box::draw(vg, x, y, width, height, style, ctx);
