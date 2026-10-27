@@ -25,6 +25,7 @@
 #include <borealis/test/harness.hpp>
 
 #include <cmath>
+#include <ctime>
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
@@ -232,6 +233,94 @@ BRLS_TEST(theme_change_draws_at_once_on_demand)
     brls::Theme::reset();
     h.step();
     BRLS_CHECK(brls::Application::getDrawnFrameCount() > drawn);
+}
+
+// Noon of a date, in the harness' time zone (UTC)
+static std::time_t noonOf(int year, int month, int day)
+{
+    std::tm date {};
+    date.tm_year = year - 1900;
+    date.tm_mon  = month - 1;
+    date.tm_mday = day;
+    date.tm_hour = 12;
+    return std::mktime(&date);
+}
+
+BRLS_TEST(seasonal_theme_picks_the_preset_of_the_date)
+{
+    Harness h;
+    const struct
+    {
+        int year, month, day;
+        const char* preset;
+    } dates[] = {
+        { 2026, 1, 5, "winter" },
+        { 2026, 2, 14, "valentine" },
+        { 2026, 2, 16, "lunar-new-year" }, // the eve of 17 February
+        { 2026, 3, 3, "lunar-new-year" },  // the Lantern Festival
+        { 2026, 3, 4, "winter" },
+        { 2029, 2, 13, "valentine" }, // both: the first of the table
+        { 2026, 3, 20, "spring" },
+        { 2026, 7, 14, "summer" },
+        { 2026, 10, 1, "autumn" },
+        { 2026, 10, 31, "halloween" },
+        { 2026, 11, 3, "autumn" },
+        { 2026, 12, 24, "christmas" },
+        { 2026, 12, 31, "new-year" },
+        { 2027, 1, 3, "new-year" },
+        { 2040, 2, 1, "winter" }, // out of the Lunar New Year's table
+    };
+    for (const auto& date : dates)
+        BRLS_CHECK_EQ(brls::Theme::seasonalTheme(noonOf(date.year, date.month, date.day)),
+            std::string("builtin:") + date.preset);
+
+    bool listed = false;
+    for (const brls::ThemeInfo& info : brls::Theme::builtinThemes())
+        if (info.path == "builtin:seasonal")
+            listed = info.ok() && info.warnings.empty() && info.light && info.dark && info.name == "Seasonal";
+    BRLS_CHECK(listed);
+}
+
+BRLS_TEST(seasonal_theme_changes_at_midnight)
+{
+    // 16 October 2026, 15 seconds before Halloween's first day
+    brls::test::Options options;
+    options.wallTime = noonOf(2026, 10, 16) + 12 * 3600 - 15;
+    Harness h(options);
+    h.push(new brls::Activity(screenOf({ new brls::Button() })));
+    brls::Theme::loadFile("builtin:seasonal");
+    h.settle();
+    NVGcolor autumn;
+    brls::Theme::parseColor("#1a1310", &autumn);
+    NVGcolor background = brls::Theme::getDarkTheme()["brls/background"];
+    BRLS_CHECK(background.r == autumn.r && background.g == autumn.g && background.b == autumn.b);
+    brls::test::Image before = h.screenshot();
+
+    h.advance(20000);
+    NVGcolor halloween;
+    brls::Theme::parseColor("#150d1f", &halloween);
+    background = brls::Theme::getDarkTheme()["brls/background"];
+    BRLS_CHECK(background.r == halloween.r && background.g == halloween.g && background.b == halloween.b);
+    BRLS_CHECK_EQ(brls::Theme::getCurrentPath(), std::string("builtin:seasonal"));
+    // Drawn again: the button and its focus in the new colours
+    BRLS_CHECK(brls::test::compareImages(h.screenshot(), before).differingPixels > 10000);
+}
+
+BRLS_TEST(every_preset_draws_the_demo_in_both_variants)
+{
+    DemoHarness h;
+    for (const brls::ThemeInfo& info : brls::Theme::builtinThemes())
+        for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })
+        {
+            if (!info.styles(variant))
+                continue;
+            BRLS_CHECK(brls::Theme::loadFile(info.path));
+            brls::Application::getPlatform()->setThemeVariant(variant);
+            h.step(2);
+            BRLS_CHECK(brls::Theme::checkContrast(variant).empty());
+        }
+    brls::Theme::reset();
+    h.step(2);
 }
 
 BRLS_TEST(theme_picker_follows_a_one_variant_palette)
