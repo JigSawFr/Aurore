@@ -1514,6 +1514,22 @@ BRLS_TEST(images_compare_with_tolerance)
     BRLS_CHECK(!brls::test::compareImages(b, a.crop(0, 0, 2, 2)).sameSize);
 }
 
+BRLS_TEST(asset_fonts_load_from_the_resources)
+{
+    // BRLS_ASSET() is "@res/..." with the resources built in: read from them
+    Harness h;
+    BRLS_CHECK(brls::Application::loadFontFromFile("test/sora", BRLS_ASSET("font/sora_bold_latin.ttf")));
+    BRLS_CHECK(brls::Application::getFont("test/sora") != brls::FONT_INVALID);
+    BRLS_CHECK(!brls::Application::loadFontFromFile("test/none", BRLS_ASSET("font/none.ttf")));
+}
+
+BRLS_TEST(cadran_display_font_loaded)
+{
+    // Cadran's figures in Sora, with the resources built in too
+    DemoHarness h;
+    BRLS_CHECK(brls::Application::getFont("cadran/digits") != brls::FONT_INVALID);
+}
+
 int main(int argc, char** argv)
 {
     return brls::test::runTests(argc, argv);

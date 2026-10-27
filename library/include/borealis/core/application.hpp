@@ -291,6 +291,8 @@ class Application
 
     /**
      * Loads a font from a given file and stores it in the font stash.
+     * A BRLS_ASSET() path ("@res/...") is read from the resources built
+     * into the program when they are (USE_LIBROMFS).
      * Returns true if the operation succeeded.
      */
     static bool loadFontFromFile(std::string fontName, std::string filePath);
