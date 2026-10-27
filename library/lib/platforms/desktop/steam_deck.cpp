@@ -28,7 +28,7 @@ namespace brls
 void runSteamDeckCommand(const std::string& cmd)
 {
     if (!isSteamDeck())
-        return ;
+        return;
     int fd = open(STEAM_CLIENT_PIPE_PATH, O_WRONLY | O_NONBLOCK);
     if (fd < 0)
     {
@@ -41,21 +41,25 @@ void runSteamDeckCommand(const std::string& cmd)
     }
 }
 
-bool isSteamDeck() {
+bool isSteamDeck()
+{
     static bool isSteamDeck = getenv("SteamDeck");
     return isSteamDeck;
 }
 
-bool isSteamDeckBrightnessSupported() {
-    if(!isSteamDeck()) return false;
+bool isSteamDeckBrightnessSupported()
+{
+    if (!isSteamDeck())
+        return false;
     static bool tested = false, value = false;
-    if (tested) return value;
+    if (tested)
+        return value;
     int fd = open(STEAM_DECK_BACKLIGHT_PATH, O_RDWR | O_NONBLOCK);
     if (fd < 0)
     {
         Logger::warning("Backlight control is not supported");
         tested = true;
-        value = false;
+        value  = false;
         return false;
     }
     else
@@ -63,13 +67,15 @@ bool isSteamDeckBrightnessSupported() {
         close(fd);
         Logger::info("Backlight control is supported");
         tested = true;
-        value = true;
+        value  = true;
         return true;
     }
 }
 
-float getSteamDeckBrightness() {
-    if(!isSteamDeck()) return 0.0f;
+float getSteamDeckBrightness()
+{
+    if (!isSteamDeck())
+        return 0.0f;
     int fd = open(STEAM_DECK_BACKLIGHT_PATH, O_RDONLY | O_NONBLOCK);
     if (fd < 0)
     {
@@ -85,8 +91,10 @@ float getSteamDeckBrightness() {
     }
 }
 
-void setSteamDeckBrightness(float value) {
-    if(!isSteamDeck()) return;
+void setSteamDeckBrightness(float value)
+{
+    if (!isSteamDeck())
+        return;
     int fd = open(STEAM_DECK_BACKLIGHT_PATH, O_WRONLY | O_NONBLOCK);
     if (fd < 0)
     {
@@ -94,7 +102,7 @@ void setSteamDeckBrightness(float value) {
     }
     else
     {
-        int b = value * STEAM_DECK_MAX_BRIGHTNESS;
+        int b                  = value * STEAM_DECK_MAX_BRIGHTNESS;
         std::string brightness = std::to_string(b);
         write(fd, brightness.c_str(), brightness.size());
         close(fd);

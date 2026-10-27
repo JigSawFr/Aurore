@@ -14,20 +14,23 @@ namespace
 // (nanovg keeps a no-break space whole).
 std::string glued(std::string text)
 {
-    for (size_t at = text.find(' '); at != std::string::npos; at = text.find(' ', at + 2)) text.replace(at, 1, " ");
+    for (size_t at = text.find(' '); at != std::string::npos; at = text.find(' ', at + 2))
+        text.replace(at, 1, " ");
     return text;
 }
-}   // namespace
+} // namespace
 
 namespace ui
 {
 
 std::string fmt_minutes(uint32_t m)
 {
-    if (m < 60) return glued(brls::getStr("cadran/common/minutes", (int)m));
-    if (m % 60 == 0) return glued(brls::getStr("cadran/common/hours", (unsigned long long)(m / 60)));
+    if (m < 60)
+        return glued(brls::getStr("cadran/common/minutes", (int)m));
+    if (m % 60 == 0)
+        return glued(brls::getStr("cadran/common/hours", (unsigned long long)(m / 60)));
     return glued(brls::getStr("cadran/common/hours_minutes", (unsigned long long)(m / 60),
-                              fmt::format("{:02d}", (int)(m % 60))));
+        fmt::format("{:02d}", (int)(m % 60))));
 }
 
 std::string fmt_duration_ns(uint64_t ns)
@@ -37,29 +40,35 @@ std::string fmt_duration_ns(uint64_t ns)
 
 std::string fmt_duration(uint64_t seconds)
 {
-    if (seconds > 0 && seconds < 60) return "cadran/common/less_than_minute"_i18n;
+    if (seconds > 0 && seconds < 60)
+        return "cadran/common/less_than_minute"_i18n;
     const uint64_t m = (seconds + 30) / 60;
-    if (m < 60) return glued(brls::getStr("cadran/common/minutes", (int)m));
+    if (m < 60)
+        return glued(brls::getStr("cadran/common/minutes", (int)m));
     // From 100 h, the minutes are noise: whole hours, rounded.
-    if (m % 60 == 0 || m >= 100 * 60) return glued(brls::getStr("cadran/common/hours", (unsigned long long)((m + 30) / 60)));
+    if (m % 60 == 0 || m >= 100 * 60)
+        return glued(brls::getStr("cadran/common/hours", (unsigned long long)((m + 30) / 60)));
     return glued(brls::getStr("cadran/common/hours_minutes", (unsigned long long)(m / 60), fmt::format("{:02d}", (int)(m % 60))));
 }
 
 std::string day_name(int day)
 {
-    if (day < 0 || day > 6) return "?";
+    if (day < 0 || day > 6)
+        return "?";
     return brls::getStr(fmt::format("cadran/days/{}", day));
 }
 
 std::string day_name_in_text(int day)
 {
-    if (day < 0 || day > 6) return "?";
+    if (day < 0 || day > 6)
+        return "?";
     return brls::getStr(fmt::format("cadran/days_lower/{}", day));
 }
 
 std::string bool_text(bool ok, bool value, const std::string& yes, const std::string& no)
 {
-    if (!ok) return "cadran/common/unavailable"_i18n;
+    if (!ok)
+        return "cadran/common/unavailable"_i18n;
     return value ? yes : no;
 }
 
@@ -73,4 +82,4 @@ std::string opens(const std::string& value)
     return value.empty() ? "›" : value + "  ›";
 }
 
-}   // namespace ui
+} // namespace ui

@@ -3,12 +3,12 @@
 
 #include <borealis/cadran/ui/hooks.hpp>
 
+#include <fmt/format.h>
+#include <yoga/Yoga.h>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
-#include <fmt/format.h>
 #include <tuple>
-#include <yoga/Yoga.h>
 
 #include <borealis/cadran/ui/cadran_list.hpp>
 #include <borealis/cadran/ui/effects.hpp>
@@ -36,17 +36,18 @@ brls::Label* label(const std::string& text, float size, const char* color_key)
 
 namespace
 {
-// A label in the display face: Sora, the other scripts from the app's fonts.
-class DisplayLabel : public brls::Label
-{
-  public:
-    DisplayLabel()
+    // A label in the display face: Sora, the other scripts from the app's fonts.
+    class DisplayLabel : public brls::Label
     {
-        const int face = brls::Application::getFont("cadran/digits");
-        if (face != brls::FONT_INVALID) this->font = face;
-    }
-};
-}   // namespace
+      public:
+        DisplayLabel()
+        {
+            const int face = brls::Application::getFont("cadran/digits");
+            if (face != brls::FONT_INVALID)
+                this->font = face;
+        }
+    };
+} // namespace
 
 brls::Label* display(const std::string& text, float size, const char* color_key)
 {
@@ -76,12 +77,14 @@ brls::Box* card(bool focusable, bool grow)
     box->setBorderThickness(1);
     box->setCornerRadius(RADIUS_CARD);
     box->setPadding(20, 24, 20, 24);
-    if (focusable) {
+    if (focusable)
+    {
         box->setFocusable(true);
         box->setHideHighlightBackground(true);
         box->setHighlightCornerRadius(RADIUS_CARD);
     }
-    if (grow) {
+    if (grow)
+    {
         box->setGrow(1.0f);
         box->setWidth(0);
     }
@@ -99,10 +102,12 @@ brls::Box* top_card(bool grow)
 
 void set_kicker(brls::Label* label, const std::string& text)
 {
-    if (!label) return;
+    if (!label)
+        return;
     label->setFontSize(TEXT_KICKER);
     label->setThemeColor("textColor", "cadran/text2");
-    if (!text.empty()) label->setText(cadran::upper(text));
+    if (!text.empty())
+        label->setText(cadran::upper(text));
 }
 
 brls::Box* kicker(const char* icon_name, const std::string& title)
@@ -129,8 +134,8 @@ Mark::Mark(const char* color_key)
 void Mark::set(const char* color_key)
 {
     const std::string key = color_key;
-    this->key = key;
-    this->shape = key.rfind("cadran/teal", 0) == 0                                          ? Shape::CHECK
+    this->key             = key;
+    this->shape           = key.rfind("cadran/teal", 0) == 0                               ? Shape::CHECK
                   : key.rfind("cadran/amber", 0) == 0 || key.rfind("cadran/coral", 0) == 0 ? Shape::WARN
                                                                                            : Shape::DOT;
 }
@@ -140,7 +145,8 @@ void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brl
     const NVGcolor color = ctx->theme[this->key];
     const float cx = x + width / 2, cy = y + height / 2;
     nvgBeginPath(vg);
-    switch (this->shape) {
+    switch (this->shape)
+    {
         case Shape::DOT:
             nvgCircle(vg, cx, cy, 4);
             nvgFillColor(vg, this->a(color));
@@ -156,7 +162,8 @@ void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brl
             nvgLineJoin(vg, NVG_ROUND);
             nvgStroke(vg);
             break;
-        case Shape::WARN: {
+        case Shape::WARN:
+        {
             // A rounded triangle, an exclamation mark cut out of it.
             nvgMoveTo(vg, cx, y + 0.5f);
             nvgLineTo(vg, x + width, y + height - 0.5f);
@@ -225,7 +232,8 @@ void Chip::frame(brls::FrameContext* ctx)
     // The press's flash (borealis' click animation, 0 → 1 → 0) as a dip of
     // the whole chip, background and words, about its middle.
     const float press = effects::motion() ? this->getClickAlpha() : 0.0f;
-    if (press <= 0.0f) {
+    if (press <= 0.0f)
+    {
         brls::Box::frame(ctx);
         return;
     }
@@ -266,14 +274,17 @@ brls::Box* qr(const std::string& payload, float side, const std::string& title, 
 {
     auto* box = new brls::Box(brls::Axis::COLUMN);
     box->setAlignItems(brls::AlignItems::CENTER);
-    if (width > 0) box->setWidth(width);
+    if (width > 0)
+        box->setWidth(width);
     box->addView(new QrView(payload, side));
-    for (const auto& [text, size, key] : { std::tuple<const std::string&, float, const char*>{ title, 18, "cadran/text" },
-                                           { caption, TEXT_META, "cadran/text3" } }) {
-        if (text.empty()) continue;
+    for (const auto& [text, size, key] : { std::tuple<const std::string&, float, const char*> { title, 18, "cadran/text" },
+             { caption, TEXT_META, "cadran/text3" } })
+    {
+        if (text.empty())
+            continue;
         brls::Label* l = label(text, size, key);
         l->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-        l->setAlignSelf(brls::AlignSelf::STRETCH);   // wraps at the box's width
+        l->setAlignSelf(brls::AlignSelf::STRETCH); // wraps at the box's width
         l->setMarginTop(&text == &title ? 10 : 2);
         box->addView(l);
     }
@@ -288,8 +299,10 @@ Bar::Bar()
 
 void Bar::set(float value)
 {
-    value = value < 0 ? 0 : value > 1 ? 1 : value;
-    if (value == this->fraction) return;
+    value = value < 0 ? 0 : value > 1 ? 1
+                                      : value;
+    if (value == this->fraction)
+        return;
     // From where the fill is drawn now, over a third of a second.
     this->from     = this->drawn();
     this->since    = effects::motion() ? motion::now() : 0;
@@ -304,14 +317,15 @@ float Bar::drawn() const
 
 void Bar::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext*)
 {
-    brls::Theme theme = brls::Application::getTheme();
+    brls::Theme theme  = brls::Application::getTheme();
     const float radius = height / 2.0f;
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, radius);
     nvgFillColor(vg, this->a(theme["cadran/well"]));
     nvgFill(vg);
     const float fill = this->drawn();
-    if (fill <= 0) return;
+    if (fill <= 0)
+        return;
     const float w = std::max(width * fill, height);
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, w, height, radius);
@@ -336,7 +350,7 @@ Empty empty(const char* icon_name)
     e.box->addView(circle);
     e.title = label("", TEXT_LEAD, "cadran/text");
     e.title->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-    e.title->setAlignSelf(brls::AlignSelf::STRETCH);   // wraps at the card's width
+    e.title->setAlignSelf(brls::AlignSelf::STRETCH); // wraps at the card's width
     e.title->setMarginTop(16);
     e.box->addView(e.title);
     e.text = label("", TEXT_META, "cadran/text2");
@@ -350,13 +364,14 @@ Empty empty(const char* icon_name)
 brls::Box* empty_around(brls::Label* label, const char* icon_name)
 {
     auto* parent = label ? dynamic_cast<brls::Box*>(label->getParent()) : nullptr;
-    if (!parent) return nullptr;
+    if (!parent)
+        return nullptr;
     Empty e = empty(icon_name);
     e.box->setId("cadran_empty_card");
     const YGValue top = YGNodeStyleGetMargin(label->getYGNode(), YGEdgeTop);
     e.box->setMargins(top.unit == YGUnitPoint && top.value > 10 ? top.value : 10, 0, 16, 0);
     const auto& children = parent->getChildren();
-    const size_t at = (size_t)(std::find(children.begin(), children.end(), label) - children.begin());
+    const size_t at      = (size_t)(std::find(children.begin(), children.end(), label) - children.begin());
     // The label in the title's place, laid out as it.
     parent->removeView(label, false);
     e.box->removeView(e.title);
@@ -367,7 +382,7 @@ brls::Box* empty_around(brls::Label* label, const char* icon_name)
     label->setAlignSelf(brls::AlignSelf::STRETCH);
     label->setMargins(16, 0, 0, 0);
     e.box->addView(label, 1);
-    e.box->removeView(e.text);   // the screen's label says it all
+    e.box->removeView(e.text); // the screen's label says it all
     parent->addView(e.box, at);
     e.box->setVisibility(label->getVisibility());
     label->setVisibility(brls::Visibility::VISIBLE);
@@ -376,13 +391,15 @@ brls::Box* empty_around(brls::Label* label, const char* icon_name)
 
 void wrap(brls::View* row)
 {
-    if (row) YGNodeStyleSetFlexWrap(row->getYGNode(), YGWrapWrap);
+    if (row)
+        YGNodeStyleSetFlexWrap(row->getYGNode(), YGWrapWrap);
 }
 
 void fit_button(brls::Button* button)
 {
     auto* label = button ? dynamic_cast<brls::Label*>(button->getView("brls/button/label")) : nullptr;
-    if (!label) return;
+    if (!label)
+        return;
     label->setSingleLine(true);
     label->setShrinkToFit(true);
     // Its width at the normal size: the text's at the size asked, its
@@ -393,15 +410,18 @@ void fit_button(brls::Button* button)
     nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
     float bounds[4];
     nvgTextBounds(vg, 0, 0, label->getFullText().c_str(), nullptr, bounds);
-    YGNodeRef node = button->getYGNode();
-    const auto points = [](YGValue v) { return v.unit == YGUnitPoint ? v.value : 0.0f; };
+    YGNodeRef node    = button->getYGNode();
+    const auto points = [](YGValue v)
+    { return v.unit == YGUnitPoint ? v.value : 0.0f; };
     float width = bounds[2] - bounds[0] + points(YGNodeStyleGetPadding(node, YGEdgeLeft))
-                  + points(YGNodeStyleGetPadding(node, YGEdgeRight)) + 1.0f;
-    for (brls::View* child : button->getChildren()) {
-        if (child == label || child->getVisibility() == brls::Visibility::GONE) continue;
+        + points(YGNodeStyleGetPadding(node, YGEdgeRight)) + 1.0f;
+    for (brls::View* child : button->getChildren())
+    {
+        if (child == label || child->getVisibility() == brls::Visibility::GONE)
+            continue;
         YGNodeRef c = child->getYGNode();
         width += points(YGNodeStyleGetWidth(c)) + points(YGNodeStyleGetMargin(c, YGEdgeLeft))
-                 + points(YGNodeStyleGetMargin(c, YGEdgeRight));
+            + points(YGNodeStyleGetMargin(c, YGEdgeRight));
     }
     YGNodeStyleSetFlexBasis(node, width);
     YGNodeStyleSetFlexShrink(node, 0);
@@ -410,10 +430,12 @@ void fit_button(brls::Button* button)
 
 void fit_head(brls::Box* row)
 {
-    if (!row || row->getChildren().size() < 2) return;
+    if (!row || row->getChildren().size() < 2)
+        return;
     auto* title = dynamic_cast<brls::Label*>(row->getChildren()[0]);
     auto* state = dynamic_cast<brls::Label*>(row->getChildren()[1]);
-    if (!title || !state) return;
+    if (!title || !state)
+        return;
     wrap(row);
     YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, 8);
     YGNodeStyleSetGap(row->getYGNode(), YGGutterRow, 2);
@@ -423,21 +445,24 @@ void fit_head(brls::Box* row)
 }
 
 void draw_more_below(NVGcontext* vg, brls::ScrollingFrame* frame, float x, float y, float width, float height,
-                     const char* color_key, float corner)
+    const char* color_key, float corner)
 {
     // The content: the frame's tallest child (the other is its scroll bar).
     brls::View* content = nullptr;
     if (frame)
         for (brls::View* child : frame->getChildren())
-            if (!content || child->getHeight() > content->getHeight()) content = child;
-    if (!content) return;
+            if (!content || child->getHeight() > content->getHeight())
+                content = child;
+    if (!content)
+        return;
     const float below = content->getHeight() - frame->getContentOffsetY() - height;
-    if (below <= 1.0f) return;
+    if (below <= 1.0f)
+        return;
     constexpr float FADE = 32.0f;
-    NVGcolor solid = brls::Application::getTheme()[color_key];
+    NVGcolor solid       = brls::Application::getTheme()[color_key];
     solid.a *= frame->getAlpha();
-    NVGcolor clear = solid;
-    clear.a = 0.0f;
+    NVGcolor clear  = solid;
+    clear.a         = 0.0f;
     const float top = y + height - FADE;
     nvgBeginPath(vg);
     if (corner > 0.0f)
@@ -454,51 +479,60 @@ std::string without_chevron(const std::string& value)
     if (value.size() < chevron.size() || value.compare(value.size() - chevron.size(), chevron.size(), chevron) != 0)
         return value;
     std::string out = value.substr(0, value.size() - chevron.size());
-    while (!out.empty() && out.back() == ' ') out.pop_back();
+    while (!out.empty() && out.back() == ' ')
+        out.pop_back();
     return out;
 }
 
 const char* dot_of(NVGcolor c)
 {
-    const auto same = [&c](NVGcolor o) { return c.r == o.r && c.g == o.g && c.b == o.b; };
-    if (same(cadran::kit::color("cadran/teal"))) return "cadran/teal_fill";
-    if (same(cadran::kit::color("cadran/amber"))) return "cadran/amber_fill";
-    if (same(cadran::kit::color("cadran/coral"))) return "cadran/coral_fill";
+    const auto same = [&c](NVGcolor o)
+    { return c.r == o.r && c.g == o.g && c.b == o.b; };
+    if (same(cadran::kit::color("cadran/teal")))
+        return "cadran/teal_fill";
+    if (same(cadran::kit::color("cadran/amber")))
+        return "cadran/amber_fill";
+    if (same(cadran::kit::color("cadran/coral")))
+        return "cadran/coral_fill";
     return "cadran/text3";
 }
 
 namespace
 {
-// {0} the day's name, {1} the same in lower case, {2} the day, {3} the month.
-std::string date_text(int weekday, int day, int month)
-{
-    return brls::getStr("cadran/date", brls::getStr(fmt::format("cadran/days/{}", weekday)),
-                        brls::getStr(fmt::format("cadran/days_lower/{}", weekday)), day,
-                        brls::getStr(fmt::format("cadran/months/{}", month)));
-}
-}   // namespace
+    // {0} the day's name, {1} the same in lower case, {2} the day, {3} the month.
+    std::string date_text(int weekday, int day, int month)
+    {
+        return brls::getStr("cadran/date", brls::getStr(fmt::format("cadran/days/{}", weekday)),
+            brls::getStr(fmt::format("cadran/days_lower/{}", weekday)), day,
+            brls::getStr(fmt::format("cadran/months/{}", month)));
+    }
+} // namespace
 
 std::string long_date()
 {
     // The app's clock when it has one of its own (the console's), else the
     // system's.
-    if (ui::hooks::get().today) return long_date(ui::hooks::get().today());
+    if (ui::hooks::get().today)
+        return long_date(ui::hooks::get().today());
     const std::time_t now = brls::getWallTime();
-    char ymd[16] = "";
-    if (const std::tm* tm = std::localtime(&now)) std::strftime(ymd, sizeof ymd, "%Y-%m-%d", tm);
+    char ymd[16]          = "";
+    if (const std::tm* tm = std::localtime(&now))
+        std::strftime(ymd, sizeof ymd, "%Y-%m-%d", tm);
     return long_date(std::string(ymd));
 }
 
 std::string long_date(const std::string& ymd)
 {
-    if (ymd.size() != 10 || ymd[4] != '-' || ymd[7] != '-') return ymd;
+    if (ymd.size() != 10 || ymd[4] != '-' || ymd[7] != '-')
+        return ymd;
     std::tm tm = {};
     tm.tm_year = std::atoi(ymd.substr(0, 4).c_str()) - 1900;
-    tm.tm_mon = std::atoi(ymd.substr(5, 2).c_str()) - 1;
+    tm.tm_mon  = std::atoi(ymd.substr(5, 2).c_str()) - 1;
     tm.tm_mday = std::atoi(ymd.substr(8, 2).c_str());
-    tm.tm_hour = 12;   // clear of any change of hour
-    if (tm.tm_mon < 0 || tm.tm_mon > 11 || tm.tm_mday < 1 || std::mktime(&tm) == (std::time_t)-1) return ymd;
+    tm.tm_hour = 12; // clear of any change of hour
+    if (tm.tm_mon < 0 || tm.tm_mon > 11 || tm.tm_mday < 1 || std::mktime(&tm) == (std::time_t)-1)
+        return ymd;
     return date_text(tm.tm_wday, tm.tm_mday, tm.tm_mon + 1);
 }
 
-}   // namespace cadran::kit
+} // namespace cadran::kit

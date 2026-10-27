@@ -74,7 +74,7 @@ class SwitchInputManager : public InputManager
     // How many vibration devices each pad has (2 for a pair of Joy-Con,
     // 1 for a Pro Controller or a single Joy-Con)
     int m_vibration_count[GAMEPADS_MAX] = {};
-    bool pointerLocked = false;
+    bool pointerLocked                  = false;
     HidMouseState currentMouseState;
     HidSixAxisSensorHandle m_six_axis_sensor_handle[4]; // All for player 1, player 2 not supported
 
@@ -93,7 +93,6 @@ class SwitchInputManager : public InputManager
         unsigned short lowFreqMotor, unsigned short highFreqMotor);
     void sendRumbleInternal(HidVibrationDeviceHandle vibration_device[2], HidVibrationValue vibration_values[2], int count,
         float lowFreq, float highFreq, float lowAmp, float highAmp);
-
 };
 
 /// HidKeyboardScancode

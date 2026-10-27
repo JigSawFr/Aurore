@@ -18,11 +18,11 @@
 
 #include <nanovg.h>
 
-#include <borealis/core/event.hpp>
-#include <borealis/core/theme.hpp>
 #include <functional>
 #include <memory>
 #include <string>
+#include <borealis/core/event.hpp>
+#include <borealis/core/theme.hpp>
 
 namespace brls
 {
@@ -55,13 +55,13 @@ struct ThemeImage
     };
 
     std::string path; // as Theme::resolveAsset() made it
-    int flags   = 0;  // NVG_IMAGE_* it was made with
-    int maxSide = 0;  // its ThemeImageOptions
+    int flags   = 0; // NVG_IMAGE_* it was made with
+    int maxSide = 0; // its ThemeImageOptions
     bool mask   = false;
     State state = State::LOADING;
     int texture = 0; // 0 until READY
     int width = 0, height = 0; // the texture's, after downscaling
-    NVGcolor mean {};          // its average colour, opaque, once READY
+    NVGcolor mean {}; // its average colour, opaque, once READY
 
     bool ready() const { return this->state == State::READY; }
 
@@ -76,8 +76,8 @@ struct ThemeImage
     bool draw(NVGcontext* vg, float x, float y, float width, float height, BackgroundFit fit,
         const NVGcolor* tint = nullptr, float alpha = 1.0f, float corner = 0.0f) const;
 
-    ThemeImage() = default;
-    ThemeImage(const ThemeImage&) = delete;
+    ThemeImage()                             = default;
+    ThemeImage(const ThemeImage&)            = delete;
     ThemeImage& operator=(const ThemeImage&) = delete;
     // Deletes the texture: the last owner lets it go on the UI thread
     ~ThemeImage();

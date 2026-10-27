@@ -4,20 +4,20 @@
 
 #include <borealis/cadran/ui/cadran_frame.hpp>
 #include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_modal.hpp>
 #include <borealis/cadran/ui/cadran_list.hpp>
+#include <borealis/cadran/ui/cadran_modal.hpp>
 #include <borealis/cadran/ui/cadran_text.hpp>
 #include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
-#include <borealis/cadran/ui/text_size.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
+#include <borealis/cadran/ui/text_size.hpp>
 #include <borealis/cadran/util/text.hpp>
 
+#include <yoga/Yoga.h>
 #include <algorithm>
 #include <cmath>
 #include <iterator>
 #include <memory>
-#include <yoga/Yoga.h>
 
 using namespace brls::literals;
 
@@ -29,8 +29,10 @@ void on_cancel(brls::Dialog* dialog, std::function<void()> on_cancel)
     dialog->setCancelable(true);
     dialog->getAppletFrame()->registerAction(
         "hints/back"_i18n, brls::BUTTON_B,
-        [dialog, on_cancel](brls::View*) {
-            dialog->close([on_cancel]() { if (on_cancel) on_cancel(); });
+        [dialog, on_cancel](brls::View*)
+        {
+            dialog->close([on_cancel]()
+                { if (on_cancel) on_cancel(); });
             return true;
         },
         false, false, brls::SOUND_BACK);
@@ -51,13 +53,15 @@ static float content_height()
 
 static void scroll_with(brls::Dialog* dialog, brls::ScrollingFrame* frame, brls::View* text)
 {
-    for (const brls::ControllerButton button : { brls::BUTTON_NAV_UP, brls::BUTTON_NAV_DOWN }) {
+    for (const brls::ControllerButton button : { brls::BUTTON_NAV_UP, brls::BUTTON_NAV_DOWN })
+    {
         const bool down = button == brls::BUTTON_NAV_DOWN;
         dialog->getAppletFrame()->registerAction(
             "", button,
-            [frame, text, down](brls::View*) {
-                const float page = std::round(frame->getHeight() / 2);
-                const float limit = std::max(0.0f, text->getHeight() - frame->getHeight());
+            [frame, text, down](brls::View*)
+            {
+                const float page   = std::round(frame->getHeight() / 2);
+                const float limit  = std::max(0.0f, text->getHeight() - frame->getHeight());
                 const float target = std::min(std::max(frame->getContentOffsetY() + (down ? page : -page), 0.0f), limit);
                 frame->setContentOffsetY(target, true);
                 return true;
@@ -68,34 +72,39 @@ static void scroll_with(brls::Dialog* dialog, brls::ScrollingFrame* frame, brls:
 
 namespace
 {
-// A dialog's text that scrolls: its foot fades into the card while more
-// follows below the buttons' row.
-class DialogScroll : public brls::ScrollingFrame
-{
-  public:
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-              brls::FrameContext* ctx) override
+    // A dialog's text that scrolls: its foot fades into the card while more
+    // follows below the buttons' row.
+    class DialogScroll : public brls::ScrollingFrame
     {
-        brls::ScrollingFrame::draw(vg, x, y, width, height, style, ctx);
-        cadran::kit::draw_more_below(vg, this, x, y, width, height, "cadran/surf");
-    }
-};
-}   // namespace
+      public:
+        void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
+            brls::FrameContext* ctx) override
+        {
+            brls::ScrollingFrame::draw(vg, x, y, width, height, style, ctx);
+            cadran::kit::draw_more_below(vg, this, x, y, width, height, "cadran/surf");
+        }
+    };
+} // namespace
 
 brls::Dialog* box_dialog(brls::Box* body)
 {
     YGNodeCalculateLayout(body->getYGNode(), 720, YGUndefined, YGDirectionLTR);
     const float room = content_height();
-    if (YGNodeLayoutGetHeight(body->getYGNode()) <= room) return new brls::Dialog(body);
+    if (YGNodeLayoutGetHeight(body->getYGNode()) <= room)
+        return new brls::Dialog(body);
     // In a scrolling frame, each line keeps the height of its text (borealis
     // caps a label at its parent's, which a scrolling body does not settle).
-    std::function<void(brls::View*)> unbounded = [&unbounded](brls::View* view) {
+    std::function<void(brls::View*)> unbounded = [&unbounded](brls::View* view)
+    {
         view->setShrink(0);
-        if (dynamic_cast<brls::Label*>(view)) YGNodeStyleSetMaxHeight(view->getYGNode(), YGUndefined);
+        if (dynamic_cast<brls::Label*>(view))
+            YGNodeStyleSetMaxHeight(view->getYGNode(), YGUndefined);
         if (auto* box = dynamic_cast<brls::Box*>(view))
-            for (brls::View* child : box->getChildren()) unbounded(child);
+            for (brls::View* child : box->getChildren())
+                unbounded(child);
     };
-    for (brls::View* child : body->getChildren()) unbounded(child);
+    for (brls::View* child : body->getChildren())
+        unbounded(child);
     auto* frame = new DialogScroll();
     frame->setHeight(room);
     frame->setScrollingBehavior(brls::ScrollingBehavior::NATURAL);
@@ -113,8 +122,10 @@ brls::Dialog* box_dialog(brls::Box* body)
 static brls::Dialog* body_dialog(const std::string& text, brls::View* below = nullptr)
 {
     brls::Box* body = cadran::dialog_body(text);
-    if (below) {
-        if (!body->getChildren().empty()) below->setMarginTop(18);
+    if (below)
+    {
+        if (!body->getChildren().empty())
+            below->setMarginTop(18);
         body->addView(below);
     }
     return box_dialog(body);
@@ -131,18 +142,20 @@ brls::Dialog* dialog(const std::string& text, brls::View* below)
 }
 
 static void open_confirm(const std::string& body, const std::string& confirm_label,
-                         std::function<void()> on_yes, std::function<void()> on_no, bool danger)
+    std::function<void()> on_yes, std::function<void()> on_no, bool danger)
 {
     auto* dialog = body_dialog(body);
-    dialog->addButton("hints/cancel"_i18n, [on_no]() { if (on_no) on_no(); });
-    dialog->addButton(confirm_label, [on_yes]() { if (on_yes) on_yes(); });
+    dialog->addButton("hints/cancel"_i18n, [on_no]()
+        { if (on_no) on_no(); });
+    dialog->addButton(confirm_label, [on_yes]()
+        { if (on_yes) on_yes(); });
     on_cancel(dialog, on_no);
     cadran::style_dialog(dialog, danger ? cadran::Emphasis::DANGER : cadran::Emphasis::PRIMARY);
     dialog->open();
 }
 
 void confirm(const std::string& body, const std::string& confirm_label,
-             std::function<void()> on_yes, std::function<void()> on_no, bool danger)
+    std::function<void()> on_yes, std::function<void()> on_no, bool danger)
 {
     open_confirm(body, confirm_label, std::move(on_yes), std::move(on_no), danger);
 }
@@ -155,29 +168,34 @@ void confirm_danger(const std::string& body, const std::string& confirm_label, s
 void show_failure(const cadran_text::Failure& f)
 {
     const std::string& title = f.title;
-    const std::string& rest = f.reason;
-    const std::string& code = f.code;
-    const bool report = f.report;
-    const std::string body = title.empty() ? rest : rest.empty() ? title : title + "\n\n" + rest;
-    auto* dialog = body_dialog(body.empty() ? code : body);
-    if (!code.empty() && !body.empty()) {
-        if (auto* box = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_body"))) {
+    const std::string& rest  = f.reason;
+    const std::string& code  = f.code;
+    const bool report        = f.report;
+    const std::string body   = title.empty() ? rest : rest.empty() ? title
+                                                                   : title + "\n\n" + rest;
+    auto* dialog             = body_dialog(body.empty() ? code : body);
+    if (!code.empty() && !body.empty())
+    {
+        if (auto* box = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_body")))
+        {
             brls::Label* small = cadran::kit::label(code, 15, "cadran/text3");
             small->setMarginTop(10);
             box->addView(small);
         }
     }
-    if (report) {
-        dialog->addButton("cadran/notices/send_report"_i18n, []() {
-            if (hooks::get().send_report) hooks::get().send_report();
-        });
+    if (report)
+    {
+        dialog->addButton("cadran/notices/send_report"_i18n, []()
+            {
+            if (hooks::get().send_report) hooks::get().send_report(); });
     }
     dialog->addButton("hints/ok"_i18n, []() {});
     dialog->setCancelable(true);
     cadran::style_dialog(dialog, cadran::Emphasis::FAILURE);
     // A closes it, as before: the report is a choice, not the default.
     if (report)
-        if (brls::View* ok = dialog->getView("brls/dialog/button2")) dialog->setLastFocusedView(ok);
+        if (brls::View* ok = dialog->getView("brls/dialog/button2"))
+            dialog->setLastFocusedView(ok);
     dialog->open();
 }
 
@@ -200,13 +218,13 @@ void qr_dialog(const std::string& body, const std::string& url)
 brls::Box* check_row(const CheckLine& line, float size)
 {
     namespace kit = cadran::kit;
-    auto* row = new brls::Box(brls::Axis::ROW);
+    auto* row     = new brls::Box(brls::Axis::ROW);
     row->setAlignItems(brls::AlignItems::FLEX_START);
-    const char* color = line.state == Check::Ok     ? "cadran/teal"
-                        : line.state == Check::Warn ? "cadran/amber"
-                        : line.state == Check::Bad  ? "cadran/coral"
-                                                    : "cadran/text3";
-    auto* mark = new kit::Mark(color);
+    const char* color = line.state == Check::Ok ? "cadran/teal"
+        : line.state == Check::Warn             ? "cadran/amber"
+        : line.state == Check::Bad              ? "cadran/coral"
+                                                : "cadran/text3";
+    auto* mark        = new kit::Mark(color);
     mark->setMarginTop(size * 0.3f);
     mark->setMarginRight(14);
     mark->setShrink(0);
@@ -220,35 +238,38 @@ brls::Box* check_row(const CheckLine& line, float size)
 
 namespace
 {
-// A panel of check lines, as dialog_body's tables: the surface, rounded.
-brls::Box* check_panel()
-{
-    auto* panel = new brls::Box(brls::Axis::COLUMN);
-    panel->setAlignItems(brls::AlignItems::STRETCH);
-    panel->setThemeColor("backgroundColor", "cadran/surf2");
-    panel->setCornerRadius(14);
-    panel->setPadding(12, 18, 14, 18);
-    return panel;
-}
-}   // namespace
+    // A panel of check lines, as dialog_body's tables: the surface, rounded.
+    brls::Box* check_panel()
+    {
+        auto* panel = new brls::Box(brls::Axis::COLUMN);
+        panel->setAlignItems(brls::AlignItems::STRETCH);
+        panel->setThemeColor("backgroundColor", "cadran/surf2");
+        panel->setCornerRadius(14);
+        panel->setPadding(12, 18, 14, 18);
+        return panel;
+    }
+} // namespace
 
 brls::Box* checklist_body(const std::string& title, const std::vector<CheckLine>& lines, const std::string& note,
-                          const std::string& subtitle)
+    const std::string& subtitle)
 {
     namespace kit = cadran::kit;
-    auto* body = new brls::Box(brls::Axis::COLUMN);
+    auto* body    = new brls::Box(brls::Axis::COLUMN);
     body->setAlignItems(brls::AlignItems::STRETCH);
     body->setPadding(30, 40, 20, 40);
     body->addView(cadran::dialog_title(title));
-    if (!subtitle.empty()) {
+    if (!subtitle.empty())
+    {
         brls::Label* sub = kit::label(subtitle, 17, "cadran/text2");
         sub->setMarginTop(6);
         body->addView(sub);
     }
     // A Header line starts a panel of its own, its name small above it.
     brls::Box* panel = nullptr;
-    for (const CheckLine& line : lines) {
-        if (line.state == Check::Header) {
+    for (const CheckLine& line : lines)
+    {
+        if (line.state == Check::Header)
+        {
             brls::Label* head = kit::label(cadran::upper(line.text), 13, "cadran/text3");
             head->setMarginTop(16);
             head->setMarginBottom(6);
@@ -258,7 +279,8 @@ brls::Box* checklist_body(const std::string& title, const std::vector<CheckLine>
             body->addView(panel);
             continue;
         }
-        if (!panel) {
+        if (!panel)
+        {
             panel = check_panel();
             panel->setMarginTop(16);
             body->addView(panel);
@@ -267,7 +289,8 @@ brls::Box* checklist_body(const std::string& title, const std::vector<CheckLine>
         row->setMarginTop(panel->getChildren().empty() ? 0 : 8);
         panel->addView(row);
     }
-    if (!note.empty()) {
+    if (!note.empty())
+    {
         auto* foot = new brls::Box(brls::Axis::ROW);
         foot->setAlignItems(brls::AlignItems::FLEX_START);
         foot->setMarginTop(14);
@@ -287,10 +310,14 @@ brls::Box* checklist_body(const std::string& title, const std::vector<CheckLine>
 
 void notice(const char* icon, Check tone, const std::string& title, const std::string& text)
 {
-    namespace kit = cadran::kit;
-    const char* color = tone == Check::Ok ? "cadran/teal" : tone == Check::Bad ? "cadran/coral" : tone == Check::Warn ? "cadran/amber" : "cadran/text2";
-    const char* soft = tone == Check::Ok ? "cadran/teal_soft" : tone == Check::Bad ? "cadran/coral_soft" : tone == Check::Warn ? "cadran/amber_surf" : "cadran/surf2";
-    auto* body = new brls::Box(brls::Axis::COLUMN);
+    namespace kit     = cadran::kit;
+    const char* color = tone == Check::Ok ? "cadran/teal" : tone == Check::Bad ? "cadran/coral"
+        : tone == Check::Warn                                                  ? "cadran/amber"
+                                                                               : "cadran/text2";
+    const char* soft  = tone == Check::Ok ? "cadran/teal_soft" : tone == Check::Bad ? "cadran/coral_soft"
+         : tone == Check::Warn                                                      ? "cadran/amber_surf"
+                                                                                    : "cadran/surf2";
+    auto* body        = new brls::Box(brls::Axis::COLUMN);
     body->setAlignItems(brls::AlignItems::STRETCH);
     body->setPadding(30, 40, 22, 40);
     auto* head = new brls::Box(brls::Axis::ROW);
@@ -315,74 +342,81 @@ void notice(const char* icon, Check tone, const std::string& title, const std::s
 
 namespace
 {
-// How long A is held so far (hold_confirm); 0 once let go.
-struct Held
-{
-    int64_t start = -1, last = 0;
-    bool    done = false;
-    bool    touching = false;          // a finger held on the button
-    std::function<void()> full;        // held long enough
-};
-constexpr int64_t HOLD_US = 2000000;
-// borealis repeats a held key's action after 250 ms, then every 100 ms: a
-// longer gap is a key let go.
-constexpr int64_t LET_GO_US = 350000;
-
-double held_part(Held& h, int64_t now)
-{
-    if (h.start < 0) return 0;
-    if (now - h.last > LET_GO_US) {
-        h.start = -1;
-        return 0;
-    }
-    return std::min(1.0, (double)(now - h.start) / HOLD_US);
-}
-
-// Over the button held: a lighter fill from its left edge as it is held,
-// within its pill; gone when it is let go.
-class HoldFill : public brls::View
-{
-  public:
-    explicit HoldFill(std::shared_ptr<Held> hold) : held(std::move(hold))
+    // How long A is held so far (hold_confirm); 0 once let go.
+    struct Held
     {
-        this->setFocusable(false);
-        this->setPositionType(brls::PositionType::ABSOLUTE);
-        this->setPositionTop(0);
-        this->setPositionLeft(0);
-        this->setWidthPercentage(100);
-        this->setHeightPercentage(100);
-    }
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx) override
+        int64_t start = -1, last = 0;
+        bool done     = false;
+        bool touching = false; // a finger held on the button
+        std::function<void()> full; // held long enough
+    };
+    constexpr int64_t HOLD_US = 2000000;
+    // borealis repeats a held key's action after 250 ms, then every 100 ms: a
+    // longer gap is a key let go.
+    constexpr int64_t LET_GO_US = 350000;
+
+    double held_part(Held& h, int64_t now)
     {
-        const int64_t now = brls::getCPUTimeUsec();
-        // A finger on the button: held as long as it stays (no key repeats).
-        if (this->held->touching) this->held->last = now;
-        const double part = held_part(*this->held, now);
-        if (part >= 1 && !this->held->done && this->held->full) {
-            this->held->done = true;
-            // Not while drawing: closing the dialog changes the views drawn.
-            brls::sync([held = this->held]() { held->full(); });
+        if (h.start < 0)
+            return 0;
+        if (now - h.last > LET_GO_US)
+        {
+            h.start = -1;
+            return 0;
         }
-        if (part <= 0) return;
-        nvgSave(vg);
-        nvgIntersectScissor(vg, x, y, (float)(width * part), height);
-        nvgBeginPath(vg);
-        nvgRoundedRect(vg, x, y, width, height, height / 2);
-        nvgFillColor(vg, ctx->theme["cadran/hold_fill"]);
-        nvgFill(vg);
-        nvgRestore(vg);
+        return std::min(1.0, (double)(now - h.start) / HOLD_US);
     }
 
-  private:
-    std::shared_ptr<Held> held;
-};
-}   // namespace
+    // Over the button held: a lighter fill from its left edge as it is held,
+    // within its pill; gone when it is let go.
+    class HoldFill : public brls::View
+    {
+      public:
+        explicit HoldFill(std::shared_ptr<Held> hold)
+            : held(std::move(hold))
+        {
+            this->setFocusable(false);
+            this->setPositionType(brls::PositionType::ABSOLUTE);
+            this->setPositionTop(0);
+            this->setPositionLeft(0);
+            this->setWidthPercentage(100);
+            this->setHeightPercentage(100);
+        }
+        void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx) override
+        {
+            const int64_t now = brls::getCPUTimeUsec();
+            // A finger on the button: held as long as it stays (no key repeats).
+            if (this->held->touching)
+                this->held->last = now;
+            const double part = held_part(*this->held, now);
+            if (part >= 1 && !this->held->done && this->held->full)
+            {
+                this->held->done = true;
+                // Not while drawing: closing the dialog changes the views drawn.
+                brls::sync([held = this->held]()
+                    { held->full(); });
+            }
+            if (part <= 0)
+                return;
+            nvgSave(vg);
+            nvgIntersectScissor(vg, x, y, (float)(width * part), height);
+            nvgBeginPath(vg);
+            nvgRoundedRect(vg, x, y, width, height, height / 2);
+            nvgFillColor(vg, ctx->theme["cadran/hold_fill"]);
+            nvgFill(vg);
+            nvgRestore(vg);
+        }
+
+      private:
+        std::shared_ptr<Held> held;
+    };
+} // namespace
 
 void hold_confirm(brls::Box* body, const std::string& hold_label, std::function<void()> on_yes,
-                  std::function<void()> on_no)
+    std::function<void()> on_no)
 {
     namespace kit = cadran::kit;
-    auto held = std::make_shared<Held>();
+    auto held     = std::make_shared<Held>();
     // How: the A key's bubble, then the words.
     auto* how = new brls::Box(brls::Axis::ROW);
     how->setAlignItems(brls::AlignItems::CENTER);
@@ -394,14 +428,19 @@ void hold_confirm(brls::Box* body, const std::string& hold_label, std::function<
     how->addView(kit::label(brls::getStr("cadran/common/hold_hint", hold_label), 15, "cadran/text2"));
     body->addView(how);
     auto* dialog = box_dialog(body);
-    dialog->addButton("hints/cancel"_i18n, [on_no]() { if (on_no) on_no(); });
+    dialog->addButton("hints/cancel"_i18n, [on_no]()
+        { if (on_no) on_no(); });
     dialog->addButton(hold_label, []() {});
     on_cancel(dialog, on_no);
     cadran::style_dialog(dialog, cadran::Emphasis::PRIMARY);
-    held->full = [dialog, on_yes]() { dialog->close([on_yes]() { if (on_yes) on_yes(); }); };
-    if (auto* yes = dynamic_cast<brls::Box*>(dialog->getView("brls/dialog/button2"))) {
+    held->full = [dialog, on_yes]()
+    { dialog->close([on_yes]()
+          { if (on_yes) on_yes(); }); };
+    if (auto* yes = dynamic_cast<brls::Box*>(dialog->getView("brls/dialog/button2")))
+    {
         yes->addView(new HoldFill(held));
-        yes->registerAction(hold_label, brls::BUTTON_A, [held](brls::View*) {
+        yes->registerAction(hold_label, brls::BUTTON_A, [held](brls::View*)
+            {
             const int64_t now = brls::getCPUTimeUsec();
             if (held->done) return true;
             if (held->start < 0 || now - held->last > LET_GO_US) held->start = now;
@@ -410,147 +449,163 @@ void hold_confirm(brls::Box* body, const std::string& hold_label, std::function<
                 held->done = true;
                 held->full();
             }
-            return true;
-        }, false, true, brls::SOUND_NONE);
+            return true; }, false, true, brls::SOUND_NONE);
         // A finger held on it does the same; lifted or moved away, it stops.
-        yes->addGestureRecognizer(new brls::TapGestureRecognizer([held](brls::TapGestureStatus status, brls::Sound*) {
+        yes->addGestureRecognizer(new brls::TapGestureRecognizer([held](brls::TapGestureStatus status, brls::Sound*)
+            {
             const bool down = status.state == brls::GestureState::UNSURE || status.state == brls::GestureState::START ||
                               status.state == brls::GestureState::STAY;
             if (down && !held->touching) held->start = held->last = brls::getCPUTimeUsec();
-            held->touching = down;
-        }));
+            held->touching = down; }));
     }
     dialog->open();
 }
 
 void prompt_text(const std::string& header, const std::string& initial, int max_len,
-                 std::function<void(std::string)> on_value)
+    std::function<void(std::string)> on_value)
 {
     brls::Application::getImeManager()->openForText(
-        [on_value](std::string text) { if (!text.empty()) on_value(text); },
+        [on_value](std::string text)
+        { if (!text.empty()) on_value(text); },
         header, "", max_len, initial);
 }
 
 namespace
 {
-template <size_t N>
-int index_of(const char* const (&list)[N], const std::string& value)
-{
-    for (size_t i = 0; i < N; i++)
-        if (value == list[i]) return (int)i;
-    return 0;
-}
-
-// Saves `value` in `field`, then applies it at once (`apply`: every screen
-// made again, the language), or refreshes when nothing changed.
-void choose(std::string& field, const char* value, std::function<void()> after, void (*apply)())
-{
-    if (field == value) {
-        if (after) after();
-        return;
+    template <size_t N>
+    int index_of(const char* const (&list)[N], const std::string& value)
+    {
+        for (size_t i = 0; i < N; i++)
+            if (value == list[i])
+                return (int)i;
+        return 0;
     }
-    field = value;
-    save_prefs();
-    apply();
-}
-}   // namespace
+
+    // Saves `value` in `field`, then applies it at once (`apply`: every screen
+    // made again, the language), or refreshes when nothing changed.
+    void choose(std::string& field, const char* value, std::function<void()> after, void (*apply)())
+    {
+        if (field == value)
+        {
+            if (after)
+                after();
+            return;
+        }
+        field = value;
+        save_prefs();
+        apply();
+    }
+} // namespace
 
 // Each language's flag (ui::LANGUAGES' order), from the Twemoji set of
 // img/emoji/: the console's own a globe; Latin American Spanish, Mexico's.
-constexpr const char* LANGUAGE_FLAGS[] = { "1f310",       "1f1fa-1f1f8", "1f1eb-1f1f7", "1f1e8-1f1e6",
-                                           "1f1e9-1f1ea", "1f1ea-1f1f8", "1f1f2-1f1fd", "1f1ee-1f1f9",
-                                           "1f1f3-1f1f1", "1f1f5-1f1f9", "1f1e7-1f1f7", "1f1f7-1f1fa",
-                                           "1f1ef-1f1f5", "1f1f0-1f1f7", "1f1e8-1f1f3", "1f1f9-1f1fc" };
+constexpr const char* LANGUAGE_FLAGS[] = { "1f310", "1f1fa-1f1f8", "1f1eb-1f1f7", "1f1e8-1f1e6",
+    "1f1e9-1f1ea", "1f1ea-1f1f8", "1f1f2-1f1fd", "1f1ee-1f1f9",
+    "1f1f3-1f1f1", "1f1f5-1f1f9", "1f1e7-1f1f7", "1f1f7-1f1fa",
+    "1f1ef-1f1f5", "1f1f0-1f1f7", "1f1e8-1f1f3", "1f1f9-1f1fc" };
 static_assert(std::size(LANGUAGE_FLAGS) == std::size(ui::LANGUAGES), "a flag for each language");
 
 void pick_language(std::function<void()> after)
 {
     std::vector<std::string> labels, flags;
-    for (const char* l : ui::LANGUAGES) labels.push_back(brls::getStr(std::string("cadran/tools/languages/") + l));
-    for (const char* f : LANGUAGE_FLAGS) flags.push_back(std::string("img/emoji/") + f + ".png");
-    pick("cadran/tools/language"_i18n, labels, index_of(ui::LANGUAGES, ui::prefs().language), [after](int i) {
-        choose(ui::prefs().language, ui::LANGUAGES[i], after, live_prefs::language_changed);
-    }, true, {}, flags);
+    for (const char* l : ui::LANGUAGES)
+        labels.push_back(brls::getStr(std::string("cadran/tools/languages/") + l));
+    for (const char* f : LANGUAGE_FLAGS)
+        flags.push_back(std::string("img/emoji/") + f + ".png");
+    pick("cadran/tools/language"_i18n, labels, index_of(ui::LANGUAGES, ui::prefs().language), [after](int i)
+        { choose(ui::prefs().language, ui::LANGUAGES[i], after, live_prefs::language_changed); }, true, {}, flags);
 }
 
 namespace
 {
-// The theme files the palette picker offers: Aurore's presets, then the
-// user's (ui::hooks' themes_dir), the readable ones.
-std::vector<brls::ThemeInfo> theme_files()
-{
-    std::vector<brls::ThemeInfo> files = brls::Theme::builtinThemes();
-    if (ui::hooks::get().themes_dir) {
-        for (brls::ThemeInfo& own : brls::Theme::listThemes(ui::hooks::get().themes_dir())) {
-            if (own.ok()) files.push_back(std::move(own));
-            else brls::Logger::warning("theme {} left out: {}", own.path, own.errors.front());
+    // The theme files the palette picker offers: Aurore's presets, then the
+    // user's (ui::hooks' themes_dir), the readable ones.
+    std::vector<brls::ThemeInfo> theme_files()
+    {
+        std::vector<brls::ThemeInfo> files = brls::Theme::builtinThemes();
+        if (ui::hooks::get().themes_dir)
+        {
+            for (brls::ThemeInfo& own : brls::Theme::listThemes(ui::hooks::get().themes_dir()))
+            {
+                if (own.ok())
+                    files.push_back(std::move(own));
+                else
+                    brls::Logger::warning("theme {} left out: {}", own.path, own.errors.front());
+            }
         }
+        return files;
     }
-    return files;
-}
 
-void theme_chosen(std::function<void()> after)
-{
-    save_prefs();
-    live_prefs::apply_theme();
-    if (after) after();
-}
+    void theme_chosen(std::function<void()> after)
+    {
+        save_prefs();
+        live_prefs::apply_theme();
+        if (after)
+            after();
+    }
 
-std::string name_of(const std::string& file)
-{
-    if (!file.empty())
-        for (const brls::ThemeInfo& info : theme_files())
-            if (info.path == file) return info.name;
-    return "cadran/tools/palettes/default"_i18n;
-}
+    std::string name_of(const std::string& file)
+    {
+        if (!file.empty())
+            for (const brls::ThemeInfo& info : theme_files())
+                if (info.path == file)
+                    return info.name;
+        return "cadran/tools/palettes/default"_i18n;
+    }
 
-// The palette to show `variant` in: the one in use when it has that
-// variant; else the counterpart it names, when that one has it; else the
-// boards' own, which have both.
-std::string palette_for(brls::ThemeVariant variant)
-{
-    const std::string& file = ui::prefs().theme_file;
-    if (file.empty()) return file;
-    const brls::ThemeInfo info = brls::Theme::inspect(file);
-    if (info.styles(variant)) return file;
-    if (!info.counterpart.empty() && brls::Theme::inspect(info.counterpart).styles(variant)) return info.counterpart;
-    return "";
-}
+    // The palette to show `variant` in: the one in use when it has that
+    // variant; else the counterpart it names, when that one has it; else the
+    // boards' own, which have both.
+    std::string palette_for(brls::ThemeVariant variant)
+    {
+        const std::string& file = ui::prefs().theme_file;
+        if (file.empty())
+            return file;
+        const brls::ThemeInfo info = brls::Theme::inspect(file);
+        if (info.styles(variant))
+            return file;
+        if (!info.counterpart.empty() && brls::Theme::inspect(info.counterpart).styles(variant))
+            return info.counterpart;
+        return "";
+    }
 
-brls::ThemeVariant variant_of(const std::string& theme)
-{
-    return theme == "light" ? brls::ThemeVariant::LIGHT : brls::ThemeVariant::DARK;
-}
+    brls::ThemeVariant variant_of(const std::string& theme)
+    {
+        return theme == "light" ? brls::ThemeVariant::LIGHT : brls::ThemeVariant::DARK;
+    }
 
-// A palette's row in its picker: its own colours, in the variant on screen
-// when it styles it, else in the one it styles; its motif in its accent; or
-// its `preview` picture.
-ui::Swatch swatch_of(const brls::ThemeInfo& info)
-{
-    const brls::ThemeVariant shown = brls::Application::getThemeVariant();
-    const brls::ThemeVariant variant = info.styles(shown) ? shown : info.variant();
-    const brls::ThemeInfo::Preview& p = variant == brls::ThemeVariant::LIGHT ? info.lightPreview : info.darkPreview;
-    // Its own thumbnail, when it has one (loaded off the UI thread, the
-    // colours shown meanwhile: CadranSwatch)
-    return { p.background, p.surface, p.accent, info.icon, info.pictures(variant).preview };
-}
+    // A palette's row in its picker: its own colours, in the variant on screen
+    // when it styles it, else in the one it styles; its motif in its accent; or
+    // its `preview` picture.
+    ui::Swatch swatch_of(const brls::ThemeInfo& info)
+    {
+        const brls::ThemeVariant shown    = brls::Application::getThemeVariant();
+        const brls::ThemeVariant variant  = info.styles(shown) ? shown : info.variant();
+        const brls::ThemeInfo::Preview& p = variant == brls::ThemeVariant::LIGHT ? info.lightPreview : info.darkPreview;
+        // Its own thumbnail, when it has one (loaded off the UI thread, the
+        // colours shown meanwhile: CadranSwatch)
+        return { p.background, p.surface, p.accent, info.icon, info.pictures(variant).preview };
+    }
 
-// Default's: the app's own colours (without a theme file), a palette.
-ui::Swatch default_swatch()
-{
-    const auto& base = brls::Theme::get(brls::Application::getThemeVariant()).getValues()->getBaseColors();
-    auto color = [&base](const char* key, const char* fallback) {
-        for (const char* name : { key, fallback }) {
-            auto it = base.find(name);
-            if (it != base.end()) return it->second;
-        }
-        return nvgRGB(0, 0, 0);
-    };
-    // The keys of ThemeInfo's previews (core/theme.cpp)
-    return { color("brls/background", "brls/clear"), color("cadran/surf", "brls/highlight/background"),
-             color("brls/sidebar/active_item", "brls/accent"), "palette" };
-}
-}   // namespace
+    // Default's: the app's own colours (without a theme file), a palette.
+    ui::Swatch default_swatch()
+    {
+        const auto& base = brls::Theme::get(brls::Application::getThemeVariant()).getValues()->getBaseColors();
+        auto color       = [&base](const char* key, const char* fallback)
+        {
+            for (const char* name : { key, fallback })
+            {
+                auto it = base.find(name);
+                if (it != base.end())
+                    return it->second;
+            }
+            return nvgRGB(0, 0, 0);
+        };
+        // The keys of ThemeInfo's previews (core/theme.cpp)
+        return { color("brls/background", "brls/clear"), color("cadran/surf", "brls/highlight/background"),
+            color("brls/sidebar/active_item", "brls/accent"), "palette" };
+    }
+} // namespace
 
 std::string palette_name()
 {
@@ -562,31 +617,35 @@ void pick_palette(std::function<void()> after)
     const std::vector<brls::ThemeInfo> files = theme_files();
     std::vector<std::string> labels = { "cadran/tools/palettes/default"_i18n }, paths = { "" };
     // A palette with one variant switches to it ("" : both, the variant kept).
-    std::vector<std::string> only = { "" };
+    std::vector<std::string> only    = { "" };
     std::vector<ui::Swatch> swatches = { default_swatch() };
-    int selected = 0;
-    for (const brls::ThemeInfo& info : files) {
-        if (info.path == ui::prefs().theme_file) selected = (int)labels.size();
+    int selected                     = 0;
+    for (const brls::ThemeInfo& info : files)
+    {
+        if (info.path == ui::prefs().theme_file)
+            selected = (int)labels.size();
         labels.push_back(info.name);
         paths.push_back(info.path);
-        only.push_back(info.light == info.dark ? "" : info.light ? "light" : "dark");
+        only.push_back(info.light == info.dark ? "" : info.light ? "light"
+                                                                 : "dark");
         swatches.push_back(swatch_of(info));
     }
-    pick("cadran/tools/palette"_i18n, labels, selected, [after, paths, only](int i) {
+    pick("cadran/tools/palette"_i18n, labels, selected, [after, paths, only](int i)
+        {
         ui::prefs().theme_file = paths[i];
         if (!only[i].empty()) ui::prefs().theme = only[i];
-        theme_chosen(after);
-    }, true, {}, {}, swatches);
+        theme_chosen(after); }, true, {}, {}, swatches);
 }
 
 void pick_theme(std::function<void()> after)
 {
     std::vector<std::string> labels, details;
-    for (const char* t : ui::THEMES) {
+    for (const char* t : ui::THEMES)
+    {
         labels.push_back(brls::getStr(std::string("cadran/tools/themes/") + t));
         // A variant the palette has not: the palette it switches to.
         const std::string theme = t;
-        const std::string file = theme == "system" ? ui::prefs().theme_file : palette_for(variant_of(theme));
+        const std::string file  = theme == "system" ? ui::prefs().theme_file : palette_for(variant_of(theme));
         details.push_back(file != ui::prefs().theme_file ? name_of(file) : "");
     }
     // Its colours, after the variants: a picker of their own.
@@ -595,7 +654,8 @@ void pick_theme(std::function<void()> after)
     // As the header's button draws them (view/header_settings.cpp).
     const std::vector<std::string> icons = { "contrast", "sun", "moon", "sparkle" };
     static_assert(std::size(ui::THEMES) == 3, "an icon for each theme");
-    pick("cadran/tools/theme"_i18n, labels, index_of(ui::THEMES, ui::prefs().theme), [after](int i) {
+    pick("cadran/tools/theme"_i18n, labels, index_of(ui::THEMES, ui::prefs().theme), [after](int i)
+        {
         if (i == (int)std::size(ui::THEMES)) {
             pick_palette(after);
             return;
@@ -608,38 +668,39 @@ void pick_theme(std::function<void()> after)
         }
         ui::prefs().theme = theme;
         ui::prefs().theme_file = file;
-        theme_chosen(after);
-    }, true, details, icons);
+        theme_chosen(after); }, true, details, icons);
 }
 
 void pick_text_size(std::function<void()> after)
 {
     std::vector<std::string> labels;
-    for (const char* t : ui::TEXT_SIZES) labels.push_back(brls::getStr(std::string("cadran/prefs/text_sizes/") + t));
+    for (const char* t : ui::TEXT_SIZES)
+        labels.push_back(brls::getStr(std::string("cadran/prefs/text_sizes/") + t));
     const std::vector<std::string> icons = { "tv", "text-normal", "text-large" };
     static_assert(std::size(ui::TEXT_SIZES) == 3, "an icon for each text size");
-    pick("cadran/prefs/text_size"_i18n, labels, index_of(ui::TEXT_SIZES, ui::prefs().text_size), [after](int i) {
+    pick("cadran/prefs/text_size"_i18n, labels, index_of(ui::TEXT_SIZES, ui::prefs().text_size), [after](int i)
+        {
         // At once, no restart: every screen is laid out again.
         ui::prefs().text_size = ui::TEXT_SIZES[i];
         save_prefs();
         text_size::apply();
-        if (after) after();
-    }, true, {}, icons);
+        if (after) after(); }, true, {}, icons);
 }
 
 void pick_rail(std::function<void()> after)
 {
     std::vector<std::string> labels;
-    for (const char* r : ui::RAILS) labels.push_back(brls::getStr(std::string("cadran/prefs/rail_values/") + r));
+    for (const char* r : ui::RAILS)
+        labels.push_back(brls::getStr(std::string("cadran/prefs/rail_values/") + r));
     const std::vector<std::string> icons = { "rail-auto", "rail-open", "rail-icons" };
     static_assert(std::size(ui::RAILS) == 3, "an icon for each sidebar");
-    pick("cadran/prefs/rail"_i18n, labels, index_of(ui::RAILS, ui::prefs().rail), [after](int i) {
+    pick("cadran/prefs/rail"_i18n, labels, index_of(ui::RAILS, ui::prefs().rail), [after](int i)
+        {
         // At once: the main screen's rail wider or narrower.
         ui::prefs().rail = ui::RAILS[i];
         save_prefs();
         cadran::apply_rail();
-        if (after) after();
-    }, true, {}, icons);
+        if (after) after(); }, true, {}, icons);
 }
 
 std::string rail_name()
@@ -649,7 +710,8 @@ std::string rail_name()
 
 std::string text_size_name(bool tile)
 {
-    if (tile && ui::prefs().text_size == std::string("auto")) return "cadran/tiles/text_size_auto"_i18n;
+    if (tile && ui::prefs().text_size == std::string("auto"))
+        return "cadran/tiles/text_size_auto"_i18n;
     return brls::getStr("cadran/prefs/text_sizes/" + std::string(ui::TEXT_SIZES[index_of(ui::TEXT_SIZES, ui::prefs().text_size)]));
 }
 
@@ -658,12 +720,17 @@ std::string language_name(bool tile)
     // The names of a language spoken in two places, shorter on a tile: the
     // place as its code.
     static const std::pair<const char*, const char*> SHORT[] = {
-        { "fr", "Français (FR)" }, { "fr-CA", "Français (CA)" }, { "es", "Español (ES)" },
-        { "es-419", "Español (LatAm)" }, { "pt", "Português (PT)" }, { "pt-BR", "Português (BR)" },
+        { "fr", "Français (FR)" },
+        { "fr-CA", "Français (CA)" },
+        { "es", "Español (ES)" },
+        { "es-419", "Español (LatAm)" },
+        { "pt", "Português (PT)" },
+        { "pt-BR", "Português (BR)" },
     };
     if (tile)
         for (const auto& [code, name] : SHORT)
-            if (ui::prefs().language == code) return name;
+            if (ui::prefs().language == code)
+                return name;
     return brls::getStr("cadran/tools/languages/" + std::string(ui::LANGUAGES[index_of(ui::LANGUAGES, ui::prefs().language)]));
 }
 
@@ -675,15 +742,15 @@ std::string theme_name(bool tile)
 void quick_settings(std::function<void()> after)
 {
     const std::vector<std::string> labels = { "cadran/tools/language"_i18n + " · " + language_name(),
-                                              "cadran/tools/theme"_i18n + " · " + theme_name(),
-                                              "cadran/prefs/text_size"_i18n + " · " + text_size_name() };
+        "cadran/tools/theme"_i18n + " · " + theme_name(),
+        "cadran/prefs/text_size"_i18n + " · " + text_size_name() };
     // As an app's Preferences tiles draw them.
     const std::vector<std::string> icons = { "language", "contrast", "eye" };
-    pick("cadran/quick/title_text"_i18n, labels, 0, [after](int i) {
+    pick("cadran/quick/title_text"_i18n, labels, 0, [after](int i)
+        {
         if (i == 0) pick_language(after);
         else if (i == 1) pick_theme(after);
-        else pick_text_size(after);
-    }, false, {}, icons);
+        else pick_text_size(after); }, false, {}, icons);
 }
 
-}   // namespace ui
+} // namespace ui

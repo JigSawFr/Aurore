@@ -98,23 +98,25 @@ GestureState PanGestureRecognizer::recognitionLoop(TouchState touch, MouseState 
                     switch (axis)
                     {
                         case PanAxis::HORIZONTAL:
-                            if (fabs(delta.x) > fabs(delta.y)) {
-                                this->delta = Point();
+                            if (fabs(delta.x) > fabs(delta.y))
+                            {
+                                this->delta         = Point();
                                 this->startPosition = position;
-                                this->state = GestureState::START;
+                                this->state         = GestureState::START;
                             }
                             break;
                         case PanAxis::VERTICAL:
-                            if (fabs(delta.x) < fabs(delta.y)) {
-                                this->delta = Point();
+                            if (fabs(delta.x) < fabs(delta.y))
+                            {
+                                this->delta         = Point();
                                 this->startPosition = position;
-                                this->state = GestureState::START;
+                                this->state         = GestureState::START;
                             }
                             break;
                         case PanAxis::ANY:
-                            this->delta = Point();
+                            this->delta         = Point();
                             this->startPosition = position;
-                            this->state = GestureState::START;
+                            this->state         = GestureState::START;
                             break;
                     }
                 }
@@ -133,12 +135,13 @@ GestureState PanGestureRecognizer::recognitionLoop(TouchState touch, MouseState 
             {
                 float time = posHistory.size() * 1.0f / Application::getFPS();
 
-                float distanceX = posHistory[posHistory.size()-1].x - posHistory[0].x;
-                float distanceY = posHistory[posHistory.size()-1].y - posHistory[0].y;
+                float distanceX = posHistory[posHistory.size() - 1].x - posHistory[0].x;
+                float distanceY = posHistory[posHistory.size() - 1].y - posHistory[0].y;
 
                 float velocityX = distanceX / time;
                 float velocityY = distanceY / time;
-                if (panFactor > 0.0f) {
+                if (panFactor > 0.0f)
+                {
                     velocityX *= panFactor;
                     velocityY *= panFactor;
                 }

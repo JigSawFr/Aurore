@@ -24,9 +24,12 @@ IconButton::IconButton()
 {
     this->text = (Label*)this->getView("brls/button/label");
 
-    this->registerFilePathXMLAttribute("icon", [this](const std::string& value) { this->setIcon(value); });
-    this->registerStringXMLAttribute("glyph", [this](const std::string& value) { this->setGlyph(value); });
-    this->registerFloatXMLAttribute("iconSize", [this](float value) { this->setIconSize(value); });
+    this->registerFilePathXMLAttribute("icon", [this](const std::string& value)
+        { this->setIcon(value); });
+    this->registerStringXMLAttribute("glyph", [this](const std::string& value)
+        { this->setGlyph(value); });
+    this->registerFloatXMLAttribute("iconSize", [this](float value)
+        { this->setIconSize(value); });
 }
 
 void IconButton::replaceIcon(View* view)

@@ -14,11 +14,11 @@
     limitations under the License.
 */
 
+#include <cmath>
 #include <borealis/core/application.hpp>
 #include <borealis/core/touch/pan_gesture.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/views/slider.hpp>
-#include <cmath>
 
 namespace brls
 {

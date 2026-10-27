@@ -27,11 +27,11 @@ BooleanCell::BooleanCell()
 {
     baseDetailTextSize = detail->getFontSize();
     setOn(false, false);
-    this->registerClickAction([this](View* view) {
+    this->registerClickAction([this](View* view)
+        {
         this->setOn(!state);
         this->event.fire(state);
-        return true;
-    });
+        return true; });
 }
 
 void BooleanCell::init(std::string title, bool isOn, std::function<void(bool)> callback)
@@ -66,10 +66,10 @@ void BooleanCell::setOn(bool on, bool animated)
     }
 
     scale.addStep(0.8f, 60, EasingFunction::quadraticOut);
-    scale.setTickCallback([this] {
-        this->scaleTick();
-    });
-    scale.setEndCallback([this](bool finished) {
+    scale.setTickCallback([this]
+        { this->scaleTick(); });
+    scale.setEndCallback([this](bool finished)
+        {
         if (!finished)
             return;
 
@@ -86,8 +86,7 @@ void BooleanCell::setOn(bool on, bool animated)
 
             detail->setFontSize(baseDetailTextSize);
         });
-        scale.start();
-    });
+        scale.start(); });
     scale.start();
 }
 

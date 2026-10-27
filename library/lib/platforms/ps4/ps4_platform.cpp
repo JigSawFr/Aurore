@@ -18,14 +18,14 @@ limitations under the License.
 #include <orbis/CommonDialog.h>
 #include <orbis/NetCtl.h>
 #include <orbis/Sysmodule.h>
-#include <orbis/UserService.h>
 #include <orbis/SystemService.h>
+#include <orbis/UserService.h>
 
 #include <borealis/core/application.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/thread.hpp>
-#include <borealis/platforms/ps4/ps4_platform.hpp>
 #include <borealis/platforms/ps4/ps4_ime.hpp>
+#include <borealis/platforms/ps4/ps4_platform.hpp>
 #ifdef USE_JBC
 #include <libjbc.h>
 #endif
@@ -239,7 +239,6 @@ ImeManager* Ps4Platform::getImeManager()
 {
     return this->imeManager;
 }
-
 
 int Ps4Platform::loadStartModuleFromSandbox(const std::string& name)
 {

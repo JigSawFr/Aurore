@@ -18,10 +18,10 @@ limitations under the License.
 
 #include <switch.h>
 
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/switch/switch_ime.hpp>
 #include <cstring>
 #include <iostream>
+#include <borealis/core/logger.hpp>
+#include <borealis/platforms/switch/switch_ime.hpp>
 
 namespace brls
 {

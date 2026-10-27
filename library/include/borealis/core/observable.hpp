@@ -18,9 +18,9 @@
 
 #include <cstddef>
 #include <functional>
-#include <type_traits>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
@@ -149,7 +149,7 @@ class Observable
     void notify()
     {
         // A copy: a subscriber may subscribe or unsubscribe while called.
-        std::shared_ptr<State> keep = this->state;
+        std::shared_ptr<State> keep                            = this->state;
         std::vector<std::pair<size_t, Subscriber>> subscribers = keep->subscribers;
         for (auto& [id, subscriber] : subscribers)
         {
@@ -165,10 +165,10 @@ class Observable
         size_t id = ++this->state->lastId;
         this->state->subscribers.emplace_back(id, std::move(subscriber));
         std::weak_ptr<State> weak = this->state;
-        return Subscription([weak, id] {
+        return Subscription([weak, id]
+            {
             if (auto state = weak.lock())
-                state->remove(id);
-        });
+                state->remove(id); });
     }
 
     size_t getSubscriberCount() const

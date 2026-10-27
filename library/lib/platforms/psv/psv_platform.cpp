@@ -89,9 +89,12 @@ PsvPlatform::PsvPlatform()
             { SCE_SYSTEM_PARAM_LANG_ITALIAN, LOCALE_IT }
         };
 
-        if (psv2brls.count(systemLanguage) > 0) {
+        if (psv2brls.count(systemLanguage) > 0)
+        {
             this->locale = psv2brls[systemLanguage];
-        } else {
+        }
+        else
+        {
             this->locale = LOCALE_EN_US;
         }
         brls::Logger::info("Set app locale: {}", this->locale);
@@ -127,12 +130,13 @@ void PsvPlatform::createWindow(std::string windowTitle, uint32_t windowWidth, ui
     this->inputManager = new SDLInputManager(this->videoContext->getSDLWindow());
     this->imeManager   = new SDLImeManager(&this->otherEvent);
 #endif
-    this->audioPlayer  = new NullAudioPlayer();
+    this->audioPlayer = new NullAudioPlayer();
 }
 
 bool PsvPlatform::mainLoopIteration()
 {
-    if (this->suspendDisabled) {
+    if (this->suspendDisabled)
+    {
         sceKernelPowerTick(SCE_KERNEL_POWER_TICK_DEFAULT);
     }
 #ifdef __SDL2__
@@ -168,8 +172,8 @@ bool PsvPlatform::isScreenDimmingDisabled()
 }
 void PsvPlatform::disableScreenDimming(bool disable, const std::string& reason, const std::string& app)
 {
-    (void) reason;
-    (void) app;
+    (void)reason;
+    (void)app;
     suspendDisabled = disable;
 }
 
@@ -248,15 +252,17 @@ void PsvPlatform::openBrowser(std::string url)
     if (url.empty())
         return;
     SceAppUtilWebBrowserParam browser_param;
-    browser_param.str = url.c_str();
-    browser_param.strlen = url.length();
+    browser_param.str        = url.c_str();
+    browser_param.strlen     = url.length();
     browser_param.launchMode = 1;
-    if (sceAppUtilLaunchWebBrowser(&browser_param) == SCE_OK) {
+    if (sceAppUtilLaunchWebBrowser(&browser_param) == SCE_OK)
+    {
         return;
     }
     brls::Logger::error("Failed to open browser in MODAL mode, trying NORMAL mode");
     browser_param.launchMode = 0;
-    if (sceAppUtilLaunchWebBrowser(&browser_param) != SCE_OK) {
+    if (sceAppUtilLaunchWebBrowser(&browser_param) != SCE_OK)
+    {
         brls::Logger::error("Failed to open browser in NORMAL mode");
     }
 }

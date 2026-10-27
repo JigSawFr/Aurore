@@ -39,7 +39,8 @@ struct StylesModel
         model.add("announced", announced);
 
         this->updateSwatch();
-        brls::Application::getThemeChangedEvent()->subscribe([this](brls::ThemeVariant) { this->updateSwatch(); });
+        brls::Application::getThemeChangedEvent()->subscribe([this](brls::ThemeVariant)
+            { this->updateSwatch(); });
     }
 
     void updateSwatch()
@@ -60,35 +61,34 @@ StylesTab::StylesTab()
     StylesModel& data = stylesModel();
     brls::Application::registerModel("styles", &data.model);
 
-    brls::Application::setFocusAnnouncer([](const std::string& description) {
-        stylesModel().announced = "Announced: " + description;
-    });
+    brls::Application::setFocusAnnouncer([](const std::string& description)
+        { stylesModel().announced = "Announced: " + description; });
 
     this->inflateFromXMLRes("xml/tabs/styles.xml");
 
     // pressed: needs something to press.
     brls::View* fade = this->getView("styles/fade");
-    fade->registerClickAction([](brls::View*) { return true; });
+    fade->registerClickAction([](brls::View*)
+        { return true; });
     fade->addGestureRecognizer(new brls::TapGestureRecognizer(fade));
 
     this->disabled->setState(brls::ButtonState::DISABLED);
-    this->toggle->registerClickAction([this](brls::View*) {
+    this->toggle->registerClickAction([this](brls::View*)
+        {
         bool enabled = this->disabled->getState() == brls::ButtonState::ENABLED;
         this->disabled->setState(enabled ? brls::ButtonState::DISABLED : brls::ButtonState::ENABLED);
-        return true;
-    });
+        return true; });
 
-    this->increment->registerClickAction([](brls::View*) {
+    this->increment->registerClickAction([](brls::View*)
+        {
         StylesModel& data = stylesModel();
         data.counter = data.counter.get() + 1;
         data.updateSwatch();
         data.even = data.counter.get() % 2 == 0;
-        return true;
-    });
+        return true; });
 
-    this->reduceMotion->init("Reduce motion", brls::Application::isReduceMotionSet(), [](bool on) {
-        brls::Application::setReduceMotion(on);
-    });
+    this->reduceMotion->init("Reduce motion", brls::Application::isReduceMotionSet(), [](bool on)
+        { brls::Application::setReduceMotion(on); });
 }
 
 brls::View* StylesTab::create()

@@ -15,10 +15,10 @@
     limitations under the License.
 */
 
+#include <mutex>
 #include <borealis/core/application.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/platforms/sdl/sdl_input.hpp>
-#include <mutex>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
@@ -403,9 +403,8 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
             SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(event->cdevice.which);
             // SDL_GameControllerOpen is reference-counted: a controller already
             // in the list (opened at start-up) is not tracked a second time.
-            auto existing = std::find_if(controllers.begin(), controllers.end(), [jid](const auto& c) {
-                return c.first == jid;
-            });
+            auto existing = std::find_if(controllers.begin(), controllers.end(), [jid](const auto& c)
+                { return c.first == jid; });
             if (existing != controllers.end())
             {
                 SDL_GameControllerClose(controller);
@@ -423,10 +422,10 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
         SDL_JoystickID jid = event->cdevice.which;
         Logger::info("Controller disconnected: {}", jid);
         std::lock_guard<std::recursive_mutex> lock(controllersMutex);
-        auto it = std::find_if(controllers.begin(), controllers.end(), [jid](auto x) {
-            return x.first == jid;
-        });
-        if (it != controllers.end()) {
+        auto it = std::find_if(controllers.begin(), controllers.end(), [jid](auto x)
+            { return x.first == jid; });
+        if (it != controllers.end())
+        {
             SDL_GameControllerClose(it->second);
             controllers.erase(it);
         }
@@ -598,7 +597,8 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
 void SDLInputManager::updateControllerState(ControllerState* state, int controller)
 {
     std::lock_guard<std::recursive_mutex> lock(controllersMutex);
-    if ((int)controllers.size() <= controller) return;
+    if ((int)controllers.size() <= controller)
+        return;
 
     SDL_GameController* c = controllers[controller].second;
 
@@ -678,7 +678,7 @@ void SDLInputManager::updateMouseStates(RawMouseState* state)
 
 void SDLInputManager::setPointerLock(bool lock)
 {
-    pointerLocked = lock;
+    pointerLocked       = lock;
     pointerOffset       = { 0, 0 };
     pointerOffsetBuffer = { 0, 0 };
 
@@ -700,7 +700,8 @@ void SDLInputManager::runloopStart()
 void SDLInputManager::sendRumble(unsigned short controller, unsigned short lowFreqMotor, unsigned short highFreqMotor)
 {
     std::lock_guard<std::recursive_mutex> lock(controllersMutex);
-    if (controllers.size() <= controller) return;
+    if (controllers.size() <= controller)
+        return;
     SDL_GameController* c = controllers[controller].second;
 
     SDL_GameControllerRumble(c, lowFreqMotor, highFreqMotor, 30000);

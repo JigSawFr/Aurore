@@ -7,9 +7,9 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <functional>
 #include <string>
+#include <borealis.hpp>
 
 namespace cadran
 {
@@ -42,16 +42,21 @@ bool is_main_frame(brls::View* frame);
 // icon, and its tone: amber for a state that needs the user, coral for
 // something off that should be on. While the app writes nothing (ui::hooks'
 // read_only), the pill says so instead, whatever the screen.
-enum class Tone { OK, WARN, DANGER };
+enum class Tone
+{
+    OK,
+    WARN,
+    DANGER
+};
 // A mode of the app the main screen's pill says over what every screen
 // says, as long as it lasts (ui::hooks' pill fills it in; read-only is
 // Aurore's own): its text, icon and tone, and what a tap on the pill opens
 // (nullptr: nothing). PlayGuard's: parental controls paused or unlocked.
 struct PillMode
 {
-    std::string           text;
-    std::string           icon = "check";
-    Tone                  tone = Tone::WARN;
+    std::string text;
+    std::string icon = "check";
+    Tone tone        = Tone::WARN;
     std::function<void()> on_tap;
 };
 void set_pill(const std::string& text, const char* icon = "check", Tone tone = Tone::OK);

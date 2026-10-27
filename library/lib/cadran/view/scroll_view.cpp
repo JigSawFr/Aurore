@@ -12,12 +12,10 @@ ScrollView::ScrollView()
     // "centered" turns borealis' natural scrolling off; the scrolling itself
     // is ours (onChildFocusGained, step).
     this->setScrollingBehavior(brls::ScrollingBehavior::CENTERED);
-    this->registerAction("", brls::BUTTON_NAV_DOWN,
-                         [this](brls::View*) { return this->step(brls::FocusDirection::DOWN); },
-                         true, true, brls::SOUND_NONE);
-    this->registerAction("", brls::BUTTON_NAV_UP,
-                         [this](brls::View*) { return this->step(brls::FocusDirection::UP); },
-                         true, true, brls::SOUND_NONE);
+    this->registerAction("", brls::BUTTON_NAV_DOWN, [this](brls::View*)
+        { return this->step(brls::FocusDirection::DOWN); }, true, true, brls::SOUND_NONE);
+    this->registerAction("", brls::BUTTON_NAV_UP, [this](brls::View*)
+        { return this->step(brls::FocusDirection::UP); }, true, true, brls::SOUND_NONE);
 }
 
 brls::View* ScrollView::create()
@@ -30,16 +28,19 @@ void ScrollView::willAppear(bool resetState)
     brls::ScrollingFrame::willAppear(resetState);
     // Not borealis' centring: our reveal, once the first layout is known.
     this->updateScrollingOnNextFrame = false;
-    if (resetState) this->reveal_pending = true;
+    if (resetState)
+        this->reveal_pending = true;
 }
 
 void ScrollView::draw(NVGcontext* vg, float x, float y, float width, float height,
-                      brls::Style style, brls::FrameContext* ctx)
+    brls::Style style, brls::FrameContext* ctx)
 {
-    if (this->reveal_pending) {
+    if (this->reveal_pending)
+    {
         this->reveal_pending = false;
-        brls::View* focus = brls::Application::getCurrentFocus();
-        if (this->owns(focus)) this->reveal(focus, false);
+        brls::View* focus    = brls::Application::getCurrentFocus();
+        if (this->owns(focus))
+            this->reveal(focus, false);
     }
     brls::ScrollingFrame::draw(vg, x, y, width, height, style, ctx);
     cadran::kit::draw_more_below(vg, this, x, y, width, height, "brls/background");
@@ -48,7 +49,8 @@ void ScrollView::draw(NVGcontext* vg, float x, float y, float width, float heigh
 void ScrollView::reveal_focused()
 {
     for (brls::View* v = brls::Application::getCurrentFocus(); v; v = v->hasParent() ? v->getParent() : nullptr)
-        if (auto* frame = dynamic_cast<ScrollView*>(v)) {
+        if (auto* frame = dynamic_cast<ScrollView*>(v))
+        {
             frame->reveal_pending = true;
             return;
         }
@@ -56,7 +58,8 @@ void ScrollView::reveal_focused()
 
 brls::View* ScrollView::getDefaultFocus()
 {
-    if (this->parked) return this;
+    if (this->parked)
+        return this;
     return brls::ScrollingFrame::getDefaultFocus();
 }
 
@@ -69,22 +72,27 @@ void ScrollView::onFocusLost()
 // The first (or last) line that can take the focus and is on screen in full.
 brls::View* ScrollView::visible_line(bool first)
 {
-    const float top = this->getContentOffsetY();
-    const float bottom = top + this->getScrollingAreaHeight();
-    brls::View* found = nullptr;
-    std::function<bool(brls::View*)> walk = [&](brls::View* view) {
-        if (view->getVisibility() != brls::Visibility::VISIBLE) return false;
-        if (view->isFocusable()) {
+    const float top                       = this->getContentOffsetY();
+    const float bottom                    = top + this->getScrollingAreaHeight();
+    brls::View* found                     = nullptr;
+    std::function<bool(brls::View*)> walk = [&](brls::View* view)
+    {
+        if (view->getVisibility() != brls::Visibility::VISIBLE)
+            return false;
+        if (view->isFocusable())
+        {
             const Span span = this->span_of(view);
-            if (span.top >= top - 1 && span.bottom <= bottom + 1) {
+            if (span.top >= top - 1 && span.bottom <= bottom + 1)
+            {
                 found = view;
-                return first;   // the first one: stop; the last one: go on
+                return first; // the first one: stop; the last one: go on
             }
             return false;
         }
         if (auto* box = dynamic_cast<brls::Box*>(view))
             for (brls::View* child : box->getChildren())
-                if (walk(child)) return true;
+                if (walk(child))
+                    return true;
         return false;
     };
     walk(this->contentView);
@@ -96,7 +104,8 @@ void ScrollView::onChildFocusGained(brls::View* directChild, brls::View* focused
     // Not ScrollingFrame's: it would centre the focused line.
     brls::Box::onChildFocusGained(directChild, focusedView);
     this->childFocused = true;
-    if (brls::Application::getInputType() == brls::InputType::GAMEPAD) this->reveal(focusedView, true);
+    if (brls::Application::getInputType() == brls::InputType::GAMEPAD)
+        this->reveal(focusedView, true);
 }
 
 brls::View* ScrollView::getNextFocus(brls::FocusDirection direction, brls::View* currentView)
@@ -108,17 +117,20 @@ brls::View* ScrollView::getNextFocus(brls::FocusDirection direction, brls::View*
 
 bool ScrollView::owns(brls::View* view) const
 {
-    if (!view || !this->contentView) return false;
+    if (!view || !this->contentView)
+        return false;
     for (brls::View* v = view; v; v = v->getParent())
-        if (v == this->contentView) return true;
+        if (v == this->contentView)
+            return true;
     return false;
 }
 
 ScrollView::Span ScrollView::span_of(brls::View* view) const
 {
-    float y = 0;
+    float y       = 0;
     brls::View* v = view;
-    for (; v && v != this->contentView; v = v->getParent()) y += v->getLocalY();
+    for (; v && v != this->contentView; v = v->getParent())
+        y += v->getLocalY();
     return { y, y + view->getHeight() };
 }
 
@@ -130,29 +142,42 @@ ScrollView::Span ScrollView::context_of(brls::View* view) const
     Span span = this->span_of(view);
     bool up = true, down = true;
     brls::View* node = view;
-    while (node != this->contentView && node->getParent() && (up || down)) {
-        brls::Box* box = node->getParent();
+    while (node != this->contentView && node->getParent() && (up || down))
+    {
+        brls::Box* box       = node->getParent();
         const auto& siblings = box->getChildren();
-        const auto at = std::find(siblings.begin(), siblings.end(), node);
-        if (at == siblings.end()) break;
+        const auto at        = std::find(siblings.begin(), siblings.end(), node);
+        if (at == siblings.end())
+            break;
         const int index = (int)(at - siblings.begin());
-        for (int i = index + 1; down && i < (int)siblings.size(); i++) {
+        for (int i = index + 1; down && i < (int)siblings.size(); i++)
+        {
             brls::View* child = siblings[i];
-            if (child->getVisibility() == brls::Visibility::GONE) continue;
-            if (child->getDefaultFocus()) down = false;
-            else span.bottom = std::max(span.bottom, this->span_of(child).bottom);
+            if (child->getVisibility() == brls::Visibility::GONE)
+                continue;
+            if (child->getDefaultFocus())
+                down = false;
+            else
+                span.bottom = std::max(span.bottom, this->span_of(child).bottom);
         }
-        for (int i = index - 1; up && i >= 0; i--) {
+        for (int i = index - 1; up && i >= 0; i--)
+        {
             brls::View* child = siblings[i];
-            if (child->getVisibility() == brls::Visibility::GONE) continue;
-            if (child->getDefaultFocus()) up = false;
-            else span.top = std::min(span.top, this->span_of(child).top);
+            if (child->getVisibility() == brls::Visibility::GONE)
+                continue;
+            if (child->getDefaultFocus())
+                up = false;
+            else
+                span.top = std::min(span.top, this->span_of(child).top);
         }
         node = box;
     }
-    if (node == this->contentView) {
-        if (up) span.top = 0;   // with the screen's top padding
-        if (down) span.bottom = this->contentView->getHeight();
+    if (node == this->contentView)
+    {
+        if (up)
+            span.top = 0; // with the screen's top padding
+        if (down)
+            span.bottom = this->contentView->getHeight();
     }
     return span;
 }
@@ -161,9 +186,11 @@ ScrollView::Span ScrollView::context_of(brls::View* view) const
 brls::View* ScrollView::neighbour(brls::FocusDirection direction) const
 {
     brls::View* focus = brls::Application::getCurrentFocus();
-    if (!this->owns(focus) || !focus->getParent()) return nullptr;
+    if (!this->owns(focus) || !focus->getParent())
+        return nullptr;
     brls::View* next = focus->getParent()->getNextFocus(direction, focus);
-    if (next) next = next->getDefaultFocus();
+    if (next)
+        next = next->getDefaultFocus();
     return this->owns(next) ? next : nullptr;
 }
 
@@ -174,21 +201,29 @@ float ScrollView::bottom_limit()
 
 void ScrollView::reveal(brls::View* view, bool animated)
 {
-    const Span line = this->span_of(view);
-    const Span around = this->context_of(view);
+    const Span line    = this->span_of(view);
+    const Span around  = this->context_of(view);
     const float height = this->getScrollingAreaHeight();
-    float target = this->getContentOffsetY();
-    if (around.height() <= height) {
-        if (around.bottom > target + height) target = around.bottom - height;
-        if (around.top < target) target = around.top;
-    } else if (!animated) {
-        target = around.top;   // a screen opens on its first words
+    float target       = this->getContentOffsetY();
+    if (around.height() <= height)
+    {
+        if (around.bottom > target + height)
+            target = around.bottom - height;
+        if (around.top < target)
+            target = around.top;
+    }
+    else if (!animated)
+    {
+        target = around.top; // a screen opens on its first words
     }
     // The focused line itself always in full (unless the screen opened on a
     // text taller than itself: D-pad down scrolls to it).
-    if (animated || around.height() <= height) {
-        if (line.bottom > target + height) target = line.bottom - height;
-        if (line.top < target) target = line.top;
+    if (animated || around.height() <= height)
+    {
+        if (line.bottom > target + height)
+            target = line.bottom - height;
+        if (line.top < target)
+            target = line.top;
     }
     target = std::min(std::max(target, 0.0f), this->bottom_limit());
     this->startScrolling(animated, target);
@@ -198,23 +233,28 @@ void ScrollView::reveal(brls::View* view, bool animated)
 // true when the press only scrolled, through a text taller than the screen.
 bool ScrollView::step(brls::FocusDirection direction)
 {
-    if (!this->contentView) return false;
-    const bool down = direction == brls::FocusDirection::DOWN;
+    if (!this->contentView)
+        return false;
+    const bool down    = direction == brls::FocusDirection::DOWN;
     const float height = this->getScrollingAreaHeight();
-    const float page = std::round(height / 2);
+    const float page   = std::round(height / 2);
     const float offset = this->getContentOffsetY();
-    const float limit = this->bottom_limit();
-    brls::View* focus = brls::Application::getCurrentFocus();
+    const float limit  = this->bottom_limit();
+    brls::View* focus  = brls::Application::getCurrentFocus();
 
-    auto scroll_to = [this, offset, limit, height, focus](float target) {
+    auto scroll_to = [this, offset, limit, height, focus](float target)
+    {
         target = std::min(std::max(target, 0.0f), limit);
-        if (std::fabs(target - offset) < 1) return false;
+        if (std::fabs(target - offset) < 1)
+            return false;
         this->startScrolling(true, target);
         // The focused line scrolled out of sight: the focus waits on the frame
         // (no highlight, borealis would draw it over the header or the footer).
-        if (focus != this) {
+        if (focus != this)
+        {
             const Span line = this->span_of(focus);
-            if (line.bottom <= target || line.top >= target + height) {
+            if (line.bottom <= target || line.top >= target + height)
+            {
                 this->parked = true;
                 brls::Application::giveFocus(this);
             }
@@ -222,32 +262,44 @@ bool ScrollView::step(brls::FocusDirection direction)
         return true;
     };
 
-    if (focus == this) {
+    if (focus == this)
+    {
         // After scrolling through a text (or by touch): the first line on
         // screen in the direction of the press, else more of the text.
-        if (brls::View* line = this->visible_line(down)) {
+        if (brls::View* line = this->visible_line(down))
+        {
             brls::Application::giveFocus(line);
             return true;
         }
         return scroll_to(offset + (down ? page : -page));
     }
-    if (!this->owns(focus)) return false;
+    if (!this->owns(focus))
+        return false;
 
-    const Span line = this->span_of(focus);
+    const Span line  = this->span_of(focus);
     brls::View* next = this->neighbour(direction);
-    if (down) {
+    if (down)
+    {
         // Scrolled up past the focused line (a long text above it): back to it.
-        if (line.bottom > offset + height + 1) return scroll_to(std::min(offset + page, line.bottom - height));
-        if (!next) return scroll_to(offset + page);   // the text after the last line, if any
-        if (this->context_of(next).height() <= height) return false;
+        if (line.bottom > offset + height + 1)
+            return scroll_to(std::min(offset + page, line.bottom - height));
+        if (!next)
+            return scroll_to(offset + page); // the text after the last line, if any
+        if (this->context_of(next).height() <= height)
+            return false;
         const Span to = this->span_of(next);
-        if (to.top > offset + height) return scroll_to(std::min(offset + page, to.bottom - height));
+        if (to.top > offset + height)
+            return scroll_to(std::min(offset + page, to.bottom - height));
         return false;
     }
-    if (line.top < offset - 1) return scroll_to(std::max(offset - page, line.top));
-    if (!next) return scroll_to(offset - page);
-    if (this->context_of(next).height() <= height) return false;
+    if (line.top < offset - 1)
+        return scroll_to(std::max(offset - page, line.top));
+    if (!next)
+        return scroll_to(offset - page);
+    if (this->context_of(next).height() <= height)
+        return false;
     const Span to = this->span_of(next);
-    if (to.bottom < offset) return scroll_to(std::max(offset - page, to.top));
+    if (to.bottom < offset)
+        return scroll_to(std::max(offset - page, to.top));
     return false;
 }

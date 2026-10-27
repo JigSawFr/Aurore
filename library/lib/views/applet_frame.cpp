@@ -201,8 +201,10 @@ void AppletFrame::popContentView(std::function<void(void)> cb)
     lastView->freeView();
 }
 
-void AppletFrame::popToRootContentView(std::function<void(void)> cb) {
-    while (contentViewStack.size() > 1) {
+void AppletFrame::popToRootContentView(std::function<void(void)> cb)
+{
+    while (contentViewStack.size() > 1)
+    {
         popContentView();
     }
     cb();

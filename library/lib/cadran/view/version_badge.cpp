@@ -1,8 +1,8 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <borealis/cadran/view/version_badge.hpp>
 
-#include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/cadran_kit.hpp>
+#include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/ui.hpp>
 
 #include <algorithm>
@@ -25,26 +25,27 @@ VersionBadge::VersionBadge()
     this->setMarginTop(brls::getStyle()["brls/applet_frame/header_title_top_offset"] - 8);
 
     // The app's (ui::hooks): its version, its commit, a release or not.
-    const auto& h = ui::hooks::get();
+    const auto& h             = ui::hooks::get();
     const std::string version = h.version ? h.version() : std::string(), commit = h.commit ? h.commit() : std::string();
     const bool release = !h.is_release || h.is_release();
 
     // The tag: filled (the amber of the warnings, or the notes' grey for a
     // release), the version in the background's colour.
     const char* ink = release ? "cadran/text3" : "cadran/amber";
-    auto* tag = new brls::Box(brls::Axis::ROW);
+    auto* tag       = new brls::Box(brls::Axis::ROW);
     tag->setThemeColor("backgroundColor", ink);
     tag->setCornerRadius(4);
     tag->setPadding(2, 8, 2, 8);
     auto* number = new brls::Label();
     number->setText(version);
     number->setFontSize(18);
-    number->setFontScaled(false);   // a tag: the same size with the larger text
+    number->setFontScaled(false); // a tag: the same size with the larger text
     number->setSingleLine(true);
     number->setThemeColor("textColor", "brls/background");
     tag->addView(number);
     this->addView(tag);
-    if (release || commit.empty()) return;
+    if (release || commit.empty())
+        return;
     auto* text = new brls::Label();
     text->setFontSize(18);
     text->setFontScaled(false);
@@ -61,28 +62,35 @@ VersionBadge::VersionBadge()
 // header (the loading screen, dialogs) are left alone.
 static void badge_screen_of(brls::View* focus)
 {
-    if (!focus) return;
-    while (focus->hasParent()) focus = focus->getParent();
+    if (!focus)
+        return;
+    while (focus->hasParent())
+        focus = focus->getParent();
     auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
     // Not on the child screen: a version means nothing to a child, and its
     // amber reads as a warning.
-    if (frame && frame->getView("child_root")) return;
+    if (frame && frame->getView("child_root"))
+        return;
     // An app that says no version (ui::hooks' version) gets no badge.
     const auto& version = ui::hooks::get().version;
-    if (!version || version().empty()) return;
+    if (!version || version().empty())
+        return;
     auto* label = frame ? frame->getView("brls/applet_frame/title_label") : nullptr;
     auto* row   = label ? dynamic_cast<brls::Box*>(label->getParent()) : nullptr;
-    if (!row || row->getView(BADGE_ID)) return;
+    if (!row || row->getView(BADGE_ID))
+        return;
     const auto& views = row->getChildren();
-    const auto at = std::find(views.begin(), views.end(), label) - views.begin() + 1;
+    const auto at     = std::find(views.begin(), views.end(), label) - views.begin() + 1;
     row->addView(new VersionBadge(), at);
 }
 
 brls::Box* VersionBadge::header_tools(brls::AppletFrame* frame)
 {
     auto* header = frame ? dynamic_cast<brls::Box*>(frame->getView("brls/applet_frame/header")) : nullptr;
-    if (!header) return nullptr;
-    if (auto* tools = dynamic_cast<brls::Box*>(header->getView(TOOLS_ID))) return tools;
+    if (!header)
+        return nullptr;
+    if (auto* tools = dynamic_cast<brls::Box*>(header->getView(TOOLS_ID)))
+        return tools;
     auto* tools = new brls::Box(brls::Axis::ROW);
     tools->setId(TOOLS_ID);
     tools->setFocusable(false);
@@ -95,7 +103,8 @@ brls::Box* VersionBadge::header_tools(brls::AppletFrame* frame)
 void VersionBadge::install()
 {
     static bool done = false;
-    if (done) return;
+    if (done)
+        return;
     done = true;
     brls::Application::getGlobalFocusChangeEvent()->subscribe(badge_screen_of);
 }

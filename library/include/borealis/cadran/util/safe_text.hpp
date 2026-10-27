@@ -33,4 +33,4 @@ std::string clean_notes(const std::string& text, size_t max_bytes);
 // 1 to 40 of [0-9A-Za-z.+-_], starting with a digit or a letter.
 bool is_version(const std::string& text);
 
-}   // namespace safe_text
+} // namespace safe_text

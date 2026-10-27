@@ -39,4 +39,4 @@ void start();
 // version badge and settings, every screen's header and list, and the main
 // screen (an AppletFrame holding a TabFrame) with its rail.
 void start_window();
-}   // namespace cadran
+} // namespace cadran

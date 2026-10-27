@@ -256,7 +256,7 @@ class LRUCache
     }
 
   private:
-    size_t capacity = 1;
+    size_t capacity   = 1;
     size_t budget     = 0;
     size_t totalBytes = 0;
     std::function<size_t(T)> sizeOf;

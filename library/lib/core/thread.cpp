@@ -14,10 +14,10 @@
     limitations under the License.
 */
 
+#include <exception>
 #include <borealis/core/application.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/thread.hpp>
-#include <exception>
 
 #ifdef BOREALIS_USE_STD_THREAD
 #include <thread>
@@ -33,7 +33,7 @@ namespace brls
 {
 
 #ifdef BOREALIS_USE_STD_THREAD
-static std::thread *task_loop_thread = nullptr;
+static std::thread* task_loop_thread = nullptr;
 #else
 static pthread_t task_loop_thread = pthread_t(0);
 #endif
@@ -89,8 +89,8 @@ size_t Threading::delay(long milliseconds, std::function<void()> func)
     operation.startPoint        = getCPUTimeUsec();
     operation.delayMilliseconds = milliseconds;
 #endif
-    operation.func              = std::move(func);
-    operation.index             = ++m_delay_index;
+    operation.func  = std::move(func);
+    operation.index = ++m_delay_index;
     m_delay_tasks.push_back(operation);
     return m_delay_index;
 }
@@ -195,9 +195,9 @@ void Threading::performSyncTasks()
             }
 
             m_delay_mutex.lock();
-            if (m_delay_cancel_set.count(d.index)) m_delay_cancel_set.erase(d.index);
+            if (m_delay_cancel_set.count(d.index))
+                m_delay_cancel_set.erase(d.index);
             m_delay_mutex.unlock();
-
         }
         else
         {
@@ -230,7 +230,8 @@ void Threading::stop()
     pthread_join(task_loop_thread, NULL);
 #endif
 }
-void Threading::std_task_loop() {
+void Threading::std_task_loop()
+{
     task_loop(nullptr);
 }
 void* Threading::task_loop(void* a)
@@ -242,7 +243,8 @@ void* Threading::task_loop(void* a)
             // Woken as soon as a task is queued, instead of polling the
             // queue every 500 ms
             std::unique_lock<std::mutex> lock(m_async_mutex);
-            m_async_cv.wait(lock, [] { return !task_loop_active || !m_async_tasks.empty(); });
+            m_async_cv.wait(lock, []
+                { return !task_loop_active || !m_async_tasks.empty(); });
             if (!task_loop_active)
                 break;
             tasks.swap(m_async_tasks);

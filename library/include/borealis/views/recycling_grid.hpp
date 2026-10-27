@@ -21,13 +21,13 @@
 
 #pragma once
 
-#include <borealis/core/box.hpp>
-#include <borealis/views/h_scrolling_frame.hpp>
-#include <borealis/views/scrolling_frame.hpp>
 #include <functional>
 #include <map>
 #include <string>
 #include <vector>
+#include <borealis/core/box.hpp>
+#include <borealis/views/h_scrolling_frame.hpp>
+#include <borealis/views/scrolling_frame.hpp>
 
 namespace brls
 {
@@ -151,7 +151,7 @@ class RecyclingView
 
     Box* contentBox = nullptr;
 
-    virtual float getScrollOffset()                     = 0;
+    virtual float getScrollOffset()                           = 0;
     virtual void setScrollOffset(float offset, bool animated) = 0;
 
     // Places and recycles the cells for the current scrolling.
@@ -182,16 +182,16 @@ class RecyclingView
 
     // The size of an item along the scrolling axis, the space between two
     // items, and how many lines are kept ready beyond each end of the view.
-    float itemSize    = 240;
-    float itemSpace   = 20;
-    int preFetchLine  = 1;
+    float itemSize   = 240;
+    float itemSpace  = 20;
+    int preFetchLine = 1;
 
   private:
     Axis axis;
     bool layouted      = false;
     bool layoutPending = false;
-    int span      = 1;
-    float crossSize = 0; // an item's size across the scrolling axis
+    int span           = 1;
+    float crossSize    = 0; // an item's size across the scrolling axis
 
     RecyclingGridDataSource* dataSource = nullptr;
     bool deleteDataSource               = false;

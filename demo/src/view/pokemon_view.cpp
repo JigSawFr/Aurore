@@ -31,7 +31,8 @@ PokemonView::PokemonView(Pokemon pokemon)
     // Inflate the tab from the XML file
     this->inflateFromXMLRes("xml/views/pokemon.xml");
 
-    auto dismissAction = [this](View* view) {
+    auto dismissAction = [this](View* view)
+    {
         this->dismiss();
         return true;
     };
@@ -52,17 +53,15 @@ PokemonView::PokemonView(Pokemon pokemon)
 
     getAppletFrameItem()->title = pokemon.name;
     getAppletFrameItem()->setIconFromRes("img/pokemon/" + pokemon.id + ".png");
-//    getAppletFrameItem()->hintView = holder;
+    //    getAppletFrameItem()->hintView = holder;
     image->setImageFromRes("img/pokemon/" + pokemon.id + ".png");
 
     description->setText("It's a pokemon with name: " + pokemon.name + "\nCollect them all to became a Shaman king!");
 
-    this->getView("close_button")->registerAction(
-        "hints/ok"_i18n, brls::BUTTON_A, [this](brls::View* view) {
+    this->getView("close_button")->registerAction("hints/ok"_i18n, brls::BUTTON_A, [this](brls::View* view)
+        {
             this->dismiss();
-            return true;
-        },
-        false, false, brls::SOUND_BACK);
+            return true; }, false, false, brls::SOUND_BACK);
 }
 
 brls::View* PokemonView::create()

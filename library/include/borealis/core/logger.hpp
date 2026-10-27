@@ -30,12 +30,12 @@
 #include <borealis/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
-#include <fmt/format.h>
 #include <fmt/chrono.h>
+#include <fmt/format.h>
 
-#include <borealis/core/event.hpp>
 #include <mutex>
 #include <string>
+#include <borealis/core/event.hpp>
 
 namespace brls
 {
@@ -78,7 +78,7 @@ class Logger
 
     static LogLevel getLogLevel();
 
-    static void setLogOutput(std::FILE *logOut);
+    static void setLogOutput(std::FILE* logOut);
 
     /**
      * If sets to true, each log operation will lock a mutex, making the Logger thread-safe.
@@ -92,14 +92,16 @@ class Logger
             return;
 
         TimePoint now = std::chrono::system_clock::now();
-        uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-            now.time_since_epoch()).count() % 1000;
+        uint64_t ms   = std::chrono::duration_cast<std::chrono::milliseconds>(
+                          now.time_since_epoch())
+                          .count()
+            % 1000;
 #ifdef PS4
-        OrbisDateTime lt{};
+        OrbisDateTime lt {};
         if (sceRtcGetCurrentClockLocalTime)
             sceRtcGetCurrentClockLocalTime(&lt);
 #else
-        std::time_t tt = std::chrono::system_clock::to_time_t(now);
+        std::time_t tt  = std::chrono::system_clock::to_time_t(now);
         std::tm time_tm = *std::localtime(&tt);
 #endif
         std::unique_lock<std::mutex> lock;
@@ -189,13 +191,13 @@ class Logger
     {
         if (!logOutSet)
         {
-            logOut   = stdout;
+            logOut    = stdout;
             logOutSet = true;
         }
         return logOut;
     }
 
-    inline static std::FILE *logOut = nullptr;
+    inline static std::FILE* logOut = nullptr;
     inline static bool logOutSet    = false;
     inline static LogLevel logLevel = LogLevel::LOG_INFO;
 };

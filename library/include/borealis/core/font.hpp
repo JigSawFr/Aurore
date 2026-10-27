@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <borealis/core/assets.hpp>
 #include <string>
 #include <unordered_map>
+#include <borealis/core/assets.hpp>
 
 namespace brls
 {

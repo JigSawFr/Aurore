@@ -132,7 +132,7 @@ class ScrollingFrame : public Box
 
     float getContentHeight();
 
-    ScrollingBehavior behavior = ScrollingBehavior::NATURAL;
+    ScrollingBehavior behavior     = ScrollingBehavior::NATURAL;
     bool naturalScrollingCanScroll = false;
     bool isRubberBanding           = false; ///< true while finger is dragging past a scroll boundary
     void naturalScrollingBehaviour();

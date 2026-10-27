@@ -17,11 +17,11 @@
 #include <strings.h>
 #include <unistd.h> /* chdir */
 
+#include <unordered_map>
 #include <borealis/core/application.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/platforms/sdl/sdl_platform.hpp>
-#include <unordered_map>
 
 #if defined(IOS) || defined(TVOS)
 #include <sys/utsname.h>
@@ -55,7 +55,7 @@ SDLPlatform::SDLPlatform()
 #elif defined(__APPLE__)
     // Same behavior as GLFW, change to the app's Resources directory if run in a ".app" bundle
     // Or to the executable's directory if run from other ways
-    char *base_path = SDL_GetBasePath();
+    char* base_path = SDL_GetBasePath();
     if (base_path)
     {
         chdir(base_path);
@@ -112,7 +112,8 @@ void SDLPlatform::setWindowAlwaysOnTop(bool enable)
 
 void SDLPlatform::setWindowSize(uint32_t windowWidth, uint32_t windowHeight)
 {
-    if (windowWidth > 0 && windowHeight > 0) {
+    if (windowWidth > 0 && windowHeight > 0)
+    {
         SDL_SetWindowSize(this->videoContext->getSDLWindow(), windowWidth, windowHeight);
     }
 }
@@ -165,10 +166,10 @@ void SDLPlatform::pasteToClipboard(const std::string& text)
 
 std::string SDLPlatform::pasteFromClipboard()
 {
-    char *str = SDL_GetClipboardText();
+    char* str = SDL_GetClipboardText();
     if (!str)
         return "";
-    return std::string{str};
+    return std::string { str };
 }
 
 std::string SDLPlatform::getName()
@@ -185,10 +186,13 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     else if (event->type == SDL_WINDOWEVENT)
     {
         auto* manager = this->inputManager;
-        if (event->window.event == SDL_WINDOWEVENT_LEAVE) {
+        if (event->window.event == SDL_WINDOWEVENT_LEAVE)
+        {
             if (manager)
                 manager->getMouseCusorEntered()->fire(false);
-        } else if (event->window.event == SDL_WINDOWEVENT_ENTER) {
+        }
+        else if (event->window.event == SDL_WINDOWEVENT_ENTER)
+        {
             if (manager)
                 manager->getMouseCusorEntered()->fire(true);
         }
@@ -225,7 +229,6 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     else if (event->type == SDL_APP_WILLENTERFOREGROUND)
     {
         brls::Application::getWindowFocusChangedEvent()->fire(true);
-
     }
     else if (event->type == SDL_APP_TERMINATING)
     {
@@ -283,7 +286,8 @@ InputManager* SDLPlatform::getInputManager()
     return this->inputManager;
 }
 
-ImeManager* SDLPlatform::getImeManager() {
+ImeManager* SDLPlatform::getImeManager()
+{
     return this->imeManager;
 }
 

@@ -29,4 +29,4 @@ std::string locale();
 // After the preferences' language changed: applied, and the screens built
 // again (ui::hooks' push_main; without it, the screen shown is read again).
 void language_changed();
-}   // namespace live_prefs
+} // namespace live_prefs

@@ -344,9 +344,9 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     Application::setWindowSize(fWidth, fHeight);
     glViewport(0, 0, fWidth, fHeight);
 #elif defined(BOREALIS_USE_D3D11)
-    scaleFactor      = D3D11_CONTEXT->getScaleFactor();
-    fWidth           = width;
-    fHeight          = height;
+    scaleFactor = D3D11_CONTEXT->getScaleFactor();
+    fWidth      = width;
+    fHeight     = height;
     Application::setWindowSize(fWidth, fHeight);
     D3D11_CONTEXT->onFramebufferSize(fWidth, fHeight);
 #endif

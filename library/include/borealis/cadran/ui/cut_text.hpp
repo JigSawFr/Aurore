@@ -12,4 +12,4 @@ namespace cut_text
 // Once per main-loop iteration (the app's main loop); does nothing without
 // the variable.
 void sample();
-}   // namespace cut_text
+} // namespace cut_text

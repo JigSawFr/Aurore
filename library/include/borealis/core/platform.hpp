@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <functional>
+#include <string>
 #include <borealis/core/audio.hpp>
 #include <borealis/core/font.hpp>
 #include <borealis/core/i18n.hpp>
@@ -24,8 +26,6 @@
 #include <borealis/core/input.hpp>
 #include <borealis/core/theme.hpp>
 #include <borealis/core/video.hpp>
-#include <functional>
-#include <string>
 
 namespace brls
 {
@@ -35,7 +35,8 @@ namespace brls
 class Platform
 {
   public:
-    virtual ~Platform() = default;;
+    virtual ~Platform() = default;
+    ;
 
     /**
      * Called on startup, right after instanciation, to create and open a window
@@ -165,7 +166,7 @@ class Platform
     /**
      * Set the windows always on top
      */
-    virtual void setWindowAlwaysOnTop(bool enable) {}
+    virtual void setWindowAlwaysOnTop(bool enable) { }
 
     /**
      * Called at every iteration of the main loop.
@@ -254,7 +255,6 @@ class Platform
      */
     virtual void openBrowser(std::string url) = 0;
 
-
     /**
      * Paste text to clipboard
      */
@@ -263,7 +263,7 @@ class Platform
     /**
      * Copy text from clipboard
      */
-    virtual std::string pasteFromClipboard() {return "";};
+    virtual std::string pasteFromClipboard() { return ""; };
 
     /**
      * Selects and returns the best platform.

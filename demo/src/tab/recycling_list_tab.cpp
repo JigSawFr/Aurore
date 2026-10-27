@@ -40,12 +40,12 @@ int DataSource::numberOfRows(brls::RecyclerFrame* recycler, int section)
 {
     return pokemons.size();
 }
-    
-std::string DataSource::titleForHeader(brls::RecyclerFrame* recycler, int section) 
+
+std::string DataSource::titleForHeader(brls::RecyclerFrame* recycler, int section)
 {
     if (section == 0)
         return "";
-    return "Section #" + std::to_string(section+1);
+    return "Section #" + std::to_string(section + 1);
 }
 
 brls::RecyclerCell* DataSource::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
@@ -58,7 +58,7 @@ brls::RecyclerCell* DataSource::cellForRow(brls::RecyclerFrame* recycler, brls::
 
 void DataSource::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
 {
-//    brls::Logger::info("Item Index(" + std::to_string(index.section) + ":" + std::to_string(index.row) + ") selected.");
+    //    brls::Logger::info("Item Index(" + std::to_string(index.section) + ":" + std::to_string(index.row) + ") selected.");
     recycler->present(new PokemonView(pokemons[indexPath.row]));
 }
 
@@ -68,7 +68,7 @@ RecyclingListTab::RecyclingListTab()
 {
     // Inflate the tab from the XML file
     this->inflateFromXMLRes("xml/tabs/recycling_list.xml");
-    
+
     pokemons.clear();
     pokemons.push_back(Pokemon("001", "Bulbasaur"));
     pokemons.push_back(Pokemon("004", "Charmander"));
@@ -81,8 +81,10 @@ RecyclingListTab::RecyclingListTab()
     pokemons.push_back(Pokemon("027", "Sandshrew"));
 
     recycler->estimatedRowHeight = 70;
-    recycler->registerCell("Header", []() { return RecyclerHeader::create(); });
-    recycler->registerCell("Cell", []() { return RecyclerCell::create(); });
+    recycler->registerCell("Header", []()
+        { return RecyclerHeader::create(); });
+    recycler->registerCell("Cell", []()
+        { return RecyclerCell::create(); });
     recycler->setDataSource(new DataSource());
 }
 

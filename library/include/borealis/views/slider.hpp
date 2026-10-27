@@ -75,7 +75,7 @@ class Slider : public Box
     bool progressing   = false;
 
     float progress = 1;
-    float step = 0.5f;
+    float step     = 0.5f;
 
     void buttonsProcessing();
     void moveByStep(int direction);

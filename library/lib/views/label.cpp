@@ -83,7 +83,8 @@ static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode w
         .height = height,
     };
 
-    if (fullText.empty()) {
+    if (fullText.empty())
+    {
         if (widthMode == YGMeasureModeExactly && heightMode == YGMeasureModeExactly)
         {
             return size;
@@ -212,8 +213,9 @@ static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode w
     return size;
 }
 
-void Label::setCursor(int cursor) {
-    this->cursor = cursor;
+void Label::setCursor(int cursor)
+{
+    this->cursor       = cursor;
     this->cursor_blink = brls::getCPUTimeUsec();
 }
 
@@ -235,8 +237,7 @@ Label::Label()
         {
             // Yoga reads an undefined or negative size as 0, with a warning
             YGSize size = labelMeasureFunc(node, width, widthMode, height, heightMode);
-            return YGSize { std::isnan(size.width) ? 0.0f : std::max(size.width, 0.0f), std::isnan(size.height) ? 0.0f : std::max(size.height, 0.0f) };
-        });
+            return YGSize { std::isnan(size.width) ? 0.0f : std::max(size.width, 0.0f), std::isnan(size.height) ? 0.0f : std::max(size.height, 0.0f) }; });
 
     // Set the max width and height to 100% to avoid overflowing
     // The view will be shortened if the text is too long
@@ -391,7 +392,8 @@ void Label::onTextScaleChanged()
 void Label::bindText(Observable<std::string>& text)
 {
     this->setText(text.get());
-    this->keepSubscription(text.subscribe([this](const std::string& value) { this->setText(value); }));
+    this->keepSubscription(text.subscribe([this](const std::string& value)
+        { this->setText(value); }));
 }
 
 std::string Label::STConverter(const std::string& text)
@@ -580,7 +582,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
 
     enum NVGalign horizAlign = this->getNVGHorizontalAlign();
     enum NVGalign vertAlign  = this->getNVGVerticalAlign();
-    int cursor_position = -1;
+    int cursor_position      = -1;
 
     nvgFontSize(vg, this->getDrawnFontSize());
     nvgTextAlign(vg, horizAlign | vertAlign);
@@ -590,9 +592,10 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     nvgFillColor(vg, a(this->textColor));
 
     // Edit cursor
-    if (this->cursor >= (int)CursorPosition::END) {
+    if (this->cursor >= (int)CursorPosition::END)
+    {
         // blink
-        auto blink = ((brls::getCPUTimeUsec() - cursor_blink) >> 10) % 1000 ;
+        auto blink = ((brls::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
         // The cursor blinks between frames nothing else asks for
         Application::requestRedraw();
         if (blink < 500)

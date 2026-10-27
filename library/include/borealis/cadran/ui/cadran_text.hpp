@@ -32,9 +32,9 @@ std::vector<std::pair<std::string, std::string>> group_rows(const std::vector<st
 // console's own code says nothing more (not one of the app's own results).
 struct Failure
 {
-    std::string title;    // "" when there is none
+    std::string title; // "" when there is none
     std::string reason;
-    std::string code;     // "" for none
+    std::string code; // "" for none
     bool report = false;
 };
 // `what` failed with `rc`; `hint` its words (cadran/error/<key>, "" when
@@ -42,4 +42,4 @@ struct Failure
 // which explain themselves and have no code to show.
 Failure failure(const std::string& what, const std::string& hint, uint32_t rc, bool app_result);
 
-}   // namespace cadran_text
+} // namespace cadran_text

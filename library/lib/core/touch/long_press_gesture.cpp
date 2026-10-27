@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
+#include <cmath>
 #include <borealis/core/application.hpp>
 #include <borealis/core/touch/long_press_gesture.hpp>
-#include <cmath>
 
 namespace brls
 {

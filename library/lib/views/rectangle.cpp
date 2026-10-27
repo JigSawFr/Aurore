@@ -26,9 +26,8 @@ Rectangle::Rectangle(NVGcolor color)
     this->setColor(color);
 
     // Register XML attributes
-    this->registerColorXMLAttribute("color", [this](NVGcolor color) {
-        this->setColor(color);
-    });
+    this->registerColorXMLAttribute("color", [this](NVGcolor color)
+        { this->setColor(color); });
 }
 
 Rectangle::Rectangle()

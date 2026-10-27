@@ -4,8 +4,8 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <string>
+#include <borealis.hpp>
 
 #include <borealis/cadran/view/cadran_icon.hpp>
 
@@ -72,7 +72,7 @@ class Mark : public brls::View
     explicit Mark(const char* color_key);
     void set(const char* color_key);
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-              brls::FrameContext* ctx) override;
+        brls::FrameContext* ctx) override;
 
   private:
     enum class Shape
@@ -80,8 +80,9 @@ class Mark : public brls::View
         DOT,
         CHECK,
         WARN,
-    } shape = Shape::DOT;
-    std::string key;   // its colour's, looked up when drawn
+    } shape
+        = Shape::DOT;
+    std::string key; // its colour's, looked up when drawn
 };
 
 // A pill: a mark of `dot_key` (its first child) and its text, on a thin
@@ -96,7 +97,7 @@ brls::Box* key(const char* letter, float size = 24);
 // phones read it best), its `title` under it and a `caption` smaller (either
 // may be empty), centred; `width` (0: the code's own) keeps cards alike.
 brls::Box* qr(const std::string& payload, float side, const std::string& title, const std::string& caption,
-              float width = 0);
+    float width = 0);
 
 // A progress bar, 12 px high: the well, filled in teal up to `set`; the
 // fill eases to each new value (at once with the motion off).
@@ -104,14 +105,14 @@ class Bar : public brls::View
 {
   public:
     Bar();
-    void set(float fraction);   // 0..1
+    void set(float fraction); // 0..1
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-              brls::FrameContext* ctx) override;
+        brls::FrameContext* ctx) override;
 
   private:
-    float drawn() const;   // the fill now, on its way from `from` to `fraction`
-    float fraction = 0;
-    float from = 0;
+    float drawn() const; // the fill now, on its way from `from` to `fraction`
+    float fraction   = 0;
+    float from       = 0;
     brls::Time since = 0;
 };
 
@@ -131,7 +132,7 @@ brls::Box* chip(const std::string& text, float height = 48);
 // empty), centred; `box` takes an action (a chip) at its end.
 struct Empty
 {
-    brls::Box*   box   = nullptr;
+    brls::Box* box     = nullptr;
     brls::Label* title = nullptr;
     brls::Label* text  = nullptr;
 };
@@ -163,7 +164,7 @@ void fit_head(brls::Box* row);
 // `corner`: the radius of the card whose foot the frame's is (a picker's
 // list), the fade then inside its rounded corners and its 1 px border.
 void draw_more_below(NVGcontext* vg, brls::ScrollingFrame* frame, float x, float y, float width, float height,
-                     const char* color_key, float corner = 0.0f);
+    const char* color_key, float corner = 0.0f);
 
 // "12 changes  ›" -> "12 changes"; "›" -> "".
 std::string without_chevron(const std::string& value);
@@ -176,4 +177,4 @@ const char* dot_of(NVGcolor value_color);
 // same for a "2026-10-08" (the text itself when it is not a date).
 std::string long_date();
 std::string long_date(const std::string& ymd);
-}   // namespace cadran::kit
+} // namespace cadran::kit

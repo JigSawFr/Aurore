@@ -1,10 +1,10 @@
 // my_app: a starting point for an app built on Aurore.
 
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <borealis.hpp>
+#include <borealis/cadran.hpp>
 
 #include "home_tab.hpp"
 
@@ -20,7 +20,8 @@ class MainActivity : public brls::Activity
 int main(int argc, char* argv[])
 {
     // Cadran, Aurore's look: the icons of the rail, one per tab (before init)
-    ui::hooks::get().rail_icons = []() { return std::vector<std::string> { "home", "info" }; };
+    ui::hooks::get().rail_icons = []()
+    { return std::vector<std::string> { "home", "info" }; };
 
     if (!brls::Application::init())
     {

@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <borealis.hpp>
 #include <memory>
+#include <borealis.hpp>
 
 // A picture and its caption, in the grid and in the row.
 class PictureCell : public brls::RecyclingGridItem

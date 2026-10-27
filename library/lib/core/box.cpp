@@ -18,14 +18,14 @@
 #include <tinyxml2.h>
 #include <yoga/Yoga.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/util.hpp>
 #include <cmath>
 #include <fstream>
 #include <functional>
 #include <limits>
+#include <borealis/core/application.hpp>
+#include <borealis/core/box.hpp>
+#include <borealis/core/hot_reload.hpp>
+#include <borealis/core/util.hpp>
 
 namespace brls
 {
@@ -431,7 +431,8 @@ View* Box::getDefaultFocus()
     if (this->isFocusable())
         return this;
 
-    if (lastFocusedView) {
+    if (lastFocusedView)
+    {
         View* view = lastFocusedView->getDefaultFocus();
         if (view)
             return view;
@@ -635,9 +636,10 @@ void Box::inflateFromXMLString(std::string_view xml)
 {
     // Load XML
     std::shared_ptr<tinyxml2::XMLDocument> document = getXMLCache(xml);
-    tinyxml2::XMLElement* element = document->RootElement();
+    tinyxml2::XMLElement* element                   = document->RootElement();
 
-    if (!element) {
+    if (!element)
+    {
         tinyxml2::XMLError error = document->Parse(xml.data());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
@@ -679,9 +681,10 @@ void Box::inflateFromXMLFile(const std::string& path)
 
     // Load XML
     std::shared_ptr<tinyxml2::XMLDocument> document = getXMLCache(path);
-    tinyxml2::XMLElement* element = document->RootElement();
+    tinyxml2::XMLElement* element                   = document->RootElement();
 
-    if (!element) {
+    if (!element)
+    {
         tinyxml2::XMLError error = document->LoadFile(path.c_str());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)

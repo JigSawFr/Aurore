@@ -22,7 +22,7 @@ class TabBadge : public brls::View
     void dock(float open, bool floating);
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-              brls::FrameContext* ctx) override;
+        brls::FrameContext* ctx) override;
 
     // The sidebar item's badge, added the first time it is asked for.
     static TabBadge* of(brls::SidebarItem* item);
@@ -32,8 +32,8 @@ class TabBadge : public brls::View
     static TabBadge* on_row(brls::Box* row);
 
   private:
-    int count = 0;
-    brls::Time pop_since = 0;   // the number changed: the disc pops (µs; 0 at rest)
-    float open = 1.0f;
-    bool floating = false;
+    int count            = 0;
+    brls::Time pop_since = 0; // the number changed: the disc pops (µs; 0 at rest)
+    float open           = 1.0f;
+    bool floating        = false;
 };

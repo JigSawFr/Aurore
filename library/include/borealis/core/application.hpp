@@ -18,25 +18,25 @@
 
 #pragma once
 
+#include <deque>
+#include <functional>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 #include <borealis/core/activity.hpp>
 #include <borealis/core/audio.hpp>
 #include <borealis/core/font.hpp>
 #include <borealis/core/frame_context.hpp>
 #include <borealis/core/logger.hpp>
+#include <borealis/core/notification_manager.hpp>
+#include <borealis/core/observable.hpp>
 #include <borealis/core/platform.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/theme.hpp>
 #include <borealis/core/view.hpp>
-#include <borealis/core/notification_manager.hpp>
-#include <borealis/core/observable.hpp>
 #include <borealis/views/label.hpp>
-#include <deque>
-#include <functional>
-#include <memory>
-#include <unordered_map>
-#include <string>
-#include <utility>
-#include <vector>
 
 #ifdef __WINRT__
 #ifdef main
@@ -68,7 +68,7 @@ class Application
 
     static inline uint32_t ORIGINAL_WINDOW_WIDTH  = 1280;
     static inline uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
-    inline static std::string appId = "";
+    inline static std::string appId               = "";
 
     /**
      * Inits the borealis application.
@@ -669,8 +669,8 @@ class Application
     static Rect missedRedrawArea;
     inline static std::vector<unsigned char> presentedPixels;
     inline static int presentedWidth = 0, presentedHeight = 0;
-    inline static int deactivatedFPS       = 5; // FPS 5
-    inline static int deactivatedTime      = 5000000; // 5s
+    inline static int deactivatedFPS  = 5; // FPS 5
+    inline static int deactivatedTime = 5000000; // 5s
 
     inline static View* repetitionOldFocus = nullptr;
 
@@ -688,7 +688,7 @@ class Application
     inline static Event<ThemeVariant> themeChangedEvent;
 
     // The theme the screens were last told about
-    inline static uint64_t themeGeneration   = 0;
+    inline static uint64_t themeGeneration  = 0;
     inline static ThemeVariant themeVariant = ThemeVariant::DARK;
     static void checkThemeChanged();
 

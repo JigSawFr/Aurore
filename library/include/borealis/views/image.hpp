@@ -18,10 +18,10 @@
 
 #pragma once
 
+#include <memory>
 #include <borealis/core/event.hpp>
 #include <borealis/core/theme.hpp>
 #include <borealis/core/view.hpp>
-#include <memory>
 
 namespace brls
 {

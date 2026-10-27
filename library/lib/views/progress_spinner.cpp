@@ -30,9 +30,8 @@ ProgressSpinner::ProgressSpinner(ProgressSpinnerSize size)
             { "large", ProgressSpinnerSize::LARGE },
         });
 
-    this->registerColorXMLAttribute("barColor", [this](NVGcolor color) {
-        this->setColor(color);
-    });
+    this->registerColorXMLAttribute("barColor", [this](NVGcolor color)
+        { this->setColor(color); });
 }
 
 void ProgressSpinner::restartAnimation()
@@ -41,10 +40,10 @@ void ProgressSpinner::restartAnimation()
 
     this->animationValue.reset(0);
     this->animationValue.stop();
-    this->animationValue.setEndCallback([this](bool done) {
+    this->animationValue.setEndCallback([this](bool done)
+        {
         if (done)
-            this->restartAnimation();
-    });
+            this->restartAnimation(); });
     float animationLength = size == NORMAL ? 8.0f : 12.0f;
     this->animationValue.addStep(animationLength, style["brls/spinner/animation_duration"], EasingFunction::linear);
     this->animationValue.start();

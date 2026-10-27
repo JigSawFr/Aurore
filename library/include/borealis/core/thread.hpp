@@ -19,13 +19,13 @@
 #include <unistd.h>
 
 #include <chrono>
-#include <cstdint>
 #include <condition_variable>
+#include <cstdint>
 #include <functional>
 #include <mutex>
+#include <set>
 #include <thread>
 #include <vector>
-#include <set>
 
 namespace brls
 {

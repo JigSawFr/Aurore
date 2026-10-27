@@ -17,11 +17,11 @@
 
 #pragma once
 
+#include <functional>
+#include <map>
 #include <borealis/core/bind.hpp>
 #include <borealis/views/applet_frame.hpp>
 #include <borealis/views/sidebar.hpp>
-#include <functional>
-#include <map>
 
 namespace brls
 {

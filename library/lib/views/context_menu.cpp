@@ -31,35 +31,35 @@ namespace brls
 
 namespace
 {
-constexpr float ITEM_HEIGHT  = 52;
-constexpr float ICON_SIZE    = 24;
-constexpr float PANEL_WIDTH  = 340;
-constexpr float PANEL_MARGIN = 16; // from the screen's edges
-constexpr float ANCHOR_GAP   = 8;
+    constexpr float ITEM_HEIGHT  = 52;
+    constexpr float ICON_SIZE    = 24;
+    constexpr float PANEL_WIDTH  = 340;
+    constexpr float PANEL_MARGIN = 16; // from the screen's edges
+    constexpr float ANCHOR_GAP   = 8;
 
-// A picture for a path, a Material Icons glyph otherwise
-View* makeIcon(const std::string& icon)
-{
-    if (icon.empty())
-        return nullptr;
-
-    if (icon.rfind("@res/", 0) == 0 || icon.find('/') != std::string::npos || icon.find('.') != std::string::npos)
+    // A picture for a path, a Material Icons glyph otherwise
+    View* makeIcon(const std::string& icon)
     {
-        auto* image = new Image();
-        image->setImageFromFile(icon);
-        image->setScalingType(ImageScalingType::FIT);
-        return image;
-    }
+        if (icon.empty())
+            return nullptr;
 
-    auto* glyph = new Label();
-    glyph->setFont(Application::getFont(FONT_MATERIAL_ICONS));
-    glyph->setFontSize(ICON_SIZE);
-    glyph->setSingleLine(true);
-    glyph->setHorizontalAlign(HorizontalAlign::CENTER);
-    glyph->setVerticalAlign(VerticalAlign::CENTER);
-    glyph->setText(icon);
-    return glyph;
-}
+        if (icon.rfind("@res/", 0) == 0 || icon.find('/') != std::string::npos || icon.find('.') != std::string::npos)
+        {
+            auto* image = new Image();
+            image->setImageFromFile(icon);
+            image->setScalingType(ImageScalingType::FIT);
+            return image;
+        }
+
+        auto* glyph = new Label();
+        glyph->setFont(Application::getFont(FONT_MATERIAL_ICONS));
+        glyph->setFontSize(ICON_SIZE);
+        glyph->setSingleLine(true);
+        glyph->setHorizontalAlign(HorizontalAlign::CENTER);
+        glyph->setVerticalAlign(VerticalAlign::CENTER);
+        glyph->setText(icon);
+        return glyph;
+    }
 }
 
 // ContextMenuItem
@@ -103,7 +103,8 @@ ContextMenu::ContextMenu(View* anchor)
     this->dimBackground();
 
     // Outside the panel: a touch or a click closes the menu
-    this->addGestureRecognizer(new TapGestureRecognizer(this, [this]() { this->close(); }, TapGestureConfig(false, SOUND_NONE, SOUND_NONE, SOUND_BACK)));
+    this->addGestureRecognizer(new TapGestureRecognizer(this, [this]()
+        { this->close(); }, TapGestureConfig(false, SOUND_NONE, SOUND_NONE, SOUND_BACK)));
 
     this->panel = new Box(Axis::COLUMN);
     this->panel->setPositionType(PositionType::ABSOLUTE);
@@ -119,10 +120,10 @@ ContextMenu::ContextMenu(View* anchor)
     this->panel->addGestureRecognizer(new TapGestureRecognizer([](TapGestureStatus, Sound*) {}));
     this->addView(this->panel);
 
-    this->registerAction("hints/back"_i18n, BUTTON_B, [this](View*) {
+    this->registerAction("hints/back"_i18n, BUTTON_B, [this](View*)
+        {
         this->close();
-        return true;
-    }, false, false, SOUND_BACK);
+        return true; }, false, false, SOUND_BACK);
 }
 
 // A light dim: the screen it was opened from stays readable
@@ -164,10 +165,10 @@ ContextMenuItem* ContextMenu::addItem(const std::string& label, std::function<vo
 ContextMenuItem* ContextMenu::addItem(const std::string& label, std::function<void()> action, View* icon)
 {
     auto* item = new ContextMenuItem(label, icon);
-    item->registerClickAction([this, action](View*) {
+    item->registerClickAction([this, action](View*)
+        {
         this->close(action);
-        return true;
-    });
+        return true; });
     this->panel->addView(item);
     return item;
 }
@@ -208,10 +209,10 @@ void ContextMenu::close(std::function<void()> then)
         return;
     this->closing = true;
 
-    Application::popActivity(TransitionAnimation::FADE, [then]() {
+    Application::popActivity(TransitionAnimation::FADE, [then]()
+        {
         if (then)
-            then();
-    });
+            then(); });
 }
 
 // Placed when drawn, once its size is known: not from onLayout(), which yoga
@@ -254,22 +255,23 @@ void ContextMenu::place()
 void ContextMenu::attach(View* view, std::function<void(ContextMenu* menu)> fill, ControllerButton button,
     const std::string& hint, bool longPress)
 {
-    auto show = [view, fill]() {
+    auto show = [view, fill]()
+    {
         auto* menu = new ContextMenu(view);
         fill(menu);
         menu->open();
     };
 
-    view->registerAction(hint.empty() ? "hints/options"_i18n : hint, button, [show](View*) {
+    view->registerAction(hint.empty() ? "hints/options"_i18n : hint, button, [show](View*)
+        {
         show();
-        return true;
-    });
+        return true; });
 
     if (longPress)
-        view->addGestureRecognizer(new LongPressGestureRecognizer(view, [view, show]() {
+        view->addGestureRecognizer(new LongPressGestureRecognizer(view, [view, show]()
+            {
             Application::giveFocus(view);
-            show();
-        }));
+            show(); }));
 }
 
 } // namespace brls

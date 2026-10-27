@@ -33,14 +33,15 @@ LogLevel Logger::getLogLevel()
     return Logger::logLevel;
 }
 
-void Logger::setLogOutput(std::FILE *newLogOut)
+void Logger::setLogOutput(std::FILE* newLogOut)
 {
     std::lock_guard<std::mutex> lock(logMtx);
     Logger::logOut    = newLogOut;
     Logger::logOutSet = true;
 }
 
-void Logger::setThreadSafeLogging(bool newThreadSafeLogging) {
+void Logger::setThreadSafeLogging(bool newThreadSafeLogging)
+{
     Logger::threadSafeLogging = newThreadSafeLogging;
 }
 

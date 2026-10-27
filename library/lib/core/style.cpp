@@ -16,10 +16,10 @@
     limitations under the License.
 */
 
+#include <stdexcept>
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/util.hpp>
-#include <stdexcept>
 
 namespace brls
 {
@@ -189,7 +189,8 @@ void StyleValues::setOverlay(const std::unordered_map<std::string, float>& overl
 
 float StyleValues::getMetric(const std::string& name)
 {
-    if (this->values.count(name) == 0) {
+    if (this->values.count(name) == 0)
+    {
         brls::Logger::error("Unknown style metric {} in size: {}", name, std::to_string(this->values.size()));
         return 0;
     }

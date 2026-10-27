@@ -25,17 +25,17 @@ class LoadingBar : public brls::View
     void setBrand(bool on) { this->brand = on; }
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
 
     static brls::View* create();
 
   private:
-    void  moveTo(float value, float duration_us, bool at_steady_pace);
-    float drawn(brls::Time now) const;   // the fill at `now`
+    void moveTo(float value, float duration_us, bool at_steady_pace);
+    float drawn(brls::Time now) const; // the fill at `now`
 
-    float from = 0.0f, to = 0.0f;   // the fill goes from `from` to `to` ...
-    brls::Time since = 0;           // ... starting then (µs) ...
-    float duration = 0.0f;          // ... in that long (µs) ...
-    bool  steady = false;           // ... at a steady pace, or easing out
-    bool  brand = false;
+    float from = 0.0f, to = 0.0f; // the fill goes from `from` to `to` ...
+    brls::Time since = 0; // ... starting then (µs) ...
+    float duration   = 0.0f; // ... in that long (µs) ...
+    bool steady      = false; // ... at a steady pace, or easing out
+    bool brand       = false;
 };

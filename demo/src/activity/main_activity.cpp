@@ -18,10 +18,9 @@
 
 MainActivity::MainActivity()
 {
-    auto* input = brls::Application::getPlatform()->getInputManager();
-    this->enterSubscription = input->getMouseCusorEntered()->subscribe([](bool enterd) {
-        brls::Logger::debug("Mouse Cusor {}", enterd ? "enterd" : "leave");
-    });
+    auto* input             = brls::Application::getPlatform()->getInputManager();
+    this->enterSubscription = input->getMouseCusorEntered()->subscribe([](bool enterd)
+        { brls::Logger::debug("Mouse Cusor {}", enterd ? "enterd" : "leave"); });
 }
 
 MainActivity::~MainActivity()

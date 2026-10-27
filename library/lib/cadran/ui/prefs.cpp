@@ -11,9 +11,9 @@ namespace ui
 
 namespace
 {
-Prefs  s_defaults;
-Prefs* s_prefs = &s_defaults;
-}   // namespace
+    Prefs s_defaults;
+    Prefs* s_prefs = &s_defaults;
+} // namespace
 
 Prefs& prefs()
 {
@@ -27,16 +27,19 @@ void use_prefs(Prefs& p)
 
 bool env_flag(const char* name)
 {
-    if (hooks::get().env_flag) return hooks::get().env_flag(name);
+    if (hooks::get().env_flag)
+        return hooks::get().env_flag(name);
 #ifdef __SWITCH__
     return false;
 #else
     const char* v = std::getenv((std::string("BRLS_") + name).c_str());
-    if (!v) return false;
+    if (!v)
+        return false;
     std::string value(v);
-    for (char& c : value) c = (char)std::tolower((unsigned char)c);
+    for (char& c : value)
+        c = (char)std::tolower((unsigned char)c);
     return value == "1" || value == "true" || value == "yes";
 #endif
 }
 
-}   // namespace ui
+} // namespace ui

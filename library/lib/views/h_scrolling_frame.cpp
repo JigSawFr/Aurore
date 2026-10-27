@@ -39,7 +39,8 @@ HScrollingFrame::HScrollingFrame()
     this->setFocusable(true);
     this->setMaximumAllowedXMLElements(1);
 
-    addGestureRecognizer(new ScrollGestureRecognizer([this](PanGestureStatus state, Sound* soundToPlay) {
+    addGestureRecognizer(new ScrollGestureRecognizer([this](PanGestureStatus state, Sound* soundToPlay)
+        {
         if (state.state == GestureState::FAILED || state.state == GestureState::UNSURE || state.state == GestureState::INTERRUPTED)
         {
             if (isRubberBanding)
@@ -137,21 +138,21 @@ HScrollingFrame::HScrollingFrame()
             // Clamp fling target to valid range
             newScroll = std::max(0.0f, std::min(newScroll, clampMax));
             animateScrolling(newScroll, time);
-        }
-    },
+        } },
         PanAxis::HORIZONTAL));
 
     // Stop scrolling on tap
-    addGestureRecognizer(new TapGestureRecognizer([this](brls::TapGestureStatus status, Sound* soundToPlay) {
+    addGestureRecognizer(new TapGestureRecognizer([this](brls::TapGestureStatus status, Sound* soundToPlay)
+        {
         if (status.state == GestureState::UNSURE)
         {
             // Clear end callback before stop() to prevent stale snap-back callback from firing
             this->contentOffsetX.setEndCallback([](bool) {});
             this->contentOffsetX.stop();
-        }
-    }));
+        } }));
 
-    inputTypeSubscription = Application::getGlobalInputTypeChangeEvent()->subscribe([this](InputType type) {
+    inputTypeSubscription = Application::getGlobalInputTypeChangeEvent()->subscribe([this](InputType type)
+        {
         if (!focused && !childFocused)
             return;
 
@@ -159,8 +160,7 @@ HScrollingFrame::HScrollingFrame()
         {
             Application::giveFocus(getDefaultFocus());
             naturalScrollingCanScroll = false;
-        }
-    });
+        } });
 
     setHideHighlightBackground(true);
     setHideHighlightBorder(true);
@@ -211,8 +211,8 @@ void HScrollingFrame::draw(NVGcontext* vg, float x, float y, float width, float 
         float rgtLimit  = contentW - getScrollingAreaWidth();
         float offset    = static_cast<float>(this->contentOffsetX);
         float corrected = contentW <= getWidth()
-                              ? 0.0f
-                              : std::max(0.0f, std::min(offset, std::max(0.0f, rgtLimit)));
+            ? 0.0f
+            : std::max(0.0f, std::min(offset, std::max(0.0f, rgtLimit)));
         if (offset != corrected)
         {
             this->contentOffsetX = corrected;
@@ -222,14 +222,14 @@ void HScrollingFrame::draw(NVGcontext* vg, float x, float y, float width, float 
 
     // Enable scissoring
     nvgSave(vg);
-    float scrollingLeft    = this->getScrollingAreaLeftBoundary();
+    float scrollingLeft  = this->getScrollingAreaLeftBoundary();
     float scrollingWidth = this->getScrollingAreaWidth();
     nvgIntersectScissor(vg, scrollingLeft, y, scrollingWidth, this->getHeight());
 
     // Draw children
     Box::draw(vg, x, y, width, height, style, ctx);
 
-    //Disable scissoring
+    // Disable scissoring
     nvgRestore(vg);
 }
 
@@ -338,8 +338,8 @@ View* HScrollingFrame::findLeftMostFocusableView()
 void HScrollingFrame::naturalScrollingButtonProcessing(FocusDirection focusDirection, bool* repeat)
 {
     float rightLimit = this->getContentWidth() - this->getScrollingAreaWidth();
-    float newOffset   = getContentOffsetX();
-    bool isBorder     = false;
+    float newOffset  = getContentOffsetX();
+    bool isBorder    = false;
     switch (focusDirection)
     {
         case FocusDirection::LEFT:
@@ -449,11 +449,11 @@ void HScrollingFrame::willAppear(bool resetState)
 void HScrollingFrame::prebakeScrolling()
 {
     // Prebaked values for scrolling
-    float x      = this->getScrollingAreaLeftBoundary();
+    float x     = this->getScrollingAreaLeftBoundary();
     float width = this->getScrollingAreaWidth();
 
     this->middleX = x + width / 2;
-    this->rightX = x + width;
+    this->rightX  = x + width;
 }
 
 void HScrollingFrame::startScrolling(bool animated, float newScroll)
@@ -485,9 +485,8 @@ void HScrollingFrame::animateScrolling(float newScroll, float time)
 
     this->contentOffsetX.addStep(newScroll, time, EasingFunction::quadraticOut);
 
-    this->contentOffsetX.setTickCallback([this] {
-        this->scrollAnimationTick();
-    });
+    this->contentOffsetX.setTickCallback([this]
+        { this->scrollAnimationTick(); });
 
     this->contentOffsetX.start();
 
@@ -539,7 +538,7 @@ void HScrollingFrame::scrollAnimationTick()
 View* HScrollingFrame::getNextFocus(FocusDirection direction, View* currentView)
 {
     // To prevent sound click on empty scroll view
-    float rightLimit    = this->getContentWidth() - this->getScrollingAreaWidth();
+    float rightLimit     = this->getContentWidth() - this->getScrollingAreaWidth();
     float contentOffsetX = this->getContentOffsetX();
     if (direction == FocusDirection::RIGHT && contentOffsetX < (rightLimit - 0.01f))
         return this;
@@ -663,7 +662,7 @@ bool HScrollingFrame::updateScrolling(bool animated)
     if (contentWidth <= getWidth())
         newScroll = 0;
 
-    //Start animation
+    // Start animation
     this->startScrolling(animated, newScroll);
 
     return true;

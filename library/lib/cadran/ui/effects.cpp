@@ -35,12 +35,15 @@ bool motion()
     // The smoke test's screenshots compare frames: nothing may depend on when
     // they are taken (the same flag holds the focus highlight still).
     static const bool still = ui::env_flag("STILL_FOCUS");
-    if (still) return false;
+    if (still)
+        return false;
     // The app's own reduced motion (brls::Application::setReduceMotion).
-    if (brls::Application::isReduceMotionSet()) return false;
+    if (brls::Application::isReduceMotionSet())
+        return false;
     const std::string& setting = ui::prefs().effects;
-    if (setting == "reduced") return false;
+    if (setting == "reduced")
+        return false;
     return setting != "auto" || !in_hand();
 }
 
-}   // namespace effects
+} // namespace effects

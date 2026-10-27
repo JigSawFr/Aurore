@@ -24,21 +24,21 @@
 #include <yoga/Yoga.h>
 #include <algorithm>
 #include <cmath>
-#include <sstream>
+#include <fstream>
 #include <functional>
+#include <sstream>
 #include <borealis/core/animation.hpp>
 #include <borealis/core/application.hpp>
-#include <borealis/core/profiler.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/core/hot_reload.hpp>
 #include <borealis/core/i18n.hpp>
-#include <borealis/core/inspector.hpp>
 #include <borealis/core/input.hpp>
+#include <borealis/core/inspector.hpp>
+#include <borealis/core/profiler.hpp>
 #include <borealis/core/theme_decor.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
 #include <borealis/views/applet_frame.hpp>
-#include <fstream>
 
 // Avoid conflicts with macro definitions in windows.h
 #undef RGB
@@ -59,7 +59,8 @@ void AppletFrameItem::setHintView(View* hintView)
 
 AppletFrameItem::~AppletFrameItem()
 {
-    if (hintView) {
+    if (hintView)
+    {
         if (!hintView->isPtrLocked())
             delete hintView;
         else
@@ -255,7 +256,7 @@ void View::frame(FrameContext* ctx)
         if (this->wireframeEnabled)
             this->drawWireframe(ctx, frame);
 
-        //Reset clipping
+        // Reset clipping
         if (this->collapseState < 1.0f || this->clipsToBounds)
             nvgRestore(ctx->vg);
     }
@@ -364,12 +365,12 @@ void View::playClickAnimation(bool reverse, bool animateBack, bool force)
         style["brls/animations/highlight"],
         reverse ? EasingFunction::quadraticOut : EasingFunction::quadraticIn);
 
-    this->clickAlpha.setEndCallback([this, reverse, animateBack](bool finished) {
+    this->clickAlpha.setEndCallback([this, reverse, animateBack](bool finished)
+        {
         if (reverse || !animateBack || Application::getInputType() == InputType::TOUCH)
             return;
 
-        this->playClickAnimation(true);
-    });
+        this->playClickAnimation(true); });
 
     this->clickAlpha.start();
 }
@@ -379,10 +380,10 @@ std::string View::getClassString() const
     // Taken from: https://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname/4541470#4541470
     const char* name = typeid(*this).name();
 #ifndef _MSC_VER
-    int status       = 0;
+    int status = 0;
     std::unique_ptr<char, void (*)(void*)> res {
-            abi::__cxa_demangle(name, NULL, NULL, &status),
-            std::free
+        abi::__cxa_demangle(name, NULL, NULL, &status),
+        std::free
     };
     return (status == 0) ? res.get() : name;
 #else
@@ -405,7 +406,7 @@ YGNode* View::getYGNode()
     return this->ygNode;
 }
 
-const std::vector<std::shared_ptr<Action> >& View::getActions()
+const std::vector<std::shared_ptr<Action>>& View::getActions()
 {
     return this->actions;
 }
@@ -554,7 +555,8 @@ void View::drawBorder(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
 // times the key's own alpha
 NVGcolor View::shadowColor(NVGcolor color, float opacity)
 {
-    auto channel = [](float value) { return (unsigned)std::lround(value * 255.0f); };
+    auto channel = [](float value)
+    { return (unsigned)std::lround(value * 255.0f); };
     return RGBA(channel(color.r), channel(color.g), channel(color.b), (unsigned)(opacity * color.a));
 }
 
@@ -610,10 +612,10 @@ void View::collapse(bool animated)
 
         this->collapseState.addStep(0.0f, style["brls/animations/collapse"], EasingFunction::quadraticOut);
 
-        this->collapseState.setTickCallback([this] {
+        this->collapseState.setTickCallback([this]
+            {
             if (this->hasParent())
-                this->getParent()->invalidate();
-        });
+                this->getParent()->invalidate(); });
 
         this->collapseState.start();
     }
@@ -638,10 +640,10 @@ void View::expand(bool animated)
 
         this->collapseState.addStep(1.0f, style["brls/animations/collapse"], EasingFunction::quadraticOut);
 
-        this->collapseState.setTickCallback([this] {
+        this->collapseState.setTickCallback([this]
+            {
             if (this->hasParent())
-                this->getParent()->invalidate();
-        });
+                this->getParent()->invalidate(); });
 
         this->collapseState.start();
     }
@@ -721,10 +723,10 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
             else
             {
                 float e = 1.0f - (1.0f - t) * (1.0f - t); // quadratic out
-                x      = glideFrom[0] + (x - glideFrom[0]) * e;
-                y      = glideFrom[1] + (y - glideFrom[1]) * e;
-                width  = glideFrom[2] + (width - glideFrom[2]) * e;
-                height = glideFrom[3] + (height - glideFrom[3]) * e;
+                x       = glideFrom[0] + (x - glideFrom[0]) * e;
+                y       = glideFrom[1] + (y - glideFrom[1]) * e;
+                width   = glideFrom[2] + (width - glideFrom[2]) * e;
+                height  = glideFrom[3] + (height - glideFrom[3]) * e;
             }
         }
 
@@ -893,8 +895,8 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect f
             nvgRect(vg, x, y + backdropHeight, width, height - backdropHeight * 2);
             nvgFill(vg);
 
-            //Borders gradient
-            // Top
+            // Borders gradient
+            //  Top
             NVGpaint topGradient = nvgLinearGradient(vg, x, y + backdropHeight, x, y, a(sidebarColor), TRANSPARENT);
             nvgBeginPath(vg);
             nvgFillPaint(vg, topGradient);
@@ -916,7 +918,8 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect f
             NVGpaint gradient = nvgLinearGradient(vg, x, y, vertical ? x : x + width, vertical ? y + height : y, a(backgroundStartColor), a(backgroundEndColor));
             nvgBeginPath(vg);
             nvgFillPaint(vg, gradient);
-            if (std::all_of(this->backgroundRadius.begin(), this->backgroundRadius.end(), [](float i) { return i == 0.0f; }))
+            if (std::all_of(this->backgroundRadius.begin(), this->backgroundRadius.end(), [](float i)
+                    { return i == 0.0f; }))
                 nvgRect(vg, x, y, width, height);
             else
                 nvgRoundedRectVarying(vg, x, y, width, height, backgroundRadius[0], backgroundRadius[1], backgroundRadius[2], backgroundRadius[3]);
@@ -954,17 +957,13 @@ template <class ButtonType>
 View::ActionIterator View::getAction(ButtonType button)
 {
     return std::find_if(this->actions.begin(), this->actions.end(), [button](const std::shared_ptr<Action>& action)
-    {
-        return *action == button;
-    });
+        { return *action == button; });
 }
 
 View::ActionIterator View::getAction(ActionIdentifier identifier)
 {
     return std::find_if(this->actions.begin(), this->actions.end(), [identifier](const std::shared_ptr<Action>& action)
-    {
-        return action->getIdentifier() == identifier;
-    });
+        { return action->getIdentifier() == identifier; });
 }
 
 template <class ButtonType, class ActionType>
@@ -1003,7 +1002,7 @@ void View::unregisterAction(ActionIdentifier identifier)
     {
         if ((*it)->getType() == ACTION_KEYBOARD)
         {
-            Application::removeWatchedKeys(BrlsKeyCombination{ (*it)->getButton() });
+            Application::removeWatchedKeys(BrlsKeyCombination { (*it)->getButton() });
         }
         this->actions.erase(it);
     }
@@ -1116,7 +1115,7 @@ void View::setWidth(float width)
     const YGValue current = YGNodeStyleGetWidth(this->ygNode);
     const YGValue minimum = YGNodeStyleGetMinWidth(this->ygNode);
     if (width == View::AUTO ? current.unit == YGUnitAuto && minimum.unit == YGUnitUndefined
-                         : current.unit == YGUnitPoint && current.value == width && minimum.unit == YGUnitPoint && minimum.value == width)
+                            : current.unit == YGUnitPoint && current.value == width && minimum.unit == YGUnitPoint && minimum.value == width)
         return;
 
     YGNodeStyleSetMinWidthPercent(this->ygNode, 0);
@@ -1143,7 +1142,7 @@ void View::setHeight(float height)
     const YGValue current = YGNodeStyleGetHeight(this->ygNode);
     const YGValue minimum = YGNodeStyleGetMinHeight(this->ygNode);
     if (height == View::AUTO ? current.unit == YGUnitAuto && minimum.unit == YGUnitUndefined
-                         : current.unit == YGUnitPoint && current.value == height && minimum.unit == YGUnitPoint && minimum.value == height)
+                             : current.unit == YGUnitPoint && current.value == height && minimum.unit == YGUnitPoint && minimum.value == height)
         return;
 
     YGNodeStyleSetMinHeightPercent(this->ygNode, 0);
@@ -1592,7 +1591,8 @@ void View::setInFadeAnimation(bool inFadeAnimation)
     this->inFadeAnimation = inFadeAnimation;
 }
 
-void View::removeFromSuperView(bool free) {
+void View::removeFromSuperView(bool free)
+{
     if (parent)
         parent->removeView(this, free);
 }
@@ -1629,12 +1629,12 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
 
         this->alpha.addStep(1.0f, animationDuration, EasingFunction::quadraticOut);
 
-        this->alpha.setEndCallback([this, cb](bool finished) {
+        this->alpha.setEndCallback([this, cb](bool finished)
+            {
             this->fadeIn = false;
             this->onShowAnimationEnd();
             if (cb)
-                cb();
-        });
+                cb(); });
 
         this->alpha.start();
     }
@@ -1673,9 +1673,9 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
 
         this->alpha.addStep(0.0f, animationDuration, EasingFunction::quadraticOut);
 
-        this->alpha.setEndCallback([cb](bool finished) {
-            if (finished && cb) cb();
-        });
+        this->alpha.setEndCallback([cb](bool finished)
+            {
+            if (finished && cb) cb(); });
 
         this->alpha.start();
     }
@@ -1709,7 +1709,8 @@ void View::overrideTheme(Theme* newTheme)
 
 void View::setAspectRatio(float value)
 {
-    if(value <= 0) return;
+    if (value <= 0)
+        return;
     this->aspectRatio = value;
     YGNodeStyleSetAspectRatio(this->ygNode, value);
     this->invalidate();
@@ -1784,7 +1785,7 @@ View::~View()
     {
         if (action->getType() == ACTION_KEYBOARD)
         {
-            Application::removeWatchedKeys(BrlsKeyCombination{ action->getButton() });
+            Application::removeWatchedKeys(BrlsKeyCombination { action->getButton() });
         }
     }
 
@@ -2104,9 +2105,10 @@ View* View::createFromXMLResource(std::string name)
 View* View::createFromXMLString(std::string_view xml)
 {
     std::shared_ptr<tinyxml2::XMLDocument> document = getXMLCache(xml);
-    tinyxml2::XMLElement* element = document->RootElement();
+    tinyxml2::XMLElement* element                   = document->RootElement();
 
-    if (!element) {
+    if (!element)
+    {
         tinyxml2::XMLError error = document->Parse(xml.data());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
@@ -2126,9 +2128,10 @@ View* View::createFromXMLFile(std::string path)
 {
     HotReload::noteXMLFile(path);
     std::shared_ptr<tinyxml2::XMLDocument> document = getXMLCache(path);
-    tinyxml2::XMLElement* element = document->RootElement();
+    tinyxml2::XMLElement* element                   = document->RootElement();
 
-    if (!element) {
+    if (!element)
+    {
         tinyxml2::XMLError error = document->LoadFile(path.c_str());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
@@ -2223,91 +2226,71 @@ unsigned View::getMaximumAllowedXMLElements()
 void View::registerCommonAttributes()
 {
     // Width
-    this->registerAutoXMLAttribute("width", [this] {
-        this->setWidth(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("width", [this]
+        { this->setWidth(View::AUTO); });
 
-    this->registerFloatXMLAttribute("width", [this](float value) {
-        this->setWidth(value);
-    });
+    this->registerFloatXMLAttribute("width", [this](float value)
+        { this->setWidth(value); });
 
-    this->registerPercentageXMLAttribute("width", [this](float value) {
-        this->setWidthPercentage(value);
-    });
+    this->registerPercentageXMLAttribute("width", [this](float value)
+        { this->setWidthPercentage(value); });
 
     // Height
-    this->registerAutoXMLAttribute("height", [this] {
-        this->setHeight(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("height", [this]
+        { this->setHeight(View::AUTO); });
 
-    this->registerFloatXMLAttribute("height", [this](float value) {
-        this->setHeight(value);
-    });
+    this->registerFloatXMLAttribute("height", [this](float value)
+        { this->setHeight(value); });
 
-    this->registerPercentageXMLAttribute("height", [this](float value) {
-        this->setHeightPercentage(value);
-    });
+    this->registerPercentageXMLAttribute("height", [this](float value)
+        { this->setHeightPercentage(value); });
 
     // Min width
-    this->registerAutoXMLAttribute("minWidth", [this] {
-        this->setMinWidth(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("minWidth", [this]
+        { this->setMinWidth(View::AUTO); });
 
-    this->registerFloatXMLAttribute("minWidth", [this](float value) {
-        this->setMinWidth(value);
-    });
+    this->registerFloatXMLAttribute("minWidth", [this](float value)
+        { this->setMinWidth(value); });
 
-    this->registerPercentageXMLAttribute("minWidth", [this](float percentage) {
-        this->setMinWidthPercentage(percentage);
-    });
+    this->registerPercentageXMLAttribute("minWidth", [this](float percentage)
+        { this->setMinWidthPercentage(percentage); });
 
     // Min height
-    this->registerAutoXMLAttribute("minHeight", [this] {
-        this->setMinHeight(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("minHeight", [this]
+        { this->setMinHeight(View::AUTO); });
 
-    this->registerFloatXMLAttribute("minHeight", [this](float value) {
-        this->setMinHeight(value);
-    });
+    this->registerFloatXMLAttribute("minHeight", [this](float value)
+        { this->setMinHeight(value); });
 
-    this->registerPercentageXMLAttribute("minHeight", [this](float percentage) {
-        this->setMinHeightPercentage(percentage);
-    });
+    this->registerPercentageXMLAttribute("minHeight", [this](float percentage)
+        { this->setMinHeightPercentage(percentage); });
 
     // Max width
-    this->registerAutoXMLAttribute("maxWidth", [this] {
-        this->setMaxWidth(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("maxWidth", [this]
+        { this->setMaxWidth(View::AUTO); });
 
-    this->registerFloatXMLAttribute("maxWidth", [this](float value) {
-        this->setMaxWidth(value);
-    });
+    this->registerFloatXMLAttribute("maxWidth", [this](float value)
+        { this->setMaxWidth(value); });
 
-    this->registerPercentageXMLAttribute("maxWidth", [this](float percentage) {
-        this->setMaxWidthPercentage(percentage);
-    });
+    this->registerPercentageXMLAttribute("maxWidth", [this](float percentage)
+        { this->setMaxWidthPercentage(percentage); });
 
     // Max height
-    this->registerAutoXMLAttribute("maxHeight", [this] {
-        this->setMaxHeight(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("maxHeight", [this]
+        { this->setMaxHeight(View::AUTO); });
 
-    this->registerFloatXMLAttribute("maxHeight", [this](float value) {
-        this->setMaxHeight(value);
-    });
+    this->registerFloatXMLAttribute("maxHeight", [this](float value)
+        { this->setMaxHeight(value); });
 
-    this->registerPercentageXMLAttribute("maxHeight", [this](float percentage) {
-        this->setMaxHeightPercentage(percentage);
-    });
+    this->registerPercentageXMLAttribute("maxHeight", [this](float percentage)
+        { this->setMaxHeightPercentage(percentage); });
 
     // Grow and shrink
-    this->registerFloatXMLAttribute("grow", [this](float value) {
-        this->setGrow(value);
-    });
+    this->registerFloatXMLAttribute("grow", [this](float value)
+        { this->setGrow(value); });
 
-    this->registerFloatXMLAttribute("shrink", [this](float value) {
-        this->setShrink(value);
-    });
+    this->registerFloatXMLAttribute("shrink", [this](float value)
+        { this->setShrink(value); });
 
     // Alignment
     BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
@@ -2324,103 +2307,80 @@ void View::registerCommonAttributes()
         });
 
     // Margins all
-    this->registerFloatXMLAttribute("margin", [this](float value) {
-        this->setMargins(value, value, value, value);
-    });
+    this->registerFloatXMLAttribute("margin", [this](float value)
+        { this->setMargins(value, value, value, value); });
 
-    this->registerAutoXMLAttribute("margin", [this] {
-        this->setMargins(View::AUTO, View::AUTO, View::AUTO, View::AUTO);
-    });
+    this->registerAutoXMLAttribute("margin", [this]
+        { this->setMargins(View::AUTO, View::AUTO, View::AUTO, View::AUTO); });
 
     // Margin top
-    this->registerFloatXMLAttribute("marginTop", [this](float value) {
-        this->setMarginTop(value);
-    });
+    this->registerFloatXMLAttribute("marginTop", [this](float value)
+        { this->setMarginTop(value); });
 
-    this->registerAutoXMLAttribute("marginTop", [this] {
-        this->setMarginTop(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("marginTop", [this]
+        { this->setMarginTop(View::AUTO); });
 
     // Margin right
-    this->registerFloatXMLAttribute("marginRight", [this](float value) {
-        this->setMarginRight(value);
-    });
+    this->registerFloatXMLAttribute("marginRight", [this](float value)
+        { this->setMarginRight(value); });
 
-    this->registerAutoXMLAttribute("marginRight", [this] {
-        this->setMarginRight(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("marginRight", [this]
+        { this->setMarginRight(View::AUTO); });
 
     // Margin bottom
-    this->registerFloatXMLAttribute("marginBottom", [this](float value) {
-        this->setMarginBottom(value);
-    });
+    this->registerFloatXMLAttribute("marginBottom", [this](float value)
+        { this->setMarginBottom(value); });
 
-    this->registerAutoXMLAttribute("marginBottom", [this] {
-        this->setMarginBottom(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("marginBottom", [this]
+        { this->setMarginBottom(View::AUTO); });
 
     // Margin left
-    this->registerFloatXMLAttribute("marginLeft", [this](float value) {
-        this->setMarginLeft(value);
-    });
+    this->registerFloatXMLAttribute("marginLeft", [this](float value)
+        { this->setMarginLeft(value); });
 
-    this->registerAutoXMLAttribute("marginLeft", [this] {
-        this->setMarginLeft(View::AUTO);
-    });
+    this->registerAutoXMLAttribute("marginLeft", [this]
+        { this->setMarginLeft(View::AUTO); });
 
     // Line
-    this->registerColorXMLAttribute("lineColor", [this](NVGcolor color) {
-        this->setLineColor(color);
-    });
+    this->registerColorXMLAttribute("lineColor", [this](NVGcolor color)
+        { this->setLineColor(color); });
 
-    this->registerFloatXMLAttribute("lineTop", [this](float value) {
-        this->setLineTop(value);
-    });
+    this->registerFloatXMLAttribute("lineTop", [this](float value)
+        { this->setLineTop(value); });
 
-    this->registerFloatXMLAttribute("lineRight", [this](float value) {
-        this->setLineRight(value);
-    });
+    this->registerFloatXMLAttribute("lineRight", [this](float value)
+        { this->setLineRight(value); });
 
-    this->registerFloatXMLAttribute("lineBottom", [this](float value) {
-        this->setLineBottom(value);
-    });
+    this->registerFloatXMLAttribute("lineBottom", [this](float value)
+        { this->setLineBottom(value); });
 
-    this->registerFloatXMLAttribute("lineLeft", [this](float value) {
-        this->setLineLeft(value);
-    });
+    this->registerFloatXMLAttribute("lineLeft", [this](float value)
+        { this->setLineLeft(value); });
 
     // Position
-    this->registerFloatXMLAttribute("positionTop", [this](float value) {
-        this->setPositionTop(value);
-    });
+    this->registerFloatXMLAttribute("positionTop", [this](float value)
+        { this->setPositionTop(value); });
 
-    this->registerFloatXMLAttribute("positionRight", [this](float value) {
-        this->setPositionRight(value);
-    });
+    this->registerFloatXMLAttribute("positionRight", [this](float value)
+        { this->setPositionRight(value); });
 
-    this->registerFloatXMLAttribute("positionBottom", [this](float value) {
-        this->setPositionBottom(value);
-    });
+    this->registerFloatXMLAttribute("positionBottom", [this](float value)
+        { this->setPositionBottom(value); });
 
-    this->registerFloatXMLAttribute("positionLeft", [this](float value) {
-        this->setPositionLeft(value);
-    });
+    this->registerFloatXMLAttribute("positionLeft", [this](float value)
+        { this->setPositionLeft(value); });
 
-    this->registerPercentageXMLAttribute("positionTop", [this](float value) {
-        this->setPositionTopPercentage(value);
-    });
+    this->registerPercentageXMLAttribute("positionTop", [this](float value)
+        { this->setPositionTopPercentage(value); });
 
-    this->registerPercentageXMLAttribute("positionRight", [this](float value) {
-        this->setPositionRightPercentage(value);
-    });
+    this->registerPercentageXMLAttribute("positionRight", [this](float value)
+        { this->setPositionRightPercentage(value); });
 
-    this->registerPercentageXMLAttribute("positionBottom", [this](float value) {
-        this->setPositionBottomPercentage(value);
-    });
+    this->registerPercentageXMLAttribute("positionBottom", [this](float value)
+        { this->setPositionBottomPercentage(value); });
 
-    this->registerPercentageXMLAttribute("positionLeft", [this](float value) {
-        this->setPositionLeftPercentage(value);
-    });
+    this->registerPercentageXMLAttribute("positionLeft", [this](float value)
+        { this->setPositionLeftPercentage(value); });
 
     BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
         "positionType", PositionType, this->setPositionType,
@@ -2438,38 +2398,30 @@ void View::registerCommonAttributes()
         });
 
     // Custom focus routes
-    this->registerStringXMLAttribute("focusUp", [this](std::string value) {
-        this->setCustomNavigationRoute(FocusDirection::UP, value);
-    });
+    this->registerStringXMLAttribute("focusUp", [this](std::string value)
+        { this->setCustomNavigationRoute(FocusDirection::UP, value); });
 
-    this->registerStringXMLAttribute("focusRight", [this](std::string value) {
-        this->setCustomNavigationRoute(FocusDirection::RIGHT, value);
-    });
+    this->registerStringXMLAttribute("focusRight", [this](std::string value)
+        { this->setCustomNavigationRoute(FocusDirection::RIGHT, value); });
 
-    this->registerStringXMLAttribute("focusDown", [this](std::string value) {
-        this->setCustomNavigationRoute(FocusDirection::DOWN, value);
-    });
+    this->registerStringXMLAttribute("focusDown", [this](std::string value)
+        { this->setCustomNavigationRoute(FocusDirection::DOWN, value); });
 
-    this->registerStringXMLAttribute("focusLeft", [this](std::string value) {
-        this->setCustomNavigationRoute(FocusDirection::LEFT, value);
-    });
+    this->registerStringXMLAttribute("focusLeft", [this](std::string value)
+        { this->setCustomNavigationRoute(FocusDirection::LEFT, value); });
 
     // Shape
-    this->registerColorXMLAttribute("backgroundColor", [this](NVGcolor value) {
-        this->setBackgroundColor(value);
-    });
+    this->registerColorXMLAttribute("backgroundColor", [this](NVGcolor value)
+        { this->setBackgroundColor(value); });
 
-    this->registerColorXMLAttribute("borderColor", [this](NVGcolor value) {
-        this->setBorderColor(value);
-    });
+    this->registerColorXMLAttribute("borderColor", [this](NVGcolor value)
+        { this->setBorderColor(value); });
 
-    this->registerFloatXMLAttribute("borderThickness", [this](float value) {
-        this->setBorderThickness(value);
-    });
+    this->registerFloatXMLAttribute("borderThickness", [this](float value)
+        { this->setBorderThickness(value); });
 
-    this->registerFloatXMLAttribute("cornerRadius", [this](float value) {
-        this->setCornerRadius(value);
-    });
+    this->registerFloatXMLAttribute("cornerRadius", [this](float value)
+        { this->setCornerRadius(value); });
 
     this->registerFloatXMLAttribute("cornerTopLeftRadius", [this](float value)
         { this->setCornerRadius(value, this->cornerRadii[1], this->cornerRadii[2], this->cornerRadii[3]); });
@@ -2509,9 +2461,8 @@ void View::registerCommonAttributes()
             { "gone", Visibility::GONE },
         });
 
-    this->registerStringXMLAttribute("id", [this](std::string value) {
-        this->setId(value);
-    });
+    this->registerStringXMLAttribute("id", [this](std::string value)
+        { this->setId(value); });
 
     BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
         "background", ViewBackground, this->setBackground,
@@ -2523,112 +2474,93 @@ void View::registerCommonAttributes()
         });
 
     // background start and end color for vertical linear style
-    this->registerColorXMLAttribute("backgroundStartColor", [this](NVGcolor value) {
-        this->backgroundStartColor = value;
-    });
-    this->registerColorXMLAttribute("backgroundEndColor", [this](NVGcolor value) {
-        this->backgroundEndColor = value;
-    });
+    this->registerColorXMLAttribute("backgroundStartColor", [this](NVGcolor value)
+        { this->backgroundStartColor = value; });
+    this->registerColorXMLAttribute("backgroundEndColor", [this](NVGcolor value)
+        { this->backgroundEndColor = value; });
 
     // background corner radius for vertical linear style
-    this->registerFloatXMLAttribute("backgroundTopLeftRadius", [this](float value) {
-        this->backgroundRadius[0] = value;
-    });
-    this->registerFloatXMLAttribute("backgroundTopRightRadius", [this](float value) {
-        this->backgroundRadius[1] = value;
-    });
-    this->registerFloatXMLAttribute("backgroundBottomRightRadius", [this](float value) {
-        this->backgroundRadius[2] = value;
-    });
-    this->registerFloatXMLAttribute("backgroundBottomLeftRadius", [this](float value) {
-        this->backgroundRadius[3] = value;
-    });
+    this->registerFloatXMLAttribute("backgroundTopLeftRadius", [this](float value)
+        { this->backgroundRadius[0] = value; });
+    this->registerFloatXMLAttribute("backgroundTopRightRadius", [this](float value)
+        { this->backgroundRadius[1] = value; });
+    this->registerFloatXMLAttribute("backgroundBottomRightRadius", [this](float value)
+        { this->backgroundRadius[2] = value; });
+    this->registerFloatXMLAttribute("backgroundBottomLeftRadius", [this](float value)
+        { this->backgroundRadius[3] = value; });
 
-    this->registerBoolXMLAttribute("focusable", [this](bool value) {
-        this->setFocusable(value);
-    });
+    this->registerBoolXMLAttribute("focusable", [this](bool value)
+        { this->setFocusable(value); });
 
-    this->registerBoolXMLAttribute("wireframe", [this](bool value) {
-        this->setWireframeEnabled(value);
-    });
+    this->registerBoolXMLAttribute("wireframe", [this](bool value)
+        { this->setWireframeEnabled(value); });
 
     // Highlight
-    this->registerBoolXMLAttribute("hideHighlightBackground", [this](bool value) {
-        this->setHideHighlightBackground(value);
-    });
+    this->registerBoolXMLAttribute("hideHighlightBackground", [this](bool value)
+        { this->setHideHighlightBackground(value); });
 
     // Highlight
-    this->registerBoolXMLAttribute("hideHighlightBorder", [this](bool value) {
-        this->setHideHighlightBorder(value);
-    });
+    this->registerBoolXMLAttribute("hideHighlightBorder", [this](bool value)
+        { this->setHideHighlightBorder(value); });
 
     // Highlight
-    this->registerBoolXMLAttribute("hideClickAnimation", [this](bool value) {
-        this->setHideClickAnimation(value);
-    });
+    this->registerBoolXMLAttribute("hideClickAnimation", [this](bool value)
+        { this->setHideClickAnimation(value); });
 
     // Highlight
-    this->registerBoolXMLAttribute("hideHighlight", [this](bool value) {
-        this->setHideHighlight(value);
-    });
+    this->registerBoolXMLAttribute("hideHighlight", [this](bool value)
+        { this->setHideHighlight(value); });
 
-    this->registerFloatXMLAttribute("highlightPadding", [this](float value) {
-        this->setHighlightPadding(value);
-    });
+    this->registerFloatXMLAttribute("highlightPadding", [this](float value)
+        { this->setHighlightPadding(value); });
 
-    this->registerFloatXMLAttribute("highlightCornerRadius", [this](float value) {
-        this->setHighlightCornerRadius(value);
-    });
+    this->registerFloatXMLAttribute("highlightCornerRadius", [this](float value)
+        { this->setHighlightCornerRadius(value); });
 
     // Misc
-    this->registerStringXMLAttribute("title", [this](std::string value) {
-        this->getAppletFrameItem()->title = value;
-    });
+    this->registerStringXMLAttribute("title", [this](std::string value)
+        { this->getAppletFrameItem()->title = value; });
 
-    this->registerFilePathXMLAttribute("icon", [this](std::string value) {
-        this->getAppletFrameItem()->setIconFromFile(value);
-    });
+    this->registerFilePathXMLAttribute("icon", [this](std::string value)
+        { this->getAppletFrameItem()->setIconFromFile(value); });
 
-    this->registerFloatXMLAttribute("detachedX", [this](float value) {
+    this->registerFloatXMLAttribute("detachedX", [this](float value)
+        {
         this->detach();
-        this->setDetachedPositionX(value);
-    });
+        this->setDetachedPositionX(value); });
 
-    this->registerFloatXMLAttribute("detachedY", [this](float value) {
+    this->registerFloatXMLAttribute("detachedY", [this](float value)
+        {
         this->detach();
-        this->setDetachedPositionY(value);
-    });
+        this->setDetachedPositionY(value); });
 
-    this->registerFloatXMLAttribute("alpha", [this](float value) {
-        this->setAlpha(value);
-    });
+    this->registerFloatXMLAttribute("alpha", [this](float value)
+        { this->setAlpha(value); });
 
     this->registerFloatXMLAttribute("scale", [this](float value)
         { this->setScale(value); });
 
-    this->registerBoolXMLAttribute("clipsToBounds", [this](float value) {
-        this->setClipsToBounds(value);
-    });
+    this->registerBoolXMLAttribute("clipsToBounds", [this](float value)
+        { this->setClipsToBounds(value); });
 
-    this->registerBoolXMLAttribute("culled", [this](float value) {
-        this->setCulled(value);
-    });
+    this->registerBoolXMLAttribute("culled", [this](float value)
+        { this->setCulled(value); });
 
-    this->registerStringXMLAttribute("transition", [this](std::string value) {
+    this->registerStringXMLAttribute("transition", [this](std::string value)
+        {
         if (!this->setTransition(value))
-            Logger::error("Cannot read transition=\"{}\" on {}", value, this->describe());
-    });
+            Logger::error("Cannot read transition=\"{}\" on {}", value, this->describe()); });
 
-    this->registerStringXMLAttribute("bind", [this](std::string value) {
+    this->registerStringXMLAttribute("bind", [this](std::string value)
+        {
         if (!this->bind(value))
-            Logger::error("Cannot read bind=\"{}\" on {}", value, this->describe());
-    });
+            Logger::error("Cannot read bind=\"{}\" on {}", value, this->describe()); });
 
-    this->registerStringXMLAttribute("accessibilityLabel", [this](std::string value) {
-        this->setAccessibilityLabel(value);
-    });
+    this->registerStringXMLAttribute("accessibilityLabel", [this](std::string value)
+        { this->setAccessibilityLabel(value); });
 
-    this->registerStringXMLAttribute("accessibilityRole", [this](std::string value) {
+    this->registerStringXMLAttribute("accessibilityRole", [this](std::string value)
+        {
         static const std::unordered_map<std::string, AccessibilityRole> ROLES = {
             { "none", AccessibilityRole::NONE },
             { "button", AccessibilityRole::BUTTON },
@@ -2645,12 +2577,10 @@ void View::registerCommonAttributes()
         auto it = ROLES.find(value);
         if (it == ROLES.end())
             fatal("Illegal value \"" + value + "\" for XML attribute \"accessibilityRole\"");
-        this->setAccessibilityRole(it->second);
-    });
+        this->setAccessibilityRole(it->second); });
 
-    this->registerFloatXMLAttribute("aspectRatio", [this](float value) {
-        this->setAspectRatio(value);
-    });
+    this->registerFloatXMLAttribute("aspectRatio", [this](float value)
+        { this->setAspectRatio(value); });
 }
 
 void View::setTranslationY(float translationY)
@@ -2701,7 +2631,7 @@ void View::printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::str
 void View::registerFloatXMLAttribute(std::string name, FloatAttributeHandler handler)
 {
     if (this->registeringCommonAttributes && this->floatAttributes.count(name) > 0)
-        return;   // the subclass's own, registered first
+        return; // the subclass's own, registered first
     this->floatAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
@@ -2709,7 +2639,7 @@ void View::registerFloatXMLAttribute(std::string name, FloatAttributeHandler han
 void View::registerPercentageXMLAttribute(std::string name, FloatAttributeHandler handler)
 {
     if (this->registeringCommonAttributes && this->percentageAttributes.count(name) > 0)
-        return;   // the subclass's own, registered first
+        return; // the subclass's own, registered first
     this->percentageAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
@@ -2717,7 +2647,7 @@ void View::registerPercentageXMLAttribute(std::string name, FloatAttributeHandle
 void View::registerAutoXMLAttribute(std::string name, AutoAttributeHandler handler)
 {
     if (this->registeringCommonAttributes && this->autoAttributes.count(name) > 0)
-        return;   // the subclass's own, registered first
+        return; // the subclass's own, registered first
     this->autoAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
@@ -2725,7 +2655,7 @@ void View::registerAutoXMLAttribute(std::string name, AutoAttributeHandler handl
 void View::registerStringXMLAttribute(std::string name, StringAttributeHandler handler)
 {
     if (this->registeringCommonAttributes && this->stringAttributes.count(name) > 0)
-        return;   // the subclass's own, registered first
+        return; // the subclass's own, registered first
     this->stringAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
@@ -2733,7 +2663,7 @@ void View::registerStringXMLAttribute(std::string name, StringAttributeHandler h
 void View::registerColorXMLAttribute(std::string name, ColorAttributeHandler handler)
 {
     if (this->registeringCommonAttributes && this->colorAttributes.count(name) > 0)
-        return;   // the subclass's own, registered first
+        return; // the subclass's own, registered first
     this->colorAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
@@ -2741,7 +2671,7 @@ void View::registerColorXMLAttribute(std::string name, ColorAttributeHandler han
 void View::registerBoolXMLAttribute(std::string name, BoolAttributeHandler handler)
 {
     if (this->registeringCommonAttributes && this->boolAttributes.count(name) > 0)
-        return;   // the subclass's own, registered first
+        return; // the subclass's own, registered first
     this->boolAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
@@ -2749,7 +2679,7 @@ void View::registerBoolXMLAttribute(std::string name, BoolAttributeHandler handl
 void View::registerFilePathXMLAttribute(std::string name, FilePathAttributeHandler handler)
 {
     if (this->registeringCommonAttributes && this->filePathAttributes.count(name) > 0)
-        return;   // the subclass's own, registered first
+        return; // the subclass's own, registered first
     this->filePathAttributes[name] = handler;
     this->knownAttributes.insert(name);
 }
@@ -2886,7 +2816,8 @@ AppletFrame* View::getAppletFrame()
 void View::updateAppletFrameItem()
 {
     AppletFrame* appletFrame = this->getAppletFrame();
-    if (appletFrame) {
+    if (appletFrame)
+    {
         appletFrame->updateAppletFrameItem();
         appletFrame->setTitle(getAppletFrameItem()->title);
         appletFrame->setIcon(getAppletFrameItem()->iconPath);

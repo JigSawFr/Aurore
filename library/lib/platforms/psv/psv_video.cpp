@@ -27,7 +27,8 @@ namespace brls
 PsvVideoContext::PsvVideoContext()
 {
 #ifdef USE_VITA_SHARK
-    if (shark_init("app0:module/libshacccg.suprx") < 0) {
+    if (shark_init("app0:module/libshacccg.suprx") < 0)
+    {
         sceClibPrintf("vitashark: failed to initialize");
         return;
     }
@@ -35,14 +36,15 @@ PsvVideoContext::PsvVideoContext()
 
     // Initialize nanovg
     NVGXMinitOptions initOptions = {
-        .msaa = SCE_GXM_MULTISAMPLE_4X,
-        .swapInterval = VideoContext::swapInterval,
-        .dumpShader = 0,
+        .msaa           = SCE_GXM_MULTISAMPLE_4X,
+        .swapInterval   = VideoContext::swapInterval,
+        .dumpShader     = 0,
         .scenesPerFrame = 1,
     };
 
     window = gxmCreateWindow(&initOptions);
-    if (window == NULL) {
+    if (window == NULL)
+    {
         fatal("gxm: failed to initialize");
     }
 
@@ -74,33 +76,39 @@ PsvVideoContext::~PsvVideoContext()
 #endif
 }
 
-void PsvVideoContext::clear(NVGcolor color) {
+void PsvVideoContext::clear(NVGcolor color)
+{
     gxmClearColor(color.r, color.g, color.b, color.a);
 }
 
 void PsvVideoContext::resetState() { }
 
-void PsvVideoContext::beginFrame() {
+void PsvVideoContext::beginFrame()
+{
     gxmBeginFrame();
     gxmClear();
 }
 
-void PsvVideoContext::endFrame() {
+void PsvVideoContext::endFrame()
+{
     gxmEndFrame();
     gxmDialogUpdate();
     gxmSwapBuffer();
 }
 
-void PsvVideoContext::setSwapInterval(int interval) {
+void PsvVideoContext::setSwapInterval(int interval)
+{
     VideoContext::swapInterval = interval;
     gxmSwapInterval(interval);
 }
 
-double PsvVideoContext::getScaleFactor() {
+double PsvVideoContext::getScaleFactor()
+{
     return 1.0;
 }
 
-NVGcontext* PsvVideoContext::getNVGContext() {
+NVGcontext* PsvVideoContext::getNVGContext()
+{
     return this->nvgContext;
 }
 

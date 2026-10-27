@@ -66,10 +66,10 @@ class ThemeValues
 // How a theme's background_image fills the window (background_fit)
 enum class BackgroundFit
 {
-    COVER,   // scaled to cover it, centred, cut at the edges (the default)
+    COVER, // scaled to cover it, centred, cut at the edges (the default)
     CONTAIN, // scaled to fit in it whole, centred, brls/clear around it
-    TILE,    // repeated from the top left, one pixel per unit of the layout
-    CENTER,  // as is, one pixel per unit of the layout, centred
+    TILE, // repeated from the top left, one pixel per unit of the layout
+    CENTER, // as is, one pixel per unit of the layout, centred
 };
 
 // A variant's background, as a theme file sets it (docs/themes.md)
@@ -104,9 +104,9 @@ struct ThemeIcon
 // (docs/themes.md, "Logos and images"): paths made by Theme::resolveAsset
 struct ThemePictures
 {
-    std::string logo;    // logo: the app's mark, "" for the app's own
+    std::string logo; // logo: the app's mark, "" for the app's own
     std::string preview; // preview: the theme's thumbnail in a picker
-    std::map<std::string, ThemeIcon> icons;    // icon.<name>, by icon name
+    std::map<std::string, ThemeIcon> icons; // icon.<name>, by icon name
     std::map<std::string, std::string> images; // image.<key>, by image slot
 
     bool empty() const { return this->logo.empty() && this->preview.empty() && this->icons.empty() && this->images.empty(); }
@@ -124,11 +124,11 @@ struct ThemeImage;
 enum class ThemeArea
 {
     NONE,
-    HEADER,  // backdrop.header: a screen's header, its whole width
+    HEADER, // backdrop.header: a screen's header, its whole width
     SIDEBAR, // backdrop.sidebar: the sidebar (Cadran's rail)
-    DIALOG,  // backdrop.dialog: dialogs, dropdowns, Cadran's sheets
-    TOP,     // decor.top: a strip along the top edge of the screen
-    BOTTOM,  // decor.bottom: along its bottom edge
+    DIALOG, // backdrop.dialog: dialogs, dropdowns, Cadran's sheets
+    TOP, // decor.top: a strip along the top edge of the screen
+    BOTTOM, // decor.bottom: along its bottom edge
 };
 constexpr int THEME_AREA_COUNT = 5; // HEADER to BOTTOM
 
@@ -171,9 +171,9 @@ struct ThemeParticles
     static constexpr float LOW = 0.3f, MEDIUM = 0.6f, HIGH = 1.0f;
     static constexpr int MAX_COLORS = 5;
 
-    ParticleKind kind = ParticleKind::NONE;
-    float density     = LOW;  // 0 to 1, of ThemeDecorations::MAX_PARTICLES
-    float speed       = 1.0f; // 0.25 to 4
+    ParticleKind kind   = ParticleKind::NONE;
+    float density       = LOW; // 0 to 1, of ThemeDecorations::MAX_PARTICLES
+    float speed         = 1.0f; // 0.25 to 4
     ParticleLayer layer = ParticleLayer::BACK;
     // particles_color: up to MAX_COLORS; empty: from the palette
     std::vector<NVGcolor> colors;
@@ -201,7 +201,7 @@ struct ThemeDecor
 struct ThemeInfo
 {
     std::string path; // as given to loadFile(); "builtin:<id>" for a preset
-    std::string id;   // the file's name without its extension
+    std::string id; // the file's name without its extension
     std::string name; // its `name`, else the id
     std::string author;
     std::string version;

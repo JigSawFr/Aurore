@@ -100,9 +100,8 @@ RadioCell::RadioCell()
 {
     this->inflateFromXMLString(radioCellXML);
 
-    this->registerStringXMLAttribute("title", [this](std::string value){
-        this->title->setText(value);
-    });
+    this->registerStringXMLAttribute("title", [this](std::string value)
+        { this->title->setText(value); });
 }
 
 void RadioCell::setSelected(bool selected)

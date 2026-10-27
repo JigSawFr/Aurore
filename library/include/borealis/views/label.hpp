@@ -187,7 +187,7 @@ class Label : public View
      */
     static std::string STConverter(const std::string& text);
 
-    static inline bool OPENCC_ON = true;
+    static inline bool OPENCC_ON   = true;
     static inline float FONT_SCALE = 1.0f;
     void setCursor(int cursor);
 
@@ -200,12 +200,12 @@ class Label : public View
 
     int font;
     float fontSize;
-    bool fontScaled = true;
+    bool fontScaled    = true;
     float fontScaleMax = 1e6f;
     bool shrinkToFit   = false;
-    float fitScale     = 1.0f;   // from onLayout, when shrinkToFit
-    float fittedWidth  = 0;      // the text's width at that scale
-    float textWidth();           // the text's width as drawn
+    float fitScale     = 1.0f; // from onLayout, when shrinkToFit
+    float fittedWidth  = 0; // the text's width at that scale
+    float textWidth(); // the text's width as drawn
     float lineHeight;
     float fontQuality;
 

@@ -1,7 +1,7 @@
-#include <borealis/views/edit_text_dialog.hpp>
+#include <borealis/core/application.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/core/application.hpp>
+#include <borealis/views/edit_text_dialog.hpp>
 
 #ifdef __PSV__
 #define EDIT_TEXT_DIALOG_POP_ANIMATION TransitionAnimation::NONE
@@ -16,7 +16,7 @@
 namespace brls
 {
 
-    const std::string editTextDialogXML = R"xml(
+const std::string editTextDialogXML = R"xml(
     <brls:Box
         id="brls/container"
         width="auto"
@@ -32,11 +32,11 @@ namespace brls
             id="brls/dialog/header"
             fontSize="24")xml"
 #ifdef __PSV__
-            R"xml(marginTop="30")xml"
+                                      R"xml(marginTop="30")xml"
 #else
-            R"xml(marginTop="50")xml"
+                                      R"xml(marginTop="50")xml"
 #endif
-      R"xml(marginBottom="30"
+                                      R"xml(marginBottom="30"
             textColor="#FFFFFF"/>
 
         <brls:Box
@@ -79,69 +79,67 @@ namespace brls
     </brls:Box>
     )xml";
 
-    EditTextDialog::EditTextDialog()
-    {
-        this->inflateFromXMLString(editTextDialogXML);
-        if (View* panel = this->getView("brls/dialog/applet"))
-            panel->setThemeArea(ThemeArea::DIALOG);
+EditTextDialog::EditTextDialog()
+{
+    this->inflateFromXMLString(editTextDialogXML);
+    if (View* panel = this->getView("brls/dialog/applet"))
+        panel->setThemeArea(ThemeArea::DIALOG);
 
-        // submit text
-        this->registerAction(
-            "hints/ok"_i18n, BUTTON_A, [this](...)
-            {
+    // submit text
+    this->registerAction(
+        "hints/ok"_i18n, BUTTON_A, [this](...)
+        {
                 Application::popActivity(EDIT_TEXT_DIALOG_POP_ANIMATION, [this](){
                         this->summitEvent.fire();
                     });
                 return true; });
-        this->registerAction(
-            "hints/ok"_i18n, BUTTON_START, [this](...)
-            {
+    this->registerAction(
+        "hints/ok"_i18n, BUTTON_START, [this](...)
+        {
                 Application::popActivity(EDIT_TEXT_DIALOG_POP_ANIMATION, [this](){
                         this->summitEvent.fire();
                     });
                 return true; }, true);
 
-        // register paste action
-        int pasteKey = BRLS_KBD_MODIFIER_CTRL;
+    // register paste action
+    int pasteKey = BRLS_KBD_MODIFIER_CTRL;
 #ifdef __APPLE__
-        pasteKey = BRLS_KBD_MODIFIER_META;
+    pasteKey = BRLS_KBD_MODIFIER_META;
 #endif
-        this->registerAction({ BRLS_KBD_KEY_V, pasteKey }, [this](...)
+    this->registerAction({ BRLS_KBD_KEY_V, pasteKey }, [this](...)
         {
             this->clipboardEvent.fire(Application::getPlatform()->pasteFromClipboard());
-            return true;
-        });
+            return true; });
 
-        // register delete action
-        this->registerAction({ BRLS_KBD_KEY_DELETE }, [this](...)
+    // register delete action
+    this->registerAction({ BRLS_KBD_KEY_DELETE }, [this](...)
         {
             // This is to ensure that the delete operation of the PSV ime will not be ignored
             this->backspaceEvent.fire();
-            return true;
-        }, true);
-        this->registerAction({ BRLS_KBD_KEY_BACKSPACE }, [this](...)
+            return true; }, true);
+    this->registerAction({ BRLS_KBD_KEY_BACKSPACE }, [this](...)
         {
             this->backspaceEvent.fire();
-            return true;
-        }, true);
+            return true; }, true);
 
-        this->registerAction("hints/delete"_i18n, BUTTON_BACK, [this](...)
-            {
+    this->registerAction("hints/delete"_i18n, BUTTON_BACK, [this](...)
+        {
                 this->backspaceEvent.fire();
                 return true; }, true, true);
 
-        // cancel input
-        this->registerAction(
-            "hints/back"_i18n, BUTTON_B, [this](...)
-            {
+    // cancel input
+    this->registerAction(
+        "hints/back"_i18n, BUTTON_B, [this](...)
+        {
                 Application::popActivity(EDIT_TEXT_DIALOG_POP_ANIMATION, [this](){
                         this->cancelEvent.fire();
                     });
                 return true; });
 
 #if defined(__PSV__) and !defined(BOREALIS_USE_GXM)
-        // After turning off the on-screen keyboard, tap on the input area to reopen
-        this->addGestureRecognizer(new brls::TapGestureRecognizer([](brls::TapGestureStatus status, brls::Sound*) {
+    // After turning off the on-screen keyboard, tap on the input area to reopen
+    this->addGestureRecognizer(new brls::TapGestureRecognizer([](brls::TapGestureStatus status, brls::Sound*)
+        {
             if (status.state == brls::GestureState::END) {
                 auto* videoContext = (SDLVideoContext*)Application::getPlatform()->getVideoContext();
                 if (!SDL_IsScreenKeyboardShown(videoContext->getSDLWindow()))
@@ -150,105 +148,105 @@ namespace brls
                     SDL_StartTextInput();
                 }
                 Application::setInputType(InputType::GAMEPAD);
-            }
-        }));
-        // Force to set to gamepad mode to avoid missing the `Enter` keyboard event
-        Application::setInputType(InputType::GAMEPAD);
+            } }));
+    // Force to set to gamepad mode to avoid missing the `Enter` keyboard event
+    Application::setInputType(InputType::GAMEPAD);
 #endif
 
-        this->init = true;
-    }
+    this->init = true;
+}
 
-    EditTextDialog::~EditTextDialog() = default;
+EditTextDialog::~EditTextDialog() = default;
 
-    void EditTextDialog::open()
+void EditTextDialog::open()
+{
+    Application::pushActivity(new Activity(this));
+}
+
+void EditTextDialog::setText(const std::string& value)
+{
+    this->content = value;
+    this->updateUI();
+}
+
+void EditTextDialog::setHeaderText(const std::string& value)
+{
+    this->header->setText(value);
+}
+
+void EditTextDialog::setHintText(const std::string& value)
+{
+    if (value.empty())
     {
-        Application::pushActivity(new Activity(this));
+        this->hint = "hints/input"_i18n;
     }
-
-    void EditTextDialog::setText(const std::string& value)
+    else
     {
-        this->content = value;
-        this->updateUI();
+        this->hint = value;
     }
+    this->updateUI();
+}
 
-    void EditTextDialog::setHeaderText(const std::string& value)
+void EditTextDialog::setCountText(const std::string& value)
+{
+    this->count->setText(value);
+}
+
+bool EditTextDialog::isTranslucent()
+{
+    return EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT;
+}
+
+void EditTextDialog::onLayout()
+{
+    if (!init)
+        return;
+    this->layoutEvent.fire(Point { this->label->getX(),
+        this->label->getY() + this->label->getHeight() });
+}
+
+Event<Point>* EditTextDialog::getLayoutEvent()
+{
+    return &this->layoutEvent;
+}
+
+Event<>* EditTextDialog::getBackspaceEvent()
+{
+    return &this->backspaceEvent;
+}
+
+Event<>* EditTextDialog::getCancelEvent()
+{
+    return &this->cancelEvent;
+}
+
+Event<>* EditTextDialog::getSubmitEvent()
+{
+    return &this->summitEvent;
+}
+
+Event<std::string>* EditTextDialog::getClipboardEvent()
+{
+    return &this->clipboardEvent;
+}
+
+void EditTextDialog::updateUI()
+{
+    if (content.empty())
     {
-        this->header->setText(value);
+        label->setThemeColor("textColor", "brls/text_disabled");
+        label->setText(hint);
+        label->setCursor((int)CursorPosition::START);
     }
-
-    void EditTextDialog::setHintText(const std::string& value)
+    else
     {
-        if (value.empty())
-        {
-            this->hint = "hints/input"_i18n;
-        }
-        else
-        {
-            this->hint = value;
-        }
-        this->updateUI();
+        label->setThemeColor("textColor", "brls/text");
+        label->setText(content);
     }
+}
 
-    void EditTextDialog::setCountText(const std::string& value)
-    {
-        this->count->setText(value);
-    }
-
-    bool EditTextDialog::isTranslucent()
-    {
-        return EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT;
-    }
-
-    void EditTextDialog::onLayout()
-    {
-        if (!init)
-            return;
-        this->layoutEvent.fire(Point { this->label->getX(),
-            this->label->getY() + this->label->getHeight() });
-    }
-
-    Event<Point>* EditTextDialog::getLayoutEvent()
-    {
-        return &this->layoutEvent;
-    }
-
-    Event<>* EditTextDialog::getBackspaceEvent()
-    {
-        return &this->backspaceEvent;
-    }
-
-    Event<>* EditTextDialog::getCancelEvent()
-    {
-        return &this->cancelEvent;
-    }
-
-    Event<>* EditTextDialog::getSubmitEvent()
-    {
-        return &this->summitEvent;
-    }
-
-    Event<std::string>* EditTextDialog::getClipboardEvent()
-    {
-        return &this->clipboardEvent;
-    }
-
-    void EditTextDialog::updateUI()
-    {
-        if (content.empty())
-        {
-            label->setThemeColor("textColor", "brls/text_disabled");
-            label->setText(hint);
-            label->setCursor((int)CursorPosition::START);
-        }
-        else
-        {
-            label->setThemeColor("textColor", "brls/text");
-            label->setText(content);
-        }
-    }
-
-    void EditTextDialog::setCursor(int cursor) {
-        label->setCursor(cursor);
-    }
+void EditTextDialog::setCursor(int cursor)
+{
+    label->setCursor(cursor);
+}
 }

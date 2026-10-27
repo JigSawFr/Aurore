@@ -1,17 +1,17 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <borealis/cadran/ui/cadran_list.hpp>
 
+#include <yoga/Yoga.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <yoga/Yoga.h>
 
-#include <borealis/cadran/ui/prefs.hpp>
 #include <borealis/cadran/ui/cadran_kit.hpp>
 #include <borealis/cadran/ui/effects.hpp>
 #include <borealis/cadran/ui/motion.hpp>
+#include <borealis/cadran/ui/prefs.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
 
 namespace kit = cadran::kit;
@@ -31,12 +31,17 @@ constexpr float ACTION_ICON_GAP = 14.0f;
 
 void append_utf8(std::string& out, uint32_t cp)
 {
-    if (cp < 0x80) {
+    if (cp < 0x80)
+    {
         out += (char)cp;
-    } else if (cp < 0x800) {
+    }
+    else if (cp < 0x800)
+    {
         out += (char)(0xC0 | (cp >> 6));
         out += (char)(0x80 | (cp & 0x3F));
-    } else {
+    }
+    else
+    {
         out += (char)(0xE0 | (cp >> 12));
         out += (char)(0x80 | ((cp >> 6) & 0x3F));
         out += (char)(0x80 | (cp & 0x3F));
@@ -45,28 +50,36 @@ void append_utf8(std::string& out, uint32_t cp)
 
 uint32_t upper_cp(uint32_t cp)
 {
-    if (cp >= 'a' && cp <= 'z') return cp - 0x20;
-    if (cp >= 0xE0 && cp <= 0xFE && cp != 0xF7) return cp - 0x20;   // à…þ
-    if (cp == 0xFF) return 0x178;                                    // ÿ
-    if (cp == 0x153) return 0x152;                                   // œ
-    if (cp >= 0x430 && cp <= 0x44F) return cp - 0x20;                // а…я
-    if (cp >= 0x450 && cp <= 0x45F) return cp - 0x50;                // ѐ…џ
+    if (cp >= 'a' && cp <= 'z')
+        return cp - 0x20;
+    if (cp >= 0xE0 && cp <= 0xFE && cp != 0xF7)
+        return cp - 0x20; // à…þ
+    if (cp == 0xFF)
+        return 0x178; // ÿ
+    if (cp == 0x153)
+        return 0x152; // œ
+    if (cp >= 0x430 && cp <= 0x44F)
+        return cp - 0x20; // а…я
+    if (cp >= 0x450 && cp <= 0x45F)
+        return cp - 0x50; // ѐ…џ
     return cp;
 }
 
 brls::ScrollingFrame* find_scroll(brls::View* view)
 {
-    if (auto* frame = dynamic_cast<brls::ScrollingFrame*>(view)) return frame;
+    if (auto* frame = dynamic_cast<brls::ScrollingFrame*>(view))
+        return frame;
     if (auto* box = dynamic_cast<brls::Box*>(view))
         for (brls::View* child : box->getChildren())
-            if (brls::ScrollingFrame* frame = find_scroll(child)) return frame;
+            if (brls::ScrollingFrame* frame = find_scroll(child))
+                return frame;
     return nullptr;
 }
 
 int index_in(brls::Box* parent, brls::View* child)
 {
     const auto& children = parent->getChildren();
-    const auto at = std::find(children.begin(), children.end(), child);
+    const auto at        = std::find(children.begin(), children.end(), child);
     return at == children.end() ? -1 : (int)(at - children.begin());
 }
 
@@ -92,7 +105,8 @@ bool has_icon(brls::View* row)
 // Moves a line to another box, keeping the view.
 void move_to(brls::View* view, brls::Box* to)
 {
-    if (brls::Box* from = view->getParent()) from->removeView(view, false);
+    if (brls::Box* from = view->getParent())
+        from->removeView(view, false);
     to->addView(view);
 }
 
@@ -115,7 +129,9 @@ class TileGlow : public brls::View
 {
   public:
     TileGlow(brls::View* cell, const char* own, const char* next)
-        : tile(cell), ink(own), far(next)
+        : tile(cell)
+        , ink(own)
+        , far(next)
     {
         this->setFocusable(false);
         this->setPositionType(brls::PositionType::ABSOLUTE);
@@ -128,7 +144,8 @@ class TileGlow : public brls::View
         // percentage of it does not follow its height.
         const float width = this->tile->getWidth(), height = this->tile->getHeight();
         static const bool off = ui::env_flag("CADRAN_NOGLOW");
-        if (off || !ui::prefs().glow || effects::light() || width <= 0 || height <= 0) return;
+        if (off || !ui::prefs().glow || effects::light() || width <= 0 || height <= 0)
+            return;
         // Fainter on the light theme's white, where a tint shows more.
         const bool light = brls::Application::getThemeVariant() == brls::ThemeVariant::LIGHT;
         const float lift = this->tile->isFocused() ? 1.5f : 1.0f;
@@ -150,7 +167,7 @@ class TileGlow : public brls::View
     }
 
     brls::View* tile;
-    const char* ink;   // theme keys
+    const char* ink; // theme keys
     const char* far;
 };
 
@@ -168,7 +185,8 @@ class TileFit : public brls::View
 {
   public:
     TileFit(brls::Box* cell, brls::Label* its_title)
-        : tile(cell), title(its_title)
+        : tile(cell)
+        , title(its_title)
     {
         this->setFocusable(false);
         this->setPositionType(brls::PositionType::ABSOLUTE);
@@ -180,35 +198,44 @@ class TileFit : public brls::View
         // The labels as they are now: one added later (a reason) joins in.
         std::vector<brls::Label*> labels = { this->title };
         for (brls::View* child : this->tile->getChildren())
-            if (auto* label = dynamic_cast<brls::Label*>(child)) labels.push_back(label);
+            if (auto* label = dynamic_cast<brls::Label*>(child))
+                labels.push_back(label);
         for (brls::Label* label : labels)
-            if (std::none_of(this->fits.begin(), this->fits.end(), [label](const Fit& f) { return f.label == label; })) {
+            if (std::none_of(this->fits.begin(), this->fits.end(), [label](const Fit& f)
+                    { return f.label == label; }))
+            {
                 label->setSingleLine(true);
                 label->setAutoAnimate(true);
                 this->fits.push_back({ label, label->getFontSize(), "" });
             }
         // A wider tile (smaller text, the window) may take the full size again.
         const bool resized = this->tile->getWidth() != this->width;
-        this->width = this->tile->getWidth();
-        for (Fit& fit : this->fits) {
+        this->width        = this->tile->getWidth();
+        for (Fit& fit : this->fits)
+        {
             const std::string text = fit.label->getFullText();
-            if (text != fit.text || resized) {
+            if (text != fit.text || resized)
+            {
                 fit.text = text;
-                if (fit.label->getFontSize() != fit.size) fit.label->setFontSize(fit.size);
-                continue;   // laid out again first
+                if (fit.label->getFontSize() != fit.size)
+                    fit.label->setFontSize(fit.size);
+                continue; // laid out again first
             }
             const float least = fit.size * 0.75f;
-            if (fit.label->getWidth() <= 0 || !fit.label->isTruncated() || fit.label->getFontSize() <= least + 0.5f) continue;
+            if (fit.label->getWidth() <= 0 || !fit.label->isTruncated() || fit.label->getFontSize() <= least + 0.5f)
+                continue;
             // At once to the size its line holds (its text measured as the
             // label measures it), then a step at a time if it still does not.
             float size = fit.label->getFontSize() - 1.0f;
-            if (fit.label->getFontSize() == fit.size) {
+            if (fit.label->getFontSize() == fit.size)
+            {
                 nvgFontSize(vg, fit.label->getDrawnFontSize());
                 nvgFontFaceId(vg, fit.label->getFont());
                 float bounds[4];
                 nvgTextBounds(vg, 0, 0, text.c_str(), nullptr, bounds);
                 const float needed = bounds[2] - bounds[0];
-                if (needed > 0) size = std::floor(fit.size * fit.label->getWidth() / needed);
+                if (needed > 0)
+                    size = std::floor(fit.size * fit.label->getWidth() / needed);
             }
             fit.label->setFontSize(std::max(least, std::min(size, fit.label->getFontSize() - 1.0f)));
         }
@@ -218,13 +245,13 @@ class TileFit : public brls::View
     struct Fit
     {
         brls::Label* label;
-        float size;         // its own size, the largest
-        std::string text;   // the text it was fitted to
+        float size; // its own size, the largest
+        std::string text; // the text it was fitted to
     };
     brls::Box* tile;
     brls::Label* title;
     std::vector<Fit> fits;
-    float width = 0;   // the tile's, when last fitted
+    float width = 0; // the tile's, when last fitted
 };
 
 // The icon before a row's title, in a soft rounded square.
@@ -242,22 +269,29 @@ brls::Box* row_icon(const char* name)
     square->addView(make_icon(name, 19, "cadran/text2"));
     return square;
 }
-}   // namespace
+} // namespace
 
 std::string cadran::upper(const std::string& text)
 {
     std::string out;
     out.reserve(text.size());
-    for (size_t i = 0; i < text.size();) {
+    for (size_t i = 0; i < text.size();)
+    {
         const unsigned char c = (unsigned char)text[i];
-        if (c < 0x80) {
+        if (c < 0x80)
+        {
             append_utf8(out, upper_cp(c));
             i++;
-        } else if ((c & 0xE0) == 0xC0 && i + 1 < text.size()) {
+        }
+        else if ((c & 0xE0) == 0xC0 && i + 1 < text.size())
+        {
             append_utf8(out, upper_cp(((uint32_t)(c & 0x1F) << 6) | ((unsigned char)text[i + 1] & 0x3F)));
             i += 2;
-        } else {   // 3- and 4-byte sequences (CJK, symbols): unchanged
-            const size_t n = (c & 0xF0) == 0xE0 ? 3 : (c & 0xF8) == 0xF0 ? 4 : 1;
+        }
+        else
+        { // 3- and 4-byte sequences (CJK, symbols): unchanged
+            const size_t n = (c & 0xF0) == 0xE0 ? 3 : (c & 0xF8) == 0xF0 ? 4
+                                                                         : 1;
             out.append(text, i, n);
             i += n;
         }
@@ -279,19 +313,23 @@ void cadran::Card::setFill(const std::string& key) { this->fill = key; }
 void cadran::Card::follow_rows()
 {
     bool shown = false;
-    for (brls::View* row : this->getChildren()) shown |= row->getVisibility() != brls::Visibility::GONE;
+    for (brls::View* row : this->getChildren())
+        shown |= row->getVisibility() != brls::Visibility::GONE;
     const brls::Visibility v = shown ? brls::Visibility::VISIBLE : brls::Visibility::GONE;
-    if (this->getVisibility() != v) this->setVisibility(v);
+    if (this->getVisibility() != v)
+        this->setVisibility(v);
 }
 
 void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx)
 {
-    if (height < 1) return;   // every row hidden
+    if (height < 1)
+        return; // every row hidden
     // Its rows hidden, its foot (a note) still shown: the note alone, no card.
     bool rows = false;
     for (brls::View* row : this->getChildren())
         rows |= row->getVisibility() != brls::Visibility::GONE && !dynamic_cast<brls::Label*>(row);
-    if (!rows) {
+    if (!rows)
+    {
         brls::Box::draw(vg, x, y, width, height, style, ctx);
         return;
     }
@@ -305,10 +343,13 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
     nvgStroke(vg);
     // A line between the visible rows, from the title (after the icon) to the end.
     brls::View* previous = nullptr;
-    for (brls::View* row : this->getChildren()) {
-        if (row->getVisibility() == brls::Visibility::GONE) continue;
+    for (brls::View* row : this->getChildren())
+    {
+        if (row->getVisibility() == brls::Visibility::GONE)
+            continue;
         // No line above a card's foot (a note): it belongs to the rows.
-        if (previous && !dynamic_cast<brls::Label*>(row)) {
+        if (previous && !dynamic_cast<brls::Label*>(row))
+        {
             const float inset = has_icon(previous) ? ROW_PAD_ICON + ICON_SQUARE + ICON_GAP : ROW_PAD;
             nvgBeginPath(vg);
             nvgRect(vg, x + inset, row->getY() - 0.5f, width - inset - ROW_PAD_END, 1);
@@ -334,7 +375,7 @@ cadran::Switch::Switch(brls::BooleanCell* boolean_cell)
 void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx)
 {
     const bool state = this->cell->isOn();
-    const float r = height / 2;
+    const float r    = height / 2;
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, r);
     nvgFillColor(vg, this->a(ctx->theme[state ? "cadran/teal_fill" : "cadran/track"]));
@@ -345,7 +386,8 @@ void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float h
     nvgFillColor(vg, this->a(ctx->theme["cadran/knob"]));
     nvgFill(vg);
     // Off on a light track, a hairline keeps the knob's edge.
-    if (!state) {
+    if (!state)
+    {
         nvgStrokeColor(vg, this->a(ctx->theme["cadran/knob_line"]));
         nvgStrokeWidth(vg, 1.0f);
         nvgStroke(vg);
@@ -359,31 +401,41 @@ cadran::List::List(brls::View* screen, bool sub_screen)
 {
     if (brls::ScrollingFrame* frame = find_scroll(screen))
         for (brls::View* child : frame->getChildren())
-            if (auto* column = dynamic_cast<brls::Box*>(child)) this->box = column;
-    if (!this->box) return;
-    if (sub_screen) this->box->setPadding(20, 72, 36, 72);
-    else this->box->setPadding(16, 48, 36, 32);
+            if (auto* column = dynamic_cast<brls::Box*>(child))
+                this->box = column;
+    if (!this->box)
+        return;
+    if (sub_screen)
+        this->box->setPadding(20, 72, 36, 72);
+    else
+        this->box->setPadding(16, 48, 36, 32);
 }
 
 cadran::List::List(brls::View* screen, brls::Box* column)
-    : tab(screen), box(column)
+    : tab(screen)
+    , box(column)
 {
 }
 
 void cadran::List::state(const char* id, const char* color_key)
 {
-    for (auto& [cell, view] : this->marks) {
-        if (cell != this->tab->getView(id)) continue;
+    for (auto& [cell, view] : this->marks)
+    {
+        if (cell != this->tab->getView(id))
+            continue;
         auto* mark = static_cast<kit::Mark*>(view);
-        if (color_key) mark->set(color_key);
+        if (color_key)
+            mark->set(color_key);
         mark->setVisibility(color_key ? brls::Visibility::VISIBLE : brls::Visibility::GONE);
     }
 }
 
 void cadran::List::tag(const char* id, const std::string& text, bool warn, const std::string& note)
 {
-    for (auto& [cell, pill] : this->tags) {
-        if (cell != this->tab->getView(id)) continue;
+    for (auto& [cell, pill] : this->tags)
+    {
+        if (cell != this->tab->getView(id))
+            continue;
         auto* words = static_cast<brls::Label*>(pill->getChildren()[0]);
         words->setText(text);
         words->setThemeColor("textColor", warn ? "cadran/amber" : "cadran/pill_ok_ink");
@@ -393,9 +445,10 @@ void cadran::List::tag(const char* id, const std::string& text, bool warn, const
         cell->setThemeColor("borderColor", warn && (!text.empty() || !note.empty()) ? "cadran/amber_line" : "cadran/line");
         // The note: the view right after the pill (tiles()).
         const auto& children = cell->getChildren();
-        const auto at = std::find(children.begin(), children.end(), pill);
+        const auto at        = std::find(children.begin(), children.end(), pill);
         if (at != children.end() && at + 1 != children.end())
-            if (auto* under = dynamic_cast<brls::Label*>(*(at + 1))) {
+            if (auto* under = dynamic_cast<brls::Label*>(*(at + 1)))
+            {
                 under->setText(note);
                 under->setThemeColor("textColor", warn ? "cadran/amber" : "cadran/text3");
                 under->setVisibility(note.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
@@ -406,16 +459,19 @@ void cadran::List::tag(const char* id, const std::string& text, bool warn, const
 brls::Box* cadran::List::head(const char* id) const
 {
     for (const auto& [cell, head] : this->heads)
-        if (cell == this->tab->getView(id)) return head;
+        if (cell == this->tab->getView(id))
+            return head;
     return nullptr;
 }
 
 brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const char*>>& cells, bool status)
 {
-    if (!this->box || cells.empty()) return nullptr;
+    if (!this->box || cells.empty())
+        return nullptr;
     brls::View* first = this->tab->getView(cells[0].first);
-    const int at = first ? index_in(this->box, first) : -1;
-    if (at < 0) return nullptr;
+    const int at      = first ? index_in(this->box, first) : -1;
+    if (at < 0)
+        return nullptr;
     auto* row = new brls::Box(brls::Axis::ROW);
     row->setAlignItems(brls::AlignItems::STRETCH);
     row->setMarginBottom(12);
@@ -423,9 +479,11 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
     // without its update.bin) leaves no gap behind.
     YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, 12);
     this->box->addView(row, at);
-    for (size_t i = 0; i < cells.size(); i++) {
+    for (size_t i = 0; i < cells.size(); i++)
+    {
         auto* cell = dynamic_cast<brls::DetailCell*>(this->tab->getView(cells[i].first));
-        if (!cell) continue;
+        if (!cell)
+            continue;
         move_to(cell, row);
         cell->setAxis(brls::Axis::COLUMN);
         cell->setAlignItems(brls::AlignItems::STRETCH);
@@ -436,9 +494,12 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         // text); an action tile as tall as its line (and its words, if any).
         cell->setHeight(brls::View::AUTO);
         cell->setMinHeight(status ? 128 : 0);
-        if (status) this->readings.push_back(cell);
-        if (status) cell->setPadding(20, 22, 18, 22);
-        else cell->setPadding(17, 20, 15, 20);
+        if (status)
+            this->readings.push_back(cell);
+        if (status)
+            cell->setPadding(20, 22, 18, 22);
+        else
+            cell->setPadding(17, 20, 15, 20);
         cell->setMarginRight(0);
         cell->setCornerRadius(kit::RADIUS_CARD);
         cell->setHighlightCornerRadius(kit::RADIUS_CARD);
@@ -453,12 +514,13 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         head->setMarginBottom(status ? 10 : 0);
         // A tile's ink: its icon, and an action tile's light (TileGlow).
         const size_t inks = sizeof(TILE_INKS) / sizeof(TILE_INKS[0]);
-        const char* ink = TILE_INKS[i % inks];
-        brls::View* icon = make_icon(cells[i].second, ACTION_ICON, ink);
+        const char* ink   = TILE_INKS[i % inks];
+        brls::View* icon  = make_icon(cells[i].second, ACTION_ICON, ink);
         head->addView(icon);
         cell->addView(head, 0);
         this->heads.push_back({ cell, head });
-        if (!status) {
+        if (!status)
+        {
             cell->addView(new TileGlow(cell, ink, TILE_INKS[(i + 1) % inks]), 0);
             icon->setMarginRight(ACTION_ICON_GAP);
             cell->removeView(cell->title, false);
@@ -469,7 +531,8 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         cell->title->setMarginRight(0);
         cell->title->setSingleLine(false);
         cell->title->setFontSize(status ? kit::TEXT_META : kit::TEXT_BODY);
-        if (status) cell->title->setThemeColor("textColor", "cadran/text3");
+        if (status)
+            cell->title->setThemeColor("textColor", "cadran/text3");
         cell->detail->setHorizontalAlign(brls::HorizontalAlign::LEFT);
         cell->detail->setMaxWidth(10000);
         cell->detail->setFontSize(status ? 22.0f : kit::TEXT_META);
@@ -477,13 +540,15 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         // A status tile's value is a figure, on one line; another's words
         // too (TileFit).
         cell->detail->setSingleLine(status);
-        if (!status) {
+        if (!status)
+        {
             // Under the title, from where it starts: past the icon.
             cell->detail->setMarginLeft(ACTION_ICON + ACTION_ICON_GAP);
             cell->detail->setThemeColor("textColor", "cadran/text2");
             cell->addView(new TileFit(cell, cell->title));
         }
-        if (status) {
+        if (status)
+        {
             // Its value after a mark of its state (state()), hidden until set.
             auto* value = new brls::Box(brls::Axis::ROW);
             value->setAlignItems(brls::AlignItems::CENTER);
@@ -526,40 +591,49 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
 
 void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>& icons)
 {
-    if (!this->box) return;
+    if (!this->box)
+        return;
     // Marks the column as dressed (the screens' skin leaves it alone).
     auto* mark = new brls::Box();
     mark->setId("cadran_list");
     mark->setVisibility(brls::Visibility::GONE);
     this->box->addView(mark);
-    const auto icon_of = [this, &icons](brls::View* cell) -> const char* {
+    const auto icon_of = [this, &icons](brls::View* cell) -> const char*
+    {
         for (const auto& [id, icon] : icons)
-            if (this->tab->getView(id) == cell) return icon;
+            if (this->tab->getView(id) == cell)
+                return icon;
         return nullptr;
     };
 
-    Card* card = nullptr;   // the card the next cell joins, while cells follow each other
+    Card* card                           = nullptr; // the card the next cell joins, while cells follow each other
     const std::vector<brls::View*> lines = this->box->getChildren();
-    for (brls::View* line : lines) {
-        Card* above = card;   // the card just before this line, if any
-        if (auto* header = dynamic_cast<brls::Header*>(line)) {
+    for (brls::View* line : lines)
+    {
+        Card* above = card; // the card just before this line, if any
+        if (auto* header = dynamic_cast<brls::Header*>(line))
+        {
             card = nullptr;
             this->headers.push_back(header);
             section(header);
             continue;
         }
         auto* cell = dynamic_cast<brls::DetailCell*>(line);
-        if (!cell) {
+        if (!cell)
+        {
             card = nullptr;
             // A note (a headline, larger, keeps its size).
-            if (auto* note = dynamic_cast<brls::Label*>(line); note && note->getFontSize() <= 20.5f) {
+            if (auto* note = dynamic_cast<brls::Label*>(line); note && note->getFontSize() <= 20.5f)
+            {
                 note->setFontSize(kit::TEXT_NOTE);
                 note->setMarginLeft(0);
                 note->setMarginRight(0);
-                if (margin_top(note) >= 10) note->setMarginTop(10);
+                if (margin_top(note) >= 10)
+                    note->setMarginTop(10);
                 // Right under a card it explains: the card's foot, in it,
                 // so it reads as that card's (and the next card stays apart).
-                if (above) {
+                if (above)
+                {
                     const float below = std::max(margin_bottom(note), 18.0f);
                     note->setMarginTop(2);
                     note->setMarginBottom(0);
@@ -574,8 +648,10 @@ void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>&
         // A cell set apart from the one above (a top margin, as Advanced
         // under the extra time) starts a card of its own: in the same card,
         // the margin is an empty band across it.
-        if (card && margin_top(cell) > 0) card = nullptr;
-        if (!card) {
+        if (card && margin_top(cell) > 0)
+            card = nullptr;
+        if (!card)
+        {
             card = new Card();
             card->setMarginTop(margin_top(cell));
             cell->setMarginTop(0);
@@ -585,14 +661,16 @@ void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>&
         row(cell, icon_of(cell));
     }
     for (brls::View* line : this->box->getChildren())
-        if (auto* c = dynamic_cast<Card*>(line)) c->follow_rows();
+        if (auto* c = dynamic_cast<Card*>(line))
+            c->follow_rows();
     this->sync();
     // The screen's lines rise into place one after the other, the first
     // ones only (the rest are below the fold, or come as they are): its top
     // board, its tile rows and its cards. A kicker is a label: left as it is.
     std::vector<brls::View*> rising;
     for (brls::View* line : this->box->getChildren())
-        if (dynamic_cast<brls::Box*>(line) && line->getId() != "cadran_list") rising.push_back(line);
+        if (dynamic_cast<brls::Box*>(line) && line->getId() != "cadran_list")
+            rising.push_back(line);
     motion::reveal_all(rising);
 }
 
@@ -601,10 +679,12 @@ void cadran::List::section(brls::Header* header)
     header->setLineBottom(0);
     header->setPaddingTop(0);
     header->setPaddingBottom(0);
-    header->setMarginLeft(0);   // flush with the cards, as the boards' kickers
+    header->setMarginLeft(0); // flush with the cards, as the boards' kickers
     header->setMarginBottom(10);
-    if (margin_top(header) > 0) header->setMarginTop(26);
-    if (!header->getChildren().empty()) header->getChildren()[0]->setVisibility(brls::Visibility::GONE);   // the bar
+    if (margin_top(header) > 0)
+        header->setMarginTop(26);
+    if (!header->getChildren().empty())
+        header->getChildren()[0]->setVisibility(brls::Visibility::GONE); // the bar
     // A kicker: read from across the room (its capitals: sync()).
     for (const char* part : { "brls/header/title", "brls/header/subtitle" })
         kit::set_kicker(dynamic_cast<brls::Label*>(header->getView(part)));
@@ -620,13 +700,17 @@ void cadran::List::row(brls::DetailCell* cell, const char* icon, bool alone)
     cell->setHighlightCornerRadius(kit::RADIUS_ROW);
     cell->title->setFontSize(18);
     cell->detail->setFontSize(kit::TEXT_NOTE);
-    if (icon) cell->addView(row_icon(icon), 0);
-    else cell->setPaddingLeft(ROW_PAD);
-    if (auto* toggle = dynamic_cast<brls::BooleanCell*>(cell)) {
+    if (icon)
+        cell->addView(row_icon(icon), 0);
+    else
+        cell->setPaddingLeft(ROW_PAD);
+    if (auto* toggle = dynamic_cast<brls::BooleanCell*>(cell))
+    {
         toggle->detail->setVisibility(brls::Visibility::GONE);
         toggle->addView(new Switch(toggle));
     }
-    if (alone) {
+    if (alone)
+    {
         cell->setCornerRadius(kit::RADIUS_ROW);
         cell->setThemeColor("backgroundColor", "cadran/surf");
         cell->setThemeColor("borderColor", "cadran/line");
@@ -672,20 +756,25 @@ void cadran::List::row_swatch(brls::DetailCell* cell, const CadranSwatch::Colors
 void cadran::List::recolor_icon(brls::DetailCell* cell, const char* icon, const char* color_key, const char* square_key)
 {
     auto* square = cell && !cell->getChildren().empty() ? dynamic_cast<brls::Box*>(cell->getChildren()[0]) : nullptr;
-    if (!square) return;   // a row without its icon
+    if (!square)
+        return; // a row without its icon
     square->setThemeColor("backgroundColor", square_key ? square_key : "cadran/surf2");
     for (brls::View* v : square->getChildren())
-        if (auto* glyph = dynamic_cast<CadranIcon*>(v)) {
-            if (icon) glyph->setIcon(icon);
+        if (auto* glyph = dynamic_cast<CadranIcon*>(v))
+        {
+            if (icon)
+                glyph->setIcon(icon);
             glyph->setThemeColor("color", color_key);
         }
 }
 
 brls::Box* cadran::List::rows_in(brls::Box* list)
 {
-    if (!list) return list;
+    if (!list)
+        return list;
     for (brls::View* child : list->getChildren())
-        if (auto* card = dynamic_cast<Card*>(child)) return card;
+        if (auto* card = dynamic_cast<Card*>(child))
+            return card;
     auto* card = new Card();
     list->addView(card);
     return card;
@@ -694,8 +783,9 @@ brls::Box* cadran::List::rows_in(brls::Box* list)
 cadran::Card* cadran::List::wrap(const char* id)
 {
     brls::View* line = this->box ? this->tab->getView(id) : nullptr;
-    const int at = line ? index_in(this->box, line) : -1;
-    if (at < 0) return nullptr;
+    const int at     = line ? index_in(this->box, line) : -1;
+    if (at < 0)
+        return nullptr;
     auto* card = new Card();
     card->setPadding(18, 24, 18, 24);
     this->box->addView(card, at);
@@ -711,20 +801,25 @@ cadran::Card* cadran::List::card_of(const char* id) const
 
 void cadran::List::sync()
 {
-    for (brls::Header* header : this->headers) {
+    for (brls::Header* header : this->headers)
+    {
         auto* text = dynamic_cast<brls::Label*>(header->getView("brls/header/title"));
-        if (!text) continue;
-        const std::string title = text->getFullText();
+        if (!text)
+            continue;
+        const std::string title    = text->getFullText();
         const std::string capitals = upper(title);
-        if (capitals != title) text->setText(capitals);
+        if (capitals != title)
+            text->setText(capitals);
     }
-    brls::Theme theme = brls::Application::getTheme();
+    brls::Theme theme      = brls::Application::getTheme();
     const NVGcolor neutral = theme["brls/list/listItem_value_color"];
-    for (brls::DetailCell* cell : this->readings) {
+    for (brls::DetailCell* cell : this->readings)
+    {
         // A reading that also opens something: the tile is the way in, no "›".
         const std::string value = cell->detail->getFullText();
-        const std::string bare = kit::without_chevron(value);
-        if (bare != value) cell->detail->setText(bare);
+        const std::string bare  = kit::without_chevron(value);
+        if (bare != value)
+            cell->detail->setText(bare);
         const NVGcolor c = cell->detail->getTextColor();
         if (c.r == neutral.r && c.g == neutral.g && c.b == neutral.b && c.a == neutral.a)
             cell->detail->setThemeColor("textColor", "cadran/text");

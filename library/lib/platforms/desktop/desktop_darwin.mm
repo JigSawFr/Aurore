@@ -15,55 +15,65 @@
     limitations under the License.
 */
 
-#include <string>
 #include <functional>
+#include <string>
 
 #include <AvailabilityMacros.h>
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-    #define HAS_CORE_WLAN 1
+#define HAS_CORE_WLAN 1
 #else
-    #define HAS_CORE_WLAN 0
+#define HAS_CORE_WLAN 0
 #endif
 
 #if HAS_CORE_WLAN
-    #import <CoreWLAN/CoreWLAN.h>
+#import <CoreWLAN/CoreWLAN.h>
 #endif
 
 namespace brls
 {
 
 // Interface method, fetching the current connection info.
-int darwin_wlan_quality() {
+int darwin_wlan_quality()
+{
 #if HAS_CORE_WLAN
 #ifdef __clang__
-    @autoreleasepool {
-        CWWiFiClient* Client = CWWiFiClient.sharedWiFiClient;
+    @autoreleasepool
+    {
+        CWWiFiClient* Client          = CWWiFiClient.sharedWiFiClient;
         CWInterface* currentInterface = Client.interface;
-        if ([currentInterface powerOn] == false) {
+        if ([currentInterface powerOn] == false)
+        {
             return -1;
         }
-        if ([currentInterface serviceActive] == false) {
+        if ([currentInterface serviceActive] == false)
+        {
             return 0;
         }
         int rssi = [currentInterface rssiValue];
-        if (rssi > -50) return 3;
-        if (rssi > -80) return 2;
+        if (rssi > -50)
+            return 3;
+        if (rssi > -80)
+            return 2;
         return 1;
     }
 #else
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool* pool       = [[NSAutoreleasePool alloc] init];
     CWInterface* currentInterface = [CWInterface interface];
-    if (![currentInterface ssid]) {
+    if (![currentInterface ssid])
+    {
         [pool drain];
         return 0;
     }
     NSNumber* rssiNumber = [currentInterface rssi];
-    int result = 1;
-    if (rssiNumber) {
+    int result           = 1;
+    if (rssiNumber)
+    {
         int rssi = [rssiNumber intValue];
-        if (rssi > -50) result = 3;
-        else if (rssi > -80) result = 2;
+        if (rssi > -50)
+            result = 3;
+        else if (rssi > -80)
+            result = 2;
     }
     [pool drain];
     return result;
@@ -73,32 +83,36 @@ int darwin_wlan_quality() {
 #endif
 }
 
-bool darwin_runloop(const std::function<bool()>& runLoopImpl) {
+bool darwin_runloop(const std::function<bool()>& runLoopImpl)
+{
 #ifdef __clang__
-    @autoreleasepool {
+    @autoreleasepool
+    {
         return runLoopImpl();
     }
 #else
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    bool result = runLoopImpl();
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    bool result             = runLoopImpl();
     [pool drain];
     return result;
 #endif
 }
 
-std::string darwin_locale() {
+std::string darwin_locale()
+{
 #ifdef __clang__
-    @autoreleasepool {
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        NSArray *languages = [defaults objectForKey:@"AppleLanguages"];
-        NSString *current = [languages objectAtIndex:0];
+    @autoreleasepool
+    {
+        NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+        NSArray* languages       = [defaults objectForKey:@"AppleLanguages"];
+        NSString* current        = [languages objectAtIndex:0];
         return [current UTF8String];
     }
 #else
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSArray *languages = [defaults objectForKey:@"AppleLanguages"];
-    NSString *current = [languages objectAtIndex:0];
+    NSAutoreleasePool* pool  = [[NSAutoreleasePool alloc] init];
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    NSArray* languages       = [defaults objectForKey:@"AppleLanguages"];
+    NSString* current        = [languages objectAtIndex:0];
     [pool drain];
     return [current UTF8String];
 #endif

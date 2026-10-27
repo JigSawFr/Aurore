@@ -7,9 +7,9 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <string>
 #include <vector>
+#include <borealis.hpp>
 
 class QrView : public brls::View
 {
@@ -18,10 +18,10 @@ class QrView : public brls::View
     ~QrView() override;
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
 
   private:
-    int               size = 0;    // modules per side (0: the text could not be encoded)
-    std::vector<bool> modules;     // row by row, true = dark
-    int               image = 0;   // the texture, made at the first draw (0: none yet)
+    int size = 0; // modules per side (0: the text could not be encoded)
+    std::vector<bool> modules; // row by row, true = dark
+    int image = 0; // the texture, made at the first draw (0: none yet)
 };

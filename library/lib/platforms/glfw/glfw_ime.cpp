@@ -18,6 +18,10 @@ limitations under the License.
 
 #include <libretro-common/encodings/utf.h>
 
+#include <codecvt>
+#include <cstring>
+#include <iostream>
+#include <locale>
 #include <borealis/core/box.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/thread.hpp>
@@ -26,10 +30,6 @@ limitations under the License.
 #include <borealis/views/dialog.hpp>
 #include <borealis/views/edit_text_dialog.hpp>
 #include <borealis/views/label.hpp>
-#include <codecvt>
-#include <cstring>
-#include <iostream>
-#include <locale>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 

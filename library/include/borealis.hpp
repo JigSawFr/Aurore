@@ -54,6 +54,7 @@
 #include <borealis/views/context_menu.hpp>
 #include <borealis/views/dialog.hpp>
 #include <borealis/views/dropdown.hpp>
+#include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/header.hpp>
 #include <borealis/views/icon_button.hpp>
 #include <borealis/views/image.hpp>
@@ -63,7 +64,6 @@
 #include <borealis/views/recycler.hpp>
 #include <borealis/views/recycling_grid.hpp>
 #include <borealis/views/scrolling_frame.hpp>
-#include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/sidebar.hpp>
 #include <borealis/views/slider.hpp>
 #include <borealis/views/tab_frame.hpp>

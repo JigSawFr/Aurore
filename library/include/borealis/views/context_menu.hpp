@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <borealis/core/box.hpp>
-#include <borealis/views/label.hpp>
 #include <functional>
 #include <string>
+#include <borealis/core/box.hpp>
+#include <borealis/views/label.hpp>
 
 namespace brls
 {

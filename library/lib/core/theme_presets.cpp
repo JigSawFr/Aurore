@@ -689,67 +689,67 @@ cadran/avatar3 = #ff9ec7
 
 namespace
 {
-// A range of days, both ends included, each year; it may run over the new
-// year (from December to January). A month of 0 counts from the Lunar New
-// Year instead: the days are offsets from it.
-struct Season
-{
-    const char* id;
-    int fromMonth, fromDay;
-    int toMonth, toDay;
-};
-
-constexpr int LUNAR = 0;
-
-// The first range the date falls in wins: the feasts first, then the
-// seasons (the northern hemisphere's) around them, which cover every day.
-constexpr Season SEASONS[] = {
-    { "new-year", 12, 29, 1, 3 },
-    { "christmas", 12, 1, 12, 28 },
-    { "valentine", 2, 10, 2, 15 },
-    { "lunar-new-year", LUNAR, -1, LUNAR, 14 }, // its eve to the Lantern Festival
-    { "halloween", 10, 17, 11, 2 },
-    { "spring", 3, 20, 6, 20 },
-    { "summer", 6, 21, 9, 22 },
-    { "autumn", 9, 23, 11, 30 },
-    { "winter", 12, 1, 3, 19 },
-};
-
-// The Lunar New Year's day (Gregorian month and day), from 2025; a year
-// out of the table has none
-constexpr int LUNAR_FIRST_YEAR      = 2025;
-constexpr int LUNAR_NEW_YEAR[][2] = {
-    { 1, 29 }, { 2, 17 }, { 2, 6 }, { 1, 26 }, { 2, 13 }, { 2, 3 }, // 2025 to 2030
-    { 1, 23 }, { 2, 11 }, { 1, 31 }, { 2, 19 }, { 2, 8 }, { 1, 28 }, // 2031 to 2036
-};
-
-// Days since 1970-01-01 of a Gregorian date (month 1 to 12)
-int daysFromCivil(int year, int month, int day)
-{
-    year -= month <= 2;
-    const int era = (year >= 0 ? year : year - 399) / 400;
-    const int yoe = year - era * 400;
-    const int doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1;
-    const int doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
-    return era * 146097 + doe - 719468;
-}
-
-bool inSeason(const Season& season, int year, int month, int day)
-{
-    if (season.fromMonth == LUNAR)
+    // A range of days, both ends included, each year; it may run over the new
+    // year (from December to January). A month of 0 counts from the Lunar New
+    // Year instead: the days are offsets from it.
+    struct Season
     {
-        int index = year - LUNAR_FIRST_YEAR;
-        if (index < 0 || index >= (int)std::size(LUNAR_NEW_YEAR))
-            return false;
-        int days  = daysFromCivil(year, month, day);
-        int feast = daysFromCivil(year, LUNAR_NEW_YEAR[index][0], LUNAR_NEW_YEAR[index][1]);
-        return days >= feast + season.fromDay && days <= feast + season.toDay;
+        const char* id;
+        int fromMonth, fromDay;
+        int toMonth, toDay;
+    };
+
+    constexpr int LUNAR = 0;
+
+    // The first range the date falls in wins: the feasts first, then the
+    // seasons (the northern hemisphere's) around them, which cover every day.
+    constexpr Season SEASONS[] = {
+        { "new-year", 12, 29, 1, 3 },
+        { "christmas", 12, 1, 12, 28 },
+        { "valentine", 2, 10, 2, 15 },
+        { "lunar-new-year", LUNAR, -1, LUNAR, 14 }, // its eve to the Lantern Festival
+        { "halloween", 10, 17, 11, 2 },
+        { "spring", 3, 20, 6, 20 },
+        { "summer", 6, 21, 9, 22 },
+        { "autumn", 9, 23, 11, 30 },
+        { "winter", 12, 1, 3, 19 },
+    };
+
+    // The Lunar New Year's day (Gregorian month and day), from 2025; a year
+    // out of the table has none
+    constexpr int LUNAR_FIRST_YEAR    = 2025;
+    constexpr int LUNAR_NEW_YEAR[][2] = {
+        { 1, 29 }, { 2, 17 }, { 2, 6 }, { 1, 26 }, { 2, 13 }, { 2, 3 }, // 2025 to 2030
+        { 1, 23 }, { 2, 11 }, { 1, 31 }, { 2, 19 }, { 2, 8 }, { 1, 28 }, // 2031 to 2036
+    };
+
+    // Days since 1970-01-01 of a Gregorian date (month 1 to 12)
+    int daysFromCivil(int year, int month, int day)
+    {
+        year -= month <= 2;
+        const int era = (year >= 0 ? year : year - 399) / 400;
+        const int yoe = year - era * 400;
+        const int doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1;
+        const int doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+        return era * 146097 + doe - 719468;
     }
-    int date = month * 100 + day;
-    int from = season.fromMonth * 100 + season.fromDay;
-    int to   = season.toMonth * 100 + season.toDay;
-    return from <= to ? date >= from && date <= to : date >= from || date <= to;
-}
+
+    bool inSeason(const Season& season, int year, int month, int day)
+    {
+        if (season.fromMonth == LUNAR)
+        {
+            int index = year - LUNAR_FIRST_YEAR;
+            if (index < 0 || index >= (int)std::size(LUNAR_NEW_YEAR))
+                return false;
+            int days  = daysFromCivil(year, month, day);
+            int feast = daysFromCivil(year, LUNAR_NEW_YEAR[index][0], LUNAR_NEW_YEAR[index][1]);
+            return days >= feast + season.fromDay && days <= feast + season.toDay;
+        }
+        int date = month * 100 + day;
+        int from = season.fromMonth * 100 + season.fromDay;
+        int to   = season.toMonth * 100 + season.toDay;
+        return from <= to ? date >= from && date <= to : date >= from || date <= to;
+    }
 }
 
 const char* seasonalThemeId(std::time_t now)

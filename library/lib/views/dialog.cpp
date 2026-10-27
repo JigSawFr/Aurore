@@ -144,11 +144,11 @@ Dialog::Dialog(Box* contentView)
     container->addView(contentView);
 
     appletFrame->registerAction(
-        "hints/back"_i18n, BUTTON_B, [this](View* view) {
+        "hints/back"_i18n, BUTTON_B, [this](View* view)
+        {
             if (cancelable)
                 this->close(this->closeCallback);
-            return cancelable;
-        },
+            return cancelable; },
         false, false, SOUND_BACK);
 
     // A tap on the backdrop, outside the dialog, cancels it as B does
@@ -166,7 +166,7 @@ Dialog::Dialog(std::string text)
 {
     Style style = Application::getStyle();
 
-    Label* label = new Label();
+    Label* label    = new Label();
     this->textLabel = label;
     label->setText(text);
     label->setFontSize(style["brls/dialog/fontSize"]);
@@ -184,11 +184,11 @@ Dialog::Dialog(std::string text)
     container->addView(box);
 
     appletFrame->registerAction(
-        "hints/back"_i18n, BUTTON_B, [this](View* view) {
+        "hints/back"_i18n, BUTTON_B, [this](View* view)
+        {
             if (cancelable)
                 this->close(this->closeCallback);
-            return cancelable;
-        },
+            return cancelable; },
         false, false, SOUND_BACK);
 
     // A tap on the backdrop, outside the dialog, cancels it as B does
@@ -245,10 +245,10 @@ void Dialog::rebuildButtons()
 
         button1->setVisibility(Visibility::VISIBLE);
         button1->setText(buttons[0]->label);
-        button1->registerClickAction([this](View* view) {
+        button1->registerClickAction([this](View* view)
+            {
             buttonClick(buttons[0]);
-            return true;
-        });
+            return true; });
     }
 
     if (this->buttons.size() > 1)
@@ -256,10 +256,10 @@ void Dialog::rebuildButtons()
         button2separator->setVisibility(Visibility::VISIBLE);
         button2->setVisibility(Visibility::VISIBLE);
         button2->setText(buttons[1]->label);
-        button2->registerClickAction([this](View* view) {
+        button2->registerClickAction([this](View* view)
+            {
             buttonClick(buttons[1]);
-            return true;
-        });
+            return true; });
     }
 
     if (this->buttons.size() > 2)
@@ -267,10 +267,10 @@ void Dialog::rebuildButtons()
         button3separator->setVisibility(Visibility::VISIBLE);
         button3->setVisibility(Visibility::VISIBLE);
         button3->setText(buttons[2]->label);
-        button3->registerClickAction([this](View* view) {
+        button3->registerClickAction([this](View* view)
+            {
             buttonClick(buttons[2]);
-            return true;
-        });
+            return true; });
     }
 }
 
@@ -283,10 +283,10 @@ void Dialog::buttonClick(DialogButton* button)
         return;
     }
 
-    dismiss([button] {
+    dismiss([button]
+        {
         if (button->cb)
-            button->cb();
-    });
+            button->cb(); });
 }
 
 void Dialog::setText(const std::string& text)
@@ -306,7 +306,7 @@ void Dialog::setButtonText(size_t index, const std::string& label)
         return;
 
     this->buttons[index]->label = label;
-    Button* buttons[] = { this->button1, this->button2, this->button3 };
+    Button* buttons[]           = { this->button1, this->button2, this->button3 };
     buttons[index]->setText(label);
 }
 
@@ -322,7 +322,8 @@ AppletFrame* Dialog::getAppletFrame()
 
 Dialog::~Dialog()
 {
-    for(auto& i: this->buttons){
+    for (auto& i : this->buttons)
+    {
         delete i;
     }
 }

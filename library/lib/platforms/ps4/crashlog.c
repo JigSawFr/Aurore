@@ -1,31 +1,32 @@
 // Thanks to: https://gist.github.com/john-tornblom/943dc2e995f0fa0c9d2dc2f9d985daeb
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <unistd.h>
 #include <signal.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <orbis/libkernel.h>
 
-#define MAX_MESSAGE_SIZE    0x1000
-#define MAX_STACK_FRAMES    32
+#define MAX_MESSAGE_SIZE 0x1000
+#define MAX_STACK_FRAMES 32
 
 /**
  * A callframe captures the stack and program pointer of a
  * frame in the call path.
  **/
-typedef struct  {
-    void *sp;
-    void *pc;
+typedef struct
+{
+    void* sp;
+    void* pc;
 } callframe_t;
-
 
 /**
  * Log a backtrace to /dev/klog
  **/
 static void
-backtrace(const char* reason) {
+backtrace(const char* reason)
+{
     char addr2line[MAX_STACK_FRAMES * 20];
     callframe_t frames[MAX_STACK_FRAMES];
     OrbisKernelVirtualQueryInfo info;
@@ -41,17 +42,18 @@ backtrace(const char* reason) {
 
     strncat(buf, "<118>[Crashlog]: Backtrace:\n", MAX_MESSAGE_SIZE);
     sceKernelBacktraceSelf(frames, sizeof frames, &nb_frames, 0);
-    for(unsigned int i=0; i<nb_frames; i++) {
+    for (unsigned int i = 0; i < nb_frames; i++)
+    {
         memset(&info, 0, sizeof info);
         sceKernelVirtualQuery(frames[i].pc, 0, &info, sizeof info);
 
         snprintf(temp, sizeof temp,
-                 "<118>[Crashlog]:   #%02d %32s: 0x%lx\n",
-                 i + 1, info.name, frames[i].pc - info.unk01 - 1);
+            "<118>[Crashlog]:   #%02d %32s: 0x%lx\n",
+            i + 1, info.name, frames[i].pc - info.unk01 - 1);
         strncat(buf, temp, MAX_MESSAGE_SIZE);
 
         snprintf(temp, sizeof temp,
-                 "0x%lx ", frames[i].pc - info.unk01 - 1);
+            "0x%lx ", frames[i].pc - info.unk01 - 1);
         strncat(addr2line, temp, sizeof addr2line - 1);
     }
 
@@ -59,8 +61,8 @@ backtrace(const char* reason) {
     strncat(buf, addr2line, MAX_MESSAGE_SIZE);
     strncat(buf, "\n", MAX_MESSAGE_SIZE);
 
-    buf[MAX_MESSAGE_SIZE+1] = '\n';
-    buf[MAX_MESSAGE_SIZE+2] = '\0';
+    buf[MAX_MESSAGE_SIZE + 1] = '\n';
+    buf[MAX_MESSAGE_SIZE + 2] = '\0';
 
     sceKernelDebugOutText(0, buf);
 }
@@ -69,7 +71,8 @@ backtrace(const char* reason) {
  * Log fatal signals to kernel log.
  **/
 static void
-fatal_signal(int sig) {
+fatal_signal(int sig)
+{
     char reason[64];
 
     sprintf(reason, "Received the fatal POSIX signal %d", sig);
@@ -77,15 +80,15 @@ fatal_signal(int sig) {
     _exit(1);
 }
 
-
 /**
  * Register handlers for fatal signals.
  **/
 static void __attribute__((constructor))
-init_signal(void) {
-    signal(5, fatal_signal);  // SIGTRAP
-    signal(6, fatal_signal);  // SIGABRT
-    signal(8, fatal_signal);  // SIGFPE
+init_signal(void)
+{
+    signal(5, fatal_signal); // SIGTRAP
+    signal(6, fatal_signal); // SIGABRT
+    signal(8, fatal_signal); // SIGFPE
     signal(10, fatal_signal); // SIGBUS
     signal(11, fatal_signal); // SIGSEGV
 }

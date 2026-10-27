@@ -102,7 +102,7 @@ struct Run
     Metrics metrics() const
     {
         Metrics m;
-        double n = frames.empty() ? 1 : (double)frames.size();
+        double n  = frames.empty() ? 1 : (double)frames.size();
         auto mean = [&](auto field)
         {
             double sum = 0;
@@ -120,19 +120,32 @@ struct Run
             std::sort(values.begin(), values.end());
             return values[std::min(values.size() - 1, (size_t)(values.size() * 0.95))];
         };
-        m["drawn_per_frame"]        = mean([](auto& f) { return f.drawn ? 1 : 0; });
-        m["layouts_per_frame"]      = mean([](auto& f) { return f.layouts; });
-        m["views_laid_out_per_frame"] = mean([](auto& f) { return f.viewsLaidOut; });
-        m["allocations_per_frame"]  = mean([](auto& f) { return f.allocations; });
-        m["us_input"]               = mean([](auto& f) { return f.input; });
-        m["us_update"]              = mean([](auto& f) { return f.update; });
-        m["us_layout"]              = mean([](auto& f) { return f.layout; });
-        m["us_draw"]                = mean([](auto& f) { return f.draw; });
-        m["us_flush"]               = mean([](auto& f) { return f.flush; });
-        m["draw_calls_per_frame"]   = mean([](auto& f) { return f.drawCalls; });
-        m["us_swap"]                = mean([](auto& f) { return f.swap; });
-        m["us_total"]               = mean([](auto& f) { return f.total; });
-        m["us_total_p95"]           = p95([](auto& f) { return f.total; });
+        m["drawn_per_frame"]          = mean([](auto& f)
+            { return f.drawn ? 1 : 0; });
+        m["layouts_per_frame"]        = mean([](auto& f)
+            { return f.layouts; });
+        m["views_laid_out_per_frame"] = mean([](auto& f)
+            { return f.viewsLaidOut; });
+        m["allocations_per_frame"]    = mean([](auto& f)
+            { return f.allocations; });
+        m["us_input"]                 = mean([](auto& f)
+            { return f.input; });
+        m["us_update"]                = mean([](auto& f)
+            { return f.update; });
+        m["us_layout"]                = mean([](auto& f)
+            { return f.layout; });
+        m["us_draw"]                  = mean([](auto& f)
+            { return f.draw; });
+        m["us_flush"]                 = mean([](auto& f)
+            { return f.flush; });
+        m["draw_calls_per_frame"]     = mean([](auto& f)
+            { return f.drawCalls; });
+        m["us_swap"]                  = mean([](auto& f)
+            { return f.swap; });
+        m["us_total"]                 = mean([](auto& f)
+            { return f.total; });
+        m["us_total_p95"]             = p95([](auto& f)
+            { return f.total; });
         return m;
     }
 };
@@ -199,9 +212,9 @@ std::map<std::string, Metrics> readBaseline(const std::string& path)
             if (quote == std::string::npos || quote > close)
                 break;
             readString(&metric);
-            size_t colon = text.find(':', pos);
+            size_t colon             = text.find(':', pos);
             result[scenario][metric] = std::strtod(text.c_str() + colon + 1, nullptr);
-            pos = colon + 1;
+            pos                      = colon + 1;
         }
         pos = close + 1;
     }
@@ -238,7 +251,8 @@ int main(int argc, char** argv)
     for (int i = 1; i < argc; i++)
     {
         std::string arg = argv[i];
-        auto next       = [&]() { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
+        auto next       = [&]()
+        { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
         if (arg == "--frames")
             frames = std::max(10, std::atoi(next().c_str()));
         else if (arg == "--json")
@@ -264,7 +278,8 @@ int main(int argc, char** argv)
     {
         brls::test::Harness h;
         demo::registerViews();
-        brls::Profiler::setAllocationCounter([]() { return allocations.load(std::memory_order_relaxed); });
+        brls::Profiler::setAllocationCounter([]()
+            { return allocations.load(std::memory_order_relaxed); });
         h.push(new MainActivity());
         h.settle();
         brls::Profiler::setEnabled(true);
@@ -274,7 +289,7 @@ int main(int argc, char** argv)
 
         // Down and up through the rail: focus, highlight and scroll moving
         results["navigate"] = measure(h, frames * 2, [&](int i)
-                                  {
+            {
             int phase = i % 40;
             brls::ControllerButton button = (i / 40) % 6 < 3 ? brls::BUTTON_DOWN : brls::BUTTON_UP;
             if (phase == 0)

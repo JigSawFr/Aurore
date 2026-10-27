@@ -19,6 +19,9 @@
 // allocated the first time one of them is asked for.
 
 #include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <borealis/core/activity.hpp>
 #include <borealis/core/application.hpp>
 #include <borealis/core/box.hpp>
@@ -27,9 +30,6 @@
 #include <borealis/core/observable.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
-#include <cmath>
-#include <cstdio>
-#include <cstring>
 
 namespace brls
 {
@@ -59,7 +59,8 @@ StyleValue StyleValue::mix(const StyleValue& from, const StyleValue& to, float t
     if (from.type == Type::COLOR)
     {
         // An overshooting easing (backOut) must not leave the colour range.
-        auto channel = [t](float a, float b) { return std::clamp(a + (b - a) * t, 0.0f, 1.0f); };
+        auto channel = [t](float a, float b)
+        { return std::clamp(a + (b - a) * t, 0.0f, 1.0f); };
         return StyleValue::of(nvgRGBAf(channel(from.color.r, to.color.r), channel(from.color.g, to.color.g),
             channel(from.color.b, to.color.b), channel(from.color.a, to.color.a)));
     }
@@ -227,7 +228,7 @@ bool View::getStyleProperty(const std::string& name, StyleValue* value)
 
 bool View::setStyleProperty(const std::string& name, const StyleValue& value)
 {
-    bool color = value.type == StyleValue::Type::COLOR;
+    bool color  = value.type == StyleValue::Type::COLOR;
     bool number = value.type == StyleValue::Type::NUMBER;
     if (name == "backgroundColor" && color)
         this->setBackgroundColor(value.color);
@@ -307,7 +308,7 @@ bool View::setStateStyle(StyleState state, const std::string& property, const st
     {
         if (style.state == state && style.property == property)
         {
-            style.value = value;
+            style.value        = value;
             extras.stylesDirty = true;
             return true;
         }
@@ -371,10 +372,10 @@ void View::notePress(bool pressed, bool releaseLater)
     Animatable& release = this->extras->pressRelease;
     release.reset(0.0f);
     release.addStep(1.0f, Application::getStyle()["brls/animations/highlight"]);
-    release.setEndCallback([this](bool finished) {
+    release.setEndCallback([this](bool finished)
+        {
         if (finished)
-            this->setStyleState(StyleState::PRESSED, false);
-    });
+            this->setStyleState(StyleState::PRESSED, false); });
     release.start();
 }
 
@@ -500,8 +501,8 @@ static bool parseDuration(const std::string& text, int32_t* duration)
 {
     try
     {
-        size_t used = 0;
-        float value = std::stof(text, &used);
+        size_t used      = 0;
+        float value      = std::stof(text, &used);
         std::string unit = text.substr(used);
         if (unit == "ms")
             *duration = (int32_t)std::lround(value);
@@ -521,7 +522,8 @@ static std::vector<std::string> splitList(const std::string& text, const char* s
 {
     std::vector<std::string> parts;
     std::string current;
-    auto flush = [&] {
+    auto flush = [&]
+    {
         size_t start = current.find_first_not_of(" \t\n\r");
         size_t end   = current.find_last_not_of(" \t\n\r");
         if (start != std::string::npos)
@@ -560,7 +562,7 @@ bool View::setTransition(const std::string& spec)
 
     if (transitions.empty() && !this->extras)
         return true;
-    Extras& extras = this->getExtras();
+    Extras& extras     = this->getExtras();
     extras.transitions = std::move(transitions);
     return true;
 }
@@ -602,7 +604,8 @@ bool View::startTransition(const char* name, const StyleValue& to)
     run->from = from;
     run->to   = to;
 
-    auto apply = [this, run](const StyleValue& value) {
+    auto apply = [this, run](const StyleValue& value)
+    {
         this->extras->applyingTransition = true;
         this->setStyleProperty(run->property, value);
         this->extras->applyingTransition = false;
@@ -610,13 +613,12 @@ bool View::startTransition(const char* name, const StyleValue& to)
 
     run->progress.reset(0.0f);
     run->progress.addStep(1.0f, spec->duration, spec->easing);
-    run->progress.setTickCallback([run, apply] {
-        apply(StyleValue::mix(run->from, run->to, run->progress.getValue()));
-    });
-    run->progress.setEndCallback([run, apply](bool finished) {
+    run->progress.setTickCallback([run, apply]
+        { apply(StyleValue::mix(run->from, run->to, run->progress.getValue())); });
+    run->progress.setEndCallback([run, apply](bool finished)
+        {
         if (finished)
-            apply(run->to);
-    });
+            apply(run->to); });
     run->progress.start();
     return true;
 }
@@ -667,10 +669,10 @@ bool View::bind(const std::string& spec)
 
 bool View::bindOne(const std::string& property, const std::string& path, Activity* activity)
 {
-    size_t dot              = path.find('.');
-    std::string modelName   = path.substr(0, dot);
-    std::string key         = path.substr(dot + 1);
-    const DataModel* model  = activity ? activity->getModel(modelName) : nullptr;
+    size_t dot             = path.find('.');
+    std::string modelName  = path.substr(0, dot);
+    std::string key        = path.substr(dot + 1);
+    const DataModel* model = activity ? activity->getModel(modelName) : nullptr;
     if (!model)
         model = Application::getModel(modelName);
     if (!model)
@@ -691,19 +693,22 @@ bool View::bindOne(const std::string& property, const std::string& path, Activit
                 Logger::error("bind: {} has no text", this->describe());
                 return true;
             }
-            this->keepSubscription(observable->subscribe([this](const std::string& value) { this->setBoundText(value); }));
+            this->keepSubscription(observable->subscribe([this](const std::string& value)
+                { this->setBoundText(value); }));
             return true;
         }
         if (auto* observable = model->get<int>(key))
         {
             this->setBoundText(std::to_string(observable->get()));
-            this->keepSubscription(observable->subscribe([this](const int& value) { this->setBoundText(std::to_string(value)); }));
+            this->keepSubscription(observable->subscribe([this](const int& value)
+                { this->setBoundText(std::to_string(value)); }));
             return true;
         }
         if (auto* observable = model->get<float>(key))
         {
             this->setBoundText(formatNumber(observable->get()));
-            this->keepSubscription(observable->subscribe([this](const float& value) { this->setBoundText(formatNumber(value)); }));
+            this->keepSubscription(observable->subscribe([this](const float& value)
+                { this->setBoundText(formatNumber(value)); }));
             return true;
         }
     }
@@ -711,7 +716,8 @@ bool View::bindOne(const std::string& property, const std::string& path, Activit
     {
         if (auto* observable = model->get<bool>(key))
         {
-            auto apply = [this](const bool& visible) { this->setVisibility(visible ? Visibility::VISIBLE : Visibility::GONE); };
+            auto apply = [this](const bool& visible)
+            { this->setVisibility(visible ? Visibility::VISIBLE : Visibility::GONE); };
             apply(observable->get());
             this->keepSubscription(observable->subscribe(apply));
             return true;
@@ -726,7 +732,8 @@ bool View::bindOne(const std::string& property, const std::string& path, Activit
             {
                 if (auto* observable = model->get<NVGcolor>(key))
                 {
-                    auto apply = [this, property](const NVGcolor& color) { this->setStyleProperty(property, StyleValue::of(color)); };
+                    auto apply = [this, property](const NVGcolor& color)
+                    { this->setStyleProperty(property, StyleValue::of(color)); };
                     apply(observable->get());
                     this->keepSubscription(observable->subscribe(apply));
                     return true;
@@ -734,7 +741,8 @@ bool View::bindOne(const std::string& property, const std::string& path, Activit
             }
             else if (auto* observable = model->get<float>(key))
             {
-                auto apply = [this, property](const float& number) { this->setStyleProperty(property, StyleValue::of(number)); };
+                auto apply = [this, property](const float& number)
+                { this->setStyleProperty(property, StyleValue::of(number)); };
                 apply(observable->get());
                 this->keepSubscription(observable->subscribe(apply));
                 return true;
@@ -876,7 +884,8 @@ bool View::setThemeColor(const std::string& property, const std::string& key)
         {
             auto& colors = *this->themeColors;
             colors.erase(std::remove_if(colors.begin(), colors.end(),
-                             [&property](const ThemeColor& color) { return color.property == property; }),
+                             [&property](const ThemeColor& color)
+                             { return color.property == property; }),
                 colors.end());
         }
         return true;
@@ -929,7 +938,7 @@ void View::onThemeChanged()
     if (!this->themeColors)
         return;
 
-    Theme theme = Application::getTheme();
+    Theme theme  = Application::getTheme();
     auto& colors = *this->themeColors;
     for (auto it = colors.begin(); it != colors.end();)
     {

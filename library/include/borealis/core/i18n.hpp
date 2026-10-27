@@ -18,8 +18,8 @@
 
 #include <fmt/format.h>
 
-#include <borealis/core/logger.hpp>
 #include <string>
+#include <borealis/core/logger.hpp>
 
 namespace brls
 {
@@ -46,9 +46,9 @@ const std::string LOCALE_ES_419  = "es-419";
 /// custom locale
 // Rename ja-RYU to RYU, as there may be a bug in PkgTool that not allow dirs with same prefix exist.
 #ifdef PS4
-const std::string LOCALE_RYU  = "RYU";
+const std::string LOCALE_RYU = "RYU";
 #else
-const std::string LOCALE_RYU  = "ja-RYU";
+const std::string LOCALE_RYU = "ja-RYU";
 #endif
 const std::string LOCALE_AUTO = "auto";
 

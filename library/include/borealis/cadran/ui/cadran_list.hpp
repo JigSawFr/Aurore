@@ -15,11 +15,11 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
-#include <borealis/cadran/view/cadran_icon.hpp>
 #include <string>
 #include <utility>
 #include <vector>
+#include <borealis.hpp>
+#include <borealis/cadran/view/cadran_icon.hpp>
 
 namespace cadran
 {
@@ -41,7 +41,7 @@ class Card : public brls::Box
     // margin leaves no gap between the cards around it.
     void follow_rows();
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
 
   private:
     std::string fill = "cadran/surf", border = "cadran/line";
@@ -54,7 +54,7 @@ class Switch : public brls::View
   public:
     explicit Switch(brls::BooleanCell* cell);
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
 
   private:
     brls::BooleanCell* cell;
@@ -127,18 +127,18 @@ class List
     // A row's icon (row()'s, at its start) changed: another `icon` (nullptr:
     // the same), in `color_key`, on `square_key` (nullptr: the usual square).
     static void recolor_icon(brls::DetailCell* cell, const char* icon, const char* color_key,
-                         const char* square_key = nullptr);
+        const char* square_key = nullptr);
     // The box a screen's rows go in: a card in `list` (made the first time).
     // The screen clears and fills that one.
     static brls::Box* rows_in(brls::Box* list);
 
   private:
     brls::View* tab;
-    brls::Box*  box = nullptr;
+    brls::Box* box = nullptr;
     std::vector<brls::Header*> headers;
-    std::vector<brls::DetailCell*> readings;   // the status tiles
-    std::vector<std::pair<brls::DetailCell*, brls::Box*>>  heads;   // every tile's head (head())
-    std::vector<std::pair<brls::DetailCell*, brls::View*>> marks;   // each one's state (a kit::Mark)
-    std::vector<std::pair<brls::DetailCell*, brls::Box*>>  tags;    // each one's pill (tag())
+    std::vector<brls::DetailCell*> readings; // the status tiles
+    std::vector<std::pair<brls::DetailCell*, brls::Box*>> heads; // every tile's head (head())
+    std::vector<std::pair<brls::DetailCell*, brls::View*>> marks; // each one's state (a kit::Mark)
+    std::vector<std::pair<brls::DetailCell*, brls::Box*>> tags; // each one's pill (tag())
 };
-}   // namespace cadran
+} // namespace cadran

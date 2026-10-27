@@ -6,11 +6,11 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
+#include <borealis.hpp>
 
 #include <borealis/cadran/ui/cadran_kit.hpp>
 
@@ -21,15 +21,15 @@ namespace cadran
 constexpr float DIALOG_BUTTONS = 80;
 constexpr float DIALOG_MARGIN  = 24;
 // A picker's card: the radius of its corners.
-constexpr float PICKER_CORNER = 24;   // kit::RADIUS_MODAL
+constexpr float PICKER_CORNER = 24; // kit::RADIUS_MODAL
 
 enum class Emphasis
 {
-    NONE,      // OK in teal, any other button plain
-    PRIMARY,   // the last button is the confirmation: teal
-    DANGER,    // the same, in coral
-    FAILURE,   // something asked did not happen: the coral warning before the
-               // title, the buttons as NONE's
+    NONE, // OK in teal, any other button plain
+    PRIMARY, // the last button is the confirmation: teal
+    DANGER, // the same, in coral
+    FAILURE, // something asked did not happen: the coral warning before the
+             // title, the buttons as NONE's
 };
 
 // A paragraph of the app's that dialog_body() draws as a note, with `icon`
@@ -71,11 +71,11 @@ brls::Box* wait_body(const std::string& text);
 // button) goes on `box`.
 struct Progress
 {
-    brls::Box*   box     = nullptr;
+    brls::Box* box       = nullptr;
     brls::Image* image   = nullptr;
     brls::Label* heading = nullptr;
     brls::Label* title   = nullptr;
-    kit::Bar*    bar     = nullptr;
+    kit::Bar* bar        = nullptr;
     brls::Label* percent = nullptr;
     brls::Label* detail  = nullptr;
 
@@ -96,10 +96,10 @@ struct TimeButton
     std::function<void()> action;
 };
 void prompt_time(const std::string& header, std::vector<int> times, int initial, TimeButton off, TimeButton other,
-                 std::function<void(int)> on_value);
+    std::function<void(int)> on_value);
 
 // A toast's icon: a check for something done, a warning for something not
 // done.
 brls::View* toast_icon(bool done);
 
-}   // namespace cadran
+} // namespace cadran

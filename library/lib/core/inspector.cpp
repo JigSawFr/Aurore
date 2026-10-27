@@ -4,6 +4,11 @@
 #include <yoga/Yoga.h>
 
 #include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <typeinfo>
 #include <borealis/core/application.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/core/frame_context.hpp>
@@ -11,11 +16,6 @@
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/profiler.hpp>
 #include <borealis/views/label.hpp>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <typeinfo>
 
 #ifndef _MSC_VER
 #include <cxxabi.h>
@@ -65,12 +65,12 @@ namespace inspector_detail
     const NVGcolor SELECTION = nvgRGBA(255, 176, 64, 50);
 
     std::vector<Row> rows;
-    View* selected  = nullptr;
-    int scroll      = 0;
-    bool panelLeft  = false;
-    bool keyHeld    = false;
-    bool comboHeld  = false;
-    bool prev[_BUTTON_MAX] = {};
+    View* selected               = nullptr;
+    int scroll                   = 0;
+    bool panelLeft               = false;
+    bool keyHeld                 = false;
+    bool comboHeld               = false;
+    bool prev[_BUTTON_MAX]       = {};
     Time nextRepeat[_BUTTON_MAX] = {};
 
     Sample history[HISTORY];
@@ -82,10 +82,10 @@ namespace inspector_detail
 
     std::string typeName(const std::type_info& type)
     {
-        const char* name = type.name();
+        const char* name   = type.name();
         std::string result = name;
 #ifndef _MSC_VER
-        int status = 0;
+        int status      = 0;
         char* demangled = abi::__cxa_demangle(name, nullptr, nullptr, &status);
         if (status == 0 && demangled)
             result = demangled;
@@ -331,8 +331,8 @@ namespace inspector_detail
             sum.layout /= count;
             sum.flush /= count;
             sum.present /= count;
-            sum.layouts = (int)std::lround((float)sum.layouts / count);
-            sum.draws   = (int)std::lround((float)sum.draws / count);
+            sum.layouts   = (int)std::lround((float)sum.layouts / count);
+            sum.draws     = (int)std::lround((float)sum.draws / count);
             sum.triangles = (int)std::lround((float)sum.triangles / count);
         }
         return sum;
@@ -372,7 +372,7 @@ namespace inspector_detail
         for (int i = 0; i < historyCount; i++)
         {
             const Sample& sample = history[(historyEnd - historyCount + i + HISTORY) % HISTORY];
-            float bh = std::min(gh, sample.frame / 33.3f * gh);
+            float bh             = std::min(gh, sample.frame / 33.3f * gh);
             nvgBeginPath(vg);
             nvgRect(vg, x + (HISTORY - historyCount + i) * bar, y + gh - bh, std::max(1.0f, bar - 1), bh);
             nvgFillColor(vg, sample.frame > 17.5f ? nvgRGB(240, 110, 90) : nvgRGB(110, 200, 140));
@@ -421,9 +421,9 @@ namespace inspector_detail
                 nvgFillColor(vg, SELECTION);
                 nvgFill(vg);
             }
-            bool focused = row.view == Application::getCurrentFocus();
-            bool chain   = !focused && isInFocusChain(row.view);
-            bool shown   = row.view->getVisibility() == Visibility::VISIBLE;
+            bool focused   = row.view == Application::getCurrentFocus();
+            bool chain     = !focused && isInFocusChain(row.view);
+            bool shown     = row.view->getVisibility() == Visibility::VISIBLE;
             NVGcolor color = focused ? FOCUS : (shown ? TEXT : DIM);
 
             float ix = x + std::min(row.depth, 20) * 10.0f;
@@ -532,7 +532,7 @@ namespace inspector_detail
         else
         {
             const char* names[] = { "none", "sidebar", "backdrop", "colour", "vertical gradient", "horizontal gradient" };
-            sx = text(vg, sx, y, TEXT, names[(int)view->getBackground()]);
+            sx                  = text(vg, sx, y, TEXT, names[(int)view->getBackground()]);
         }
         if (view->getBorderThickness() > 0)
         {
@@ -615,7 +615,7 @@ void Inspector::setMode(Mode newMode)
     if (newMode != Mode::CLOSED && !Inspector::enabled)
         return;
 
-    Mode old       = Inspector::mode;
+    Mode old        = Inspector::mode;
     Inspector::mode = newMode;
     if (newMode == Mode::CLOSED)
     {
@@ -635,10 +635,10 @@ void Inspector::setMode(Mode newMode)
 
 void Inspector::processInput(InputManager* input, ControllerState* state)
 {
-    bool key   = input->getKeyboardKeyState(BRLS_KBD_KEY_F12);
-    bool combo = state->buttons[BUTTON_LSB] && state->buttons[BUTTON_RSB];
+    bool key    = input->getKeyboardKeyState(BRLS_KBD_KEY_F12);
+    bool combo  = state->buttons[BUTTON_LSB] && state->buttons[BUTTON_RSB];
     bool toggle = (key && !keyHeld) || (combo && !comboHeld);
-    keyHeld = key;
+    keyHeld     = key;
 
     // The combo's buttons are the inspector's until both are let go
     if (combo)
@@ -652,7 +652,8 @@ void Inspector::processInput(InputManager* input, ControllerState* state)
     }
 
     if (toggle)
-        setMode(mode == Mode::CLOSED ? Mode::LIVE : mode == Mode::LIVE ? Mode::BROWSE : Mode::CLOSED);
+        setMode(mode == Mode::CLOSED ? Mode::LIVE : mode == Mode::LIVE ? Mode::BROWSE
+                                                                       : Mode::CLOSED);
 
     if (mode != Mode::BROWSE)
         return;
@@ -662,7 +663,8 @@ void Inspector::processInput(InputManager* input, ControllerState* state)
         selected = Application::getCurrentFocus();
 
     Time now     = getCPUTimeUsec();
-    auto pressed = [&](int button) { return state->buttons[button] && !prev[button]; };
+    auto pressed = [&](int button)
+    { return state->buttons[button] && !prev[button]; };
     auto repeats = [&](int button)
     {
         if (!state->buttons[button])
@@ -747,7 +749,7 @@ void Inspector::beginFrame()
 
 void Inspector::draw(FrameContext* ctx)
 {
-    NVGcontext* vg = ctx->vg;
+    NVGcontext* vg       = ctx->vg;
     Inspector::recording = false;
 
     buildRows();

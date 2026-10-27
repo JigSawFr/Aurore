@@ -21,4 +21,4 @@ bool larger();
 void apply();
 // apply() before the first view, then follows the dock. Once, at start-up.
 void install();
-}   // namespace text_size
+} // namespace text_size

@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <borealis/core/audio.hpp>
-#include <borealis/core/input.hpp>
 #include <functional>
 #include <string>
+#include <borealis/core/audio.hpp>
+#include <borealis/core/input.hpp>
 
 namespace brls
 {
@@ -35,7 +35,7 @@ typedef int BrlsKeyCode;
 struct BrlsKeyCombination
 {
     BrlsKeyboardScancode code;
-    int mod{};
+    int mod {};
 
     explicit BrlsKeyCombination(const int key)
     {
@@ -48,21 +48,29 @@ struct BrlsKeyCombination
         mod  = static_cast<BrlsKeyboardModifiers>((key >> 16) & 0xFFFF);
     }
 
-    BrlsKeyCombination(const BrlsKeyboardScancode code) : code(code), mod(BRLS_KBD_MODIFIER_NONE) {}
+    BrlsKeyCombination(const BrlsKeyboardScancode code)
+        : code(code)
+        , mod(BRLS_KBD_MODIFIER_NONE)
+    {
+    }
 
-    BrlsKeyCombination(const BrlsKeyboardScancode code, const int mod) : code(code), mod(mod) {}
+    BrlsKeyCombination(const BrlsKeyboardScancode code, const int mod)
+        : code(code)
+        , mod(mod)
+    {
+    }
 
     operator int() const
     {
         return mod << 16 | code;
     }
 
-    bool operator ==(const int a) const
+    bool operator==(const int a) const
     {
         return (mod << 16 | code) == a;
     }
 
-    bool operator !=(const int a) const
+    bool operator!=(const int a) const
     {
         return (mod << 16 | code) != a;
     }
@@ -70,12 +78,15 @@ struct BrlsKeyCombination
 
 class BrlsKeyState
 {
-public:
-    explicit BrlsKeyState(const BrlsKeyCombination keyComb): key(keyComb) {}
+  public:
+    explicit BrlsKeyState(const BrlsKeyCombination keyComb)
+        : key(keyComb)
+    {
+    }
 
     BrlsKeyCombination key;
-    bool pressed{};
-    Time repeatingStop{};
+    bool pressed {};
+    Time repeatingStop {};
 
     [[nodiscard]] int getModifiers() const
     {
@@ -99,7 +110,7 @@ enum ActionType
 
 class Action
 {
-public:
+  public:
     Action(const int button, const ActionIdentifier identifier, const std::string& hintText,
         const bool available, const bool hidden, const bool allowRepeating, const Sound sound, const ActionListener& actionListener)
     {
@@ -186,24 +197,24 @@ public:
         return this->actionListener;
     }
 
-protected:
-    ActionType type{};
-    int button{};
-    ActionIdentifier identifier{};
-    std::string hintText{};
-    bool available{};
-    bool hidden{};
-    bool allowRepeating{};
-    Sound sound{};
-    ActionListener actionListener{};
+  protected:
+    ActionType type {};
+    int button {};
+    ActionIdentifier identifier {};
+    std::string hintText {};
+    bool available {};
+    bool hidden {};
+    bool allowRepeating {};
+    Sound sound {};
+    ActionListener actionListener {};
 };
 
 class KeyboardAction final : public Action
 {
-public:
+  public:
     KeyboardAction(const BrlsKeyCode button, const ActionIdentifier identifier, const std::string& hintText,
-        const bool available, const bool hidden, const bool allowRepeating, const Sound sound, const ActionListener& actionListener):
-        Action(button, identifier, hintText, available, hidden, allowRepeating, sound, actionListener)
+        const bool available, const bool hidden, const bool allowRepeating, const Sound sound, const ActionListener& actionListener)
+        : Action(button, identifier, hintText, available, hidden, allowRepeating, sound, actionListener)
     {
         this->type = ACTION_KEYBOARD;
     }
@@ -211,10 +222,10 @@ public:
 
 class GamepadAction final : public Action
 {
-public:
+  public:
     GamepadAction(const ControllerButton button, const ActionIdentifier identifier, const std::string& hintText,
-        const bool available, const bool hidden, const bool allowRepeating, const Sound sound, const ActionListener& actionListener):
-        Action(button, identifier, hintText, available, hidden, allowRepeating, sound, actionListener)
+        const bool available, const bool hidden, const bool allowRepeating, const Sound sound, const ActionListener& actionListener)
+        : Action(button, identifier, hintText, available, hidden, allowRepeating, sound, actionListener)
     {
         this->type = ACTION_GAMEPAD;
     }

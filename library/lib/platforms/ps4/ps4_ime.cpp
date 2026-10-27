@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include <borealis/extern/libretro-common/retro_timers.h>
 #include <orbis/UserService.h>
 #include <orbis/_types/ime_dialog.h>
+#include <borealis/extern/libretro-common/retro_timers.h>
 
 #include <borealis/core/application.hpp>
 #include <borealis/core/logger.hpp>
@@ -32,8 +32,8 @@ extern "C"
 namespace brls
 {
 
-#define SCE_IME_DIALOG_MAX_TITLE_LENGTH	(128)
-#define SCE_IME_DIALOG_MAX_TEXT_LENGTH	(512)
+#define SCE_IME_DIALOG_MAX_TITLE_LENGTH (128)
+#define SCE_IME_DIALOG_MAX_TEXT_LENGTH (512)
 
 static uint16_t input_u16[SCE_IME_DIALOG_MAX_TEXT_LENGTH + 1];
 static uint16_t title_u16[SCE_IME_DIALOG_MAX_TITLE_LENGTH];
@@ -194,7 +194,7 @@ bool Ps4ImeManager::openForNumber(std::function<void(long)> f, std::string heade
 
     InitializeImeDialog(headerText, initialText, subText, ORBIS_TYPE_NUMBER, maxStringLength);
     ShowImeDialog([f](const std::string& text)
-    {
+        {
         if(text.empty()) return ;
         try
         {
@@ -203,8 +203,7 @@ bool Ps4ImeManager::openForNumber(std::function<void(long)> f, std::string heade
         catch (const std::exception& e)
         {
             Logger::error("Could not parse input, did you enter a valid integer?");
-        }
-    });
+        } });
     return true;
 }
 

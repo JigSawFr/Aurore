@@ -141,7 +141,6 @@ SwitchInputManager::~SwitchInputManager()
     hidStopSixAxisSensor(this->m_six_axis_sensor_handle[1]);
     hidStopSixAxisSensor(this->m_six_axis_sensor_handle[2]);
     hidStopSixAxisSensor(this->m_six_axis_sensor_handle[3]);
-
 }
 
 void SwitchInputManager::clearVibration(int controller)
@@ -187,10 +186,10 @@ void SwitchInputManager::clearVibration(int controller)
 
 void SwitchInputManager::updateUnifiedControllerState(ControllerState* state)
 {
-    for (size_t i         = 0; i < _BUTTON_MAX; i++)
+    for (size_t i = 0; i < _BUTTON_MAX; i++)
         state->buttons[i] = false;
 
-    for (size_t i      = 0; i < _AXES_MAX; i++)
+    for (size_t i = 0; i < _AXES_MAX; i++)
         state->axes[i] = 0;
 
     auto connected = getControllersConnectedCount();
@@ -432,7 +431,7 @@ void SwitchInputManager::handleKeyboard()
                 m_hid_keyboard_state[i]            = is_pressed;
                 const BrlsKeyboardScancode brlsKey = m_hid_brls_map[i];
 
-                KeyState keyState{};
+                KeyState keyState {};
                 keyState.key     = brlsKey;
                 keyState.pressed = is_pressed;
 
@@ -477,23 +476,22 @@ void SwitchInputManager::handleControllerSensors()
             hidGetSixAxisSensorStates(this->m_six_axis_sensor_handle[3], &sixaxis, 1);
     }
 
-    auto accelState = SensorEvent{
+    auto accelState = SensorEvent {
         0,
         SensorEventType::ACCEL,
         { -sixaxis.acceleration.x,
-          -sixaxis.acceleration.z,
-          sixaxis.acceleration.y
-        },
+            -sixaxis.acceleration.z,
+            sixaxis.acceleration.y },
         0
     };
-    auto gyroState = SensorEvent{
+    auto gyroState = SensorEvent {
         0,
         SensorEventType::GYRO,
         { static_cast<float>(sixaxis.angular_velocity.x * 2.0f * M_PI),
-          static_cast<float>(sixaxis.angular_velocity.z * 2.0f * M_PI),
-          static_cast<float>(-sixaxis.angular_velocity.y * 2.0f * M_PI)
-        },
-        0 };
+            static_cast<float>(sixaxis.angular_velocity.z * 2.0f * M_PI),
+            static_cast<float>(-sixaxis.angular_velocity.y * 2.0f * M_PI) },
+        0
+    };
     getControllerSensorStateChanged()->fire(accelState);
     getControllerSensorStateChanged()->fire(gyroState);
     Application::setActiveEvent(true);

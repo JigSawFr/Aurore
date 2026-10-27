@@ -16,12 +16,12 @@ limitations under the License.
 
 #include <psp2/ime_dialog.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/psv/psv_ime.hpp>
 #include <iostream>
 #include <string>
 #include <utility>
+#include <borealis/core/application.hpp>
+#include <borealis/core/logger.hpp>
+#include <borealis/platforms/psv/psv_ime.hpp>
 
 namespace brls
 {
@@ -167,14 +167,14 @@ class PsvImeView : public View
         {
 
             utf16_to_utf8(ime_buffer, utf8_buffer);
-            text = std::string{ (const char*)utf8_buffer };
+            text = std::string { (const char*)utf8_buffer };
         }
 
         sceImeDialogTerm();
-        Application::popActivity(TransitionAnimation::NONE, [this, text](){
+        Application::popActivity(TransitionAnimation::NONE, [this, text]()
+            {
             if (!text.empty() && callback)
-                callback(text);
-        });
+                callback(text); });
         Application::unblockInputs();
         running = false;
     }
@@ -219,7 +219,8 @@ bool PsvImeManager::openForNumber(std::function<void(long)> f, std::string heade
     bool ret;
     auto ime = new PsvImeView();
     ime->setTextFieldType(SCE_IME_TYPE_NUMBER);
-    ime->setCallback([f](const std::string& text) {
+    ime->setCallback([f](const std::string& text)
+        {
         if(text.empty()) return ;
         try
         {
@@ -235,8 +236,7 @@ bool PsvImeManager::openForNumber(std::function<void(long)> f, std::string heade
         catch (const std::exception& e)
         {
             Logger::error("Unexpected error occurred: {}", e.what());
-        }
-    });
+        } });
     ime->setHeaderText(headerText);
     ime->setInitialText(initialText);
     ime->setMaxStringLength(maxStringLength);

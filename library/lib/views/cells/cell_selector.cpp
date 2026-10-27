@@ -25,14 +25,14 @@ SelectorCell::SelectorCell()
 {
     detail->setThemeColor("textColor", "brls/list/listItem_value_color");
 
-    this->registerClickAction([this](View* view) {
+    this->registerClickAction([this](View* view)
+        {
         Dropdown* dropdown = new Dropdown(
             this->title->getFullText(), data, [this](int selected) {
                 this->setSelection(selected, false);
             }, selection, this->dismissCb);
         Application::pushActivity(new Activity(dropdown));
-        return true;
-    });
+        return true; });
 }
 
 void SelectorCell::init(std::string title, std::vector<std::string> data, int selected, Event<int>::Callback callback, Event<int>::Callback dismissCb)
