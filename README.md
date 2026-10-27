@@ -283,7 +283,7 @@ The default branch is `main`; upstream's is `wiliwili`. Picks from upstream and 
 
 ## 📜 License and credits
 
-borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`LICENSE.GPL`](LICENSE.GPL)), and so is an app built with it. [`NOTICE`](NOTICE) says which is which, and the licences of what is bundled (QR Code generator, Twemoji, Sora). Maintained by [JigSawFr](https://github.com/JigSawFr).
+borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`LICENSE.GPL`](LICENSE.GPL)), and so is an app built with it. [`NOTICE`](NOTICE) says which is which, and [`resources/THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md) lists what is bundled (the libraries in `library/lib/extern`, Inter, PromptFont, Sora, Material Icons, Twemoji) with its licence. Maintained by [JigSawFr](https://github.com/JigSawFr).
 
 <details>
 <summary>Credits</summary>

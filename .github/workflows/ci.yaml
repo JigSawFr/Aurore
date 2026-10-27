@@ -15,6 +15,9 @@ jobs:
           # Ubuntu 24.04 ships clang-format 18, the version .clang-format is written for
           git ls-files '*.c' '*.cc' '*.cpp' '*.h' '*.hpp' '*.m' '*.mm' ':!:**/extern/**' \
             | xargs clang-format-18 --dry-run --Werror
+      - name: Third-party notices
+        # Each vendored component and font listed, the versions they say
+        run: python3 tools/check_notices.py
   ios:
     runs-on: macos-latest
     steps:
