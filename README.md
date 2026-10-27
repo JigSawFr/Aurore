@@ -216,6 +216,8 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `USE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
+5. Pick a version: the submodule can follow a release tag (`vX.Y.Z`), and [`CHANGELOG.md`](CHANGELOG.md) says what each one changes. Before 1.0 a minor version may break the API. In code, `AURORE_VERSION` and `AURORE_VERSION_AT_LEAST(0, 2, 0)` come with `borealis.hpp`; an installed Aurore answers `find_package(Aurore 0.1)`.
+
 > [!TIP]
 > Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.
 
