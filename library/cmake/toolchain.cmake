@@ -172,6 +172,17 @@ function(program_target target source)
     endif ()
 endfunction()
 
+# Links an app without the functions and data of the library it does not use
+# (the library is built with -ffunction-sections -fdata-sections). Linux and
+# macOS; the consoles' toolchains do it themselves.
+function(aurore_app_link_options target)
+    if (APPLE)
+        target_link_options(${target} PRIVATE -Wl,-dead_strip)
+    elseif (NOT WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_link_options(${target} PRIVATE -Wl,--gc-sections)
+    endif ()
+endfunction()
+
 function(ios_bundle iosStoryBoard assets plist name version)
     set(IOS_CODE_SIGN_IDENTITY "" CACHE STRING "The code sign identity to use when building the IPA.")
     set(IOS_GUI_IDENTIFIER "" CACHE STRING "The package name")

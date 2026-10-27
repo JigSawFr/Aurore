@@ -89,9 +89,15 @@ endif()
 
 # yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
 add_subdirectory(${BOREALIS_PATH}/lib/extern/yoga/yoga EXCLUDE_FROM_ALL)
-target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
-# C++20 library parts Yoga 3 needs that some toolchains' libraries lack
-target_compile_options(yogacore PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/yoga_std_compat.h)
+# Its headers' installed place, relative to the prefix (yoga's own is absolute)
+set_property(TARGET yogacore PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+        $<BUILD_INTERFACE:${BOREALIS_PATH}/lib/extern/yoga>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/yoga>)
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
+    # C++20 library parts Yoga 3 needs that some toolchains' libraries lack
+    target_compile_options(yogacore PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/yoga_std_compat.h)
+endif ()
 
 # opencc
 if (BRLS_USE_OPENCC)
@@ -251,7 +257,7 @@ elseif (PLATFORM_PSV)
                         SceShaccCg_stub
                 )
         endif ()
-        file(GLOB_RECURSE PSV_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/psv/*.cpp")
+        file(GLOB_RECURSE PSV_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/psv/*.cpp")
         list(APPEND BOREALIS_SRC ${PSV_PLATFORM_SRC})
     else()
         if (USE_SYSTEM_SDL2)
@@ -267,7 +273,7 @@ elseif (PLATFORM_PSV)
                 libIMGEGL_stub_weak
                 libGLESv2_stub_weak)
         # Using SDL implementation instead
-        file(GLOB_RECURSE SDL_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/sdl/*.cpp")
+        file(GLOB_RECURSE SDL_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/sdl/*.cpp")
         list(APPEND BOREALIS_SRC ${SDL_PLATFORM_SRC})
         list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/psv/psv_platform.cpp)
     endif ()
@@ -280,7 +286,7 @@ elseif(PLATFORM_PS4)
             ${BOREALIS_PATH}/lib/platforms/sdl
             ${BOREALIS_PATH}/lib/platforms/desktop
             ${BOREALIS_PATH}/lib/extern/nanovg/ps4)
-    file(GLOB_RECURSE PS4_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/ps4/*.cpp")
+    file(GLOB_RECURSE PS4_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/ps4/*.cpp")
     list(APPEND BOREALIS_SRC ${PS4_PLATFORM_SRC})
     list(APPEND BOREALIS_INCLUDE /opt/OpenOrbis-PS4-Toolchain/include)
     list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SceNetCtl SceImeDialog SceCommonDialog)
@@ -319,7 +325,7 @@ elseif(PLATFORM_IOS OR PLATFORM_TVOS)
         list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ TVOS)
     endif()
 elseif(PLATFORM_SWITCH)
-    file(GLOB_RECURSE SWITCH_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/switch/*.cpp")
+    file(GLOB_RECURSE SWITCH_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/switch/*.cpp")
     list(APPEND BOREALIS_SRC ${SWITCH_PLATFORM_SRC})
     list(APPEND BRLS_PUBLIC_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>)
     list(APPEND BRLS_PUBLIC_DEFINITIONS SWITCH __SWITCH__ STBI_NO_THREAD_LOCALS)
@@ -349,10 +355,7 @@ endif ()
 # aurore c/cpp source
 list(APPEND BOREALIS_SOURCE
         ${BOREALIS_PATH}/lib/core
-        ${BOREALIS_PATH}/lib/core/touch
         ${BOREALIS_PATH}/lib/views
-        ${BOREALIS_PATH}/lib/views/cells
-        ${BOREALIS_PATH}/lib/views/widgets
         ${BOREALIS_PATH}/lib/extern/glad
         ${BOREALIS_PATH}/lib/extern/libretro-common/compat
         ${BOREALIS_PATH}/lib/extern/libretro-common/encodings
@@ -400,7 +403,7 @@ if (USE_FRIBIDI)
     message(STATUS "aurore: labels reorder right-to-left text with FriBidi")
 endif ()
 if (PLATFORM_SWITCH AND BOREALIS_USE_DEKO3D)
-    file(GLOB_RECURSE NANOVG_PLATFORM_SRC ${BOREALIS_PATH}/lib/extern/nanovg/*.cpp)
+    file(GLOB_RECURSE NANOVG_PLATFORM_SRC CONFIGURE_DEPENDS ${BOREALIS_PATH}/lib/extern/nanovg/*.cpp)
     list(APPEND BOREALIS_SRC ${NANOVG_PLATFORM_SRC})
 
     # nanovg's deko3d shaders, compiled and built into the library: an app
@@ -434,14 +437,15 @@ if (PLATFORM_SWITCH AND BOREALIS_USE_DEKO3D)
     file(WRITE "${DKSH_OUT}/dk_shaders.h" "${DKSH_HEADER}")
     set(BOREALIS_DKSH_INCLUDE "${DKSH_OUT}")
 endif ()
-message(STATUS "BOREALIS_SOURCE: ${BOREALIS_SOURCE}")
 
+# Every .c and .cpp under these directories: CONFIGURE_DEPENDS has the build
+# run CMake again when one is added or removed
 foreach (lib ${BOREALIS_SOURCE})
-    file(GLOB_RECURSE TEMP_SRC "${lib}/*.cpp" "${lib}/*.c")
+    file(GLOB_RECURSE TEMP_SRC CONFIGURE_DEPENDS "${lib}/*.cpp" "${lib}/*.c")
     list(APPEND BOREALIS_SRC ${TEMP_SRC})
 endforeach (lib)
 
-# aurore 图形 driver
+# The graphics driver
 set(BOREALIS_DRIVER BOREALIS_USE_OPENGL)
 if (BOREALIS_USE_METAL)
     set(BOREALIS_DRIVER BOREALIS_USE_METAL)
@@ -515,17 +519,13 @@ target_compile_definitions(aurore
         ${BRLS_PUBLIC_DEFINITIONS}
         PRIVATE
         ${BRLS_PRIVATE_DEFINITIONS})
-# Public: apps rely on them for --gc-sections to drop what they do not use
-target_compile_options(aurore PUBLIC
-        -ffunction-sections
-        -fdata-sections
-        ${BRLS_PUBLIC_OPTIONS})
-if (PLATFORM_DESKTOP)
+target_compile_options(aurore PUBLIC ${BRLS_PUBLIC_OPTIONS})
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # A section per function and per variable: an app linked with
+    # aurore_app_link_options() (toolchain.cmake) drops the ones it does not use
+    target_compile_options(aurore PRIVATE -ffunction-sections -fdata-sections)
+    # The same warnings on every platform; never errors
     target_compile_options(aurore PRIVATE -Wall)
-endif ()
-
-if (AURORE_INSTALL)
-    include(${BOREALIS_PATH}/cmake/install.cmake)
 endif ()
 
 # Test harness: a headless platform and brls::test::Harness (include/borealis/test/,

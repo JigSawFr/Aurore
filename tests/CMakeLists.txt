@@ -1,9 +1,9 @@
 # The demo's views, without its main(): what the tests, the bench and
 # aurore-preview show
-file(GLOB_RECURSE DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/*.cpp)
-list(REMOVE_ITEM DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/main.cpp)
+file(GLOB_RECURSE DEMO_VIEWS_SRC CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/demo/src/*.cpp)
+list(REMOVE_ITEM DEMO_VIEWS_SRC ${PROJECT_SOURCE_DIR}/demo/src/main.cpp)
 add_library(aurore_demo_views STATIC ${DEMO_VIEWS_SRC})
-target_include_directories(aurore_demo_views PUBLIC ${CMAKE_SOURCE_DIR}/demo/include ${CMAKE_SOURCE_DIR}/demo)
+target_include_directories(aurore_demo_views PUBLIC ${PROJECT_SOURCE_DIR}/demo/include ${PROJECT_SOURCE_DIR}/demo)
 target_link_libraries(aurore_demo_views PUBLIC Aurore::aurore)
 
 # Test cases over the demo (ctest runs each in a process of its own)
@@ -14,7 +14,7 @@ brls_add_tests(aurore_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/references)
 # Pictures too large are refused before they are decoded
 add_executable(aurore_image_limits_tests image_limits_tests.cpp)
 target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
-target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_image_limits_tests)
 
 # The main loop's cost on the demo (Profiler), checked against a baseline
