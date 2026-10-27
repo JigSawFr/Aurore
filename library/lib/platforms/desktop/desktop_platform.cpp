@@ -17,6 +17,7 @@
 
 #include <strings.h>
 
+#include <cctype>
 #include <memory>
 #include <sstream>
 #include <borealis/core/i18n.hpp>
@@ -584,8 +585,18 @@ DesktopPlatform::DesktopPlatform()
     // Locale
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO)
     {
+        // A locale's name as it is ("zh-Hant", an app's own), else read as a
+        // system's ("fr_FR.UTF-8"): never a path
         char* langEnv = getenv("BOREALIS_LANG");
-        this->locale  = langEnv ? std::string(langEnv) : LOCALE_DEFAULT;
+        this->locale  = LOCALE_DEFAULT;
+        if (langEnv)
+        {
+            std::string lang = langEnv;
+            bool name        = !lang.empty() && lang.size() <= 32;
+            for (char c : lang)
+                name = name && (std::isalnum((unsigned char)c) || c == '-');
+            this->locale = name ? lang : localeFromSystem(lang);
+        }
     }
     else
     {
