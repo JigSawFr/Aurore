@@ -1,0 +1,18 @@
+# Weekly updates of the pinned actions (SHA and version comment together) and of the Gradle wrapper
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: [ "*" ]
+    commit-message:
+      prefix: ci
+  - package-ecosystem: gradle
+    directory: /android-project
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: build
