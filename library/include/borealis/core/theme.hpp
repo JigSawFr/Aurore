@@ -308,14 +308,14 @@ class Theme
     static ThemePictures getPictures(ThemeVariant variant);
 
     /**
-     * The icons a theme may draw as pictures (icon.<name> = file.png): any
+     * The icons a theme may draw as pictures (`icon.<name> = file.png`): any
      * other name is a warning. Cadran adds its own (CadranIcon).
      */
     static void addIconNames(const std::vector<std::string>& names);
 
     /**
      * Declares an image slot: a picture of the app's that a theme may
-     * replace (image.<key> = file.png), "playguard/loading/art". `fallback`
+     * replace (`image.<key> = file.png`), "playguard/loading/art". `fallback`
      * is the app's own picture ("@res/img/art.png", a file; "" for none),
      * `maxSide` the largest side it is made at (0: 1920 x 1080). Before the
      * theme file is loaded: a theme naming a slot not declared is warned
