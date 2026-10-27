@@ -201,6 +201,14 @@ class Harness
     // The first label shown with exactly this text (nullptr: none), to tap
     View* findText(const std::string& text);
 
+    // Accessibility
+
+    // The views shown that take the focus themselves (not passing it on)
+    // with nothing to tell them apart: no accessibility label nor value
+    // (a role at most), as View::describe(). What the focus announcer was
+    // given last: Application::getLastAnnouncement().
+    std::vector<std::string> silentFocusables();
+
     // Pictures
 
     // The last frame drawn (a frame is drawn first if none was)

@@ -106,7 +106,10 @@ RadioCell::RadioCell()
 
 void RadioCell::setSelected(bool selected)
 {
+    bool changed   = this->selected != selected;
     this->selected = selected;
+    if (changed && selected)
+        this->announceAccessibilityValue();
     this->checkbox->setVisibility(selected ? Visibility::VISIBLE : Visibility::GONE);
     this->title->setThemeColor("textColor", selected ? "brls/list/listItem_value_color" : "brls/text");
 }
