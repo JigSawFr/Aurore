@@ -781,6 +781,79 @@ BRLS_TEST(theme_background_switches_back_and_forth)
     BRLS_CHECK(!brls::Application::hasThemeBackground());
 }
 
+// ---------------------------------------------------------------------------
+// Decorations: backdrops, strips, particles
+// ---------------------------------------------------------------------------
+
+BRLS_TEST(theme_decor_keys_are_read_and_inherited)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_decor_test");
+    themes.picture("garland.png", 200, 30, 40, 128, 16);
+    themes.picture("frost.png", 220, 230, 240);
+    themes.picture("outside.png", 1, 2, 3);
+    const std::string base = themes.write("base/theme.theme",
+        "name = Base\ninherit = dark\ndecor.top = garland.png\ndecor.top_fit = tile\ndecor.top_height = 24\nbackdrop.sidebar = frost.png\n"
+        "backdrop.sidebar_opacity = 0.5\nparticles = snow\nparticles_density = medium\nparticles_speed = 0.5\n"
+        "particles_color = #ffffff, rgba(200, 220, 255, 0.8) # a comment\n"
+        "[colors]\nbrls/backdrop = rgba(0, 0, 0, 0.8) # a comment\n[dark]\nparticles_color = #ffffff, #ddeeff, #c0d0e0\n"
+        "[light]\nparticles = petals\nbackdrop.dialog = frost.png\nbackdrop.dialog_fit = center\n");
+    themes.picture("base/garland.png", 200, 30, 40, 128, 16);
+    themes.picture("base/frost.png", 220, 230, 240);
+    const std::string child = themes.write("base/child.theme",
+        "inherit = theme.theme\nparticles_layer = front\n[dark]\ndecor.top = none\nparticles_density = high\n");
+    const std::string wrong = themes.write("base/wrong.theme",
+        "decor.top = ../outside.png\nbackdrop.header = /etc/passwd\nbackdrop.nowhere = frost.png\nparticles = rain\n"
+        "particles_density = lots\nparticles_speed = 9\nparticles_layer = middle\nparticles_color = #12\n"
+        "decor.top_height = -3\nbackdrop.header_height = 20\nbackdrop.dialog_opacity = 2\ndecor.side = frost.png\n");
+    const std::string plain = themes.write("plain.theme", "name = Plain\naccent = #3ddc97\n");
+
+    brls::ThemeInfo info = brls::Theme::inspect(base);
+    BRLS_CHECK(info.ok() && info.warnings.empty());
+    const brls::ThemePicture& top = info.darkDecor.picture(brls::ThemeArea::TOP);
+    BRLS_CHECK(top.image.find("base/garland.png") != std::string::npos);
+    BRLS_CHECK(top.fit == brls::BackgroundFit::TILE);
+    BRLS_CHECK_EQ(top.height, 24.0f);
+    BRLS_CHECK_EQ(info.darkDecor.picture(brls::ThemeArea::SIDEBAR).opacity, 0.5f);
+    BRLS_CHECK(!info.darkDecor.picture(brls::ThemeArea::DIALOG).hasImage());
+    BRLS_CHECK(info.lightDecor.picture(brls::ThemeArea::DIALOG).fit == brls::BackgroundFit::CENTER);
+    BRLS_CHECK(info.darkDecor.particles.kind == brls::ParticleKind::SNOW);
+    BRLS_CHECK(info.lightDecor.particles.kind == brls::ParticleKind::PETALS); // its own variant's line
+    BRLS_CHECK_EQ(info.darkDecor.particles.density, brls::ThemeParticles::MEDIUM);
+    BRLS_CHECK_EQ(info.darkDecor.particles.speed, 0.5f);
+    BRLS_CHECK_EQ(info.darkDecor.particles.colors.size(), (size_t)3); // its own variant's
+    BRLS_CHECK_EQ(info.lightDecor.particles.colors.size(), (size_t)2);
+    BRLS_CHECK(std::fabs(info.lightDecor.particles.colors[1].a - 0.8f) < 0.01f);
+    BRLS_CHECK(info.darkDecor.particles.layer == brls::ParticleLayer::BACK);
+
+    // Inherited, and taken away
+    info = brls::Theme::inspect(child);
+    BRLS_CHECK(info.ok());
+    BRLS_CHECK(!info.darkDecor.picture(brls::ThemeArea::TOP).hasImage());
+    BRLS_CHECK(info.lightDecor.picture(brls::ThemeArea::TOP).hasImage());
+    BRLS_CHECK(info.lightDecor.picture(brls::ThemeArea::SIDEBAR).hasImage());
+    BRLS_CHECK_EQ(info.darkDecor.particles.density, brls::ThemeParticles::HIGH);
+    BRLS_CHECK_EQ(info.lightDecor.particles.density, brls::ThemeParticles::MEDIUM);
+    BRLS_CHECK(info.lightDecor.particles.layer == brls::ParticleLayer::FRONT);
+
+    // Every wrong line an error, none of them a decoration; out of the
+    // folder refused as the background's
+    info = brls::Theme::inspect(wrong);
+    BRLS_CHECK_EQ(info.errors.size(), (size_t)12);
+    BRLS_CHECK(hasErrorWith(info, "goes out of the theme's folder"));
+    BRLS_CHECK(hasErrorWith(info, "an absolute path is not allowed"));
+    BRLS_CHECK(!info.darkDecor.hasPictures() && !info.darkDecor.particles.enabled());
+
+    // None by default
+    info = brls::Theme::inspect(plain);
+    BRLS_CHECK(!info.darkDecor.hasPictures() && !info.lightDecor.hasPictures());
+    BRLS_CHECK(info.darkDecor.particles.kind == brls::ParticleKind::NONE);
+
+    // A picture that is not there
+    BRLS_CHECK(hasErrorWith(brls::Theme::inspect(themes.write("base/missing.theme", "backdrop.header = nowhere.png\n")),
+        "backdrop.header: cannot read"));
+}
+
 BRLS_TEST(images_compare_with_tolerance)
 {
     brls::test::Image a;

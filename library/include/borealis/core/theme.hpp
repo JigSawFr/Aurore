@@ -87,6 +87,88 @@ struct ThemeBackground
     bool hasImage() const { return !this->image.empty(); }
 };
 
+// ---------------------------------------------------------------------------
+// Decorations (docs/themes.md, Decorations): pictures over the surfaces of
+// a few areas, strips along the screen's edges, particles
+// ---------------------------------------------------------------------------
+
+// What a decoration picture is drawn in (View::setThemeArea)
+enum class ThemeArea
+{
+    NONE,
+    HEADER,  // backdrop.header: a screen's header, its whole width
+    SIDEBAR, // backdrop.sidebar: the sidebar (Cadran's rail)
+    DIALOG,  // backdrop.dialog: dialogs, dropdowns, Cadran's sheets
+    TOP,     // decor.top: a strip along the top edge of the screen
+    BOTTOM,  // decor.bottom: along its bottom edge
+};
+constexpr int THEME_AREA_COUNT = 5; // HEADER to BOTTOM
+
+// A picture of the decorations, as a theme file sets it
+struct ThemePicture
+{
+    std::string image; // its path (Theme::resolveAsset), "" without one
+    BackgroundFit fit = BackgroundFit::COVER;
+    float opacity     = 1.0f; // 0 to 1
+    // decor.top_height, decor.bottom_height: the strip's height in layout
+    // units; 0: the picture's at the screen's width
+    float height = 0.0f;
+
+    bool hasImage() const { return !this->image.empty(); }
+};
+
+enum class ParticleKind
+{
+    NONE,
+    SNOW,
+    LEAVES,
+    PETALS,
+    EMBERS,
+    CONFETTI,
+    SPARKLES,
+    HEARTS,
+    BUBBLES,
+};
+
+// particles_layer: behind the screens (under every view) or in front of
+// them, fainter
+enum class ParticleLayer
+{
+    BACK,
+    FRONT,
+};
+
+struct ThemeParticles
+{
+    static constexpr float LOW = 0.3f, MEDIUM = 0.6f, HIGH = 1.0f;
+    static constexpr int MAX_COLORS = 5;
+
+    ParticleKind kind = ParticleKind::NONE;
+    float density     = LOW;  // 0 to 1, of ThemeDecorations::MAX_PARTICLES
+    float speed       = 1.0f; // 0.25 to 4
+    ParticleLayer layer = ParticleLayer::BACK;
+    // particles_color: up to MAX_COLORS; empty: from the palette
+    std::vector<NVGcolor> colors;
+
+    bool enabled() const { return this->kind != ParticleKind::NONE && this->density > 0.0f; }
+};
+
+// A variant's decorations: one picture per area, and particles
+struct ThemeDecor
+{
+    ThemePicture pictures[THEME_AREA_COUNT]; // by ThemeArea, HEADER first
+    ThemeParticles particles;
+
+    const ThemePicture& picture(ThemeArea area) const { return this->pictures[(int)area - 1]; }
+    bool hasPictures() const
+    {
+        for (const ThemePicture& picture : this->pictures)
+            if (picture.hasImage())
+                return true;
+        return false;
+    }
+};
+
 // A theme file as listThemes() or inspect() read it, without applying it.
 struct ThemeInfo
 {
@@ -131,6 +213,14 @@ struct ThemeInfo
     const ThemeBackground& background(ThemeVariant variant) const
     {
         return variant == ThemeVariant::LIGHT ? this->lightBackground : this->darkBackground;
+    }
+
+    // Each variant's decorations (backdrops, strips, particles)
+    ThemeDecor lightDecor;
+    ThemeDecor darkDecor;
+    const ThemeDecor& decor(ThemeVariant variant) const
+    {
+        return variant == ThemeVariant::LIGHT ? this->lightDecor : this->darkDecor;
     }
 
     // "line 4: #12 is not a colour"…: lines skipped, files not found.
@@ -249,6 +339,13 @@ class Theme
      * fits, its veil, the surfaces' opacity.
      */
     static ThemeBackground getBackground(ThemeVariant variant);
+
+    /**
+     * The decorations of `variant` with the file in use (backdrop.*,
+     * decor.*, particles*): none without a file, or for a variant the file
+     * does not style. ThemeDecorations draws them.
+     */
+    static ThemeDecor getDecor(ThemeVariant variant);
 
     /**
      * A file a theme names (its background_image, and any picture a theme
