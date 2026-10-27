@@ -1,0 +1,34 @@
+# A theme folder: this file, named theme.theme, and its pictures next to it
+# (the folder's name is the theme's id). The pictures are drawn by
+# tools/make_aurora_background.py.
+name = Aurora
+author = Aurore demo
+version = 1.0
+description = Northern lights behind every screen, at night or at dawn.
+icon = sparkle
+
+# The cards and panels let the sky show through a little; the veil of the
+# background colour over the pictures is the default one (0.35), stronger
+# at dawn, where the text is dark on a pale sky
+background_fit = cover
+surface_opacity = 0.85
+
+[light]
+background = #eef2fa
+surface = #ffffff
+text = #1b2433
+accent = #15604f
+background_image = day.jpg
+background_dim = 0.5
+# Derived, these read at 4.5:1 (3:1 for the focus) on the background colour
+# only: a little darker, on the sky too
+cadran/text3 = #56606e
+brls/header/subtitle = #56606e
+brls/highlight/color2 = #2a8f7a
+
+[dark]
+background = #0a1426
+surface = #13233a
+text = #eaf4f4
+accent = #3ee8a5
+background_image = night.jpg

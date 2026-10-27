@@ -25,10 +25,13 @@
 #include <borealis/core/theme_image.hpp>
 #include <borealis/test/harness.hpp>
 
+#include <chrono>
 #include <cmath>
+#include <cstring>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <thread>
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
@@ -708,6 +711,74 @@ BRLS_TEST(theme_text_is_checked_on_its_picture)
     brls::Theme::reset();
     h.settle();
     BRLS_CHECK(brls::Theme::checkBackgroundContrast(brls::ThemeVariant::DARK).empty());
+}
+
+// The demo's Aurora theme (a folder: resources/themes/aurora), its picture
+// behind the main screen
+static void auroraScreen(brls::ThemeVariant variant, const char* reference)
+{
+    DemoHarness h;
+    // What does not move (the focus ring pulses, the glow drifts): the last
+    // card and the header's right end
+    auto still = [&h]() { return h.screenshot().crop(1000, 0, 280, 430); };
+    brls::test::Image before = still();
+    auto colors              = brls::Theme::getDarkTheme().getValues()->getColors();
+
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/aurora/theme.theme"));
+    brls::Application::getPlatform()->setThemeVariant(variant);
+    h.step(); // the picture asked for: decoded, as many frames on any machine
+    while (brls::ThemeImages::decoding() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    h.settle();
+    BRLS_CHECK(brls::Application::hasThemeBackground());
+    BRLS_CHECK(brls::Theme::checkContrast(variant).empty());
+    BRLS_CHECK(h.matchesReference(reference));
+
+    // Back to no theme, live: the screen as it was, pixel for pixel
+    brls::Theme::reset();
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+    h.settle();
+    BRLS_CHECK(!brls::Application::hasThemeBackground());
+    auto diff = brls::test::compareImages(still(), before, 0);
+    BRLS_CHECK(diff.sameSize && diff.differingPixels == 0);
+    auto again = brls::Theme::getDarkTheme().getValues()->getColors();
+    BRLS_CHECK_EQ(again.size(), colors.size());
+    for (auto& [key, color] : colors)
+        BRLS_CHECK(again.count(key) && std::memcmp(&again[key], &color, sizeof(NVGcolor)) == 0);
+}
+
+BRLS_TEST(theme_background_dark)
+{
+    auroraScreen(brls::ThemeVariant::DARK, "theme_background_dark");
+}
+
+BRLS_TEST(theme_background_light)
+{
+    auroraScreen(brls::ThemeVariant::LIGHT, "theme_background_light");
+}
+
+// Pictures still loading when the theme changes again: dropped, never
+// drawn late, never freed twice (run under the sanitizers too)
+BRLS_TEST(theme_background_switches_back_and_forth)
+{
+    DemoHarness h;
+    const char* themes[] = { "@res/themes/aurora/theme.theme", "builtin:ocean", "@res/themes/aurora/theme.theme", "" };
+    for (int round = 0; round < 12; round++)
+    {
+        const char* theme = themes[round % 4];
+        if (*theme)
+            BRLS_CHECK(brls::Theme::loadFile(theme));
+        else
+            brls::Theme::reset();
+        brls::Application::getPlatform()->setThemeVariant(round % 3 ? brls::ThemeVariant::DARK : brls::ThemeVariant::LIGHT);
+        h.step(round % 2 ? 1 : 2);
+    }
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/aurora/theme.theme"));
+    h.settle();
+    BRLS_CHECK(brls::Application::hasThemeBackground());
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK(!brls::Application::hasThemeBackground());
 }
 
 BRLS_TEST(images_compare_with_tolerance)
