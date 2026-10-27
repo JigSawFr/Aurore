@@ -290,7 +290,8 @@ function(git_info tag short)
 endfunction()
 
 # switch platform
-# glsl -> deko3d dksh
+# glsl -> deko3d dksh, in romfs_dir. The library builds these shaders in
+# (library/CMakeLists.txt): an app needs this only to ship its own copies.
 function(gen_dksh romfs_dir)
     find_program(NX_UAM_EXE NAMES uam HINTS "${DEVKITPRO}/tools/bin")
     if (NOT NX_UAM_EXE)

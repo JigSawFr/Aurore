@@ -9,10 +9,8 @@ PROJECT_NAME           = Aurore
 PROJECT_BRIEF          = "A Switch-like interface for your app, on every screen"
 OUTPUT_DIRECTORY       = build_docs
 
-INPUT                  = docs/getting-started.md \
-                         docs/cadran.md \
-                         docs/inspector.md \
-                         docs/hot_reload.md \
+# Every guide in docs/, and the headers
+INPUT                  = docs \
                          library/include/borealis.hpp \
                          library/include/borealis
 FILE_PATTERNS          = *.hpp *.h *.md

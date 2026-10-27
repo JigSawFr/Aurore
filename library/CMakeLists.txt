@@ -45,12 +45,13 @@ if (AURORE_FETCH_DEPS)
         message(FATAL_ERROR "AURORE_FETCH_DEPS needs CMake 3.24 or later (FIND_PACKAGE_ARGS)")
     endif ()
     include(FetchContent)
-    # The versions of the vendored copies
+    # The versions of the vendored copies: tools/check_extern_versions.py
+    # (CI) checks they match. A system fmt 12 or later will do.
     FetchContent_Declare(fmt
             GIT_REPOSITORY https://github.com/fmtlib/fmt.git
             GIT_TAG 12.2.0
             GIT_SHALLOW TRUE
-            FIND_PACKAGE_ARGS 10)
+            FIND_PACKAGE_ARGS 12)
     FetchContent_Declare(tinyxml2
             GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
             GIT_TAG 11.0.0
@@ -114,7 +115,7 @@ if (USE_BOOST_FILESYSTEM)
         list(APPEND BRLS_PRIVATE_DEFINITIONS USE_BOOST_FILESYSTEM)
     endif()
 elseif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR
-    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32) AND NOT PLATFORM_ANDROID AND NOT PLATFORM_PS4)
+    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32 AND NOT PLATFORM_ANDROID AND NOT PLATFORM_PS4))
     list(APPEND BRLS_PLATFORM_LIBS stdc++fs)
 endif ()
 
@@ -210,14 +211,8 @@ if (PLATFORM_DESKTOP)
         endif ()
         list(APPEND BRLS_PLATFORM_LIBS wlanapi iphlpapi ws2_32)
     elseif (APPLE)
-        if (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL "10.6")
-            list(APPEND BRLS_PLATFORM_LIBS "-framework CoreWLAN")
-        endif ()
-        if (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL "10.7")
-            list(APPEND BRLS_PLATFORM_LIBS "-framework CoreGraphics")
-        else ()
-            list(APPEND BRLS_PLATFORM_LIBS "-framework ApplicationServices")
-        endif ()
+        # C++20 needs macOS 10.15, which has them all
+        list(APPEND BRLS_PLATFORM_LIBS "-framework CoreWLAN" "-framework CoreGraphics")
         list(APPEND BRLS_PLATFORM_LIBS "-framework SystemConfiguration" "-framework Cocoa")
         list(APPEND BRLS_PLATFORM_LIBS "-framework IOKit" "-framework CoreFoundation")
         list(APPEND BRLS_PLATFORM_LIBS "-framework AppKit" "-framework Foundation" "-framework CoreServices" "-lobjc")
@@ -234,7 +229,6 @@ elseif (PLATFORM_PSV)
             SceCommonDialog_stub
             SceTouch_stub
             SceAppUtil_stub
-            SceCtrl_stub
             SceIme_stub
             ScePower_stub
             SceAVConfig_stub
@@ -242,8 +236,9 @@ elseif (PLATFORM_PSV)
             -Wl,--whole-archive -lpthread -Wl,--no-whole-archive)
     if (BOREALIS_USE_GXM)
         if (USE_VITA_SHARK)
+                # libshacccg.suprx, which the app ships in its module folder
                 include(FetchContent)
-                FetchContent_Populate(
+                FetchContent_Declare(
                         libshacccg
                         # A fixed commit, not the moving main branch
                         URL "https://codeload.github.com/AnimMouse/SceShaccCg/zip/f9511fc20ce905704f384b3a99a17c5e97f9a92c"
@@ -251,6 +246,8 @@ elseif (PLATFORM_PSV)
                         SUBBUILD_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
                         BINARY_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
                 )
+                # No CMakeLists.txt in it: downloaded only
+                FetchContent_MakeAvailable(libshacccg)
                 list(APPEND BRLS_PLATFORM_LIBS
                         vitashark
                         SceShaccCgExt

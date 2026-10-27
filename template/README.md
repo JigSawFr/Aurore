@@ -23,13 +23,13 @@ git submodule add -b main https://github.com/JigSawFr/aurore.git library/aurore
 git submodule update --init --recursive
 ```
 
-Rename `my_app` in `CMakeLists.txt` (`project()`), set the author, the version and the title in `app.json`, and replace `icon.jpg`.
+Rename `my_app` in `CMakeLists.txt` (`project()`) and set the author (`PROJECT_AUTHOR`) and the version (`VERSION_MAJOR`, `VERSION_MINOR`, `VERSION_ALTER`) there too; the title shown on screen is `title` in `resources/i18n/<lang>/app.json`. Replace `icon.jpg`.
 
 Inside Aurore's own repository the template finds Aurore around it (`..`) and builds as it is; elsewhere it looks in `library/aurore`, or where `-DAURORE_DIR=…` says.
 
 ## Desktop
 
-Linux needs a compiler with C++20, CMake, Ninja, and the X11/Wayland and OpenGL development packages GLFW asks for (`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl-dev` on Debian or Ubuntu).
+Linux needs a compiler with C++20, CMake 3.16 or later, Ninja, and the X11/Wayland and OpenGL development packages GLFW asks for (`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl-dev`, and `pkg-config libdbus-1-dev`, on Debian or Ubuntu).
 
 ```sh
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=DESKTOP
