@@ -33,6 +33,7 @@
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/profiler.hpp>
+#include <borealis/core/theme_decor.hpp>
 #include <borealis/core/theme_image.hpp>
 #include <borealis/core/thread.hpp>
 #include <borealis/core/time.hpp>
@@ -264,6 +265,8 @@ bool Application::internalMainLoop()
     // however it was made (the seasonal preset's at a new season included)
     Theme::followCalendar();
     Application::checkThemeChanged();
+    // The theme's particles moved since the last frame drawn
+    bool particlesMoved = ThemeDecorations::step(Application::frameStartTime);
     Profiler::endPhase(Profiler::Phase::UPDATE);
 
     // Render: every frame, or with redraw on demand only when something
@@ -274,7 +277,7 @@ bool Application::internalMainLoop()
     {
         if (!Ticking::runningTickings.empty())
             Application::requestRedraw();
-        draw = Application::redrawFrames > 0 || Application::frameStartTime - Application::lastDrawTime >= 1000000;
+        draw = Application::redrawFrames > 0 || particlesMoved || Application::frameStartTime - Application::lastDrawTime >= 1000000;
     }
 
     if (draw)
@@ -505,7 +508,10 @@ void Application::processInput()
     currentTouchState = touchState;
     for (auto& i : touchState)
         if (i.phase != TouchPhase::NONE)
+        {
             Application::requestRedraw();
+            Application::lastInputTime = getCPUTimeUsec();
+        }
 
     MouseState mouseState = InputManager::computeMouseState(rawMouse, currentMouseState);
 
@@ -514,6 +520,7 @@ void Application::processInput()
         Application::setInputType(InputType::TOUCH);
         Application::setDrawCoursor(true);
         Application::requestRedraw();
+        Application::lastInputTime = getCPUTimeUsec();
     }
 
     // hover: styles follow the pointer when it moves (its offset is only
@@ -844,6 +851,9 @@ bool Application::hasActiveEvent()
 #else
     if (!Application::deactivatedBehavior || activeEvent || Application::frameStartTime - lastActiveTime < Application::deactivatedTime)
         return true;
+    // The theme's particles, until they stop on their own after a while
+    if (ThemeDecorations::particlesRunning())
+        return true;
     // An animation under way (not a timer that never ends, a clock) keeps
     // the frames coming: idle, it was drawn at the idle rate, in jerks.
     for (Ticking* ticking : Ticking::runningTickings)
@@ -983,6 +993,8 @@ void Application::frame(bool present)
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
     Application::drawThemeBackgroundImage(frameContext.vg, 0, 0, Application::contentWidth, Application::contentHeight);
+    ThemeDecorations::drawStrips(frameContext.vg, 0, 0, Application::contentWidth, Application::contentHeight);
+    ThemeDecorations::drawParticles(frameContext.vg, ParticleLayer::BACK, Application::contentWidth, Application::contentHeight);
 
     // Kept from frame to frame: no allocation once it is large enough
     static std::vector<View*> viewsToDraw;
@@ -1033,6 +1045,9 @@ void Application::frame(bool present)
             }
         }
     }
+
+    // The theme's particles in front of the screens, under the toasts
+    ThemeDecorations::drawParticles(frameContext.vg, ParticleLayer::FRONT, Application::contentWidth, Application::contentHeight);
 
     // Notifications
     Application::notificationManager->frame(&frameContext);
@@ -1224,6 +1239,7 @@ void Application::exit()
     Application::themeBackground.reset();
     Application::themeBackgroundLoading.reset();
     Application::themeBackgroundSpec = ThemeBackground();
+    ThemeDecorations::reset();
     ThemeImages::releaseAll();
 
     delete Application::notificationManager;
@@ -2081,6 +2097,7 @@ void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float wi
     nvgFillColor(vg, Application::getTheme().getColor("brls/clear"));
     nvgFill(vg);
     Application::drawThemeBackgroundImage(vg, x, y, width, height);
+    ThemeDecorations::drawStrips(vg, x, y, width, height);
 }
 
 // The background image as background_fit says, then its veil, over the
@@ -2152,6 +2169,7 @@ void Application::checkThemeChanged()
     Application::themeVariant    = variant;
 
     Application::loadThemeBackground();
+    ThemeDecorations::update(variant);
     for (Activity* activity : Application::activitiesStack)
         if (View* view = activity->getContentView())
             view->onThemeChanged();

@@ -82,6 +82,8 @@ namespace brls
     EditTextDialog::EditTextDialog()
     {
         this->inflateFromXMLString(editTextDialogXML);
+        if (View* panel = this->getView("brls/dialog/applet"))
+            panel->setThemeArea(ThemeArea::DIALOG);
 
         // submit text
         this->registerAction(

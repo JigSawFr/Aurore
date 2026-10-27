@@ -34,6 +34,7 @@
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/input.hpp>
+#include <borealis/core/theme_decor.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
 #include <borealis/views/applet_frame.hpp>
@@ -214,6 +215,10 @@ void View::frame(FrameContext* ctx)
         // Draw background
         this->drawBackground(ctx->vg, ctx, style, frame);
 
+        // The theme's picture of this area, over its surface
+        if (this->themeArea != ThemeArea::NONE)
+            this->drawThemeBackdrop(ctx, frame);
+
         // Draw shadow
         if (this->shadowType != ShadowType::NONE && (this->showShadow || Application::getInputType() == InputType::TOUCH))
             this->drawShadow(ctx->vg, ctx, style, frame);
@@ -258,6 +263,23 @@ void View::frame(FrameContext* ctx)
 
     if (inspected)
         Inspector::recording = wasRecording;
+}
+
+void View::drawThemeBackdrop(FrameContext* ctx, const Rect& frame)
+{
+    if (!ThemeDecorations::hasPicture(this->themeArea))
+        return;
+    Rect area = frame;
+    if (this->themeArea == ThemeArea::HEADER)
+    {
+        // A screen's header, from one side of the screen to the other
+        View* screen = this->hasParent() ? this->getParent() : nullptr;
+        if (!screen || screen->hasParent())
+            return;
+        area = Rect(screen->getX(), frame.getMinY(), screen->getWidth(), frame.getHeight());
+    }
+    ThemeDecorations::drawBackdrop(this->themeArea, ctx->vg, area.getMinX(), area.getMinY(), area.getWidth(), area.getHeight(),
+        this->themeArea == ThemeArea::HEADER ? 0.0f : this->cornerRadius);
 }
 
 void View::frameHighlight(FrameContext* ctx)

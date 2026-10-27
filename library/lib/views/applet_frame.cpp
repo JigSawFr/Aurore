@@ -96,6 +96,7 @@ const std::string appletFrameXML = R"xml(
 AppletFrame::AppletFrame()
 {
     this->inflateFromXMLString(appletFrameXML);
+    header->setThemeArea(ThemeArea::HEADER);
 
     this->forwardXMLAttribute("iconInterpolation", this->icon, "interpolation");
 

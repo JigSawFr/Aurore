@@ -22,11 +22,14 @@
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
 #include <borealis/cadran/ui/ui.hpp>
+#include <borealis/core/theme_decor.hpp>
 #include <borealis/core/theme_image.hpp>
 #include <borealis/test/harness.hpp>
 
 #include <chrono>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <filesystem>
@@ -852,6 +855,163 @@ BRLS_TEST(theme_decor_keys_are_read_and_inherited)
     // A picture that is not there
     BRLS_CHECK(hasErrorWith(brls::Theme::inspect(themes.write("base/missing.theme", "backdrop.header = nowhere.png\n")),
         "backdrop.header: cannot read"));
+
+    // Used, and gone with the theme
+    BRLS_CHECK(brls::Theme::loadFile(base));
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+    h.step();
+    while (brls::ThemeImages::decoding() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    h.settle();
+    BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP));
+    BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::SIDEBAR));
+    BRLS_CHECK(!brls::ThemeDecorations::hasPicture(brls::ThemeArea::HEADER));
+    BRLS_CHECK(brls::ThemeDecorations::particleCount() > 0);
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK(!brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP));
+    BRLS_CHECK_EQ(brls::ThemeDecorations::particleCount(), 0);
+}
+
+// A theme of particles only, over an empty screen
+static void useParticles(const std::string& preset, const std::string& kind, const std::string& more = "")
+{
+    BRLS_CHECK(brls::Theme::load("inherit = builtin:" + preset + "\nparticles = " + kind + "\n" + more));
+}
+
+BRLS_TEST(theme_particles_follow_motion_and_input)
+{
+    Harness h;
+    // Nothing that moves of its own (a focus pulses)
+    auto* label = new brls::Label();
+    label->setText("Still");
+    auto* screen = new brls::Box(brls::Axis::COLUMN); // no fill: the particles show
+    screen->addView(label);
+    h.push(new brls::Activity(screen));
+    brls::Application::setRedrawOnDemand(true);
+    useParticles("winter", "snow");
+    h.settle();
+    BRLS_CHECK(brls::ThemeDecorations::particleCount() > 0);
+    BRLS_CHECK(brls::ThemeDecorations::particlesRunning());
+
+    // Moving: about PARTICLE_FPS frames a second, not every frame
+    uint64_t drawn = brls::Application::getDrawnFrameCount();
+    h.advance(1000);
+    uint64_t frames = brls::Application::getDrawnFrameCount() - drawn;
+    BRLS_CHECK(frames >= 25 && frames <= 35);
+
+    // Reduced motion: nothing drawn, no frame asked for but the one a second
+    brls::Application::setReduceMotion(true);
+    h.step(3);
+    BRLS_CHECK(!brls::ThemeDecorations::particlesRunning());
+    brls::test::Image still = h.screenshot();
+    drawn = brls::Application::getDrawnFrameCount();
+    h.advance(900);
+    BRLS_CHECK(brls::Application::getDrawnFrameCount() - drawn <= 1);
+    // ...and not a frozen frame of them: the screen is the one without
+    brls::Theme::load("inherit = builtin:winter\n");
+    h.settle();
+    BRLS_CHECK_EQ(brls::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
+    useParticles("winter", "snow");
+    h.settle();
+    BRLS_CHECK_EQ(brls::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
+
+    // Motion again: they come back
+    brls::Application::setReduceMotion(false);
+    h.advance(2000);
+    BRLS_CHECK(brls::ThemeDecorations::particlesRunning());
+    BRLS_CHECK(brls::test::compareImages(h.screenshot(), still, 0).differingPixels > 50);
+
+    // Idle a minute: they fade out and stop asking for frames
+    h.advance(brls::ThemeDecorations::IDLE_SECONDS * 1000.0 + 4000);
+    BRLS_CHECK(!brls::ThemeDecorations::particlesRunning());
+    drawn = brls::Application::getDrawnFrameCount();
+    h.advance(2000);
+    BRLS_CHECK(brls::Application::getDrawnFrameCount() - drawn <= 2);
+    BRLS_CHECK_EQ(brls::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
+
+    // An input: back
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK(brls::ThemeDecorations::particlesRunning());
+    drawn = brls::Application::getDrawnFrameCount();
+    h.advance(1000);
+    BRLS_CHECK(brls::Application::getDrawnFrameCount() - drawn >= 25);
+
+    // Never a view: the focus and the layout know nothing of them
+    BRLS_CHECK(dynamic_cast<brls::Box*>(h.top()->getContentView())->getChildren().size() == 1);
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK(!brls::ThemeDecorations::particlesRunning());
+}
+
+// Every kind, mid-flight, in both variants: drawn (and saved, for a look,
+// with BRLS_DECOR_SHOTS=<folder>)
+BRLS_TEST(theme_particles_draw_every_kind)
+{
+    const struct
+    {
+        const char* kind;
+        const char* preset;
+    } kinds[] = { { "snow", "winter" }, { "leaves", "autumn" }, { "petals", "spring" }, { "embers", "halloween" },
+        { "confetti", "new-year" }, { "sparkles", "lunar-new-year" }, { "hearts", "valentine" }, { "bubbles", "summer" } };
+    const char* folder = std::getenv("BRLS_DECOR_SHOTS");
+    Harness h;
+    h.push(new brls::Activity(new brls::Box()));
+    for (const auto& each : kinds)
+        for (brls::ThemeVariant variant : { brls::ThemeVariant::DARK, brls::ThemeVariant::LIGHT })
+        {
+            brls::Application::getPlatform()->setThemeVariant(variant);
+            brls::Theme::load(std::string("inherit = builtin:") + each.preset + "\n");
+            h.step(2);
+            brls::test::Image plain = h.screenshot();
+            useParticles(each.preset, each.kind, "particles_density = high\n");
+            h.advance(2500);
+            brls::test::Image shot = h.screenshot();
+            BRLS_CHECK(brls::test::compareImages(shot, plain, 4).differingPixels > 200);
+            if (folder)
+                shot.savePng(std::string(folder) + "/particles_" + each.kind
+                    + (variant == brls::ThemeVariant::DARK ? "_dark" : "_light") + ".png");
+        }
+    // A few frames in a row, for a moving picture
+    if (folder)
+        for (const char* kind : { "snow", "leaves" })
+        {
+            brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+            useParticles(std::string(kind) == "snow" ? "winter" : "autumn", kind, "particles_density = medium\n");
+            h.advance(2000);
+            for (int i = 0; i < 45; i++)
+            {
+                h.advance(1000.0 / 30);
+                char name[64];
+                std::snprintf(name, sizeof(name), "/frames_%s_%02d.png", kind, i);
+                h.screenshot().crop(0, 0, 640, 360).savePng(std::string(folder) + name);
+            }
+        }
+    brls::Theme::reset();
+    h.step(2);
+}
+
+// backdrop.header: across the whole width of a screen's header, under its
+// title; nothing elsewhere
+BRLS_TEST(theme_decor_header_backdrop)
+{
+    DemoHarness h;
+    brls::Application::setReduceMotion(true);
+    ThemeFolder themes("aurore_theme_header_test");
+    themes.picture("red.png", 255, 0, 0);
+    BRLS_CHECK(brls::Theme::loadFile(themes.write("red.theme", "inherit = dark\nbackdrop.header = red.png\n")));
+    h.step();
+    while (brls::ThemeImages::decoding() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    h.settle();
+    BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::HEADER));
+    brls::test::Image shot = h.screenshot();
+    for (int x : { 2, 640, 1277 })
+        BRLS_CHECK(shot.at(x, 4)[0] > 200 && shot.at(x, 4)[1] < 60);
+    BRLS_CHECK(shot.at(640, 300)[0] < 120); // the content: as it was
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK(h.screenshot().at(640, 4)[0] < 120);
 }
 
 BRLS_TEST(images_compare_with_tolerance)

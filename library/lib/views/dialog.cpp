@@ -140,6 +140,7 @@ const std::string dialogXML = R"xml(
 Dialog::Dialog(Box* contentView)
 {
     this->inflateFromXMLString(dialogXML);
+    appletFrame->setThemeArea(ThemeArea::DIALOG);
     container->addView(contentView);
 
     appletFrame->registerAction(
@@ -179,6 +180,7 @@ Dialog::Dialog(std::string text)
     box->setPadding(style["brls/dialog/paddingTopBottom"], style["brls/dialog/paddingLeftRight"], style["brls/dialog/paddingTopBottom"], style["brls/dialog/paddingLeftRight"]);
 
     this->inflateFromXMLString(dialogXML);
+    appletFrame->setThemeArea(ThemeArea::DIALOG);
     container->addView(box);
 
     appletFrame->registerAction(

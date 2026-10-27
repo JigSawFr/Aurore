@@ -219,6 +219,12 @@ class Application
     static bool isReduceMotionSet() { return Application::reduceMotion; }
 
     /**
+     * When the last input came (a button, a key, a touch, the mouse), on the
+     * clock of getCPUTimeUsec(): what the theme's particles stop after.
+     */
+    static Time getLastInputTime() { return Application::lastInputTime; }
+
+    /**
      * Every Label drawn `scale` times its size (Label::setFontScale), and the
      * screens laid out again for it at once (every view told through
      * View::onTextScaleChanged). 1 by default; Cadran's text size setting
