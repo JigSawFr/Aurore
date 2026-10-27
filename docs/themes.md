@@ -116,7 +116,7 @@ themes/                      # the folder an app lists (Theme::listThemes)
 | `background_image` | a file in the theme's folder, or `none` | none | A picture behind every screen: PNG or JPEG (not WebP). `none` takes away an inherited one |
 | `background_fit` | `cover`, `contain`, `tile`, `center` | `cover` | `cover` fills the window, centred, cut at the edges; `contain` shows it whole, centred, `brls/clear` around it; `tile` repeats it from the top left; `center` puts it in the middle as is. `tile` and `center` draw one pixel of the picture per unit of the 1280×720 layout |
 | `background_dim` | 0 to 1 | 0.35 | A veil of `brls/background` over the picture, so that the text drawn on it reads: 0 shows it as is, 1 hides it |
-| `surface_opacity` | 0 to 1 | 1 | The opacity of the surfaces over the picture: cards and chips (`cadran/surf`, `cadran/surf2`), the sidebar (`brls/sidebar/background`), the focus's fill (`brls/highlight/background`), the default buttons. 1 keeps them opaque; without a picture it does nothing |
+| `surface_opacity` | 0 to 1 | 1 | The opacity of the surfaces over the picture: cards and chips (`cadran/surf`, `cadran/surf2`, and the tinted ones: `cadran/amber_surf`, `cadran/teal_soft`, `cadran/coral_soft`, `cadran/pill_ok`), the sidebar (`brls/sidebar/background`), the focus's fill (`brls/highlight/background`), the default buttons. 1 keeps them opaque; without a picture it does nothing |
 
 Each key is read at the top (every variant the file styles) or in `[light]`/`[dark]` (one variant), as the colours: a theme can have a night picture and a day one, or a picture in one variant only. A variant the file does not style has no picture.
 
