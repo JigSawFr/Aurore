@@ -63,6 +63,15 @@ namespace inspector_detail
     const NVGcolor ACCENT    = nvgRGB(255, 176, 64);
     const NVGcolor FOCUS     = nvgRGB(96, 205, 255);
     const NVGcolor SELECTION = nvgRGBA(255, 176, 64, 50);
+    const NVGcolor WARN      = nvgRGB(255, 120, 110);
+
+    // A view that takes the focus with nothing to tell it from another (its
+    // role at most)
+    bool silent(View* view)
+    {
+        return view->isFocusable() && view->getDefaultFocus() == view && view->getAccessibilityLabel().empty()
+            && view->getAccessibilityValue().empty();
+    }
 
     std::vector<Row> rows;
     View* selected               = nullptr;
@@ -429,7 +438,9 @@ namespace inspector_detail
             float ix = x + std::min(row.depth, 20) * 10.0f;
             if (focused || chain)
                 text(vg, ix - 9, y + 1, FOCUS, focused ? ">" : "|");
-            text(vg, ix, y + 1, color, shortName(row.view));
+            float nx = text(vg, ix, y + 1, color, shortName(row.view));
+            if (silent(row.view))
+                text(vg, nx + 6, y + 1, WARN, "no a11y");
 
             std::string size = number(row.view->getWidth()) + " x " + number(row.view->getHeight());
             nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP);
@@ -521,6 +532,21 @@ namespace inspector_detail
                 + (view->isFocused() ? "   focused" : "") + (view->isDetached() ? "   detached" : "")
                 + (view->isCulled() ? "" : "   not culled"));
         y += LINE;
+
+        // What the focus announcer says of it, and its role
+        {
+            std::string role        = accessibilityRoleName(view->getAccessibilityRole());
+            std::string description = view->getAccessibilityDescription();
+            float ax                = text(vg, x, y, TEXT, "a11y " + (role.empty() ? std::string("-") : role) + "  ");
+            nvgSave(vg);
+            nvgIntersectScissor(vg, ax, y, x + w - ax, LINE);
+            if (silent(view))
+                text(vg, ax, y, WARN, "focusable, no label: give it an accessibilityLabel");
+            else
+                text(vg, ax, y, DIM, description.empty() ? "nothing announced" : "\"" + description + "\"");
+            nvgRestore(vg);
+            y += LINE;
+        }
 
         float sx = text(vg, x, y, TEXT, "background ");
         if (view->getBackground() == ViewBackground::SHAPE_COLOR)

@@ -63,6 +63,10 @@ class Dropdown : public Box, private RecyclerDataSource
   protected:
     float getShowAnimationDuration(TransitionAnimation animation) override;
 
+    // Said with its title when it opens, before its row.
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::LIST; }
+    std::string getDefaultAccessibilityLabel() override { return this->title->getFullText(); }
+
   public:
     Dropdown(std::string title, std::vector<std::string> values, ValueSelectedEvent::Callback cb, int selected = 0, ValueSelectedEvent::Callback dismissCb = [](int) {});
 

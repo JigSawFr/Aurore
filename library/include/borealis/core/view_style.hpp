@@ -87,9 +87,18 @@ enum class AccessibilityRole : uint8_t
     TEXT_FIELD,
     TAB,
     LIST,
+    DIALOG, // said with its text when the focus enters it
 };
 
 // "button", "toggle"… (the XML names); "" for NONE.
 std::string accessibilityRoleName(AccessibilityRole role);
+
+// The words the descriptions are made of, in the app's language
+// (resources/i18n/<language>/a11y.json, English when the app has none): a
+// role as said ("switch"; "" for NONE, a label, a cell), a state ("on",
+// "off", "selected", "disabled"), a share of 0..1 as "40%".
+std::string accessibilityRoleWord(AccessibilityRole role);
+std::string accessibilityStateWord(const std::string& state);
+std::string accessibilityPercent(float fraction);
 
 } // namespace brls

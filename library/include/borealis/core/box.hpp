@@ -285,6 +285,9 @@ class Box : public View
     std::unordered_map<std::string, std::pair<std::string, View*>> forwardedAttributes;
 
   protected:
+    // A focusable box says the texts shown in it (getAccessibilityText).
+    std::string getDefaultAccessibilityLabel() override;
+
     /**
      * Inflates the Box with the given XML string.
      *
