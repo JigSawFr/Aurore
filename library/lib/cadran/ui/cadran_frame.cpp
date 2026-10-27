@@ -68,6 +68,8 @@ void cadran::install_theme()
     for (const pal::Contrast& pair : pal::CONTRAST) brls::Theme::addContrastCheck(pair.ink, pair.surface, pair.minimum);
     // Cards and panels: a theme's background image shows through them (surface_opacity)
     for (const char* key : { "cadran/surf", "cadran/surf2" }) brls::Theme::addSurfaceKey(key);
+    // The icons a theme may draw as pictures (icon.<name>)
+    brls::Theme::addIconNames(CadranIcon::names());
 #ifndef __SWITCH__
     // And held where it is (brls::setHighlightAnimationStill). The footer's hints too:
     // drawn as once a screen or a dialog has opened, not greyed while its
