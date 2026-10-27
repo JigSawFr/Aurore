@@ -27,6 +27,7 @@
 #include <borealis/core/theme_decor.hpp>
 #include <borealis/core/theme_image.hpp>
 #include <borealis/test/harness.hpp>
+#include <borealis/views/edit_text_dialog.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -36,6 +37,7 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <thread>
 
 #include "activity/main_activity.hpp"
@@ -1517,4 +1519,159 @@ BRLS_TEST(images_compare_with_tolerance)
 int main(int argc, char** argv)
 {
     return brls::test::runTests(argc, argv);
+}
+
+BRLS_TEST(mouse_quick_click_is_not_lost)
+{
+    // Pressed and let go between two frames: a touchpad tap, a quick click
+    DemoHarness h;
+    brls::View* tab = h.findText("Layout and alignment");
+    BRLS_CHECK(tab != nullptr);
+    brls::Rect frame = tab->getFrame();
+    h.mouseQuickClick(frame.getMidX(), frame.getMidY());
+    BRLS_CHECK(h.hasText("alignItems: center"));
+}
+
+namespace
+{
+
+// A screen whose button counts the controller buttons it gets
+struct ButtonCounter
+{
+    brls::Button* button = new brls::Button();
+    std::map<brls::ControllerButton, int> pressed;
+
+    ButtonCounter(Harness& h)
+    {
+        button->setText("Count");
+        for (brls::ControllerButton b : { brls::BUTTON_X, brls::BUTTON_Y, brls::BUTTON_LB, brls::BUTTON_RB,
+                 brls::BUTTON_LT, brls::BUTTON_RT, brls::BUTTON_START, brls::BUTTON_BACK })
+            button->registerAction("", b, [this, b](brls::View*)
+                {
+                    pressed[b]++;
+                    return true; });
+        h.push(new brls::Activity(screenOf({ button })));
+        h.settle();
+    }
+};
+
+} // namespace
+
+BRLS_TEST(keyboard_keys_press_controller_buttons)
+{
+    Harness h;
+    ButtonCounter c(h);
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    h.tapKey(brls::BRLS_KBD_KEY_Y);
+    h.tapKey(brls::BRLS_KBD_KEY_L);
+    h.tapKey(brls::BRLS_KBD_KEY_R);
+    h.tapKey(brls::BRLS_KBD_KEY_P);
+    h.tapKey(brls::BRLS_KBD_KEY_KP_ADD);
+    h.tapKey(brls::BRLS_KBD_KEY_M);
+    h.tapKey(brls::BRLS_KBD_KEY_MINUS);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_Y], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LB], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_RB], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_START], 2);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_BACK], 2);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LT], 0);
+
+    // Shift for the triggers, and not the shoulder buttons then
+    h.pressKey(brls::BRLS_KBD_KEY_LEFT_SHIFT);
+    h.tapKey(brls::BRLS_KBD_KEY_L);
+    h.tapKey(brls::BRLS_KBD_KEY_R);
+    h.releaseKey(brls::BRLS_KBD_KEY_LEFT_SHIFT);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LT], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_RT], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LB], 1);
+
+    // Ctrl+X is a shortcut, not X
+    h.pressKey(brls::BRLS_KBD_KEY_LEFT_CONTROL);
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    h.releaseKey(brls::BRLS_KBD_KEY_LEFT_CONTROL);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 1);
+}
+
+BRLS_TEST(keyboard_keys_can_be_mapped_again)
+{
+    Harness h;
+    ButtonCounter c(h);
+    brls::Application::mapKey(brls::BRLS_KBD_KEY_Q, brls::BUTTON_LB);
+    brls::Application::unmapKey(brls::BRLS_KBD_KEY_L);
+    h.tapKey(brls::BRLS_KBD_KEY_Q);
+    h.tapKey(brls::BRLS_KBD_KEY_L);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LB], 1);
+
+    // A key the app handles itself is its own
+    int own = 0;
+    c.button->registerAction(brls::BrlsKeyCombination(brls::BRLS_KBD_KEY_X), [&own](brls::View*)
+        {
+            own++;
+            return true; });
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    BRLS_CHECK_EQ(own, 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 0);
+
+    brls::Application::clearKeyMap();
+    h.tapKey(brls::BRLS_KBD_KEY_Y);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_Y], 0);
+    BRLS_CHECK(brls::Application::getKeyMap().empty());
+}
+
+BRLS_TEST(keyboard_keys_type_text_in_a_text_field)
+{
+    Harness h;
+    ButtonCounter c(h);
+    auto* dialog = new brls::EditTextDialog();
+    dialog->open();
+    h.settle();
+    h.tapKey(brls::BRLS_KBD_KEY_M); // not Minus: the dialog's delete
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 0);
+    BRLS_CHECK(dynamic_cast<brls::EditTextDialog*>(h.top()->getContentView()) != nullptr);
+}
+
+BRLS_TEST(horizontal_carousel_lets_left_out)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("Basic components"));
+    h.tap(brls::BUTTON_RIGHT);
+    brls::View* first = h.focus();
+    BRLS_CHECK(first != nullptr);
+    bool inCarousel = false;
+    for (brls::View* v = first; v; v = v->hasParent() ? v->getParent() : nullptr)
+        inCarousel |= dynamic_cast<brls::HScrollingFrame*>(v) != nullptr;
+    BRLS_CHECK(inCarousel);
+    h.tapKey(brls::BRLS_KBD_KEY_LEFT);
+    BRLS_CHECK(dynamic_cast<brls::SidebarItem*>(h.focus()) != nullptr);
+}
+
+BRLS_TEST(focus_on_a_scrolling_frame_shows_its_place)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("Layout and alignment"));
+    h.tap(brls::BUTTON_RIGHT);
+    // Down through the tab until the focus waits on the frame itself
+    brls::ScrollingFrame* frame = nullptr;
+    for (int i = 0; i < 30 && !frame; i++)
+    {
+        h.tap(brls::BUTTON_DOWN);
+        frame = dynamic_cast<brls::ScrollingFrame*>(h.focus());
+    }
+    BRLS_CHECK(frame != nullptr);
+    if (!frame)
+        return;
+    brls::Rectangle* indicator = nullptr;
+    for (brls::View* child : frame->getChildren())
+        if (auto* r = dynamic_cast<brls::Rectangle*>(child))
+            indicator = r;
+    BRLS_CHECK(indicator != nullptr);
+    if (!indicator)
+        return;
+    BRLS_CHECK(indicator->getAlpha() > 0.99f);
+    NVGcolor want = brls::Application::getTheme()["brls/highlight/color1"];
+    NVGcolor got  = indicator->getColor();
+    BRLS_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
+    BRLS_CHECK(h.matchesReference("scrolling_frame_focus"));
 }

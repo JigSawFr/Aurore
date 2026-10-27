@@ -340,11 +340,9 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
 #endif
 
     // Configure window
+    // The mouse buttons are read from their events (GLFWInputManager), so a
+    // short click or a touchpad tap is not lost between two frames
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
-#ifdef __APPLE__
-    // Make the touchpad click normally
-    glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_TRUE);
-#endif
     glfwSetFramebufferSizeCallback(window, glfwWindowFramebufferSizeCallback);
     glfwSetWindowPosCallback(window, glfwWindowPositionCallback);
 

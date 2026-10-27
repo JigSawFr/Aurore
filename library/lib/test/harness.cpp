@@ -392,6 +392,15 @@ void Harness::mouseClick(float x, float y)
     settle();
 }
 
+void Harness::mouseQuickClick(float x, float y)
+{
+    headless->getHeadlessInput()->setMouse(Point(x, y), true);
+    headless->getHeadlessInput()->setMouse(Point(x, y), false);
+    step();
+    step();
+    settle();
+}
+
 void Harness::mouseScroll(float dx, float dy)
 {
     headless->getHeadlessInput()->scroll(Point(dx, dy));

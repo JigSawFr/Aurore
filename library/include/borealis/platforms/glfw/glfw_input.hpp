@@ -56,8 +56,13 @@ class GLFWInputManager : public InputManager
     static void cursorCallback(GLFWwindow* window, double xoffset, double yoffset);
     static void cursorEnterCallback(GLFWwindow* window, int entered);
     static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     GLFWwindow* window;
-    bool pointerLocked = false;
+    // Left, right and middle: from their events, a short click is not lost
+    // between two frames
+    ButtonLatch mouseLatches[3];
+    bool mouseButtons[3] = {};
+    bool pointerLocked   = false;
 };
 
 };
