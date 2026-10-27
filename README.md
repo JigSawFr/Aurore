@@ -135,6 +135,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
+| Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
 | A spinner's own colour | `ProgressSpinner::setColor` |
 | Toasts styled by the theme, with an optional icon | `brls/notification/background`, `…/text`, `…/corner_radius`, `…/spacing`, `…/margin_top`, `…/margin_right` · `Application::notify(text, leading)` |
 | The footer's clock in hours and minutes | — |

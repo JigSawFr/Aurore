@@ -28,7 +28,6 @@
 
 #include "borealis/core/cache_helper.hpp"
 #include "borealis/core/thread.hpp"
-#include "borealis/extern/nanovg/stb_image.h"
 
 #include <memory>
 
@@ -448,9 +447,9 @@ void Image::setImageFromFileAsync(const std::string& path)
     ASYNC_RETAIN
     brls::async([ASYNC_TOKEN, path, generation, flags]()
         {
-            int width = 0, height = 0, channels = 0;
+            int width = 0, height = 0;
             // Freed whatever happens to the image meanwhile
-            std::shared_ptr<unsigned char> pixels(stbi_load(path.c_str(), &width, &height, &channels, 4), stbi_image_free);
+            std::shared_ptr<unsigned char> pixels(nvgDecodeImage(path.c_str(), &width, &height), nvgFreeImageData);
             brls::sync([ASYNC_TOKEN, path, generation, flags, pixels, width, height]()
                 {
                     ASYNC_RELEASE
