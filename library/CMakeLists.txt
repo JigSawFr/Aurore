@@ -25,6 +25,11 @@ if (NOT BRLS_RESOURCES_DIR)
     endif ()
 endif ()
 
+# The version of library/include/borealis/version.hpp, which release-please updates
+file(STRINGS ${BOREALIS_PATH}/include/borealis/version.hpp AURORE_VERSION REGEX "^#define AURORE_VERSION \"")
+string(REGEX REPLACE ".*\"([0-9.]+)\".*" "\\1" AURORE_VERSION "${AURORE_VERSION}")
+set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
+
 option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
 
 # fmt, tinyxml2, GLFW and SDL2 from the system when find_package() finds
