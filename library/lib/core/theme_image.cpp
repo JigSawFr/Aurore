@@ -30,6 +30,7 @@
 #include <map>
 #include <mutex>
 #include <set>
+#include <tuple>
 #include <sys/stat.h>
 #include <vector>
 
@@ -62,7 +63,9 @@ std::mutex meanMutex;
 std::map<std::string, NVGcolor> means; // by keyOf(), under meanMutex
 
 std::set<std::string> reported; // paths already logged as unreadable (UI thread)
-std::map<std::pair<std::string, int>, std::weak_ptr<ThemeImage>> images; // UI thread
+// By path, flags, size cap and mask (UI thread)
+using ImageKey = std::tuple<std::string, int, int, bool>;
+std::map<ImageKey, std::weak_ptr<ThemeImage>> images;
 Event<const ThemeImage*> loadedEvent;
 
 // sRGB to linear light, for an average the eye agrees with
@@ -187,6 +190,22 @@ void downscale(Pixels* pixels, const unsigned char* source, int width, int heigh
     }
 }
 
+// A mask to tint: white, its alpha the picture's; a picture with no
+// transparent pixel keeps its dark parts (the ink of a drawing on paper)
+void makeMask(Pixels* pixels)
+{
+    std::vector<unsigned char>& rgba = pixels->rgba;
+    bool transparent                 = false;
+    for (size_t i = 3; i < rgba.size() && !transparent; i += 4)
+        transparent = rgba[i] < 255;
+    for (size_t i = 0; i < rgba.size(); i += 4)
+    {
+        if (!transparent)
+            rgba[i + 3] = (unsigned char)(255 - (rgba[i] * 54 + rgba[i + 1] * 183 + rgba[i + 2] * 19) / 256);
+        rgba[i] = rgba[i + 1] = rgba[i + 2] = 255;
+    }
+}
+
 // Decodes (any thread): false when it cannot
 bool decode(const Source& source, Pixels* pixels, int maxWidth, int maxHeight)
 {
@@ -300,7 +319,17 @@ Event<const ThemeImage*>* ThemeImages::getLoadedEvent()
 
 std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, int flags)
 {
-    auto key = std::make_pair(path, flags);
+    ThemeImageOptions options;
+    options.flags = flags;
+    return ThemeImages::load(path, options);
+}
+
+std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, const ThemeImageOptions& options)
+{
+    int flags   = options.flags;
+    int maxSide = std::max(0, options.maxSide);
+    bool mask   = options.mask;
+    ImageKey key { path, flags, maxSide, mask };
     auto it  = images.find(key);
     if (it != images.end())
     {
@@ -310,9 +339,11 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, int flags
     }
 
     auto image   = std::make_shared<ThemeImage>();
-    image->path  = path;
-    image->flags = flags;
-    images[key]  = image;
+    image->path    = path;
+    image->flags   = flags;
+    image->maxSide = maxSide;
+    image->mask    = mask;
+    images[key]    = image;
 
     Source source;
     if (!locate(path, &source))
@@ -325,13 +356,18 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, int flags
     std::string meanKey = keyOf(path, source);
     std::weak_ptr<ThemeImage> weak = image;
     decodingCount++;
-    brls::async([weak, source, meanKey]()
+    int maxWidth  = maxSide > 0 ? std::min(maxSide, MAX_WIDTH) : MAX_WIDTH;
+    int maxHeight = maxSide > 0 ? std::min(maxSide, MAX_HEIGHT) : MAX_HEIGHT;
+    brls::async([weak, source, meanKey, maxWidth, maxHeight, mask]()
         {
             // Shared with the UI thread's task, freed by whichever ends last
             auto pixels = std::make_shared<Pixels>();
-            bool ok     = decode(source, pixels.get(), MAX_WIDTH, MAX_HEIGHT);
-            if (ok)
+            bool ok     = decode(source, pixels.get(), maxWidth, maxHeight);
+            // The mean of the whole picture only (the background's)
+            if (ok && maxWidth == MAX_WIDTH && maxHeight == MAX_HEIGHT)
                 rememberMean(meanKey, pixels->mean);
+            if (ok && mask)
+                makeMask(pixels.get());
             decodingCount--;
             brls::sync([weak, pixels, ok]()
                 {
@@ -359,6 +395,59 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, int flags
                     Application::requestRedraw();
                 }); });
     return image;
+}
+
+bool ThemeImage::draw(NVGcontext* vg, float x, float y, float width, float height, BackgroundFit fit,
+    const NVGcolor* tint, float alpha, float corner) const
+{
+    if (!this->ready() || this->width <= 0 || this->height <= 0 || width <= 0 || height <= 0)
+        return false;
+    float w = (float)this->width, h = (float)this->height;
+    float left = x, top = y, right = x + width, bottom = y + height; // what is filled
+    float px = x, py = y;                                            // where the picture is
+    switch (fit)
+    {
+        case BackgroundFit::COVER:
+        case BackgroundFit::CONTAIN:
+        {
+            float scale = fit == BackgroundFit::COVER ? std::max(width / w, height / h) : std::min(width / w, height / h);
+            w *= scale;
+            h *= scale;
+            px = x + (width - w) / 2;
+            py = y + (height - h) / 2;
+            if (fit == BackgroundFit::CONTAIN)
+            {
+                left = px, top = py, right = px + w, bottom = py + h;
+                corner = 0;
+            }
+            break;
+        }
+        case BackgroundFit::CENTER:
+            px    = std::round(x + (width - w) / 2);
+            py    = std::round(y + (height - h) / 2);
+            left  = std::max(left, px);
+            top   = std::max(top, py);
+            right = std::min(right, px + w);
+            bottom = std::min(bottom, py + h);
+            break;
+        case BackgroundFit::TILE:
+            break;
+    }
+    if (right <= left || bottom <= top)
+        return true;
+    NVGpaint paint = nvgImagePattern(vg, px, py, w, h, 0, this->texture, alpha);
+    if (tint)
+    {
+        paint.innerColor = paint.outerColor = nvgRGBAf(tint->r, tint->g, tint->b, tint->a * alpha);
+    }
+    nvgBeginPath(vg);
+    if (corner > 0)
+        nvgRoundedRect(vg, left, top, right - left, bottom - top, corner);
+    else
+        nvgRect(vg, left, top, right - left, bottom - top);
+    nvgFillPaint(vg, paint);
+    nvgFill(vg);
+    return true;
 }
 
 bool ThemeImages::exists(const std::string& path)
