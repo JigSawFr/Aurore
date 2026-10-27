@@ -146,8 +146,46 @@ Built into the library (`library/lib/core/theme_presets.cpp`), every app has the
 | `ocean` | dark | Deep blue, a sky-blue accent |
 | `amethyst` | light and dark | Violet, following the system's mode |
 | `sand` | light | Warm paper, a terracotta accent |
+| `winter`, `valentine`, `lunar-new-year`, `spring`, `summer`, `autumn`, `halloween`, `christmas`, `new-year` | light and dark | The seasons and the feasts of the year, below |
+| `seasonal` | light and dark | The one of the day, by the calendar, below |
 
 A preset is also a starting point: `inherit = builtin:ocean`, then the keys to change.
+
+### The seasons
+
+Each season has both variants and keeps the roles of every theme (the accent for what is chosen and the primary buttons, amber for warnings, red for removals), so that an app reads the same all year; the season is in the surfaces, the focus ring (it pulses between its two colours), the screens' glow, the loading bar, the charts' bars, the tiles' inks (`cadran/blue`, `violet`, `pink`) and the avatars. To see one: `aurore_demo -t builtin:halloween` (`BOREALIS_THEME=LIGHT` for the light variant).
+
+| Id | Dark | Light |
+| --- | --- | --- |
+| `winter` | Frost and silver: a cold slate night (`#0f1620`), an ice-blue accent (`#9cc9ff`), the focus pulsing from ice to white | Frost (`#edf3f8`), a glacier-blue accent (`#2a6496`) |
+| `valentine` | Wine (`#1f0a14`), a rose accent (`#ff5c8a`), the focus from rose to blush | Blush (`#fbeff2`), a crimson accent (`#c1121f`) |
+| `lunar-new-year` | Red lacquer (`#1f0a0b`), a gold accent (`#f6c445`), the focus from gold to lantern red, a red glow; jade for the details | Rice paper (`#fbf2e4`), an imperial red accent (`#b5121b`), the focus from red to gold |
+| `spring` | Cherry blossoms at night (`#1c1320`), a petal-pink accent (`#ff9cc4`) | Blush (`#fbf0f3`), a cherry accent (`#b8487a`), the focus from cherry to leaf green |
+| `summer` | A warm night by the sea (`#0d2327`), a sunset-coral accent (`#ff8f5a`), the focus from coral to sun | Sun-bleached sand (`#fdf7ea`), a lagoon accent (`#00798c`), the focus from tangerine to lagoon |
+| `autumn` | Dark bark (`#1a1310`), a maple accent (`#e8743b`), the focus from maple to amber | Linen (`#f6efe4`), a rust accent (`#a83f12`), the focus from rust to olive |
+| `halloween` | A violet night (`#150d1f`), bone text (`#f3ead8`), a pumpkin accent (`#ff8a1f`), the focus flickering to candlelight with a warm shadow, a violet moonlight glow, slime green and violet inks | Moonlit lilac (`#f1edf6`), a pumpkin accent (`#c2520a`), the focus from violet to pumpkin |
+| `christmas` | Pine (`#0d1f17`), snow text, a gold accent (`#e8c15a`), the focus twinkling from gold to cranberry like the tree's lights, a golden shadow; a cranberry loading bar | Snow (`#f4f6f1`), a cranberry accent (`#b3162f`), the focus from pine to gold |
+| `new-year` | Midnight (`#0a0c18`), a champagne accent (`#e9c46a`), the focus sparkling from gold to silver | Silver (`#f3f2ef`), champagne-gold fills (`#c9a227`), the focus from gold to midnight blue |
+
+#### Seasonal
+
+`builtin:seasonal` is the preset of the day: a picker lists it like the others (*Seasonal*, Cadran's palette picker included), and an app that saves it gets Halloween at the end of October and Christmas in December without doing anything. It reads the local date, and the main loop looks again once a minute (`Theme::followCalendar()`): the day a season begins, the screens change at midnight, or as soon as the console wakes up. Every season has both variants, so the variant stays as it is. `Theme::seasonalTheme(time)` says which preset a date has (`"builtin:halloween"`), for a tile or a test.
+
+The days are in one table (`SEASONS`, `library/lib/core/theme_presets.cpp`), both ends included, the first range a date falls in winning:
+
+| Preset | Days |
+| --- | --- |
+| `new-year` | 29 December to 3 January |
+| `christmas` | 1 to 28 December |
+| `valentine` | 10 to 15 February |
+| `lunar-new-year` | The eve of the Lunar New Year to the Lantern Festival, 14 days after it (the dates are tabled from 2025 to 2036; a year out of the table has none) |
+| `halloween` | 17 October to 2 November |
+| `spring` | 20 March to 20 June |
+| `summer` | 21 June to 22 September |
+| `autumn` | 23 September to 30 November |
+| `winter` | The rest: 4 January to 19 March, but for the feasts |
+
+The seasons are the northern hemisphere's.
 
 ## The API
 

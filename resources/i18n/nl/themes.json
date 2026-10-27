@@ -4,6 +4,16 @@
         "high_contrast_light": "Hoog contrast licht",
         "ocean": "Oceaan",
         "amethyst": "Amethist",
-        "sand": "Zand"
+        "sand": "Zand",
+        "winter": "Winter",
+        "valentine": "Valentijnsdag",
+        "lunar_new_year": "Maannieuwjaar",
+        "spring": "Lente",
+        "summer": "Zomer",
+        "autumn": "Herfst",
+        "halloween": "Halloween",
+        "christmas": "Kerstmis",
+        "new_year": "Oud en nieuw",
+        "seasonal": "Volgens het seizoen"
     }
 }

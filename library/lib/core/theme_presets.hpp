@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <ctime>
+#include <string>
 #include <vector>
 
 namespace brls
@@ -25,9 +27,15 @@ namespace brls
 struct BuiltinTheme
 {
     const char* id;
-    const char* text;
+    const char* text; // nullptr: made when read (seasonalThemeText)
 };
 
 const std::vector<BuiltinTheme>& builtinThemeTexts();
+
+// The preset's text: its own, or the one made for now
+std::string builtinThemeText(const BuiltinTheme& theme, std::time_t now);
+
+// The id of the preset builtin:seasonal uses at `now` (in local time)
+const char* seasonalThemeId(std::time_t now);
 
 } // namespace brls

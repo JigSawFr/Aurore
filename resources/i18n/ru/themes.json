@@ -4,6 +4,16 @@
         "high_contrast_light": "Высокий контраст, светлая",
         "ocean": "Океан",
         "amethyst": "Аметист",
-        "sand": "Песок"
+        "sand": "Песок",
+        "winter": "Зима",
+        "valentine": "День святого Валентина",
+        "lunar_new_year": "Лунный Новый год",
+        "spring": "Весна",
+        "summer": "Лето",
+        "autumn": "Осень",
+        "halloween": "Хэллоуин",
+        "christmas": "Рождество",
+        "new_year": "Новый год",
+        "seasonal": "По временам года"
     }
 }

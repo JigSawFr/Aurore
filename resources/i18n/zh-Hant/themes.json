@@ -4,6 +4,16 @@
         "high_contrast_light": "高對比淺色",
         "ocean": "海洋",
         "amethyst": "紫水晶",
-        "sand": "沙色"
+        "sand": "沙色",
+        "winter": "冬季",
+        "valentine": "情人節",
+        "lunar_new_year": "農曆新年",
+        "spring": "春季",
+        "summer": "夏季",
+        "autumn": "秋季",
+        "halloween": "萬聖節",
+        "christmas": "聖誕節",
+        "new_year": "跨年",
+        "seasonal": "隨季節變化"
     }
 }

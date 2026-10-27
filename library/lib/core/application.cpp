@@ -260,7 +260,8 @@ bool Application::internalMainLoop()
     Ticking::updateTickings();
 
     // Before deciding whether to draw: a theme change asks for a redraw,
-    // however it was made
+    // however it was made (the seasonal preset's at a new season included)
+    Theme::followCalendar();
     Application::checkThemeChanged();
     Profiler::endPhase(Profiler::Phase::UPDATE);
 

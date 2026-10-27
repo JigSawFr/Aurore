@@ -4,6 +4,16 @@
         "high_contrast_light": "ハイコントラスト（ライト）",
         "ocean": "オーシャン",
         "amethyst": "アメジスト",
-        "sand": "サンド"
+        "sand": "サンド",
+        "winter": "冬",
+        "valentine": "バレンタイン",
+        "lunar_new_year": "旧正月",
+        "spring": "春",
+        "summer": "夏",
+        "autumn": "秋",
+        "halloween": "ハロウィン",
+        "christmas": "クリスマス",
+        "new_year": "年越し",
+        "seasonal": "季節に合わせて"
     }
 }
