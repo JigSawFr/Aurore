@@ -21,6 +21,7 @@
 #include <nanovg.h>
 
 #include <cstdint>
+#include <ctime>
 #include <initializer_list>
 #include <string>
 #include <unordered_map>
@@ -166,6 +167,21 @@ class Theme
      * Back to the look without a theme file.
      */
     static void reset();
+
+    /**
+     * With "builtin:seasonal" in use, the preset of the day (by local date:
+     * Halloween, Christmas, the seasons... docs/themes.md), used as soon as
+     * the date enters another one. The main loop calls it at each
+     * iteration; it looks at the wall clock once a minute (a console
+     * resuming from sleep included).
+     */
+    static void followCalendar();
+
+    /**
+     * The preset "builtin:seasonal" uses at `when` (seconds since the
+     * epoch, read in local time): "builtin:halloween"...
+     */
+    static std::string seasonalTheme(std::time_t when);
 
     /**
      * The file in use ("" without one), as given to loadFile.

@@ -4,6 +4,16 @@
         "high_contrast_light": "Hoher Kontrast hell",
         "ocean": "Ozean",
         "amethyst": "Amethyst",
-        "sand": "Sand"
+        "sand": "Sand",
+        "winter": "Winter",
+        "valentine": "Valentinstag",
+        "lunar_new_year": "Mondneujahr",
+        "spring": "Frühling",
+        "summer": "Sommer",
+        "autumn": "Herbst",
+        "halloween": "Halloween",
+        "christmas": "Weihnachten",
+        "new_year": "Silvester",
+        "seasonal": "Nach Jahreszeit"
     }
 }

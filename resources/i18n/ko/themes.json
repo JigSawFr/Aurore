@@ -4,6 +4,16 @@
         "high_contrast_light": "고대비 라이트",
         "ocean": "오션",
         "amethyst": "자수정",
-        "sand": "샌드"
+        "sand": "샌드",
+        "winter": "겨울",
+        "valentine": "밸런타인데이",
+        "lunar_new_year": "설날",
+        "spring": "봄",
+        "summer": "여름",
+        "autumn": "가을",
+        "halloween": "핼러윈",
+        "christmas": "크리스마스",
+        "new_year": "새해 전야",
+        "seasonal": "계절에 따라"
     }
 }

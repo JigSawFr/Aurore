@@ -24,6 +24,7 @@
 #include <borealis/core/logger.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/theme.hpp>
+#include <borealis/core/time.hpp>
 #include <borealis/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
@@ -703,6 +704,7 @@ std::vector<std::string> Theme::checkContrast(ThemeVariant variant)
 // ---------------------------------------------------------------------------
 
 static const char* BUILTIN_PREFIX = "builtin:";
+static const char* SEASONAL_PATH  = "builtin:seasonal";
 static const int MAX_DEPTH        = 8;
 
 static const BuiltinTheme* findBuiltin(std::string id)
@@ -728,7 +730,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
         const BuiltinTheme* theme = findBuiltin(path);
         if (!theme)
             return false;
-        *text = theme->text;
+        *text = builtinThemeText(*theme, getWallTime());
         return true;
     }
 #ifdef USE_LIBROMFS
@@ -1054,7 +1056,9 @@ static std::string localized(const std::string& value)
 }
 
 static std::string currentPath;
+static std::string currentText;                  // its text, as read
 static std::unique_ptr<ParsedTheme> currentTheme; // the file in use
+static std::time_t calendarMinute = -1;          // when followCalendar() last looked
 static bool reapplying = false;
 
 static void useOverlays(const ResolvedTheme& resolved)
@@ -1086,6 +1090,7 @@ static bool applyTheme(const std::string& text, const std::string& directory, co
 
     useOverlays(resolved);
     currentPath  = path;
+    currentText  = text;
     currentTheme = std::make_unique<ParsedTheme>(theme);
 
     // A file's own text is read again on a change; text given to load() is not
@@ -1125,10 +1130,25 @@ bool Theme::loadFile(const std::string& path, ThemeVariant* variant)
     return applyTheme(text, directoryOf(path), path, variant);
 }
 
+void Theme::followCalendar()
+{
+    if (currentPath != SEASONAL_PATH)
+        return;
+    std::time_t minute = getWallTime() / 60;
+    if (minute == calendarMinute)
+        return;
+    calendarMinute = minute;
+    // The day's preset (each has both variants: the variant stays)
+    std::string text;
+    if (readThemeText(currentPath, &text) && text != currentText)
+        applyTheme(text, directoryOf(currentPath), currentPath, nullptr);
+}
+
 void Theme::reset()
 {
     currentTheme.reset();
     currentPath.clear();
+    currentText.clear();
     HotReload::setThemeFiles({});
     useOverlays(ResolvedTheme());
 }
@@ -1278,11 +1298,16 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory)
     return themes;
 }
 
+std::string Theme::seasonalTheme(std::time_t when)
+{
+    return std::string(BUILTIN_PREFIX) + seasonalThemeId(when);
+}
+
 std::vector<ThemeInfo> Theme::builtinThemes()
 {
     std::vector<ThemeInfo> themes;
     for (const BuiltinTheme& theme : builtinThemeTexts())
-        themes.push_back(inspectText(theme.text, std::string(BUILTIN_PREFIX) + theme.id));
+        themes.push_back(inspectText(builtinThemeText(theme, getWallTime()), std::string(BUILTIN_PREFIX) + theme.id));
     return themes;
 }
 
