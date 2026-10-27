@@ -28,12 +28,15 @@
 #endif
 
 #ifdef _WIN32
+// The order matters: winsock2 before iphlpapi, winioctl before ntddvdeo
+// clang-format off
+#include <winsock2.h>
 #include <iphlpapi.h>
-#include <ntddvdeo.h>
+#include <wlanapi.h>
 #include <shellapi.h>
 #include <winioctl.h>
-#include <winsock2.h>
-#include <wlanapi.h>
+#include <ntddvdeo.h>
+// clang-format on
 #elif IOS || TVOS
 #elif __APPLE__
 #include <IOKit/ps/IOPSKeys.h>
@@ -42,11 +45,13 @@
 #endif
 
 #ifdef __WINRT__
-#include <winrt/Windows.Devices.WiFi.h>
-#include <winrt/Windows.Foundation.Collections.h>
+// clang-format off
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Networking.Connectivity.h>
+#include <winrt/Windows.Devices.WiFi.h>
 #include <winrt/Windows.UI.ViewManagement.h>
+// clang-format on
 using winrt::Windows::Devices::WiFi::WiFiAdapter;
 using winrt::Windows::UI::ViewManagement::UIColorType;
 using winrt::Windows::UI::ViewManagement::UISettings;
