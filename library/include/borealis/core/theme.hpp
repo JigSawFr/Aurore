@@ -61,6 +61,32 @@ class ThemeValues
     std::unordered_map<std::string, NVGcolor> values; // base, then overlay
 };
 
+// How a theme's background_image fills the window (background_fit)
+enum class BackgroundFit
+{
+    COVER,   // scaled to cover it, centred, cut at the edges (the default)
+    CONTAIN, // scaled to fit in it whole, centred, brls/clear around it
+    TILE,    // repeated from the top left, one pixel per unit of the layout
+    CENTER,  // as is, one pixel per unit of the layout, centred
+};
+
+// A variant's background, as a theme file sets it (docs/themes.md)
+struct ThemeBackground
+{
+    static constexpr float DEFAULT_DIM = 0.35f;
+
+    // background_image: its path (Theme::resolveAsset), "" without one
+    std::string image;
+    BackgroundFit fit = BackgroundFit::COVER;
+    // background_dim: how much of brls/background veils the image (0 to 1)
+    float dim = DEFAULT_DIM;
+    // surface_opacity: the surfaces' opacity over the image (0 to 1), see
+    // Theme::addSurfaceKey; 1 without an image
+    float surfaceOpacity = 1.0f;
+
+    bool hasImage() const { return !this->image.empty(); }
+};
+
 // A theme file as listThemes() or inspect() read it, without applying it.
 struct ThemeInfo
 {
@@ -70,7 +96,9 @@ struct ThemeInfo
     std::string author;
     std::string version;
     std::string description;
-    std::string backgroundImage; // its background_image, "" without one
+    // Its background_image: the dark variant's, else the light one's; ""
+    // without one (each variant's below)
+    std::string backgroundImage;
     // Its `icon`, the Cadran icon a picker shows it with ("snowflake"...),
     // "" without one
     std::string icon;
@@ -97,9 +125,20 @@ struct ThemeInfo
     Preview lightPreview {};
     Preview darkPreview {};
 
+    // Each variant's background (image, fit, dim, surface opacity)
+    ThemeBackground lightBackground;
+    ThemeBackground darkBackground;
+    const ThemeBackground& background(ThemeVariant variant) const
+    {
+        return variant == ThemeVariant::LIGHT ? this->lightBackground : this->darkBackground;
+    }
+
     // "line 4: #12 is not a colour"…: lines skipped, files not found.
     std::vector<std::string> errors;
-    // Unknown keys and text that reads badly on its background.
+    // Unknown keys and text that reads badly on its background. Text on a
+    // background picture is checked only when the picture's colour is known:
+    // from an explicit check (inspect or listThemes with decodePictures), or
+    // once the picture was loaded in this run; a plain listing never decodes.
     std::vector<std::string> warnings;
 
     bool ok() const { return this->errors.empty(); }
@@ -198,27 +237,60 @@ class Theme
     static bool styles(ThemeVariant variant);
 
     /**
-     * The picture the file in use puts behind every screen
-     * (background_image = file.png, next to the theme file), "" without one:
-     * drawn over brls/clear, under the screens (a view with a background
-     * of its own hides it).
+     * The picture the file in use puts behind every screen in the variant
+     * in use (background_image = file.png, next to the theme file), ""
+     * without one: drawn over brls/clear, under the screens.
      */
     static std::string getBackgroundImage();
 
     /**
-     * Reads a theme file without using it: its metadata, a preview, what is
-     * wrong with it.
+     * The background of `variant` with the file in use: its image (none
+     * without a file, or for a variant the file does not style), how it
+     * fits, its veil, the surfaces' opacity.
      */
-    static ThemeInfo inspect(const std::string& path);
+    static ThemeBackground getBackground(ThemeVariant variant);
+
+    /**
+     * A file a theme names (its background_image, and any picture a theme
+     * key names), as a path: `name` is read from `directory`, the folder of
+     * the theme file (or included file) that names it, and must stay in
+     * `root`, the folder of the theme (a theme folder, or the folder of a
+     * single .theme file). No absolute path, no "x:/", no ".." out of
+     * `root`, no link out of it; "@res/..." only for a preset (`directory`
+     * "builtin:") or a theme that is itself a resource. False, with the
+     * reason in `error`, when it is refused. The one place theme files'
+     * pictures are resolved.
+     */
+    static bool resolveAsset(const std::string& name, const std::string& directory, const std::string& root,
+        std::string* path, std::string* error);
+
+    /**
+     * A key of a surface (a card, a panel) drawn over the screens'
+     * background: with a background image and surface_opacity under 1, its
+     * opacity is multiplied by it. The core's: brls/sidebar/background,
+     * brls/highlight/background, the default buttons' backgrounds; Cadran
+     * adds cadran/surf and cadran/surf2.
+     */
+    static void addSurfaceKey(const std::string& key);
+
+    /**
+     * Reads a theme file without using it: its metadata, a preview, what is
+     * wrong with it. Its pictures are only looked for (an error when one is
+     * not there), never decoded, unless `decodePictures`: then each is
+     * decoded on the calling thread, to tell a broken file and to check the
+     * text on it (for a check off the UI thread: --check-themes, a test).
+     */
+    static ThemeInfo inspect(const std::string& path, bool decodePictures = false);
 
     /**
      * Every *.theme of `directory` (a folder, or a resource folder such as
      * "@res/themes"), sorted by name: one entry per file, a broken one with
      * its errors (never skipped, never fatal). Empty when the folder does
      * not exist. From the main thread, as inspect(): the previews are made
-     * from the themes in use.
+     * from the themes in use. Cheap: colours only, no picture decoded unless
+     * `decodePictures` (as inspect()).
      */
-    static std::vector<ThemeInfo> listThemes(const std::string& directory);
+    static std::vector<ThemeInfo> listThemes(const std::string& directory, bool decodePictures = false);
 
     /**
      * The presets built into Aurore ("builtin:<id>" paths).
@@ -245,9 +317,19 @@ class Theme
 
     /**
      * The pairs of `variant` under their minimum, as "brls/text on
-     * brls/background: 3.1:1, under 4.5:1".
+     * brls/background: 3.1:1, under 4.5:1". With a background image whose
+     * colour is known (ThemeImages), text on brls/background is checked on
+     * the image's average colour under its veil, and translucent surfaces
+     * over it.
      */
     static std::vector<std::string> checkContrast(ThemeVariant variant);
+
+    /**
+     * Only the pairs the background image changes (text on the screens'
+     * background, translucent surfaces), on its average colour under its
+     * veil; empty without an image, or while its colour is not known.
+     */
+    static std::vector<std::string> checkBackgroundContrast(ThemeVariant variant);
 
     /**
      * Changes each time a colour or a metric changes (a theme file used, a

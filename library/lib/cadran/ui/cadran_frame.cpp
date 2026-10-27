@@ -66,6 +66,8 @@ void cadran::install_theme()
 #endif
     }
     for (const pal::Contrast& pair : pal::CONTRAST) brls::Theme::addContrastCheck(pair.ink, pair.surface, pair.minimum);
+    // Cards and panels: a theme's background image shows through them (surface_opacity)
+    for (const char* key : { "cadran/surf", "cadran/surf2" }) brls::Theme::addSurfaceKey(key);
 #ifndef __SWITCH__
     // And held where it is (brls::setHighlightAnimationStill). The footer's hints too:
     // drawn as once a screen or a dialog has opened, not greyed while its
@@ -642,6 +644,10 @@ class RailFold : public brls::Box
         const float t = s_rail_open, out = this->visible();
         nvgSave(vg);
         nvgIntersectScissor(vg, x, y, out, height);
+        // Over a theme's picture, a translucent rail would show the tab under
+        // it: the picture first, as behind the screens
+        if (brls::Application::hasThemeBackground() && ctx->theme["brls/sidebar/background"].a < 1.0f)
+            brls::Application::drawThemeBackground(vg, x, y, out, height);
         brls::Box::draw(vg, x, y, width, height, style, ctx);
         // The separators, from their left end to as far as the rail is out.
         const NVGcolor line = brls::Application::getTheme()["brls/sidebar/separator"];

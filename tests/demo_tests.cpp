@@ -22,6 +22,7 @@
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
 #include <borealis/cadran/ui/ui.hpp>
+#include <borealis/core/theme_image.hpp>
 #include <borealis/test/harness.hpp>
 
 #include <cmath>
@@ -468,6 +469,245 @@ BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
     brls::Rect frame = swatch->getFrame();
     BRLS_CHECK(std::fabs(area.getMinX() - frame.getMinX()) <= 1 && std::fabs(area.getMinY() - frame.getMinY()) <= 1);
     BRLS_CHECK(std::fabs(area.getWidth() - frame.getWidth()) <= 2 && std::fabs(area.getHeight() - frame.getHeight()) <= 2);
+}
+
+// A folder of theme files and pictures, removed afterwards
+struct ThemeFolder
+{
+    std::filesystem::path dir;
+
+    explicit ThemeFolder(const char* name)
+        : dir(std::filesystem::temp_directory_path() / name)
+    {
+        std::filesystem::remove_all(dir);
+        std::filesystem::create_directories(dir);
+    }
+    ~ThemeFolder() { std::filesystem::remove_all(dir); }
+
+    std::string write(const std::string& name, const std::string& text)
+    {
+        std::filesystem::create_directories((dir / name).parent_path());
+        std::ofstream(dir / name) << text;
+        return (dir / name).generic_string();
+    }
+
+    // A picture of one colour
+    std::string picture(const std::string& name, unsigned char r, unsigned char g, unsigned char b, int width = 64,
+        int height = 36)
+    {
+        std::filesystem::create_directories((dir / name).parent_path());
+        brls::test::Image image;
+        image.width  = width;
+        image.height = height;
+        for (int i = 0; i < width * height; i++)
+            image.rgba.insert(image.rgba.end(), { r, g, b, 255 });
+        image.savePng((dir / name).string());
+        return (dir / name).generic_string();
+    }
+};
+
+static bool hasErrorWith(const brls::ThemeInfo& info, const std::string& text)
+{
+    for (const std::string& error : info.errors)
+        if (error.find(text) != std::string::npos)
+            return true;
+    return false;
+}
+
+BRLS_TEST(theme_pictures_stay_in_their_folder)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_assets_test");
+    const std::string root = themes.dir.generic_string();
+    themes.picture("night.png", 10, 20, 40);
+    themes.picture("aurora/sky/night.png", 10, 20, 40);
+    themes.picture("outside.png", 10, 20, 40);
+    themes.write("single.theme", "name = Single\nbackground_image = night.png\n");
+    themes.write("aurora/theme.theme", "name = Aurora\n@include parts/sky.inc\n");
+    themes.write("aurora/parts/sky.inc", "background_image = ../sky/night.png\n");
+    themes.write("aurora/notes.txt", "not a theme\n");
+    themes.write("empty/readme.txt", "a folder without theme.theme\n");
+
+    // Folder themes are listed with the single files, named after their folder
+    std::vector<brls::ThemeInfo> listed = brls::Theme::listThemes(root);
+    BRLS_CHECK_EQ(listed.size(), (size_t)2);
+    for (const brls::ThemeInfo& info : listed)
+        BRLS_CHECK(info.ok());
+    BRLS_CHECK_EQ(listed[0].id, std::string("aurora"));
+    BRLS_CHECK_EQ(listed[0].path, root + "/aurora/theme.theme");
+    BRLS_CHECK_EQ(listed[0].darkBackground.image, root + "/aurora/sky/night.png");
+    BRLS_CHECK_EQ(listed[1].id, std::string("single"));
+    BRLS_CHECK_EQ(listed[1].backgroundImage, root + "/night.png");
+
+    // Out of the theme's folder: refused, an error, never a crash
+    std::string path, error;
+    const std::string folder = root + "/aurora";
+    for (const char* name : { "../outside.png", "sky/../../outside.png", "/etc/passwd", "sdmc:/x.png", "C:/x.png",
+             "@res/img/demo_icon.jpg", "sky\\night.png", "..", "." })
+    {
+        BRLS_CHECK(!brls::Theme::resolveAsset(name, folder, folder, &path, &error));
+        BRLS_CHECK(!error.empty());
+    }
+    BRLS_CHECK(brls::Theme::resolveAsset("./sky/x/../night.png", folder, folder, &path, &error));
+    BRLS_CHECK_EQ(path, folder + "/sky/night.png");
+    // From an included file in a subfolder, still in the theme's folder
+    BRLS_CHECK(brls::Theme::resolveAsset("../sky/night.png", folder + "/parts", folder, &path, &error));
+    BRLS_CHECK_EQ(path, folder + "/sky/night.png");
+    // A preset's pictures are the app's resources
+    BRLS_CHECK(brls::Theme::resolveAsset("@res/img/demo_icon.jpg", "builtin:", "builtin:", &path, &error));
+    BRLS_CHECK(!brls::Theme::resolveAsset("night.png", "builtin:", "builtin:", &path, &error));
+
+    const std::string escapes = themes.write("aurora2/theme.theme",
+        "name = Escapes\nbackground_image = ../outside.png\n[light]\nbackground_image = /etc/passwd\n");
+    brls::ThemeInfo info = brls::Theme::inspect(escapes);
+    BRLS_CHECK(hasErrorWith(info, "goes out of the theme's folder"));
+    BRLS_CHECK(hasErrorWith(info, "an absolute path is not allowed"));
+    BRLS_CHECK(!info.darkBackground.hasImage() && !info.lightBackground.hasImage());
+
+#ifndef _WIN32
+    // A link in the folder to a file out of it
+    std::filesystem::create_symlink(themes.dir / "outside.png", themes.dir / "aurora" / "link.png");
+    BRLS_CHECK(!brls::Theme::resolveAsset("link.png", folder, folder, &path, &error));
+    BRLS_CHECK(error.find("link") != std::string::npos);
+#endif
+
+    // A picture that is not there, or not a picture
+    themes.write("broken.jpg", "not a jpeg");
+    BRLS_CHECK(hasErrorWith(brls::Theme::inspect(themes.write("missing.theme", "background_image = nowhere.png\n")),
+        "cannot read"));
+    // A file that is not a picture: told by a check that decodes it only
+    const std::string broken = themes.write("broken.theme", "background_image = broken.jpg\n");
+    BRLS_CHECK(brls::Theme::inspect(broken).ok());
+    BRLS_CHECK(hasErrorWith(brls::Theme::inspect(broken, true), "cannot read"));
+    // Used anyway: nothing drawn, no crash
+    BRLS_CHECK(brls::Theme::loadFile(root + "/broken.theme"));
+    h.settle();
+    BRLS_CHECK(!brls::Application::hasThemeBackground());
+    brls::Theme::reset();
+}
+
+BRLS_TEST(theme_background_keys_are_read_and_inherited)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_background_test");
+    themes.picture("a.png", 10, 20, 40);
+    themes.picture("b.png", 230, 235, 240);
+    const std::string base = themes.write("base.theme",
+        "name = Base\nbackground_image = a.png\nbackground_fit = tile\nbackground_dim = 0.2\nsurface_opacity = 0.5\n"
+        "[light]\nbackground = #f0f0f0\n[dark]\nbackground = #101010\nbackground_dim = 0.6\n");
+    const std::string child = themes.write("child.theme",
+        "inherit = base.theme\n[light]\nbackground_image = b.png\nbackground_fit = contain\n[dark]\nsurface_opacity = 0.8\n");
+    const std::string plain = themes.write("plain.theme", "name = Plain\nsurface_opacity = 0.5\naccent = #3ddc97\n");
+    const std::string none  = themes.write("none.theme", "inherit = base.theme\n[light]\nbackground_image = none\n");
+    const std::string wrong = themes.write("wrong.theme",
+        "background_image = a.png\nbackground_fit = stretch\nbackground_dim = 2\nsurface_opacity = half\n");
+
+    brls::ThemeInfo info = brls::Theme::inspect(base);
+    BRLS_CHECK(info.ok());
+    BRLS_CHECK(info.lightBackground.image == info.darkBackground.image && info.lightBackground.hasImage());
+    BRLS_CHECK(info.lightBackground.fit == brls::BackgroundFit::TILE);
+    BRLS_CHECK_EQ(info.lightBackground.dim, 0.2f);
+    BRLS_CHECK_EQ(info.darkBackground.dim, 0.6f); // its own variant's line wins
+    BRLS_CHECK_EQ(info.darkBackground.surfaceOpacity, 0.5f);
+
+    info = brls::Theme::inspect(child);
+    BRLS_CHECK(info.ok());
+    BRLS_CHECK(info.lightBackground.image.find("b.png") != std::string::npos);
+    BRLS_CHECK(info.darkBackground.image.find("a.png") != std::string::npos);
+    BRLS_CHECK(info.lightBackground.fit == brls::BackgroundFit::CONTAIN);
+    BRLS_CHECK(info.darkBackground.fit == brls::BackgroundFit::TILE);
+    BRLS_CHECK_EQ(info.darkBackground.dim, 0.6f);
+    BRLS_CHECK_EQ(info.lightBackground.surfaceOpacity, 0.5f);
+    BRLS_CHECK_EQ(info.darkBackground.surfaceOpacity, 0.8f);
+
+    info = brls::Theme::inspect(none);
+    BRLS_CHECK(!info.lightBackground.hasImage() && info.darkBackground.hasImage());
+    BRLS_CHECK_EQ(info.lightBackground.surfaceOpacity, 1.0f); // nothing to show through
+
+    // The defaults, and surface_opacity without a picture: no effect
+    info = brls::Theme::inspect(plain);
+    BRLS_CHECK(info.ok() && !info.darkBackground.hasImage());
+    BRLS_CHECK(info.darkBackground.fit == brls::BackgroundFit::COVER);
+    BRLS_CHECK_EQ(info.darkBackground.dim, brls::ThemeBackground::DEFAULT_DIM);
+    BRLS_CHECK_EQ(info.darkBackground.surfaceOpacity, 1.0f);
+
+    info = brls::Theme::inspect(wrong);
+    BRLS_CHECK_EQ(info.errors.size(), (size_t)3);
+    BRLS_CHECK(info.darkBackground.fit == brls::BackgroundFit::COVER);
+
+    // Used: the surfaces let the picture through, and are opaque again after
+    NVGcolor surface = brls::Theme::getDarkTheme()["cadran/surf"];
+    BRLS_CHECK(brls::Theme::loadFile(child));
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+    h.settle();
+    BRLS_CHECK(brls::Application::hasThemeBackground());
+    BRLS_CHECK(std::fabs(brls::Theme::getDarkTheme()["cadran/surf"].a - surface.a * 0.8f) < 0.001f);
+    BRLS_CHECK(std::fabs(brls::Theme::getDarkTheme()["brls/sidebar/background"].a - 0.8f) < 0.001f);
+    BRLS_CHECK(brls::Theme::getDarkTheme()["brls/background"].a == 1.0f);
+    BRLS_CHECK(brls::Theme::loadFile(plain));
+    h.settle();
+    BRLS_CHECK(!brls::Application::hasThemeBackground());
+    BRLS_CHECK_EQ(brls::Theme::getDarkTheme()["cadran/surf"].a, 1.0f);
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK_EQ(brls::Theme::getDarkTheme()["cadran/surf"].a, surface.a);
+}
+
+BRLS_TEST(theme_text_is_checked_on_its_picture)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_contrast_test");
+    themes.picture("snow.png", 250, 250, 250);
+    themes.picture("night.png", 8, 10, 20);
+    // White text on a dark theme: fine on its colour, not on a white picture
+    // with no veil
+    const char* dark = "inherit = dark\nbackground = #101418\ntext = #ffffff\nbackground_dim = 0\n";
+    const std::string snow  = themes.write("snow.theme", std::string(dark) + "background_image = snow.png\n");
+    const std::string night = themes.write("night.theme", std::string(dark) + "background_image = night.png\n");
+
+    auto onPicture = [](const brls::ThemeInfo& info)
+    {
+        for (const std::string& warning : info.warnings)
+            if (warning.find("brls/text on brls/background over the background image") != std::string::npos)
+                return true;
+        return false;
+    };
+    // A plain listing decodes nothing: no check on the picture yet
+    NVGcolor mean;
+    std::vector<brls::ThemeInfo> listed = brls::Theme::listThemes(themes.dir.generic_string());
+    BRLS_CHECK_EQ(listed.size(), (size_t)2);
+    for (const brls::ThemeInfo& info : listed)
+        BRLS_CHECK(info.ok() && !onPicture(info));
+    BRLS_CHECK(!brls::ThemeImages::knownMeanColor(listed[0].backgroundImage, &mean));
+
+    // An explicit check decodes them
+    BRLS_CHECK(onPicture(brls::Theme::inspect(snow, true)));
+    BRLS_CHECK(!onPicture(brls::Theme::inspect(night, true)));
+    // ...and remembers their colour, for the next listing
+    BRLS_CHECK(onPicture(brls::Theme::inspect(snow)));
+
+    // A veil of the background colour makes it read again
+    const std::string veiled = themes.write("veiled.theme", std::string(dark) + "background_image = snow.png\nbackground_dim = 0.9\n");
+    BRLS_CHECK(!onPicture(brls::Theme::inspect(veiled, true)));
+
+    // Used, the check runs once the picture is loaded (decoded off the UI
+    // thread, its colour recorded then)
+    ThemeFolder fresh("aurore_theme_contrast_load_test");
+    fresh.picture("sky.png", 250, 250, 250);
+    const std::string loaded = fresh.write("sky.theme", std::string(dark) + "background_image = sky.png\n");
+    BRLS_CHECK(!onPicture(brls::Theme::inspect(loaded)));
+    BRLS_CHECK(brls::Theme::loadFile(loaded));
+    h.settle();
+    BRLS_CHECK(!brls::Theme::checkBackgroundContrast(brls::ThemeVariant::DARK).empty());
+    BRLS_CHECK(onPicture(brls::Theme::inspect(loaded)));
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK(brls::Theme::loadFile(snow));
+    h.settle();
+    BRLS_CHECK(!brls::Theme::checkBackgroundContrast(brls::ThemeVariant::DARK).empty());
+    brls::Theme::reset();
+    h.settle();
+    BRLS_CHECK(brls::Theme::checkBackgroundContrast(brls::ThemeVariant::DARK).empty());
 }
 
 BRLS_TEST(images_compare_with_tolerance)

@@ -24,6 +24,7 @@
 #include <borealis/core/logger.hpp>
 #include <borealis/core/style.hpp>
 #include <borealis/core/theme.hpp>
+#include <borealis/core/theme_image.hpp>
 #include <borealis/core/time.hpp>
 #include <borealis/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
@@ -48,6 +49,7 @@ namespace fs = std::experimental::filesystem;
 #include <fstream>
 #include <map>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -668,35 +670,61 @@ void Theme::addContrastCheck(const std::string& ink, const std::string& surface,
     contrastChecks.push_back({ ink, surface, minimum });
 }
 
-static std::vector<std::string> checkColors(const ColorMap& colors)
+// The surfaces a background image shows through (surface_opacity)
+static std::vector<std::string> surfaceKeys = {
+    "brls/sidebar/background",
+    "brls/highlight/background",
+    "brls/button/default_enabled_background",
+    "brls/button/default_disabled_background",
+};
+
+void Theme::addSurfaceKey(const std::string& key)
+{
+    if (std::find(surfaceKeys.begin(), surfaceKeys.end(), key) == surfaceKeys.end())
+        surfaceKeys.push_back(key);
+}
+
+// `backdrop`, when given: what the screens' background is drawn as (a
+// background image's average colour under its veil). `backdropOnly`: the
+// pairs it changes only.
+static std::vector<std::string> checkColors(const ColorMap& colors, const NVGcolor* backdrop = nullptr,
+    bool backdropOnly = false)
 {
     std::vector<std::string> warnings;
     auto background = colors.find("brls/background");
     if (background == colors.end())
         return warnings;
-    NVGcolor under = over(background->second, nvgRGB(0, 0, 0));
+    NVGcolor under = backdrop ? *backdrop : over(background->second, nvgRGB(0, 0, 0));
     for (auto& check : contrastChecks)
     {
         auto ink     = colors.find(check.ink);
         auto surface = colors.find(check.surface);
         if (ink == colors.end() || surface == colors.end())
             continue;
-        NVGcolor drawnSurface = over(surface->second, under);
+        // Text on the screens' background sits on the image
+        bool onScreen = backdrop && (check.surface == "brls/background" || check.surface == "brls/clear");
+        if (backdropOnly && !onScreen && !(backdrop && surface->second.a < 1.0f))
+            continue;
+        NVGcolor drawnSurface = onScreen ? under : over(surface->second, under);
         float ratio           = Theme::contrast(over(ink->second, drawnSurface), drawnSurface);
         if (ratio < check.minimum)
         {
             char text[256];
-            std::snprintf(text, sizeof(text), "%s on %s reads badly: %.1f:1, under %.1f:1", check.ink.c_str(),
-                check.surface.c_str(), ratio, check.minimum);
+            std::snprintf(text, sizeof(text), "%s on %s%s reads badly: %.1f:1, under %.1f:1", check.ink.c_str(),
+                check.surface.c_str(), backdrop ? " over the background image" : "", ratio, check.minimum);
             warnings.push_back(text);
         }
     }
     return warnings;
 }
 
-std::vector<std::string> Theme::checkContrast(ThemeVariant variant)
+// The screens' background as drawn over `background`'s image: its average
+// colour under the veil of brls/background
+static NVGcolor backdropOf(const ColorMap& colors, const ThemeBackground& background, NVGcolor mean)
 {
-    return checkColors(Theme::get(variant).getValues()->getColors());
+    NVGcolor veil = lookup(colors, "brls/background", nvgRGB(0, 0, 0));
+    veil.a *= background.dim;
+    return over(veil, mean);
 }
 
 // ---------------------------------------------------------------------------
@@ -704,6 +732,8 @@ std::vector<std::string> Theme::checkContrast(ThemeVariant variant)
 // ---------------------------------------------------------------------------
 
 static const char* BUILTIN_PREFIX = "builtin:";
+// A theme folder's file: <themes>/<id>/theme.theme, next to its pictures
+static const char* THEME_FOLDER_FILE = "theme.theme";
 static const char* SEASONAL_PATH  = "builtin:seasonal";
 static const int MAX_DEPTH        = 8;
 
@@ -794,16 +824,121 @@ static std::string resolvePath(const std::string& name, const std::string& direc
     return path;
 }
 
+// `text` cut at each '/'
+static std::vector<std::string> segmentsOf(const std::string& text)
+{
+    std::vector<std::string> segments;
+    std::stringstream stream(text);
+    std::string segment;
+    while (std::getline(stream, segment, '/'))
+        segments.push_back(segment);
+    return segments;
+}
+
+bool Theme::resolveAsset(const std::string& raw, const std::string& directory, const std::string& root,
+    std::string* path, std::string* error)
+{
+    std::string name = trim(raw);
+    if (name.size() >= 2 && name.front() == '"' && name.back() == '"')
+        name = name.substr(1, name.size() - 2);
+    auto refuse = [&](const std::string& why)
+    {
+        *error = name + ": " + why;
+        return false;
+    };
+    if (name.empty())
+        return refuse("no file named");
+
+    // A preset's pictures, or a resource theme's, may be the app's resources
+    bool trusted = root == BUILTIN_PREFIX || startsWith(root, "@res/") || root == "@res";
+    if (startsWith(name, "@res/"))
+    {
+        if (!trusted)
+            return refuse("a theme file's pictures are in its folder, not in the app's resources");
+        if (name.find("..") != std::string::npos)
+            return refuse("\"..\" is not allowed");
+        *path = name;
+        return true;
+    }
+    if (root == BUILTIN_PREFIX)
+        return refuse("a preset's pictures are resources (@res/...)");
+    if (name.front() == '/' || name.find(':') != std::string::npos || name.find('\\') != std::string::npos)
+        return refuse("an absolute path is not allowed: a theme's pictures are in its folder");
+
+    // From the root, through the including file's folder, to the file
+    std::string inside = directory;
+    if (inside == root)
+        inside.clear();
+    else if (startsWith(inside, root + "/"))
+        inside = inside.substr(root.size() + 1);
+    else if (!root.empty())
+        return refuse("read from outside the theme's folder");
+    std::vector<std::string> kept;
+    for (const std::string& segment : segmentsOf(inside + (inside.empty() ? "" : "/") + name))
+    {
+        if (segment.empty() || segment == ".")
+            continue;
+        if (segment == "..")
+        {
+            if (kept.empty())
+                return refuse("goes out of the theme's folder");
+            kept.pop_back();
+            continue;
+        }
+        kept.push_back(segment);
+    }
+    if (kept.empty())
+        return refuse("not a file");
+    std::string relative;
+    for (const std::string& segment : kept)
+        relative += (relative.empty() ? "" : "/") + segment;
+    std::string resolved = root.empty() ? relative : root + "/" + relative;
+
+    // A link inside the folder to a file out of it is refused too (where
+    // the file system has links and can say where they go: the path is
+    // already in the folder by its name)
+    if (!trusted)
+    {
+        bool out = false;
+        try
+        {
+            if (fs::exists(resolved))
+            {
+                fs::path within = fs::canonical(resolved).lexically_relative(fs::canonical(root.empty() ? "." : root));
+                out             = within.empty() || *within.begin() == "..";
+            }
+        }
+        catch (const std::exception& e)
+        {
+        }
+        if (out)
+            return refuse("a link out of the theme's folder");
+    }
+    *path = resolved;
+    return true;
+}
+
 namespace
 {
+// A background as a file writes it, for every variant it styles or one:
+// what it does not say is unset (and inherited)
+struct BackgroundSpec
+{
+    std::optional<std::string> image; // its path; "" for none
+    std::optional<BackgroundFit> fit;
+    std::optional<float> dim;
+    std::optional<float> surfaceOpacity;
+};
+
 // A file read, with what it includes and inherits
 struct ParsedTheme
 {
     std::string name, author, version, description;
     std::string inherit;
-    std::string counterpart;     // its path, from the file's folder
-    std::string backgroundImage; // its path, from the file's folder
+    std::string counterpart; // its path, from the file's folder
     std::string icon;
+    // [0]: every variant the file styles, [1] the light one, [2] the dark
+    BackgroundSpec background[3];
     std::vector<std::string> files; // the files it includes and inherits, read
     bool lightSection = false, darkSection = false;
     bool light = false, dark = false;
@@ -817,8 +952,23 @@ struct ParsedTheme
 };
 }
 
-static void parseThemeText(const std::string& text, const std::string& directory, const std::string& label, int depth,
-    bool root, ParsedTheme* out)
+static bool parseFit(const std::string& value, BackgroundFit* fit)
+{
+    static const std::pair<const char*, BackgroundFit> FITS[] = { { "cover", BackgroundFit::COVER },
+        { "contain", BackgroundFit::CONTAIN }, { "tile", BackgroundFit::TILE }, { "center", BackgroundFit::CENTER } };
+    for (auto& [name, each] : FITS)
+        if (value == name)
+        {
+            *fit = each;
+            return true;
+        }
+    return false;
+}
+
+// `directory`: the folder of the file read; `assets`: the folder its
+// pictures must stay in (the theme's, Theme::resolveAsset)
+static void parseThemeText(const std::string& text, const std::string& directory, const std::string& assets,
+    const std::string& label, int depth, bool root, ParsedTheme* out)
 {
     auto where = [&label](int number) { return (label.empty() ? std::string("line ") : label + ":") + std::to_string(number); };
 
@@ -858,8 +1008,11 @@ static void parseThemeText(const std::string& text, const std::string& directory
                 out->errors.push_back(where(number) + ": @include " + name + ": cannot read " + path);
             else
             {
+                // An include in the theme's folder keeps its pictures there
+                std::string folder = directoryOf(path);
+                bool inside        = folder == assets || startsWith(folder, assets + "/");
                 out->files.push_back(path);
-                parseThemeText(included, directoryOf(path), name, depth + 1, false, out);
+                parseThemeText(included, folder, inside ? assets : folder, name, depth + 1, false, out);
             }
             continue;
         }
@@ -897,12 +1050,41 @@ static void parseThemeText(const std::string& text, const std::string& directory
             continue;
         }
 
-        if (section.empty() && key == "background_image")
+        // The background, for every variant or one; an included file's is
+        // the including one's too
+        if ((section.empty() || section == "light" || section == "dark")
+            && (key == "background_image" || key == "background_fit" || key == "background_dim" || key == "surface_opacity"))
         {
-            // An included file's is the including one's too
-            out->backgroundImage = resolvePath(value, directory);
-            if (startsWith(out->backgroundImage, BUILTIN_PREFIX))
-                out->errors.push_back(where(number) + ": background_image is a file, not " + value);
+            BackgroundSpec& background = out->background[section == "light" ? 1 : section == "dark" ? 2 : 0];
+            if (key == "background_image")
+            {
+                std::string path, error;
+                if (value == "none")
+                    background.image = "";
+                else if (Theme::resolveAsset(value, directory, assets, &path, &error))
+                    background.image = path;
+                else
+                    out->errors.push_back(where(number) + ": background_image " + error);
+            }
+            else if (key == "background_fit")
+            {
+                BackgroundFit fit;
+                if (parseFit(value, &fit))
+                    background.fit = fit;
+                else
+                    out->errors.push_back(where(number) + ": background_fit is cover, contain, tile or center, not " + value);
+            }
+            else
+            {
+                char* end;
+                float number_ = std::strtof(value.c_str(), &end);
+                if (value.empty() || *end != '\0' || !(number_ >= 0.0f && number_ <= 1.0f))
+                    out->errors.push_back(where(number) + ": " + key + " is a number from 0 to 1, not " + value);
+                else if (key == "background_dim")
+                    background.dim = number_;
+                else
+                    background.surfaceOpacity = number_;
+            }
             continue;
         }
 
@@ -952,6 +1134,26 @@ static void parseThemeText(const std::string& text, const std::string& directory
     }
 }
 
+// What a file does not say of its background, from the file it inherits:
+// its own lines win, those for every variant over the inherited file's for
+// one variant
+static void inheritBackground(BackgroundSpec* own, const BackgroundSpec* parent)
+{
+    auto inherit = [&](auto field)
+    {
+        bool everyVariant = (own[0].*field).has_value();
+        if (!everyVariant)
+            own[0].*field = parent[0].*field;
+        for (int slot : { 1, 2 })
+            if (!(own[slot].*field).has_value() && !everyVariant)
+                own[slot].*field = parent[slot].*field;
+    };
+    inherit(&BackgroundSpec::image);
+    inherit(&BackgroundSpec::fit);
+    inherit(&BackgroundSpec::dim);
+    inherit(&BackgroundSpec::surfaceOpacity);
+}
+
 // The file's `inherit` and the variants it styles: the inherited file's
 // lines come first, this one's over them
 static void resolveInherit(ParsedTheme* theme, const std::string& directory, int depth)
@@ -975,7 +1177,7 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
     else
     {
         theme->files.push_back(path);
-        parseThemeText(text, directoryOf(path), inherit, depth + 1, true, &parent);
+        parseThemeText(text, directoryOf(path), directoryOf(path), inherit, depth + 1, true, &parent);
         resolveInherit(&parent, directoryOf(path), depth + 1);
         theme->files.insert(theme->files.end(), parent.files.begin(), parent.files.end());
     }
@@ -986,8 +1188,7 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
         theme->colors[slot].insert(theme->colors[slot].begin(), parent.colors[slot].begin(), parent.colors[slot].end());
     }
     theme->metrics.insert(theme->metrics.begin(), parent.metrics.begin(), parent.metrics.end());
-    if (theme->backgroundImage.empty())
-        theme->backgroundImage = parent.backgroundImage;
+    inheritBackground(theme->background, parent.background);
     if (theme->icon.empty())
         theme->icon = parent.icon;
     theme->errors.insert(theme->errors.begin(), parent.errors.begin(), parent.errors.end());
@@ -1004,11 +1205,29 @@ struct ResolvedTheme
 {
     ColorMap overlay[2]; // [0] light, [1] dark; empty for a variant not styled
     MetricMap metrics;
+    ThemeBackground background[2]; // as overlay; no image for a variant not styled
     std::vector<std::string> warnings;
 };
 }
 
-static ResolvedTheme resolveTheme(const ParsedTheme& theme)
+// Variant `v`'s background (0 light, 1 dark): its own lines, else those for
+// every variant, else the defaults
+static ThemeBackground resolveBackground(const BackgroundSpec* spec, int v)
+{
+    ThemeBackground background;
+    const BackgroundSpec& own = spec[v + 1];
+    const BackgroundSpec& all = spec[0];
+    background.image          = own.image.value_or(all.image.value_or(""));
+    background.fit            = own.fit.value_or(all.fit.value_or(BackgroundFit::COVER));
+    background.dim            = own.dim.value_or(all.dim.value_or(ThemeBackground::DEFAULT_DIM));
+    background.surfaceOpacity = background.hasImage() ? own.surfaceOpacity.value_or(all.surfaceOpacity.value_or(1.0f)) : 1.0f;
+    return background;
+}
+
+// `decodeImages`: a background image's colour, for the contrast checks, is
+// worked out here when not known yet (inspect); else (a theme used) the
+// checks wait for it to be loaded (Application, checkBackgroundContrast)
+static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = false)
 {
     ResolvedTheme resolved;
     for (int v = 0; v < 2; v++)
@@ -1035,7 +1254,25 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme)
         ColorMap all = base;
         for (auto& [key, color] : overlay)
             all[key] = color;
-        for (const std::string& warning : checkColors(all))
+
+        // Over a background image, the surfaces let it show through
+        const ThemeBackground& background = resolved.background[v] = resolveBackground(theme.background, v);
+        if (background.hasImage() && background.surfaceOpacity < 1.0f)
+            for (const std::string& key : surfaceKeys)
+            {
+                auto it = all.find(key);
+                if (it == all.end())
+                    continue;
+                it->second.a *= background.surfaceOpacity;
+                overlay[key] = it->second;
+            }
+
+        NVGcolor mean;
+        bool known = background.hasImage()
+            && (decodeImages ? ThemeImages::meanColor(background.image, &mean)
+                             : ThemeImages::knownMeanColor(background.image, &mean));
+        NVGcolor backdrop = known ? backdropOf(all, background, mean) : NVGcolor {};
+        for (const std::string& warning : checkColors(all, known ? &backdrop : nullptr))
             resolved.warnings.push_back(std::string(name) + ": " + warning);
         resolved.overlay[v] = std::move(overlay);
     }
@@ -1054,7 +1291,7 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme)
 static ParsedTheme parseTheme(const std::string& text, const std::string& directory)
 {
     ParsedTheme theme;
-    parseThemeText(text, directory, "", 0, true, &theme);
+    parseThemeText(text, directory, directory, "", 0, true, &theme);
     resolveInherit(&theme, directory, 0);
     return theme;
 }
@@ -1068,6 +1305,7 @@ static std::string localized(const std::string& value)
 static std::string currentPath;
 static std::string currentText;                  // its text, as read
 static std::unique_ptr<ParsedTheme> currentTheme; // the file in use
+static ThemeBackground currentBackground[2];       // its backgrounds, [0] light
 static std::time_t calendarMinute = -1;          // when followCalendar() last looked
 static bool reapplying = false;
 
@@ -1076,6 +1314,8 @@ static void useOverlays(const ResolvedTheme& resolved)
     Theme::getLightTheme().getValues()->setOverlay(resolved.overlay[0]);
     Theme::getDarkTheme().getValues()->setOverlay(resolved.overlay[1]);
     getStyle().getValues()->setOverlay(resolved.metrics);
+    currentBackground[0] = resolved.background[0];
+    currentBackground[1] = resolved.background[1];
     generation++;
 }
 
@@ -1173,9 +1413,38 @@ const std::string& Theme::getCurrentPath()
     return currentPath;
 }
 
+ThemeBackground Theme::getBackground(ThemeVariant variant)
+{
+    return currentBackground[variant == ThemeVariant::LIGHT ? 0 : 1];
+}
+
 std::string Theme::getBackgroundImage()
 {
-    return currentTheme ? currentTheme->backgroundImage : "";
+    return getBackground(Application::getPlatform() ? Application::getThemeVariant() : ThemeVariant::DARK).image;
+}
+
+std::vector<std::string> Theme::checkContrast(ThemeVariant variant)
+{
+    const ColorMap& colors     = Theme::get(variant).getValues()->getColors();
+    ThemeBackground background = getBackground(variant);
+    NVGcolor mean;
+    if (background.hasImage() && ThemeImages::knownMeanColor(background.image, &mean))
+    {
+        NVGcolor backdrop = backdropOf(colors, background, mean);
+        return checkColors(colors, &backdrop);
+    }
+    return checkColors(colors);
+}
+
+std::vector<std::string> Theme::checkBackgroundContrast(ThemeVariant variant)
+{
+    const ColorMap& colors     = Theme::get(variant).getValues()->getColors();
+    ThemeBackground background = getBackground(variant);
+    NVGcolor mean;
+    if (!background.hasImage() || !ThemeImages::knownMeanColor(background.image, &mean))
+        return {};
+    NVGcolor backdrop = backdropOf(colors, background, mean);
+    return checkColors(colors, &backdrop, true);
 }
 
 static ThemeInfo::Preview previewOf(const ColorMap& base, const ColorMap& overlay)
@@ -1202,28 +1471,48 @@ static ThemeInfo::Preview previewOf(const ColorMap& base, const ColorMap& overla
     return preview;
 }
 
-static ThemeInfo inspectText(const std::string& text, const std::string& path)
+// `decodePictures`: its pictures decoded here, to check that they are
+// pictures and the text on them (an explicit check); else only that they
+// are there, and the text on those whose colour is known already
+static ThemeInfo inspectText(const std::string& text, const std::string& path, bool decodePictures = false)
 {
     ThemeInfo info;
     info.path = path;
-    std::string file = path.substr(path.find_last_of("/:") == std::string::npos ? 0 : path.find_last_of("/:") + 1);
-    info.id   = endsWith(file, ".theme") ? file.substr(0, file.size() - 6) : file;
+    // A theme folder's file is named after its folder
+    std::string named = path;
+    if (named == THEME_FOLDER_FILE || endsWith(named, std::string("/") + THEME_FOLDER_FILE))
+        named = directoryOf(named);
+    std::string file = named.substr(named.find_last_of("/:") == std::string::npos ? 0 : named.find_last_of("/:") + 1);
+    info.id          = endsWith(file, ".theme") ? file.substr(0, file.size() - 6) : file;
 
     ParsedTheme theme      = parseTheme(text, directoryOf(path));
-    ResolvedTheme resolved = resolveTheme(theme);
+    ResolvedTheme resolved = resolveTheme(theme, decodePictures);
     info.name        = theme.name.empty() ? info.id : localized(theme.name);
     info.author      = localized(theme.author);
     info.version     = theme.version;
     info.description = localized(theme.description);
     info.light       = theme.light;
     info.dark        = theme.dark;
-    info.backgroundImage = theme.backgroundImage;
+    info.lightBackground = resolved.background[0];
+    info.darkBackground  = resolved.background[1];
+    info.backgroundImage = info.darkBackground.hasImage() ? info.darkBackground.image : info.lightBackground.image;
     info.icon        = theme.icon;
     info.counterpart = theme.counterpart;
     info.lightPreview = previewOf(Theme::getLightTheme().getValues()->getBaseColors(), resolved.overlay[0]);
     info.darkPreview  = previewOf(Theme::getDarkTheme().getValues()->getBaseColors(), resolved.overlay[1]);
     info.errors      = theme.errors;
     info.warnings    = resolved.warnings;
+
+    // Its pictures must be there (and be pictures, when decoded)
+    for (const ThemeBackground* background : { &info.lightBackground, &info.darkBackground })
+    {
+        NVGcolor mean;
+        std::string error = "background_image: cannot read " + background->image;
+        bool readable     = decodePictures ? ThemeImages::meanColor(background->image, &mean)
+                                           : ThemeImages::exists(background->image);
+        if (background->hasImage() && !readable && std::find(info.errors.begin(), info.errors.end(), error) == info.errors.end())
+            info.errors.push_back(error);
+    }
 
     // The counterpart must have the variant this one has not
     if (!theme.counterpart.empty())
@@ -1244,7 +1533,7 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path)
     return info;
 }
 
-ThemeInfo Theme::inspect(const std::string& path)
+ThemeInfo Theme::inspect(const std::string& path, bool decodePictures)
 {
     std::string text;
     if (!readThemeText(path, &text))
@@ -1255,7 +1544,7 @@ ThemeInfo Theme::inspect(const std::string& path)
         info.errors.push_back("cannot read " + path);
         return info;
     }
-    return inspectText(text, path);
+    return inspectText(text, path, decodePictures);
 }
 
 static bool byName(const ThemeInfo& a, const ThemeInfo& b)
@@ -1263,7 +1552,7 @@ static bool byName(const ThemeInfo& a, const ThemeInfo& b)
     return a.name < b.name;
 }
 
-std::vector<ThemeInfo> Theme::listThemes(const std::string& directory)
+std::vector<ThemeInfo> Theme::listThemes(const std::string& directory, bool decodePictures)
 {
     std::vector<std::string> paths;
     std::string folder = directory;
@@ -1277,6 +1566,11 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory)
             for (auto& entry : romfs::list(folder.substr(5)))
                 if (endsWith(entry.filename().string(), ".theme"))
                     paths.push_back("@res/" + entry.string());
+            // The theme folders' (romfs lists the files of a folder only)
+            fs::path parent = folder.substr(5);
+            for (auto& entry : romfs::list())
+                if (entry.filename() == THEME_FOLDER_FILE && entry.parent_path().parent_path() == parent)
+                    paths.push_back("@res/" + entry.generic_string());
         }
         catch (const std::exception& e)
         {
@@ -1292,7 +1586,12 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory)
                 for (const auto& entry : fs::directory_iterator(real))
                 {
                     std::string name = entry.path().filename().string();
-                    if (endsWith(name, ".theme") && !fs::is_directory(entry.path()))
+                    if (fs::is_directory(entry.path()))
+                    {
+                        if (fs::is_regular_file(entry.path() / THEME_FOLDER_FILE))
+                            paths.push_back(folder + "/" + name + "/" + THEME_FOLDER_FILE);
+                    }
+                    else if (endsWith(name, ".theme"))
                         paths.push_back(folder + "/" + name);
                 }
         }
@@ -1304,7 +1603,7 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory)
 
     std::vector<ThemeInfo> themes;
     for (const std::string& path : paths)
-        themes.push_back(Theme::inspect(path));
+        themes.push_back(Theme::inspect(path, decodePictures));
     std::sort(themes.begin(), themes.end(), byName);
     return themes;
 }

@@ -32,6 +32,7 @@
 #include <borealis/views/label.hpp>
 #include <deque>
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <string>
 #include <utility>
@@ -56,6 +57,7 @@ enum class InputType
 
 class DebugLayer;
 class EditTextDialog;
+struct ThemeImage;
 
 typedef std::function<View*(void)> XMLViewCreator;
 
@@ -256,6 +258,21 @@ class Application
      * change (View::onThemeChanged). For what keeps colours of its own.
      */
     static Event<ThemeVariant>* getThemeChangedEvent();
+
+    /**
+     * Whether the theme in use draws a picture behind the screens in the
+     * variant in use (its background_image, loaded).
+     */
+    static bool hasThemeBackground();
+
+    /**
+     * Draws what is behind the screens over `x, y, width, height`: the
+     * clear colour, the theme's background image and its veil. For a panel
+     * drawn over other views in a translucent surface colour (a drawer over
+     * a page), so that it hides them and still shows the picture. Nothing
+     * without a background image.
+     */
+    static void drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height);
 
     static ImeManager* getImeManager();
 
@@ -662,11 +679,14 @@ class Application
     inline static ThemeVariant themeVariant = ThemeVariant::DARK;
     static void checkThemeChanged();
 
-    // The theme file's background_image: its texture (0: none)
-    inline static std::string themeBackgroundPath;
-    inline static int themeBackground = 0;
+    // The theme file's background in the variant in use: the image drawn,
+    // and the one replacing it once loaded (the one drawn stays meanwhile)
+    inline static ThemeBackground themeBackgroundSpec;
+    inline static std::shared_ptr<ThemeImage> themeBackground;
+    inline static std::shared_ptr<ThemeImage> themeBackgroundLoading;
     static void loadThemeBackground();
-    static void drawThemeBackground(NVGcontext* vg);
+    static void onThemeImageLoaded(const ThemeImage* image);
+    static void drawThemeBackgroundImage(NVGcontext* vg, float x, float y, float width, float height);
 
     inline static std::unordered_map<std::string, XMLViewCreator> xmlViewsRegister;
 
