@@ -1803,8 +1803,7 @@ View::~View()
 
     YGNodeFree(this->ygNode);
 
-    if (deletionToken)
-        *deletionToken = true;
+    alive.reset();
 }
 
 std::string View::getStringXMLAttributeValue(std::string value)
@@ -2850,6 +2849,13 @@ void View::ptrLock()
 void View::ptrUnlock()
 {
     ptrLockCounter--;
+}
+
+std::weak_ptr<void> View::aliveToken()
+{
+    if (!alive)
+        alive = std::make_shared<char>(0);
+    return alive;
 }
 
 bool View::isPtrLocked()

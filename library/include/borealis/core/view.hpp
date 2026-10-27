@@ -56,37 +56,17 @@
 #define BRLS_REGISTER_CLICK_BY_ID(id, method) \
     this->getView(id)->registerClickAction([this](brls::View* view) { return method(view); })
 
-#define ASYNC_RETAIN                             \
-    if (!deletionToken && !deletionTokenCounter) \
-    {                                            \
-        deletionToken        = new bool(false);  \
-        deletionTokenCounter = new int(0);       \
-    }                                            \
-    (*deletionTokenCounter)++;                   \
-    bool* token       = deletionToken;           \
-    int* tokenCounter = deletionTokenCounter;
+// Deprecated: capture View::aliveToken() instead. Kept for older code: they
+// now wrap it, with no counter to keep balanced, so a callback run twice, or
+// after the view is deleted, does nothing. ASYNC_RELEASE is to be used on the
+// UI thread (in brls::sync()), where views are deleted.
+#define ASYNC_RETAIN auto token = this->aliveToken();
 
-#define ASYNC_RELEASE                           \
-    bool release = *token;                      \
-    int counter  = *tokenCounter;               \
-    if (counter > 0)                            \
-    {                                           \
-        (*tokenCounter)--;                      \
-        if (*tokenCounter == 0)                 \
-        {                                       \
-            delete token;                       \
-            delete tokenCounter;                \
-            if (!release)                       \
-            {                                   \
-                deletionToken        = nullptr; \
-                deletionTokenCounter = nullptr; \
-            }                                   \
-        }                                       \
-    }                                           \
-    if (release)                                \
+#define ASYNC_RELEASE    \
+    if (token.expired()) \
         return;
 
-#define ASYNC_TOKEN this, token, tokenCounter
+#define ASYNC_TOKEN this, token
 
 // Avoid conflicts with macro definitions in windows.h
 #undef RGB
@@ -1697,8 +1677,23 @@ class View
     void present(View* view);
     virtual void dismiss(std::function<void(void)> cb = [] {});
 
-    bool* deletionToken       = nullptr;
-    int* deletionTokenCounter = nullptr;
+    /**
+     * A token that expires when this view is deleted. A task that comes back
+     * to the view from another thread captures it by value and checks it on
+     * the UI thread, before it touches the view:
+     *
+     *   brls::async([this, alive = aliveToken()] {
+     *       auto result = work(); // not `this`: the view may be gone
+     *       brls::sync([this, alive, result] {
+     *           if (alive.expired())
+     *               return;
+     *           ...
+     *       });
+     *   });
+     *
+     * Checked on another thread it only says the view was alive then.
+     */
+    std::weak_ptr<void> aliveToken();
     void ptrLock();
     void ptrUnlock();
     bool isPtrLocked();
@@ -1853,6 +1848,7 @@ class View
 
   private:
     friend class Application;
+    std::shared_ptr<void> alive; // see aliveToken()
     struct Extras;
     struct ExtrasDeleter
     {

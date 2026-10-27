@@ -1,5 +1,6 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <borealis/cadran/ui/cadran_kit.hpp>
+#include <borealis/core/time.hpp>
 
 #include <borealis/cadran/ui/hooks.hpp>
 
@@ -516,8 +517,8 @@ std::string long_date()
         return long_date(ui::hooks::get().today());
     const std::time_t now = brls::getWallTime();
     char ymd[16]          = "";
-    if (const std::tm* tm = std::localtime(&now))
-        std::strftime(ymd, sizeof ymd, "%Y-%m-%d", tm);
+    const std::tm tm      = brls::localTime(now);
+    std::strftime(ymd, sizeof ymd, "%Y-%m-%d", &tm);
     return long_date(std::string(ymd));
 }
 

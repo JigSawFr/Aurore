@@ -17,6 +17,7 @@
 #pragma once
 
 #include <borealis/core/box.hpp>
+#include <borealis/core/logger.hpp>
 
 namespace brls
 {
@@ -25,6 +26,10 @@ class DebugLayer : public Box
 {
   public:
     DebugLayer();
+    ~DebugLayer() override;
+
+  private:
+    Event<Logger::TimePoint, LogLevel, std::string>::Subscription logSubscription;
 };
 
 } // namespace brls
