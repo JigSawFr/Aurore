@@ -30,8 +30,9 @@ static const std::string FONT_KOREAN_REGULAR         = "korean"; // regular Kore
 static const std::string FONT_CHINESE_SIMPLIFIED     = "zh-Hans"; // Simplified Chinese
 static const std::string FONT_CHINESE_SIMPLIFIED_EXT = "zh-Hans-ext"; // Simplified Chinese Extended
 static const std::string FONT_CHINESE_TRADITIONAL    = "zh-Hant"; // Traditional Chinese
+static const std::string FONT_JAPANESE               = "ja"; // Japanese (where the regular font has no kana nor kanji)
 static const std::string FONT_MATERIAL_ICONS         = "material"; // Material icons font
-static const std::string FONT_SWITCH_ICONS           = "switch"; // Switch icons font (see the HOS shared symbols font for an example)
+static const std::string FONT_SWITCH_ICONS           = "switch"; // the controller buttons, at the code points of the Switch's shared font (U+E0E0 for A...)
 static const std::string FONT_EMOJI                  = "emoji";
 
 typedef std::unordered_map<std::string, int> FontStash;

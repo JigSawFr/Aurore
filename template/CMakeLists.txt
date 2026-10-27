@@ -68,7 +68,7 @@ set(ASSEMBLE_RESOURCES
 
 if (PLATFORM_SWITCH)
     list(APPEND ASSEMBLE_RESOURCES
-        COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/font/switch_font.ttf ${MERGED_RESOURCES}/font/switch_icons.ttf)
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/font/aurore_text.ttf ${MERGED_RESOURCES}/font/aurore_buttons.ttf)
     if (USE_DEKO3D)
         # deko3d's shaders, compiled at configure time
         gen_dksh(${CMAKE_BINARY_DIR}/shaders)

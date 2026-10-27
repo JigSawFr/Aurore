@@ -304,6 +304,11 @@ class Application
     static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData);
 
     /**
+     * The same, with the face at `faceIndex` of a font collection (.ttc).
+     */
+    static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData, int faceIndex);
+
+    /**
      * Returns the nanovg handle to the given font name, or FONT_INVALID if
      * no such font is currently loaded.
      */

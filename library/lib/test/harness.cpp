@@ -178,6 +178,8 @@ Harness::Harness(Options options)
         setSimulatedWallTime(opts.wallTime);
     }
 
+    DesktopFontLoader::useSystemFonts = opts.systemFonts;
+
     Platform::setFactory([this]()
         {
         this->headless = new HeadlessPlatform(opts.width, opts.height, opts.locale, opts.theme);

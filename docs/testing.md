@@ -34,7 +34,7 @@ What it gives:
 
 | Call | Does |
 |---|---|
-| `Harness(Options)` | `width`, `height`, `frameMs` (simulated time per frame), `locale`, `theme`, reference and output folders. One harness per process: `Application` is global |
+| `Harness(Options)` | `width`, `height`, `frameMs` (simulated time per frame), `locale`, `theme`, reference and output folders, `systemFonts` (the system's Chinese, Japanese and Korean fonts, off by default). One harness per process: `Application` is global |
 | `push(activity)`, `top()`, `find(id)` | a screen pushed (without transition), the one on top, a view of it by XML id |
 | `step(n)`, `advance(ms)`, `settle(maxMs)` | `n` frames; frames for `ms` of simulated time; frames until no animation runs and no `sync`/`async` task is queued or running |
 | `press`, `release`, `tap(button, times)`, `hold(button, ms)`, `setAxis` | the gamepad (`tap` presses for a frame, releases and settles; `hold` gets the repeats a device gets) |
@@ -59,7 +59,7 @@ What it gives:
 
 The folders: `Options::referenceDir` and `outputDir`, else `BRLS_TEST_REFERENCES` and `BRLS_TEST_OUTPUT`, else `references` and `test-output` in the working directory. `brls_add_tests` (below) sets them.
 
-The same frames are drawn on every run: the clock is simulated, the platform says the same thing everywhere (no battery or Wi-Fi shown, `127.0.0.1`, the locale and theme of `Options`), the fonts are the app's resources. On Linux, the drawing is Mesa's software renderer (llvmpipe), with no display: the references are made with it, and a tolerance absorbs what another version of it changes in the antialiasing.
+The same frames are drawn on every run: the clock is simulated, the platform says the same thing everywhere (no battery or Wi-Fi shown, `127.0.0.1`, the locale and theme of `Options`), the fonts are the app's resources: no system font is read unless `Options::systemFonts` asks for it ([fonts](fonts.md)). On Linux, the drawing is Mesa's software renderer (llvmpipe), with no display: the references are made with it, and a tolerance absorbs what another version of it changes in the antialiasing.
 
 ## How it draws without a display
 

@@ -26,6 +26,7 @@
 #include <borealis/cadran/view/cadran_icon.hpp>
 #include <borealis/core/theme_decor.hpp>
 #include <borealis/core/theme_image.hpp>
+#include <borealis/platforms/desktop/desktop_font.hpp>
 #include <borealis/test/harness.hpp>
 
 #include <chrono>
@@ -1514,6 +1515,64 @@ BRLS_TEST(images_compare_with_tolerance)
     BRLS_CHECK(!brls::test::compareImages(b, a.crop(0, 0, 2, 2)).sameSize);
 }
 
+namespace
+{
+
+// A line of text, the same size whatever it says
+brls::Label* lineOf(const std::string& text)
+{
+    auto* label = new brls::Label();
+    label->setText(text);
+    label->setFontSize(40);
+    label->setSingleLine(true);
+    label->setWidth(600);
+    label->setHeight(60);
+    return label;
+}
+
+// What the screen shows where a view is
+brls::test::Image shotOf(Harness& h, brls::View* view)
+{
+    brls::Rect frame = view->getFrame();
+    return h.screenshot().crop((int)frame.getMinX(), (int)frame.getMinY(), (int)frame.getWidth(), (int)frame.getHeight());
+}
+
+// Two lines drawn differently: not the same glyphs
+bool drawnDifferently(Harness& h, brls::View* one, brls::View* other)
+{
+    return brls::test::compareImages(shotOf(h, one), shotOf(h, other), 8).differingPixels > 100;
+}
+
+} // namespace
+
+BRLS_TEST(fonts_are_the_free_ones)
+{
+    Harness h;
+    // The text and the buttons from the library's resources, the Switch's
+    // fonts nowhere
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_REGULAR) != brls::FONT_INVALID);
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_SWITCH_ICONS) != brls::FONT_INVALID);
+    BRLS_CHECK(!brls::Application::loadFontFromFile("old", BRLS_ASSET("font/switch_font.ttf")));
+    BRLS_CHECK(!brls::Application::loadFontFromFile("old", BRLS_ASSET("font/switch_icons.ttf")));
+    // The harness reads no system font: its pictures are the same everywhere
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_KOREAN_REGULAR) == brls::FONT_INVALID);
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_JAPANESE) == brls::FONT_INVALID);
+}
+
+BRLS_TEST(button_glyphs_drawn)
+{
+    Harness h;
+    // At the code points of the Switch's shared font (Hint::getKeyIcon)
+    auto* a       = lineOf(brls::Hint::getKeyIcon(brls::BUTTON_A, true) + brls::Hint::getKeyIcon(brls::BUTTON_LB, true));
+    auto* b       = lineOf(brls::Hint::getKeyIcon(brls::BUTTON_B, true) + brls::Hint::getKeyIcon(brls::BUTTON_RB, true));
+    auto* missing = lineOf("\u0378\u0378"); // no such character: the empty box
+    h.push(new brls::Activity(screenOf({ a, b, missing })));
+    h.settle();
+    BRLS_CHECK(drawnDifferently(h, a, b));
+    BRLS_CHECK(drawnDifferently(h, a, missing));
+    BRLS_CHECK(drawnDifferently(h, b, missing));
+}
+
 BRLS_TEST(asset_fonts_load_from_the_resources)
 {
     // BRLS_ASSET() is "@res/..." with the resources built in: read from them
@@ -1528,6 +1587,43 @@ BRLS_TEST(cadran_display_font_loaded)
     // Cadran's figures in Sora, with the resources built in too
     DemoHarness h;
     BRLS_CHECK(brls::Application::getFont("cadran/digits") != brls::FONT_INVALID);
+}
+
+BRLS_TEST(cjk_from_the_system_fonts)
+{
+    brls::test::Options options;
+    options.systemFonts = true;
+    Harness h(options);
+    struct Case
+    {
+        const char* language;
+        const std::string& font;
+        const char* text;
+        const char* missing; // as many characters, none drawn
+    };
+    const Case cases[] = {
+        { "ko", brls::FONT_KOREAN_REGULAR, "\uD55C\uAD6D\uC5B4", "\u0378\u0378\u0378" }, // 한국어
+        { "zh-Hans", brls::FONT_CHINESE_SIMPLIFIED, "\u7B80\u4F53\u4E2D\u6587", "\u0378\u0378\u0378\u0378" }, // 简体中文
+        { "zh-Hant", brls::FONT_CHINESE_TRADITIONAL, "\u7E41\u9AD4\u4E2D\u6587", "\u0378\u0378\u0378\u0378" }, // 繁體中文
+        { "ja", brls::FONT_JAPANESE, "\u65E5\u672C\u8A9E\u3042", "\u0378\u0378\u0378\u0378" }, // 日本語あ
+    };
+    for (const Case& c : cases)
+    {
+        brls::DesktopFontLoader::FontFile file = brls::DesktopFontLoader::findSystemFont(c.language);
+        if (file.path.empty())
+        {
+            std::printf("cjk_from_the_system_fonts: no %s font on this system, not checked\n", c.language);
+            continue;
+        }
+        BRLS_CHECK(brls::Application::getFont(c.font) != brls::FONT_INVALID);
+        auto* text    = lineOf(c.text);
+        auto* missing = lineOf(c.missing);
+        h.push(new brls::Activity(screenOf({ text, missing })));
+        h.settle();
+        if (!drawnDifferently(h, text, missing))
+            std::printf("cjk_from_the_system_fonts: %s drawn as missing glyphs (%s)\n", c.language, file.path.c_str());
+        BRLS_CHECK(drawnDifferently(h, text, missing));
+    }
 }
 
 int main(int argc, char** argv)

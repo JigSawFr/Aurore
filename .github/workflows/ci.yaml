@@ -334,6 +334,9 @@ jobs:
           sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols xorg-dev ninja-build \
             libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri
+          # A system font for Chinese, Japanese and Korean, which the library
+          # finds with fontconfig (the case cjk_from_the_system_fonts)
+          sudo apt install -y --no-install-recommends fontconfig fonts-wqy-microhei
       - name: Build
         run: |
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON \

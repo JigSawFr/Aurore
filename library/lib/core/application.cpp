@@ -1839,7 +1839,12 @@ bool Application::loadFontFromFile(std::string fontName, std::string filePath)
 
 bool Application::loadFontFromMemory(std::string fontName, void* address, size_t size, bool freeData)
 {
-    int handle = nvgCreateFontMem(Application::getNVGContext(), fontName.c_str(), (unsigned char*)address, size, freeData);
+    return Application::loadFontFromMemory(fontName, address, size, freeData, 0);
+}
+
+bool Application::loadFontFromMemory(std::string fontName, void* address, size_t size, bool freeData, int faceIndex)
+{
+    int handle = nvgCreateFontMemAtIndex(Application::getNVGContext(), fontName.c_str(), (unsigned char*)address, size, freeData, faceIndex);
 
     if (handle == FONT_INVALID)
     {
