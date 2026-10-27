@@ -940,6 +940,26 @@ struct PictureSpec
     std::map<std::string, bool> tints; // icon.<name>.tint, by icon name
 };
 
+// The decorations as a file writes them, as BackgroundSpec: what it does
+// not say is unset (and inherited)
+struct DecorPictureSpec
+{
+    std::optional<std::string> image; // its path; "" for none
+    std::optional<BackgroundFit> fit;
+    std::optional<float> opacity;
+    std::optional<float> height;
+};
+
+struct DecorSpec
+{
+    DecorPictureSpec pictures[THEME_AREA_COUNT];
+    std::optional<ParticleKind> kind;
+    std::optional<float> density;
+    std::optional<float> speed;
+    std::optional<ParticleLayer> layer;
+    std::optional<std::vector<NVGcolor>> colors;
+};
+
 // A file read, with what it includes and inherits
 struct ParsedTheme
 {
@@ -950,6 +970,7 @@ struct ParsedTheme
     // [0]: every variant the file styles, [1] the light one, [2] the dark
     BackgroundSpec background[3];
     PictureSpec pictures[3]; // as background
+    DecorSpec decor[3]; // as background
     std::vector<std::string> files; // the files it includes and inherits, read
     bool lightSection = false, darkSection = false;
     bool light = false, dark = false;
@@ -1098,6 +1119,218 @@ static ThemePictures resolvePictures(const PictureSpec* spec, int v, std::vector
     return pictures;
 }
 
+// ---------------------------------------------------------------------------
+// Decorations: backdrop.<area>, decor.<edge> and particles* (docs/themes.md)
+// ---------------------------------------------------------------------------
+
+namespace
+{
+// The picture keys' prefixes, by ThemeArea from HEADER
+const char* const DECOR_PICTURES[THEME_AREA_COUNT] = { "backdrop.header", "backdrop.sidebar", "backdrop.dialog",
+    "decor.top", "decor.bottom" };
+
+const std::pair<const char*, ParticleKind> PARTICLE_KINDS[] = { { "none", ParticleKind::NONE },
+    { "snow", ParticleKind::SNOW }, { "leaves", ParticleKind::LEAVES }, { "petals", ParticleKind::PETALS },
+    { "embers", ParticleKind::EMBERS }, { "confetti", ParticleKind::CONFETTI }, { "sparkles", ParticleKind::SPARKLES },
+    { "hearts", ParticleKind::HEARTS }, { "bubbles", ParticleKind::BUBBLES } };
+}
+
+static bool isDecorKey(const std::string& key)
+{
+    return startsWith(key, "backdrop.") || startsWith(key, "decor.") || key == "particles" || startsWith(key, "particles_");
+}
+
+static bool parseNumber(const std::string& value, float minimum, float maximum, float* out)
+{
+    char* end;
+    float number = std::strtof(value.c_str(), &end);
+    if (value.empty() || *end != '\0' || !(number >= minimum && number <= maximum))
+        return false;
+    *out = number;
+    return true;
+}
+
+// "#fff, rgba(1, 2, 3, 0.5)": the colours of a list, split at the commas
+// out of parentheses
+static bool parseColorList(const std::string& value, std::vector<NVGcolor>* colors)
+{
+    colors->clear();
+    int depth = 0;
+    size_t start = 0;
+    for (size_t i = 0; i <= value.size(); i++)
+    {
+        char c = i < value.size() ? value[i] : ',';
+        depth += c == '(' ? 1 : c == ')' ? -1 : 0;
+        if (c != ',' || depth > 0)
+            continue;
+        NVGcolor color;
+        if (!Theme::parseColor(trim(value.substr(start, i - start)), &color))
+            return false;
+        colors->push_back(color);
+        start = i + 1;
+    }
+    return !colors->empty() && colors->size() <= (size_t)ThemeParticles::MAX_COLORS;
+}
+
+// A decoration line: false, with the reason in `error`, when it cannot be
+// read; its pictures are confined as the background's (Theme::resolveAsset)
+static bool parseDecorLine(const std::string& key, const std::string& value, const std::string& directory,
+    const std::string& assets, DecorSpec* decor, std::string* error)
+{
+    auto fail = [error](const std::string& why)
+    {
+        *error = why;
+        return false;
+    };
+    for (int i = 0; i < THEME_AREA_COUNT; i++)
+    {
+        const std::string prefix = DECOR_PICTURES[i];
+        if (!startsWith(key, prefix) || (key.size() > prefix.size() && key[prefix.size()] != '_'))
+            continue;
+        DecorPictureSpec& picture = decor->pictures[i];
+        const std::string property = key.substr(prefix.size());
+        bool strip = i >= (int)ThemeArea::TOP - 1;
+        if (property.empty())
+        {
+            std::string path;
+            if (value == "none")
+                picture.image = "";
+            else if (Theme::resolveAsset(value, directory, assets, &path, error))
+                picture.image = path;
+            else
+                return false;
+        }
+        else if (property == "_fit")
+        {
+            BackgroundFit fit;
+            if (!parseFit(value, &fit))
+                return fail("is cover, contain, tile or center, not " + value);
+            picture.fit = fit;
+        }
+        else if (property == "_opacity")
+        {
+            float opacity;
+            if (!parseNumber(value, 0.0f, 1.0f, &opacity))
+                return fail("is a number from 0 to 1, not " + value);
+            picture.opacity = opacity;
+        }
+        else if (property == "_height" && strip)
+        {
+            float height;
+            if (!parseNumber(value, 1.0f, 720.0f, &height))
+                return fail("is a height from 1 to 720, not " + value);
+            picture.height = height;
+        }
+        else
+            return fail("is not a key");
+        return true;
+    }
+
+    if (key == "particles")
+    {
+        for (auto& [name, kind] : PARTICLE_KINDS)
+            if (value == name)
+            {
+                decor->kind = kind;
+                return true;
+            }
+        *error = "is none, snow, leaves, petals, embers, confetti, sparkles, hearts or bubbles, not " + value;
+        return false;
+    }
+    if (key == "particles_density")
+    {
+        float density;
+        if (value == "low" || value == "medium" || value == "high")
+            density = value == "low" ? ThemeParticles::LOW : value == "medium" ? ThemeParticles::MEDIUM : ThemeParticles::HIGH;
+        else if (!parseNumber(value, 0.0f, 1.0f, &density))
+            return fail("is low, medium, high or a number from 0 to 1, not " + value);
+        decor->density = density;
+        return true;
+    }
+    if (key == "particles_speed")
+    {
+        float speed;
+        if (!parseNumber(value, 0.25f, 4.0f, &speed))
+            return fail("is a number from 0.25 to 4, not " + value);
+        decor->speed = speed;
+        return true;
+    }
+    if (key == "particles_layer")
+    {
+        if (value != "back" && value != "front")
+            return fail("is back or front, not " + value);
+        decor->layer = value == "back" ? ParticleLayer::BACK : ParticleLayer::FRONT;
+        return true;
+    }
+    if (key == "particles_color")
+    {
+        std::vector<NVGcolor> colors;
+        if (value == "auto")
+            colors.clear();
+        else if (!parseColorList(value, &colors))
+            return fail("is up to 5 colours, or auto, not " + value);
+        decor->colors = colors;
+        return true;
+    }
+    return fail("is not a key");
+}
+
+// What a file does not say of its decorations, from the file it inherits,
+// as inheritBackground
+static void inheritDecor(DecorSpec* own, const DecorSpec* parent)
+{
+    auto inherit = [](auto* mine, const auto* theirs, auto field)
+    {
+        bool everyVariant = (mine[0].*field).has_value();
+        if (!everyVariant)
+            mine[0].*field = theirs[0].*field;
+        for (int slot : { 1, 2 })
+            if (!(mine[slot].*field).has_value() && !everyVariant)
+                mine[slot].*field = theirs[slot].*field;
+    };
+    for (int i = 0; i < THEME_AREA_COUNT; i++)
+    {
+        DecorPictureSpec mine[3]         = { own[0].pictures[i], own[1].pictures[i], own[2].pictures[i] };
+        const DecorPictureSpec theirs[3] = { parent[0].pictures[i], parent[1].pictures[i], parent[2].pictures[i] };
+        inherit(mine, theirs, &DecorPictureSpec::image);
+        inherit(mine, theirs, &DecorPictureSpec::fit);
+        inherit(mine, theirs, &DecorPictureSpec::opacity);
+        inherit(mine, theirs, &DecorPictureSpec::height);
+        for (int slot = 0; slot < 3; slot++)
+            own[slot].pictures[i] = mine[slot];
+    }
+    inherit(own, parent, &DecorSpec::kind);
+    inherit(own, parent, &DecorSpec::density);
+    inherit(own, parent, &DecorSpec::speed);
+    inherit(own, parent, &DecorSpec::layer);
+    inherit(own, parent, &DecorSpec::colors);
+}
+
+// Variant `v`'s decorations (0 light, 1 dark), as resolveBackground
+static ThemeDecor resolveDecor(const DecorSpec* spec, int v)
+{
+    ThemeDecor decor;
+    const DecorSpec& own = spec[v + 1];
+    const DecorSpec& all = spec[0];
+    for (int i = 0; i < THEME_AREA_COUNT; i++)
+    {
+        const DecorPictureSpec& mine  = own.pictures[i];
+        const DecorPictureSpec& every = all.pictures[i];
+        ThemePicture& picture    = decor.pictures[i];
+        picture.image            = mine.image.value_or(every.image.value_or(""));
+        picture.fit              = mine.fit.value_or(every.fit.value_or(BackgroundFit::COVER));
+        picture.opacity          = mine.opacity.value_or(every.opacity.value_or(1.0f));
+        picture.height           = mine.height.value_or(every.height.value_or(0.0f));
+    }
+    ThemeParticles& particles = decor.particles;
+    particles.kind            = own.kind.value_or(all.kind.value_or(ParticleKind::NONE));
+    particles.density         = own.density.value_or(all.density.value_or(ThemeParticles::LOW));
+    particles.speed           = own.speed.value_or(all.speed.value_or(1.0f));
+    particles.layer           = own.layer.value_or(all.layer.value_or(ParticleLayer::BACK));
+    particles.colors          = own.colors.value_or(all.colors.value_or(std::vector<NVGcolor>()));
+    return decor;
+}
+
 // `directory`: the folder of the file read; `assets`: the folder its
 // pictures must stay in (the theme's, Theme::resolveAsset)
 static void parseThemeText(const std::string& text, const std::string& directory, const std::string& assets,
@@ -1120,6 +1353,10 @@ static void parseThemeText(const std::string& text, const std::string& directory
             if (line[i] != '#' || (i > 0 && line[i - 1] != ' ' && line[i - 1] != '\t'))
                 continue;
             if (equals != std::string::npos && i > equals && trim(line.substr(equals + 1, i - equals - 1)).empty())
+                continue;
+            // Nor one after a comma: the next colour of a list
+            std::string before = trim(line.substr(0, i));
+            if (!before.empty() && before.back() == ',')
                 continue;
             line = line.substr(0, i);
             break;
@@ -1231,6 +1468,16 @@ static void parseThemeText(const std::string& text, const std::string& directory
             continue;
         }
 
+        // The decorations, as the background
+        if ((section.empty() || section == "light" || section == "dark") && isDecorKey(key))
+        {
+            std::string error;
+            DecorSpec& decor = out->decor[section == "light" ? 1 : section == "dark" ? 2 : 0];
+            if (!parseDecorLine(key, value, directory, assets, &decor, &error))
+                out->errors.push_back(where(number) + ": " + key + " " + error);
+            continue;
+        }
+
         if (section.empty() && key == "icon")
         {
             // As background_image: an included file's counts, an inherited one's too
@@ -1333,6 +1580,7 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
     theme->metrics.insert(theme->metrics.begin(), parent.metrics.begin(), parent.metrics.end());
     inheritBackground(theme->background, parent.background);
     inheritPictures(theme->pictures, parent.pictures);
+    inheritDecor(theme->decor, parent.decor);
     if (theme->icon.empty())
         theme->icon = parent.icon;
     theme->errors.insert(theme->errors.begin(), parent.errors.begin(), parent.errors.end());
@@ -1351,6 +1599,7 @@ struct ResolvedTheme
     MetricMap metrics;
     ThemeBackground background[2]; // as overlay; no image for a variant not styled
     ThemePictures pictures[2];     // as background
+    ThemeDecor decor[2];           // as background
     std::vector<std::string> warnings;
 };
 }
@@ -1402,6 +1651,7 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = 
 
         // Over a background image, the surfaces let it show through
         const ThemeBackground& background = resolved.background[v] = resolveBackground(theme.background, v);
+        resolved.decor[v]                 = resolveDecor(theme.decor, v);
         if (background.hasImage() && background.surfaceOpacity < 1.0f)
             for (const std::string& key : surfaceKeys)
             {
@@ -1454,6 +1704,7 @@ static std::unique_ptr<ParsedTheme> currentTheme; // the file in use
 static ThemeBackground currentBackground[2];       // its backgrounds, [0] light
 static ThemePictures currentPictures[2];           // its logos and images, [0] light
 static uint64_t picturesGeneration = 1;            // bumped when they change
+static ThemeDecor currentDecor[2];                 // its decorations, [0] light
 static std::time_t calendarMinute = -1;          // when followCalendar() last looked
 static bool reapplying = false;
 
@@ -1470,6 +1721,8 @@ static void useOverlays(const ResolvedTheme& resolved)
         currentPictures[1] = resolved.pictures[1];
         picturesGeneration++;
     }
+    currentDecor[0]      = resolved.decor[0];
+    currentDecor[1]      = resolved.decor[1];
     generation++;
 }
 
@@ -1572,6 +1825,11 @@ ThemeBackground Theme::getBackground(ThemeVariant variant)
     return currentBackground[variant == ThemeVariant::LIGHT ? 0 : 1];
 }
 
+ThemeDecor Theme::getDecor(ThemeVariant variant)
+{
+    return currentDecor[variant == ThemeVariant::LIGHT ? 0 : 1];
+}
+
 std::string Theme::getBackgroundImage()
 {
     return getBackground(Application::getPlatform() ? Application::getThemeVariant() : ThemeVariant::DARK).image;
@@ -1650,6 +1908,8 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
     info.lightBackground = resolved.background[0];
     info.darkBackground  = resolved.background[1];
     info.backgroundImage = info.darkBackground.hasImage() ? info.darkBackground.image : info.lightBackground.image;
+    info.lightDecor      = resolved.decor[0];
+    info.darkDecor       = resolved.decor[1];
     info.icon        = theme.icon;
     info.lightPictures = resolved.pictures[0];
     info.darkPictures  = resolved.pictures[1];
@@ -1687,6 +1947,19 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
                 info.errors.push_back(error);
         }
     }
+    // Its decorations' pictures too
+    for (const ThemeDecor* decor : { &info.lightDecor, &info.darkDecor })
+        for (int i = 0; i < THEME_AREA_COUNT; i++)
+        {
+            const ThemePicture& picture = decor->pictures[i];
+            if (!picture.hasImage())
+                continue;
+            NVGcolor mean;
+            std::string error = std::string(DECOR_PICTURES[i]) + ": cannot read " + picture.image;
+            bool readable     = decodePictures ? ThemeImages::meanColor(picture.image, &mean) : ThemeImages::exists(picture.image);
+            if (!readable && std::find(info.errors.begin(), info.errors.end(), error) == info.errors.end())
+                info.errors.push_back(error);
+        }
 
     // The counterpart must have the variant this one has not
     if (!theme.counterpart.empty())

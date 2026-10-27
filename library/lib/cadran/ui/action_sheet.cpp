@@ -113,6 +113,7 @@ class Sheet : public brls::Box
         panel->setThemeColor("borderColor", "cadran/line");
         panel->setBorderThickness(1);
         panel->setAlignItems(brls::AlignItems::STRETCH);
+        panel->setThemeArea(brls::ThemeArea::DIALOG);   // backdrop.dialog, and over a theme's picture
         brls::Box* head = this->header(title, subtitle, image);
         panel->addView(head);
 

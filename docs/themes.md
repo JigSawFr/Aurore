@@ -10,7 +10,7 @@ accent = #3ddc97
 
 ## The format
 
-A theme file is text, `*.theme` by convention: `key = value` lines, `[sections]`, `#` comments (a `#` at the start of a line or after a space; `#3ddc97` right after `=` is a colour). A theme with pictures is a folder holding its file and its pictures (below, [Theme folders and pictures](#theme-folders-and-pictures)).
+A theme file is text, `*.theme` by convention: `key = value` lines, `[sections]`, `#` comments (a `#` at the start of a line or after a space; `#3ddc97` right after `=` is a colour, and so is one after a comma, in a list of colours). A theme with pictures is a folder holding its file and its pictures (below, [Theme folders and pictures](#theme-folders-and-pictures)).
 
 ```ini
 # Metadata: shown by a picker (Theme::listThemes)
@@ -66,6 +66,7 @@ brls/highlight/stroke_width = 6
 - **Variants**: a file styles the variant it inherits (`inherit = light` or `dark`, dark by default), or both when it has `[light]` and `[dark]` sections; it then follows the system's mode (or the app's light/dark setting). The variant a file does not style stays as it is without a file.
 - **`counterpart`**, for a file that styles one variant only: the file (or preset) with the other variant, the same look in light or dark. A picker asked for the variant this file lacks switches to it (Cadran's does, below); `--check-themes` reports a counterpart that cannot be read or lacks that variant.
 - **Background** (`background_image`, `background_fit`, `background_dim`, `surface_opacity`): for every variant the file styles, or in `[light]`/`[dark]` for one; below.
+- **Decorations** (`backdrop.*`, `decor.*`, `particles*`): the same way; [Decorations](#decorations).
 - **`icon`**: the Cadran icon (`cadran/view/cadran_icon.hpp`) a picker shows the file with: Cadran's palette picker draws it in the file's accent on a swatch of its background and surface. The motifs drawn for palettes: `snowflake`, `heart`, `lantern`, `blossom`, `sun`, `wave`, `leaf`, `pumpkin`, `tree`, `firework`, `gem`, `dune`, `contrast`, `moon`, `bolt`, `sparkle`; any other icon of the list works too. Inherited, and an `@include`d file's counts, as `background_image`. Without one (or with a name Cadran does not know), `sparkle`.
 - **Logos and images** (`logo`, `icon.<name>`, `image.<slot>`, `preview`): pictures in the theme's folder for the app's logo, Cadran's icons, the app's image slots and the theme's thumbnail in a picker, for every variant or in `[light]`/`[dark]`; below, [Logos and images](#logos-and-images).
 - **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them; for the background, a line of this file for every variant also beats the inherited file's `[light]`/`[dark]` one. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets; loops stop after 8 levels.
@@ -123,7 +124,7 @@ What shows and what does not:
 
 - The screens have no fill of their own: their background is the window's, `brls/clear`, then the picture, then its veil. The main screen, a tab frame's content, applet frames and Cadran's screens show it as they are.
 - The surfaces keep their colours, at `surface_opacity`. Cadran's rail, when it opens over the tab in a translucent colour, draws the picture again under itself (`Application::drawThemeBackground`), so that the tab does not show through it.
-- Dialogs keep their own surfaces, over `brls/backdrop`: the core's panel is `brls/background`, opaque; Cadran's dialogs, sheets and pickers are drawn in `cadran/surf`/`surf2`, at `surface_opacity`, so the dimmed screen shows faintly through them under 1 (0.8 and over keep them clean).
+- Dialogs keep their own surfaces, over `brls/backdrop`: the core's panel is `brls/background`, opaque; Cadran's dialogs, sheets and pickers are drawn in `cadran/surf`/`surf2`, at `surface_opacity`. Under 1, such a panel draws the picture again under itself, dimmed by `brls/backdrop` as around it (`View::setThemeArea(ThemeArea::DIALOG)`), so it shows the picture faintly, not the screen behind it.
 - `brls/background` stays opaque: views use it to cut a shape out of what is under them (a badge's ring, the fade at the bottom of a list).
 
 Why 0.35: over a picture as it comes (a photo, a gradient with bright parts), text keyed to the theme's own background colour needs that colour back under it; 0.35 keeps two thirds of the picture's colour, enough to see it, and pulls its brightest and darkest parts toward the background, which in most pictures brings the text's contrast back over its minimum. A busy or bright picture wants more (0.5 to 0.7); a dark, quiet one under a dark theme reads at 0.
@@ -277,6 +278,102 @@ logo = logo-dark.png
 ```
 
 The demo declares its slot in `demo/src/demo_app.cpp` (`Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512)`), and the About tab's image follows it (`themeImage="demo/about/art"`, `resources/xml/activity/main.xml`). To see it: `aurore_demo -t @res/themes/prism/theme.theme`, or the palette picker.
+
+## Decorations
+
+Over the palette and the background, a theme can decorate the screens: a picture over the surface of the header, the sidebar or the dialogs (a **backdrop**), a strip along the top or the bottom edge of the screen (a garland, icicles, a snowdrift), and **particles** (snow, leaves, petals...) drifting behind the screens. Without these keys nothing is drawn and nothing changes: an app's screens stay pixel for pixel what they were.
+
+```ini
+# resources/themes/winter/theme.theme (the demo's)
+inherit = builtin:winter
+decor.top_fit = tile
+decor.bottom_fit = tile
+backdrop.sidebar_fit = tile
+backdrop.dialog_fit = tile
+backdrop.dialog_opacity = 0.6
+particles = snow
+particles_density = medium
+
+[light]
+decor.top = icicles-day.png
+decor.bottom = drift-day.png
+backdrop.sidebar = frost-day.png
+backdrop.dialog = frost-day.png
+
+[dark]
+decor.top = icicles-night.png
+decor.bottom = drift-night.png
+backdrop.sidebar = frost-night.png
+backdrop.dialog = frost-night.png
+```
+
+To see it: `aurore_demo -t @res/themes/winter/theme.theme` (`BOREALIS_THEME=LIGHT` for the day). Its pictures are drawn by `tools/make_winter_decor.py` (a few KB each).
+
+### Backdrops and strips
+
+| Key | Values | Default | What |
+| --- | --- | --- | --- |
+| `backdrop.header` | a file in the theme's folder, or `none` | none | Over a screen's header, its whole width (an `AppletFrame`'s, not a dialog's), under its title |
+| `backdrop.sidebar` | the same | none | Over the sidebar (Cadran's rail), under its items |
+| `backdrop.dialog` | the same | none | Over the panel of dialogs, dropdowns and Cadran's sheets and pickers, in their round corners, under their content |
+| `decor.top`, `decor.bottom` | the same | none | A strip along the top (bottom) edge of the screen, the screen's width, behind the screens: over the background and its picture, under every view |
+| `<key>_fit` | `cover`, `contain`, `tile`, `center` | `cover` | As `background_fit`, in the area. A strip's `cover` is the picture at the screen's width (its height from its ratio); its `tile` repeats it sideways, at its own height or `_height` |
+| `<key>_opacity` | 0 to 1 | 1 | The picture's opacity |
+| `decor.top_height`, `decor.bottom_height` | 1 to 720 (layout units) | the picture's | The strip's height |
+
+Each key is read at the top or in `[light]`/`[dark]`, inherited and taken away (`none`) like `background_image`; the pictures are confined to the theme's folder the same way (`Theme::resolveAsset`), reported in `ThemeInfo::errors` when they are refused or missing (`backdrop.header: cannot read …`), loaded by `ThemeImages`, and only the variant on screen's are in memory. A picture still loading leaves the one before.
+
+What to draw: a backdrop is under text, so keep it quiet (a texture, a faint pattern, a gradient) or lower its opacity; the screen's text is not checked on it. A strip is behind the screens: the header's title and the footer's hints are drawn over it, so a top strip stays within the header's first 30 units or so (icicles, a garland), a bottom strip under about 20 (the footer's text is above that), or stays faint. A header backdrop covers the top strip: use one or the other. PNG with transparency is the usual form of a strip.
+
+Which views: the core's AppletFrame header, `Sidebar`, `Dialog`, `Dropdown` and `EditTextDialog`, and Cadran's sheets; an app's own panel opts in with `view->setThemeArea(brls::ThemeArea::DIALOG)` (or `HEADER`, `SIDEBAR`).
+
+### Particles
+
+| Key | Values | Default | What |
+| --- | --- | --- | --- |
+| `particles` | `none`, `snow`, `leaves`, `petals`, `embers`, `confetti`, `sparkles`, `hearts`, `bubbles` | `none` | What drifts: snowflakes falling, leaves and cherry petals tumbling down, embers rising and dying out, confetti fluttering down, four-pointed sparkles twinkling, hearts and bubbles rising |
+| `particles_density` | `low`, `medium`, `high`, or 0 to 1 | `low` (0.3) | How many, of 60 at most (`ThemeDecorations::MAX_PARTICLES`); each kind takes its share (a leaf is larger than a flake). `medium` is 0.6, `high` 1 |
+| `particles_color` | up to 5 colours, comma-separated (`#fff, rgba(200, 220, 255, 0.8)`), or `auto` | from the palette | Each particle takes one. From the palette: snow and bubbles a pale ink on a dark background, the accent's tint on a light one; leaves the accent, amber and coral; petals the accent and a lighter one; embers amber and the accent; confetti the accent, pink, blue, amber, violet; sparkles the accent and a pale ink (amber on a light background); hearts the accent and pink |
+| `particles_speed` | 0.25 to 4 | 1 | Faster or slower, sway and spin included |
+| `particles_layer` | `back`, `front` | `back` | `back`: behind the screens (over the background, its picture and the strips, under every view), so they show between the cards and never cross a text or the focus. `front`: over the screens (under the toasts), at 55 % of their opacity, for a theme that wants them seen everywhere; they then cross text |
+
+Read like the others: at the top or per variant, inherited. They are drawn with nanovg in three depths (the far ones smaller, slower, fainter), a few fills per frame (one per depth and colour; a gradient each for the glow of embers and of the nearest flakes): no picture, no allocation once made.
+
+**Motion, the battery and the user** (`ThemeDecorations`, `borealis/core/theme_decor.hpp`):
+
+- They move only when motion is allowed: `Application::getReduceMotion()` false, so not with the app's reduced motion, nor, with Cadran, with Preferences › Visual effects at *Reduced*, nor *Automatic* in hand (the lighter effects), nor with `BRLS_STILL_FOCUS` (screenshot tests). Otherwise **nothing** of them is drawn, not even a frozen frame: the plain palette.
+- They move at 30 frames a second at most (`PARTICLE_FPS`): their places are a function of the time, taken at a 30 Hz tick. With redraw on demand, an otherwise still screen is drawn 30 times a second while they run, instead of once a second.
+- After 60 seconds without input (`IDLE_SECONDS`: a button, a key, a touch, the mouse) they fade out over 3 seconds and stop: no frame is asked for any more. The next input brings them back, fading in. A theme being used counts as an input.
+- They are not views: they never take the focus, an input or a touch, and the layout does not know them.
+- What they cost (measured on the desktop, the demo's main screen, Mesa's software renderer, every frame drawn): about 0.1 to 0.3 ms more of nanovg per frame to build their paths and 0.5 to 1.3 ms more to rasterise them (`low` to `high` snow), the whole process 6 to 9 % more CPU. On a GPU the rasterising is close to free; the paths stay.
+
+### The presets' particles
+
+The seasons and feasts drift gently (`low`), each in its own colours, under the rules above: a user who reduces motion, or a console in hand on *Automatic*, gets the plain palette.
+
+| Preset | Particles |
+| --- | --- |
+| `winter`, `christmas` | `snow` |
+| `spring` | `petals` |
+| `autumn` | `leaves` |
+| `halloween` | `embers` |
+| `new-year` | `confetti` |
+| `valentine` | `hearts` |
+| `lunar-new-year` | `sparkles`, in gold |
+| `summer` | none |
+
+A file built on one keeps them (`inherit = builtin:winter`), or says `particles = none`.
+
+### The API
+
+```cpp
+brls::Theme::getDecor(brls::ThemeVariant::DARK);   // pictures by area, particles
+info.decor(variant);                                // the same, from ThemeInfo (lightDecor, darkDecor)
+view->setThemeArea(brls::ThemeArea::DIALOG);        // an app's panel takes backdrop.dialog
+brls::ThemeDecorations::particlesRunning();         // shown and moving now
+brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP);
+brls::Application::getLastInputTime();              // what the particles' pause counts from
+```
 
 ## Every key
 

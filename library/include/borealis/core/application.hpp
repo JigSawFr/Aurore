@@ -219,6 +219,12 @@ class Application
     static bool isReduceMotionSet() { return Application::reduceMotion; }
 
     /**
+     * When the last input came (a button, a key, a touch, the mouse), on the
+     * clock of getCPUTimeUsec(): what the theme's particles stop after.
+     */
+    static Time getLastInputTime() { return Application::lastInputTime; }
+
+    /**
      * Every Label drawn `scale` times its size (Label::setFontScale), and the
      * screens laid out again for it at once (every view told through
      * View::onTextScaleChanged). 1 by default; Cadran's text size setting
@@ -273,6 +279,13 @@ class Application
      * without a background image.
      */
     static void drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height);
+
+    /**
+     * The same in a shape with round corners of `radius`, and the strips
+     * of the theme's decorations (decor.top, decor.bottom) over it: under a
+     * translucent dialog or sheet (View::setThemeArea).
+     */
+    static void drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height, float radius);
 
     static ImeManager* getImeManager();
 
@@ -686,7 +699,7 @@ class Application
     inline static std::shared_ptr<ThemeImage> themeBackgroundLoading;
     static void loadThemeBackground();
     static void onThemeImageLoaded(const ThemeImage* image);
-    static void drawThemeBackgroundImage(NVGcontext* vg, float x, float y, float width, float height);
+    static void drawThemeBackgroundImage(NVGcontext* vg, float x, float y, float width, float height, float radius = 0.0f);
 
     inline static std::unordered_map<std::string, XMLViewCreator> xmlViewsRegister;
 

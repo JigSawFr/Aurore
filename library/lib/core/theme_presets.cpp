@@ -164,6 +164,7 @@ accent = #b34a2b
 name = @i18n/themes/presets/winter
 author = Aurore
 icon = snowflake
+particles = snow
 version = 1
 description = Frost and silver: ice-blue on a cold slate night, or glacier blue on frost.
 
@@ -220,6 +221,7 @@ cadran/avatar3 = #7fd4ff
 name = @i18n/themes/presets/valentine
 author = Aurore
 icon = heart
+particles = hearts
 version = 1
 description = Rose and wine: a crimson accent, a focus pulsing from red to blush.
 
@@ -276,6 +278,7 @@ cadran/avatar3 = #ffd88a
 name = @i18n/themes/presets/lunar_new_year
 author = Aurore
 icon = lantern
+particles = sparkles
 version = 1
 description = Red lacquer and gold, jade for the details, lanterns glowing behind.
 
@@ -297,9 +300,11 @@ cadran/bar = #f0d3c4
 cadran/bar_today = #d9826e
 cadran/glow = rgba(226, 58, 58, 0.12)
 cadran/glow_strong = rgba(246, 196, 69, 0.30)
+particles_color = #a87908, #c9971c
 
 [dark]
 background = #1f0a0b
+particles_color = #f6c445, #ffe08a
 surface = #2d1112
 text = #fff1db
 accent = #f6c445
@@ -332,6 +337,7 @@ cadran/avatar3 = #ff8c9e
 name = @i18n/themes/presets/spring
 author = Aurore
 icon = blossom
+particles = petals
 version = 1
 description = Cherry blossoms: blush and leaf green by day, pink petals at night.
 
@@ -444,6 +450,7 @@ cadran/avatar3 = #aed581
 name = @i18n/themes/presets/autumn
 author = Aurore
 icon = leaf
+particles = leaves
 version = 1
 description = Maple and amber leaves on linen, or on dark bark.
 
@@ -500,6 +507,7 @@ cadran/avatar3 = #d9a07a
 name = @i18n/themes/presets/halloween
 author = Aurore
 icon = pumpkin
+particles = embers
 version = 1
 description = Pumpkin and candlelight on a violet night; by day, moonlit lilac.
 
@@ -557,6 +565,7 @@ cadran/avatar3 = #f3ead8
 name = @i18n/themes/presets/christmas
 author = Aurore
 icon = tree
+particles = snow
 version = 1
 description = Pine, cranberry and gold; the focus twinkles like the tree's lights.
 
@@ -614,6 +623,7 @@ cadran/avatar3 = #9fd8ff
 name = @i18n/themes/presets/new_year
 author = Aurore
 icon = firework
+particles = confetti
 version = 1
 description = Midnight and champagne: gold and silver sparkling in the focus.
 

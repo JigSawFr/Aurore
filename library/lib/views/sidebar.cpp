@@ -156,6 +156,7 @@ Sidebar::Sidebar()
 
     this->setScrollingBehavior(ScrollingBehavior::CENTERED);
     this->setBackground(ViewBackground::SIDEBAR);
+    this->setThemeArea(ThemeArea::SIDEBAR);
 
     // Create content box
     this->contentBox = new Box(Axis::COLUMN);
