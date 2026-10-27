@@ -13,8 +13,8 @@ A theme file is watched when it is read by `Theme::loadFile()` after hot reload 
 
 ### Where the XML files are read from
 
-- **A build that reads its resources from disk** (without `USE_LIBROMFS`) reads them from the `resources/` folder copied next to the app when it was built. Edit the files there, or better, give hot reload the sources' own folder (`BRLS_HOT_RELOAD=/path/to/my_app/resources`): the XML files are then read from it.
-- **A build with its resources built in** (`USE_LIBROMFS`, the default on the consoles and phones) has no files to watch: give hot reload the sources' resources folder, and the XML files found there are read from it in place of the ones built in (`@res/…` in `brls:View`, `createFromXMLResource()`, `inflateFromXMLRes()`). The images, fonts and translations still come from the built-in ones.
+- **A build that reads its resources from disk** (without `AURORE_LIBROMFS`) reads them from the `resources/` folder copied next to the app when it was built. Edit the files there, or better, give hot reload the sources' own folder (`BRLS_HOT_RELOAD=/path/to/my_app/resources`): the XML files are then read from it.
+- **A build with its resources built in** (`AURORE_LIBROMFS`, the default on the consoles and phones) has no files to watch: give hot reload the sources' resources folder, and the XML files found there are read from it in place of the ones built in (`@res/…` in `brls:View`, `createFromXMLResource()`, `inflateFromXMLRes()`). The images, fonts and translations still come from the built-in ones.
 - A path given to `createFromXMLFile()` or `inflateFromXMLFile()` is watched as it is.
 
 It does nothing on the Switch, the PS4, the PS Vita, Android and iOS: their resources are not read from a folder of the developer's machine.

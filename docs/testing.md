@@ -86,7 +86,7 @@ A smoke scenario of an Xvfb script (start, press keys, wait, grab the screen, co
 ## The demo's tests
 
 ```sh
-cmake -B build -G Ninja -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
+cmake -B build -G Ninja -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```

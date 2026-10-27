@@ -21,9 +21,9 @@
       "description": "Windows, macOS or Linux, windowing and input with GLFW, resources built in",
       "inherits": "base",
       "cacheVariables": {
-        "PLATFORM_DESKTOP": "ON",
-        "USE_GLFW": "ON",
-        "USE_LIBROMFS": "ON"
+        "AURORE_PLATFORM": "DESKTOP",
+        "AURORE_WINDOW": "GLFW",
+        "AURORE_LIBROMFS": "ON"
       }
     },
     {
@@ -32,9 +32,9 @@
       "description": "Windows, macOS or Linux, windowing and input with SDL2, resources built in",
       "inherits": "base",
       "cacheVariables": {
-        "PLATFORM_DESKTOP": "ON",
-        "USE_SDL2": "ON",
-        "USE_LIBROMFS": "ON"
+        "AURORE_PLATFORM": "DESKTOP",
+        "AURORE_WINDOW": "SDL2",
+        "AURORE_LIBROMFS": "ON"
       }
     },
     {
@@ -43,8 +43,8 @@
       "description": "Switch homebrew drawn with deko3d; needs devkitPro and DEVKITPRO set",
       "inherits": "base",
       "cacheVariables": {
-        "PLATFORM_SWITCH": "ON",
-        "USE_DEKO3D": "ON"
+        "AURORE_PLATFORM": "SWITCH",
+        "AURORE_GRAPHICS": "DEKO3D"
       }
     },
     {
@@ -53,9 +53,9 @@
       "description": "Switch homebrew drawn with OpenGL (mesa) and GLFW; needs devkitPro and DEVKITPRO set",
       "inherits": "base",
       "cacheVariables": {
-        "PLATFORM_SWITCH": "ON",
-        "USE_DEKO3D": "OFF",
-        "USE_GLFW": "ON"
+        "AURORE_PLATFORM": "SWITCH",
+        "AURORE_GRAPHICS": "GL3",
+        "AURORE_WINDOW": "GLFW"
       }
     }
   ],

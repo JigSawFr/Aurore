@@ -17,8 +17,12 @@ set(BRLS_EXTERN_EXCLUDE EXCLUDE_FROM_ALL)
 if (AURORE_INSTALL)
     set(BRLS_EXTERN_EXCLUDE)
 endif ()
+# Desktop: the directory that holds "resources/" at run time (default: the
+# working directory). An app sets it before add_subdirectory(); it can be
+# given with -DBRLS_RESOURCES_DIR=... too (for an AppImage, say).
 if (NOT BRLS_RESOURCES_DIR)
     if (CUSTOM_RESOURCES_DIR)
+        message(DEPRECATION "CUSTOM_RESOURCES_DIR is deprecated: use -DBRLS_RESOURCES_DIR=${CUSTOM_RESOURCES_DIR}")
         set(BRLS_RESOURCES_DIR "${CUSTOM_RESOURCES_DIR}")
     else ()
         set(BRLS_RESOURCES_DIR ".")
@@ -186,6 +190,9 @@ if (PLATFORM_DESKTOP)
         list(APPEND BRLS_PUBLIC_DEFINITIONS __GLFW__)
         list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/glfw)
     endif ()
+    if (BOREALIS_USE_D3D11 AND NOT WIN32)
+        message(FATAL_ERROR "AURORE_GRAPHICS=D3D11 is for Windows")
+    endif ()
     if (WIN32)
         if (BOREALIS_USE_D3D11)
             list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/driver/d3d11.cpp)
@@ -336,7 +343,7 @@ elseif(PLATFORM_SWITCH)
     # tinyxml2.h and a glad/glad.h, which must not hide the library's own
     list(APPEND BOREALIS_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
 else ()
-    message(FATAL_ERROR "Please set build target. Example: -DPLATFORM_DESKTOP=ON or -DPLATFORM_SWITCH=ON")
+    message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
 endif ()
 
 # aurore c/cpp source

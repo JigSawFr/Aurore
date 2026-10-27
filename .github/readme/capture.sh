@@ -1,6 +1,6 @@
 #!/bin/bash
 # The README's screenshots and tour.gif, from the demo's desktop build:
-#   cmake -B build_pc -DPLATFORM_DESKTOP=ON && cmake --build build_pc
+#   cmake -B build_pc -DAURORE_PLATFORM=DESKTOP && cmake --build build_pc
 #   xvfb-run -a -s "-screen 0 1280x720x24" .github/readme/capture.sh
 # Needs Xvfb, xdotool, ImageMagick, ffmpeg and dbus. The demo starts on its
 # Cadran tab, in the dark theme; light.png with BOREALIS_THEME=LIGHT.

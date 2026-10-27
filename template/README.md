@@ -32,12 +32,12 @@ Inside Aurore's own repository the template finds Aurore around it (`..`) and bu
 Linux needs a compiler with C++20, CMake, Ninja, and the X11/Wayland and OpenGL development packages GLFW asks for (`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl-dev` on Debian or Ubuntu).
 
 ```sh
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=DESKTOP
 cmake --build build
 ./build/my_app
 ```
 
-`-DUSE_SDL2=ON` builds with SDL2 instead of GLFW. The resources are copied to `build/resources` at each build; the binary reads them there.
+`-DAURORE_WINDOW=SDL2` builds with SDL2 instead of GLFW. The resources are copied to `build/resources` at each build; the binary reads them there.
 
 ## Nintendo Switch
 
@@ -45,11 +45,11 @@ With [devkitPro](https://devkitpro.org/wiki/Getting_Started) and its `switch-dev
 
 ```sh
 export DEVKITPRO=/opt/devkitpro
-cmake -B build-switch -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_SWITCH=ON -DUSE_DEKO3D=ON
+cmake -B build-switch -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=SWITCH -DAURORE_GRAPHICS=DEKO3D
 cmake --build build-switch --target my_app.nro
 ```
 
-`build-switch/my_app.nro` goes to `/switch/` on the SD card; nxlink sends it straight to a console (`nxlink -s build-switch/my_app.nro`). `-DUSE_DEKO3D=OFF` draws with OpenGL instead of deko3d.
+`build-switch/my_app.nro` goes to `/switch/` on the SD card; nxlink sends it straight to a console (`nxlink -s build-switch/my_app.nro`). Without `-DAURORE_GRAPHICS=DEKO3D` it draws with OpenGL instead of deko3d.
 
 ## Where to go next
 

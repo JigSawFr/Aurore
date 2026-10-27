@@ -1,7 +1,7 @@
 # An app built on Aurore: a desktop binary (GLFW or SDL2) and a Switch .nro.
 #
-#   cmake -B build -DPLATFORM_DESKTOP=ON && cmake --build build
-#   cmake -B build-switch -DPLATFORM_SWITCH=ON && cmake --build build-switch --target my_app.nro
+#   cmake -B build -DAURORE_PLATFORM=DESKTOP && cmake --build build
+#   cmake -B build-switch -DAURORE_PLATFORM=SWITCH && cmake --build build-switch --target my_app.nro
 #
 # See README.md.
 cmake_minimum_required(VERSION 3.13)
@@ -19,7 +19,8 @@ endif ()
 get_filename_component(AURORE_DIR "${AURORE_DIR}" ABSOLUTE)
 set(BOREALIS_LIBRARY ${AURORE_DIR}/library)
 
-# Aurore's options (PLATFORM_*, USE_GLFW, USE_SDL2, USE_DEKO3D…) and toolchain
+# Aurore's options (AURORE_PLATFORM, AURORE_WINDOW, AURORE_GRAPHICS…) and toolchain;
+# they set PLATFORM_DESKTOP, PLATFORM_SWITCH, USE_DEKO3D… for the tests below
 include(${BOREALIS_LIBRARY}/cmake/commonOption.cmake)
 include(${BOREALIS_LIBRARY}/cmake/toolchain.cmake)
 
