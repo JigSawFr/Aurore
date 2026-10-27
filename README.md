@@ -6,7 +6,7 @@
 
 **Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch**
 
-[![C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](#-use-it-in-your-project)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](#-use-it-in-your-project)
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
@@ -34,7 +34,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - 🧱 **Flexbox layout** — every view is laid out by [Yoga](https://github.com/facebook/yoga), described in XML, code only where it matters.
 - 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM), scaled for a TV.
 - 🧩 **Ready-made components** — tabs, lists that recycle their cells, settings cells, dialogs, toasts, sliders, images, all restyled by a theme.
-- 🌗 **Light and dark themes, theme files and presets** (high contrast included) switched while the app runs ([docs/themes.md](docs/themes.md)), and translations in one JSON catalogue per language.
+- 🎨 **Themes** — every colour is a theme key; theme files and folders bring palettes, background pictures, logos, icons and decorations, switched while the app runs ([docs/themes.md](docs/themes.md)). Presets ship with it: high contrast, Ocean, Amethyst, Sand, one per season and feast, and *Seasonal*, which follows the calendar.
+- 🌍 **15 languages** — one JSON catalogue per language, switched while the app runs; colour emoji and right-to-left text as options.
+- 🧪 **Tools** — a test harness with simulated time and screenshot comparison, an inspector (F12), hot reload of XML and themes, a profiler and an app template.
 - 🧰 **The toolbox** — logger, animations, timers, background tasks, storage.
 
 <details>
@@ -60,6 +62,18 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 </p>
 
 <p align="center">
+  <img src=".github/readme/winter.png" alt="A theme folder: Winter" width="49%">
+  <img src=".github/readme/prism.png" alt="A theme folder: Prism" width="49%">
+  <br><sub><b>A theme folder with decorations: Winter</b> · <b>A theme with its own logo and icons: Prism</b></sub>
+</p>
+
+<p align="center">
+  <img src=".github/readme/aurora.png" alt="A background picture: Aurora" width="49%">
+  <img src=".github/readme/palettes.png" alt="The palette picker" width="49%">
+  <br><sub><b>A background picture: Aurora</b> · <b>The palette picker</b></sub>
+</p>
+
+<p align="center">
   <img src=".github/readme/light.png" alt="The light theme" width="49%">
   <img src=".github/readme/french.png" alt="In French, switched while the app runs" width="49%">
   <br><sub><b>The light theme</b> · <b>In French, switched while the app runs</b></sub>
@@ -69,6 +83,10 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 ## 🌟 What Aurore adds
 
+- 🎨 **Themes** — theme files and folders: palettes from one accent, presets, background pictures, logos, icons, app image slots, backdrops, decor strips and gentle particles, all switched live, with contrast checked.
+- ✨ **Styles** — per-state styles (focus, pressed, disabled, hover), transitions, data binding and accessibility labels.
+- 🧩 **Views** — a recycling grid and row, context menus, icon buttons, Markdown.
+- 🧪 **Tools** — test harness, inspector, hot reload, profiler, template.
 - 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients.
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
@@ -79,6 +97,31 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 <details>
 <summary><b>Every change and its API</b></summary>
 <br>
+
+**Themes** ([docs/themes.md](docs/themes.md))
+
+| Change | API |
+| --- | --- |
+| Every colour by theme key, switched live without rebuilding the screens | `View::setThemeColor`, XML `@theme/…`, `View::onThemeChanged`, `Application::getThemeChangedEvent` |
+| Theme files: metadata, `inherit`, `[light]`/`[dark]`, a palette from one accent, `@include` | `Theme::loadFile`, `Theme::inspect`, `Theme::listThemes` |
+| Presets: high contrast, Ocean, Amethyst, Sand, nine seasons and feasts, *Seasonal* | `builtin:<id>` · `Theme::seasonalTheme`, `Theme::followCalendar` |
+| Contrast checked for every theme (WCAG 4.5:1 and 3:1) | `Theme::addContrastCheck` · `aurore_demo --check-themes` |
+| Theme folders with their pictures, kept inside the folder | `<id>/theme.theme` · `Theme::resolveAsset` |
+| Background pictures, their fit, a veil, translucent surfaces | `background_image`, `background_fit`, `background_dim`, `surface_opacity` · `Theme::addSurfaceKey` |
+| Logo, icons, app image slots, a thumbnail | `logo`, `icon.<name>`, `image.<slot>`, `preview` · `Theme::addImageSlot`, `Image::setThemeImage` |
+| Backdrops, decor strips, particles (still with reduced motion) | `backdrop.*`, `decor.*`, `particles*` · `View::setThemeArea` |
+| Cadran's palette picker, each palette with a swatch and a motif | `ui::pick_palette` · `icon =` |
+
+**Styles, views and tools**
+
+| Change | API |
+| --- | --- |
+| Styles per state, transitions, data binding, accessibility | [docs/styles.md](docs/styles.md) |
+| Recycling grid and row, context menu, icon button | [docs/components.md](docs/components.md) |
+| A test harness: no window, simulated time, inputs by call, screenshots compared | `-DBRLS_BUILD_TESTS=ON` · [docs/testing.md](docs/testing.md) |
+| An inspector drawn over the app, on every platform | F12 or L3+R3 · [docs/inspector.md](docs/inspector.md) |
+| Hot reload of the XML and the theme on the desktop | [docs/hot_reload.md](docs/hot_reload.md) |
+| Frame profiler | `BRLS_PROFILE=1` |
 
 **Layout and drawing**
 
@@ -199,7 +242,7 @@ cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 
 With the resources built in (`USE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
 
-New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
+New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
 For the other platforms, upstream's wiki has the toolchains and the commands:
 
@@ -207,12 +250,26 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 - 🎮 [Nintendo Switch](https://github.com/xfangfang/borealis/wiki/NintendoSwitch) · [PS4](https://github.com/xfangfang/borealis/wiki/PS4) · [PS Vita](https://github.com/xfangfang/borealis/wiki/PS-Vita)
 - 📱 [Android](https://github.com/xfangfang/borealis/wiki/Android) · [iOS](https://github.com/xfangfang/borealis/wiki/iOS)
 
+## 📚 Documentation
+
+| Page | |
+| --- | --- |
+| [Aurore in 15 minutes](docs/getting-started.md) | From the demo to a screen of your own on the Switch |
+| [Themes](docs/themes.md) | Theme files and folders, presets, pictures, decorations, keys |
+| [Cadran](docs/cadran.md) | The default look and its kit |
+| [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
+| [Components](docs/components.md) | The views Aurore adds |
+| [Testing](docs/testing.md) | The test harness |
+| [Inspector](docs/inspector.md) · [Hot reload](docs/hot_reload.md) | Debugging aids |
+| [Overlay](docs/overlay.md) | Design note on a Switch overlay mode (not built) |
+
 ## 🕹️ Made with borealis
 
 | Project | |
 | --- | --- |
 | [Moonlight-Switch](https://github.com/XITRIX/Moonlight-Switch) | Moonlight game streaming for Nintendo Switch |
 | [PlayGuard](https://github.com/JigSawFr/playguard) | Parental controls for Nintendo Switch, on the console |
+| [PlayShelf](https://github.com/JigSawFr/playshelf) | A game library, catalogue and downloads for Nintendo Switch |
 | [SimpleModDownloader](https://github.com/PoloNX/SimpleModDownloader) | GameBanana mods, downloaded on the Switch |
 | [switchfin](https://github.com/dragonflylee/switchfin) | Jellyfin client for PC, PS4 and Nintendo Switch |
 | [UpcomingSwitchGames](https://github.com/PoloNX/UpcomingSwitchGames) | The upcoming Switch games |
