@@ -10,7 +10,7 @@ accent = #3ddc97
 
 ## The format
 
-A theme file is text, `*.theme` by convention: `key = value` lines, `[sections]`, `#` comments (a `#` at the start of a line or after a space; `#3ddc97` right after `=` is a colour).
+A theme file is text, `*.theme` by convention: `key = value` lines, `[sections]`, `#` comments (a `#` at the start of a line or after a space; `#3ddc97` right after `=` is a colour). A theme with pictures is a folder holding its file and its pictures (below, [Theme folders and pictures](#theme-folders-and-pictures)).
 
 ```ini
 # Metadata: shown by a picker (Theme::listThemes)
@@ -38,8 +38,12 @@ accent = #3fa7ff
 warning = #ffb000
 danger = #ff6b6b
 
-# A picture behind every screen, next to the file
+# A picture behind every screen, in the theme's folder; how it fills the
+# window, the veil over it, the surfaces' opacity over it (below)
 background_image = night.jpg
+background_fit = cover
+background_dim = 0.35
+surface_opacity = 1
 
 # Another file's lines, here
 @include shared.inc
@@ -47,8 +51,9 @@ background_image = night.jpg
 [colors]            # any key, for every variant the file styles
 brls/sidebar/background = #0d1b2a
 
-[light]             # for the light variant only (palette or keys)
+[light]             # for the light variant only (palette, keys, background)
 accent = #1f5fc4
+background_image = day.jpg
 
 [dark]              # for the dark variant only
 cadran/glow = rgba(63, 167, 255, 0.15)
@@ -60,8 +65,9 @@ brls/highlight/stroke_width = 6
 - **Colours**: `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(r, g, b)`, `rgba(r, g, b, a)` (a from 0 to 1).
 - **Variants**: a file styles the variant it inherits (`inherit = light` or `dark`, dark by default), or both when it has `[light]` and `[dark]` sections; it then follows the system's mode (or the app's light/dark setting). The variant a file does not style stays as it is without a file.
 - **`counterpart`**, for a file that styles one variant only: the file (or preset) with the other variant, the same look in light or dark. A picker asked for the variant this file lacks switches to it (Cadran's does, below); `--check-themes` reports a counterpart that cannot be read or lacks that variant.
+- **Background** (`background_image`, `background_fit`, `background_dim`, `surface_opacity`): for every variant the file styles, or in `[light]`/`[dark]` for one; below.
 - **`icon`**: the Cadran icon (`cadran/view/cadran_icon.hpp`) a picker shows the file with: Cadran's palette picker draws it in the file's accent on a swatch of its background and surface. The motifs drawn for palettes: `snowflake`, `heart`, `lantern`, `blossom`, `sun`, `wave`, `leaf`, `pumpkin`, `tree`, `firework`, `gem`, `dune`, `contrast`, `moon`, `bolt`, `sparkle`; any other icon of the list works too. Inherited, and an `@include`d file's counts, as `background_image`. Without one (or with a name Cadran does not know), `sparkle`.
-- **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets; loops stop after 8 levels.
+- **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them; for the background, a line of this file for every variant also beats the inherited file's `[light]`/`[dark]` one. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets; loops stop after 8 levels.
 - **Later lines win**; palette values are derived first, then `[colors]`, then `[light]`/`[dark]`, so an explicit key always beats the derived one.
 - **Errors never stop the file**: a line that cannot be read (a bad colour, an unknown section, a missing include) is skipped and reported, with its file and line number. An unknown key is kept (an app's own keys are fine) and reported as a warning, in case it is a typo.
 - **Contrast**: after a file is read, the pairs the core and Cadran promise to keep readable are checked (`Theme::checkContrast`): `brls/text on brls/background reads badly: 3.1:1, under 4.5:1`. Text needs 4.5:1, the focus ring 3:1 (WCAG 1.4.3, 1.4.11). Warnings are logged, and listed in `ThemeInfo::warnings`.
@@ -82,6 +88,89 @@ The palette keys (`accent`, `background`, `surface`, `text`, `warning`, `danger`
 The label on the fills (`cadran/navy`: a confirmation's, a primary button's) is the one of the text, the background, black or white that reads best on the accent and danger fills; a fill the file does not give is darkened or lightened until it reads at 4.5:1.
 
 **State shades**: `brls/accent/hover`, `brls/accent/pressed`, `brls/accent/disabled` and `brls/accent/ink` (the text on the accent) exist in every theme, derived from `brls/accent` (from `accent` in a file), for an app's state styles: `pressed:backgroundColor="@theme/brls/accent/pressed"` (docs/styles.md).
+
+## Theme folders and pictures
+
+A theme stays a single `.theme` file, or becomes a folder when it has pictures: the folder is named after the theme (its id), its file is `theme.theme`, and its pictures are next to it or in subfolders.
+
+```
+themes/                      # the folder an app lists (Theme::listThemes)
+├── mint.theme               # a single file: id "mint"
+└── aurora/                  # a theme folder: id "aurora"
+    ├── theme.theme
+    ├── night.jpg
+    ├── day.jpg
+    └── parts/sky.inc        # an @include, not listed
+```
+
+`Theme::listThemes(folder)` lists the folder's `*.theme` files and its subfolders that have a `theme.theme` (a subfolder without one is skipped); `Theme::loadFile("themes/aurora/theme.theme")` uses one.
+
+**Pictures stay in the theme's folder.** A picture a theme names (`background_image`, and any picture a later key names) is read from the folder of the file that names it, and must stay in the theme's folder: the theme folder, or the folder of a single `.theme` file. An absolute path (`/…`, `sdmc:/…`, `C:/…`), a `..` going out of the folder, a backslash, or a link in the folder to a file out of it is refused: the line is skipped and reported in `ThemeInfo::errors` (`line 7: background_image ../x.png: goes out of the theme's folder`), never a crash. An included file in a subfolder of the theme keeps the theme's folder (`parts/sky.inc` may name `../night.jpg`); an inherited theme's pictures are confined to its own folder. A preset's pictures are the app's resources (`@res/…`), and so may be those of a theme that is itself a resource (`@res/themes/…`); no other theme may name `@res/`. One function does this, `Theme::resolveAsset`, for every picture of a theme. A picture that is not there is an error of `inspect()` and `listThemes()` (`background_image: cannot read …`); one that is there but cannot be decoded is an error only of an explicit check (`inspect(path, true)`, `listThemes(folder, true)`, `--check-themes`), since a listing decodes nothing. Used anyway, it is logged once and nothing is drawn.
+
+### The background
+
+| Key | Values | Default | What |
+| --- | --- | --- | --- |
+| `background_image` | a file in the theme's folder, or `none` | none | A picture behind every screen: PNG or JPEG (not WebP). `none` takes away an inherited one |
+| `background_fit` | `cover`, `contain`, `tile`, `center` | `cover` | `cover` fills the window, centred, cut at the edges; `contain` shows it whole, centred, `brls/clear` around it; `tile` repeats it from the top left; `center` puts it in the middle as is. `tile` and `center` draw one pixel of the picture per unit of the 1280×720 layout |
+| `background_dim` | 0 to 1 | 0.35 | A veil of `brls/background` over the picture, so that the text drawn on it reads: 0 shows it as is, 1 hides it |
+| `surface_opacity` | 0 to 1 | 1 | The opacity of the surfaces over the picture: cards and chips (`cadran/surf`, `cadran/surf2`), the sidebar (`brls/sidebar/background`), the focus's fill (`brls/highlight/background`), the default buttons. 1 keeps them opaque; without a picture it does nothing |
+
+Each key is read at the top (every variant the file styles) or in `[light]`/`[dark]` (one variant), as the colours: a theme can have a night picture and a day one, or a picture in one variant only. A variant the file does not style has no picture.
+
+What shows and what does not:
+
+- The screens have no fill of their own: their background is the window's, `brls/clear`, then the picture, then its veil. The main screen, a tab frame's content, applet frames and Cadran's screens show it as they are.
+- The surfaces keep their colours, at `surface_opacity`. Cadran's rail, when it opens over the tab in a translucent colour, draws the picture again under itself (`Application::drawThemeBackground`), so that the tab does not show through it.
+- Dialogs keep their own surfaces, over `brls/backdrop`: the core's panel is `brls/background`, opaque; Cadran's dialogs, sheets and pickers are drawn in `cadran/surf`/`surf2`, at `surface_opacity`, so the dimmed screen shows faintly through them under 1 (0.8 and over keep them clean).
+- `brls/background` stays opaque: views use it to cut a shape out of what is under them (a badge's ring, the fade at the bottom of a list).
+
+Why 0.35: over a picture as it comes (a photo, a gradient with bright parts), text keyed to the theme's own background colour needs that colour back under it; 0.35 keeps two thirds of the picture's colour, enough to see it, and pulls its brightest and darkest parts toward the background, which in most pictures brings the text's contrast back over its minimum. A busy or bright picture wants more (0.5 to 0.7); a dark, quiet one under a dark theme reads at 0.
+
+**Contrast**: the picture's average colour is worked out once, where it is decoded, then the veil over it: that is what the text on the screens is checked on (`brls/text on brls/background over the background image reads badly: 3.2:1, under 4.5:1`), and the translucent surfaces over it. The palette derives its inks to read on `background`; over a picture darker or lighter than that, give the keys the check names (the demo's Aurora does, in `[light]`). The average does not see a bright spot in a dark picture: look at the screens too.
+
+When the check runs: a picture is decoded off the UI thread when a theme is used (its colour recorded then, the check logged once it is loaded, `Theme::checkBackgroundContrast`), or by an explicit check on the thread that asks (`inspect(path, true)`, `listThemes(folder, true)`, `aurore_demo --check-themes`, which a picker must not call from the UI thread). A plain `listThemes()`, the one a picker calls, decodes nothing and reads colours only: its `ThemeInfo::warnings` have the picture's check only for a picture whose colour is already known (loaded, or checked, in this run).
+
+**Live**: a theme with a picture is used like any other, at once, without building the screens again; going back to a theme without one (or to none) gives every colour and every pixel back. A picture still loading leaves the one before on screen until it is ready.
+
+A complete theme folder, the demo's Aurora (`resources/themes/aurora`, its pictures drawn by `tools/make_aurora_background.py`):
+
+```ini
+# resources/themes/aurora/theme.theme
+name = Aurora
+author = Aurore demo
+version = 1.0
+description = Northern lights behind every screen, at night or at dawn.
+icon = sparkle
+
+background_fit = cover
+surface_opacity = 0.85
+
+[light]
+background = #eef2fa
+surface = #ffffff
+text = #1b2433
+accent = #15604f
+background_image = day.jpg
+background_dim = 0.5
+cadran/text3 = #56606e
+brls/header/subtitle = #56606e
+brls/highlight/color2 = #2a8f7a
+
+[dark]
+background = #0a1426
+surface = #13233a
+text = #eaf4f4
+accent = #3ee8a5
+background_image = night.jpg
+```
+
+To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BOREALIS_THEME=LIGHT` for the dawn), or the demo's Settings tab.
+
+### Pictures in memory
+
+A theme's pictures are loaded by `ThemeImages` (`borealis/core/theme_image.hpp`), the one loader for them: decoded on the async thread (`brls::async`), made smaller when larger than 1920×1080 (the ratio kept, an average of the pixels each one covers), the texture made on the UI thread (`brls::sync`), and freed when nothing holds it any more: the background's when the theme or the variant changes. Only the variant on screen has its picture loaded: a 1920×1080 picture is 8 MB of texture (RGBA), so at most 8 MB for the background, plus the picture being replaced while the next one loads. A JPEG that size takes a few tens of milliseconds to decode on a desktop, a few hundred on a Switch, on the async thread.
+
 
 ## Every key
 
@@ -217,7 +306,26 @@ brls::Theme::checkContrast(variant);        // the pairs under their minimum
 brls::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
 ```
 
-`ThemeInfo` has `path`, `id`, `name`, `author`, `version`, `description`, `backgroundImage`, `icon` (its `icon`, "" without one), `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`); a file's `@include`s are best named `*.inc`, so that they are not listed.
+`ThemeInfo` has `path`, `id` (a theme folder's name for its `theme.theme`), `name`, `author`, `version`, `description`, `icon` (its `icon`, "" without one), `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `lightBackground`/`darkBackground` (`ThemeBackground`: `image`, `fit`, `dim`, `surfaceOpacity`; `background(variant)`), `backgroundImage` (the dark variant's picture, else the light one's), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`), and lists its `*.theme` files and theme folders, cheaply (no picture decoded unless asked, above); a file's `@include`s are best named `*.inc`, so that they are not listed.
+
+For what a theme's pictures need (the background, and what later keys draw):
+
+```cpp
+brls::Theme::getBackground(brls::ThemeVariant::DARK);   // image, fit, dim, surfaceOpacity
+brls::Theme::resolveAsset(name, directory, root, &path, &error); // a theme's picture, confined
+brls::Theme::addSurfaceKey("myapp/card");   // an app's surface, translucent over a picture
+brls::Theme::checkBackgroundContrast(variant); // the text on the picture, once it is loaded
+
+// The loader: shared by path while held, freed with its last holder
+std::shared_ptr<brls::ThemeImage> image = brls::ThemeImages::load(path);
+brls::ThemeImages::getLoadedEvent()->subscribe([](const brls::ThemeImage* image) { /* ready or failed */ });
+if (image->ready()) nvgImagePattern(vg, x, y, image->width, image->height, 0, image->texture, 1.0f);
+brls::ThemeImages::meanColor(path, &color);  // its average colour, remembered
+brls::ThemeImages::decoding();               // pictures on the async thread (a test waits for 0)
+
+brls::Application::hasThemeBackground();    // a picture is behind the screens
+brls::Application::drawThemeBackground(vg, x, y, width, height); // under a translucent panel
+```
 
 ### Colours that follow the theme
 
