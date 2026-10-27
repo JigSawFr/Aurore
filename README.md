@@ -135,6 +135,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
+| Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
 | A spinner's own colour | `ProgressSpinner::setColor` |
 | Toasts styled by the theme, with an optional icon | `brls/notification/background`, `…/text`, `…/corner_radius`, `…/spacing`, `…/margin_top`, `…/margin_right` · `Application::notify(text, leading)` |
 | The footer's clock in hours and minutes | — |
@@ -148,6 +149,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A wrapped line no longer starts with a space; a no-break space keeps words together | — |
 | The default font looked up for each new label | — |
 | FreeType instead of stb_truetype, hinted (an option) | `-DUSE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
+| stb_truetype: a glyph read within its own data, a font's tables within the font (CVE-2026-18497); fonts still from trusted sources | — |
 | Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
 | Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DUSE_FRIBIDI=ON` · `brls::bidiVisual()` |
 
@@ -213,6 +215,8 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `USE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
+
+5. Pick a version: the submodule can follow a release tag (`vX.Y.Z`), and [`CHANGELOG.md`](CHANGELOG.md) says what each one changes. Before 1.0 a minor version may break the API. In code, `AURORE_VERSION` and `AURORE_VERSION_AT_LEAST(0, 2, 0)` come with `borealis.hpp`; an installed Aurore answers `find_package(Aurore 0.1)`.
 
 > [!TIP]
 > Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.

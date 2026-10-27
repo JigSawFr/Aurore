@@ -1,0 +1,42 @@
+name: pr-title
+
+# Pull requests are squash-merged: the title becomes the commit that
+# release-please writes the changelog from, so it must be a conventional
+# commit with a scope (feat(theme): …, fix(cadran): …).
+on:
+  pull_request_target:
+    types: [ opened, edited, synchronize, reopened ]
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  conventional-title:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            security
+            perf
+            revert
+            refactor
+            docs
+            build
+            test
+            style
+            chore
+            ci
+          requireScope: true
+          # release-please's own pull request: chore(main): release X.Y.Z
+          ignoreLabels: |
+            autorelease: pending

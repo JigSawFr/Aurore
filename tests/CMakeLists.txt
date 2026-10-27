@@ -16,6 +16,12 @@ add_executable(aurore_open_url_tests open_url_tests.cpp)
 target_link_libraries(aurore_open_url_tests PRIVATE Aurore::test)
 brls_add_tests(aurore_open_url_tests)
 
+# Pictures too large are refused before they are decoded
+add_executable(aurore_image_limits_tests image_limits_tests.cpp)
+target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
+target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+brls_add_tests(aurore_image_limits_tests)
+
 # The main loop's cost on the demo (Profiler), checked against a baseline
 add_executable(aurore_bench bench.cpp)
 target_link_libraries(aurore_bench PRIVATE aurore_demo_views Aurore::test)
@@ -27,3 +33,4 @@ target_link_libraries(aurore-preview PRIVATE aurore_demo_views Aurore::test)
 add_test(NAME aurore_preview
         COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
+set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)

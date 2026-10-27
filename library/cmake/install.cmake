@@ -50,3 +50,13 @@ configure_package_config_file(${BOREALIS_PATH}/cmake/AuroreConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/AuroreConfig.cmake
         INSTALL_DESTINATION ${AURORE_CMAKE_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/AuroreConfig.cmake DESTINATION ${AURORE_CMAKE_DIR})
+
+# find_package(Aurore 0.1): before 1.0 a minor version may break the API, so it only accepts the same minor version
+if (AURORE_VERSION VERSION_LESS 1.0)
+    set(AURORE_COMPATIBILITY SameMinorVersion)
+else ()
+    set(AURORE_COMPATIBILITY SameMajorVersion)
+endif ()
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/AuroreConfigVersion.cmake
+        VERSION ${AURORE_VERSION} COMPATIBILITY ${AURORE_COMPATIBILITY})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/AuroreConfigVersion.cmake DESTINATION ${AURORE_CMAKE_DIR})
