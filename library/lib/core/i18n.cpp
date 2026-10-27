@@ -47,9 +47,9 @@ namespace brls
 // The strings of the default locale and of the current one, never changed
 // once published: a new language is loaded into a new table, put in place of
 // the old one with an atomic store. getStr may be called from any thread
-// while loadTranslations runs on another: a lookup takes the table with an
-// atomic load and keeps it alive until it has copied its string, so a table
-// replaced meanwhile is freed only after its last reader.
+// while loadTranslations runs on another: a lookup takes a reference to the
+// table under tableMutex and keeps it alive until it has copied its string,
+// so a table replaced meanwhile is freed only after its last reader.
 struct Translations
 {
     nlohmann::json defaultLocale = nlohmann::json::object();
@@ -57,6 +57,19 @@ struct Translations
 };
 
 static std::shared_ptr<const Translations> translations;
+static std::mutex tableMutex;
+
+static std::shared_ptr<const Translations> currentTable()
+{
+    std::lock_guard<std::mutex> lock(tableMutex);
+    return translations;
+}
+
+static void setTable(std::shared_ptr<const Translations> table)
+{
+    std::lock_guard<std::mutex> lock(tableMutex);
+    translations.swap(table);
+}
 
 // One load at a time (each one builds on the table in place).
 static std::mutex loadMutex;
@@ -193,21 +206,21 @@ void loadTranslations()
     std::string currentLocaleName = Application::getLocale();
     if (currentLocaleName != LOCALE_DEFAULT)
         loadLocale(currentLocaleName, &next->currentLocale);
-    std::atomic_store(&translations, std::shared_ptr<const Translations>(std::move(next)));
+    setTable(std::move(next));
 }
 
 void loadTranslations(const std::string& locale)
 {
     std::lock_guard<std::mutex> lock(loadMutex);
     auto next                                    = std::make_shared<Translations>();
-    std::shared_ptr<const Translations> previous = std::atomic_load(&translations);
+    std::shared_ptr<const Translations> previous = currentTable();
     if (previous && !previous->defaultLocale.empty())
         next->defaultLocale = previous->defaultLocale;
     else
         loadLocale(LOCALE_DEFAULT, &next->defaultLocale);
     if (locale != LOCALE_DEFAULT)
         loadLocale(locale, &next->currentLocale);
-    std::atomic_store(&translations, std::shared_ptr<const Translations>(std::move(next)));
+    setTable(std::move(next));
 }
 
 namespace internal
@@ -228,7 +241,7 @@ namespace internal
 
         // The table as it is now, kept for this lookup even if another
         // thread loads a new language meanwhile.
-        std::shared_ptr<const Translations> table = std::atomic_load(&translations);
+        std::shared_ptr<const Translations> table = currentTable();
         if (!table)
             return stringName;
 
