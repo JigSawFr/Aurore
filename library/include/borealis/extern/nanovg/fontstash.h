@@ -663,17 +663,66 @@ int fons__tt_loadFont(FONScontext *context, FONSttFontImpl *font, FONSstream *st
 }
 
 #else
+static unsigned int fons__be32(const unsigned char* p)
+{
+	return ((unsigned int)p[0] << 24) | ((unsigned int)p[1] << 16) | ((unsigned int)p[2] << 8) | p[3];
+}
+
+// Aurore: stb_truetype trusts the offsets in the font. Its table directory
+// must lie in the data (before stbtt_InitFont reads it), and each glyph
+// (loca) in the glyf table (after).
+static int fons__tt_tablesFit(const unsigned char* data, int dataSize, int offset, unsigned long long* glyfLength)
+{
+	unsigned long long size = (unsigned long long)dataSize;
+	int numTables, t;
+	if (offset < 0 || (unsigned long long)offset + 12 > size)
+		return 0;
+	numTables = (data[offset + 4] << 8) | data[offset + 5];
+	if ((unsigned long long)offset + 12 + 16ull * numTables > size)
+		return 0;
+	*glyfLength = 0;
+	for (t = 0; t < numTables; t++) {
+		const unsigned char* record = data + offset + 12 + 16 * t;
+		if ((unsigned long long)fons__be32(record + 8) + fons__be32(record + 12) > size)
+			return 0;
+		if (memcmp(record, "glyf", 4) == 0)
+			*glyfLength = fons__be32(record + 12);
+	}
+	return 1;
+}
+
+static int fons__tt_glyphsFit(const stbtt_fontinfo* info, int dataSize, unsigned long long glyfLength)
+{
+	unsigned long long entry, next, i;
+	if (info->cff.size || !info->glyf)
+		return 1;
+	entry = info->indexToLocFormat == 0 ? 2 : 4;
+	if ((unsigned long long)info->loca + entry * ((unsigned long long)info->numGlyphs + 1) > (unsigned long long)dataSize)
+		return 0;
+	for (i = 0; i <= (unsigned long long)info->numGlyphs; i++) {
+		const unsigned char* p = info->data + info->loca + i * entry;
+		next = entry == 2 ? (((unsigned long long)p[0] << 8) | p[1]) * 2 : fons__be32(p);
+		if (next > glyfLength)
+			return 0;
+	}
+	return 1;
+}
+
 int fons__tt_loadFont(FONScontext *context, FONSttFontImpl *font, unsigned char *data, int dataSize, int fontIndex)
 {
 	int offset, stbError;
-	FONS_NOTUSED(dataSize);
 
 	font->font.userdata = context;
+	if (data == NULL || dataSize < 16 || fontIndex < 0 || 12 + 4 * (long long)(fontIndex + 1) > dataSize)
+		return 0;
 	offset = stbtt_GetFontOffsetForIndex(data, fontIndex);
 	if (offset == -1) {
 		stbError = 0;
 	} else {
-		stbError = stbtt_InitFont(&font->font, data, offset);
+		unsigned long long glyfLength = 0;
+		stbError = fons__tt_tablesFit(data, dataSize, offset, &glyfLength)
+			&& stbtt_InitFont(&font->font, data, offset)
+			&& fons__tt_glyphsFit(&font->font, dataSize, glyfLength);
 	}
 	return stbError;
 }
