@@ -49,7 +49,7 @@
         "check_info": "Vérifié aujourd’hui",
         "check_note": "Vérifié sur cette console seulement.",
         "hold": "Maintenir pour confirmer",
-        "hold_text": "Tout réinitialiser ?\n\nMaintenez le bouton 2 secondes.",
+        "hold_text": "Tout réinitialiser ?",
         "qr": "Code QR",
         "qr_text": "Ouvrez Aurore sur votre téléphone :",
         "toast": "Notification",

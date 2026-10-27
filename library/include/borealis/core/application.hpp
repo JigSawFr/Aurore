@@ -206,8 +206,10 @@ class Application
 
     /**
      * Reduced motion: the movements that are only there for show are skipped
-     * (the transition= of views, the highlight's glide; Cadran's entrances,
-     * glides and breathing glow). Off by default. getReduceMotion(), which
+     * (the transition= of views, the highlight's glide, the scrolling of
+     * lists and of texts cut short, the toasts' and dropdowns' slide, the
+     * switch cells' bounce; Cadran's entrances, glides and breathing glow).
+     * Off by default. getReduceMotion(), which
      * transitions read, is also true while Cadran's effects leave movement
      * out (Preferences › Visual effects "reduced", the lighter effects in
      * hand, BRLS_STILL_FOCUS); the highlight's glide follows the app's
@@ -503,6 +505,9 @@ class Application
     static void registerXMLView(std::string name, XMLViewCreator creator);
 
     static bool XMLViewsRegisterContains(std::string name);
+
+    // The XML tags registered (registerXMLView)
+    static std::vector<std::string> getXMLViewNames();
     static XMLViewCreator getXMLViewCreator(std::string name);
 
     /**

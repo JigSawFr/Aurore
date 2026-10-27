@@ -96,7 +96,7 @@
         "check_info": "Last checked today",
         "check_note": "Checked on this console only.",
         "hold": "Hold to confirm",
-        "hold_text": "Reset everything?\n\nHold the button for 2 seconds.",
+        "hold_text": "Reset everything?",
         "qr": "QR code",
         "qr_text": "Open Aurore on your phone:",
         "toast": "Toast",

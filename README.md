@@ -259,6 +259,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 | [Cadran](docs/cadran.md) | The default look and its kit |
 | [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
 | [Components](docs/components.md) | The views Aurore adds |
+| [XML attributes](docs/xml-attributes.md) | Every attribute of every view, generated from the sources |
 | [Testing](docs/testing.md) | The test harness |
 | [Inspector](docs/inspector.md) · [Hot reload](docs/hot_reload.md) | Debugging aids |
 | [Overlay](docs/overlay.md) | Design note on a Switch overlay mode (not built) |

@@ -72,7 +72,7 @@ brls/highlight/stroke_width = 6
 - **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them; for the background, a line of this file for every variant also beats the inherited file's `[light]`/`[dark]` one. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets; loops stop after 8 levels.
 - **Later lines win**; palette values are derived first, then `[colors]`, then `[light]`/`[dark]`, so an explicit key always beats the derived one.
 - **Errors never stop the file**: a line that cannot be read (a bad colour, an unknown section, a missing include) is skipped and reported, with its file and line number. An unknown key is kept (an app's own keys are fine) and reported as a warning, in case it is a typo.
-- **Contrast**: after a file is read, the pairs the core and Cadran promise to keep readable are checked (`Theme::checkContrast`): `brls/text on brls/background reads badly: 3.1:1, under 4.5:1`. Text needs 4.5:1, the focus ring 3:1 (WCAG 1.4.3, 1.4.11). Warnings are logged, and listed in `ThemeInfo::warnings`.
+- **Contrast**: after a file is read, the pairs the core and Cadran promise to keep readable are checked (`Theme::checkContrast`): `brls/text on brls/background reads badly: 3.1:1, under 4.5:1`. Text needs 4.5:1 (the inks, a cell's value, secondary text, the toasts), shapes that carry meaning 3:1: the focus ring on the screen and on a card, a tile's icon, a chart's bars (`cadran/bar`, `cadran/bar_today`) (WCAG 1.4.3, 1.4.11). A theme that sets `cadran/text3` over a picture sets `brls/text_secondary` with it. Warnings are logged, and listed in `ThemeInfo::warnings`.
 
 ### The palette
 
@@ -82,7 +82,7 @@ The palette keys (`accent`, `background`, `surface`, `text`, `warning`, `danger`
 | --- | --- |
 | `background` | `brls/background`, `brls/clear`, `brls/sidebar/background` |
 | `surface` | `cadran/surf`, `cadran/surf2` (5 % toward the text), `brls/highlight/background`, `brls/button/default_*_background` |
-| `text` (and `background`) | `brls/text`, `cadran/text`, `cadran/text2` and `text3` (30 % and 45 % toward the background, at 4.5:1), `brls/text_disabled`, `brls/header/subtitle`, `brls/header/rectangle`, `brls/list/listItem_value_color`, every separator and line (`brls/sidebar/separator`, `brls/header/border`, `brls/applet_frame/separator`, `cadran/line`, `cadran/track`, `cadran/border`, `cadran/well`), button text and borders, `brls/slider/line_empty`, `brls/spinner/bar_color`, `cadran/key_bg`, `cadran/key_fg` |
+| `text` (and `background`) | `brls/text`, `cadran/text`, `cadran/text2` and `text3` (30 % and 45 % toward the background, at 4.5:1), `brls/text_disabled`, `brls/text_secondary` (as `text3`), `brls/header/subtitle`, `brls/header/rectangle`, `brls/list/listItem_value_color`, every separator and line (`brls/sidebar/separator`, `brls/header/border`, `brls/applet_frame/separator`, `cadran/line`, `cadran/track`, `cadran/border`, `cadran/well`), button text and borders, `brls/slider/line_empty`, `brls/spinner/bar_color`, `cadran/key_bg`, `cadran/key_fg` |
 | `accent` | `brls/accent` and the inks of the active and chosen things (`brls/sidebar/active_item`, `brls/button/highlight_*_text`, `cadran/teal`, `cadran/pill_ok_ink`), the fills (`brls/button/primary_*`, `brls/slider/line_filled`, `cadran/teal_fill`, `cadran/teal_soft`, `cadran/pill_ok`, `cadran/rail_active`), the focus ring (`brls/highlight/color1` at 3:1, `color2` lighter, `cadran/hl1`, `cadran/hl2`), `brls/click_pulse`, `cadran/glow`, `cadran/glow_strong`, and the state shades below |
 | `warning` | `cadran/amber`, `cadran/amber_fill`, `cadran/amber_surf`, `cadran/amber_line` |
 | `danger` | `cadran/coral`, `cadran/coral_fill`, `cadran/coral_line`, `cadran/coral_soft` |
@@ -386,6 +386,7 @@ Without a theme file, each variant has the core's defaults, then Cadran's palett
 | `brls/clear` | The window's colour, under everything |
 | `brls/background` | Screens, dialogs and pickers |
 | `brls/text`, `brls/text_disabled` | Labels, and what cannot be used now |
+| `brls/text_secondary` | Secondary text at 4.5:1: a switch cell's Off, a placeholder, a counter (Cadran: `cadran/text3`) |
 | `brls/accent`, `brls/accent/hover`, `…/pressed`, `…/disabled`, `…/ink` | The accent (a dialog's buttons) and its state shades |
 | `brls/backdrop` | Behind a dialog or a picker |
 | `brls/notification/background`, `brls/notification/text` | Toasts |

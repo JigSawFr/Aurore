@@ -160,7 +160,8 @@ AppletFrame* Dropdown::getAppletFrame()
 
 void Dropdown::show(std::function<void(void)> cb, bool animate, float animationDuration)
 {
-    if (animate)
+    // Reduced motion: it fades in where it stays, without rising
+    if (animate && !Application::getReduceMotion())
     {
         content->setTranslationY(30.0f);
 

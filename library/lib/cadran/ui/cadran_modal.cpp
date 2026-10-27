@@ -20,6 +20,8 @@ namespace
 {
 // The pills' looks (theme and style keys, as borealis' own button styles):
 // plain on the second surface with a hairline, the confirmation filled.
+// The focus ring stands off a filled pill (cadran/ring_gap): its colour is
+// often the fill's own.
 const brls::ButtonStyle PLAIN = {
     .shadowType              = brls::ShadowType::NONE,
     .hideHighlightBackground = true,
@@ -35,7 +37,7 @@ const brls::ButtonStyle PLAIN = {
 const brls::ButtonStyle PRIMARY = {
     .shadowType              = brls::ShadowType::NONE,
     .hideHighlightBackground = true,
-    .highlightPadding        = "",
+    .highlightPadding        = "cadran/ring_gap",
     .borderThickness         = "",
     .enabledBackgroundColor  = "cadran/teal_fill",
     .enabledLabelColor       = "cadran/navy",
@@ -47,7 +49,7 @@ const brls::ButtonStyle PRIMARY = {
 const brls::ButtonStyle DANGER = {
     .shadowType              = brls::ShadowType::NONE,
     .hideHighlightBackground = true,
-    .highlightPadding        = "",
+    .highlightPadding        = "cadran/ring_gap",
     .borderThickness         = "",
     .enabledBackgroundColor  = "cadran/coral_fill",
     .enabledLabelColor       = "cadran/navy",
