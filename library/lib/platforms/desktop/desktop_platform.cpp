@@ -58,6 +58,19 @@ using winrt::Windows::UI::ViewManagement::UISettings;
 #include <ifaddrs.h>
 #endif
 
+#if (defined(__APPLE__) || defined(__linux__)) && !defined(ANDROID) && !defined(IOS) && !defined(TVOS)
+#include <spawn.h>
+#include <sys/wait.h>
+
+#include <cstring>
+#include <thread>
+#ifdef __APPLE__
+#include <crt_externs.h>
+#else
+extern char** environ;
+#endif
+#endif
+
 namespace brls
 {
 #ifdef __WINRT__
@@ -1094,26 +1107,68 @@ void DesktopPlatform::forceEnableGamePlayRecording()
 
 void DesktopPlatform::openBrowser(std::string url)
 {
+    if (!isBrowserUrl(url))
+    {
+        brls::Logger::warning("open url: refused, not an http(s) link");
+        return;
+    }
     brls::Logger::debug("open url: {}", url);
 #if __SDL2__
     SDL_OpenURL(url.c_str());
-#elif __APPLE__
-    std::string cmd = "open \"" + url + "\"";
-    system(cmd.c_str());
-#elif defined(__linux__)
+#elif defined(__APPLE__) || defined(__linux__)
+#ifdef __linux__
     if (isSteamDeck())
     {
-        runSteamDeckCommand(fmt::format("steam://openurl/{}\n", url));
+        runSteamDeckCommand(steamOpenUrlCommand(url));
+        return;
     }
-    else
-    {
-        std::string cmd = "xdg-open \"" + url + "\"";
-        system(cmd.c_str());
-    }
+#endif
+    int pid = spawnProcess(browserCommand(url));
+    if (pid > 0)
+        std::thread([pid]
+            { waitpid(pid, nullptr, 0); })
+            .detach();
 #elif defined(_WIN32) and !defined(__WINRT__)
     shell_open(url.c_str());
 #endif
 }
+
+#if (defined(__APPLE__) || defined(__linux__)) && !defined(ANDROID) && !defined(IOS) && !defined(TVOS)
+std::vector<std::string> DesktopPlatform::browserCommand(const std::string& url)
+{
+    if (!isBrowserUrl(url))
+        return {};
+#ifdef __APPLE__
+    return { "open", url };
+#else
+    return { "xdg-open", url };
+#endif
+}
+
+int DesktopPlatform::spawnProcess(const std::vector<std::string>& args)
+{
+    if (args.empty())
+        return -1;
+    std::vector<char*> argv;
+    for (const std::string& arg : args)
+        argv.push_back(const_cast<char*>(arg.c_str()));
+    argv.push_back(nullptr);
+
+#ifdef __APPLE__
+    char** env = *_NSGetEnviron();
+#else
+    char** env = environ;
+#endif
+    pid_t pid = -1;
+    int err   = posix_spawnp(&pid, argv[0], nullptr, nullptr, argv.data(), env);
+    if (err != 0)
+    {
+        brls::Logger::warning("Cannot start {}: {}", args[0], strerror(err));
+        return -1;
+    }
+    return pid;
+}
+#endif
 
 std::string DesktopPlatform::getName()
 {

@@ -182,6 +182,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
 | deko3d: the command memory grows instead of aborting; image descriptors reused | — |
 | Switch: the applet hook removed first at shutdown | — |
+| `openBrowser`: http and https links only, handed to `xdg-open`/`open` as one argument (no shell), one line on the Steam Deck pipe | `Platform::isBrowserUrl`, `Platform::BROWSER_URL_SCHEMES` |
 | Logger: flushed after every line | — |
 
 **Speed**

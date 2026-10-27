@@ -68,6 +68,20 @@ class DesktopPlatform : public Platform
     void forceEnableGamePlayRecording() override;
     void openBrowser(std::string url) override;
 
+#if (defined(__APPLE__) || defined(__linux__)) && !defined(ANDROID) && !defined(IOS) && !defined(TVOS)
+    /**
+     * The command openBrowser() runs for this url: xdg-open or open, with the
+     * url as one argument; empty if isBrowserUrl() refuses it
+     */
+    static std::vector<std::string> browserCommand(const std::string& url);
+
+    /**
+     * Starts args[0], looked up in PATH, with these arguments and no shell
+     * @return the child's pid, or -1
+     */
+    static int spawnProcess(const std::vector<std::string>& args);
+#endif
+
     inline static bool RESTART_APP       = false;
     inline static std::string GAMEPAD_DB = BRLS_ASSET("gamepad/gamecontrollerdb.txt");
 

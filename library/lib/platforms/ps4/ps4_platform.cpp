@@ -227,6 +227,11 @@ std::string Ps4Platform::getDnsServer()
 
 void Ps4Platform::openBrowser(std::string url)
 {
+    if (!isBrowserUrl(url))
+    {
+        Logger::warning("open url: refused, not an http(s) link");
+        return;
+    }
     SceShellUIUtilLaunchByUriParam param;
     param.size = sizeof(SceShellUIUtilLaunchByUriParam);
     sceUserServiceGetForegroundUser((int*)&param.userId);
