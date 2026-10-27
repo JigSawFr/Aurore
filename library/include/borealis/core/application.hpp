@@ -280,6 +280,13 @@ class Application
      */
     static void drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height);
 
+    /**
+     * The same in a shape with round corners of `radius`, and the strips
+     * of the theme's decorations (decor.top, decor.bottom) over it: under a
+     * translucent dialog or sheet (View::setThemeArea).
+     */
+    static void drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height, float radius);
+
     static ImeManager* getImeManager();
 
     /**
@@ -692,7 +699,7 @@ class Application
     inline static std::shared_ptr<ThemeImage> themeBackgroundLoading;
     static void loadThemeBackground();
     static void onThemeImageLoaded(const ThemeImage* image);
-    static void drawThemeBackgroundImage(NVGcontext* vg, float x, float y, float width, float height);
+    static void drawThemeBackgroundImage(NVGcontext* vg, float x, float y, float width, float height, float radius = 0.0f);
 
     inline static std::unordered_map<std::string, XMLViewCreator> xmlViewsRegister;
 

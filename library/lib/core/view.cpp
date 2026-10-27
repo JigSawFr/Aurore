@@ -212,6 +212,11 @@ void View::frame(FrameContext* ctx)
 
     if (this->alpha > 0.0f && this->collapseState != 0.0f)
     {
+        // A translucent dialog over a theme's picture: the picture under it,
+        // dimmed as around it, not the screen behind it
+        if (this->themeArea == ThemeArea::DIALOG && this->backgroundColor.a < 1.0f && Application::hasThemeBackground())
+            this->drawThemeUnderlay(ctx, frame);
+
         // Draw background
         this->drawBackground(ctx->vg, ctx, style, frame);
 
@@ -263,6 +268,16 @@ void View::frame(FrameContext* ctx)
 
     if (inspected)
         Inspector::recording = wasRecording;
+}
+
+void View::drawThemeUnderlay(FrameContext* ctx, const Rect& frame)
+{
+    NVGcontext* vg = ctx->vg;
+    Application::drawThemeBackground(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
+    nvgFillColor(vg, ctx->theme["brls/backdrop"]);
+    nvgFill(vg);
 }
 
 void View::drawThemeBackdrop(FrameContext* ctx, const Rect& frame)

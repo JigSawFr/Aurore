@@ -248,6 +248,7 @@ class View
 
     void drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame);
     void drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame);
+    void drawThemeUnderlay(FrameContext* ctx, const Rect& frame);
     void drawThemeBackdrop(FrameContext* ctx, const Rect& frame);
     void drawBorder(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame);
     void drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, bool background);
@@ -971,7 +972,10 @@ class View
      * The area of the theme's decorations this view is (docs/themes.md,
      * Decorations): HEADER, SIDEBAR or DIALOG. Its picture (backdrop.header,
      * .sidebar, .dialog) is drawn over the view's background, under its
-     * content, in its corners. A HEADER is drawn across the whole width of its parent (an AppletFrame),
+     * content, in its corners. A DIALOG in a translucent colour over a
+     * theme's background image has that image drawn under it first, dimmed
+     * by brls/backdrop, so that it does not show the screen behind it. A
+     * HEADER is drawn across the whole width of its parent (an AppletFrame),
      * when that parent is a screen's (not in a dialog). NONE by default; the
      * core's header, sidebar, dialogs and dropdowns are set.
      */

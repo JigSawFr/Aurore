@@ -1014,6 +1014,25 @@ BRLS_TEST(theme_decor_header_backdrop)
     BRLS_CHECK(h.screenshot().at(640, 4)[0] < 120);
 }
 
+// A translucent dialog over a theme's picture shows the picture, not the
+// screen behind it
+BRLS_TEST(theme_decor_dialog_over_a_picture)
+{
+    DemoHarness h;
+    brls::Application::setReduceMotion(true);
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/aurora/theme.theme"));
+    h.step();
+    while (brls::ThemeImages::decoding() > 0)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    h.settle();
+    h.tap(brls::BUTTON_RIGHT);
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(h.focusText(), std::string("Confirm"));
+    h.tap(brls::BUTTON_A);
+    h.settle();
+    BRLS_CHECK(h.matchesReference("theme_decor_dialog"));
+}
+
 BRLS_TEST(images_compare_with_tolerance)
 {
     brls::test::Image a;

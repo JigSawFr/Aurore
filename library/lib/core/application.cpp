@@ -2100,9 +2100,27 @@ void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float wi
     ThemeDecorations::drawStrips(vg, x, y, width, height);
 }
 
+void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height, float radius)
+{
+    if (!Application::hasThemeBackground())
+        return;
+    if (radius <= 0.0f)
+        return Application::drawThemeBackground(vg, x, y, width, height);
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, x, y, width, height, radius);
+    nvgFillColor(vg, Application::getTheme().getColor("brls/clear"));
+    nvgFill(vg);
+    Application::drawThemeBackgroundImage(vg, x, y, width, height, radius);
+    // The strips have straight edges: in the corners' square, over the image
+    nvgSave(vg);
+    nvgIntersectScissor(vg, x, y + radius, width, height - 2 * radius);
+    ThemeDecorations::drawStrips(vg, x, y, width, height);
+    nvgRestore(vg);
+}
+
 // The background image as background_fit says, then its veil, over the
 // clear colour and under the screens: the part over x, y, width, height
-void Application::drawThemeBackgroundImage(NVGcontext* vg, float areaX, float areaY, float areaWidth, float areaHeight)
+void Application::drawThemeBackgroundImage(NVGcontext* vg, float areaX, float areaY, float areaWidth, float areaHeight, float radius)
 {
     if (!Application::hasThemeBackground())
         return;
@@ -2143,7 +2161,10 @@ void Application::drawThemeBackgroundImage(NVGcontext* vg, float areaX, float ar
     if (right > left && bottom > top)
     {
         nvgBeginPath(vg);
-        nvgRect(vg, left, top, right - left, bottom - top);
+        if (radius > 0.0f)
+            nvgRoundedRect(vg, left, top, right - left, bottom - top, radius);
+        else
+            nvgRect(vg, left, top, right - left, bottom - top);
         nvgFillPaint(vg, nvgImagePattern(vg, x, y, w, h, 0, image->texture, 1.0f));
         nvgFill(vg);
     }
@@ -2153,7 +2174,10 @@ void Application::drawThemeBackgroundImage(NVGcontext* vg, float areaX, float ar
         NVGcolor veil = Application::getTheme().getColor("brls/background");
         veil.a *= background.dim;
         nvgBeginPath(vg);
-        nvgRect(vg, areaX, areaY, areaWidth, areaHeight);
+        if (radius > 0.0f)
+            nvgRoundedRect(vg, areaX, areaY, areaWidth, areaHeight, radius);
+        else
+            nvgRect(vg, areaX, areaY, areaWidth, areaHeight);
         nvgFillColor(vg, veil);
         nvgFill(vg);
     }
