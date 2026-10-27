@@ -1,0 +1,540 @@
+[0/2] Re-checking globbed directories...
+[1/501] Building CXX object library/CMakeFiles/tinyxml2.dir/lib/extern/tinyxml2/tinyxml2.cpp.o
+[2/501] cd /home/user/aw-theme/build-noromfs && /usr/bin/cmake -E copy_directory /home/user/aw-theme/resources /home/user/aw-theme/build-noromfs/resources
+[3/501] Building CXX object library/lib/extern/fmt/CMakeFiles/fmt.dir/src/format.cc.o
+[4/501] Building CXX object library/lib/extern/fmt/CMakeFiles/fmt.dir/src/os.cc.o
+[5/501] Linking CXX static library library/libtinyxml2.a
+[6/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/YGConfig.cpp.o
+[7/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/YGEnums.cpp.o
+[8/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/YGNode.cpp.o
+[9/501] Linking CXX static library library/lib/extern/fmt/libfmt.a
+[10/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/YGNodeStyle.cpp.o
+[11/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/YGNodeLayout.cpp.o
+[12/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/YGValue.cpp.o
+[13/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/YGPixelGrid.cpp.o
+[14/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/algorithm/AbsoluteLayout.cpp.o
+[15/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/algorithm/Baseline.cpp.o
+[16/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/algorithm/Cache.cpp.o
+[17/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/algorithm/CalculateLayout.cpp.o
+[18/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/algorithm/FlexLine.cpp.o
+[19/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/algorithm/PixelGrid.cpp.o
+[20/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/config/Config.cpp.o
+[21/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/debug/AssertFatal.cpp.o
+[22/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/debug/Log.cpp.o
+[23/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/event/event.cpp.o
+[24/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/node/LayoutResults.cpp.o
+[25/501] Building CXX object library/lib/extern/yoga/yoga/CMakeFiles/yogacore.dir/node/Node.cpp.o
+[26/501] Generating include/SDL2/SDL.h
+[27/501] Generating include/SDL2/SDL_assert.h
+[28/501] Generating include/SDL2/SDL_atomic.h
+[29/501] Generating include/SDL2/SDL_audio.h
+[30/501] Generating include/SDL2/SDL_bits.h
+[31/501] Generating include/SDL2/SDL_blendmode.h
+[32/501] Linking CXX static library library/lib/extern/yoga/yoga/libyogacore.a
+[33/501] Generating include/SDL2/SDL_clipboard.h
+[34/501] Generating include/SDL2/SDL_copying.h
+[35/501] Generating include/SDL2/SDL_cpuinfo.h
+[36/501] Generating include/SDL2/SDL_egl.h
+[37/501] Generating include/SDL2/SDL_endian.h
+[38/501] Generating include/SDL2/SDL_error.h
+[39/501] Generating include/SDL2/SDL_events.h
+[40/501] Generating include/SDL2/SDL_filesystem.h
+[41/501] Generating include/SDL2/SDL_gamecontroller.h
+[42/501] Generating include/SDL2/SDL_gesture.h
+[43/501] Generating include/SDL2/SDL_guid.h
+[44/501] Generating include/SDL2/SDL_haptic.h
+[45/501] Generating include/SDL2/SDL_hidapi.h
+[46/501] Generating include/SDL2/SDL_hints.h
+[47/501] Generating include/SDL2/SDL_joystick.h
+[48/501] Generating include/SDL2/SDL_keyboard.h
+[49/501] Generating include/SDL2/SDL_loadso.h
+[50/501] Generating include/SDL2/SDL_keycode.h
+[51/501] Generating include/SDL2/SDL_locale.h
+[52/501] Generating include/SDL2/SDL_log.h
+[53/501] Generating include/SDL2/SDL_main.h
+[54/501] Generating include/SDL2/SDL_messagebox.h
+[55/501] Generating include/SDL2/SDL_metal.h
+[56/501] Generating include/SDL2/SDL_misc.h
+[57/501] Generating include/SDL2/SDL_mouse.h
+[58/501] Generating include/SDL2/SDL_mutex.h
+[59/501] Generating include/SDL2/SDL_name.h
+[60/501] Generating include/SDL2/SDL_opengl.h
+[61/501] Generating include/SDL2/SDL_opengles.h
+[62/501] Generating include/SDL2/SDL_opengl_glext.h
+[63/501] Generating include/SDL2/SDL_opengles2.h
+[64/501] Generating include/SDL2/SDL_opengles2_gl2.h
+[65/501] Generating include/SDL2/SDL_opengles2_gl2ext.h
+[66/501] Generating include/SDL2/SDL_opengles2_gl2platform.h
+[67/501] Generating include/SDL2/SDL_opengles2_khrplatform.h
+[68/501] Generating include/SDL2/SDL_pixels.h
+[69/501] Generating include/SDL2/SDL_platform.h
+[70/501] Generating include/SDL2/SDL_power.h
+[71/501] Generating include/SDL2/SDL_quit.h
+[72/501] Generating include/SDL2/SDL_rect.h
+[73/501] Generating include/SDL2/SDL_render.h
+[74/501] Generating include/SDL2/SDL_rwops.h
+[75/501] Generating include/SDL2/SDL_scancode.h
+[76/501] Generating include/SDL2/SDL_sensor.h
+[77/501] Generating include/SDL2/SDL_shape.h
+[78/501] Generating include/SDL2/SDL_stdinc.h
+[79/501] Generating include/SDL2/SDL_surface.h
+[80/501] Generating include/SDL2/SDL_system.h
+[81/501] Generating include/SDL2/SDL_syswm.h
+[82/501] Generating include/SDL2/SDL_test.h
+[83/501] Generating include/SDL2/SDL_test_assert.h
+[84/501] Generating include/SDL2/SDL_test_common.h
+[85/501] Generating include/SDL2/SDL_test_compare.h
+[86/501] Generating include/SDL2/SDL_test_crc32.h
+[87/501] Generating include/SDL2/SDL_test_font.h
+[88/501] Generating include/SDL2/SDL_test_harness.h
+[89/501] Generating include/SDL2/SDL_test_fuzzer.h
+[90/501] Generating include/SDL2/SDL_test_images.h
+[91/501] Generating include/SDL2/SDL_test_log.h
+[92/501] Generating include/SDL2/SDL_test_md5.h
+[93/501] Generating include/SDL2/SDL_test_memory.h
+[94/501] Generating include/SDL2/SDL_test_random.h
+[95/501] Generating include/SDL2/SDL_thread.h
+[96/501] Generating include/SDL2/SDL_timer.h
+[97/501] Generating include/SDL2/SDL_touch.h
+[98/501] Generating include/SDL2/SDL_types.h
+[99/501] Generating include/SDL2/SDL_version.h
+[100/501] Generating include/SDL2/SDL_video.h
+[101/501] Generating include/SDL2/SDL_vulkan.h
+[102/501] Generating include/SDL2/begin_code.h
+[103/501] Generating wayland-generated-protocols/fractional-scale-v1-client-protocol.h
+[104/501] Generating include/SDL2/close_code.h
+[105/501] Generating wayland-generated-protocols/idle-inhibit-unstable-v1-client-protocol.h
+[106/501] Generating wayland-generated-protocols/keyboard-shortcuts-inhibit-unstable-v1-client-protocol.h
+[107/501] Generating wayland-generated-protocols/pointer-constraints-unstable-v1-client-protocol.h
+[108/501] Generating wayland-generated-protocols/primary-selection-unstable-v1-client-protocol.h
+[109/501] Generating wayland-generated-protocols/relative-pointer-unstable-v1-client-protocol.h
+[110/501] Generating wayland-generated-protocols/tablet-unstable-v2-client-protocol.h
+[111/501] Generating wayland-generated-protocols/text-input-unstable-v3-client-protocol.h
+[112/501] Generating wayland-generated-protocols/viewporter-client-protocol.h
+[113/501] Generating wayland-generated-protocols/xdg-activation-v1-client-protocol.h
+[114/501] Generating wayland-generated-protocols/wayland-client-protocol.h
+[115/501] Generating wayland-generated-protocols/xdg-decoration-unstable-v1-client-protocol.h
+[116/501] Generating wayland-generated-protocols/xdg-output-unstable-v1-client-protocol.h
+[117/501] Generating wayland-generated-protocols/xdg-shell-client-protocol.h
+[118/501] Generating wayland-generated-protocols/fractional-scale-v1-protocol.c
+[119/501] Generating wayland-generated-protocols/idle-inhibit-unstable-v1-protocol.c
+[120/501] Generating wayland-generated-protocols/keyboard-shortcuts-inhibit-unstable-v1-protocol.c
+[121/501] Generating wayland-generated-protocols/pointer-constraints-unstable-v1-protocol.c
+[122/501] Generating wayland-generated-protocols/primary-selection-unstable-v1-protocol.c
+[123/501] Generating wayland-generated-protocols/relative-pointer-unstable-v1-protocol.c
+[124/501] Generating wayland-generated-protocols/tablet-unstable-v2-protocol.c
+[125/501] Generating wayland-generated-protocols/text-input-unstable-v3-protocol.c
+[126/501] Generating wayland-generated-protocols/viewporter-protocol.c
+[127/501] Generating wayland-generated-protocols/wayland-protocol.c
+[128/501] Generating wayland-generated-protocols/xdg-activation-v1-protocol.c
+[129/501] Generating wayland-generated-protocols/xdg-decoration-unstable-v1-protocol.c
+[130/501] Generating wayland-generated-protocols/xdg-output-unstable-v1-protocol.c
+[131/501] Generating wayland-generated-protocols/xdg-shell-protocol.c
+[132/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2main.dir/src/main/dummy/SDL_dummy_main.c.o
+[133/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/demo_app.cpp.o
+[134/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/activity/main_activity.cpp.o
+[135/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/main.cpp.o
+[136/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/cadran_tab.cpp.o
+[137/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/components_tab.cpp.o
+[138/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/grid_tab.cpp.o
+[139/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/recycling_list_tab.cpp.o
+[140/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/styles_tab.cpp.o
+[141/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/settings_tab.cpp.o
+[142/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/text_test_tab.cpp.o
+[143/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/tab/transform_tab.cpp.o
+[144/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/view/captioned_image.cpp.o
+[145/501] Building C object library/CMakeFiles/aurore.dir/lib/extern/nanovg/nanovg.c.o
+[146/501] Building CXX object CMakeFiles/aurore_demo.dir/demo/src/view/pokemon_view.cpp.o
+[147/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/sdl/sdl_ime.cpp.o
+[148/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/sdl/sdl_input.cpp.o
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp: In function 'const brls::BrlsKeyboardScancode brls::sdlToBrlsKeyboardScancode(SDL_Scancode)':
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:50:54: warning: arithmetic between different enumeration types 'brls::BrlsKeyboardScancode' and 'SDL_Scancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+   50 |         return (BrlsKeyboardScancode)(BRLS_KBD_KEY_1 + scancode - SDL_SCANCODE_1);
+      |                                       ~~~~~~~~~~~~~~~^~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:54:57: warning: arithmetic between different enumeration types 'brls::BrlsKeyboardScancode' and 'SDL_Scancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+   54 |         return (BrlsKeyboardScancode)(BRLS_KBD_KEY_KP_1 + scancode - SDL_SCANCODE_KP_1);
+      |                                       ~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:58:54: warning: arithmetic between different enumeration types 'brls::BrlsKeyboardScancode' and 'SDL_Scancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+   58 |         return (BrlsKeyboardScancode)(BRLS_KBD_KEY_A + scancode - SDL_SCANCODE_A);
+      |                                       ~~~~~~~~~~~~~~~^~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:62:55: warning: arithmetic between different enumeration types 'brls::BrlsKeyboardScancode' and 'SDL_Scancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+   62 |         return (BrlsKeyboardScancode)(BRLS_KBD_KEY_F1 + scancode - SDL_SCANCODE_F1);
+      |                                       ~~~~~~~~~~~~~~~~^~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp: In function 'const SDL_Scancode brls::brlsToSdlKeyboardScancode(BrlsKeyboardScancode)':
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:184:46: warning: arithmetic between different enumeration types 'SDL_Scancode' and 'brls::BrlsKeyboardScancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+  184 |         return (SDL_Scancode)(SDL_SCANCODE_1 + scancode - BRLS_KBD_KEY_1);
+      |                               ~~~~~~~~~~~~~~~^~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:188:49: warning: arithmetic between different enumeration types 'SDL_Scancode' and 'brls::BrlsKeyboardScancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+  188 |         return (SDL_Scancode)(SDL_SCANCODE_KP_1 + scancode - BRLS_KBD_KEY_KP_1);
+      |                               ~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:192:46: warning: arithmetic between different enumeration types 'SDL_Scancode' and 'brls::BrlsKeyboardScancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+  192 |         return (SDL_Scancode)(SDL_SCANCODE_A + scancode - BRLS_KBD_KEY_A);
+      |                               ~~~~~~~~~~~~~~~^~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/sdl/sdl_input.cpp:196:47: warning: arithmetic between different enumeration types 'SDL_Scancode' and 'brls::BrlsKeyboardScancode' is deprecated [-Wdeprecated-enum-enum-conversion]
+  196 |         return (SDL_Scancode)(SDL_SCANCODE_F1 + scancode - BRLS_KBD_KEY_F1);
+      |                               ~~~~~~~~~~~~~~~~^~~~~~~~~~
+[149/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/sdl/sdl_platform.cpp.o
+[150/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/sdl/sdl_video.cpp.o
+[151/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/desktop/desktop_ime.cpp.o
+[152/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/desktop/desktop_font.cpp.o
+[153/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/desktop/desktop_winrt.cpp.o
+[154/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/desktop/steam_deck.cpp.o
+/home/user/aw-theme/library/lib/platforms/desktop/steam_deck.cpp: In function 'void brls::runSteamDeckCommand(const std::string&)':
+/home/user/aw-theme/library/lib/platforms/desktop/steam_deck.cpp:39:14: warning: ignoring return value of 'ssize_t write(int, const void*, size_t)' declared with attribute 'warn_unused_result' [-Wunused-result]
+   39 |         write(fd, cmd.c_str(), cmd.size());
+      |         ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/desktop/steam_deck.cpp: In function 'float brls::getSteamDeckBrightness()':
+/home/user/aw-theme/library/lib/platforms/desktop/steam_deck.cpp:88:13: warning: ignoring return value of 'ssize_t read(int, void*, size_t)' declared with attribute 'warn_unused_result' [-Wunused-result]
+   88 |         read(fd, brightness, sizeof(brightness));
+      |         ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/aw-theme/library/lib/platforms/desktop/steam_deck.cpp: In function 'void brls::setSteamDeckBrightness(float)':
+/home/user/aw-theme/library/lib/platforms/desktop/steam_deck.cpp:107:14: warning: ignoring return value of 'ssize_t write(int, const void*, size_t)' declared with attribute 'warn_unused_result' [-Wunused-result]
+  107 |         write(fd, brightness.c_str(), brightness.size());
+      |         ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[155/501] Building CXX object library/CMakeFiles/aurore.dir/lib/platforms/desktop/desktop_platform.cpp.o
+[156/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/activity.cpp.o
+[157/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/animation.cpp.o
+[158/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/bidi.cpp.o
+[159/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/bind.cpp.o
+[160/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/application.cpp.o
+[161/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/box.cpp.o
+[162/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/geometry.cpp.o
+[163/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/gesture.cpp.o
+[164/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/font.cpp.o
+[165/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/hot_reload.cpp.o
+[166/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/input.cpp.o
+[167/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/i18n.cpp.o
+[168/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/inspector.cpp.o
+[169/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/logger.cpp.o
+[170/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/platform.cpp.o
+[171/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/profiler.cpp.o
+[172/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/style.cpp.o
+[173/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/task.cpp.o
+[174/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/notification_manager.cpp.o
+[175/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/theme_decor.cpp.o
+[176/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/theme_image.cpp.o
+[177/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/theme_presets.cpp.o
+[178/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/theme.cpp.o
+[179/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/time.cpp.o
+[180/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/timer.cpp.o
+[181/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/touch/long_press_gesture.cpp.o
+[182/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/thread.cpp.o
+[183/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/touch/pan_gesture.cpp.o
+[184/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/touch/scroll_gesture.cpp.o
+[185/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/util.cpp.o
+[186/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/touch/tap_gesture.cpp.o
+[187/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/view_style.cpp.o
+[188/501] Building CXX object library/CMakeFiles/aurore.dir/lib/core/view.cpp.o
+[189/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/bottom_bar.cpp.o
+[190/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/applet_frame.cpp.o
+[191/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/cells/cell_bool.cpp.o
+[192/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/button.cpp.o
+[193/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/cells/cell_detail.cpp.o
+[194/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/cells/cell_input.cpp.o
+[195/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/cells/cell_radio.cpp.o
+[196/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/cells/cell_selector.cpp.o
+[197/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/cells/cell_slider.cpp.o
+[198/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/context_menu.cpp.o
+[199/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/debug_layer.cpp.o
+[200/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/dialog.cpp.o
+[201/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/dropdown.cpp.o
+[202/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/edit_text_dialog.cpp.o
+[203/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/header.cpp.o
+[204/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/h_scrolling_frame.cpp.o
+[205/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/icon_button.cpp.o
+[206/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/hint.cpp.o
+[207/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/label.cpp.o
+[208/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/image.cpp.o
+[209/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/rectangle.cpp.o
+[210/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/progress_spinner.cpp.o
+[211/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/recycler.cpp.o
+[212/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/recycling_grid.cpp.o
+[213/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/scrolling_frame.cpp.o
+[214/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/sidebar.cpp.o
+[215/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/slider.cpp.o
+[216/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/tab_frame.cpp.o
+[217/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/widgets/account.cpp.o
+[218/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/widgets/battery.cpp.o
+[219/501] Building C object library/CMakeFiles/aurore.dir/lib/extern/glad/glad.c.o
+[220/501] Building C object library/CMakeFiles/aurore.dir/lib/extern/libretro-common/compat/compat_strl.c.o
+[221/501] Building C object library/CMakeFiles/aurore.dir/lib/extern/libretro-common/encodings/encoding_utf.c.o
+[222/501] Building C object library/CMakeFiles/aurore.dir/lib/extern/libretro-common/features/features_cpu.c.o
+[223/501] Building CXX object library/CMakeFiles/aurore.dir/lib/extern/qrcodegen/qrcodegen.cpp.o
+[224/501] Building CXX object library/CMakeFiles/aurore.dir/lib/views/widgets/wireless.cpp.o
+[225/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/cadran.cpp.o
+[226/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/action_sheet.cpp.o
+[227/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/cadran_frame.cpp.o
+[228/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/cadran_kit.cpp.o
+[229/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/cadran_list.cpp.o
+[230/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/cadran_modal.cpp.o
+[231/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/cut_text.cpp.o
+[232/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/cadran_text.cpp.o
+[233/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/effects.cpp.o
+[234/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/dialogs.cpp.o
+[235/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/focus_log.cpp.o
+[236/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/hooks.cpp.o
+[237/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/format_text.cpp.o
+[238/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/live_prefs.cpp.o
+[239/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/motion.cpp.o
+[240/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/prefs.cpp.o
+[241/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/text_size.cpp.o
+[242/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/theme.cpp.o
+[243/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/ui.cpp.o
+[244/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/util/markdown.cpp.o
+[245/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/util/safe_text.cpp.o
+[246/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/ui/visibility.cpp.o
+[247/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/cadran_digits.cpp.o
+[248/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/cadran_icon.cpp.o
+[249/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/header_settings.cpp.o
+[250/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/footer_hints.cpp.o
+[251/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/loading_bar.cpp.o
+[252/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/markdown_view.cpp.o
+[253/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/scroll_view.cpp.o
+[254/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/qr_view.cpp.o
+[255/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/tab_badge.cpp.o
+[256/501] Building CXX object library/CMakeFiles/aurore.dir/lib/cadran/view/version_badge.cpp.o
+[257/501] Building CXX object library/CMakeFiles/aurore_test.dir/lib/test/headless_platform.cpp.o
+[258/501] Linking C static library library/lib/extern/SDL/libSDL2main.a
+[259/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL.c.o
+[260/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_assert.c.o
+[261/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_dataqueue.c.o
+[262/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_error.c.o
+[263/501] Building CXX object library/CMakeFiles/aurore_test.dir/lib/test/harness.cpp.o
+[264/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_guid.c.o
+[265/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_hints.c.o
+[266/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_log.c.o
+[267/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_utils.c.o
+[268/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/atomic/SDL_atomic.c.o
+[269/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/SDL_list.c.o
+[270/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/atomic/SDL_spinlock.c.o
+[271/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/SDL_audio.c.o
+[272/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/SDL_audiodev.c.o
+[273/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/SDL_audiocvt.c.o
+[274/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/SDL_audiotypecvt.c.o
+[275/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/SDL_mixer.c.o
+[276/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/SDL_wave.c.o
+[277/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/cpuinfo/SDL_cpuinfo.c.o
+[278/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_clipboardevents.c.o
+[279/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_displayevents.c.o
+[280/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_dropevents.c.o
+[281/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_events.c.o
+[282/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_gesture.c.o
+[283/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_keyboard.c.o
+[284/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/dynapi/SDL_dynapi.c.o
+[285/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_keysym_to_scancode.c.o
+[286/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_quit.c.o
+[287/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_scancode_tables.c.o
+[288/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_mouse.c.o
+[289/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_windowevents.c.o
+[290/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/SDL_touch.c.o
+[291/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/events/imKStoUCS.c.o
+[292/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/file/SDL_rwops.c.o
+[293/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/haptic/SDL_haptic.c.o
+[294/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/hidapi/SDL_hidapi.c.o
+[295/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/SDL_gamecontroller.c.o
+[296/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/controller_type.c.o
+[297/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_atan2.c.o
+[298/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_exp.c.o
+[299/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_fmod.c.o
+[300/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_log.c.o
+[301/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/SDL_joystick.c.o
+[302/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_log10.c.o
+[303/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_pow.c.o
+[304/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_rem_pio2.c.o
+[305/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/k_cos.c.o
+[306/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/e_sqrt.c.o
+[307/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/k_sin.c.o
+[308/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/k_rem_pio2.c.o
+[309/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/k_tan.c.o
+[310/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_atan.c.o
+[311/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_copysign.c.o
+[312/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_cos.c.o
+[313/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_fabs.c.o
+[314/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_scalbn.c.o
+[315/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_floor.c.o
+[316/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_tan.c.o
+[317/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/libm/s_sin.c.o
+[318/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/locale/SDL_locale.c.o
+[319/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/misc/SDL_url.c.o
+[320/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/power/SDL_power.c.o
+[321/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/SDL_d3dmath.c.o
+[322/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/SDL_yuv_sw.c.o
+[323/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/direct3d/SDL_render_d3d.c.o
+[324/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/direct3d/SDL_shaders_d3d.c.o
+[325/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/direct3d11/SDL_render_d3d11.c.o
+[326/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/direct3d11/SDL_shaders_d3d11.c.o
+[327/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/direct3d12/SDL_render_d3d12.c.o
+[328/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/direct3d12/SDL_shaders_d3d12.c.o
+[329/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/SDL_render.c.o
+[330/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/opengl/SDL_shaders_gl.c.o
+[331/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/opengl/SDL_render_gl.c.o
+[332/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/opengles/SDL_render_gles.c.o
+[333/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/opengles2/SDL_shaders_gles2.c.o
+[334/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/ps2/SDL_render_ps2.c.o
+[335/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/psp/SDL_render_psp.c.o
+[336/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/opengles2/SDL_render_gles2.c.o
+[337/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_blendfillrect.c.o
+[338/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_blendpoint.c.o
+[339/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_blendline.c.o
+[340/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_drawline.c.o
+[341/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_drawpoint.c.o
+[342/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_rotate.c.o
+[343/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_render_sw.c.o
+[344/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/vitagxm/SDL_render_vita_gxm.c.o
+[345/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/vitagxm/SDL_render_vita_gxm_memory.c.o
+[346/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/vitagxm/SDL_render_vita_gxm_tools.c.o
+[347/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/sensor/SDL_sensor.c.o
+[348/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/render/software/SDL_triangle.c.o
+[349/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_crc16.c.o
+[350/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_crc32.c.o
+[351/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_getenv.c.o
+[352/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_iconv.c.o
+[353/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_malloc.c.o
+[354/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_mslibc.c.o
+[355/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_qsort.c.o
+[356/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_stdlib.c.o
+[357/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_strtokr.c.o
+[358/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/stdlib/SDL_string.c.o
+[359/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/thread/SDL_thread.c.o
+[360/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/timer/SDL_timer.c.o
+[361/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit.c.o
+[362/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_RLEaccel.c.o
+[363/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit_0.c.o
+[364/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit_1.c.o
+[365/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit_A.c.o
+[366/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit_N.c.o
+[367/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit_copy.c.o
+[368/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit_slow.c.o
+[369/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_bmp.c.o
+[370/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_clipboard.c.o
+[371/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_blit_auto.c.o
+[372/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_egl.c.o
+[373/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_fillrect.c.o
+[374/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_rect.c.o
+[375/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_pixels.c.o
+[376/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_shape.c.o
+[377/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_stretch.c.o
+[378/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_surface.c.o
+[379/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_vulkan_utils.c.o
+[380/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_video.c.o
+[381/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/SDL_yuv.c.o
+[382/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/dummy/SDL_dummyaudio.c.o
+[383/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/disk/SDL_diskaudio.c.o
+[384/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/loadso/dlopen/SDL_sysloadso.c.o
+[385/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/virtual/SDL_virtualjoystick.c.o
+[386/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/dummy/SDL_nullevents.c.o
+[387/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/dummy/SDL_nullframebuffer.c.o
+[388/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/yuv2rgb/yuv_rgb.c.o
+[389/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenevents.c.o
+[390/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/dummy/SDL_nullvideo.c.o
+[391/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenframebuffer.c.o
+[392/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenopengles.c.o
+[393/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenvideo.c.o
+[394/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/offscreen/SDL_offscreenwindow.c.o
+[395/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11clipboard.c.o
+[396/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/audio/dsp/SDL_dspaudio.c.o
+[397/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11dyn.c.o
+[398/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11events.c.o
+[399/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11framebuffer.c.o
+[400/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11keyboard.c.o
+[401/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11modes.c.o
+[402/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11messagebox.c.o
+[403/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11mouse.c.o
+[404/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11opengles.c.o
+[405/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11opengl.c.o
+[406/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11shape.c.o
+[407/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11touch.c.o
+[408/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11vulkan.c.o
+[409/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11video.c.o
+[410/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11xfixes.c.o
+[411/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11xinput2.c.o
+[412/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/SDL_x11window.c.o
+[413/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandclipboard.c.o
+[414/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/x11/edid-parse.c.o
+[415/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylanddatamanager.c.o
+[416/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylanddyn.c.o
+[417/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandkeyboard.c.o
+[418/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandevents.c.o
+[419/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandmessagebox.c.o
+[420/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandopengles.c.o
+[421/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandmouse.c.o
+[422/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandtouch.c.o
+[423/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandvulkan.c.o
+[424/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandvideo.c.o
+[425/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/fractional-scale-v1-protocol.c.o
+[426/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/idle-inhibit-unstable-v1-protocol.c.o
+[427/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/keyboard-shortcuts-inhibit-unstable-v1-protocol.c.o
+[428/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/pointer-constraints-unstable-v1-protocol.c.o
+[429/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/primary-selection-unstable-v1-protocol.c.o
+[430/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/relative-pointer-unstable-v1-protocol.c.o
+[431/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/tablet-unstable-v2-protocol.c.o
+[432/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/video/wayland/SDL_waylandwindow.c.o
+[433/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/text-input-unstable-v3-protocol.c.o
+[434/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/viewporter-protocol.c.o
+[435/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/wayland-protocol.c.o
+[436/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/xdg-activation-v1-protocol.c.o
+[437/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/xdg-decoration-unstable-v1-protocol.c.o
+[438/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/xdg-output-unstable-v1-protocol.c.o
+[439/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/wayland-generated-protocols/xdg-shell-protocol.c.o
+[440/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/unix/SDL_poll.c.o
+[441/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_dbus.c.o
+[442/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/haptic/linux/SDL_syshaptic.c.o
+[443/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_ime.c.o
+[444/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_fcitx.c.o
+[445/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_evdev.c.o
+[446/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_evdev_kbd.c.o
+[447/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_evdev_capabilities.c.o
+[448/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_threadprio.c.o
+[449/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/core/linux/SDL_sandbox.c.o
+[450/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_combined.c.o
+[451/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_gamecube.c.o
+[452/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_luna.c.o
+[453/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_ps3.c.o
+[454/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_ps4.c.o
+[455/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_rumble.c.o
+[456/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_ps5.c.o
+[457/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_shield.c.o
+[458/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_stadia.c.o
+[459/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_steam.c.o
+[460/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_wii.c.o
+[461/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_switch.c.o
+[462/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_xbox360.c.o
+[463/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_xbox360w.c.o
+[464/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapi_xboxone.c.o
+[465/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/hidapi/SDL_hidapijoystick.c.o
+[466/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/steam/SDL_steamcontroller.c.o
+[467/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_systhread.c.o
+[468/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/joystick/linux/SDL_sysjoystick.c.o
+[469/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_sysmutex.c.o
+[470/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_syscond.c.o
+[471/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_systls.c.o
+[472/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/thread/pthread/SDL_syssem.c.o
+[473/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/misc/unix/SDL_sysurl.c.o
+[474/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/locale/unix/SDL_syslocale.c.o
+[475/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/power/linux/SDL_syspower.c.o
+[476/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/filesystem/unix/SDL_sysfilesystem.c.o
+[477/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/timer/unix/SDL_systimer.c.o
+[478/501] Building C object library/lib/extern/SDL/CMakeFiles/SDL2-static.dir/src/sensor/dummy/SDL_dummysensor.c.o
+[479/501] Linking C static library library/lib/extern/SDL/libSDL2.a
+[480/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/activity/main_activity.cpp.o
+[481/501] Linking CXX static library library/libaurore.a
+[482/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/demo_app.cpp.o
+[483/501] Linking CXX static library library/libaurore_test.a
+[484/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/cadran_tab.cpp.o
+[485/501] Linking CXX executable aurore_demo
+[486/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/grid_tab.cpp.o
+[487/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/components_tab.cpp.o
+[488/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/recycling_list_tab.cpp.o
+[489/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/settings_tab.cpp.o
+[490/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/text_test_tab.cpp.o
+[491/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/styles_tab.cpp.o
+[492/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/view/captioned_image.cpp.o
+[493/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/tab/transform_tab.cpp.o
+[494/501] Building CXX object tests/CMakeFiles/aurore_demo_views.dir/__/demo/src/view/pokemon_view.cpp.o
+[495/501] Linking CXX static library tests/libaurore_demo_views.a
+[496/501] Building CXX object tests/CMakeFiles/aurore_bench.dir/bench.cpp.o
+[497/501] Linking CXX executable tests/aurore_bench
+[498/501] Building CXX object tests/CMakeFiles/aurore-preview.dir/preview.cpp.o
+[499/501] Linking CXX executable tests/aurore-preview
+[500/501] Building CXX object tests/CMakeFiles/aurore_tests.dir/demo_tests.cpp.o
+[501/501] Linking CXX executable tests/aurore_tests
