@@ -375,9 +375,25 @@ float nvgRadToDeg(float rad);
 //
 // Images
 //
-// NanoVG allows you to load jpg, png, psd, tga, pic and gif files to be used for rendering.
+// NanoVG allows you to load jpg and png files to be used for rendering.
 // In addition you can upload your own image. The image loading is provided by stb_image.
 // The parameter imageFlags is combination of flags defined in NVGimageFlags.
+//
+// A picture larger than NVG_MAX_IMAGE_PIXELS (width x height) or than
+// NVG_MAX_IMAGE_SIDE on a side is refused from its header, before it is decoded.
+
+#ifndef NVG_MAX_IMAGE_PIXELS
+#define NVG_MAX_IMAGE_PIXELS (4096 * 4096)
+#endif
+#ifndef NVG_MAX_IMAGE_SIDE
+#define NVG_MAX_IMAGE_SIDE 16384
+#endif
+
+// Decodes the picture in a file, or in memory, to RGBA (4 bytes a pixel):
+// NULL when it cannot or when it is too large. To free with nvgFreeImageData().
+unsigned char* nvgDecodeImage(const char* filename, int* w, int* h);
+unsigned char* nvgDecodeImageMem(const unsigned char* data, int ndata, int* w, int* h);
+void nvgFreeImageData(unsigned char* pixels);
 
 // Creates image by loading it from the disk from specified file name.
 // Returns handle to the image.

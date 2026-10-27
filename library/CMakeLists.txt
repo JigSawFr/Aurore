@@ -25,6 +25,11 @@ if (NOT BRLS_RESOURCES_DIR)
     endif ()
 endif ()
 
+# The version of library/include/borealis/version.hpp, which release-please updates
+file(STRINGS ${BOREALIS_PATH}/include/borealis/version.hpp AURORE_VERSION REGEX "^#define AURORE_VERSION \"")
+string(REGEX REPLACE ".*\"([0-9.]+)\".*" "\\1" AURORE_VERSION "${AURORE_VERSION}")
+set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
+
 option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
 
 # fmt, tinyxml2, GLFW and SDL2 from the system when find_package() finds
@@ -226,7 +231,8 @@ elseif (PLATFORM_PSV)
                 include(FetchContent)
                 FetchContent_Populate(
                         libshacccg
-                        URL "https://codeload.github.com/AnimMouse/SceShaccCg/zip/refs/heads/main"
+                        # A fixed commit, not the moving main branch
+                        URL "https://codeload.github.com/AnimMouse/SceShaccCg/zip/f9511fc20ce905704f384b3a99a17c5e97f9a92c"
                         SOURCE_DIR "${CMAKE_BINARY_DIR}/vendor/SceShaccCg"
                         SUBBUILD_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
                         BINARY_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
@@ -568,7 +574,8 @@ foreach (case IN LISTS cases)
         add_test(${target}.\${case} \"$<TARGET_FILE:${target}>\" \${case})
         set_tests_properties(${target}.\${case} PROPERTIES
             WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\"
-            ENVIRONMENT \"${env}\")
+            ENVIRONMENT \"${env}\"
+            TIMEOUT 300)
     endif ()
 endforeach ()
 ")

@@ -1,4 +1,6 @@
 // stb_truetype.h - v1.26 - public domain
+// Aurore: upstream master after v1.26, glyph parsing bounded by the glyph's
+// data (CVE-2026-18497)
 // authored from 2009-2021 by Sean Barrett / RAD Game Tools
 //
 // =======================================================================
@@ -54,7 +56,7 @@
 //       Hou Qiming                 Derek Vinyard
 //       Rob Loach                  Cort Stratton
 //       Kenney Phillis Jr.         Brian Costabile
-//       Ken Voskuil (kaesve)
+//       Ken Voskuil (kaesve)       Yakov Galka
 //
 // VERSION HISTORY
 //
@@ -1617,7 +1619,15 @@ static int stbtt__GetGlyfOffset(const stbtt_fontinfo *info, int glyph_index)
       g2 = info->glyf + ttULONG (info->data + info->loca + glyph_index * 4 + 4);
    }
 
-   return g1==g2 ? -1 : g1; // if length is 0, return -1
+   return g1>=g2 ? -1 : g1; // if length is 0 (or negative), return -1
+}
+
+// Aurore: where the glyph's data ends, to bound its parsing (CVE-2026-18497)
+static int stbtt__GetGlyfEnd(const stbtt_fontinfo *info, int glyph_index)
+{
+   if (info->indexToLocFormat == 0)
+      return info->glyf + ttUSHORT(info->data + info->loca + glyph_index * 2 + 2) * 2;
+   return info->glyf + ttULONG (info->data + info->loca + glyph_index * 4 + 4);
 }
 
 static int stbtt__GetGlyphInfoT2(const stbtt_fontinfo *info, int glyph_index, int *x0, int *y0, int *x1, int *y1);
@@ -1690,10 +1700,14 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
       stbtt_uint8 flags=0,flagcount;
       stbtt_int32 ins, i,j=0,m,n, next_move, was_off=0, off, start_off=0;
       stbtt_int32 x,y,cx,cy,sx,sy, scx,scy;
-      stbtt_uint8 *points;
+      stbtt_uint8 *points, *limit;
+      int end = stbtt__GetGlyfEnd(info, glyph_index);
+      if (end - g < 10 + numberOfContours * 2 + 2) return 0;
       endPtsOfContours = (data + g + 10);
       ins = ttUSHORT(data + g + 10 + numberOfContours * 2);
+      if (end - g < 10 + numberOfContours * 2 + 2 + ins) return 0;
       points = data + g + 10 + numberOfContours * 2 + 2 + ins;
+      limit = data + end;
 
       n = 1+ttUSHORT(endPtsOfContours + numberOfContours*2-2);
 
@@ -1715,9 +1729,12 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
 
       for (i=0; i < n; ++i) {
          if (flagcount == 0) {
+            if (points >= limit) goto bad_glyph;
             flags = *points++;
-            if (flags & 8)
+            if (flags & 8) {
+               if (points >= limit) goto bad_glyph;
                flagcount = *points++;
+            }
          } else
             --flagcount;
          vertices[off+i].type = flags;
@@ -1728,10 +1745,13 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
       for (i=0; i < n; ++i) {
          flags = vertices[off+i].type;
          if (flags & 2) {
-            stbtt_int16 dx = *points++;
+            stbtt_int16 dx;
+            if (points >= limit) goto bad_glyph;
+            dx = *points++;
             x += (flags & 16) ? dx : -dx; // ???
          } else {
             if (!(flags & 16)) {
+               if (limit - points < 2) goto bad_glyph;
                x = x + (stbtt_int16) (points[0]*256 + points[1]);
                points += 2;
             }
@@ -1744,10 +1764,13 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
       for (i=0; i < n; ++i) {
          flags = vertices[off+i].type;
          if (flags & 4) {
-            stbtt_int16 dy = *points++;
+            stbtt_int16 dy;
+            if (points >= limit) goto bad_glyph;
+            dy = *points++;
             y += (flags & 32) ? dy : -dy; // ???
          } else {
             if (!(flags & 32)) {
+               if (limit - points < 2) goto bad_glyph;
                y = y + (stbtt_int16) (points[0]*256 + points[1]);
                points += 2;
             }
@@ -1774,7 +1797,11 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
                // where we can start, and we need to save some state for when we wraparound.
                scx = x;
                scy = y;
-               if (!(vertices[off+i+1].type & 1)) {
+               if (i+1 >= n) {
+                  // Aurore: no next point (the last one), start on this one
+                  sx = x;
+                  sy = y;
+               } else if (!(vertices[off+i+1].type & 1)) {
                   // next point is also a curve point, so interpolate an on-point curve
                   sx = (x + (stbtt_int32) vertices[off+i+1].x) >> 1;
                   sy = (y + (stbtt_int32) vertices[off+i+1].y) >> 1;
@@ -1790,7 +1817,7 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
             }
             stbtt_setvertex(&vertices[num_vertices++], STBTT_vmove,sx,sy,0,0);
             was_off = 0;
-            next_move = 1 + ttUSHORT(endPtsOfContours+j*2);
+            next_move = j < numberOfContours ? 1 + ttUSHORT(endPtsOfContours+j*2) : n;
             ++j;
          } else {
             if (!(flags & 1)) { // if it's a curve
@@ -1892,6 +1919,11 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo *info, int glyph_index, s
 
    *pvertices = vertices;
    return num_vertices;
+
+bad_glyph:
+   // Aurore: the glyph's points run past its data
+   STBTT_free(vertices, info->userdata);
+   return 0;
 }
 
 typedef struct
@@ -4604,6 +4636,8 @@ STBTT_DEF unsigned char * stbtt_GetGlyphSDF(const stbtt_fontinfo *info, float sc
    scale_y = -scale_y;
 
    {
+      // distance from singular values (in the same units as the pixel grid)
+      const float eps = 1./1024, eps2 = eps*eps;
       int x,y,i,j;
       float *precompute;
       stbtt_vertex *verts;
@@ -4616,15 +4650,15 @@ STBTT_DEF unsigned char * stbtt_GetGlyphSDF(const stbtt_fontinfo *info, float sc
             float x0 = verts[i].x*scale_x, y0 = verts[i].y*scale_y;
             float x1 = verts[j].x*scale_x, y1 = verts[j].y*scale_y;
             float dist = (float) STBTT_sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
-            precompute[i] = (dist == 0) ? 0.0f : 1.0f / dist;
+            precompute[i] = (dist < eps) ? 0.0f : 1.0f / dist;
          } else if (verts[i].type == STBTT_vcurve) {
             float x2 = verts[j].x *scale_x, y2 = verts[j].y *scale_y;
             float x1 = verts[i].cx*scale_x, y1 = verts[i].cy*scale_y;
             float x0 = verts[i].x *scale_x, y0 = verts[i].y *scale_y;
             float bx = x0 - 2*x1 + x2, by = y0 - 2*y1 + y2;
             float len2 = bx*bx + by*by;
-            if (len2 != 0.0f)
-               precompute[i] = 1.0f / (bx*bx + by*by);
+            if (len2 >= eps2)
+               precompute[i] = 1.0f / len2;
             else
                precompute[i] = 0.0f;
          } else
@@ -4689,8 +4723,8 @@ STBTT_DEF unsigned char * stbtt_GetGlyphSDF(const stbtt_fontinfo *info, float sc
                         float a = 3*(ax*bx + ay*by);
                         float b = 2*(ax*ax + ay*ay) + (mx*bx+my*by);
                         float c = mx*ax+my*ay;
-                        if (a == 0.0) { // if a is 0, it's linear
-                           if (b != 0.0) {
+                        if (STBTT_fabs(a) < eps2) { // if a is 0, it's linear
+                           if (STBTT_fabs(b) >= eps2) {
                               res[num++] = -c/b;
                            }
                         } else {

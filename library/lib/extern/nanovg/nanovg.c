@@ -26,6 +26,10 @@
 #include "fontstash.h"
 
 #ifndef NVG_NO_STB
+// PNG and JPEG only: the other decoders are not needed and have known flaws
+#define STBI_ONLY_PNG
+#define STBI_ONLY_JPEG
+#define STBI_MAX_DIMENSIONS NVG_MAX_IMAGE_SIDE
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #endif
@@ -845,17 +849,66 @@ void nvgFillPaint(NVGcontext* ctx, NVGpaint paint)
 }
 
 #ifndef NVG_NO_STB
+static int nvg__imageFits(int w, int h)
+{
+	return w > 0 && h > 0 && w <= NVG_MAX_IMAGE_SIDE && h <= NVG_MAX_IMAGE_SIDE
+		&& (long long)w * h <= NVG_MAX_IMAGE_PIXELS;
+}
+
+unsigned char* nvgDecodeImage(const char* filename, int* w, int* h)
+{
+	int n;
+	unsigned char* img = NULL;
+	FILE* f = fopen(filename, "rb");
+	if (f == NULL) {
+		printf("Failed to load %s - cannot open file\n", filename);
+		return NULL;
+	}
+	// The size from the header, then the same open file decoded
+	if (!stbi_info_from_file(f, w, h, &n))
+		printf("Failed to load %s - %s\n", filename, stbi_failure_reason());
+	else if (!nvg__imageFits(*w, *h))
+		printf("Failed to load %s - image too large (%dx%d)\n", filename, *w, *h);
+	else if ((img = stbi_load_from_file(f, w, h, &n, 4)) == NULL)
+		printf("Failed to load %s - %s\n", filename, stbi_failure_reason());
+	fclose(f);
+	return img;
+}
+
+unsigned char* nvgDecodeImageMem(const unsigned char* data, int ndata, int* w, int* h)
+{
+	int n;
+	unsigned char* img;
+	if (data == NULL || ndata <= 0)
+		return NULL;
+	if (!stbi_info_from_memory(data, ndata, w, h, &n)) {
+		printf("Failed to load - %s\n", stbi_failure_reason());
+		return NULL;
+	}
+	if (!nvg__imageFits(*w, *h)) {
+		printf("Failed to load - image too large (%dx%d)\n", *w, *h);
+		return NULL;
+	}
+	img = stbi_load_from_memory(data, ndata, w, h, &n, 4);
+	if (img == NULL)
+		printf("Failed to load - %s\n", stbi_failure_reason());
+	return img;
+}
+
+void nvgFreeImageData(unsigned char* pixels)
+{
+	stbi_image_free(pixels);
+}
+
 int nvgCreateImage(NVGcontext* ctx, const char* filename, int imageFlags)
 {
-	int w, h, n, image;
+	int w, h, image;
 	unsigned char* img;
 	stbi_set_unpremultiply_on_load(1);
 	stbi_convert_iphone_png_to_rgb(1);
-	img = stbi_load(filename, &w, &h, &n, 4);
-	if (img == NULL) {
-		printf("Failed to load %s - %s\n", filename, stbi_failure_reason());
+	img = nvgDecodeImage(filename, &w, &h);
+	if (img == NULL)
 		return 0;
-	}
 	image = nvgCreateImageRGBA(ctx, w, h, imageFlags, img);
 	stbi_image_free(img);
 	return image;
@@ -863,12 +916,10 @@ int nvgCreateImage(NVGcontext* ctx, const char* filename, int imageFlags)
 
 int nvgCreateImageMem(NVGcontext* ctx, int imageFlags, unsigned char* data, int ndata)
 {
-	int w, h, n, image;
-	unsigned char* img = stbi_load_from_memory(data, ndata, &w, &h, &n, 4);
-	if (img == NULL) {
-		printf("Failed to load - %s\n", stbi_failure_reason());
+	int w, h, image;
+	unsigned char* img = nvgDecodeImageMem(data, ndata, &w, &h);
+	if (img == NULL)
 		return 0;
-	}
 	image = nvgCreateImageRGBA(ctx, w, h, imageFlags, img);
 	stbi_image_free(img);
 	return image;

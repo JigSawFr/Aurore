@@ -55,7 +55,7 @@ What it gives:
 
 ## Screenshots and references
 
-`matchesReference("main")` takes a screenshot, writes it to `<output>/main.png`, and compares it with `<references>/main.png`: it matches when at most `maxRatio` of the pixels (0.1 % by default) have a channel off by more than `tolerance` (8 by default). When it does not, `<output>/main.diff.png` shows the pixels that differ in red. A missing reference is written and matches; `BRLS_TEST_UPDATE=1` writes them all again, to commit after looking at them.
+`matchesReference("main")` takes a screenshot, writes it to `<output>/main.png`, and compares it with `<references>/main.png`: it matches when at most `maxRatio` of the pixels (0.1 % by default) have a channel off by more than `tolerance` (8 by default). When it does not, `<output>/main.diff.png` shows the pixels that differ in red. A missing reference is written and matches, except in CI (the `CI` variable set, as on GitHub Actions) where it fails: a test whose reference was not committed, or whose name has a typo, does not pass unseen. `BRLS_TEST_UPDATE=1` writes them all again, to commit after looking at them. Each case registered by `brls_add_tests` stops after 5 minutes.
 
 The folders: `Options::referenceDir` and `outputDir`, else `BRLS_TEST_REFERENCES` and `BRLS_TEST_OUTPUT`, else `references` and `test-output` in the working directory. `brls_add_tests` (below) sets them.
 

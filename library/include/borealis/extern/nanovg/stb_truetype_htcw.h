@@ -1,4 +1,5 @@
 // stb_truetype.h - v1.26htcw (fork to enable streaming and low memory environments)
+// Aurore: glyph parsing bounded by the glyph's data (CVE-2026-18497)
 // stb_truetype.h - v1.26 - public domain
 // authored from 2009-2021 by Sean Barrett / RAD Game Tools
 //
@@ -1819,7 +1820,15 @@ static int stbtt__GetGlyfOffset(const stbtt_fontinfo * info, int glyph_index)
         g2 = info->glyf + ttULONG(info->data, info->loca + glyph_index * 4 + 4);
     }
 
-    return g1 == g2 ? -1 : g1; // if length is 0, return -1
+    return g1 >= g2 ? -1 : g1; // if length is 0 (or negative), return -1
+}
+
+// Aurore: where the glyph's data ends, to bound its parsing (CVE-2026-18497)
+static int stbtt__GetGlyfEnd(const stbtt_fontinfo * info, int glyph_index)
+{
+    if(info->indexToLocFormat == 0)
+        return info->glyf + ttUSHORT(info->data, info->loca + glyph_index * 2 + 2) * 2;
+    return info->glyf + ttULONG(info->data, info->loca + glyph_index * 4 + 4);
 }
 
 static int stbtt__GetGlyphInfoT2(const stbtt_fontinfo * info, int glyph_index, int * x0, int * y0, int * x1, int * y1);
@@ -1898,10 +1907,14 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo * info, int glyph_index, 
         stbtt_uint8 flags = 0, flagcount;
         stbtt_int32 ins, i, j = 0, m, n, next_move, was_off = 0, off, start_off = 0;
         stbtt_int32 x, y, cx, cy, sx, sy, scx, scy;
-        stbtt_uint32 points;
+        stbtt_uint32 points, limit;
+        int end = stbtt__GetGlyfEnd(info, glyph_index);
+        if(end - g < 10 + numberOfContours * 2 + 2) return 0;
         endPtsOfContours = (g + 10);
         ins = ttUSHORT(data, g + 10 + numberOfContours * 2);
+        if(end - g < 10 + numberOfContours * 2 + 2 + ins) return 0;
         points = g + 10 + numberOfContours * 2 + 2 + ins;
+        limit = end;
 
         n = 1 + ttUSHORT(data, endPtsOfContours + numberOfContours * 2 - 2);
 
@@ -1923,9 +1936,12 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo * info, int glyph_index, 
 
         for(i = 0; i < n; ++i) {
             if(flagcount == 0) {
+                if(points >= limit) goto bad_glyph;
                 flags = ttBYTE(data, points++);
-                if(flags & 8)
+                if(flags & 8) {
+                    if(points >= limit) goto bad_glyph;
                     flagcount = ttBYTE(data, points++);
+                }
             }
             else
                 --flagcount;
@@ -1937,11 +1953,14 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo * info, int glyph_index, 
         for(i = 0; i < n; ++i) {
             flags = vertices[off + i].type;
             if(flags & 2) {
-                stbtt_int16 dx = ttBYTE(data, points++);
+                stbtt_int16 dx;
+                if(points >= limit) goto bad_glyph;
+                dx = ttBYTE(data, points++);
                 x += (flags & 16) ? dx : -dx; // ???
             }
             else {
                 if(!(flags & 16)) {
+                    if(limit - points < 2) goto bad_glyph;
                     x = x + (stbtt_int16)(ttBYTE(data, points) * 256 + ttBYTE(data, points + 1));
                     points += 2;
                 }
@@ -1954,11 +1973,14 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo * info, int glyph_index, 
         for(i = 0; i < n; ++i) {
             flags = vertices[off + i].type;
             if(flags & 4) {
-                stbtt_int16 dy = ttBYTE(data, points++);
+                stbtt_int16 dy;
+                if(points >= limit) goto bad_glyph;
+                dy = ttBYTE(data, points++);
                 y += (flags & 32) ? dy : -dy; // ???
             }
             else {
                 if(!(flags & 32)) {
+                    if(limit - points < 2) goto bad_glyph;
                     y = y + (stbtt_int16)(ttBYTE(data, points) * 256 + ttBYTE(data, points + 1));
                     points += 2;
                 }
@@ -1985,7 +2007,12 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo * info, int glyph_index, 
                     // where we can start, and we need to save some state for when we wraparound.
                     scx = x;
                     scy = y;
-                    if(!(vertices[off + i + 1].type & 1)) {
+                    if(i + 1 >= n) {
+                        // Aurore: no next point (the last one), start on this one
+                        sx = x;
+                        sy = y;
+                    }
+                    else if(!(vertices[off + i + 1].type & 1)) {
                         // next point is also a curve point, so interpolate an on-point curve
                         sx = (x + (stbtt_int32)vertices[off + i + 1].x) >> 1;
                         sy = (y + (stbtt_int32)vertices[off + i + 1].y) >> 1;
@@ -2003,7 +2030,7 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo * info, int glyph_index, 
                 }
                 stbtt_setvertex(&vertices[num_vertices++], STBTT_vmove, sx, sy, 0, 0);
                 was_off = 0;
-                next_move = 1 + ttUSHORT(data, endPtsOfContours + j * 2);
+                next_move = j < numberOfContours ? 1 + ttUSHORT(data, endPtsOfContours + j * 2) : n;
                 ++j;
             }
             else {
@@ -2127,6 +2154,11 @@ static int stbtt__GetGlyphShapeTT(const stbtt_fontinfo * info, int glyph_index, 
 
     *pvertices = vertices;
     return num_vertices;
+
+bad_glyph:
+    // Aurore: the glyph's points run past its data
+    STBTT_free(vertices, info->userdata);
+    return 0;
 }
 
 typedef struct {
