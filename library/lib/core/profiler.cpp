@@ -114,7 +114,7 @@ void Profiler::endFrame(bool drawn)
     if (!logging)
         return;
     static FrameProfile sum;
-    static int frames = 0;
+    static int frames      = 0;
     static int drawnFrames = 0;
     sum.events += last.events;
     sum.input += last.input;

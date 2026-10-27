@@ -5,11 +5,11 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <functional>
 #include <string>
 #include <utility>
 #include <vector>
+#include <borealis.hpp>
 
 #include <borealis/cadran/ui/cadran_frame.hpp>
 
@@ -19,7 +19,7 @@ namespace ui::hooks
 struct Hooks
 {
     // The main screen.
-    std::function<bool(brls::Activity* activity)> is_main;   // `activity` is it
+    std::function<bool(brls::Activity* activity)> is_main; // `activity` is it
     std::function<void(brls::Activity* main, int position, const std::string& row)> open_tab;
     std::function<void(brls::Activity* main)> update_title;
     // A new main screen, pushed, on tab `position`, the focus on `row`.
@@ -27,26 +27,26 @@ struct Hooks
 
     // The tabs: re-read the one shown, the name of the screen shown and of
     // the main screen's tab ("tab/about"), and whether a view is a tab.
-    std::function<void()>                 refresh_shown;
-    std::function<std::string()>          shown_screen;
-    std::function<std::string()>          main_screen;
+    std::function<void()> refresh_shown;
+    std::function<std::string()> shown_screen;
+    std::function<std::string()> main_screen;
     std::function<bool(brls::View* view)> is_tab;
 
     // The sidebar position of the tab whose screen name is `screen`, -1 when
     // there is none; and the position to fall back on.
     std::function<int(const std::string& screen)> tab_position;
-    std::function<int()>                          settings_tab;
+    std::function<int()> settings_tab;
     // The rail's icons (cadran/view/cadran_icon), one per sidebar position,
     // "" for a separator.
-    std::function<std::vector<std::string>()>    rail_icons;
+    std::function<std::vector<std::string>()> rail_icons;
 
     // The app: its version and commit (the header's badge), whether it is a
     // release, and whether it writes nothing for now (a read-only mode: the
     // header's pill says so).
     std::function<std::string()> version;
     std::function<std::string()> commit;
-    std::function<bool()>        is_release;
-    std::function<bool()>        read_only;
+    std::function<bool()> is_release;
+    std::function<bool()> read_only;
     // The app's logo, drawn in a `w` × `h` box at (0, 0) (CadranIcon "mark":
     // the header's, the about screen's). Unset: Aurore's.
     std::function<void(NVGcontext* vg, float w, float h)> mark;
@@ -86,4 +86,4 @@ struct Hooks
 // The one set, filled in at start-up.
 Hooks& get();
 
-}   // namespace ui::hooks
+} // namespace ui::hooks

@@ -62,9 +62,8 @@ Button::Button()
     this->forwardXMLAttribute("autoAnimate", this->label);
     this->forwardXMLAttribute("textHorizontalAlign", this->label, "horizontalAlign");
 
-    this->registerColorXMLAttribute("textColor", [this](NVGcolor color) {
-        this->setTextColor(color);
-    });
+    this->registerColorXMLAttribute("textColor", [this](NVGcolor color)
+        { this->setTextColor(color); });
 
     BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
         "style", const ButtonStyle*, this->setStyle,

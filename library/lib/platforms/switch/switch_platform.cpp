@@ -181,8 +181,10 @@ bool SwitchPlatform::isScreenDimmingDisabled()
 
 void SwitchPlatform::setBacklightBrightness(float brightness)
 {
-    if (brightness < 0) brightness = 0.0f;
-    if (brightness > 1) brightness = 1.0f;
+    if (brightness < 0)
+        brightness = 0.0f;
+    if (brightness > 1)
+        brightness = 1.0f;
     lblSetCurrentBrightnessSetting(brightness);
 }
 

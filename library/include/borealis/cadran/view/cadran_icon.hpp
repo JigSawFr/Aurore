@@ -15,11 +15,11 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
-#include <borealis/core/theme_image.hpp>
 #include <memory>
 #include <string>
 #include <vector>
+#include <borealis.hpp>
+#include <borealis/core/theme_image.hpp>
 
 class CadranIcon : public brls::View
 {
@@ -37,7 +37,7 @@ class CadranIcon : public brls::View
     void pop();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
 
     static brls::View* create();
 
@@ -54,7 +54,7 @@ class CadranIcon : public brls::View
   private:
     std::string icon = "today";
     NVGcolor color;
-    brls::Time pop_since = 0;   // pop(): when it began (µs), 0 at rest
+    brls::Time pop_since = 0; // pop(): when it began (µs), 0 at rest
 };
 
 // A few colours shown in an icon's place, the size of a row's icon square
@@ -76,13 +76,13 @@ class CadranSwatch : public brls::View
         NVGcolor ring;
         NVGcolor ink;
         std::string motif;
-        std::string picture;   // "": the colours
+        std::string picture; // "": the colours
     };
 
     explicit CadranSwatch(Colors colors);
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
 
   private:
     Colors colors;

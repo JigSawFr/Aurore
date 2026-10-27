@@ -7,8 +7,8 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <vector>
+#include <borealis.hpp>
 
 #include <borealis/cadran/util/markdown.hpp>
 
@@ -17,4 +17,4 @@ namespace markdown_view
 
 void fill(brls::Box* box, const std::vector<markdown::Block>& blocks);
 
-}   // namespace markdown_view
+} // namespace markdown_view

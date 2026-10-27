@@ -18,7 +18,8 @@
 
 #include <borealis.hpp>
 
-class TransformBox: public brls::Image {
+class TransformBox : public brls::Image
+{
   public:
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx) override;
 
@@ -39,8 +40,8 @@ class TransformBox: public brls::Image {
     void setFontScaleY(float size);
 
   private:
-    float skew_x{}, skew_y{}, rotate{}, scale_x{1}, scale_y{1};
-    float font_scale_x{1}, font_scale_y{1};
+    float skew_x {}, skew_y {}, rotate {}, scale_x { 1 }, scale_y { 1 };
+    float font_scale_x { 1 }, font_scale_y { 1 };
 };
 
 class TransformTab : public brls::Box

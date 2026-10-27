@@ -33,6 +33,5 @@ class Ps4ImeManager : public ImeManager
         int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE) override;
 
   private:
-
 };
 }

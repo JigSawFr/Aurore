@@ -19,6 +19,13 @@
 
 #include <nanovg.h>
 #include <stdio.h>
+#include <array>
+#include <functional>
+#include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <vector>
 #include <borealis/core/actions.hpp>
 #include <borealis/core/animation.hpp>
 #include <borealis/core/event.hpp>
@@ -27,13 +34,6 @@
 #include <borealis/core/gesture.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view_style.hpp>
-#include <array>
-#include <functional>
-#include <memory>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <vector>
 #ifdef USE_LIBROMFS
 #include <romfs/romfs.hpp>
 #endif
@@ -41,49 +41,50 @@
 // Registers an "enum" XML attribute, which is just a string attribute with a map string -> enum inside
 // When using this macro please use the same (wonky) formatting as what you see in Box.cpp or View.cpp
 // otherwise clang-format will screw it up
-#define BRLS_REGISTER_ENUM_XML_ATTRIBUTE(name, enumType, method, ...)                    \
+#define BRLS_REGISTER_ENUM_XML_ATTRIBUTE(name, enumType, method, ...) \
     this->registerStringXMLAttribute(name, [this](std::string value) {                   \
         std::unordered_map<std::string, enumType> enumMap = __VA_ARGS__;                 \
         if (enumMap.count(value) > 0)                                                    \
             method(enumMap[value]);                                                      \
         else                                                                             \
-            brls::fatal("Illegal value \"" + value + "\" for XML attribute \"" + name + "\""); \
-    })
+            brls::fatal("Illegal value \"" + value + "\" for XML attribute \"" + name + "\""); })
 
 // Shortcut to register an A key action (generic click) on a view given its id, that calls any function or method
 // To be used in activities or derivates of Box (internally uses the getView() method)
 // The function or method must return a boolean (true if the action was consumed, false otherwise) and take a single brls::View*
 // parameter (useful to know what was clicked if you use the same listener for multiple views)
-#define BRLS_REGISTER_CLICK_BY_ID(id, method)                         \
-    this->getView(id)->registerClickAction([this](brls::View* view) { \
-        return method(view);                                          \
-    })
+#define BRLS_REGISTER_CLICK_BY_ID(id, method) \
+    this->getView(id)->registerClickAction([this](brls::View* view) { return method(view); })
 
-#define ASYNC_RETAIN                                \
-    if (!deletionToken && !deletionTokenCounter) {  \
-        deletionToken = new bool(false);            \
-        deletionTokenCounter = new int(0);          \
-    }                                               \
-    (*deletionTokenCounter)++;                      \
-    bool* token   = deletionToken;                  \
-    int* tokenCounter   = deletionTokenCounter;
+#define ASYNC_RETAIN                             \
+    if (!deletionToken && !deletionTokenCounter) \
+    {                                            \
+        deletionToken        = new bool(false);  \
+        deletionTokenCounter = new int(0);       \
+    }                                            \
+    (*deletionTokenCounter)++;                   \
+    bool* token       = deletionToken;           \
+    int* tokenCounter = deletionTokenCounter;
 
 #define ASYNC_RELEASE                           \
     bool release = *token;                      \
-    int counter = *tokenCounter;                \
-    if (counter > 0) {                          \
+    int counter  = *tokenCounter;               \
+    if (counter > 0)                            \
+    {                                           \
         (*tokenCounter)--;                      \
-        if (*tokenCounter == 0) {               \
+        if (*tokenCounter == 0)                 \
+        {                                       \
             delete token;                       \
             delete tokenCounter;                \
-            if (!release) {                     \
-                deletionToken = nullptr;        \
+            if (!release)                       \
+            {                                   \
+                deletionToken        = nullptr; \
                 deletionTokenCounter = nullptr; \
             }                                   \
-                                                \
         }                                       \
     }                                           \
-    if (release) return;    
+    if (release)                                \
+        return;
 
 #define ASYNC_TOKEN this, token, tokenCounter
 
@@ -95,8 +96,8 @@
 
 namespace tinyxml2
 {
-    class XMLDocument;
-    class XMLElement;
+class XMLDocument;
+class XMLElement;
 }
 struct YGNode;
 struct YGConfig;
@@ -181,7 +182,8 @@ enum class ShadowType
     CUSTOM, // customized shadow (use the provided methods to tweak it)
 };
 
-struct AppletFrameItem {
+struct AppletFrameItem
+{
     std::string title;
     std::string iconPath;
 
@@ -203,7 +205,8 @@ struct AppletFrameItem {
     View* getHintView() { return hintView; }
 
     ~AppletFrameItem();
-private:
+
+  private:
     View* hintView = nullptr;
 };
 
@@ -343,9 +346,9 @@ class View
 
     // Background gradient colors for vertical linear style
     NVGcolor backgroundStartColor = TRANSPARENT;
-    NVGcolor backgroundEndColor = nvgRGBA(0, 0, 0, 200);
+    NVGcolor backgroundEndColor   = nvgRGBA(0, 0, 0, 200);
     // Background corner radii for vertical linear style: top-left, top-right, bottom-right, bottom-left
-    std::vector<float> backgroundRadius{0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> backgroundRadius { 0.0f, 0.0f, 0.0f, 0.0f };
 
     NVGcolor borderColor             = TRANSPARENT;
     float borderThickness            = 0.0f;
@@ -460,12 +463,12 @@ class View
     float getHeight(bool includeCollapse = true);
 
     /**
-    * Triggers a layout of the whole view tree. Must be called
-    * after a yoga node property is changed.
-    *
-    * Only methods that change yoga nodes properties should
-    * call this method.
-    */
+     * Triggers a layout of the whole view tree. Must be called
+     * after a yoga node property is changed.
+     *
+     * Only methods that change yoga nodes properties should
+     * call this method.
+     */
     virtual void invalidate();
 
     /**
@@ -1251,7 +1254,7 @@ class View
     }
 
     bool isFocusable();
-    
+
     /**
      * Removes view from it's parent
      */
@@ -1395,68 +1398,68 @@ class View
 
     /**
      * Called each frame when touch is registered.
-     * 
+     *
      * @returns sound to play invoked by touch recognizers.
      */
     Sound gestureRecognizerRequest(TouchState touch, MouseState mouse, View* firstResponder);
 
     /**
-      * Called each frame
-      * Do not override it to draw your view,
-      * override draw() instead
-      */
+     * Called each frame
+     * Do not override it to draw your view,
+     * override draw() instead
+     */
     virtual void frame(FrameContext* ctx);
 
     /**
-      * Called each frame
-      */
+     * Called each frame
+     */
     void frameHighlight(FrameContext* ctx);
 
     /**
-      * Called by frame() to draw the view onscreen.
-      * Views should not draw outside of their bounds (they
-      * may be clipped if they do so).
-      */
+     * Called by frame() to draw the view onscreen.
+     * Views should not draw outside of their bounds (they
+     * may be clipped if they do so).
+     */
     virtual void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) = 0;
 
     /**
-      * Called when the view will appear
-      * on screen, before or after layout().
-      *
-      * Can be called if the view has
-      * already appeared, so be careful.
-      */
+     * Called when the view will appear
+     * on screen, before or after layout().
+     *
+     * Can be called if the view has
+     * already appeared, so be careful.
+     */
     virtual void willAppear(bool resetState = false)
     {
         // Nothing to do
     }
 
     /**
-      * Called when the view will disappear
-      * from the screen.
-      *
-      * Can be called if the view has
-      * already disappeared, so be careful.
-      */
+     * Called when the view will disappear
+     * from the screen.
+     *
+     * Can be called if the view has
+     * already disappeared, so be careful.
+     */
     virtual void willDisappear(bool resetState = false)
     {
         // Nothing to do
     }
 
     /**
-      * Called when the show() animation (fade in)
-      * ends
-      */
+     * Called when the show() animation (fade in)
+     * ends
+     */
     virtual void onShowAnimationEnd() {};
 
     /**
-      * Shows the view with a fade in animation.
-      */
+     * Shows the view with a fade in animation.
+     */
     virtual void show(std::function<void(void)> cb);
 
     /**
-      * Shows the view with a fade in animation, or no animation at all.
-      */
+     * Shows the view with a fade in animation, or no animation at all.
+     */
     virtual void show(std::function<void(void)> cb, bool animate, float animationDuration);
 
     /**
@@ -1465,8 +1468,8 @@ class View
     virtual float getShowAnimationDuration(TransitionAnimation animation);
 
     /**
-      * Hides the view in a collapse animation
-      */
+     * Hides the view in a collapse animation
+     */
     void collapse(bool animated = true);
 
     bool isCollapsed();
@@ -1474,30 +1477,30 @@ class View
     void setAlpha(float alpha);
 
     /**
-      * Shows the view in a expand animation (opposite
-      * of collapse)
-      */
+     * Shows the view in a expand animation (opposite
+     * of collapse)
+     */
     void expand(bool animated = true);
 
     /**
-      * Hides the view with a fade out animation.
-      */
+     * Hides the view with a fade out animation.
+     */
     virtual void hide(std::function<void(void)> cb);
 
     /**
-      * Hides the view with a fade out animation, or no animation at all.
-      */
+     * Hides the view with a fade out animation, or no animation at all.
+     */
     virtual void hide(std::function<void(void)> cb, bool animate, float animationDuration);
 
     bool isHidden();
 
     /**
-      * Is this view translucent?
-      *
-      * If you override it please return
-      * <value> || View::isTranslucent()
-      * to keep the fadeIn transition
-      */
+     * Is this view translucent?
+     *
+     * If you override it please return
+     * <value> || View::isTranslucent()
+     * to keep the fadeIn transition
+     */
     virtual bool isTranslucent();
 
     bool isFocused();
@@ -1560,13 +1563,13 @@ class View
     std::string getCustomNavigationRouteId(FocusDirection direction);
 
     /**
-      * Fired when focus is gained.
-      */
+     * Fired when focus is gained.
+     */
     virtual void onFocusGained();
 
     /**
-      * Fired when focus is lost.
-      */
+     * Fired when focus is lost.
+     */
     virtual void onFocusLost();
 
     /**
@@ -1599,9 +1602,9 @@ class View
     float getClickAlpha() { return this->clickAlpha; }
 
     /**
-      * Forces this view and its children to use
-      * the specified theme.
-      */
+     * Forces this view and its children to use
+     * the specified theme.
+     */
     void overrideTheme(Theme* newTheme);
 
     /**
@@ -1629,7 +1632,7 @@ class View
      */
     void setBackgroundCornerRadii(float topLeft, float topRight, float bottomRight, float bottomLeft)
     {
-        this->backgroundRadius = {topLeft, topRight, bottomRight, bottomLeft};
+        this->backgroundRadius = { topLeft, topRight, bottomRight, bottomLeft };
     }
 
     /**
@@ -1672,7 +1675,7 @@ class View
      */
     static std::string getFilePathXMLAttributeValue(std::string value);
 
-    AppletFrameItem *getAppletFrameItem()
+    AppletFrameItem* getAppletFrameItem()
     {
         return &this->appletFrameItem;
     }
@@ -1694,7 +1697,7 @@ class View
     void present(View* view);
     virtual void dismiss(std::function<void(void)> cb = [] {});
 
-    bool* deletionToken = nullptr;
+    bool* deletionToken       = nullptr;
     int* deletionTokenCounter = nullptr;
     void ptrLock();
     void ptrUnlock();
@@ -1803,7 +1806,7 @@ class View
      * (Application::setTextScale): a view that measures text marks itself
      * dirty here.
      */
-    virtual void onTextScaleChanged() {}
+    virtual void onTextScaleChanged() { }
 
     /**
      * Draws the style property `property` (backgroundColor, textColor…, see

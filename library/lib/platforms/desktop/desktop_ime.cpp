@@ -16,10 +16,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/desktop/desktop_ime.hpp>
 #include <cstring>
 #include <iostream>
+#include <borealis/core/logger.hpp>
+#include <borealis/platforms/desktop/desktop_ime.hpp>
 
 namespace brls
 {

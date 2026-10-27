@@ -17,24 +17,24 @@
 
 #include <strings.h>
 
+#include <memory>
+#include <sstream>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/platforms/desktop/desktop_platform.hpp>
 #include <borealis/platforms/desktop/steam_deck.hpp>
-#include <memory>
-#include <sstream>
 
 #ifdef __SDL2__
 #include <SDL2/SDL_misc.h>
 #endif
 
 #ifdef _WIN32
-#include <winsock2.h>
 #include <iphlpapi.h>
-#include <wlanapi.h>
+#include <ntddvdeo.h>
 #include <shellapi.h>
 #include <winioctl.h>
-#include <ntddvdeo.h>
+#include <winsock2.h>
+#include <wlanapi.h>
 #elif IOS || TVOS
 #elif __APPLE__
 #include <IOKit/ps/IOPSKeys.h>
@@ -43,10 +43,10 @@
 #endif
 
 #ifdef __WINRT__
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Foundation.Collections.h>
-#include <winrt/Windows.Networking.Connectivity.h>
 #include <winrt/Windows.Devices.WiFi.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Networking.Connectivity.h>
 #include <winrt/Windows.UI.ViewManagement.h>
 using winrt::Windows::Devices::WiFi::WiFiAdapter;
 using winrt::Windows::UI::ViewManagement::UIColorType;
@@ -57,7 +57,6 @@ using winrt::Windows::UI::ViewManagement::UISettings;
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #endif
-
 
 namespace brls
 {
@@ -275,7 +274,8 @@ void closeSessionBus(DBusConnection* bus)
 
 uint32_t dbusInhibit(DBusConnection* connection, const std::string& app, const std::string& reason)
 {
-    if (systemType == NONE) {
+    if (systemType == NONE)
+    {
         Logger::error("Idle inhibitor not available");
         return 0;
     }
@@ -345,7 +345,8 @@ uint32_t dbusInhibit(DBusConnection* connection, const std::string& app, const s
 
 void dbusUnInhibit(DBusConnection* connection, uint32_t cookie)
 {
-    if (systemType == NONE) {
+    if (systemType == NONE)
+    {
         Logger::error("Idle inhibitor not available");
         return;
     }
@@ -705,8 +706,8 @@ bool DesktopPlatform::hasEthernetConnection()
     if (globalRef)
     {
         CFDictionaryGetValueIfPresent(globalRef, kSCDynamicStorePropNetPrimaryInterface, &primaryIf);
-            if (primaryIf)
-                CFRetain(primaryIf);
+        if (primaryIf)
+            CFRetain(primaryIf);
         CFRelease(globalRef);
     }
     CFRelease(storeRef);
@@ -817,7 +818,8 @@ void DesktopPlatform::disableScreenDimming(bool disable, const std::string& reas
     }
 }
 
-bool DesktopPlatform::runLoop(const std::function<bool()>& runLoopImpl) {
+bool DesktopPlatform::runLoop(const std::function<bool()>& runLoopImpl)
+{
 #if __APPLE__
     return darwin_runloop(runLoopImpl);
 #else
@@ -837,8 +839,8 @@ void DesktopPlatform::setBacklightBrightness(float brightness)
 #elif defined(_WIN32)
     DISPLAY_BRIGHTNESS db = {
         .ucDisplayPolicy = DISPLAYPOLICY_BOTH,
-        .ucACBrightness = (UCHAR)std::floor(brightness * 100),
-        .ucDCBrightness = (UCHAR)std::floor(brightness * 100),
+        .ucACBrightness  = (UCHAR)std::floor(brightness * 100),
+        .ucDCBrightness  = (UCHAR)std::floor(brightness * 100),
     };
     DeviceIoControl(this->hLCD, IOCTL_VIDEO_SET_DISPLAY_BRIGHTNESS,
         &db, sizeof(db), NULL, 0, NULL, NULL);
@@ -881,8 +883,10 @@ bool DesktopPlatform::canSetBacklightBrightness()
         &bytesReturned,
         NULL);
 
-    for (DWORD i = 0; i < bytesReturned; i++) {
-        if (abLevels[i]) return true;
+    for (DWORD i = 0; i < bytesReturned; i++)
+    {
+        if (abLevels[i])
+            return true;
     }
 #elif defined(__linux__)
     return isSteamDeckBrightnessSupported();
@@ -901,7 +905,8 @@ std::string DesktopPlatform::getIpAddress()
     {
         for (auto addr = interfaces; addr != nullptr; addr = addr->ifa_next)
         {
-            if (!addr->ifa_addr) continue;
+            if (!addr->ifa_addr)
+                continue;
             if (addr->ifa_addr->sa_family == AF_INET)
             {
                 ipaddr = inet_ntoa(reinterpret_cast<struct sockaddr_in*>(addr->ifa_addr)->sin_addr);
@@ -1099,7 +1104,8 @@ void DesktopPlatform::openBrowser(std::string url)
     if (isSteamDeck())
     {
         runSteamDeckCommand(fmt::format("steam://openurl/{}\n", url));
-    } else
+    }
+    else
     {
         std::string cmd = "xdg-open \"" + url + "\"";
         system(cmd.c_str());
@@ -1143,7 +1149,8 @@ DesktopPlatform::~DesktopPlatform()
 {
 #if defined(__WINRT__)
 #elif defined(_WIN32)
-    if (this->hLCD) ::CloseHandle(this->hLCD);
+    if (this->hLCD)
+        ::CloseHandle(this->hLCD);
 #endif
 
     delete this->fontLoader;

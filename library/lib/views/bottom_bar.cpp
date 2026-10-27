@@ -14,12 +14,12 @@
     limitations under the License.
 */
 
-#include <borealis/views/bottom_bar.hpp>
-#include <borealis/views/hint.hpp>
 #include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <borealis/views/bottom_bar.hpp>
+#include <borealis/views/hint.hpp>
 
 #ifdef PS4
 #include <borealis/platforms/ps4/ps4_sysmodule.hpp>
@@ -109,16 +109,16 @@ void BottomBar::draw(NVGcontext* vg, float x, float y, float width, float height
 void BottomBar::updateText()
 {
 #ifdef PS4
-    OrbisDateTime lt{};
+    OrbisDateTime lt {};
     if (sceRtcGetCurrentClockLocalTime)
         sceRtcGetCurrentClockLocalTime(&lt);
-    tm tm{};
+    tm tm {};
     tm.tm_hour = lt.hour;
-    tm.tm_min = lt.minute;
-    tm.tm_sec = lt.second;
+    tm.tm_min  = lt.minute;
+    tm.tm_sec  = lt.second;
 #else
     std::time_t in_time_t = getWallTime();
-    auto tm = *std::localtime(&in_time_t);
+    auto tm               = *std::localtime(&in_time_t);
 #endif
     std::stringstream ss;
     ss << std::put_time(&tm, "%H:%M");

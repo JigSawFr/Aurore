@@ -182,8 +182,8 @@ class Activity
 
   private:
     std::unordered_map<std::string, DataModel*> models;
-    View* constructorView = nullptr;
-    View* contentView     = nullptr;
+    View* constructorView      = nullptr;
+    View* contentView          = nullptr;
     unsigned contentGeneration = 0;
 };
 

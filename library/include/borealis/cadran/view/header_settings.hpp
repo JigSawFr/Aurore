@@ -17,7 +17,12 @@
 class HeaderSetting : public brls::View
 {
   public:
-    enum class Kind { LANGUAGE, THEME, TEXT_SIZE };
+    enum class Kind
+    {
+        LANGUAGE,
+        THEME,
+        TEXT_SIZE
+    };
 
     explicit HeaderSetting(Kind kind);
 
@@ -26,7 +31,7 @@ class HeaderSetting : public brls::View
     static void install();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-              brls::FrameContext* ctx) override;
+        brls::FrameContext* ctx) override;
     // Touched although it is not focusable.
     brls::View* hitTest(brls::Point point) override;
 

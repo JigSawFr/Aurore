@@ -29,12 +29,12 @@ namespace fs = std::experimental::filesystem;
 #else
 #error "Failed to include <filesystem> header!"
 #endif
+#include <cctype>
 #include <fstream>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <cctype>
 #include <vector>
 
 #ifndef BRLS_I18N_PREFIX

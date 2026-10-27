@@ -17,9 +17,9 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/logger.hpp>
+#include <borealis/core/thread.hpp>
 #include <borealis/core/touch/tap_gesture.hpp>
 #include <borealis/core/util.hpp>
-#include <borealis/core/thread.hpp>
 #include <borealis/views/applet_frame.hpp>
 #include <borealis/views/hint.hpp>
 
@@ -54,7 +54,7 @@ const std::string hintXML = R"xml(
     </brls:Box>
 )xml";
 
-static bool hintsSteady = false;
+static bool hintsSteady         = false;
 static View* hintsOptionalOwner = nullptr;
 
 void setHintsOptionalOwner(View* owner)
@@ -90,7 +90,7 @@ void setHintsSteady(bool steady)
 
 Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
     : Box(Axis::ROW)
-      , action(action)
+    , action(action)
 {
     this->inflateFromXMLString(hintXML);
     this->setFocusable(false);
@@ -107,9 +107,7 @@ Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
     if ((action->getButton() != BUTTON_A || allowAButtonTouch) && action->isAvailable() && !blocked)
     {
         this->addGestureRecognizer(new TapGestureRecognizer(this, [this, action]()
-        {
-            action->getActionListener()(this);
-        }));
+            { action->getActionListener()(this); }));
     }
 
     if (!action->isAvailable() || blocked)
@@ -181,27 +179,20 @@ Hints::Hints()
     setDirection(Direction::LEFT_TO_RIGHT);
 
     hintSubscription = Application::getGlobalHintsUpdateEvent()->subscribe([this]()
-    {
+        {
         if (!AppletFrame::HIDE_BOTTOM_BAR || forceShown)
         {
             refillHints(Application::getCurrentFocus());
-        }
-    });
+        } });
 
     this->registerBoolXMLAttribute("addBaseAction", [this](bool value)
-    {
-        this->setAddUnableAButtonAction(value);
-    });
+        { this->setAddUnableAButtonAction(value); });
 
     this->registerBoolXMLAttribute("allowAButtonTouch", [this](bool value)
-    {
-        this->setAllowAButtonTouch(value);
-    });
+        { this->setAllowAButtonTouch(value); });
 
     this->registerBoolXMLAttribute("forceShown", [this](bool value)
-    {
-        this->forceShown = value;
-    });
+        { this->forceShown = value; });
 }
 
 Hints::~Hints()
@@ -243,7 +234,7 @@ void Hints::refillHints(View* focusView)
     clearViews();
 
     std::set<ControllerButton> addedButtons; // we only ever want one action per key
-    std::vector<std::shared_ptr<Action> > actions;
+    std::vector<std::shared_ptr<Action>> actions;
     std::set<Action*> optional;
 
     while (focusView != nullptr)
@@ -278,9 +269,7 @@ void Hints::refillHints(View* focusView)
     }
 
     const auto it = std::find_if(actions.begin(), actions.end(), [](const std::shared_ptr<Action>& action)
-    {
-        return *action == BUTTON_A;
-    });
+        { return *action == BUTTON_A; });
 
     if (addUnableAButtonAction && it == actions.end())
     {
@@ -335,7 +324,8 @@ void Hints::onLayout()
     if (!roomUnknown || !hintsOptionalOwner || room() <= 0)
         return;
     roomUnknown = false;
-    brls::sync([]() { Application::getGlobalHintsUpdateEvent()->fire(); });
+    brls::sync([]()
+        { Application::getGlobalHintsUpdateEvent()->fire(); });
 }
 
 View* Hints::create()

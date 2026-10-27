@@ -4,7 +4,6 @@
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -12,9 +11,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <borealis.hpp>
 
-#include <borealis/cadran/ui/format_text.hpp>
 #include <borealis/cadran/ui/cadran_text.hpp>
+#include <borealis/cadran/ui/format_text.hpp>
 #include <borealis/cadran/ui/guarded.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
@@ -30,7 +30,7 @@ namespace ui
 // one only as a fallback; for Chinese, the Chinese one. Right after
 // createWindow(), before the first label exists, then again when the language
 // changes while the app runs (live_prefs, which builds the screens again).
-void     use_font_for(const std::string& locale);
+void use_font_for(const std::string& locale);
 
 // Deferred to the next frame (toasts fired right after a system applet returns
 // were dropped on fw 22.1.0).
@@ -63,7 +63,7 @@ void replace_screen(brls::Activity* next);
 // `confirm_label` (right) runs `on_yes`, Cancel or B runs `on_no`.
 // `danger`: the confirm button is drawn in the "bad" colour (see below).
 void confirm(const std::string& body, const std::string& confirm_label,
-             std::function<void()> on_yes, std::function<void()> on_no = nullptr, bool danger = false);
+    std::function<void()> on_yes, std::function<void()> on_no = nullptr, bool danger = false);
 // Same, for actions that delete something: the confirm button is drawn in the
 // "bad" colour so it never looks like an ordinary OK.
 void confirm_danger(const std::string& body, const std::string& confirm_label, std::function<void()> on_yes);
@@ -81,11 +81,11 @@ enum class Check
     Warn,
     Bad,
     Info,
-    Header,   // not a check: the name of the panel of lines after it
+    Header, // not a check: the name of the panel of lines after it
 };
 struct CheckLine
 {
-    Check       state = Check::Info;
+    Check state = Check::Info;
     std::string text;
 };
 // One of them: the mark, then the text (`size` px).
@@ -93,7 +93,7 @@ brls::Box* check_row(const CheckLine& line, float size = 17);
 // Under `title` (and `subtitle`), the lines in rounded panels, one per
 // Header line (its name small above it); `note` with an info icon last.
 brls::Box* checklist_body(const std::string& title, const std::vector<CheckLine>& lines, const std::string& note = "",
-                          const std::string& subtitle = "");
+    const std::string& subtitle = "");
 // A dialog that only says something: a badge (`icon` in `tone`'s colour),
 // `title`, `text`, OK.
 void notice(const char* icon, Check tone, const std::string& title, const std::string& text);
@@ -101,7 +101,7 @@ void notice(const char* icon, Check tone, const std::string& title, const std::s
 // the button filling meanwhile, runs `on_yes`; let go sooner, it empties
 // and nothing happens. For what is hard to undo from the console.
 void hold_confirm(brls::Box* body, const std::string& hold_label, std::function<void()> on_yes,
-                  std::function<void()> on_no = nullptr);
+    std::function<void()> on_no = nullptr);
 
 // A dialog showing `text`, laid out by cadran::dialog_body (its question as
 // the title, its tables, its notes), the caller adding its buttons; a text
@@ -133,18 +133,18 @@ void add_cancel(brls::Dialog* dialog, std::function<void()> cancel);
 // ink, a hairline of the theme's cadran/line around it (CadranSwatch).
 using Swatch = CadranSwatch::Colors;
 void pick(const std::string& title, const std::vector<std::string>& values, int selected,
-          std::function<void(int)> on_pick, bool checked = true, const std::vector<std::string>& details = {},
-          const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {});
+    std::function<void(int)> on_pick, bool checked = true, const std::vector<std::string>& details = {},
+    const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {});
 // The same as tiles, `columns` to a row, each its Cadran icon (`icons`, a
 // name) large above its label: a few values that read better side by side
 // (the tabs of Start on).
 void pick_grid(const std::string& title, const std::vector<std::string>& values, const std::vector<std::string>& icons,
-               int selected, std::function<void(int)> on_pick, int columns = 4);
+    int selected, std::function<void(int)> on_pick, int columns = 4);
 // The same with several rows checked: those `marks` sets (true). Choosing a
 // row closes the list as pick() does: to toggle one, the caller opens it
 // again with the row's mark changed and the focus on it (`focus`).
 void pick_marked(const std::string& title, const std::vector<std::string>& values, const std::vector<bool>& marks,
-                 int focus, std::function<void(int)> on_pick, const std::vector<std::string>& details = {});
+    int focus, std::function<void(int)> on_pick, const std::vector<std::string>& details = {});
 // A list of things to do, as a sheet (ui/action_sheet.cpp): each line's
 // label, and what it runs once the sheet has closed; its icon (a Cadran
 // icon, nullptr: none), what is set now at its end (`detail`), its group
@@ -156,11 +156,21 @@ void pick_marked(const std::string& title, const std::vector<std::string>& value
 // kept). The first line is selected; none, no sheet.
 struct Choice
 {
-    enum class Tone { PLAIN, ON, WARN, DANGER };
+    enum class Tone
+    {
+        PLAIN,
+        ON,
+        WARN,
+        DANGER
+    };
     Choice(std::string text, std::function<void()> action, const char* icon_name = nullptr, std::string detail_text = "",
-           std::string group_name = "", Tone line_tone = Tone::PLAIN)
-        : label(std::move(text)), run(std::move(action)), icon(icon_name), detail(std::move(detail_text)),
-          group(std::move(group_name)), tone(line_tone)
+        std::string group_name = "", Tone line_tone = Tone::PLAIN)
+        : label(std::move(text))
+        , run(std::move(action))
+        , icon(icon_name)
+        , detail(std::move(detail_text))
+        , group(std::move(group_name))
+        , tone(line_tone)
     {
     }
     Choice& switched(bool on)
@@ -168,29 +178,29 @@ struct Choice
         this->toggle = on ? 1 : 0;
         return *this;
     }
-    std::string           label;
+    std::string label;
     std::function<void()> run;
-    const char*           icon;
-    std::string           detail;
-    std::string           group;
-    Tone                  tone;
-    int                   toggle = -1;   // switched(): 1 on, 0 off
+    const char* icon;
+    std::string detail;
+    std::string group;
+    Tone tone;
+    int toggle = -1; // switched(): 1 on, 0 off
 };
 void pick_actions(const std::string& title, const std::vector<Choice>& choices, const std::string& subtitle = "",
-                  int image = 0);
+    int image = 0);
 // The sheet those open: its view, on top of the activities' stack.
 bool is_sheet(brls::View* view);
 
 // The system keyboard for a text. The callback only on confirm.
 void prompt_text(const std::string& header, const std::string& initial, int max_len,
-                 std::function<void(std::string)> on_value);
+    std::function<void(std::string)> on_value);
 
 // An action that writes stays visible when the app cannot write (a
 // read-only mode), greyed (title and value), so the user sees what exists.
 // `title_key` / `detail_key`: the theme colours when writable. A
 // BooleanCell gets its own colours back from its state.
 void show_writable(brls::DetailCell* cell, bool writable, const char* title_key = "cadran/text",
-                   const char* detail_key = "cadran/text2");
+    const char* detail_key = "cadran/text2");
 
 // Hides a view when `visible` is false (Visibility::GONE frees its space).
 // When the hidden view had the focus, the focus moves to the nearest visible
@@ -257,24 +267,24 @@ void open_screen(brls::View* content, const std::string& title);
 // pick_palette: the boards' colours, Aurore's presets (brls::Theme::
 // builtinThemes) or the user's theme files (ui::hooks' themes_dir);
 // palette_name, the one saved (ui::Prefs::theme_file), by its name.
-void        pick_language(std::function<void()> after = nullptr);
-void        pick_theme(std::function<void()> after = nullptr);
-void        pick_palette(std::function<void()> after = nullptr);
+void pick_language(std::function<void()> after = nullptr);
+void pick_theme(std::function<void()> after = nullptr);
+void pick_palette(std::function<void()> after = nullptr);
 std::string palette_name();
-void        pick_text_size(std::function<void()> after = nullptr);
+void pick_text_size(std::function<void()> after = nullptr);
 std::string text_size_name(bool tile = false);
 // The main screen's sidebar (ui::Prefs::rail): open, on its icons, or
 // folding by itself; applied at once (cadran::apply_rail). rail_name: the
 // choice saved, as text.
-void        pick_rail(std::function<void()> after = nullptr);
+void pick_rail(std::function<void()> after = nullptr);
 std::string rail_name();
 std::string language_name(bool tile = false);
 std::string theme_name(bool tile = false);
 // − on the main screen: a list of the two, each opening its picker.
-void        quick_settings(std::function<void()> after = nullptr);
+void quick_settings(std::function<void()> after = nullptr);
 
 // Saves ui::prefs() through hooks::get().save_prefs: false when it cannot be
 // saved at all.
 bool save_prefs();
 
-}   // namespace ui
+} // namespace ui

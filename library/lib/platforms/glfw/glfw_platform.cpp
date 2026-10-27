@@ -69,24 +69,47 @@ GLFWPlatform::GLFWPlatform()
     {
 #if defined(_WIN32)
         LANGID lang = GetUserDefaultLangID();
-        switch (PRIMARYLANGID(lang)) {
-        case LANG_CHINESE: this->locale = (SUBLANGID(lang) == SUBLANG_CHINESE_SIMPLIFIED) ? LOCALE_ZH_HANS : LOCALE_ZH_HANT; break;
-        case LANG_ENGLISH: this->locale = (SUBLANGID(lang) == SUBLANG_ENGLISH_UK) ? LOCALE_EN_GB : LOCALE_EN_US; break;
-        case LANG_FRENCH: this->locale = (SUBLANGID(lang) == SUBLANG_FRENCH_CANADIAN) ? LOCALE_FR_CA : LOCALE_FR; break;
-        case LANG_PORTUGUESE: this->locale = (SUBLANGID(lang) == SUBLANG_PORTUGUESE_BRAZILIAN) ? LOCALE_PT_BR : LOCALE_PT; break;
-        case LANG_JAPANESE: this->locale = LOCALE_JA; break;
-        case LANG_GERMAN: this->locale = LOCALE_DE; break;
-        case LANG_ITALIAN: this->locale = LOCALE_IT; break;
-        case LANG_SPANISH: this->locale = LOCALE_ES; break;
-        case LANG_KOREAN: this->locale = LOCALE_Ko; break;
-        case LANG_DUTCH: this->locale = LOCALE_NL; break;
-        case LANG_RUSSIAN: this->locale = LOCALE_RU; break;
-        default:;
+        switch (PRIMARYLANGID(lang))
+        {
+            case LANG_CHINESE:
+                this->locale = (SUBLANGID(lang) == SUBLANG_CHINESE_SIMPLIFIED) ? LOCALE_ZH_HANS : LOCALE_ZH_HANT;
+                break;
+            case LANG_ENGLISH:
+                this->locale = (SUBLANGID(lang) == SUBLANG_ENGLISH_UK) ? LOCALE_EN_GB : LOCALE_EN_US;
+                break;
+            case LANG_FRENCH:
+                this->locale = (SUBLANGID(lang) == SUBLANG_FRENCH_CANADIAN) ? LOCALE_FR_CA : LOCALE_FR;
+                break;
+            case LANG_PORTUGUESE:
+                this->locale = (SUBLANGID(lang) == SUBLANG_PORTUGUESE_BRAZILIAN) ? LOCALE_PT_BR : LOCALE_PT;
+                break;
+            case LANG_JAPANESE:
+                this->locale = LOCALE_JA;
+                break;
+            case LANG_GERMAN:
+                this->locale = LOCALE_DE;
+                break;
+            case LANG_ITALIAN:
+                this->locale = LOCALE_IT;
+                break;
+            case LANG_SPANISH:
+                this->locale = LOCALE_ES;
+                break;
+            case LANG_KOREAN:
+                this->locale = LOCALE_Ko;
+                break;
+            case LANG_DUTCH:
+                this->locale = LOCALE_NL;
+                break;
+            case LANG_RUSSIAN:
+                this->locale = LOCALE_RU;
+                break;
+            default:;
         }
 #elif defined(__APPLE__)
         std::string lang = darwin_locale();
-        auto pos = lang.find_last_of('-');
-        this->locale = lang.substr(0, pos);
+        auto pos         = lang.find_last_of('-');
+        this->locale     = lang.substr(0, pos);
 #elif defined(__linux__)
         // The variables in the order the C library reads them (LANGUAGE
         // may list several, "fr:en": the first one)
@@ -100,10 +123,11 @@ GLFWPlatform::GLFWPlatform()
                 break;
             }
         }
-        if (langEnv) {
+        if (langEnv)
+        {
             std::string lang = langEnv;
-            lang = lang.substr(0, lang.find(':'));
-            this->locale = localeFromSystem(lang);
+            lang             = lang.substr(0, lang.find(':'));
+            this->locale     = localeFromSystem(lang);
         }
 #endif
         brls::Logger::info("Auto detect app locale: {}", this->locale);

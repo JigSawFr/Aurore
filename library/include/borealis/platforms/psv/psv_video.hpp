@@ -16,8 +16,8 @@ limitations under the License.
 
 #pragma once
 
-#include <borealis/core/video.hpp>
 #include <nanovg_gxm_utils.h>
+#include <borealis/core/video.hpp>
 
 namespace brls
 {
@@ -36,7 +36,7 @@ class PsvVideoContext : public VideoContext
     double getScaleFactor() override;
     NVGcontext* getNVGContext() override;
 
-    NVGXMwindow *getWindow();
+    NVGXMwindow* getWindow();
 
   private:
     NVGcontext* nvgContext;

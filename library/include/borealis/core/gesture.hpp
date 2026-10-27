@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <functional>
 #include <borealis/core/audio.hpp>
 #include <borealis/core/input.hpp>
-#include <functional>
 
 namespace brls
 {
@@ -37,33 +37,33 @@ enum class GestureState
 };
 
 /*
-* Superclass for all recognizers
-* 
-* To create a new type of gesture recognizer, you should implement 
-* recognitionLoop method.
-* 
-* It should contain logic with changing gesture's state. 
-* Recognizers' first state is UNSURE, in that state calling stack cannot tell
-* which gesture user tries to apply. I.E. user puts and holds finger on the screen, so it can't be 
-* told whether it's going to be a tap or a swipe
-*
-* If gesture has been recognized, change its state to START, but ONLY for the first frame, 
-* on the next frame it should be changed to STAY and remain the same until the end, then it 
-* should change state to END. 
-* 
-* When any recognizer changes its state to START, it sends an interrupt event to every recognizer in the stack,
-* so don't forget to handle that case.
-* 
-* If gesture does not apply to recognizer's pattern, change its state to FAILED. 
-* It could also be used as a placerholder when recognizer is not in use.
-* 
-* Use touch argument to get current state of touch.
-*
-* View argument contains the view to which this recognizer is attached.
-* 
-* Use soundToPlay pointer to set sound which will be played in current frame.
-* Leave it empty or use SOUND_NONE to not play any sound.
-*/
+ * Superclass for all recognizers
+ *
+ * To create a new type of gesture recognizer, you should implement
+ * recognitionLoop method.
+ *
+ * It should contain logic with changing gesture's state.
+ * Recognizers' first state is UNSURE, in that state calling stack cannot tell
+ * which gesture user tries to apply. I.E. user puts and holds finger on the screen, so it can't be
+ * told whether it's going to be a tap or a swipe
+ *
+ * If gesture has been recognized, change its state to START, but ONLY for the first frame,
+ * on the next frame it should be changed to STAY and remain the same until the end, then it
+ * should change state to END.
+ *
+ * When any recognizer changes its state to START, it sends an interrupt event to every recognizer in the stack,
+ * so don't forget to handle that case.
+ *
+ * If gesture does not apply to recognizer's pattern, change its state to FAILED.
+ * It could also be used as a placerholder when recognizer is not in use.
+ *
+ * Use touch argument to get current state of touch.
+ *
+ * View argument contains the view to which this recognizer is attached.
+ *
+ * Use soundToPlay pointer to set sound which will be played in current frame.
+ * Leave it empty or use SOUND_NONE to not play any sound.
+ */
 class GestureRecognizer
 {
   public:

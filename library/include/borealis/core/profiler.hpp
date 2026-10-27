@@ -97,10 +97,10 @@ class Profiler
     inline static bool logging = false;
     inline static FrameProfile current;
     inline static FrameProfile last;
-    inline static Time phaseStart  = 0;
-    inline static Time frameStart  = 0;
-    inline static Time lastStart   = 0; // frameStart of the iteration before
-    inline static Time layoutMark  = 0; // current.layout when the phase started
+    inline static Time phaseStart           = 0;
+    inline static Time frameStart           = 0;
+    inline static Time lastStart            = 0; // frameStart of the iteration before
+    inline static Time layoutMark           = 0; // current.layout when the phase started
     inline static uint64_t allocationsStart = 0;
     inline static Event<> frameEvent;
     inline static std::function<uint64_t()> allocationCounter;

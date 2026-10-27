@@ -1,7 +1,7 @@
 #pragma once
+#include <borealis/core/bind.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/views/label.hpp>
-#include <borealis/core/bind.hpp>
 
 namespace brls
 {
@@ -24,6 +24,7 @@ class EditTextDialog : public Box
     Event<>* getSubmitEvent();
     Event<std::string>* getClipboardEvent();
     void updateUI();
+
   private:
     std::string content;
     std::string hint;

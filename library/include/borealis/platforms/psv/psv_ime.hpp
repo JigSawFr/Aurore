@@ -16,24 +16,23 @@ limitations under the License.
 
 #pragma once
 
-#include <borealis/core/ime.hpp>
 #include <borealis/core/event.hpp>
+#include <borealis/core/ime.hpp>
 
 namespace brls
 {
-    class PsvImeManager : public ImeManager
-    {
-      public:
-        PsvImeManager();
+class PsvImeManager : public ImeManager
+{
+  public:
+    PsvImeManager();
 
-        bool openForText(std::function<void(std::string)> f, std::string headerText = "",
-            std::string subText = "", int maxStringLength = 32, std::string initialText = "",
-            int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE) override;
+    bool openForText(std::function<void(std::string)> f, std::string headerText = "",
+        std::string subText = "", int maxStringLength = 32, std::string initialText = "",
+        int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE) override;
 
-        bool openForNumber(std::function<void(long)> f, std::string headerText = "",
-            std::string subText = "", int maxStringLength = 18, std::string initialText = "",
-            std::string leftButton = "", std::string rightButton = "",
-            int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE) override;
-
-    };
+    bool openForNumber(std::function<void(long)> f, std::string headerText = "",
+        std::string subText = "", int maxStringLength = 18, std::string initialText = "",
+        std::string leftButton = "", std::string rightButton = "",
+        int kbdDisableBitmask = KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE) override;
+};
 }

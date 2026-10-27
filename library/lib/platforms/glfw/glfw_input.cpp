@@ -79,8 +79,8 @@ static void glfwJoystickCallback(int jid, int event)
 
 #define GLFW_STICKY 4
 static RawTouchState touchState = { 0, 0, { 0, 0 } };
-static int touchStateStatus = GLFW_RELEASE;
-static bool touchUpdate = false;
+static int touchStateStatus     = GLFW_RELEASE;
+static bool touchUpdate         = false;
 
 static inline int getTouchState()
 {
@@ -88,7 +88,7 @@ static inline int getTouchState()
     {
         touchStateStatus = GLFW_RELEASE;
         // Try to ignore the touch end event as this can lead to a smaller calculation of scrolling acceleration
-        int res = touchUpdate ? GLFW_PRESS : GLFW_RELEASE;
+        int res     = touchUpdate ? GLFW_PRESS : GLFW_RELEASE;
         touchUpdate = false;
         return res;
     }
@@ -111,7 +111,7 @@ static void glfwTouchCallback(GLFWwindow* window, int touch, int action, double 
     touchState.position.x = (float)(xpos * scaleFactor);
     touchState.position.y = (float)(ypos * scaleFactor);
     touchStateStatus      = touchState.pressed ? GLFW_PRESS : GLFW_STICKY;
-    touchUpdate          |= touchState.pressed;
+    touchUpdate |= touchState.pressed;
     Application::setActiveEvent(true);
 }
 
@@ -119,9 +119,9 @@ void GLFWInputManager::keyboardCallback(GLFWwindow* window, int key, int scancod
 {
     auto* self = (GLFWInputManager*)Application::getPlatform()->getInputManager();
     KeyState state {};
-    state.key            = (BrlsKeyboardScancode)key;
-    state.mods           = mods;
-    state.pressed        = action != GLFW_RELEASE;
+    state.key     = (BrlsKeyboardScancode)key;
+    state.mods    = mods;
+    state.pressed = action != GLFW_RELEASE;
     // A key that types a character is not logged: it may be a password
     // or a PIN being typed
     if (glfwGetKeyName(key, scancode) != NULL)
@@ -272,12 +272,15 @@ void GLFWInputManager::updateUnifiedControllerState(ControllerState* state)
     }
 
     // Add keyboard keys on top of gamepad buttons
-    if (Application::isSwapInputKeys()) {
+    if (Application::isSwapInputKeys())
+    {
         state->buttons[BUTTON_B] |= glfwGetKey(this->window, GLFW_KEY_KP_ENTER) != 0;
         state->buttons[BUTTON_B] |= glfwGetKey(this->window, GLFW_KEY_ENTER) != 0;
         state->buttons[BUTTON_A] |= glfwGetKey(this->window, GLFW_KEY_ESCAPE) != 0;
         state->buttons[BUTTON_A] |= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-    } else {
+    }
+    else
+    {
         state->buttons[BUTTON_A] |= glfwGetKey(this->window, GLFW_KEY_KP_ENTER) != 0;
         state->buttons[BUTTON_A] |= glfwGetKey(this->window, GLFW_KEY_ENTER) != 0;
         state->buttons[BUTTON_B] |= glfwGetKey(this->window, GLFW_KEY_ESCAPE) != 0;
@@ -330,7 +333,8 @@ bool GLFWInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
 
 void GLFWInputManager::updateTouchStates(std::vector<RawTouchState>* states)
 {
-    if (getTouchState()) {
+    if (getTouchState())
+    {
         touchState.pressed = true;
         states->push_back(touchState);
     }

@@ -64,7 +64,7 @@ bool Image::savePng(const std::string& path) const
 Image Image::loadPng(const std::string& path)
 {
     Image image;
-    int channels   = 0;
+    int channels        = 0;
     unsigned char* data = stbi_load(path.c_str(), &image.width, &image.height, &channels, 4);
     if (!data)
     {
@@ -87,7 +87,7 @@ ImageDiff compareImages(const Image& actual, const Image& expected, int toleranc
         result.maxDelta        = 255;
         return result;
     }
-    result.map = expected;
+    result.map    = expected;
     size_t pixels = (size_t)actual.width * actual.height;
     for (size_t i = 0; i < pixels; i++)
     {

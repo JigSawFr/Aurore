@@ -17,11 +17,11 @@
 
 #include "demo_app.hpp"
 
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <borealis.hpp>
+#include <borealis/cadran.hpp>
 
 #include "activity/main_activity.hpp"
 #include "tab/cadran_tab.hpp"
@@ -46,20 +46,22 @@ int shownTab = 0;
 // files the palette picker lists after Aurore's presets.
 void installCadranHooks()
 {
-    static ui::Prefs prefs;   // not saved: the demo starts in the defaults
+    static ui::Prefs prefs; // not saved: the demo starts in the defaults
     const char* theme = std::getenv("BOREALIS_THEME");
     if (theme && !std::strcmp(theme, "LIGHT"))
         prefs.theme = "light";
     ui::use_prefs(prefs);
 
     ui::hooks::Hooks& h = ui::hooks::get();
-    h.themes_dir        = []() { return std::string("@res/themes"); };
-    h.rail_icons        = []()
+    h.themes_dir        = []()
+    { return std::string("@res/themes"); };
+    h.rail_icons = []()
     {
         return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "contrast", "language", "", "activity", "gamepad",
             "shelf", "", "settings", "", "info" };
     };
-    h.shown_screen = []() { return "tab/" + std::to_string(shownTab); };
+    h.shown_screen = []()
+    { return "tab/" + std::to_string(shownTab); };
     h.main_screen  = h.shown_screen;
     h.tab_position = [](const std::string& screen)
     { return screen.rfind("tab/", 0) == 0 ? std::atoi(screen.c_str() + 4) : -1; };

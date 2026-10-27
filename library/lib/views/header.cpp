@@ -60,13 +60,11 @@ Header::Header()
 {
     this->inflateFromXMLString(headerXML);
 
-    this->registerStringXMLAttribute("title", [this](std::string value) {
-        this->setTitle(value);
-    });
+    this->registerStringXMLAttribute("title", [this](std::string value)
+        { this->setTitle(value); });
 
-    this->registerStringXMLAttribute("subtitle", [this](std::string value) {
-        this->setSubtitle(value);
-    });
+    this->registerStringXMLAttribute("subtitle", [this](std::string value)
+        { this->setSubtitle(value); });
 }
 
 void Header::setTitle(std::string title)

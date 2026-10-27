@@ -21,10 +21,10 @@ limitations under the License.
 #include <nanovg/framework/CMemPool.h>
 #include <switch.h>
 
-#include <borealis/core/video.hpp>
 #include <deko3d.hpp>
 #include <nanovg/dk_renderer.hpp>
 #include <optional>
+#include <borealis/core/video.hpp>
 
 typedef Event _LibNXEvent; // "Event" alone clashes with brls::Event
 

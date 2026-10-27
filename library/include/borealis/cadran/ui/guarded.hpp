@@ -28,9 +28,11 @@ inline Alive make_alive() { return std::make_shared<bool>(true); }
 template <typename F>
 auto guarded(Weak alive, F fn)
 {
-    return [weak = std::move(alive), fn = std::move(fn)](auto&&... args) {
+    return [weak = std::move(alive), fn = std::move(fn)](auto&&... args)
+    {
         const Alive held = weak.lock();
-        if (!held || !*held) return;
+        if (!held || !*held)
+            return;
         fn(std::forward<decltype(args)>(args)...);
     };
 }
@@ -40,4 +42,4 @@ auto guarded(const Alive& alive, F fn)
     return guarded(Weak(alive), std::move(fn));
 }
 
-}   // namespace ui
+} // namespace ui

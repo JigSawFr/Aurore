@@ -1,12 +1,12 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <borealis/cadran/ui/cadran_modal.hpp>
 
-#include <algorithm>
 #include <fmt/format.h>
+#include <yoga/Yoga.h>
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <vector>
-#include <yoga/Yoga.h>
 
 #include <borealis/cadran/ui/cadran_kit.hpp>
 #include <borealis/cadran/ui/cadran_text.hpp>
@@ -75,16 +75,18 @@ brls::Button* button(brls::Dialog* dialog, const char* id)
 
 void hide(brls::View* parent, const char* id)
 {
-    if (brls::View* v = parent->getView(id)) v->setVisibility(brls::Visibility::GONE);
+    if (brls::View* v = parent->getView(id))
+        v->setVisibility(brls::Visibility::GONE);
 }
-}   // namespace
+} // namespace
 
 namespace
 {
 std::string trim(const std::string& text)
 {
     const size_t first = text.find_first_not_of(" \n");
-    if (first == std::string::npos) return "";
+    if (first == std::string::npos)
+        return "";
     return text.substr(first, text.find_last_not_of(" \n") - first + 1);
 }
 
@@ -92,11 +94,14 @@ std::vector<std::string> split(const std::string& text, const std::string& by)
 {
     std::vector<std::string> parts;
     size_t from = 0;
-    while (true) {
-        const size_t at = text.find(by, from);
+    while (true)
+    {
+        const size_t at        = text.find(by, from);
         const std::string part = trim(text.substr(from, at == std::string::npos ? std::string::npos : at - from));
-        if (!part.empty()) parts.push_back(part);
-        if (at == std::string::npos) return parts;
+        if (!part.empty())
+            parts.push_back(part);
+        if (at == std::string::npos)
+            return parts;
         from = at + by.size();
     }
 }
@@ -111,20 +116,23 @@ bool starts_with(const std::string& text, const std::string& start)
 std::string question_of(const std::string& paragraph)
 {
     size_t end = std::string::npos;
-    for (const char* mark : { "?", "\xEF\xBC\x9F" }) {   // "?" and the full-width one
+    for (const char* mark : { "?", "\xEF\xBC\x9F" })
+    { // "?" and the full-width one
         const size_t at = paragraph.find(mark);
-        if (at != std::string::npos && at + std::string(mark).size() < end) end = at + std::string(mark).size();
+        if (at != std::string::npos && at + std::string(mark).size() < end)
+            end = at + std::string(mark).size();
     }
-    if (end == std::string::npos || end > 220 || paragraph.substr(0, end).find('\n') != std::string::npos) return "";
+    if (end == std::string::npos || end > 220 || paragraph.substr(0, end).find('\n') != std::string::npos)
+        return "";
     return paragraph.substr(0, end);
 }
 
 // The notes the app adds to its dialogs (cadran::add_note).
 struct NoteKind
 {
-    std::string key;   // its text's i18n key
+    std::string key; // its text's i18n key
     const char* icon;
-    bool        warn;
+    bool warn;
 };
 std::vector<NoteKind>& note_kinds()
 {
@@ -136,18 +144,20 @@ std::vector<NoteKind>& note_kinds()
 const char* note_icon(const std::string& paragraph, bool* warn)
 {
     *warn = false;
-    for (const NoteKind& k : note_kinds()) {
+    for (const NoteKind& k : note_kinds())
+    {
         // Read each time: the language may have changed since (live_prefs).
         // Raw: a text with a "{}" to fill would not format without its value.
         const std::string text = brls::internal::getRawStr(k.key);
-        if (starts_with(paragraph, text.substr(0, text.find("{}")))) {
+        if (starts_with(paragraph, text.substr(0, text.find("{}"))))
+        {
             *warn = k.warn;
             return k.icon;
         }
     }
     return nullptr;
 }
-}   // namespace
+} // namespace
 
 void cadran::add_note(const std::string& key, const char* icon, bool warn)
 {
@@ -157,7 +167,7 @@ void cadran::add_note(const std::string& key, const char* icon, bool warn)
 brls::Box* cadran::dialog_body(const std::string& text)
 {
     namespace kit = cadran::kit;
-    auto* body = new brls::Box(brls::Axis::COLUMN);
+    auto* body    = new brls::Box(brls::Axis::COLUMN);
     body->setId("cadran_dialog_body");
     body->setAlignItems(brls::AlignItems::STRETCH);
     body->setPadding(34, 40, 26, 40);
@@ -165,17 +175,23 @@ brls::Box* cadran::dialog_body(const std::string& text)
     std::vector<std::string> paragraphs = split(text, "\n\n");
     // The title: the opening question, else a short first line before more.
     std::string title;
-    if (!paragraphs.empty()) {
+    if (!paragraphs.empty())
+    {
         title = question_of(paragraphs[0]);
-        if (!title.empty()) {
+        if (!title.empty())
+        {
             paragraphs[0] = trim(paragraphs[0].substr(title.size()));
-            if (paragraphs[0].empty()) paragraphs.erase(paragraphs.begin());
-        } else if (paragraphs.size() > 1 && paragraphs[0].size() <= 90 && paragraphs[0].find('\n') == std::string::npos) {
+            if (paragraphs[0].empty())
+                paragraphs.erase(paragraphs.begin());
+        }
+        else if (paragraphs.size() > 1 && paragraphs[0].size() <= 90 && paragraphs[0].find('\n') == std::string::npos)
+        {
             title = paragraphs[0];
             paragraphs.erase(paragraphs.begin());
         }
     }
-    if (!title.empty()) {
+    if (!title.empty())
+    {
         auto* head = new brls::Box(brls::Axis::ROW);
         head->setId("cadran_dialog_head");
         head->setAlignItems(brls::AlignItems::CENTER);
@@ -193,29 +209,34 @@ brls::Box* cadran::dialog_body(const std::string& text)
         bool warn;
     };
     std::vector<Note> notes;
-    for (const std::string& paragraph : paragraphs) {
+    for (const std::string& paragraph : paragraphs)
+    {
         bool warn = false;
-        if (const char* icon = note_icon(paragraph, &warn)) {
+        if (const char* icon = note_icon(paragraph, &warn))
+        {
             notes.push_back({ paragraph, icon, warn });
             continue;
         }
         std::vector<std::pair<std::string, std::string>> rows;
-        if (cadran_text::table_rows(paragraph, &rows)) {
+        if (cadran_text::table_rows(paragraph, &rows))
+        {
             // A week of lines: the days that change alike on one line
             // ("Monday – Friday  2 h → 0 min").
-            rows = cadran_text::group_rows(rows);
+            rows        = cadran_text::group_rows(rows);
             auto* table = new brls::Box(brls::Axis::COLUMN);
             table->setAlignItems(brls::AlignItems::STRETCH);
             table->setThemeColor("backgroundColor", "cadran/surf2");
             table->setCornerRadius(kit::RADIUS_ROW);
             table->setPadding(12, 20, 12, 20);
             table->setMarginTop(body->getChildren().empty() ? 0 : 18);
-            for (size_t i = 0; i < rows.size(); i++) {
+            for (size_t i = 0; i < rows.size(); i++)
+            {
                 auto* row = new brls::Box(brls::Axis::ROW);
                 row->setAlignItems(brls::AlignItems::CENTER);
                 row->setPaddingTop(7);
                 row->setPaddingBottom(7);
-                if (i + 1 < rows.size()) {
+                if (i + 1 < rows.size())
+                {
                     row->setLineBottom(1);
                     row->setThemeColor("lineColor", "cadran/line");
                 }
@@ -242,8 +263,10 @@ brls::Box* cadran::dialog_body(const std::string& text)
     // suspended matters before the details); the other notes under a line,
     // each with its icon.
     size_t at = body->getView("cadran_dialog_head") ? 1 : 0;
-    for (const Note& note : notes) {
-        if (!note.warn) continue;
+    for (const Note& note : notes)
+    {
+        if (!note.warn)
+            continue;
         auto* card = new brls::Box(brls::Axis::ROW);
         card->setAlignItems(brls::AlignItems::FLEX_START);
         card->setThemeColor("backgroundColor", "cadran/amber_surf");
@@ -263,18 +286,25 @@ brls::Box* cadran::dialog_body(const std::string& text)
         card->addView(label);
         body->addView(card, at++);
     }
-    notes.erase(std::remove_if(notes.begin(), notes.end(), [](const Note& n) { return n.warn; }), notes.end());
+    notes.erase(std::remove_if(notes.begin(), notes.end(), [](const Note& n)
+                    { return n.warn; }),
+        notes.end());
     // What follows the warning, apart from it.
-    if (at > 0 && at < body->getChildren().size()) body->getChildren()[at]->setMarginTop(14);
-    for (size_t i = 0; i < notes.size(); i++) {
+    if (at > 0 && at < body->getChildren().size())
+        body->getChildren()[at]->setMarginTop(14);
+    for (size_t i = 0; i < notes.size(); i++)
+    {
         auto* row = new brls::Box(brls::Axis::ROW);
         row->setAlignItems(brls::AlignItems::FLEX_START);
-        if (i == 0 && !body->getChildren().empty()) {
+        if (i == 0 && !body->getChildren().empty())
+        {
             row->setMarginTop(20);
             row->setPaddingTop(16);
             row->setLineTop(1);
             row->setThemeColor("lineColor", "cadran/line");
-        } else if (i > 0) {
+        }
+        else if (i > 0)
+        {
             row->setMarginTop(12);
         }
         CadranIcon* icon = kit::icon(notes[i].icon, 18, notes[i].warn ? "cadran/amber" : "cadran/text3");
@@ -292,13 +322,17 @@ brls::Box* cadran::dialog_body(const std::string& text)
     // keep their height there. A label offered less than its wrapped text
     // needs draws one cut line, and borealis caps a label at its parent's
     // height (100 %), which a scrolling body does not settle before it.
-    std::function<void(brls::View*)> unbounded = [&unbounded](brls::View* view) {
+    std::function<void(brls::View*)> unbounded = [&unbounded](brls::View* view)
+    {
         view->setShrink(0);
-        if (dynamic_cast<brls::Label*>(view)) YGNodeStyleSetMaxHeight(view->getYGNode(), YGUndefined);
+        if (dynamic_cast<brls::Label*>(view))
+            YGNodeStyleSetMaxHeight(view->getYGNode(), YGUndefined);
         if (auto* box = dynamic_cast<brls::Box*>(view))
-            for (brls::View* child : box->getChildren()) unbounded(child);
+            for (brls::View* child : box->getChildren())
+                unbounded(child);
     };
-    for (brls::View* child : body->getChildren()) unbounded(child);
+    for (brls::View* child : body->getChildren())
+        unbounded(child);
     return body;
 }
 
@@ -323,7 +357,8 @@ brls::Box* cadran::dialog_badge(const char* icon, const char* color_key, const c
 
 void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
 {
-    if (!dialog || dialog->getView("cadran_dialog")) return;
+    if (!dialog || dialog->getView("cadran_dialog"))
+        return;
     brls::AppletFrame* card = dialog->getAppletFrame();
     card->setCornerRadius(kit::RADIUS_MODAL);
     card->setThemeColor("backgroundColor", "cadran/surf");
@@ -335,15 +370,17 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
     card->addView(mark);
     // Something removed or stopped: a coral warning before the title (above
     // the text when it has none).
-    auto* head = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_head"));
-    auto* body = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_body"));
+    auto* head       = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_head"));
+    auto* body       = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_body"));
     const bool warns = emphasis == Emphasis::DANGER || emphasis == Emphasis::FAILURE;
-    if (warns && !head && body) {
+    if (warns && !head && body)
+    {
         head = new brls::Box(brls::Axis::ROW);
         head->setMarginBottom(14);
         body->addView(head, 0);
     }
-    if (warns && head) {
+    if (warns && head)
+    {
         auto* badge = new brls::Box(brls::Axis::ROW);
         badge->setWidth(44);
         badge->setHeight(44);
@@ -358,29 +395,38 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
     }
 
     // borealis' order: button3 alone above, button1 and button2 in a row.
-    brls::Button* b1 = button(dialog, "brls/dialog/button1");
-    brls::Button* b2 = button(dialog, "brls/dialog/button2");
-    brls::Button* b3 = button(dialog, "brls/dialog/button3");
-    brls::Button* last = b3 ? b3 : b2 ? b2 : b1;
+    brls::Button* b1     = button(dialog, "brls/dialog/button1");
+    brls::Button* b2     = button(dialog, "brls/dialog/button2");
+    brls::Button* b3     = button(dialog, "brls/dialog/button3");
+    brls::Button* last   = b3 ? b3 : b2 ? b2
+                                        : b1;
     const std::string ok = "hints/ok"_i18n;
-    for (brls::Button* b : { b1, b2, b3 }) {
-        if (!b) continue;
+    for (brls::Button* b : { b1, b2, b3 })
+    {
+        if (!b)
+            continue;
         const brls::ButtonStyle* look = &PLAIN;
-        if (b == last && emphasis == Emphasis::PRIMARY) look = &PRIMARY;
-        else if (b == last && emphasis == Emphasis::DANGER) look = &DANGER;
-        else if ((emphasis == Emphasis::NONE || emphasis == Emphasis::FAILURE) && b->getText() == ok) look = &PRIMARY;
+        if (b == last && emphasis == Emphasis::PRIMARY)
+            look = &PRIMARY;
+        else if (b == last && emphasis == Emphasis::DANGER)
+            look = &DANGER;
+        else if ((emphasis == Emphasis::NONE || emphasis == Emphasis::FAILURE) && b->getText() == ok)
+            look = &PRIMARY;
         pill(b, look);
         // A says what the focused button does ("A Cancel"), not borealis' "OK".
         b->updateActionHint(brls::BUTTON_A, b->getText());
     }
     hide(dialog, "brls/dialog/button2/separator");
     hide(dialog, "brls/dialog/button3/separator");
-    if (b2) b2->setMarginLeft(12);
-    if (b3) {
+    if (b2)
+        b2->setMarginLeft(12);
+    if (b3)
+    {
         b3->setHeight(PILL);
         b3->setMargins(0, 24, 12, 24);
     }
-    if (brls::Box* row = b1 ? b1->getParent() : nullptr) {
+    if (brls::Box* row = b1 ? b1->getParent() : nullptr)
+    {
         row->setLineTop(0);
         row->setHeight(DIALOG_BUTTONS);
         row->setPadding(0, 24, DIALOG_BUTTONS - PILL, 24);
@@ -389,7 +435,8 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
 
 void cadran::style_button(brls::Button* button, Emphasis emphasis)
 {
-    pill(button, emphasis == Emphasis::PRIMARY ? &PRIMARY : emphasis == Emphasis::DANGER ? &DANGER : &PLAIN);
+    pill(button, emphasis == Emphasis::PRIMARY ? &PRIMARY : emphasis == Emphasis::DANGER ? &DANGER
+                                                                                         : &PLAIN);
     button->setHeight(PILL);
 }
 
@@ -441,7 +488,7 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
     p.heading = kit::label(heading, 18, "cadran/text3");
     titles->addView(p.heading);
     p.title = kit::label(title, 22, "cadran/text");
-    p.title->setSingleLine(true);   // a long name is cut, not wrapped over the dialog
+    p.title->setSingleLine(true); // a long name is cut, not wrapped over the dialog
     p.title->setMarginTop(6);
     titles->addView(p.title);
     head->addView(titles);
@@ -465,7 +512,8 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
     numbers->addView(p.detail);
     p.box->addView(numbers);
 
-    if (!note.empty()) {
+    if (!note.empty())
+    {
         brls::Label* label = kit::label(note, 18, "cadran/text3");
         label->setMarginTop(16);
         p.box->addView(label);
@@ -474,14 +522,16 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
 }
 
 void cadran::prompt_time(const std::string& header, std::vector<int> times, int initial, TimeButton off,
-                         TimeButton other, std::function<void(int)> on_value)
+    TimeButton other, std::function<void(int)> on_value)
 {
     namespace kit = cadran::kit;
-    if (times.empty()) return;
+    if (times.empty())
+        return;
     // The time shown: its place in `times`, the first at or after `initial`.
     size_t first = 0;
-    while (first + 1 < times.size() && times[first] < initial) first++;
-    auto at = std::make_shared<size_t>(first);
+    while (first + 1 < times.size() && times[first] < initial)
+        first++;
+    auto at    = std::make_shared<size_t>(first);
     auto* body = new brls::Box(brls::Axis::COLUMN);
     body->setAlignItems(brls::AlignItems::CENTER);
     body->setPadding(30, 40, 22, 40);
@@ -494,7 +544,8 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     auto* value = new CadranDigits();
     value->setFontSize(56);
     value->setThemeColor("textColor", "cadran/text");
-    const auto text = [](int t) { return fmt::format("{:02d}:{:02d}", t / 60, t % 60); };
+    const auto text = [](int t)
+    { return fmt::format("{:02d}:{:02d}", t / 60, t % 60); };
     value->setText(text(times[first]));
     body->addView(value);
     CadranIcon* down = kit::icon("caret-down", 30, "cadran/teal");
@@ -504,14 +555,15 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     auto* keys = new brls::Box(brls::Axis::ROW);
     keys->setAlignItems(brls::AlignItems::CENTER);
     keys->setMarginTop(16);
-    const auto key = [](const char* letter) {
+    const auto key = [](const char* letter)
+    {
         brls::Box* bubble = kit::key(letter);
         bubble->setMarginRight(4);
         return bubble;
     };
     keys->addView(kit::icon("caret-up", 18, "cadran/text3"));
     keys->addView(kit::icon("caret-down", 18, "cadran/text3"));
-    const int step_min = times.size() > 1 ? std::max(1, times[1] - times[0]) : 15;
+    const int step_min     = times.size() > 1 ? std::max(1, times[1] - times[0]) : 15;
     brls::Label* step_text = kit::label(ui::fmt_minutes((uint32_t)step_min), 16, "cadran/text3");
     step_text->setMarginLeft(6);
     step_text->setMarginRight(22);
@@ -520,7 +572,8 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     keys->addView(key("R"));
     keys->addView(kit::label(ui::fmt_minutes(60), 16, "cadran/text3"));
     brls::Box* other_key = nullptr;
-    if (other.action) {
+    if (other.action)
+    {
         other_key = new brls::Box(brls::Axis::ROW);
         other_key->setAlignItems(brls::AlignItems::CENTER);
         other_key->setMarginLeft(22);
@@ -530,46 +583,54 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     }
     body->addView(keys);
 
-    auto* dialog = new brls::Dialog(body);
-    const auto move = [at, value, times, text](int delta) {
+    auto* dialog    = new brls::Dialog(body);
+    const auto move = [at, value, times, text](int delta)
+    {
         *at = (size_t)std::max(0, std::min((int)times.size() - 1, (int)*at + delta));
         value->setText(text(times[*at]));
     };
     const int per_hour = std::max(1, 60 / step_min);
-    brls::View* frame = dialog->getAppletFrame();
-    for (const auto& [button, delta] : { std::pair<brls::ControllerButton, int>{ brls::BUTTON_NAV_UP, 1 },
-                                         { brls::BUTTON_NAV_DOWN, -1 }, { brls::BUTTON_RB, per_hour },
-                                         { brls::BUTTON_LB, -per_hour } })
-        frame->registerAction("", button, [move, delta = delta](brls::View*) {
+    brls::View* frame  = dialog->getAppletFrame();
+    for (const auto& [button, delta] : { std::pair<brls::ControllerButton, int> { brls::BUTTON_NAV_UP, 1 },
+             { brls::BUTTON_NAV_DOWN, -1 }, { brls::BUTTON_RB, per_hour },
+             { brls::BUTTON_LB, -per_hour } })
+        frame->registerAction("", button, [move, delta = delta](brls::View*)
+            {
             move(delta);
-            return true;
-        }, true, true, brls::SOUND_FOCUS_CHANGE);
-    up->addGestureRecognizer(new brls::TapGestureRecognizer(up, [move]() { move(1); }));
-    down->addGestureRecognizer(new brls::TapGestureRecognizer(down, [move]() { move(-1); }));
-    if (other.action) {
-        const auto open_other = [dialog, action = other.action]() { dialog->close(action); };
-        frame->registerAction(other.label, brls::BUTTON_Y, [open_other](brls::View*) {
+            return true; }, true, true, brls::SOUND_FOCUS_CHANGE);
+    up->addGestureRecognizer(new brls::TapGestureRecognizer(up, [move]()
+        { move(1); }));
+    down->addGestureRecognizer(new brls::TapGestureRecognizer(down, [move]()
+        { move(-1); }));
+    if (other.action)
+    {
+        const auto open_other = [dialog, action = other.action]()
+        { dialog->close(action); };
+        frame->registerAction(other.label, brls::BUTTON_Y, [open_other](brls::View*)
+            {
             open_other();
-            return true;
-        });
+            return true; });
 #if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
         // The desktop build: the keyboard has no Ⓨ, so the Y key (as the main screen).
-        frame->registerAction(brls::BrlsKeyCombination(brls::BRLS_KBD_KEY_Y), [open_other](brls::View*) {
+        frame->registerAction(brls::BrlsKeyCombination(brls::BRLS_KBD_KEY_Y), [open_other](brls::View*)
+            {
             open_other();
-            return true;
-        });
+            return true; });
 #endif
         other_key->addGestureRecognizer(new brls::TapGestureRecognizer(other_key, open_other));
     }
-    if (off.action) dialog->addButton(off.label, off.action);
-    else dialog->addButton("hints/cancel"_i18n, []() {});
-    dialog->addButton("hints/ok"_i18n, [at, times, on_value]() {
-        if (on_value) on_value(times[*at]);
-    });
+    if (off.action)
+        dialog->addButton(off.label, off.action);
+    else
+        dialog->addButton("hints/cancel"_i18n, []() {});
+    dialog->addButton("hints/ok"_i18n, [at, times, on_value]()
+        {
+        if (on_value) on_value(times[*at]); });
     dialog->setCancelable(true);
     style_dialog(dialog, Emphasis::PRIMARY);
     // A time is set, then confirmed: A right after the arrows is OK.
-    if (brls::View* ok = dialog->getView("brls/dialog/button2")) dialog->setLastFocusedView(ok);
+    if (brls::View* ok = dialog->getView("brls/dialog/button2"))
+        dialog->setLastFocusedView(ok);
     dialog->open();
 }
 
@@ -580,4 +641,3 @@ brls::View* cadran::toast_icon(bool done)
     icon->setShrink(0);
     return icon;
 }
-

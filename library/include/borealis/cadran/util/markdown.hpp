@@ -22,31 +22,31 @@
 namespace markdown
 {
 
-constexpr size_t MAX_BLOCKS = 300;
+constexpr size_t MAX_BLOCKS     = 300;
 constexpr size_t MAX_CODE_LINES = 60;
-constexpr size_t MAX_COLUMNS = 6;
-constexpr size_t MAX_ROWS = 40;
-constexpr int    MAX_DEPTH = 4;
+constexpr size_t MAX_COLUMNS    = 6;
+constexpr size_t MAX_ROWS       = 40;
+constexpr int MAX_DEPTH         = 4;
 
 struct Block
 {
     enum Kind
     {
-        Heading,     // `level` 1 to 6
-        Paragraph,   // `text`, its line breaks kept
-        Item,        // a list item: `level` its depth (0: top), `number` (0: a bullet), `task`
-        Code,        // `lines`, as written
-        Quote,       // `text`; `alert`: "note", "tip", "important", "warning", "caution" or ""
+        Heading, // `level` 1 to 6
+        Paragraph, // `text`, its line breaks kept
+        Item, // a list item: `level` its depth (0: top), `number` (0: a bullet), `task`
+        Code, // `lines`, as written
+        Quote, // `text`; `alert`: "note", "tip", "important", "warning", "caution" or ""
         Rule,
-        Table,       // `rows`, the first one the header, each cut to MAX_COLUMNS cells
+        Table, // `rows`, the first one the header, each cut to MAX_COLUMNS cells
     };
-    Kind        kind = Paragraph;
+    Kind kind = Paragraph;
     std::string text;
-    int         level = 0;
-    int         number = 0;
-    int         task = -1;   // Item: -1 not a task, 0 open, 1 done
+    int level  = 0;
+    int number = 0;
+    int task   = -1; // Item: -1 not a task, 0 open, 1 done
     std::string alert;
-    std::string icon;        // Heading / Item: the emoji it opens on, in hex ("1f680")
+    std::string icon; // Heading / Item: the emoji it opens on, in hex ("1f680")
     std::vector<std::string> lines;
     std::vector<std::vector<std::string>> rows;
 };
@@ -57,4 +57,4 @@ std::vector<Block> parse(const std::string& md);
 // entities, escapes, HTML tags, emoji).
 std::string inline_text(const std::string& md);
 
-}   // namespace markdown
+} // namespace markdown

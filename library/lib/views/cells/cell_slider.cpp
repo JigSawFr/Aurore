@@ -42,7 +42,8 @@ void SliderCell::init(const std::string& title, float init, const std::function<
     this->slider->getProgressEvent()->subscribe(callback);
 }
 
-Event<float>* SliderCell::getEvent() {
+Event<float>* SliderCell::getEvent()
+{
     return this->slider->getProgressEvent();
 }
 

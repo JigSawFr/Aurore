@@ -20,12 +20,12 @@
 */
 
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
 #include <borealis/core/activity.hpp>
 #include <borealis/core/application.hpp>
 #include <borealis/core/touch/tap_gesture.hpp>
 #include <borealis/views/recycling_grid.hpp>
-#include <cmath>
-#include <cstdlib>
 
 namespace brls
 {
@@ -36,15 +36,15 @@ RecyclingGridItem::RecyclingGridItem()
 {
     this->setFocusable(true);
 
-    this->registerClickAction([this](View* view) {
+    this->registerClickAction([this](View* view)
+        {
         auto* content = dynamic_cast<RecyclingGridContentBox*>(this->getParent());
         if (!content)
             return false;
         RecyclingView* recycler = content->getRecycler();
         if (recycler->getDataSource())
             recycler->getDataSource()->onItemSelected(recycler->getFrameBox(), this->index);
-        return true;
-    });
+        return true; });
 
     this->addGestureRecognizer(new TapGestureRecognizer(this));
 }
@@ -139,12 +139,12 @@ size_t RecyclingView::getItemCount()
 
 void RecyclingView::computeGeometry()
 {
-    Box* frame     = this->getFrameBox();
-    bool vertical  = this->axis == Axis::COLUMN;
-    float width    = frame->getWidth();
-    float height   = frame->getHeight();
-    float across   = vertical ? width - this->paddingLeft - this->paddingRight
-                              : height - this->paddingTop - this->paddingBottom;
+    Box* frame    = this->getFrameBox();
+    bool vertical = this->axis == Axis::COLUMN;
+    float width   = frame->getWidth();
+    float height  = frame->getHeight();
+    float across  = vertical ? width - this->paddingLeft - this->paddingRight
+                             : height - this->paddingTop - this->paddingBottom;
 
     if (this->minimumLineSize > 0)
         this->span = std::max(1, (int)std::floor((across + this->itemSpace) / (this->minimumLineSize + this->itemSpace)));
@@ -472,14 +472,14 @@ View* RecyclingView::getNextCellFocus(FocusDirection direction, View* currentVie
     size_t count = this->getItemCount();
     if (cell && cell->getIndex() < count)
     {
-        size_t index    = cell->getIndex();
-        size_t span     = this->span;
-        bool vertical   = this->axis == Axis::COLUMN;
-        bool alongAxis  = vertical ? (direction == FocusDirection::UP || direction == FocusDirection::DOWN)
-                                   : (direction == FocusDirection::LEFT || direction == FocusDirection::RIGHT);
-        bool forward    = direction == FocusDirection::DOWN || direction == FocusDirection::RIGHT;
-        bool found      = false;
-        size_t target   = 0;
+        size_t index   = cell->getIndex();
+        size_t span    = this->span;
+        bool vertical  = this->axis == Axis::COLUMN;
+        bool alongAxis = vertical ? (direction == FocusDirection::UP || direction == FocusDirection::DOWN)
+                                  : (direction == FocusDirection::LEFT || direction == FocusDirection::RIGHT);
+        bool forward   = direction == FocusDirection::DOWN || direction == FocusDirection::RIGHT;
+        bool found     = false;
+        size_t target  = 0;
 
         if (alongAxis)
         {
@@ -536,11 +536,16 @@ RecyclingGrid::RecyclingGrid()
     this->setScrollingBehavior(ScrollingBehavior::CENTERED);
     this->setContentView(this->contentBox);
 
-    this->registerFloatXMLAttribute("spanCount", [this](float value) { this->setSpanCount((int)value); });
-    this->registerFloatXMLAttribute("columnWidth", [this](float value) { this->setColumnWidth(value); });
-    this->registerFloatXMLAttribute("itemHeight", [this](float value) { this->setItemHeight(value); });
-    this->registerFloatXMLAttribute("itemSpace", [this](float value) { this->setItemSpace(value); });
-    this->registerFloatXMLAttribute("preFetchLine", [this](float value) { this->setPreFetchLine((int)value); });
+    this->registerFloatXMLAttribute("spanCount", [this](float value)
+        { this->setSpanCount((int)value); });
+    this->registerFloatXMLAttribute("columnWidth", [this](float value)
+        { this->setColumnWidth(value); });
+    this->registerFloatXMLAttribute("itemHeight", [this](float value)
+        { this->setItemHeight(value); });
+    this->registerFloatXMLAttribute("itemSpace", [this](float value)
+        { this->setItemSpace(value); });
+    this->registerFloatXMLAttribute("preFetchLine", [this](float value)
+        { this->setPreFetchLine((int)value); });
 }
 
 void RecyclingGrid::setSpanCount(int count)
@@ -654,10 +659,14 @@ HRecyclerFrame::HRecyclerFrame()
     this->setScrollingBehavior(ScrollingBehavior::CENTERED);
     this->setContentView(this->contentBox);
 
-    this->registerFloatXMLAttribute("spanCount", [this](float value) { this->setSpanCount((int)value); });
-    this->registerFloatXMLAttribute("itemWidth", [this](float value) { this->setItemWidth(value); });
-    this->registerFloatXMLAttribute("itemSpace", [this](float value) { this->setItemSpace(value); });
-    this->registerFloatXMLAttribute("preFetchLine", [this](float value) { this->setPreFetchLine((int)value); });
+    this->registerFloatXMLAttribute("spanCount", [this](float value)
+        { this->setSpanCount((int)value); });
+    this->registerFloatXMLAttribute("itemWidth", [this](float value)
+        { this->setItemWidth(value); });
+    this->registerFloatXMLAttribute("itemSpace", [this](float value)
+        { this->setItemSpace(value); });
+    this->registerFloatXMLAttribute("preFetchLine", [this](float value)
+        { this->setPreFetchLine((int)value); });
 }
 
 void HRecyclerFrame::setSpanCount(int count)

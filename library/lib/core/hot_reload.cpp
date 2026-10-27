@@ -2,17 +2,17 @@
 // desktop, and the activity built again when one changes.
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <algorithm>
+#include <fstream>
+#include <functional>
+#include <set>
+#include <sstream>
+#include <vector>
 #include <borealis/core/application.hpp>
 #include <borealis/core/hot_reload.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/core/theme.hpp>
 #include <borealis/core/time.hpp>
 #include <borealis/core/view.hpp>
-#include <fstream>
-#include <functional>
-#include <set>
-#include <sstream>
-#include <vector>
 
 #if defined(__SWITCH__) || defined(__PSV__) || defined(PS4) || defined(ANDROID) || defined(IOS) || defined(TVOS) \
     || defined(__WINRT__)
@@ -32,9 +32,9 @@ namespace hot_reload_detail
     struct Watched
     {
         std::string path;
-        bool theme  = false;
-        bool read   = false; // its contents were read at least once
-        size_t hash = 0;
+        bool theme         = false;
+        bool read          = false; // its contents were read at least once
+        size_t hash        = 0;
         bool pending       = false;
         size_t pendingHash = 0;
         std::set<Activity*> activities; // the ones built from it (XML)
@@ -103,7 +103,7 @@ void HotReload::noteXMLFile(const std::string& path)
 {
     if (!HotReload::enabled)
         return;
-    Watched& file = watch(path);
+    Watched& file      = watch(path);
     Activity* activity = HotReload::building;
     if (!activity)
     {
@@ -119,7 +119,9 @@ void HotReload::setThemeFiles(const std::vector<std::string>& paths)
 {
     if (!HotReload::enabled)
         return;
-    files.erase(std::remove_if(files.begin(), files.end(), [](const Watched& file) { return file.theme; }), files.end());
+    files.erase(std::remove_if(files.begin(), files.end(), [](const Watched& file)
+                    { return file.theme; }),
+        files.end());
     for (const std::string& path : paths)
     {
         // A preset has no file; a resource is one when read from a folder

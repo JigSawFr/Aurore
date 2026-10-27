@@ -172,7 +172,8 @@ void Activity::unregisterAction(ActionIdentifier identifier)
 ActionIdentifier Activity::registerExitAction(enum ControllerButton button)
 {
     if (this->contentView)
-        return this->contentView->registerAction("hints/exit"_i18n, button, [](View* view) { Application::quit(); return true; });
+        return this->contentView->registerAction("hints/exit"_i18n, button, [](View* view)
+            { Application::quit(); return true; });
 
     return ACTION_NONE;
 }

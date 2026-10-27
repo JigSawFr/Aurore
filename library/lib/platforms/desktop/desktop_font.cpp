@@ -33,13 +33,18 @@ const static std::vector<std::string> fontExts = {
     ".otf",
 };
 
-bool DesktopFontLoader::loadFontsExist(NVGcontext* vg, std::vector<std::string> fontPaths, std::string fontName, std::string fallbackFont) {
-    for (auto &fontPath: fontPaths) {
-        for (auto &fontExt: fontExts) {
+bool DesktopFontLoader::loadFontsExist(NVGcontext* vg, std::vector<std::string> fontPaths, std::string fontName, std::string fallbackFont)
+{
+    for (auto& fontPath : fontPaths)
+    {
+        for (auto& fontExt : fontExts)
+        {
             std::string fullPath = fontPath + fontExt;
-            if (access(fullPath.c_str(), F_OK) != -1) {
+            if (access(fullPath.c_str(), F_OK) != -1)
+            {
                 this->loadFontFromFile(fontName, fullPath);
-                if (!fallbackFont.empty()) {
+                if (!fallbackFont.empty())
+                {
                     nvgAddFallbackFontId(vg, Application::getFont(fallbackFont), Application::getFont(fontName));
                 }
                 brls::Logger::info("Using {} font: {}", fontName, fullPath);
@@ -50,9 +55,11 @@ bool DesktopFontLoader::loadFontsExist(NVGcontext* vg, std::vector<std::string> 
     return false;
 }
 
-bool DesktopFontLoader::loadFont(const std::string& name, const std::string& path) {
+bool DesktopFontLoader::loadFont(const std::string& name, const std::string& path)
+{
 #ifdef USE_LIBROMFS
-    if (path.empty()) return false;
+    if (path.empty())
+        return false;
     if (path.rfind("@res/", 0) == 0)
     {
         // font is inside the romfs
@@ -65,9 +72,11 @@ bool DesktopFontLoader::loadFont(const std::string& name, const std::string& pat
         catch (...)
         {
         }
-    } else
+    }
+    else
 #endif
-    if (access(path.c_str(), F_OK) != -1 && Application::loadFontFromFile(name, path)) {
+        if (access(path.c_str(), F_OK) != -1 && Application::loadFontFromFile(name, path))
+    {
         return true;
     }
 
@@ -86,7 +95,9 @@ void DesktopFontLoader::loadFonts()
         {
             nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont("default"));
         }
-    } else {
+    }
+    else
+    {
         brls::Logger::warning("Cannot find custom font, (Searched at: {})", USER_FONT_PATH);
         brls::Logger::info("Trying to use internal font: {}", INTER_FONT_PATH);
         if (!loadFont(FONT_REGULAR, INTER_FONT_PATH))
@@ -108,15 +119,16 @@ void DesktopFontLoader::loadFonts()
     // };
 #elif defined(_WIN32)
     std::string prefix = "C:\\Windows\\Fonts\\";
-    char* winDir = getenv("systemroot");
-    if (winDir) {
-        prefix = std::string{winDir} + "\\Fonts\\";
+    char* winDir       = getenv("systemroot");
+    if (winDir)
+    {
+        prefix = std::string { winDir } + "\\Fonts\\";
     }
     std::vector<std::string> koreanFonts = {
-        prefix+"malgun",
+        prefix + "malgun",
     };
     std::vector<std::string> simplifiedChineseFonts = {
-        prefix+"msyh",
+        prefix + "msyh",
     };
 #elif defined(__EMSCRIPTEN__)
     // A browser has no system font to read: the page's build packages one
@@ -137,10 +149,12 @@ void DesktopFontLoader::loadFonts()
     std::vector<std::string> koreanFonts;
     std::vector<std::string> simplifiedChineseFonts;
 #endif
-    if (!simplifiedChineseFonts.empty()) {
+    if (!simplifiedChineseFonts.empty())
+    {
         loadFontsExist(vg, simplifiedChineseFonts, FONT_CHINESE_SIMPLIFIED, FONT_REGULAR);
     }
-    if (!koreanFonts.empty()) {
+    if (!koreanFonts.empty())
+    {
         loadFontsExist(vg, koreanFonts, FONT_KOREAN_REGULAR, FONT_REGULAR);
     }
 

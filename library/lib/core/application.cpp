@@ -17,21 +17,22 @@
     limitations under the License.
 */
 
+#include <yoga/Yoga.h>
+#include <yoga/event/event.h>
+#include <cmath>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
-#include <yoga/Yoga.h>
-#include <yoga/event/event.h>
 
 #include <algorithm>
+#include <stdexcept>
+#include <string>
 #include <borealis/core/application.hpp>
-#include <borealis/views/dialog.hpp>
 #include <borealis/core/font.hpp>
 #include <borealis/core/hot_reload.hpp>
-#include <borealis/core/inspector.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/inspector.hpp>
 #include <borealis/core/profiler.hpp>
 #include <borealis/core/theme_decor.hpp>
 #include <borealis/core/theme_image.hpp>
@@ -45,6 +46,8 @@
 #include <borealis/views/cells/cell_radio.hpp>
 #include <borealis/views/cells/cell_selector.hpp>
 #include <borealis/views/cells/cell_slider.hpp>
+#include <borealis/views/debug_layer.hpp>
+#include <borealis/views/dialog.hpp>
 #include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/header.hpp>
 #include <borealis/views/hint.hpp>
@@ -60,17 +63,14 @@
 #include <borealis/views/widgets/account.hpp>
 #include <borealis/views/widgets/battery.hpp>
 #include <borealis/views/widgets/wireless.hpp>
-#include <borealis/views/debug_layer.hpp>
-#include <stdexcept>
-#include <string>
 
-#include <borealis/cadran.hpp>
 #include <chrono>
 #include <set>
 #include <thread>
+#include <borealis/cadran.hpp>
 
 #define BUTTOM_REPEAT_TRIGGER 250000 // 250ms
-#define BUTTON_REPEAT_DELAY   100000 // 100 ms
+#define BUTTON_REPEAT_DELAY 100000 // 100 ms
 
 namespace brls
 {
@@ -79,7 +79,7 @@ static std::thread::id mainThreadId;
 
 bool Application::init()
 {
-    mainThreadId = std::this_thread::get_id();
+    mainThreadId               = std::this_thread::get_id();
     Application::inited        = false;
     Application::quitRequested = false;
 
@@ -89,7 +89,7 @@ bool Application::init()
         Application::ORIGINAL_WINDOW_HEIGHT = 720;
 
     // Init platform
-    Application::platform = Platform::createPlatform();
+    Application::platform            = Platform::createPlatform();
     Application::notificationManager = new NotificationManager();
 
     if (!Application::platform)
@@ -365,17 +365,18 @@ bool Application::internalMainLoop()
 
 void Application::updateFPS()
 {
-    static Time start = getCPUTimeUsec();
+    static Time start   = getCPUTimeUsec();
     static size_t index = 0;
 
     index++;
     // update FPS every second, from the time that really went by (the
     // frames of slightly more than a second are not a second's worth)
     Time elapsed = Application::frameStartTime - start;
-    if (elapsed > 1000000) {
+    if (elapsed > 1000000)
+    {
         Application::globalFPS = (size_t)((double)index * 1000000.0 / (double)elapsed + 0.5);
-        start = Application::frameStartTime;
-        index = 0;
+        start                  = Application::frameStartTime;
+        index                  = 0;
     }
 }
 
@@ -391,8 +392,8 @@ const ControllerState& Application::getControllerState()
 static void keepDominantStickDirection(ControllerState* state)
 {
     const float threshold = 0.5f;
-    float x = std::max(std::fabs(state->axes[LEFT_X]), std::fabs(state->axes[RIGHT_X]));
-    float y = std::max(std::fabs(state->axes[LEFT_Y]), std::fabs(state->axes[RIGHT_Y]));
+    float x               = std::max(std::fabs(state->axes[LEFT_X]), std::fabs(state->axes[RIGHT_X]));
+    float y               = std::max(std::fabs(state->axes[LEFT_Y]), std::fabs(state->axes[RIGHT_Y]));
     if (x <= threshold || y <= threshold)
         return;
 
@@ -559,15 +560,15 @@ void Application::processInput()
     }
 
     // Trigger controller events
-    bool repeating                  = false;
-    Time cpuTime = getCPUTimeUsec();
+    bool repeating = false;
+    Time cpuTime   = getCPUTimeUsec();
 
     for (int i = 0; i < _BUTTON_MAX; i++)
     {
         if (controllerState.buttons[i])
         {
             Application::lastInputTime = cpuTime;
-            repeating = controllerState.repeatingButtonStop[i] > 0 && cpuTime > controllerState.repeatingButtonStop[i];
+            repeating                  = controllerState.repeatingButtonStop[i] > 0 && cpuTime > controllerState.repeatingButtonStop[i];
 
             if (repeating)
                 controllerState.repeatingButtonStop[i] = cpuTime + BUTTON_REPEAT_DELAY;
@@ -577,7 +578,9 @@ void Application::processInput()
 
             if (!oldControllerState.buttons[i] || repeating)
                 Application::onControllerButtonPressed((enum ControllerButton)i, repeating);
-        } else {
+        }
+        else
+        {
             controllerState.repeatingButtonStop[i] = 0;
         }
     }
@@ -611,10 +614,7 @@ void Application::processInput()
         }
 
         watchedKey.pressed = inputManager->getKeyboardKeyState(scancode);
-        if (static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_SHIFT) != shiftPressed ||
-            static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_CTRL) != ctrlPressed ||
-            static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_ALT) != altPressed ||
-            static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_META) != metaPressed)
+        if (static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_SHIFT) != shiftPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_CTRL) != ctrlPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_ALT) != altPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_META) != metaPressed)
         {
             // If the key is pressed but the modifiers are not, unpressed it
             watchedKey.pressed = false;
@@ -1921,10 +1921,10 @@ void Application::setWindowSize(int width, int height)
 
     // Rescale UI
     float uncappedWindowScale = (float)width / (float)ORIGINAL_WINDOW_WIDTH;
-    bool uiScaleIsCapped = Application::maximumUIScale > 0.0f
+    bool uiScaleIsCapped      = Application::maximumUIScale > 0.0f
         && uncappedWindowScale > Application::maximumUIScale;
 
-    Application::windowScale  = uiScaleIsCapped ? Application::maximumUIScale : uncappedWindowScale;
+    Application::windowScale = uiScaleIsCapped ? Application::maximumUIScale : uncappedWindowScale;
     // Uncapped, the content keeps its design width exactly
     Application::contentWidth  = uiScaleIsCapped ? std::ceil((float)width / Application::windowScale) : (float)ORIGINAL_WINDOW_WIDTH;
     Application::contentHeight = std::ceil((float)height / Application::windowScale);
@@ -1949,8 +1949,7 @@ void Application::onWindowResized(int width, int height)
             Logger::info("Window size changed to {}x{}, content size: {}x{} windowScale: {}",
                 width, height, contentWidth, contentHeight, Application::windowScale);
             brls::Logger::info("scale factor: {}",
-                Application::getPlatform()->getVideoContext()->getScaleFactor());
-        });
+                Application::getPlatform()->getVideoContext()->getScaleFactor()); });
 }
 
 void Application::setWindowPosition(int x, int y)
@@ -2051,7 +2050,7 @@ void Application::loadThemeBackground()
         Application::themeBackgroundLoading.reset();
         return;
     }
-    int flags = background.fit == BackgroundFit::TILE ? NVG_IMAGE_REPEATX | NVG_IMAGE_REPEATY : 0;
+    int flags                          = background.fit == BackgroundFit::TILE ? NVG_IMAGE_REPEATX | NVG_IMAGE_REPEATY : 0;
     std::shared_ptr<ThemeImage>& shown = Application::themeBackground;
     if (shown && shown->path == background.image && shown->flags == flags)
     {

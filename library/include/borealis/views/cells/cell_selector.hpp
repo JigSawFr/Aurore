@@ -16,12 +16,12 @@
 
 #pragma once
 
+#include <string>
 #include <borealis/core/application.hpp>
 #include <borealis/core/bind.hpp>
 #include <borealis/core/box.hpp>
 #include <borealis/views/cells/cell_detail.hpp>
 #include <borealis/views/recycler.hpp>
-#include <string>
 
 namespace brls
 {
@@ -31,7 +31,7 @@ class SelectorCell : public DetailCell
   public:
     SelectorCell();
 
-    void init(std::string title, std::vector<std::string> data, int selected, Event<int>::Callback callback, Event<int>::Callback dismissCb = [](int){});
+    void init(std::string title, std::vector<std::string> data, int selected, Event<int>::Callback callback, Event<int>::Callback dismissCb = [](int) {});
 
     void setData(std::vector<std::string> data)
     {

@@ -39,7 +39,8 @@ ScrollingFrame::ScrollingFrame()
     this->setFocusable(true);
     this->setMaximumAllowedXMLElements(1);
 
-    addGestureRecognizer(new ScrollGestureRecognizer([this](PanGestureStatus state, Sound* soundToPlay) {
+    addGestureRecognizer(new ScrollGestureRecognizer([this](PanGestureStatus state, Sound* soundToPlay)
+        {
         if (state.state == GestureState::FAILED || state.state == GestureState::UNSURE || state.state == GestureState::INTERRUPTED)
         {
             // When a second finger is placed during a rubber-band drag the pan recognizer
@@ -146,17 +147,17 @@ ScrollingFrame::ScrollingFrame()
             // Clamp fling target to valid range so we never fling into dead space
             newScroll = std::max(0.0f, std::min(newScroll, clampMax));
             animateScrolling(newScroll, time);
-        }
-    },
+        } },
         PanAxis::VERTICAL));
 
     // Stop scrolling on tap
-    addGestureRecognizer(new TapGestureRecognizer([this](brls::TapGestureStatus status, Sound* soundToPlay) {
+    addGestureRecognizer(new TapGestureRecognizer([this](brls::TapGestureStatus status, Sound* soundToPlay)
+        {
         if (status.state == GestureState::UNSURE)
-            this->contentOffsetY.stop();
-    }));
+            this->contentOffsetY.stop(); }));
 
-    inputTypeSubscription = Application::getGlobalInputTypeChangeEvent()->subscribe([this](InputType type) {
+    inputTypeSubscription = Application::getGlobalInputTypeChangeEvent()->subscribe([this](InputType type)
+        {
         if (!focused && !childFocused)
             return;
 
@@ -164,8 +165,7 @@ ScrollingFrame::ScrollingFrame()
         {
             Application::giveFocus(getDefaultFocus());
             naturalScrollingCanScroll = false;
-        }
-    });
+        } });
 
     setHideHighlightBackground(true);
     setHideHighlightBorder(true);
@@ -239,8 +239,8 @@ void ScrollingFrame::draw(NVGcontext* vg, float x, float y, float width, float h
         float btmLimit  = contentH - getScrollingAreaHeight();
         float offset    = static_cast<float>(this->contentOffsetY);
         float corrected = contentH <= getHeight()
-                              ? 0.0f
-                              : std::max(0.0f, std::min(offset, std::max(0.0f, btmLimit)));
+            ? 0.0f
+            : std::max(0.0f, std::min(offset, std::max(0.0f, btmLimit)));
         if (offset != corrected)
         {
             this->contentOffsetY = corrected;
@@ -257,7 +257,7 @@ void ScrollingFrame::draw(NVGcontext* vg, float x, float y, float width, float h
     // Draw children
     Box::draw(vg, x, y, width, height, style, ctx);
 
-    //Disable scissoring
+    // Disable scissoring
     nvgRestore(vg);
 }
 
@@ -507,9 +507,8 @@ void ScrollingFrame::animateScrolling(float newScroll, float time)
 
     this->contentOffsetY.addStep(newScroll, time, EasingFunction::quadraticOut);
 
-    this->contentOffsetY.setTickCallback([this] {
-        this->scrollAnimationTick();
-    });
+    this->contentOffsetY.setTickCallback([this]
+        { this->scrollAnimationTick(); });
 
     this->contentOffsetY.start();
 
@@ -691,7 +690,7 @@ bool ScrollingFrame::updateScrolling(bool animated)
     if (contentHeight <= getHeight())
         newScroll = 0;
 
-    //Start animation
+    // Start animation
     this->startScrolling(animated, newScroll);
 
     return true;

@@ -50,7 +50,8 @@ int main(int argc, char** argv)
     for (int i = 1; i < argc; i++)
     {
         std::string arg = argv[i];
-        auto next       = [&]() { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
+        auto next       = [&]()
+        { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
         if (arg == "--theme")
             theme = next();
         else if (arg == "--lang")
@@ -84,9 +85,9 @@ int main(int argc, char** argv)
 
     // Cadran's preferences: the theme and language asked for
     static ui::Prefs prefs;
-    bool themeFile    = theme != "dark" && theme != "light";
-    prefs.theme       = themeFile ? "dark" : theme;
-    prefs.language    = lang;
+    bool themeFile = theme != "dark" && theme != "light";
+    prefs.theme    = themeFile ? "dark" : theme;
+    prefs.language = lang;
     ui::use_prefs(prefs);
     demo::installHooks();
     ui::use_prefs(prefs); // after the demo's, which sets its own

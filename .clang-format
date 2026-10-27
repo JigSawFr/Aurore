@@ -1,21 +1,22 @@
-﻿---
-AccessModifierOffset: -2
-AlignConsecutiveAssignments: 'true'
+---
+# clang-format 18; CI checks the files a pull request changes
 BasedOnStyle: WebKit
+Standard: c++20
+AccessModifierOffset: -2
+AlignConsecutiveAssignments: true
 BreakBeforeBraces: Allman
-IncludeBlocks: Regroup
-IncludeCategories: 
-  - Regex: '^<borealis/.*\.hpp>'
-    Priority: 2
+IndentCaseLabels: true
+PointerAlignment: Left
+# Sorted within each block; a blank line keeps an order that matters (glad before GLFW)
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex: '^<borealis(\.hpp|/)'
+    Priority: 3
   - Regex: '^<.*\.h>'
     Priority: 1
-  - Regex: '^<.*'
+  - Regex: '^<'
     Priority: 2
   - Regex: '.*'
-    Priority: 3
-IndentCaseLabels: 'true'
-PointerAlignment: Left
-SortIncludes: 'true'
-Standard: Cpp11
-
+    Priority: 4
 ...

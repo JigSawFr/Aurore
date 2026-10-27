@@ -19,10 +19,10 @@
 
 #include <nanovg.h>
 
+#include <vector>
 #include <borealis/core/event.hpp>
 #include <borealis/core/geometry.hpp>
 #include <borealis/core/time.hpp>
-#include <vector>
 
 #define GAMEPADS_MAX 5
 
@@ -360,7 +360,8 @@ class InputManager
         return &mouseScrollOffsetChanged;
     }
 
-    inline Event<SensorEvent>* getControllerSensorStateChanged() {
+    inline Event<SensorEvent>* getControllerSensorStateChanged()
+    {
         return &controllerSensorStateChanged;
     }
 

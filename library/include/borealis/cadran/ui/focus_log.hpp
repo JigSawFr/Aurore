@@ -9,4 +9,4 @@ namespace focus_log
 {
 // Once, at start-up; does nothing without the variable.
 void install();
-}   // namespace focus_log
+} // namespace focus_log

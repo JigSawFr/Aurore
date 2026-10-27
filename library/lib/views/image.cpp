@@ -141,8 +141,7 @@ Image::Image()
         {
             // Yoga reads an undefined or negative size as 0, with a warning
             YGSize size = imageMeasureFunc(node, width, widthMode, height, heightMode);
-            return YGSize { std::isnan(size.width) ? 0.0f : std::max(size.width, 0.0f), std::isnan(size.height) ? 0.0f : std::max(size.height, 0.0f) };
-        });
+            return YGSize { std::isnan(size.width) ? 0.0f : std::max(size.width, 0.0f), std::isnan(size.height) ? 0.0f : std::max(size.height, 0.0f) }; });
 
     // This view uses a custom measure function, so the node type is automatically set to YGNodeTypeText,
     // which causes some deviations in the calculation of YGRoundToPixelGrid.
@@ -488,14 +487,14 @@ void Image::setThemeImage(const std::string& key)
     this->themeImageKey = key;
     if (!this->followingTheme)
     {
-        this->followingTheme = true;
-        this->themeToken     = std::make_shared<char>();
+        this->followingTheme      = true;
+        this->themeToken          = std::make_shared<char>();
         std::weak_ptr<char> token = this->themeToken;
-        this->themeChanged   = Application::getThemeChangedEvent()->subscribe([this, token](ThemeVariant)
+        this->themeChanged        = Application::getThemeChangedEvent()->subscribe([this, token](ThemeVariant)
             {
                 if (!token.expired())
                     this->refreshThemeImage(); });
-        this->themeImageLoaded = ThemeImages::getLoadedEvent()->subscribe([this, token](const ThemeImage* image)
+        this->themeImageLoaded    = ThemeImages::getLoadedEvent()->subscribe([this, token](const ThemeImage* image)
             {
                 if (!token.expired() && (image == this->themeImagePending.get() || image == this->themeImage.get()))
                     this->refreshThemeImage(); });

@@ -233,7 +233,8 @@ static bool sameColor(NVGcolor a, NVGcolor b)
 // WCAG's relative luminance
 static float luminance(NVGcolor c)
 {
-    auto channel = [](float v) { return v <= 0.03928f ? v / 12.92f : std::pow((v + 0.055f) / 1.055f, 2.4f); };
+    auto channel = [](float v)
+    { return v <= 0.03928f ? v / 12.92f : std::pow((v + 0.055f) / 1.055f, 2.4f); };
     return 0.2126f * channel(c.r) + 0.7152f * channel(c.g) + 0.0722f * channel(c.b);
 }
 
@@ -291,7 +292,7 @@ static NVGcolor lookup(const ColorMap& colors, const char* key, NVGcolor fallbac
 // on it
 static void addAccentShades(ColorMap& out, NVGcolor accent, NVGcolor background, NVGcolor text)
 {
-    bool dark                 = isDark(background);
+    bool dark                   = isDark(background);
     out["brls/accent/hover"]    = dark ? mix(accent, nvgRGB(255, 255, 255), 0.15f) : mix(accent, nvgRGB(0, 0, 0), 0.10f);
     out["brls/accent/pressed"]  = mix(accent, nvgRGB(0, 0, 0), 0.20f);
     out["brls/accent/disabled"] = mix(accent, background, 0.6f);
@@ -325,15 +326,18 @@ static bool isSeed(const std::string& key)
 static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
 {
     ColorMap out;
-    auto has = [&seeds](const char* seed) { return seeds.count(seed) > 0; };
-    NVGcolor B = has("background") ? seeds.at("background") : lookup(base, "brls/background", nvgRGB(45, 45, 45));
-    NVGcolor T = has("text") ? seeds.at("text") : lookup(base, "brls/text", nvgRGB(255, 255, 255));
-    NVGcolor S = has("surface") ? seeds.at("surface")
-                                : lookup(base, "cadran/surf", lookup(base, "brls/highlight/background", B));
-    NVGcolor S2  = has("surface") || has("text") ? mix(S, T, 0.05f) : lookup(base, "cadran/surf2", S);
-    bool dark    = isDark(B);
-    auto alpha   = [dark](NVGcolor c, int onDark, int onLight) { return withAlpha(c, dark ? onDark : onLight); };
-    auto inkOn   = [&](NVGcolor c, float minimum) { return ink(c, { B, S, S2 }, B, minimum); };
+    auto has = [&seeds](const char* seed)
+    { return seeds.count(seed) > 0; };
+    NVGcolor B  = has("background") ? seeds.at("background") : lookup(base, "brls/background", nvgRGB(45, 45, 45));
+    NVGcolor T  = has("text") ? seeds.at("text") : lookup(base, "brls/text", nvgRGB(255, 255, 255));
+    NVGcolor S  = has("surface") ? seeds.at("surface")
+                                 : lookup(base, "cadran/surf", lookup(base, "brls/highlight/background", B));
+    NVGcolor S2 = has("surface") || has("text") ? mix(S, T, 0.05f) : lookup(base, "cadran/surf2", S);
+    bool dark   = isDark(B);
+    auto alpha  = [dark](NVGcolor c, int onDark, int onLight)
+    { return withAlpha(c, dark ? onDark : onLight); };
+    auto inkOn = [&](NVGcolor c, float minimum)
+    { return ink(c, { B, S, S2 }, B, minimum); };
 
     if (has("background"))
     {
@@ -344,18 +348,18 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
 
     if (has("surface"))
     {
-        out["brls/highlight/background"]                = S;
-        out["cadran/surf"]                              = S;
-        out["cadran/surf2"]                             = S2;
+        out["brls/highlight/background"]               = S;
+        out["cadran/surf"]                             = S;
+        out["cadran/surf2"]                            = S2;
         out["brls/button/default_enabled_background"]  = S2;
         out["brls/button/default_disabled_background"] = S2;
     }
 
     if (has("text") || has("background"))
     {
-        NVGcolor text2 = inkOn(mix(T, B, 0.30f), 4.5f);
-        NVGcolor text3 = inkOn(mix(T, B, 0.45f), 4.5f);
-        NVGcolor line  = alpha(T, 36, 26);
+        NVGcolor text2                           = inkOn(mix(T, B, 0.30f), 4.5f);
+        NVGcolor text3                           = inkOn(mix(T, B, 0.45f), 4.5f);
+        NVGcolor line                            = alpha(T, 36, 26);
         out["brls/text"]                         = T;
         out["cadran/text"]                       = T;
         out["cadran/text2"]                      = text2;
@@ -383,42 +387,42 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
 
     if (has("accent") || has("background") || has("surface"))
     {
-        NVGcolor A    = has("accent") ? seeds.at("accent") : lookup(base, "brls/accent", T);
-        NVGcolor fill = has("accent") ? A : lookup(base, "cadran/teal_fill", A);
-        NVGcolor railActive = withAlpha(fill, 36);
-        NVGcolor accentInk  = ink(fill, { B, S, S2, railActive }, B, 4.5f);
-        NVGcolor ring      = ink(fill, { B }, B, 3.0f);
-        NVGcolor glow      = ink(dark ? mix(fill, nvgRGB(255, 255, 255), 0.5f) : mix(fill, B, 0.25f), { B }, B, 3.0f);
-        NVGcolor onFill    = onColor(fill, T, B);
-        out["brls/accent"]                               = accentInk;
-        out["brls/sidebar/active_item"]                  = accentInk;
-        out["brls/button/highlight_enabled_text"]        = accentInk;
-        out["brls/button/highlight_disabled_text"]       = accentInk;
-        out["brls/highlight/color1"]                     = ring;
-        out["brls/highlight/color2"]                     = glow;
-        out["brls/click_pulse"]                          = withAlpha(fill, 38);
-        out["brls/button/primary_enabled_background"]   = fill;
-        out["brls/button/primary_enabled_text"]         = onFill;
-        out["brls/button/primary_disabled_background"]  = mix(fill, B, 0.6f);
-        out["brls/button/primary_disabled_text"]        = mix(onFill, mix(fill, B, 0.6f), 0.5f);
-        out["brls/slider/line_filled"]                   = fill;
-        out["cadran/teal"]                               = accentInk;
-        out["cadran/teal_fill"]                          = fill;
-        out["cadran/teal_soft"]                          = withAlpha(fill, 26);
-        out["cadran/glow"]                               = alpha(fill, 31, 41);
-        out["cadran/glow_strong"]                        = alpha(fill, 51, 56);
-        out["cadran/pill_ok"]                            = dark ? withAlpha(fill, 41) : over(withAlpha(fill, 46), S);
-        out["cadran/pill_ok_ink"]                        = ink(accentInk, { B, S, out["cadran/pill_ok"] }, B, 4.5f);
-        out["cadran/rail_active"]                        = railActive;
-        out["cadran/hl1"]                                = ring;
-        out["cadran/hl2"]                                = glow;
+        NVGcolor A                                     = has("accent") ? seeds.at("accent") : lookup(base, "brls/accent", T);
+        NVGcolor fill                                  = has("accent") ? A : lookup(base, "cadran/teal_fill", A);
+        NVGcolor railActive                            = withAlpha(fill, 36);
+        NVGcolor accentInk                             = ink(fill, { B, S, S2, railActive }, B, 4.5f);
+        NVGcolor ring                                  = ink(fill, { B }, B, 3.0f);
+        NVGcolor glow                                  = ink(dark ? mix(fill, nvgRGB(255, 255, 255), 0.5f) : mix(fill, B, 0.25f), { B }, B, 3.0f);
+        NVGcolor onFill                                = onColor(fill, T, B);
+        out["brls/accent"]                             = accentInk;
+        out["brls/sidebar/active_item"]                = accentInk;
+        out["brls/button/highlight_enabled_text"]      = accentInk;
+        out["brls/button/highlight_disabled_text"]     = accentInk;
+        out["brls/highlight/color1"]                   = ring;
+        out["brls/highlight/color2"]                   = glow;
+        out["brls/click_pulse"]                        = withAlpha(fill, 38);
+        out["brls/button/primary_enabled_background"]  = fill;
+        out["brls/button/primary_enabled_text"]        = onFill;
+        out["brls/button/primary_disabled_background"] = mix(fill, B, 0.6f);
+        out["brls/button/primary_disabled_text"]       = mix(onFill, mix(fill, B, 0.6f), 0.5f);
+        out["brls/slider/line_filled"]                 = fill;
+        out["cadran/teal"]                             = accentInk;
+        out["cadran/teal_fill"]                        = fill;
+        out["cadran/teal_soft"]                        = withAlpha(fill, 26);
+        out["cadran/glow"]                             = alpha(fill, 31, 41);
+        out["cadran/glow_strong"]                      = alpha(fill, 51, 56);
+        out["cadran/pill_ok"]                          = dark ? withAlpha(fill, 41) : over(withAlpha(fill, 46), S);
+        out["cadran/pill_ok_ink"]                      = ink(accentInk, { B, S, out["cadran/pill_ok"] }, B, 4.5f);
+        out["cadran/rail_active"]                      = railActive;
+        out["cadran/hl1"]                              = ring;
+        out["cadran/hl2"]                              = glow;
         addAccentShades(out, fill, B, T);
     }
 
     if (has("warning"))
     {
-        NVGcolor W           = seeds.at("warning");
-        NVGcolor surface     = dark ? withAlpha(W, 26) : over(withAlpha(W, 36), S);
+        NVGcolor W               = seeds.at("warning");
+        NVGcolor surface         = dark ? withAlpha(W, 26) : over(withAlpha(W, 36), S);
         out["cadran/amber_fill"] = W;
         out["cadran/amber_surf"] = surface;
         out["cadran/amber_line"] = dark ? withAlpha(W, 90) : over(withAlpha(W, 115), S);
@@ -457,7 +461,7 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
                 bestRatio = ratio;
             }
         }
-        bestRatio = std::min(Theme::contrast(best, fills[0]), Theme::contrast(best, fills[1]));
+        bestRatio          = std::min(Theme::contrast(best, fills[0]), Theme::contrast(best, fills[1]));
         out["cadran/navy"] = best;
         // A fill the file does not give, darkened or lightened until the
         // label reads on it
@@ -734,8 +738,8 @@ static NVGcolor backdropOf(const ColorMap& colors, const ThemeBackground& backgr
 static const char* BUILTIN_PREFIX = "builtin:";
 // A theme folder's file: <themes>/<id>/theme.theme, next to its pictures
 static const char* THEME_FOLDER_FILE = "theme.theme";
-static const char* SEASONAL_PATH  = "builtin:seasonal";
-static const int MAX_DEPTH        = 8;
+static const char* SEASONAL_PATH     = "builtin:seasonal";
+static const int MAX_DEPTH           = 8;
 
 static const BuiltinTheme* findBuiltin(std::string id)
 {
@@ -920,68 +924,68 @@ bool Theme::resolveAsset(const std::string& raw, const std::string& directory, c
 
 namespace
 {
-// A background as a file writes it, for every variant it styles or one:
-// what it does not say is unset (and inherited)
-struct BackgroundSpec
-{
-    std::optional<std::string> image; // its path; "" for none
-    std::optional<BackgroundFit> fit;
-    std::optional<float> dim;
-    std::optional<float> surfaceOpacity;
-};
+    // A background as a file writes it, for every variant it styles or one:
+    // what it does not say is unset (and inherited)
+    struct BackgroundSpec
+    {
+        std::optional<std::string> image; // its path; "" for none
+        std::optional<BackgroundFit> fit;
+        std::optional<float> dim;
+        std::optional<float> surfaceOpacity;
+    };
 
-// The logo, icons, preview and image slots' pictures as a file writes them,
-// for every variant it styles or one: by key ("logo", "preview",
-// "icon.<name>", "image.<slot>"), "" for none; what it does not say is
-// unset (and inherited)
-struct PictureSpec
-{
-    std::map<std::string, std::string> files;
-    std::map<std::string, bool> tints; // icon.<name>.tint, by icon name
-};
+    // The logo, icons, preview and image slots' pictures as a file writes them,
+    // for every variant it styles or one: by key ("logo", "preview",
+    // "icon.<name>", "image.<slot>"), "" for none; what it does not say is
+    // unset (and inherited)
+    struct PictureSpec
+    {
+        std::map<std::string, std::string> files;
+        std::map<std::string, bool> tints; // icon.<name>.tint, by icon name
+    };
 
-// The decorations as a file writes them, as BackgroundSpec: what it does
-// not say is unset (and inherited)
-struct DecorPictureSpec
-{
-    std::optional<std::string> image; // its path; "" for none
-    std::optional<BackgroundFit> fit;
-    std::optional<float> opacity;
-    std::optional<float> height;
-};
+    // The decorations as a file writes them, as BackgroundSpec: what it does
+    // not say is unset (and inherited)
+    struct DecorPictureSpec
+    {
+        std::optional<std::string> image; // its path; "" for none
+        std::optional<BackgroundFit> fit;
+        std::optional<float> opacity;
+        std::optional<float> height;
+    };
 
-struct DecorSpec
-{
-    DecorPictureSpec pictures[THEME_AREA_COUNT];
-    std::optional<ParticleKind> kind;
-    std::optional<float> density;
-    std::optional<float> speed;
-    std::optional<ParticleLayer> layer;
-    std::optional<std::vector<NVGcolor>> colors;
-};
+    struct DecorSpec
+    {
+        DecorPictureSpec pictures[THEME_AREA_COUNT];
+        std::optional<ParticleKind> kind;
+        std::optional<float> density;
+        std::optional<float> speed;
+        std::optional<ParticleLayer> layer;
+        std::optional<std::vector<NVGcolor>> colors;
+    };
 
-// A file read, with what it includes and inherits
-struct ParsedTheme
-{
-    std::string name, author, version, description;
-    std::string inherit;
-    std::string counterpart; // its path, from the file's folder
-    std::string icon;
-    // [0]: every variant the file styles, [1] the light one, [2] the dark
-    BackgroundSpec background[3];
-    PictureSpec pictures[3]; // as background
-    DecorSpec decor[3]; // as background
-    std::vector<std::string> files; // the files it includes and inherits, read
-    bool lightSection = false, darkSection = false;
-    bool light = false, dark = false;
+    // A file read, with what it includes and inherits
+    struct ParsedTheme
+    {
+        std::string name, author, version, description;
+        std::string inherit;
+        std::string counterpart; // its path, from the file's folder
+        std::string icon;
+        // [0]: every variant the file styles, [1] the light one, [2] the dark
+        BackgroundSpec background[3];
+        PictureSpec pictures[3]; // as background
+        DecorSpec decor[3]; // as background
+        std::vector<std::string> files; // the files it includes and inherits, read
+        bool lightSection = false, darkSection = false;
+        bool light = false, dark = false;
 
-    // [0]: every variant the file styles, [1] the light one, [2] the dark
-    std::vector<std::pair<std::string, NVGcolor>> seeds[3];
-    std::vector<std::pair<std::string, NVGcolor>> colors[3];
-    std::vector<std::pair<std::string, float>> metrics;
+        // [0]: every variant the file styles, [1] the light one, [2] the dark
+        std::vector<std::pair<std::string, NVGcolor>> seeds[3];
+        std::vector<std::pair<std::string, NVGcolor>> colors[3];
+        std::vector<std::pair<std::string, float>> metrics;
 
-    std::vector<std::string> errors;
-};
+        std::vector<std::string> errors;
+    };
 }
 
 static bool parseFit(const std::string& value, BackgroundFit* fit)
@@ -1069,11 +1073,11 @@ static std::vector<std::string> iconNames; // Theme::addIconNames, sorted
 
 namespace
 {
-struct ImageSlot
-{
-    std::string fallback;
-    int maxSide = 0;
-};
+    struct ImageSlot
+    {
+        std::string fallback;
+        int maxSide = 0;
+    };
 }
 static std::map<std::string, ImageSlot> imageSlots; // Theme::addImageSlot
 
@@ -1125,14 +1129,14 @@ static ThemePictures resolvePictures(const PictureSpec* spec, int v, std::vector
 
 namespace
 {
-// The picture keys' prefixes, by ThemeArea from HEADER
-const char* const DECOR_PICTURES[THEME_AREA_COUNT] = { "backdrop.header", "backdrop.sidebar", "backdrop.dialog",
-    "decor.top", "decor.bottom" };
+    // The picture keys' prefixes, by ThemeArea from HEADER
+    const char* const DECOR_PICTURES[THEME_AREA_COUNT] = { "backdrop.header", "backdrop.sidebar", "backdrop.dialog",
+        "decor.top", "decor.bottom" };
 
-const std::pair<const char*, ParticleKind> PARTICLE_KINDS[] = { { "none", ParticleKind::NONE },
-    { "snow", ParticleKind::SNOW }, { "leaves", ParticleKind::LEAVES }, { "petals", ParticleKind::PETALS },
-    { "embers", ParticleKind::EMBERS }, { "confetti", ParticleKind::CONFETTI }, { "sparkles", ParticleKind::SPARKLES },
-    { "hearts", ParticleKind::HEARTS }, { "bubbles", ParticleKind::BUBBLES } };
+    const std::pair<const char*, ParticleKind> PARTICLE_KINDS[] = { { "none", ParticleKind::NONE },
+        { "snow", ParticleKind::SNOW }, { "leaves", ParticleKind::LEAVES }, { "petals", ParticleKind::PETALS },
+        { "embers", ParticleKind::EMBERS }, { "confetti", ParticleKind::CONFETTI }, { "sparkles", ParticleKind::SPARKLES },
+        { "hearts", ParticleKind::HEARTS }, { "bubbles", ParticleKind::BUBBLES } };
 }
 
 static bool isDecorKey(const std::string& key)
@@ -1155,12 +1159,13 @@ static bool parseNumber(const std::string& value, float minimum, float maximum, 
 static bool parseColorList(const std::string& value, std::vector<NVGcolor>* colors)
 {
     colors->clear();
-    int depth = 0;
+    int depth    = 0;
     size_t start = 0;
     for (size_t i = 0; i <= value.size(); i++)
     {
         char c = i < value.size() ? value[i] : ',';
-        depth += c == '(' ? 1 : c == ')' ? -1 : 0;
+        depth += c == '(' ? 1 : c == ')' ? -1
+                                         : 0;
         if (c != ',' || depth > 0)
             continue;
         NVGcolor color;
@@ -1187,9 +1192,9 @@ static bool parseDecorLine(const std::string& key, const std::string& value, con
         const std::string prefix = DECOR_PICTURES[i];
         if (!startsWith(key, prefix) || (key.size() > prefix.size() && key[prefix.size()] != '_'))
             continue;
-        DecorPictureSpec& picture = decor->pictures[i];
+        DecorPictureSpec& picture  = decor->pictures[i];
         const std::string property = key.substr(prefix.size());
-        bool strip = i >= (int)ThemeArea::TOP - 1;
+        bool strip                 = i >= (int)ThemeArea::TOP - 1;
         if (property.empty())
         {
             std::string path;
@@ -1241,7 +1246,8 @@ static bool parseDecorLine(const std::string& key, const std::string& value, con
     {
         float density;
         if (value == "low" || value == "medium" || value == "high")
-            density = value == "low" ? ThemeParticles::LOW : value == "medium" ? ThemeParticles::MEDIUM : ThemeParticles::HIGH;
+            density = value == "low" ? ThemeParticles::LOW : value == "medium" ? ThemeParticles::MEDIUM
+                                                                               : ThemeParticles::HIGH;
         else if (!parseNumber(value, 0.0f, 1.0f, &density))
             return fail("is low, medium, high or a number from 0 to 1, not " + value);
         decor->density = density;
@@ -1316,11 +1322,11 @@ static ThemeDecor resolveDecor(const DecorSpec* spec, int v)
     {
         const DecorPictureSpec& mine  = own.pictures[i];
         const DecorPictureSpec& every = all.pictures[i];
-        ThemePicture& picture    = decor.pictures[i];
-        picture.image            = mine.image.value_or(every.image.value_or(""));
-        picture.fit              = mine.fit.value_or(every.fit.value_or(BackgroundFit::COVER));
-        picture.opacity          = mine.opacity.value_or(every.opacity.value_or(1.0f));
-        picture.height           = mine.height.value_or(every.height.value_or(0.0f));
+        ThemePicture& picture         = decor.pictures[i];
+        picture.image                 = mine.image.value_or(every.image.value_or(""));
+        picture.fit                   = mine.fit.value_or(every.fit.value_or(BackgroundFit::COVER));
+        picture.opacity               = mine.opacity.value_or(every.opacity.value_or(1.0f));
+        picture.height                = mine.height.value_or(every.height.value_or(0.0f));
     }
     ThemeParticles& particles = decor.particles;
     particles.kind            = own.kind.value_or(all.kind.value_or(ParticleKind::NONE));
@@ -1336,7 +1342,8 @@ static ThemeDecor resolveDecor(const DecorSpec* spec, int v)
 static void parseThemeText(const std::string& text, const std::string& directory, const std::string& assets,
     const std::string& label, int depth, bool root, ParsedTheme* out)
 {
-    auto where = [&label](int number) { return (label.empty() ? std::string("line ") : label + ":") + std::to_string(number); };
+    auto where = [&label](int number)
+    { return (label.empty() ? std::string("line ") : label + ":") + std::to_string(number); };
 
     std::stringstream lines(text);
     std::string line, section;
@@ -1425,7 +1432,8 @@ static void parseThemeText(const std::string& text, const std::string& directory
         if ((section.empty() || section == "light" || section == "dark")
             && (key == "background_image" || key == "background_fit" || key == "background_dim" || key == "surface_opacity"))
         {
-            BackgroundSpec& background = out->background[section == "light" ? 1 : section == "dark" ? 2 : 0];
+            BackgroundSpec& background = out->background[section == "light" ? 1 : section == "dark" ? 2
+                                                                                                    : 0];
             if (key == "background_image")
             {
                 std::string path, error;
@@ -1462,7 +1470,8 @@ static void parseThemeText(const std::string& text, const std::string& directory
         if ((section.empty() || section == "light" || section == "dark") && isPictureKey(key))
         {
             std::string error;
-            PictureSpec& pictures = out->pictures[section == "light" ? 1 : section == "dark" ? 2 : 0];
+            PictureSpec& pictures = out->pictures[section == "light" ? 1 : section == "dark" ? 2
+                                                                                             : 0];
             if (!parsePictureKey(key, value, directory, assets, &pictures, &error))
                 out->errors.push_back(where(number) + ": " + error);
             continue;
@@ -1472,7 +1481,8 @@ static void parseThemeText(const std::string& text, const std::string& directory
         if ((section.empty() || section == "light" || section == "dark") && isDecorKey(key))
         {
             std::string error;
-            DecorSpec& decor = out->decor[section == "light" ? 1 : section == "dark" ? 2 : 0];
+            DecorSpec& decor = out->decor[section == "light" ? 1 : section == "dark" ? 2
+                                                                                     : 0];
             if (!parseDecorLine(key, value, directory, assets, &decor, &error))
                 out->errors.push_back(where(number) + ": " + key + " " + error);
             continue;
@@ -1519,7 +1529,8 @@ static void parseThemeText(const std::string& text, const std::string& directory
             out->errors.push_back(where(number) + ": " + value + " is not a colour");
             continue;
         }
-        int slot = section == "light" ? 1 : section == "dark" ? 2 : 0;
+        int slot = section == "light" ? 1 : section == "dark" ? 2
+                                                              : 0;
         (isSeed(key) ? out->seeds : out->colors)[slot].emplace_back(key, color);
     }
 }
@@ -1592,16 +1603,16 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
 
 namespace
 {
-// What a file makes of each variant
-struct ResolvedTheme
-{
-    ColorMap overlay[2]; // [0] light, [1] dark; empty for a variant not styled
-    MetricMap metrics;
-    ThemeBackground background[2]; // as overlay; no image for a variant not styled
-    ThemePictures pictures[2];     // as background
-    ThemeDecor decor[2];           // as background
-    std::vector<std::string> warnings;
-};
+    // What a file makes of each variant
+    struct ResolvedTheme
+    {
+        ColorMap overlay[2]; // [0] light, [1] dark; empty for a variant not styled
+        MetricMap metrics;
+        ThemeBackground background[2]; // as overlay; no image for a variant not styled
+        ThemePictures pictures[2]; // as background
+        ThemeDecor decor[2]; // as background
+        std::vector<std::string> warnings;
+    };
 }
 
 // Variant `v`'s background (0 light, 1 dark): its own lines, else those for
@@ -1628,9 +1639,9 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = 
     {
         if (!(v == 0 ? theme.light : theme.dark))
             continue;
-        ThemeVariant variant  = v == 0 ? ThemeVariant::LIGHT : ThemeVariant::DARK;
-        const ColorMap& base  = Theme::get(variant).getValues()->getBaseColors();
-        const char* name      = v == 0 ? "light" : "dark";
+        ThemeVariant variant = v == 0 ? ThemeVariant::LIGHT : ThemeVariant::DARK;
+        const ColorMap& base = Theme::get(variant).getValues()->getBaseColors();
+        const char* name     = v == 0 ? "light" : "dark";
 
         ColorMap seeds;
         for (int slot : { 0, v + 1 })
@@ -1651,7 +1662,7 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = 
 
         // Over a background image, the surfaces let it show through
         const ThemeBackground& background = resolved.background[v] = resolveBackground(theme.background, v);
-        resolved.decor[v]                 = resolveDecor(theme.decor, v);
+        resolved.decor[v]                                          = resolveDecor(theme.decor, v);
         if (background.hasImage() && background.surfaceOpacity < 1.0f)
             for (const std::string& key : surfaceKeys)
             {
@@ -1699,14 +1710,14 @@ static std::string localized(const std::string& value)
 }
 
 static std::string currentPath;
-static std::string currentText;                  // its text, as read
+static std::string currentText; // its text, as read
 static std::unique_ptr<ParsedTheme> currentTheme; // the file in use
-static ThemeBackground currentBackground[2];       // its backgrounds, [0] light
-static ThemePictures currentPictures[2];           // its logos and images, [0] light
-static uint64_t picturesGeneration = 1;            // bumped when they change
-static ThemeDecor currentDecor[2];                 // its decorations, [0] light
-static std::time_t calendarMinute = -1;          // when followCalendar() last looked
-static bool reapplying = false;
+static ThemeBackground currentBackground[2]; // its backgrounds, [0] light
+static ThemePictures currentPictures[2]; // its logos and images, [0] light
+static uint64_t picturesGeneration = 1; // bumped when they change
+static ThemeDecor currentDecor[2]; // its decorations, [0] light
+static std::time_t calendarMinute = -1; // when followCalendar() last looked
+static bool reapplying            = false;
 
 static void useOverlays(const ResolvedTheme& resolved)
 {
@@ -1721,8 +1732,8 @@ static void useOverlays(const ResolvedTheme& resolved)
         currentPictures[1] = resolved.pictures[1];
         picturesGeneration++;
     }
-    currentDecor[0]      = resolved.decor[0];
-    currentDecor[1]      = resolved.decor[1];
+    currentDecor[0] = resolved.decor[0];
+    currentDecor[1] = resolved.decor[1];
     generation++;
 }
 
@@ -1737,9 +1748,9 @@ static void reapplyTheme()
 
 static bool applyTheme(const std::string& text, const std::string& directory, const std::string& path, ThemeVariant* variant)
 {
-    ParsedTheme theme       = parseTheme(text, directory);
-    ResolvedTheme resolved  = resolveTheme(theme);
-    std::string label       = path.empty() ? "theme" : "theme " + path;
+    ParsedTheme theme      = parseTheme(text, directory);
+    ResolvedTheme resolved = resolveTheme(theme);
+    std::string label      = path.empty() ? "theme" : "theme " + path;
     for (const std::string& error : theme.errors)
         Logger::warning("{}: {}", label, error);
     for (const std::string& warning : resolved.warnings)
@@ -1767,7 +1778,9 @@ static bool applyTheme(const std::string& text, const std::string& directory, co
             *variant = Application::getPlatform() ? Application::getThemeVariant() : ThemeVariant::DARK;
     }
     Logger::info("{}: {} for the {} variant{}", label, theme.name.empty() ? "read" : localized(theme.name),
-        theme.light && theme.dark ? "light and dark" : theme.light ? "light" : "dark", theme.light && theme.dark ? "s" : "");
+        theme.light && theme.dark ? "light and dark" : theme.light ? "light"
+                                                                   : "dark",
+        theme.light && theme.dark ? "s" : "");
     return true;
 }
 
@@ -1899,25 +1912,25 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
 
     ParsedTheme theme      = parseTheme(text, directoryOf(path));
     ResolvedTheme resolved = resolveTheme(theme, decodePictures);
-    info.name        = theme.name.empty() ? info.id : localized(theme.name);
-    info.author      = localized(theme.author);
-    info.version     = theme.version;
-    info.description = localized(theme.description);
-    info.light       = theme.light;
-    info.dark        = theme.dark;
-    info.lightBackground = resolved.background[0];
-    info.darkBackground  = resolved.background[1];
-    info.backgroundImage = info.darkBackground.hasImage() ? info.darkBackground.image : info.lightBackground.image;
-    info.lightDecor      = resolved.decor[0];
-    info.darkDecor       = resolved.decor[1];
-    info.icon        = theme.icon;
-    info.lightPictures = resolved.pictures[0];
-    info.darkPictures  = resolved.pictures[1];
-    info.counterpart = theme.counterpart;
-    info.lightPreview = previewOf(Theme::getLightTheme().getValues()->getBaseColors(), resolved.overlay[0]);
-    info.darkPreview  = previewOf(Theme::getDarkTheme().getValues()->getBaseColors(), resolved.overlay[1]);
-    info.errors      = theme.errors;
-    info.warnings    = resolved.warnings;
+    info.name              = theme.name.empty() ? info.id : localized(theme.name);
+    info.author            = localized(theme.author);
+    info.version           = theme.version;
+    info.description       = localized(theme.description);
+    info.light             = theme.light;
+    info.dark              = theme.dark;
+    info.lightBackground   = resolved.background[0];
+    info.darkBackground    = resolved.background[1];
+    info.backgroundImage   = info.darkBackground.hasImage() ? info.darkBackground.image : info.lightBackground.image;
+    info.lightDecor        = resolved.decor[0];
+    info.darkDecor         = resolved.decor[1];
+    info.icon              = theme.icon;
+    info.lightPictures     = resolved.pictures[0];
+    info.darkPictures      = resolved.pictures[1];
+    info.counterpart       = theme.counterpart;
+    info.lightPreview      = previewOf(Theme::getLightTheme().getValues()->getBaseColors(), resolved.overlay[0]);
+    info.darkPreview       = previewOf(Theme::getDarkTheme().getValues()->getBaseColors(), resolved.overlay[1]);
+    info.errors            = theme.errors;
+    info.warnings          = resolved.warnings;
 
     // Its pictures must be there (and be pictures, when decoded)
     for (const ThemeBackground* background : { &info.lightBackground, &info.darkBackground })
@@ -2145,9 +2158,9 @@ std::shared_ptr<ThemeImage> Theme::image(const std::string& key)
     if (slot == imageSlots.end())
         return nullptr;
     ThemeImageOptions options;
-    options.maxSide = slot->second.maxSide;
+    options.maxSide               = slot->second.maxSide;
     const ThemePictures& pictures = picturesInUse();
-    auto it = pictures.images.find(key);
+    auto it                       = pictures.images.find(key);
     if (it != pictures.images.end())
     {
         std::shared_ptr<ThemeImage> image = heldPicture(IMAGE_PREFIX + key, it->second, options);

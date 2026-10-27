@@ -23,20 +23,20 @@ namespace brls
 
 class AndroidPlatform : public SDLPlatform
 {
-    public:
-        bool canShowBatteryLevel() override;
-        bool canShowWirelessLevel() override;
-        int getBatteryLevel() override;
-        bool isBatteryCharging() override;
-        bool hasWirelessConnection() override;
-        int getWirelessLevel() override;
-        bool hasEthernetConnection() override;
-        std::string getIpAddress() override;
-        std::string getDnsServer() override;
-        void openBrowser(std::string url) override;
-        float getBacklightBrightness() override;
-        void setBacklightBrightness(float brightness) override;
-        bool canSetBacklightBrightness() override;
+  public:
+    bool canShowBatteryLevel() override;
+    bool canShowWirelessLevel() override;
+    int getBatteryLevel() override;
+    bool isBatteryCharging() override;
+    bool hasWirelessConnection() override;
+    int getWirelessLevel() override;
+    bool hasEthernetConnection() override;
+    std::string getIpAddress() override;
+    std::string getDnsServer() override;
+    void openBrowser(std::string url) override;
+    float getBacklightBrightness() override;
+    void setBacklightBrightness(float brightness) override;
+    bool canSetBacklightBrightness() override;
 };
 
 } // namespace brls

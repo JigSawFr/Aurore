@@ -44,8 +44,8 @@ class PsvInputManager : public InputManager
     void updateKeyboardState(SDL_KeyboardEvent event);
 
   private:
-    SceCtrlData pad{};
-    Rect screen{};
+    SceCtrlData pad {};
+    Rect screen {};
     [[nodiscard]] Point convertVitaTouchXY(float x, float y) const;
 };
 

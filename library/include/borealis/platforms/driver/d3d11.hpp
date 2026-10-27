@@ -15,9 +15,9 @@
 */
 
 #pragma once
-#include <nanovg.h>
 #include <d3d11.h>
 #include <d3d11_1.h>
+#include <nanovg.h>
 
 #ifdef __GLFW__
 #define GLFW_INCLUDE_NONE
@@ -59,7 +59,8 @@ class D3D11Context
     ID3D11DepthStencilView* depthStencilView = nullptr;
     int interval                             = 1;
 
-    UINT(WINAPI* GetDpiForWindow)(HWND);
+    UINT(WINAPI* GetDpiForWindow)
+    (HWND);
 
     HWND hWnd = nullptr;
 

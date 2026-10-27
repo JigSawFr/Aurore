@@ -19,12 +19,12 @@
 #include <SDL2/SDL_main.h>
 #endif
 
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <borealis.hpp>
+#include <borealis/cadran.hpp>
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
@@ -73,19 +73,31 @@ int main(int argc, char* argv[])
     // We recommend to use INFO for real apps
     std::string themeFile;
     const char* checkThemes = nullptr;
-    for (int i = 1; i < argc; i++) {
-        if (std::strcmp(argv[i], "-d") == 0) { // Set log level
+    for (int i = 1; i < argc; i++)
+    {
+        if (std::strcmp(argv[i], "-d") == 0)
+        { // Set log level
             brls::Logger::setLogLevel(brls::LogLevel::LOG_DEBUG);
-        } else if (std::strcmp(argv[i], "-o") == 0) {
+        }
+        else if (std::strcmp(argv[i], "-o") == 0)
+        {
             const char* path = (i + 1 < argc) ? argv[++i] : "borealis.log";
             brls::Logger::setLogOutput(std::fopen(path, "w+"));
-        } else if (std::strcmp(argv[i], "-v") == 0) {
+        }
+        else if (std::strcmp(argv[i], "-v") == 0)
+        {
             brls::Application::enableDebuggingView(true);
-        } else if (std::strcmp(argv[i], "-t") == 0 && i + 1 < argc) { // Theme file
+        }
+        else if (std::strcmp(argv[i], "-t") == 0 && i + 1 < argc)
+        { // Theme file
             themeFile = argv[++i];
-        } else if (std::strcmp(argv[i], "--check-themes") == 0) { // Check the presets and a folder, then quit
+        }
+        else if (std::strcmp(argv[i], "--check-themes") == 0)
+        { // Check the presets and a folder, then quit
             checkThemes = (i + 1 < argc) ? argv[++i] : "@res/themes";
-        } else if (std::strcmp(argv[i], "-r") == 0) { // Redraw on demand
+        }
+        else if (std::strcmp(argv[i], "-r") == 0)
+        { // Redraw on demand
             brls::Application::setRedrawOnDemand(true);
         }
     }

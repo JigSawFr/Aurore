@@ -47,9 +47,9 @@ class IconButton : public Button
     static View* create();
 
   private:
-    Label* text  = nullptr; // the Button's label
-    View* icon   = nullptr;
-    Label* glyph = nullptr; // the icon, when it is a glyph
+    Label* text    = nullptr; // the Button's label
+    View* icon     = nullptr;
+    Label* glyph   = nullptr; // the icon, when it is a glyph
     float iconSize = 24;
 
     void replaceIcon(View* view);

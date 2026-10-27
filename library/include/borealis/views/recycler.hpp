@@ -16,15 +16,15 @@
 
 #pragma once
 
+#include <functional>
+#include <map>
+#include <vector>
 #include <borealis/core/application.hpp>
 #include <borealis/core/bind.hpp>
 #include <borealis/views/header.hpp>
 #include <borealis/views/label.hpp>
 #include <borealis/views/rectangle.hpp>
 #include <borealis/views/scrolling_frame.hpp>
-#include <functional>
-#include <map>
-#include <vector>
 
 namespace brls
 {

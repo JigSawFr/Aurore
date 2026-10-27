@@ -19,9 +19,9 @@
 // BRLS_TEST_UPDATE=1 writes them again.
 
 #include <borealis.hpp>
+#include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/ui.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
 #include <borealis/core/theme_decor.hpp>
@@ -185,7 +185,8 @@ BRLS_TEST(timers_follow_the_simulated_clock)
 {
     Harness h;
     bool fired = false;
-    brls::delay(500, [&fired]() { fired = true; });
+    brls::delay(500, [&fired]()
+        { fired = true; });
     h.advance(400);
     BRLS_CHECK(!fired);
     h.advance(150);
@@ -268,7 +269,7 @@ BRLS_TEST(seasonal_theme_picks_the_preset_of_the_date)
         { 2026, 1, 5, "winter" },
         { 2026, 2, 14, "valentine" },
         { 2026, 2, 16, "lunar-new-year" }, // the eve of 17 February
-        { 2026, 3, 3, "lunar-new-year" },  // the Lantern Festival
+        { 2026, 3, 3, "lunar-new-year" }, // the Lantern Festival
         { 2026, 3, 4, "winter" },
         { 2029, 2, 13, "valentine" }, // both: the first of the table
         { 2026, 3, 20, "spring" },
@@ -379,7 +380,7 @@ BRLS_TEST(theme_picker_follows_a_one_variant_palette)
 BRLS_TEST(theme_icon_is_read_and_inherited)
 {
     Harness h;
-    namespace fs = std::filesystem;
+    namespace fs       = std::filesystem;
     const fs::path dir = fs::temp_directory_path() / "aurore_theme_icon_test";
     fs::create_directories(dir);
     auto write = [&dir](const char* name, const char* text)
@@ -415,8 +416,15 @@ BRLS_TEST(seasonal_palette_shows_the_motif_of_the_date)
         int month, day;
         const char* icon;
     } dates[] = {
-        { 1, 20, "snowflake" }, { 2, 12, "heart" }, { 2, 17, "lantern" }, { 4, 10, "blossom" },
-        { 7, 14, "sun" }, { 10, 1, "leaf" }, { 10, 31, "pumpkin" }, { 12, 24, "tree" }, { 12, 31, "firework" },
+        { 1, 20, "snowflake" },
+        { 2, 12, "heart" },
+        { 2, 17, "lantern" },
+        { 4, 10, "blossom" },
+        { 7, 14, "sun" },
+        { 10, 1, "leaf" },
+        { 10, 31, "pumpkin" },
+        { 12, 24, "tree" },
+        { 12, 31, "firework" },
     };
     for (const auto& date : dates)
     {
@@ -583,7 +591,7 @@ BRLS_TEST(theme_pictures_stay_in_their_folder)
 
     const std::string escapes = themes.write("aurora2/theme.theme",
         "name = Escapes\nbackground_image = ../outside.png\n[light]\nbackground_image = /etc/passwd\n");
-    brls::ThemeInfo info = brls::Theme::inspect(escapes);
+    brls::ThemeInfo info      = brls::Theme::inspect(escapes);
     BRLS_CHECK(hasErrorWith(info, "goes out of the theme's folder"));
     BRLS_CHECK(hasErrorWith(info, "an absolute path is not allowed"));
     BRLS_CHECK(!info.darkBackground.hasImage() && !info.lightBackground.hasImage());
@@ -616,9 +624,9 @@ BRLS_TEST(theme_background_keys_are_read_and_inherited)
     ThemeFolder themes("aurore_theme_background_test");
     themes.picture("a.png", 10, 20, 40);
     themes.picture("b.png", 230, 235, 240);
-    const std::string base = themes.write("base.theme",
-        "name = Base\nbackground_image = a.png\nbackground_fit = tile\nbackground_dim = 0.2\nsurface_opacity = 0.5\n"
-        "[light]\nbackground = #f0f0f0\n[dark]\nbackground = #101010\nbackground_dim = 0.6\n");
+    const std::string base  = themes.write("base.theme",
+         "name = Base\nbackground_image = a.png\nbackground_fit = tile\nbackground_dim = 0.2\nsurface_opacity = 0.5\n"
+          "[light]\nbackground = #f0f0f0\n[dark]\nbackground = #101010\nbackground_dim = 0.6\n");
     const std::string child = themes.write("child.theme",
         "inherit = base.theme\n[light]\nbackground_image = b.png\nbackground_fit = contain\n[dark]\nsurface_opacity = 0.8\n");
     const std::string plain = themes.write("plain.theme", "name = Plain\nsurface_opacity = 0.5\naccent = #3ddc97\n");
@@ -688,7 +696,7 @@ BRLS_TEST(theme_text_is_checked_on_its_picture)
     themes.picture("night.png", 8, 10, 20);
     // White text on a dark theme: fine on its colour, not on a white picture
     // with no veil
-    const char* dark = "inherit = dark\nbackground = #101418\ntext = #ffffff\nbackground_dim = 0\n";
+    const char* dark        = "inherit = dark\nbackground = #101418\ntext = #ffffff\nbackground_dim = 0\n";
     const std::string snow  = themes.write("snow.theme", std::string(dark) + "background_image = snow.png\n");
     const std::string night = themes.write("night.theme", std::string(dark) + "background_image = night.png\n");
 
@@ -744,7 +752,8 @@ static void auroraScreen(brls::ThemeVariant variant, const char* reference)
     DemoHarness h;
     // What does not move (the focus ring pulses, the glow drifts): the last
     // card and the header's right end
-    auto still = [&h]() { return h.screenshot().crop(1000, 0, 280, 430); };
+    auto still = [&h]()
+    { return h.screenshot().crop(1000, 0, 280, 430); };
     brls::test::Image before = still();
     auto colors              = brls::Theme::getDarkTheme().getValues()->getColors();
 
@@ -859,7 +868,7 @@ BRLS_TEST(theme_logos_and_images_are_read_inherited_and_confined)
     // file's lines win
     const std::string child = themes.write("child.theme",
         "inherit = base/theme.theme\nicon.settings = gear.png\n[dark]\nlogo = none\n");
-    info = brls::Theme::inspect(child);
+    info                    = brls::Theme::inspect(child);
     BRLS_CHECK(info.ok());
     BRLS_CHECK(info.darkPictures.logo.empty());
     BRLS_CHECK_EQ(info.lightPictures.logo, root + "/base/logo.png");
@@ -872,7 +881,7 @@ BRLS_TEST(theme_logos_and_images_are_read_inherited_and_confined)
     const std::string wrong = themes.write("wrong.theme",
         "logo = ../outside.png\npreview = /etc/passwd\nicon.settings = missing.png\nicon.settings.tint = maybe\n"
         "icon.nosuchicon = gear.png\nimage.test/nosuchslot = art.png\n");
-    info = brls::Theme::inspect(wrong);
+    info                    = brls::Theme::inspect(wrong);
     BRLS_CHECK(hasErrorWith(info, "logo ../outside.png: goes out of the theme's folder"));
     BRLS_CHECK(hasErrorWith(info, "preview /etc/passwd: an absolute path is not allowed"));
     BRLS_CHECK(hasErrorWith(info, "icon.settings: cannot read"));
@@ -939,7 +948,7 @@ BRLS_TEST(theme_image_slots_follow_the_theme)
     brls::Theme::addImageSlot("test/art", fallback, 256);
     brls::Theme::addImageSlot("test/empty");
     BRLS_CHECK(brls::Theme::getImageSlots() == (std::vector<std::string> { "test/art", "test/empty" }));
-    const std::string art = themes.write("art.theme", "image.test/art = art.png\nimage.test/empty = art.png\n");
+    const std::string art    = themes.write("art.theme", "image.test/art = art.png\nimage.test/empty = art.png\n");
     const std::string broken = themes.write("broken.theme", "image.test/art = broken.png\n");
 
     auto* image = new brls::Image();
@@ -1016,14 +1025,14 @@ BRLS_TEST(theme_icons_are_tinted_or_drawn_as_they_are)
 
     auto middle = [&h](brls::View* view)
     {
-        brls::Rect frame = view->getFrame();
+        brls::Rect frame       = view->getFrame();
         brls::test::Image shot = h.screenshot();
         const unsigned char* p = shot.at((int)frame.getMidX(), (int)frame.getMidY());
         return std::vector<int> { p[0], p[1], p[2] };
     };
     auto corner = [&h](brls::View* view)
     {
-        brls::Rect frame = view->getFrame();
+        brls::Rect frame       = view->getFrame();
         brls::test::Image shot = h.screenshot();
         const unsigned char* p = shot.at((int)frame.getMinX() + 4, (int)frame.getMinY() + 4);
         return std::vector<int> { p[0], p[1], p[2] };
@@ -1039,9 +1048,9 @@ BRLS_TEST(theme_icons_are_tinted_or_drawn_as_they_are)
     BRLS_CHECK(brls::Theme::loadFile((themes.dir / "icons.theme").generic_string()));
     settlePictures(h);
     BRLS_CHECK(near(middle(tinted), { 20, 40, 230 })); // the icon's colour
-    BRLS_CHECK(near(middle(plain), { 230, 20, 20 }));  // the picture's
-    BRLS_CHECK(near(corner(tinted), { 20, 20, 30 }));  // transparent around it
-    BRLS_CHECK(near(middle(ink), { 20, 40, 230 }));    // black on nothing: all ink
+    BRLS_CHECK(near(middle(plain), { 230, 20, 20 })); // the picture's
+    BRLS_CHECK(near(corner(tinted), { 20, 20, 30 })); // transparent around it
+    BRLS_CHECK(near(middle(ink), { 20, 40, 230 })); // black on nothing: all ink
 
     // Back: the drawings, pixel for pixel
     brls::Theme::reset();
@@ -1126,8 +1135,8 @@ static void pickPrism(const char* theme, const char* reference)
     ui::pick_palette();
     // Asked for by the picker's swatch, not decoded on this thread: still loading
     brls::ThemeImageOptions options;
-    options.flags   = NVG_IMAGE_GENERATE_MIPMAPS;
-    options.maxSide = brls::ThemeImages::PREVIEW_SIZE;
+    options.flags                           = NVG_IMAGE_GENERATE_MIPMAPS;
+    options.maxSide                         = brls::ThemeImages::PREVIEW_SIZE;
     std::shared_ptr<brls::ThemeImage> image = brls::ThemeImages::load(preview, options);
     BRLS_CHECK(image->state == brls::ThemeImage::State::LOADING);
     BRLS_CHECK(h.focusByText("Prism", brls::BUTTON_DOWN, 40));
@@ -1300,7 +1309,7 @@ BRLS_TEST(theme_particles_follow_motion_and_input)
     h.step(3);
     BRLS_CHECK(!brls::ThemeDecorations::particlesRunning());
     brls::test::Image still = h.screenshot();
-    drawn = brls::Application::getDrawnFrameCount();
+    drawn                   = brls::Application::getDrawnFrameCount();
     h.advance(900);
     BRLS_CHECK(brls::Application::getDrawnFrameCount() - drawn <= 1);
     // ...and not a frozen frame of them: the screen is the one without
@@ -1347,8 +1356,8 @@ BRLS_TEST(theme_particles_draw_every_kind)
     {
         const char* kind;
         const char* preset;
-    } kinds[] = { { "snow", "winter" }, { "leaves", "autumn" }, { "petals", "spring" }, { "embers", "halloween" },
-        { "confetti", "new-year" }, { "sparkles", "lunar-new-year" }, { "hearts", "valentine" }, { "bubbles", "summer" } };
+    } kinds[]          = { { "snow", "winter" }, { "leaves", "autumn" }, { "petals", "spring" }, { "embers", "halloween" },
+                 { "confetti", "new-year" }, { "sparkles", "lunar-new-year" }, { "hearts", "valentine" }, { "bubbles", "summer" } };
     const char* folder = std::getenv("BRLS_DECOR_SHOTS");
     Harness h;
     h.push(new brls::Activity(new brls::Box()));
@@ -1496,9 +1505,9 @@ BRLS_TEST(images_compare_with_tolerance)
     a.height = 2;
     a.rgba.assign(4 * 2 * 4, 100);
     brls::test::Image b = a;
-    b.rgba[0] = 105; // within 8
-    b.rgba[4] = 140; // a pixel off
-    auto diff = brls::test::compareImages(b, a, 8);
+    b.rgba[0]           = 105; // within 8
+    b.rgba[4]           = 140; // a pixel off
+    auto diff           = brls::test::compareImages(b, a, 8);
     BRLS_CHECK(diff.sameSize);
     BRLS_CHECK_EQ(diff.differingPixels, (size_t)1);
     BRLS_CHECK_EQ(diff.maxDelta, 40);

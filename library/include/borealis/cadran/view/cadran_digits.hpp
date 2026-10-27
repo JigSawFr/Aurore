@@ -5,9 +5,9 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <string>
 #include <vector>
+#include <borealis.hpp>
 
 class CadranDigits : public brls::View
 {
@@ -42,35 +42,35 @@ class CadranDigits : public brls::View
     void onTextScaleChanged() override { this->measure(); }
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
 
     static brls::View* create();
 
   private:
     std::string text;
-    float fontSize = 32.0f;
-    float drawSize = 32.0f;   // fontSize, or less to fit fitWidth
-    float fitWidth = 0.0f;
-    bool fitParent = false;
-    bool smallUnits = false;
+    float fontSize       = 32.0f;
+    float drawSize       = 32.0f; // fontSize, or less to fit fitWidth
+    float fitWidth       = 0.0f;
+    bool fitParent       = false;
+    bool smallUnits      = false;
     bool followsTextSize = false;
-    bool rolls = false;
+    bool rolls           = false;
     // The text before, leaving (rolls): until when (µs), and its size.
     std::string leaving;
-    brls::Time  roll_since = 0;
-    float       leaving_size = 32.0f;
-    bool        drawn = false;   // shown at least once: a change may roll
+    brls::Time roll_since = 0;
+    float leaving_size    = 32.0f;
+    bool drawn            = false; // shown at least once: a change may roll
     NVGcolor color;
     int font;
 
-    void measure();   // the view's size from the text
+    void measure(); // the view's size from the text
     struct Run
     {
         std::string text;
-        bool figure;   // drawn at the full size
+        bool figure; // drawn at the full size
     };
-    std::vector<Run> runs(const std::string& text) const;   // the text cut into figures and words
-    float advance(NVGcontext* vg, float size) const;         // its width at `size`
+    std::vector<Run> runs(const std::string& text) const; // the text cut into figures and words
+    float advance(NVGcontext* vg, float size) const; // its width at `size`
     // `text` written at `size` within (x, y, width, height), at its middle.
     void write(NVGcontext* vg, const std::string& text, float size, float x, float y, float height) const;
 };

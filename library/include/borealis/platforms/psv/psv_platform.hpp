@@ -61,7 +61,7 @@ class PsvPlatform : public SDLPlatform
     AudioPlayer* getAudioPlayer() override;
 
   private:
-    bool suspendDisabled{};
+    bool suspendDisabled {};
 #ifdef BOREALIS_USE_GXM
     PsvInputManager* inputManager = nullptr;
     PsvImeManager* imeManager     = nullptr;

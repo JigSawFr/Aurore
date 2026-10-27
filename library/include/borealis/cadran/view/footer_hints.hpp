@@ -27,11 +27,11 @@ class FooterHints : public brls::Hints
     static void set_timed(const std::string& hint_text, brls::Time until, brls::Time total_us);
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-              brls::FrameContext* ctx) override;
+        brls::FrameContext* ctx) override;
 
   private:
     void fit();
 
     brls::VoidEvent::Subscription subscription;
-    std::shared_ptr<bool> alive = std::make_shared<bool>(true);   // guards the fit after the first frame
+    std::shared_ptr<bool> alive = std::make_shared<bool>(true); // guards the fit after the first frame
 };

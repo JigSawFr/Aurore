@@ -52,7 +52,8 @@ TabFrame::TabFrame()
 void TabFrame::addTab(std::string label, TabViewCreator creator)
 {
     int index = this->tabCount++;
-    this->sidebar->addItem(label, [this, creator, index](brls::View* view) {
+    this->sidebar->addItem(label, [this, creator, index](brls::View* view)
+        {
         // Only trigger when the sidebar item gains focus
         if (!view->isFocused())
             return;
@@ -101,8 +102,7 @@ void TabFrame::addTab(std::string label, TabViewCreator creator)
                     Application::giveFocus(this->sidebar);
                 return true;
             },
-            false, false, SOUND_BACK);
-    });
+            false, false, SOUND_BACK); });
 }
 
 void TabFrame::focusTab(int position)
@@ -163,16 +163,16 @@ void TabFrame::handleXMLElement(tinyxml2::XMLElement* element)
 
         if (viewElement)
         {
-            this->addTab(label, [viewElement] {
-                return View::createFromXMLElement(viewElement);
-            });
+            this->addTab(label, [viewElement]
+                { return View::createFromXMLElement(viewElement); });
 
             if (viewElement->NextSiblingElement())
                 fatal("\"brls:Tab\" can only contain one child element");
         }
         else
         {
-            this->addTab(label, [] { return nullptr; });
+            this->addTab(label, []
+                { return nullptr; });
         }
     }
     else if (name == "brls:Separator")

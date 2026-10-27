@@ -23,9 +23,8 @@ RepeatingTask::RepeatingTask(Time period)
 {
     this->setPeriod(period);
 
-    this->setCallback([this]() {
-        this->run();
-    });
+    this->setCallback([this]()
+        { this->run(); });
 }
 
 void RepeatingTask::start()

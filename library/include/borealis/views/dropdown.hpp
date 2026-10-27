@@ -18,12 +18,12 @@
 
 #pragma once
 
+#include <string>
 #include <borealis/core/box.hpp>
 #include <borealis/core/event.hpp>
 #include <borealis/views/applet_frame.hpp>
 #include <borealis/views/hint.hpp>
 #include <borealis/views/recycler.hpp>
-#include <string>
 
 namespace brls
 {
@@ -64,7 +64,7 @@ class Dropdown : public Box, private RecyclerDataSource
     float getShowAnimationDuration(TransitionAnimation animation) override;
 
   public:
-    Dropdown(std::string title, std::vector<std::string> values, ValueSelectedEvent::Callback cb, int selected = 0, ValueSelectedEvent::Callback dismissCb = [](int){});
+    Dropdown(std::string title, std::vector<std::string> values, ValueSelectedEvent::Callback cb, int selected = 0, ValueSelectedEvent::Callback dismissCb = [](int) {});
 
     void show(std::function<void(void)> cb, bool animate, float animationDuration) override;
     void hide(std::function<void(void)> cb, bool animated, float animationDuration) override;
@@ -72,7 +72,8 @@ class Dropdown : public Box, private RecyclerDataSource
     virtual AppletFrame* getAppletFrame() override;
     virtual View* getParentNavigationDecision(View* from, View* newFocus, FocusDirection direction) override;
 
-    Event<RecyclerCell*> *getCellFocusDidChangeEvent() {
+    Event<RecyclerCell*>* getCellFocusDidChangeEvent()
+    {
         return &cellFocusDidChangeEvent;
     }
 

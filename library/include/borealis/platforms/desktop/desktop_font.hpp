@@ -27,6 +27,7 @@ class DesktopFontLoader : public FontLoader
 {
   public:
     void loadFonts() override;
+
   private:
     bool loadFontsExist(NVGcontext* vg, std::vector<std::string> fontPaths, std::string fontName, std::string fallbackFont);
 

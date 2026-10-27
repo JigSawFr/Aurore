@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include <functional>
 #include <borealis/core/gesture.hpp>
 #include <borealis/core/time.hpp>
-#include <functional>
 
 namespace brls
 {

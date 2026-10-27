@@ -26,4 +26,4 @@ bool reduced();
 // own (transition=) ask brls::Application::getReduceMotion(), which asks
 // this.
 bool motion();
-}   // namespace effects
+} // namespace effects

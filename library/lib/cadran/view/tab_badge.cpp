@@ -9,10 +9,10 @@
 #include <borealis/cadran/ui/ui.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
 
-static constexpr float SIZE = 26;
+static constexpr float SIZE           = 26;
 static constexpr const char* BADGE_ID = "tab_badge";
-static constexpr float POP_US = 380000.0f;
-static constexpr float DOCKED = 18;   // on the icon's corner
+static constexpr float POP_US         = 380000.0f;
+static constexpr float DOCKED         = 18; // on the icon's corner
 
 TabBadge::TabBadge()
 {
@@ -27,10 +27,12 @@ TabBadge::TabBadge()
 
 void TabBadge::set_count(int n)
 {
-    if (n == this->count) return;
+    if (n == this->count)
+        return;
     // A number that comes or changes pops in (one that goes takes the badge
     // with it).
-    if (n > 0 && effects::motion()) this->pop_since = motion::now();
+    if (n > 0 && effects::motion())
+        this->pop_since = motion::now();
     this->count = n;
     this->setVisibility(n > 0 ? brls::Visibility::VISIBLE : brls::Visibility::GONE);
 }
@@ -38,37 +40,45 @@ void TabBadge::set_count(int n)
 void TabBadge::dock(float t, bool out_of_row)
 {
     this->open = t;
-    if (out_of_row == this->floating) return;
+    if (out_of_row == this->floating)
+        return;
     this->floating = out_of_row;
     this->setPositionType(out_of_row ? brls::PositionType::ABSOLUTE : brls::PositionType::RELATIVE);
 }
 
 void TabBadge::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-                    brls::FrameContext* ctx)
+    brls::FrameContext* ctx)
 {
     (void)style;
     (void)ctx;
-    if (this->count <= 0) return;
+    if (this->count <= 0)
+        return;
     const std::string n = this->count > 9 ? "9+" : std::to_string(this->count);
     float r = height * 0.5f, cx = x + width * 0.5f, cy = y + height * 0.5f;
     // Docked on the icon of its sidebar item: its top right corner.
     CadranIcon* glyph = nullptr;
     if (this->open < 1.0f && this->hasParent())
         for (brls::View* v : this->getParent()->getChildren())
-            if ((glyph = dynamic_cast<CadranIcon*>(v))) break;
-    if (glyph) {
+            if ((glyph = dynamic_cast<CadranIcon*>(v)))
+                break;
+    if (glyph)
+    {
         const brls::Rect at = glyph->getFrame();
-        const float t = this->open;
-        cx = at.getMaxX() - 1 + (cx - at.getMaxX() + 1) * t;
-        cy = at.getMinY() + 1 + (cy - at.getMinY() - 1) * t;
-        r  = DOCKED * 0.5f + (r - DOCKED * 0.5f) * t;
+        const float t       = this->open;
+        cx                  = at.getMaxX() - 1 + (cx - at.getMaxX() + 1) * t;
+        cy                  = at.getMinY() + 1 + (cy - at.getMinY() - 1) * t;
+        r                   = DOCKED * 0.5f + (r - DOCKED * 0.5f) * t;
     }
     nvgSave(vg);
-    if (this->pop_since) {
+    if (this->pop_since)
+    {
         const float t = motion::progress(this->pop_since, POP_US);
-        if (t >= 1.0f) {
+        if (t >= 1.0f)
+        {
             this->pop_since = 0;
-        } else {
+        }
+        else
+        {
             const float scale = motion::back_out(t);
             nvgTranslate(vg, cx, cy);
             nvgScale(vg, scale, scale);
@@ -89,8 +99,10 @@ void TabBadge::draw(NVGcontext* vg, float x, float y, float width, float height,
 
 TabBadge* TabBadge::on_row(brls::Box* row)
 {
-    if (!row) return nullptr;
-    if (auto* badge = dynamic_cast<TabBadge*>(row->getView(BADGE_ID))) return badge;
+    if (!row)
+        return nullptr;
+    if (auto* badge = dynamic_cast<TabBadge*>(row->getView(BADGE_ID)))
+        return badge;
     auto* badge = new TabBadge();
     // Last, so it lines up at the right whatever the value (an empty one
     // still takes room).
@@ -107,8 +119,10 @@ TabBadge* TabBadge::find(brls::SidebarItem* item)
 
 TabBadge* TabBadge::of(brls::SidebarItem* item)
 {
-    if (!item) return nullptr;
-    if (auto* badge = dynamic_cast<TabBadge*>(item->getView(BADGE_ID))) return badge;
+    if (!item)
+        return nullptr;
+    if (auto* badge = dynamic_cast<TabBadge*>(item->getView(BADGE_ID)))
+        return badge;
     auto* badge = new TabBadge();
     item->addView(badge);
     return badge;

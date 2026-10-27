@@ -14,8 +14,8 @@
     limitations under the License.
 */
 
-#include <borealis/core/util.hpp>
 #include <fstream>
+#include <borealis/core/util.hpp>
 
 #ifdef __PSV__
 #include <psp2/kernel/processmgr.h>
@@ -44,16 +44,19 @@ bool startsWith(const std::string& data, const std::string& prefix)
 #endif
 }
 
-std::string loadFileContents(const std::string &path) {
+std::string loadFileContents(const std::string& path)
+{
     std::ifstream fin;
     fin.open(path, std::ios::in);
-    if (!fin.is_open()) {
-      brls::Logger::error("cannot open file: {}", path);
-      return "";
+    if (!fin.is_open())
+    {
+        brls::Logger::error("cannot open file: {}", path);
+        return "";
     }
 
     std::string res, buff;
-    while (getline(fin, buff)) {
+    while (getline(fin, buff))
+    {
         res += buff + "\n";
     }
     fin.close();

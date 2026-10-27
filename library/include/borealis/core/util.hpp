@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <borealis/core/logger.hpp>
 #include <stdexcept>
+#include <borealis/core/logger.hpp>
 
 namespace brls
 {

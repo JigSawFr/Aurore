@@ -92,7 +92,7 @@ class HScrollingFrame : public Box
     bool showScrollingIndicator     = true;
 
     float middleX = 0; // y + height/2
-    float rightX = 0; // y + height
+    float rightX  = 0; // y + height
 
     Animatable contentOffsetX = 0.0f;
 
@@ -107,7 +107,7 @@ class HScrollingFrame : public Box
 
     float getContentWidth();
 
-    ScrollingBehavior behavior = ScrollingBehavior::NATURAL;
+    ScrollingBehavior behavior     = ScrollingBehavior::NATURAL;
     bool naturalScrollingCanScroll = false;
     bool isRubberBanding           = false; ///< true while finger is dragging past a scroll boundary or snap-back is animating
     void naturalScrollingBehaviour();

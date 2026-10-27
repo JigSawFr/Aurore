@@ -18,7 +18,8 @@ inline std::string trim_space(const std::string& s)
 {
     const char* ws = " \t\n\v\f\r";
     const size_t a = s.find_first_not_of(ws);
-    if (a == std::string::npos) return "";
+    if (a == std::string::npos)
+        return "";
     return s.substr(a, s.find_last_not_of(ws) - a + 1);
 }
 
@@ -35,7 +36,8 @@ inline std::string trim_space_end(std::string s)
 inline std::string trim_blank(const std::string& s)
 {
     const size_t a = s.find_first_not_of(" \t");
-    if (a == std::string::npos) return "";
+    if (a == std::string::npos)
+        return "";
     return s.substr(a, s.find_last_not_of(" \t") - a + 1);
 }
 
@@ -43,7 +45,8 @@ inline std::string trim_blank(const std::string& s)
 inline std::string lower_ascii(std::string s)
 {
     for (char& c : s)
-        if (c >= 'A' && c <= 'Z') c = (char)(c - 'A' + 'a');
+        if (c >= 'A' && c <= 'Z')
+            c = (char)(c - 'A' + 'a');
     return s;
 }
 
@@ -51,7 +54,8 @@ inline std::string lower_ascii(std::string s)
 // starts with anything else (a digit, a UTF-8 character) as it is.
 inline std::string capitalise_ascii(std::string s)
 {
-    if (!s.empty() && s[0] >= 'a' && s[0] <= 'z') s[0] = (char)(s[0] - 'a' + 'A');
+    if (!s.empty() && s[0] >= 'a' && s[0] <= 'z')
+        s[0] = (char)(s[0] - 'a' + 'A');
     return s;
 }
 
@@ -76,11 +80,14 @@ inline bool ends_with(const std::string& s, const std::string& suffix)
 inline std::vector<std::string> lines(const std::string& s)
 {
     std::vector<std::string> out;
-    for (size_t start = 0; start <= s.size();) {
+    for (size_t start = 0; start <= s.size();)
+    {
         size_t end = s.find('\n', start);
-        if (end == std::string::npos) end = s.size();
+        if (end == std::string::npos)
+            end = s.size();
         out.push_back(s.substr(start, end - start));
-        if (!out.back().empty() && out.back().back() == '\r') out.back().pop_back();
+        if (!out.back().empty() && out.back().back() == '\r')
+            out.back().pop_back();
         start = end + 1;
     }
     return out;
@@ -101,11 +108,14 @@ inline std::string url_encode(const std::string& s)
 {
     static const char HEX[] = "0123456789ABCDEF";
     std::string out;
-    for (unsigned char c : s) {
-        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' ||
-            c == '.' || c == '~') {
+    for (unsigned char c : s)
+    {
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~')
+        {
             out += (char)c;
-        } else {
+        }
+        else
+        {
             out += '%';
             out += HEX[c >> 4];
             out += HEX[c & 0xF];
@@ -119,8 +129,10 @@ inline std::string url_encode(const std::string& s)
 inline std::string join(const std::vector<std::string>& parts, const std::string& sep)
 {
     std::string out;
-    for (size_t i = 0; i < parts.size(); i++) {
-        if (i) out += sep;
+    for (size_t i = 0; i < parts.size(); i++)
+    {
+        if (i)
+            out += sep;
         out += parts[i];
     }
     return out;
@@ -134,39 +146,52 @@ inline std::string join(const std::vector<std::string>& parts, const std::string
 //   <!-- console:hide --> … <!-- /console -->   the lines between, not here.
 class ConsoleComments
 {
-public:
+  public:
     enum Step
     {
-        Show,        // an ordinary line (one inside console:only too)
-        Skip,        // inside a comment or a console:hide block
-        Break,       // a comment or a block starts or a console:only ends: no line
-        Directive,   // <!-- console: … -->: `inner` is its line
+        Show, // an ordinary line (one inside console:only too)
+        Skip, // inside a comment or a console:hide block
+        Break, // a comment or a block starts or a console:only ends: no line
+        Directive, // <!-- console: … -->: `inner` is its line
     };
 
     Step next(const std::string& t, std::string& inner)
     {
-        if (block_ == Comment) {
-            if (t.find("-->") != std::string::npos) block_ = Plain;
+        if (block_ == Comment)
+        {
+            if (t.find("-->") != std::string::npos)
+                block_ = Plain;
             return Skip;
         }
-        if (block_ == Hide) {
-            if (t == "<!-- /console -->") block_ = Plain;
+        if (block_ == Hide)
+        {
+            if (t == "<!-- /console -->")
+                block_ = Plain;
             return Skip;
         }
-        if (block_ == Only && t == "-->") {
+        if (block_ == Only && t == "-->")
+        {
             block_ = Plain;
             return Break;
         }
-        if (block_ == Plain && starts_with(t, "<!--")) {
+        if (block_ == Plain && starts_with(t, "<!--"))
+        {
             const bool closed = t.size() >= 7 && t.compare(t.size() - 3, 3, "-->") == 0;
-            if (t == "<!-- console:hide -->") {
+            if (t == "<!-- console:hide -->")
+            {
                 block_ = Hide;
-            } else if (t == "<!-- console:only") {
+            }
+            else if (t == "<!-- console:only")
+            {
                 block_ = Only;
-            } else if (closed && starts_with(t, "<!-- console:")) {
+            }
+            else if (closed && starts_with(t, "<!-- console:"))
+            {
                 inner = trim_space(t.substr(13, t.size() - 16));
                 return Directive;
-            } else if (!closed) {
+            }
+            else if (!closed)
+            {
                 block_ = Comment;
             }
             return Break;
@@ -174,8 +199,15 @@ public:
         return Show;
     }
 
-private:
-    enum { Plain, Comment, Hide, Only } block_ = Plain;
+  private:
+    enum
+    {
+        Plain,
+        Comment,
+        Hide,
+        Only
+    } block_
+        = Plain;
 };
 
-}   // namespace text
+} // namespace text

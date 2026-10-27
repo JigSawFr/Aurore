@@ -4,8 +4,8 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
 #include <functional>
+#include <borealis.hpp>
 
 namespace ui
 {
@@ -17,4 +17,4 @@ void close_sheet(std::function<void()> then);
 // touch there closes the sheet.
 brls::Box* sheet_outside(float width, bool grow);
 
-}   // namespace ui
+} // namespace ui

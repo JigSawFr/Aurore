@@ -24,7 +24,7 @@ namespace
 {
 const std::array<const char*, 9> names = { "Bulbasaur", "Charmander", "Squirtle", "Metapod", "Kakuna",
     "Pidgeotto", "Spearow", "Arbok", "Sandshrew" };
-const std::array<const char*, 9> ids = { "001", "004", "007", "011", "014", "017", "021", "024", "027" };
+const std::array<const char*, 9> ids   = { "001", "004", "007", "011", "014", "017", "021", "024", "027" };
 
 constexpr size_t PAGE      = 24;
 constexpr size_t MAX_ITEMS = 240;
@@ -85,7 +85,8 @@ PictureCell::PictureCell()
     this->inflateFromXMLString(pictureCellXML);
 
     // X or a long press: the item's menu, next to it
-    brls::ContextMenu::attach(this, [this](brls::ContextMenu* menu) {
+    brls::ContextMenu::attach(this, [this](brls::ContextMenu* menu)
+        {
         std::string name = names[this->getIndex() % names.size()];
         auto chosen      = [name](const std::string& what) {
             return [name, what]() { brls::Application::notify(name + ": " + what); };
@@ -94,8 +95,7 @@ PictureCell::PictureCell()
         menu->addItem("demo/components/menu_open"_i18n, chosen("demo/components/menu_open"_i18n), "\uE89E");
         menu->addItem("demo/components/menu_favourite"_i18n, chosen("demo/components/menu_favourite"_i18n), "\uE87D");
         menu->addSeparator();
-        menu->addItem("demo/components/menu_delete"_i18n, chosen("demo/components/menu_delete"_i18n), "\uE872");
-    });
+        menu->addItem("demo/components/menu_delete"_i18n, chosen("demo/components/menu_delete"_i18n), "\uE872"); });
 }
 
 void PictureCell::prepareForReuse()
@@ -125,12 +125,15 @@ GridTab::GridTab()
 {
     this->inflateFromXMLRes("xml/tabs/grid.xml");
 
-    this->row->registerCell("Picture", []() { return PictureCell::create(); });
+    this->row->registerCell("Picture", []()
+        { return PictureCell::create(); });
     this->row->setDataSource(new RowSource());
 
     this->gridSource = new PictureSource(PAGE * 2);
-    this->grid->registerCell("Picture", []() { return PictureCell::create(); });
-    this->grid->onEndReached([this]() { this->loadMore(); });
+    this->grid->registerCell("Picture", []()
+        { return PictureCell::create(); });
+    this->grid->onEndReached([this]()
+        { this->loadMore(); });
     this->grid->setDataSource(this->gridSource);
     this->updateHeader();
 }
@@ -147,15 +150,14 @@ void GridTab::loadMore()
         return;
 
     std::weak_ptr<bool> alive = this->alive;
-    brls::delay(400, [this, alive]() {
-        brls::sync([this, alive]() {
+    brls::delay(400, [this, alive]()
+        { brls::sync([this, alive]()
+              {
             if (alive.expired())
                 return;
             this->gridSource->count = std::min(MAX_ITEMS, this->gridSource->count + PAGE);
             this->grid->notifyDataChanged();
-            this->updateHeader();
-        });
-    });
+            this->updateHeader(); }); });
 }
 
 void GridTab::updateHeader()

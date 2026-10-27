@@ -30,15 +30,18 @@ void setIcon(AccountUid id, Image* image)
     AccountProfileBase profilebase;
     memset(&profilebase, 0, sizeof(profilebase));
 
-    if (R_SUCCEEDED(accountGetPreselectedUser(&id))) {
+    if (R_SUCCEEDED(accountGetPreselectedUser(&id)))
+    {
         accountGetProfile(&profile, id);
 
         u32 iconsize = 0;
-        if (R_SUCCEEDED(accountProfileGetImageSize(&profile, &iconsize))) {
-            u8* icon = new u8[iconsize];
+        if (R_SUCCEEDED(accountProfileGetImageSize(&profile, &iconsize)))
+        {
+            u8* icon     = new u8[iconsize];
             u32 fakesize = 0;
 
-            if(R_SUCCEEDED(accountProfileLoadImage(&profile, icon, iconsize, &fakesize))) {
+            if (R_SUCCEEDED(accountProfileLoadImage(&profile, icon, iconsize, &fakesize)))
+            {
                 image->setImageFromMem(icon, iconsize);
             }
 
@@ -55,15 +58,18 @@ AccountWidget::AccountWidget()
     setSize(Size(44, 44));
 
     Result rc = accountInitialize(AccountServiceType_Application);
-    if (R_FAILED(rc)) {
+    if (R_FAILED(rc))
+    {
         brls::Logger::error("accountInitialize() failed: {}\n", rc);
     }
 
-    AccountUid userID = {0};
-    if (R_SUCCEEDED(rc)) {
+    AccountUid userID = { 0 };
+    if (R_SUCCEEDED(rc))
+    {
         rc = accountGetPreselectedUser(&userID);
 
-        if (R_FAILED(rc)) {
+        if (R_FAILED(rc))
+        {
             brls::Logger::error("accountGetPreselectedUser() failed: {}\n", rc);
         }
     }

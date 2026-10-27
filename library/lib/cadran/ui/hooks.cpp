@@ -10,4 +10,4 @@ Hooks& get()
     return hooks;
 }
 
-}   // namespace ui::hooks
+} // namespace ui::hooks

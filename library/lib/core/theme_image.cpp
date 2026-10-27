@@ -23,6 +23,7 @@
 #include <romfs/romfs.hpp>
 #endif
 
+#include <sys/stat.h>
 #include <algorithm>
 #include <atomic>
 #include <cmath>
@@ -31,7 +32,6 @@
 #include <mutex>
 #include <set>
 #include <tuple>
-#include <sys/stat.h>
 #include <vector>
 
 #include "borealis/extern/nanovg/stb_image.h"
@@ -42,254 +42,254 @@ namespace brls
 namespace
 {
 
-// Decoded pixels, RGBA, made smaller if needed
-struct Pixels
-{
-    std::vector<unsigned char> rgba;
-    int width = 0, height = 0;
-    NVGcolor mean {};
-};
-
-// Where a picture's bytes are: a file on disk, or bytes in memory (romfs)
-struct Source
-{
-    std::string file;
-    const unsigned char* data = nullptr;
-    size_t size               = 0;
-};
-
-std::atomic<int> decodingCount { 0 };
-std::mutex meanMutex;
-std::map<std::string, NVGcolor> means; // by keyOf(), under meanMutex
-
-std::set<std::string> reported; // paths already logged as unreadable (UI thread)
-// By path, flags, size cap and mask (UI thread)
-using ImageKey = std::tuple<std::string, int, int, bool>;
-std::map<ImageKey, std::weak_ptr<ThemeImage>> images;
-Event<const ThemeImage*> loadedEvent;
-
-// sRGB to linear light, for an average the eye agrees with
-const float* linearTable()
-{
-    // Made once, from whichever thread asks first (a static's
-    // initialisation is thread-safe)
-    static const std::vector<float> table = []
+    // Decoded pixels, RGBA, made smaller if needed
+    struct Pixels
     {
-        std::vector<float> values(256);
-        for (int i = 0; i < 256; i++)
-        {
-            float v   = i / 255.0f;
-            values[i] = v <= 0.04045f ? v / 12.92f : std::pow((v + 0.055f) / 1.055f, 2.4f);
-        }
-        return values;
-    }();
-    return table.data();
-}
-
-float toSRGB(float v)
-{
-    v = std::clamp(v, 0.0f, 1.0f);
-    return v <= 0.0031308f ? v * 12.92f : 1.055f * std::pow(v, 1.0f / 2.4f) - 0.055f;
-}
-
-// The average colour, each pixel weighed by its alpha, every few pixels
-// (a mean does not need them all)
-NVGcolor averageOf(const unsigned char* rgba, int width, int height)
-{
-    const float* linear = linearTable();
-    int step            = std::max(1, std::min(width, height) / 256);
-    double r = 0, g = 0, b = 0, weight = 0;
-    for (int y = 0; y < height; y += step)
-    {
-        const unsigned char* row = rgba + (size_t)y * width * 4;
-        for (int x = 0; x < width; x += step)
-        {
-            const unsigned char* p = row + x * 4;
-            double a               = p[3] / 255.0;
-            r += linear[p[0]] * a;
-            g += linear[p[1]] * a;
-            b += linear[p[2]] * a;
-            weight += a;
-        }
-    }
-    if (weight <= 0)
-        return nvgRGB(0, 0, 0);
-    return nvgRGBf(toSRGB((float)(r / weight)), toSRGB((float)(g / weight)), toSRGB((float)(b / weight)));
-}
-
-// An area average down to at most maxWidth x maxHeight, the ratio kept:
-// rows first, then columns
-void downscale(Pixels* pixels, const unsigned char* source, int width, int height, int maxWidth, int maxHeight)
-{
-    float scale = std::min(1.0f, std::min((float)maxWidth / width, (float)maxHeight / height));
-    int outW    = std::max(1, (int)std::lround(width * scale));
-    int outH    = std::max(1, (int)std::lround(height * scale));
-    pixels->width  = outW;
-    pixels->height = outH;
-    if (outW == width && outH == height)
-    {
-        pixels->rgba.assign(source, source + (size_t)width * height * 4);
-        return;
-    }
-
-    // The source spans [begin, end) of each output column (or row)
-    auto spans = [](int in, int out)
-    {
-        std::vector<std::pair<int, int>> result(out);
-        for (int i = 0; i < out; i++)
-        {
-            int begin = (int)((int64_t)i * in / out);
-            int end   = std::max(begin + 1, (int)((int64_t)(i + 1) * in / out));
-            result[i] = { begin, std::min(end, in) };
-        }
-        return result;
+        std::vector<unsigned char> rgba;
+        int width = 0, height = 0;
+        NVGcolor mean {};
     };
-    auto columns = spans(width, outW);
-    auto rows    = spans(height, outH);
 
-    // Premultiplied while averaging, so a transparent pixel's colour does
-    // not bleed into its neighbours
-    std::vector<uint32_t> horizontal((size_t)outW * height * 4);
-    for (int y = 0; y < height; y++)
+    // Where a picture's bytes are: a file on disk, or bytes in memory (romfs)
+    struct Source
     {
-        const unsigned char* row = source + (size_t)y * width * 4;
-        uint32_t* out            = horizontal.data() + (size_t)y * outW * 4;
-        for (int x = 0; x < outW; x++)
+        std::string file;
+        const unsigned char* data = nullptr;
+        size_t size               = 0;
+    };
+
+    std::atomic<int> decodingCount { 0 };
+    std::mutex meanMutex;
+    std::map<std::string, NVGcolor> means; // by keyOf(), under meanMutex
+
+    std::set<std::string> reported; // paths already logged as unreadable (UI thread)
+    // By path, flags, size cap and mask (UI thread)
+    using ImageKey = std::tuple<std::string, int, int, bool>;
+    std::map<ImageKey, std::weak_ptr<ThemeImage>> images;
+    Event<const ThemeImage*> loadedEvent;
+
+    // sRGB to linear light, for an average the eye agrees with
+    const float* linearTable()
+    {
+        // Made once, from whichever thread asks first (a static's
+        // initialisation is thread-safe)
+        static const std::vector<float> table = []
         {
-            uint32_t sum[4] = { 0, 0, 0, 0 };
-            for (int sx = columns[x].first; sx < columns[x].second; sx++)
+            std::vector<float> values(256);
+            for (int i = 0; i < 256; i++)
             {
-                const unsigned char* p = row + sx * 4;
-                sum[0] += p[0] * p[3];
-                sum[1] += p[1] * p[3];
-                sum[2] += p[2] * p[3];
-                sum[3] += p[3];
+                float v   = i / 255.0f;
+                values[i] = v <= 0.04045f ? v / 12.92f : std::pow((v + 0.055f) / 1.055f, 2.4f);
             }
-            uint32_t count = columns[x].second - columns[x].first;
-            for (int c = 0; c < 4; c++)
-                out[x * 4 + c] = sum[c] / count;
-        }
+            return values;
+        }();
+        return table.data();
     }
 
-    pixels->rgba.resize((size_t)outW * outH * 4);
-    for (int y = 0; y < outH; y++)
+    float toSRGB(float v)
     {
-        unsigned char* out = pixels->rgba.data() + (size_t)y * outW * 4;
-        uint32_t count     = rows[y].second - rows[y].first;
-        for (int x = 0; x < outW; x++)
+        v = std::clamp(v, 0.0f, 1.0f);
+        return v <= 0.0031308f ? v * 12.92f : 1.055f * std::pow(v, 1.0f / 2.4f) - 0.055f;
+    }
+
+    // The average colour, each pixel weighed by its alpha, every few pixels
+    // (a mean does not need them all)
+    NVGcolor averageOf(const unsigned char* rgba, int width, int height)
+    {
+        const float* linear = linearTable();
+        int step            = std::max(1, std::min(width, height) / 256);
+        double r = 0, g = 0, b = 0, weight = 0;
+        for (int y = 0; y < height; y += step)
         {
-            uint64_t sum[4] = { 0, 0, 0, 0 };
-            for (int sy = rows[y].first; sy < rows[y].second; sy++)
+            const unsigned char* row = rgba + (size_t)y * width * 4;
+            for (int x = 0; x < width; x += step)
+            {
+                const unsigned char* p = row + x * 4;
+                double a               = p[3] / 255.0;
+                r += linear[p[0]] * a;
+                g += linear[p[1]] * a;
+                b += linear[p[2]] * a;
+                weight += a;
+            }
+        }
+        if (weight <= 0)
+            return nvgRGB(0, 0, 0);
+        return nvgRGBf(toSRGB((float)(r / weight)), toSRGB((float)(g / weight)), toSRGB((float)(b / weight)));
+    }
+
+    // An area average down to at most maxWidth x maxHeight, the ratio kept:
+    // rows first, then columns
+    void downscale(Pixels* pixels, const unsigned char* source, int width, int height, int maxWidth, int maxHeight)
+    {
+        float scale    = std::min(1.0f, std::min((float)maxWidth / width, (float)maxHeight / height));
+        int outW       = std::max(1, (int)std::lround(width * scale));
+        int outH       = std::max(1, (int)std::lround(height * scale));
+        pixels->width  = outW;
+        pixels->height = outH;
+        if (outW == width && outH == height)
+        {
+            pixels->rgba.assign(source, source + (size_t)width * height * 4);
+            return;
+        }
+
+        // The source spans [begin, end) of each output column (or row)
+        auto spans = [](int in, int out)
+        {
+            std::vector<std::pair<int, int>> result(out);
+            for (int i = 0; i < out; i++)
+            {
+                int begin = (int)((int64_t)i * in / out);
+                int end   = std::max(begin + 1, (int)((int64_t)(i + 1) * in / out));
+                result[i] = { begin, std::min(end, in) };
+            }
+            return result;
+        };
+        auto columns = spans(width, outW);
+        auto rows    = spans(height, outH);
+
+        // Premultiplied while averaging, so a transparent pixel's colour does
+        // not bleed into its neighbours
+        std::vector<uint32_t> horizontal((size_t)outW * height * 4);
+        for (int y = 0; y < height; y++)
+        {
+            const unsigned char* row = source + (size_t)y * width * 4;
+            uint32_t* out            = horizontal.data() + (size_t)y * outW * 4;
+            for (int x = 0; x < outW; x++)
+            {
+                uint32_t sum[4] = { 0, 0, 0, 0 };
+                for (int sx = columns[x].first; sx < columns[x].second; sx++)
+                {
+                    const unsigned char* p = row + sx * 4;
+                    sum[0] += p[0] * p[3];
+                    sum[1] += p[1] * p[3];
+                    sum[2] += p[2] * p[3];
+                    sum[3] += p[3];
+                }
+                uint32_t count = columns[x].second - columns[x].first;
                 for (int c = 0; c < 4; c++)
-                    sum[c] += horizontal[((size_t)sy * outW + x) * 4 + c];
-            uint64_t alpha = sum[3] / count;
-            for (int c = 0; c < 3; c++)
-                out[x * 4 + c] = alpha ? (unsigned char)std::min<uint64_t>(255, sum[c] / count / alpha) : 0;
-            out[x * 4 + 3] = (unsigned char)alpha;
+                    out[x * 4 + c] = sum[c] / count;
+            }
+        }
+
+        pixels->rgba.resize((size_t)outW * outH * 4);
+        for (int y = 0; y < outH; y++)
+        {
+            unsigned char* out = pixels->rgba.data() + (size_t)y * outW * 4;
+            uint32_t count     = rows[y].second - rows[y].first;
+            for (int x = 0; x < outW; x++)
+            {
+                uint64_t sum[4] = { 0, 0, 0, 0 };
+                for (int sy = rows[y].first; sy < rows[y].second; sy++)
+                    for (int c = 0; c < 4; c++)
+                        sum[c] += horizontal[((size_t)sy * outW + x) * 4 + c];
+                uint64_t alpha = sum[3] / count;
+                for (int c = 0; c < 3; c++)
+                    out[x * 4 + c] = alpha ? (unsigned char)std::min<uint64_t>(255, sum[c] / count / alpha) : 0;
+                out[x * 4 + 3] = (unsigned char)alpha;
+            }
         }
     }
-}
 
-// A mask to tint: white, its alpha the picture's; a picture with no
-// transparent pixel keeps its dark parts (the ink of a drawing on paper)
-void makeMask(Pixels* pixels)
-{
-    std::vector<unsigned char>& rgba = pixels->rgba;
-    bool transparent                 = false;
-    for (size_t i = 3; i < rgba.size() && !transparent; i += 4)
-        transparent = rgba[i] < 255;
-    for (size_t i = 0; i < rgba.size(); i += 4)
+    // A mask to tint: white, its alpha the picture's; a picture with no
+    // transparent pixel keeps its dark parts (the ink of a drawing on paper)
+    void makeMask(Pixels* pixels)
     {
-        if (!transparent)
-            rgba[i + 3] = (unsigned char)(255 - (rgba[i] * 54 + rgba[i + 1] * 183 + rgba[i + 2] * 19) / 256);
-        rgba[i] = rgba[i + 1] = rgba[i + 2] = 255;
-    }
-}
-
-// Decodes (any thread): false when it cannot
-bool decode(const Source& source, Pixels* pixels, int maxWidth, int maxHeight)
-{
-    int width = 0, height = 0, channels = 0;
-    unsigned char* data = source.data
-        ? stbi_load_from_memory(source.data, (int)source.size, &width, &height, &channels, 4)
-        : stbi_load(source.file.c_str(), &width, &height, &channels, 4);
-    if (!data)
-        return false;
-    if (width <= 0 || height <= 0)
-    {
-        stbi_image_free(data);
-        return false;
-    }
-    if (maxWidth > 0)
-        downscale(pixels, data, width, height, maxWidth, maxHeight);
-    else
-    {
-        pixels->width  = width;
-        pixels->height = height;
-    }
-    pixels->mean = maxWidth > 0 ? averageOf(pixels->rgba.data(), pixels->width, pixels->height) : averageOf(data, width, height);
-    stbi_image_free(data);
-    return true;
-}
-
-// Where `path` is read from (UI thread for a resource: romfs is not
-// thread-safe); false when it is nowhere
-bool locate(const std::string& path, Source* source)
-{
-    std::string disk        = HotReload::diskResource(path);
-    const std::string& name = disk.empty() ? path : disk;
-#ifdef USE_LIBROMFS
-    if (name.rfind("@res/", 0) == 0)
-    {
-        try
+        std::vector<unsigned char>& rgba = pixels->rgba;
+        bool transparent                 = false;
+        for (size_t i = 3; i < rgba.size() && !transparent; i += 4)
+            transparent = rgba[i] < 255;
+        for (size_t i = 0; i < rgba.size(); i += 4)
         {
-            const romfs::Resource& resource = romfs::get(name.substr(5));
-            source->data                    = reinterpret_cast<const unsigned char*>(resource.data());
-            source->size                    = resource.size();
-            return source->size > 0;
+            if (!transparent)
+                rgba[i + 3] = (unsigned char)(255 - (rgba[i] * 54 + rgba[i + 1] * 183 + rgba[i + 2] * 19) / 256);
+            rgba[i] = rgba[i + 1] = rgba[i + 2] = 255;
         }
-        catch (const std::exception& e)
+    }
+
+    // Decodes (any thread): false when it cannot
+    bool decode(const Source& source, Pixels* pixels, int maxWidth, int maxHeight)
+    {
+        int width = 0, height = 0, channels = 0;
+        unsigned char* data = source.data
+            ? stbi_load_from_memory(source.data, (int)source.size, &width, &height, &channels, 4)
+            : stbi_load(source.file.c_str(), &width, &height, &channels, 4);
+        if (!data)
+            return false;
+        if (width <= 0 || height <= 0)
         {
+            stbi_image_free(data);
             return false;
         }
+        if (maxWidth > 0)
+            downscale(pixels, data, width, height, maxWidth, maxHeight);
+        else
+        {
+            pixels->width  = width;
+            pixels->height = height;
+        }
+        pixels->mean = maxWidth > 0 ? averageOf(pixels->rgba.data(), pixels->width, pixels->height) : averageOf(data, width, height);
+        stbi_image_free(data);
+        return true;
     }
+
+    // Where `path` is read from (UI thread for a resource: romfs is not
+    // thread-safe); false when it is nowhere
+    bool locate(const std::string& path, Source* source)
+    {
+        std::string disk        = HotReload::diskResource(path);
+        const std::string& name = disk.empty() ? path : disk;
+#ifdef USE_LIBROMFS
+        if (name.rfind("@res/", 0) == 0)
+        {
+            try
+            {
+                const romfs::Resource& resource = romfs::get(name.substr(5));
+                source->data                    = reinterpret_cast<const unsigned char*>(resource.data());
+                source->size                    = resource.size();
+                return source->size > 0;
+            }
+            catch (const std::exception& e)
+            {
+                return false;
+            }
+        }
 #endif
-    source->file = name.rfind("@res/", 0) == 0 ? std::string(BRLS_RESOURCES) + name.substr(5) : name;
-    return true;
-}
+        source->file = name.rfind("@res/", 0) == 0 ? std::string(BRLS_RESOURCES) + name.substr(5) : name;
+        return true;
+    }
 
-// The mean cache's key: a file changed on disk is another picture
-std::string keyOf(const std::string& path, const Source& source)
-{
-    if (source.file.empty())
-        return path;
-    struct stat info;
-    if (stat(source.file.c_str(), &info) != 0)
-        return path;
-    return path + "|" + std::to_string((long long)info.st_size) + "|" + std::to_string((long long)info.st_mtime);
-}
+    // The mean cache's key: a file changed on disk is another picture
+    std::string keyOf(const std::string& path, const Source& source)
+    {
+        if (source.file.empty())
+            return path;
+        struct stat info;
+        if (stat(source.file.c_str(), &info) != 0)
+            return path;
+        return path + "|" + std::to_string((long long)info.st_size) + "|" + std::to_string((long long)info.st_mtime);
+    }
 
-void rememberMean(const std::string& key, NVGcolor mean)
-{
-    std::lock_guard<std::mutex> lock(meanMutex);
-    means[key] = mean;
-}
+    void rememberMean(const std::string& key, NVGcolor mean)
+    {
+        std::lock_guard<std::mutex> lock(meanMutex);
+        means[key] = mean;
+    }
 
-bool recalledMean(const std::string& key, NVGcolor* mean)
-{
-    std::lock_guard<std::mutex> lock(meanMutex);
-    auto it = means.find(key);
-    if (it == means.end())
-        return false;
-    *mean = it->second;
-    return true;
-}
+    bool recalledMean(const std::string& key, NVGcolor* mean)
+    {
+        std::lock_guard<std::mutex> lock(meanMutex);
+        auto it = means.find(key);
+        if (it == means.end())
+            return false;
+        *mean = it->second;
+        return true;
+    }
 
-void reportOnce(const std::string& path)
-{
-    if (reported.insert(path).second)
-        Logger::error("theme: cannot load the image {}", path);
-}
+    void reportOnce(const std::string& path)
+    {
+        if (reported.insert(path).second)
+            Logger::error("theme: cannot load the image {}", path);
+    }
 
 } // namespace
 
@@ -330,7 +330,7 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, const The
     int maxSide = std::max(0, options.maxSide);
     bool mask   = options.mask;
     ImageKey key { path, flags, maxSide, mask };
-    auto it  = images.find(key);
+    auto it = images.find(key);
     if (it != images.end())
     {
         if (std::shared_ptr<ThemeImage> image = it->second.lock())
@@ -338,7 +338,7 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, const The
         images.erase(it);
     }
 
-    auto image   = std::make_shared<ThemeImage>();
+    auto image     = std::make_shared<ThemeImage>();
     image->path    = path;
     image->flags   = flags;
     image->maxSide = maxSide;
@@ -353,7 +353,7 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, const The
         return image;
     }
 
-    std::string meanKey = keyOf(path, source);
+    std::string meanKey            = keyOf(path, source);
     std::weak_ptr<ThemeImage> weak = image;
     decodingCount++;
     int maxWidth  = maxSide > 0 ? std::min(maxSide, MAX_WIDTH) : MAX_WIDTH;
@@ -404,7 +404,7 @@ bool ThemeImage::draw(NVGcontext* vg, float x, float y, float width, float heigh
         return false;
     float w = (float)this->width, h = (float)this->height;
     float left = x, top = y, right = x + width, bottom = y + height; // what is filled
-    float px = x, py = y;                                            // where the picture is
+    float px = x, py = y; // where the picture is
     switch (fit)
     {
         case BackgroundFit::COVER:
@@ -423,11 +423,11 @@ bool ThemeImage::draw(NVGcontext* vg, float x, float y, float width, float heigh
             break;
         }
         case BackgroundFit::CENTER:
-            px    = std::round(x + (width - w) / 2);
-            py    = std::round(y + (height - h) / 2);
-            left  = std::max(left, px);
-            top   = std::max(top, py);
-            right = std::min(right, px + w);
+            px     = std::round(x + (width - w) / 2);
+            py     = std::round(y + (height - h) / 2);
+            left   = std::max(left, px);
+            top    = std::max(top, py);
+            right  = std::min(right, px + w);
             bottom = std::min(bottom, py + h);
             break;
         case BackgroundFit::TILE:

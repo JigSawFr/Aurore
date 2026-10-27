@@ -4,6 +4,17 @@ on:
   push:
   pull_request:
 jobs:
+  format:
+    name: format
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: clang-format
+        run: |
+          # Ubuntu 24.04 ships clang-format 18, the version .clang-format is written for
+          git ls-files '*.c' '*.cc' '*.cpp' '*.h' '*.hpp' '*.m' '*.mm' ':!:**/extern/**' \
+            | xargs clang-format-18 --dry-run --Werror
   ios:
     runs-on: macos-latest
     steps:

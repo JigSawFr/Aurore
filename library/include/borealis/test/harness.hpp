@@ -254,27 +254,27 @@ void reportFailure(const char* file, int line, const std::string& what);
 int runTests(int argc, char** argv);
 } // namespace brls::test
 
-#define BRLS_TEST(name)                                                                      \
-    static void brls_test_##name();                                                         \
+#define BRLS_TEST(name)                                                                                \
+    static void brls_test_##name();                                                                    \
     static const bool brls_test_registered_##name = brls::test::registerTest(#name, brls_test_##name); \
     static void brls_test_##name()
 
-#define BRLS_CHECK(condition)                                                        \
-    do                                                                               \
-    {                                                                                \
-        if (!(condition))                                                            \
+#define BRLS_CHECK(condition)                                                            \
+    do                                                                                   \
+    {                                                                                    \
+        if (!(condition))                                                                \
             brls::test::reportFailure(__FILE__, __LINE__, "BRLS_CHECK(" #condition ")"); \
     } while (0)
 
-#define BRLS_CHECK_EQ(actual, expected)                                                                 \
-    do                                                                                                  \
-    {                                                                                                   \
-        auto brls_actual_   = (actual);                                                                 \
-        auto brls_expected_ = (expected);                                                               \
-        if (!(brls_actual_ == brls_expected_))                                                          \
-            brls::test::reportFailure(__FILE__, __LINE__,                                               \
+#define BRLS_CHECK_EQ(actual, expected)                                                                                  \
+    do                                                                                                                   \
+    {                                                                                                                    \
+        auto brls_actual_   = (actual);                                                                                  \
+        auto brls_expected_ = (expected);                                                                                \
+        if (!(brls_actual_ == brls_expected_))                                                                           \
+            brls::test::reportFailure(__FILE__, __LINE__,                                                                \
                 std::string("BRLS_CHECK_EQ(" #actual ", " #expected "): got ") + brls::test::describeValue(brls_actual_) \
-                    + ", expected " + brls::test::describeValue(brls_expected_));                       \
+                    + ", expected " + brls::test::describeValue(brls_expected_));                                        \
     } while (0)
 
 namespace brls::test

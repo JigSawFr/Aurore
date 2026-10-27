@@ -250,8 +250,8 @@ void HeadlessInputManager::updateUnifiedControllerState(ControllerState* state)
     updateControllerState(state, 0);
 
     // The keyboard on top of the buttons, as GLFW maps it
-    bool swap = Application::isSwapInputKeys();
-    bool enter = keys.count(BRLS_KBD_KEY_ENTER) || keys.count(BRLS_KBD_KEY_KP_ENTER);
+    bool swap   = Application::isSwapInputKeys();
+    bool enter  = keys.count(BRLS_KBD_KEY_ENTER) || keys.count(BRLS_KBD_KEY_KP_ENTER);
     bool escape = keys.count(BRLS_KBD_KEY_ESCAPE) > 0;
     state->buttons[swap ? BUTTON_B : BUTTON_A] |= enter;
     state->buttons[swap ? BUTTON_A : BUTTON_B] |= escape;

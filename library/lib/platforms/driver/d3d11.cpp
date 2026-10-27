@@ -1,5 +1,5 @@
-#include <borealis/platforms/driver/d3d11.hpp>
 #include <borealis/core/logger.hpp>
+#include <borealis/platforms/driver/d3d11.hpp>
 #define NANOVG_D3D11_IMPLEMENTATION
 #include <nanovg_d3d11.h>
 #include <versionhelpers.h>
@@ -123,9 +123,12 @@ bool D3D11Context::initDX(HWND hWnd, IUnknown* coreWindow, int width, int height
         swapDesc.BufferCount        = SwapChainBufferCount;
         swapDesc.Flags              = 0;
         swapDesc.Scaling            = DXGI_SCALING_STRETCH;
-        if (IsWindows10OrGreater()) {
+        if (IsWindows10OrGreater())
+        {
             swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-        } else {
+        }
+        else
+        {
             swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
         }
 #ifdef __WINRT__
@@ -174,12 +177,12 @@ bool D3D11Context::initDX(HWND hWnd, IUnknown* coreWindow, int width, int height
 
         char errorText[256] = { 0 };
         FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                      nullptr,
-                      hr,
-                      0,
-                      errorText,
-                      sizeof(errorText),
-                      nullptr);
+            nullptr,
+            hr,
+            0,
+            errorText,
+            sizeof(errorText),
+            nullptr);
         MessageBox(hWnd, errorText, "Init D3D11 Failed", MB_ICONERROR);
         ExitProcess(hr);
         return false;

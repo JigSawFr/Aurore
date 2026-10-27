@@ -21,7 +21,7 @@ class ScrollView : public brls::ScrollingFrame
     ScrollView();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-              brls::Style style, brls::FrameContext* ctx) override;
+        brls::Style style, brls::FrameContext* ctx) override;
     void willAppear(bool resetState) override;
     void onChildFocusGained(brls::View* directChild, brls::View* focusedView) override;
     brls::View* getNextFocus(brls::FocusDirection direction, brls::View* currentView) override;
@@ -42,7 +42,7 @@ class ScrollView : public brls::ScrollingFrame
     };
 
     bool reveal_pending = false;
-    bool parked = false;   // the focus waits on the frame: see step()
+    bool parked         = false; // the focus waits on the frame: see step()
 
     bool owns(brls::View* view) const;
     Span span_of(brls::View* view) const;

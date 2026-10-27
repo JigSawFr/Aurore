@@ -33,7 +33,7 @@ class GLFWInputManager : public InputManager
     short getControllersConnectedCount() override;
 
     void updateUnifiedControllerState(ControllerState* state) override;
-    
+
     void updateControllerState(ControllerState* state, int controller) override;
 
     bool getKeyboardKeyState(BrlsKeyboardScancode state) override;
@@ -45,7 +45,7 @@ class GLFWInputManager : public InputManager
     void sendRumble(unsigned short controller, unsigned short lowFreqMotor, unsigned short highFreqMotor) override;
 
     void runloopStart() override;
-    
+
     void setPointerLock(bool lock) override;
 
   private:

@@ -28,17 +28,17 @@ RecyclerCell::RecyclerCell()
 
     setHeight(Application::getStyle()["brls/dropdown/listItemHeight"]);
 
-    this->registerClickAction([this](View* view) {
+    this->registerClickAction([this](View* view)
+        {
         RecyclerFrame* recycler = dynamic_cast<RecyclerFrame*>(getParent()->getParent());
         if (recycler)
             recycler->getDataSource()->didSelectRowAt(recycler, indexPath);
-        return true;
-    });
+        return true; });
 
-    subscription = Application::getGlobalInputTypeChangeEvent()->subscribe([this](InputType type) {
+    subscription = Application::getGlobalInputTypeChangeEvent()->subscribe([this](InputType type)
+        {
         bool isTouch = type == InputType::TOUCH;
-        this->showSeparator(isTouch || !this->focused);
-    });
+        this->showSeparator(isTouch || !this->focused); });
 
     this->addGestureRecognizer(new TapGestureRecognizer(this));
 }
@@ -184,28 +184,24 @@ View* RecyclerFrame::getNextCellFocus(FocusDirection direction, View* currentVie
 
 RecyclerFrame::RecyclerFrame()
 {
-    registerCell("brls::Header", []() { return RecyclerHeader::create(); });
+    registerCell("brls::Header", []()
+        { return RecyclerHeader::create(); });
 
     // Padding
-    this->registerFloatXMLAttribute("paddingTop", [this](float value) {
-        this->setPaddingTop(value);
-    });
+    this->registerFloatXMLAttribute("paddingTop", [this](float value)
+        { this->setPaddingTop(value); });
 
-    this->registerFloatXMLAttribute("paddingRight", [this](float value) {
-        this->setPaddingRight(value);
-    });
+    this->registerFloatXMLAttribute("paddingRight", [this](float value)
+        { this->setPaddingRight(value); });
 
-    this->registerFloatXMLAttribute("paddingBottom", [this](float value) {
-        this->setPaddingBottom(value);
-    });
+    this->registerFloatXMLAttribute("paddingBottom", [this](float value)
+        { this->setPaddingBottom(value); });
 
-    this->registerFloatXMLAttribute("paddingLeft", [this](float value) {
-        this->setPaddingLeft(value);
-    });
+    this->registerFloatXMLAttribute("paddingLeft", [this](float value)
+        { this->setPaddingLeft(value); });
 
-    this->registerFloatXMLAttribute("padding", [this](float value) {
-        this->setPadding(value);
-    });
+    this->registerFloatXMLAttribute("padding", [this](float value)
+        { this->setPadding(value); });
 
     this->setScrollingBehavior(ScrollingBehavior::CENTERED);
 
@@ -232,7 +228,7 @@ void RecyclerFrame::setDataSource(RecyclerDataSource* source, bool deleteDataSou
     if (this->dataSource && this->deleteDataSource)
         delete this->dataSource;
 
-    this->dataSource = source;
+    this->dataSource       = source;
     this->deleteDataSource = deleteDataSource;
     if (layouted)
         reloadData();
@@ -348,7 +344,7 @@ void RecyclerFrame::selectRowAt(IndexPath indexPath, bool animated)
     if (indexPath.row < -1)
         indexPath.row = -1;
 
-    size_t count    = 0;
+    size_t count = 0;
     float offset = 0;
 
     for (size_t j = 0; j < indexPath.section; j++)
@@ -541,7 +537,7 @@ void RecyclerFrame::removeCell(View* view)
 
     // Find the index of the view
     size_t index;
-    bool found = false;
+    bool found     = false;
     auto& children = this->contentBox->getChildren();
 
     for (size_t i = 0; i < children.size(); i++)
