@@ -26,6 +26,8 @@
 
 #include <cmath>
 #include <ctime>
+#include <filesystem>
+#include <fstream>
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
@@ -363,6 +365,59 @@ BRLS_TEST(theme_picker_follows_a_one_variant_palette)
     h.settle();
     BRLS_CHECK_EQ(ui::prefs().theme_file, std::string(""));
     BRLS_CHECK(brls::Application::getThemeVariant() == brls::ThemeVariant::DARK);
+}
+
+BRLS_TEST(theme_icon_is_read_and_inherited)
+{
+    Harness h;
+    namespace fs = std::filesystem;
+    const fs::path dir = fs::temp_directory_path() / "aurore_theme_icon_test";
+    fs::create_directories(dir);
+    auto write = [&dir](const char* name, const char* text)
+    {
+        std::ofstream(dir / name) << text;
+        return (dir / name).string();
+    };
+    write("motif.inc", "icon = gem\n");
+    const std::string own       = write("own.theme", "name = Own\nicon = leaf\naccent = #3ddc97\n");
+    const std::string none      = write("none.theme", "name = None\naccent = #3ddc97\n");
+    const std::string inherits  = write("inherits.theme", "name = Inherits\ninherit = builtin:ocean\n");
+    const std::string overrides = write("overrides.theme", "inherit = own.theme\nicon = tree\n");
+    const std::string includes  = write("includes.theme", "@include motif.inc\naccent = #3ddc97\n");
+
+    BRLS_CHECK_EQ(brls::Theme::inspect(own).icon, std::string("leaf"));
+    BRLS_CHECK(brls::Theme::inspect(own).warnings.empty() && brls::Theme::inspect(own).ok());
+    BRLS_CHECK_EQ(brls::Theme::inspect(none).icon, std::string(""));
+    BRLS_CHECK_EQ(brls::Theme::inspect(inherits).icon, std::string("wave"));
+    BRLS_CHECK_EQ(brls::Theme::inspect(overrides).icon, std::string("tree"));
+    BRLS_CHECK_EQ(brls::Theme::inspect(includes).icon, std::string("gem"));
+    fs::remove_all(dir);
+
+    // Every preset has its motif
+    for (const brls::ThemeInfo& info : brls::Theme::builtinThemes())
+        BRLS_CHECK(!info.icon.empty());
+}
+
+BRLS_TEST(seasonal_palette_shows_the_motif_of_the_date)
+{
+    Harness h;
+    const struct
+    {
+        int month, day;
+        const char* icon;
+    } dates[] = {
+        { 1, 20, "snowflake" }, { 2, 12, "heart" }, { 2, 17, "lantern" }, { 4, 10, "blossom" },
+        { 7, 14, "sun" }, { 10, 1, "leaf" }, { 10, 31, "pumpkin" }, { 12, 24, "tree" }, { 12, 31, "firework" },
+    };
+    for (const auto& date : dates)
+    {
+        brls::setSimulatedWallTime(noonOf(2026, date.month, date.day));
+        std::string icon;
+        for (const brls::ThemeInfo& info : brls::Theme::builtinThemes())
+            if (info.path == "builtin:seasonal")
+                icon = info.icon;
+        BRLS_CHECK_EQ(icon, std::string(date.icon));
+    }
 }
 
 BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
