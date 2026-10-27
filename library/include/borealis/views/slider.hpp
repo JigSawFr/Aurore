@@ -64,7 +64,17 @@ class Slider : public Box
 
     static View* create();
 
+  protected:
+    // The knob takes the focus and says these: a slider, its cell's title,
+    // its value as "40%".
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::SLIDER; }
+    std::string getDefaultAccessibilityLabel() override;
+    std::string getDefaultAccessibilityValue() override;
+
   private:
+    int announced = -1; // the value last said, in percent
+    void announceValue();
+
     Rectangle* line;
     Rectangle* lineEmpty;
     Rectangle* pointer;

@@ -7,7 +7,13 @@
         "slider": "슬라이더",
         "text_field": "텍스트 필드",
         "tab": "탭",
-        "list": "목록"
+        "list": "목록",
+        "dialog": "대화 상자"
     },
-    "disabled": "비활성화됨"
+    "disabled": "비활성화됨",
+    "on": "켜짐",
+    "off": "꺼짐",
+    "selected": "선택됨",
+    "position": "{1}개 중 {0}번째",
+    "percent": "{}%"
 }

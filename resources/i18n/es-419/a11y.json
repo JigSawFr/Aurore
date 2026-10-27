@@ -7,7 +7,13 @@
         "slider": "control deslizante",
         "text_field": "campo de texto",
         "tab": "pestaña",
-        "list": "lista"
+        "list": "lista",
+        "dialog": "cuadro de diálogo"
     },
-    "disabled": "desactivado"
+    "disabled": "no disponible",
+    "on": "activado",
+    "off": "desactivado",
+    "selected": "seleccionado",
+    "position": "{} de {}",
+    "percent": "{} %"
 }

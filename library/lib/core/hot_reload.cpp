@@ -12,7 +12,20 @@
 #include <borealis/core/logger.hpp>
 #include <borealis/core/theme.hpp>
 #include <borealis/core/time.hpp>
+#include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
+#ifdef USE_BOOST_FILESYSTEM
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#elif __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif __has_include("experimental/filesystem")
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#else
+#error "Failed to include <filesystem> header!"
+#endif
 
 #if defined(__SWITCH__) || defined(__PSV__) || defined(PS4) || defined(ANDROID) || defined(IOS) || defined(TVOS) \
     || defined(__WINRT__)
@@ -28,6 +41,10 @@ namespace hot_reload_detail
     // Twice a second or so: an editor's save is seen at the next look, and
     // acted upon at the one after, once the file has stopped changing
     constexpr Time POLL_INTERVAL = 300000;
+    // A file watched larger than this is not read (an XML or a theme is a
+    // few kilobytes)
+    constexpr size_t MAX_FILE_BYTES = 4 * 1024 * 1024;
+    using FileTime                  = decltype(fs::last_write_time(fs::path()));
 
     struct Watched
     {
@@ -37,6 +54,9 @@ namespace hot_reload_detail
         size_t hash        = 0;
         bool pending       = false;
         size_t pendingHash = 0;
+        // When it was last read, and its size: read again only when they change
+        FileTime modified {};
+        uintmax_t size = 0;
         std::set<Activity*> activities; // the ones built from it (XML)
     };
 
@@ -46,13 +66,26 @@ namespace hot_reload_detail
 
     bool contents(const std::string& path, size_t* hash)
     {
-        std::ifstream file(path, std::ios::binary);
-        if (!file)
+        std::string text;
+        if (!readSmallFile(path, MAX_FILE_BYTES, &text))
             return false;
-        std::stringstream text;
-        text << file.rdbuf();
-        *hash = std::hash<std::string> {}(text.str());
+        *hash = std::hash<std::string> {}(text);
         return true;
+    }
+
+    // Its time and size now; false when it is not there
+    bool stamp(const std::string& path, FileTime* modified, uintmax_t* size)
+    {
+        try
+        {
+            *modified = fs::last_write_time(path);
+            *size     = fs::file_size(path);
+            return true;
+        }
+        catch (...)
+        {
+            return false;
+        }
     }
 
     Watched& watch(const std::string& path)
@@ -62,9 +95,10 @@ namespace hot_reload_detail
                 return file;
         Watched file;
         file.path = path;
+        stamp(path, &file.modified, &file.size);
         file.read = contents(path, &file.hash);
         files.push_back(file);
-        Logger::debug("hot reload: watching {}", path);
+        Logger::debug("hot reload: watching {}", escapeControlChars(path));
         return files.back();
     }
 } // namespace hot_reload_detail
@@ -91,7 +125,7 @@ void HotReload::setEnabled(bool on, const std::string& resourcesDir)
 
 std::string HotReload::diskResource(const std::string& value)
 {
-    if (!HotReload::enabled || resources.empty() || value.rfind("@res/", 0) != 0)
+    if (!HotReload::enabled || resources.empty() || value.rfind("@res/", 0) != 0 || !isResourceNameSafe(value))
         return "";
     std::string path = resources + value.substr(5);
     if (!std::ifstream(path).good())
@@ -166,8 +200,18 @@ void HotReload::poll()
     bool theme   = false;
     for (Watched& file : files)
     {
+        // Unchanged since it was read: not read again
+        FileTime modified;
+        uintmax_t size;
+        if (!stamp(file.path, &modified, &size)) // being written, or moved away
+            continue;
+        if (file.read && !file.pending && modified == file.modified && size == file.size)
+            continue;
+        file.modified = modified;
+        file.size     = size;
+
         size_t hash;
-        if (!contents(file.path, &hash)) // being written, or moved away
+        if (!contents(file.path, &hash))
             continue;
         if (file.read && hash == file.hash)
         {
@@ -184,7 +228,7 @@ void HotReload::poll()
         file.pending = false;
         file.read    = true;
         file.hash    = hash;
-        Logger::info("hot reload: {} changed", file.path);
+        Logger::info("hot reload: {} changed", escapeControlChars(file.path));
         if (file.theme)
         {
             theme   = true;
