@@ -18,7 +18,6 @@
 #include <strings.h>
 
 #include <memory>
-#include <sstream>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/logger.hpp>
 #include <borealis/platforms/desktop/desktop_platform.hpp>
@@ -1039,56 +1038,6 @@ std::string DesktopPlatform::getDnsServer()
 #elif defined(__linux__)
 #endif
     return dnssvr;
-}
-
-std::string DesktopPlatform::exec(const char* cmd)
-{
-    std::stringstream ss;
-#if defined(ANDROID)
-#elif defined(IOS) || defined(TVOS)
-#elif defined(__APPLE__) || defined(__linux__)
-    FILE* pipe = popen(cmd, "r");
-    if (!pipe)
-    {
-        throw std::runtime_error("popen() failed!");
-    }
-    char buffer[128];
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
-    {
-        ss << buffer;
-    }
-    pclose(pipe);
-#elif defined(_WIN32) and !defined(__WINRT__)
-    PROCESS_INFORMATION pi;
-    std::vector<WCHAR> cmdline(strlen(cmd) + 1);
-    SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, TRUE };
-    MultiByteToWideChar(CP_UTF8, 0, cmd, -1, cmdline.data(), cmdline.size());
-
-    STARTUPINFOW si = { sizeof(STARTUPINFOW) };
-    HANDLE hStdread = nullptr;
-    si.dwFlags      = STARTF_USESTDHANDLES;
-    CreatePipe(&hStdread, &si.hStdOutput, &sa, 0);
-    SetHandleInformation(hStdread, HANDLE_FLAG_INHERIT, 0);
-
-    if (CreateProcessW(nullptr, cmdline.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi))
-    {
-        WaitForSingleObject(pi.hProcess, INFINITE);
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-        CloseHandle(si.hStdOutput);
-
-        char buffer[128];
-        DWORD readlen = 0;
-        while (ReadFile(hStdread, buffer, sizeof(buffer), &readlen, nullptr) == TRUE && readlen > 0)
-        {
-            ss.write(buffer, readlen);
-        }
-    }
-
-    CloseHandle(hStdread);
-#endif
-    // ss.seekp(-1, std::ios_base::end);
-    return ss.str();
 }
 
 bool DesktopPlatform::isApplicationMode()

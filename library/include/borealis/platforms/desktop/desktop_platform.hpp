@@ -62,7 +62,6 @@ class DesktopPlatform : public Platform
     bool canSetBacklightBrightness() override;
     std::string getIpAddress() override;
     std::string getDnsServer() override;
-    std::string exec(const char* cmd);
     bool isApplicationMode() override;
     void exitToHomeMode(bool value) override;
     void forceEnableGamePlayRecording() override;
