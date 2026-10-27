@@ -28,9 +28,6 @@ jobs:
           # Ubuntu 24.04 ships clang-format 18, the version .clang-format is written for
           git ls-files '*.c' '*.cc' '*.cpp' '*.h' '*.hpp' '*.m' '*.mm' ':!:**/extern/**' \
             | xargs clang-format-18 --dry-run --Werror
-      - name: Third-party notices
-        # Each vendored component and font listed, the versions they say
-        run: python3 tools/check_notices.py
   ios:
     runs-on: macos-14
     timeout-minutes: 40
@@ -422,6 +419,9 @@ jobs:
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON \
               -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
           cmake --build build
+      - name: Third-party notices
+        # Each vendored component and font listed, the versions they say (needs the submodules)
+        run: python3 tools/check_notices.py
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Bench
