@@ -661,12 +661,14 @@ BRLS_TEST(theme_background_keys_are_read_and_inherited)
 
     // Used: the surfaces let the picture through, and are opaque again after
     NVGcolor surface = brls::Theme::getDarkTheme()["cadran/surf"];
+    NVGcolor warning = brls::Theme::getDarkTheme()["cadran/amber_surf"];
     BRLS_CHECK(brls::Theme::loadFile(child));
     brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
     h.settle();
     BRLS_CHECK(brls::Application::hasThemeBackground());
     BRLS_CHECK(std::fabs(brls::Theme::getDarkTheme()["cadran/surf"].a - surface.a * 0.8f) < 0.001f);
     BRLS_CHECK(std::fabs(brls::Theme::getDarkTheme()["brls/sidebar/background"].a - 0.8f) < 0.001f);
+    BRLS_CHECK(std::fabs(brls::Theme::getDarkTheme()["cadran/amber_surf"].a - warning.a * 0.8f) < 0.001f);
     BRLS_CHECK(brls::Theme::getDarkTheme()["brls/background"].a == 1.0f);
     BRLS_CHECK(brls::Theme::loadFile(plain));
     h.settle();
@@ -675,6 +677,7 @@ BRLS_TEST(theme_background_keys_are_read_and_inherited)
     brls::Theme::reset();
     h.settle();
     BRLS_CHECK_EQ(brls::Theme::getDarkTheme()["cadran/surf"].a, surface.a);
+    BRLS_CHECK_EQ(brls::Theme::getDarkTheme()["cadran/amber_surf"].a, warning.a);
 }
 
 BRLS_TEST(theme_text_is_checked_on_its_picture)
