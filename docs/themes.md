@@ -67,6 +67,7 @@ brls/highlight/stroke_width = 6
 - **`counterpart`**, for a file that styles one variant only: the file (or preset) with the other variant, the same look in light or dark. A picker asked for the variant this file lacks switches to it (Cadran's does, below); `--check-themes` reports a counterpart that cannot be read or lacks that variant.
 - **Background** (`background_image`, `background_fit`, `background_dim`, `surface_opacity`): for every variant the file styles, or in `[light]`/`[dark]` for one; below.
 - **`icon`**: the Cadran icon (`cadran/view/cadran_icon.hpp`) a picker shows the file with: Cadran's palette picker draws it in the file's accent on a swatch of its background and surface. The motifs drawn for palettes: `snowflake`, `heart`, `lantern`, `blossom`, `sun`, `wave`, `leaf`, `pumpkin`, `tree`, `firework`, `gem`, `dune`, `contrast`, `moon`, `bolt`, `sparkle`; any other icon of the list works too. Inherited, and an `@include`d file's counts, as `background_image`. Without one (or with a name Cadran does not know), `sparkle`.
+- **Logos and images** (`logo`, `icon.<name>`, `image.<slot>`, `preview`): pictures in the theme's folder for the app's logo, Cadran's icons, the app's image slots and the theme's thumbnail in a picker, for every variant or in `[light]`/`[dark]`; below, [Logos and images](#logos-and-images).
 - **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them; for the background, a line of this file for every variant also beats the inherited file's `[light]`/`[dark]` one. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets; loops stop after 8 levels.
 - **Later lines win**; palette values are derived first, then `[colors]`, then `[light]`/`[dark]`, so an explicit key always beats the derived one.
 - **Errors never stop the file**: a line that cannot be read (a bad colour, an unknown section, a missing include) is skipped and reported, with its file and line number. An unknown key is kept (an app's own keys are fine) and reported as a warning, in case it is a typo.
@@ -172,6 +173,111 @@ To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BOREALIS_THEME=LIGH
 A theme's pictures are loaded by `ThemeImages` (`borealis/core/theme_image.hpp`), the one loader for them: decoded on the async thread (`brls::async`), made smaller when larger than 1920×1080 (the ratio kept, an average of the pixels each one covers), the texture made on the UI thread (`brls::sync`), and freed when nothing holds it any more: the background's when the theme or the variant changes. Only the variant on screen has its picture loaded: a 1920×1080 picture is 8 MB of texture (RGBA), so at most 8 MB for the background, plus the picture being replaced while the next one loads. A JPEG that size takes a few tens of milliseconds to decode on a desktop, a few hundred on a Switch, on the async thread.
 
 
+## Logos and images
+
+Besides its background, a theme folder can bring pictures of its own: the app's logo, some of Cadran's icons, the pictures an app lets themes replace (its image slots), and a thumbnail of itself for a picker. Each key names a file in the theme's folder, confined like `background_image` (above: no absolute path, no `..` out of the folder, no link out of it), PNG or JPEG.
+
+| Key | Value | What |
+| --- | --- | --- |
+| `logo` | a file, or `none` | The app's logo wherever Cadran draws its mark (`CadranIcon` "mark": the header, the about screen), instead of the app's own drawing (`ui::hooks`' `mark`) or Aurore's. Fitted in the mark's box, its ratio kept, centred, drawn as it is |
+| `icon.<name>` | a file, or `none` | Cadran's icon `<name>` (`settings`, `info`, `gamepad`…: the names of `cadran/view/cadran_icon.hpp`), wherever it is drawn (`CadranIcon`, `CadranIcon::glyph`: the rail, the rows and sheets, the pills, the palettes' motifs; not the header's language, theme and text size buttons, which are drawn otherwise). Fitted in the icon's box, its ratio kept |
+| `icon.<name>.tint` | `true` or `false` | `true`: the picture is a mask drawn in the icon's colour (below); `false` (the default): drawn as it is |
+| `image.<slot>` | a file, or `none` | The picture of an image slot the app declares (`playguard/loading/art`, below) |
+| `preview` | a file, or `none` | The theme's thumbnail in a picker: Cadran's palette picker draws it in the row's square, instead of the swatch of its colours |
+
+Each is read at the top (every variant the file styles) or in `[light]`/`[dark]` (one variant): a dark logo and a light one, an icon replaced in one variant only. Inherited and included as the background is: a file's own line for every variant beats the inherited file's `[light]`/`[dark]` one, and `none` takes away an inherited picture. A variant the file does not style has none of them. Without these keys nothing changes, pixel for pixel.
+
+**The tint**: a monochrome icon follows the theme as Cadran's drawings do when it is a mask: `icon.settings.tint = true` draws the picture in the icon's colour of the moment (the rail's ink, the focus's colour on the focused row, the accent of a checked line, a disabled grey), keeping only its shape: each pixel's alpha, its colour ignored. A picture with no transparent pixel at all (a black drawing on white, a JPEG) is read by its darkness instead: black is the ink, white is nothing. Without the tint the picture is drawn in its own colours, at the opacity of the icon's colour (a faded icon fades), the same in every state: for a coloured icon, or one that must stay as it is. Draw tinted icons white (or black) on transparent, the shape filling its 24-unit box as Cadran's do, with no margin of its own beyond theirs.
+
+**What happens when**: the pictures are decoded on the async thread (`ThemeImages`) when something first draws them, the built-in logo or icon drawn until they are ready (a frame or two). A file that is not there is an error of `inspect()` and `listThemes()` (`icon.settings: cannot read …`; a picker leaves the theme out); one that cannot be decoded is an error of an explicit check only (`inspect(path, true)`, `--check-themes`). Used anyway, it is logged once and the built-in logo, icon or slot picture is drawn. An `icon.<name>` that no icon has (`icon.cog`), or an `image.<slot>` the app does not declare, is a warning (`image.myapp/art: the app has no such image slot (kept); its slots: …`), kept in case another version of the app has it.
+
+**Sizes and memory**: a logo is made at most 256×256 (`ThemeImages::LOGO_SIZE`), an icon and a preview 128×128 (`ICON_SIZE`, `PREVIEW_SIZE`), at load, the ratio kept: a larger file costs its decoding time only. An image slot's pictures are made at most what the app declared for it (`maxSide`), else 1920×1080. Only the variant on screen has its pictures loaded, and only those drawn; they are let go of when the theme or the variant changes (a picture still drawn by a view, until it takes the new one), the picker's previews when it closes. A logo and a dozen icons are about 1 MB of textures.
+
+### Image slots: pictures an app lets themes replace
+
+An app declares, once at start-up and before it loads the user's theme, the pictures a theme may replace, with its own as the fallback:
+
+```cpp
+// PlayGuard: the loading screen's art; PlayShelf: the placeholder of a game
+// without a cover, made at most 512 px
+brls::Theme::addImageSlot("playguard/loading/art", "@res/img/loading_art.png");
+brls::Theme::addImageSlot("playshelf/cover/placeholder", "@res/img/no_cover.png", 512);
+```
+
+A theme then replaces it:
+
+```ini
+image.playguard/loading/art = loading.png
+[light]
+image.playguard/loading/art = loading-day.png
+```
+
+and the app shows whichever is in use, live:
+
+```xml
+<!-- Follows the theme: the theme's picture, else the app's -->
+<brls:Image themeImage="playshelf/cover/placeholder" scalingType="fit"/>
+```
+
+```cpp
+image->setThemeImage("playguard/loading/art");   // the same, in code
+
+// Drawn by the app's own view: the picture now (the theme's for the
+// variant on screen, else the fallback; nullptr for neither), maybe still
+// loading
+std::shared_ptr<brls::ThemeImage> art = brls::Theme::image("playguard/loading/art");
+if (art && art->ready())
+    art->draw(vg, x, y, width, height, brls::BackgroundFit::COVER);
+// ...asked again when the theme changes, and drawn again once it is loaded
+brls::Application::getThemeChangedEvent()->subscribe([](brls::ThemeVariant) { /* Theme::image(key) again */ });
+brls::ThemeImages::getLoadedEvent()->subscribe([](const brls::ThemeImage* image) { /* redraw */ });
+```
+
+Slot keys are the app's: prefix them with its name (`myapp/…`). A slot without a fallback (`addImageSlot("myapp/banner")`) shows nothing unless a theme gives it a picture: `Theme::image` is `nullptr`, `setThemeImage` clears the image. `brls::Image::setThemeImage` keeps the picture it shows until the next one is loaded, takes the fallback back when the theme's cannot be read or the theme goes, and stops following the slot when the image is set another way (`setImageFromFile`, `clear`). `Theme::getImageSlots()` lists them, for a theme author's documentation. Keep a transparent edge around a slot's picture that a `brls::Image` draws larger than it is: the picture's edge pixels are stretched over the rest of the view (borealis' images do this).
+
+Apps that draw their logo themselves (a loading screen of their own, a splash) ask for the theme's the same way: `brls::Theme::logo()` (`nullptr` without one), drawn with `logo->draw(vg, x, y, size, size, brls::BackgroundFit::CONTAIN)` when `ready()`, their own otherwise. `brls::Theme::icon(name, &tint)` is an icon's picture, for a view that draws Cadran's icons its own way, and `brls::Theme::getPictures(variant)` the paths of all of them.
+
+### The preview in a picker
+
+`preview` is shown by Cadran's palette picker in the theme's row (`ui::pick_palette`), in the swatch's rounded square, filling it (cut at its edges, centred), with its hairline. Listing the themes decodes nothing: the picker asks for each preview when it opens, they are decoded on the async thread, and each row shows the swatch of its colours until its preview is ready. A square picture of a screen of the theme, or its emblem on its background, at least 72×72 (the square is 36 units wide, 54 pixels on a 1080p screen), made 128×128 at most when loaded. `ThemeInfo::lightPictures`/`darkPictures` (`pictures(variant)`) have it for an app's own picker: `brls::ThemeImages::load(info.pictures(variant).preview, options)` with `options.maxSide = brls::ThemeImages::PREVIEW_SIZE`.
+
+### The demo's Prism
+
+A theme folder with a logo per variant, three icons (two tinted masks, a coloured one), a preview, and the picture of the demo's image slot (`demo/about/art`, the About tab's picture), all drawn by `tools/make_prism_pictures.py`:
+
+```ini
+# resources/themes/prism/theme.theme
+name = Prism
+author = Aurore demo
+version = 1.0
+description = Light split into its colours: a logo, icons and a picture of its own.
+icon = gem
+
+preview = preview.png
+icon.settings = icons/settings.png
+icon.settings.tint = true
+icon.info = icons/info.png
+icon.info.tint = true
+icon.gamepad = icons/gamepad.png
+image.demo/about/art = about.png
+
+[light]
+background = #f6f4fb
+surface = #ffffff
+text = #221d33
+accent = #6a3fd1
+logo = logo-light.png
+
+[dark]
+background = #14111f
+surface = #1e1a2e
+text = #f1eefa
+accent = #b48cff
+logo = logo-dark.png
+```
+
+The demo declares its slot in `demo/src/demo_app.cpp` (`Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512)`), and the About tab's image follows it (`themeImage="demo/about/art"`, `resources/xml/activity/main.xml`). To see it: `aurore_demo -t @res/themes/prism/theme.theme`, or the palette picker.
+
 ## Every key
 
 Without a theme file, each variant has the core's defaults, then Cadran's palettes over them (`cadran/ui/cadran_palette.hpp`, the single place they are defined) when Cadran is on (the default).
@@ -223,7 +329,7 @@ Without a theme file, each variant has the core's defaults, then Cadran's palett
 | `cadran/brand/track`, `brand/fill`, `brand/glow` | The loading screen's bar, alike in both variants |
 | `cadran/none` | Transparent |
 
-Not keys, on purpose: the app's logo (`CadranIcon` "mark", the app's own drawing through `ui::hooks`' `mark`), the debug layer and the layout wireframe (`-v`), and a `Rectangle`'s default colour before the app sets one.
+Not colour keys, on purpose: the app's logo (`CadranIcon` "mark", the app's own drawing through `ui::hooks`' `mark`; a theme replaces it with a picture, `logo`, below), the debug layer and the layout wireframe (`-v`), and a `Rectangle`'s default colour before the app sets one.
 
 **Metrics** (`[metrics]`): any of `library/lib/core/style.cpp` and Cadran's (`cadran/radius/*`, `brls/tab_frame/sidebar_width`…). The focus highlight's look is there: `brls/highlight/stroke_width`, `corner_radius`, `shadow_width`, `shadow_offset`, `shadow_feather`, `shadow_opacity`. Metrics read when drawing (the highlight's) change at once; the ones read when a view is made (paddings, sizes) apply to the views made afterwards.
 
@@ -306,7 +412,7 @@ brls::Theme::checkContrast(variant);        // the pairs under their minimum
 brls::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
 ```
 
-`ThemeInfo` has `path`, `id` (a theme folder's name for its `theme.theme`), `name`, `author`, `version`, `description`, `icon` (its `icon`, "" without one), `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `lightBackground`/`darkBackground` (`ThemeBackground`: `image`, `fit`, `dim`, `surfaceOpacity`; `background(variant)`), `backgroundImage` (the dark variant's picture, else the light one's), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`), and lists its `*.theme` files and theme folders, cheaply (no picture decoded unless asked, above); a file's `@include`s are best named `*.inc`, so that they are not listed.
+`ThemeInfo` has `path`, `id` (a theme folder's name for its `theme.theme`), `name`, `author`, `version`, `description`, `icon` (its `icon`, "" without one), `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `lightBackground`/`darkBackground` (`ThemeBackground`: `image`, `fit`, `dim`, `surfaceOpacity`; `background(variant)`), `lightPictures`/`darkPictures` (`ThemePictures`: `logo`, `preview`, `icons`, `images`; `pictures(variant)`), `backgroundImage` (the dark variant's picture, else the light one's), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`), and lists its `*.theme` files and theme folders, cheaply (no picture decoded unless asked, above); a file's `@include`s are best named `*.inc`, so that they are not listed.
 
 For what a theme's pictures need (the background, and what later keys draw):
 
@@ -322,6 +428,13 @@ brls::ThemeImages::getLoadedEvent()->subscribe([](const brls::ThemeImage* image)
 if (image->ready()) nvgImagePattern(vg, x, y, image->width, image->height, 0, image->texture, 1.0f);
 brls::ThemeImages::meanColor(path, &color);  // its average colour, remembered
 brls::ThemeImages::decoding();               // pictures on the async thread (a test waits for 0)
+
+brls::Theme::addImageSlot("myapp/art", "@res/img/art.png");   // a picture themes may replace
+brls::Theme::image("myapp/art");             // the picture now: the theme's, else the app's
+image->setThemeImage("myapp/art");           // a brls::Image that follows it
+brls::Theme::logo();                         // the theme's logo, nullptr without one
+brls::Theme::icon("settings", &tint);        // an icon's picture, nullptr without one
+art->draw(vg, x, y, width, height, brls::BackgroundFit::CONTAIN); // a ThemeImage, fitted
 
 brls::Application::hasThemeBackground();    // a picture is behind the screens
 brls::Application::drawThemeBackground(vg, x, y, width, height); // under a translucent panel
@@ -343,7 +456,7 @@ With Cadran (PlayGuard, PlayShelf), everything is there:
 
 1. Keep `ui::Prefs::theme_file` in the app's settings, next to `theme` ("" for the boards' palettes, `builtin:<id>`, or a path), and hand the prefs over with `ui::use_prefs()` as today.
 2. Say where the user's own files are: `ui::hooks::get().themes_dir = [] { return std::string("sdmc:/config/myapp/themes"); };` (on the desktop, a folder next to the settings). The folder may not exist: the picker then offers the presets only.
-3. That is all: `ui::pick_theme()` (the header's button, Preferences) ends with a **Palette** row opening `ui::pick_palette()`: Default, the presets, then the folder's readable files (a broken one is logged and left out), each row with a swatch of its colours (its background, its surface as a ring, its `icon` in its accent; in the variant on screen when the palette styles it, else in the one it styles; Default's, the app's own colours and a palette). `ui::palette_name()` is the choice saved, for a tile. The choice is saved through `save_prefs` and applied at once (`live_prefs::apply_theme()`).
+3. That is all: `ui::pick_theme()` (the header's button, Preferences) ends with a **Palette** row opening `ui::pick_palette()`: Default, the presets, then the folder's readable files (a broken one is logged and left out), each row with a swatch of its colours (its background, its surface as a ring, its `icon` in its accent; in the variant on screen when the palette styles it, else in the one it styles; Default's, the app's own colours and a palette), or the theme's `preview` once loaded. `ui::palette_name()` is the choice saved, for a tile. The choice is saved through `save_prefs` and applied at once (`live_prefs::apply_theme()`).
 
 A palette that styles one variant only decides the variant, and the header's button always shows the variant on screen:
 

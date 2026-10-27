@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include <borealis/core/application.hpp>
+#include <borealis/core/theme_image.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/views/image.hpp>
 
@@ -179,6 +180,9 @@ Image::Image()
         { this->setImageFromFile(value); }
 
     );
+
+    this->registerStringXMLAttribute("themeImage", [this](const std::string& value)
+        { this->setThemeImage(value); });
 
     setClipsToBounds(true);
 }
@@ -473,8 +477,83 @@ void Image::setImageFromFileAsync(const std::string& path)
                 }); });
 }
 
+void Image::setThemeImage(const std::string& key)
+{
+    this->asyncGeneration++;
+    if (key.empty())
+    {
+        this->stopFollowingTheme();
+        return;
+    }
+    this->themeImageKey = key;
+    if (!this->followingTheme)
+    {
+        this->followingTheme = true;
+        this->themeToken     = std::make_shared<char>();
+        std::weak_ptr<char> token = this->themeToken;
+        this->themeChanged   = Application::getThemeChangedEvent()->subscribe([this, token](ThemeVariant)
+            {
+                if (!token.expired())
+                    this->refreshThemeImage(); });
+        this->themeImageLoaded = ThemeImages::getLoadedEvent()->subscribe([this, token](const ThemeImage* image)
+            {
+                if (!token.expired() && (image == this->themeImagePending.get() || image == this->themeImage.get()))
+                    this->refreshThemeImage(); });
+    }
+    this->refreshThemeImage();
+}
+
+void Image::stopFollowingTheme()
+{
+    if (this->followingTheme)
+    {
+        Application::getThemeChangedEvent()->unsubscribe(this->themeChanged);
+        ThemeImages::getLoadedEvent()->unsubscribe(this->themeImageLoaded);
+        this->followingTheme = false;
+        this->themeToken.reset();
+    }
+    this->themeImageKey.clear();
+    this->themeImagePending.reset();
+}
+
+void Image::refreshThemeImage()
+{
+    std::shared_ptr<ThemeImage> image = Theme::image(this->themeImageKey);
+    if (image && image->state == ThemeImage::State::LOADING)
+    {
+        // The picture shown stays until it is ready
+        this->themeImagePending = image;
+        return;
+    }
+    this->themeImagePending.reset();
+    if (image && image == this->themeImage)
+        return;
+    if (!image || !image->ready())
+    {
+        // Neither the theme nor the app has one
+        if (this->themeImage)
+        {
+            this->releaseTexture();
+            this->invalidate();
+        }
+        return;
+    }
+    this->settingThemeImage = true;
+    this->innerSetImage(image->texture);
+    this->settingThemeImage = false;
+    this->setFreeTexture(false);
+    this->themeImage = image;
+}
+
 void Image::releaseTexture()
 {
+    // A theme's picture is the theme's: let go of it, not deleted
+    if (this->themeImage)
+    {
+        if (this->texture == this->themeImage->texture)
+            this->texture = 0;
+        this->themeImage.reset();
+    }
     if (this->texture == 0)
         return;
 
@@ -510,6 +589,10 @@ void Image::innerSetImage(int tex)
 
     NVGcontext* vg = Application::getNVGContext();
 
+    // Set another way: the theme's slot is not followed any more
+    if (!this->settingThemeImage && !this->themeImageKey.empty())
+        this->stopFollowingTheme();
+
     // Release the old texture as it was held (owned or cached); the same
     // texture again (a cache hit on the path already shown) is kept
     if (this->texture != tex)
@@ -531,6 +614,7 @@ void Image::innerSetImage(int tex)
 void Image::clear()
 {
     this->asyncGeneration++;
+    this->stopFollowingTheme();
     // A cached texture is handed back too: it was never released, so the
     // cache could never free it
     this->releaseTexture();
@@ -575,6 +659,7 @@ float Image::getOriginalImageHeight()
 
 Image::~Image()
 {
+    this->stopFollowingTheme();
     this->releaseTexture();
 }
 

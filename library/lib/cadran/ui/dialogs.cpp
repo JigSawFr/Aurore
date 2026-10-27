@@ -523,13 +523,16 @@ brls::ThemeVariant variant_of(const std::string& theme)
 }
 
 // A palette's row in its picker: its own colours, in the variant on screen
-// when it styles it, else in the one it styles; its motif in its accent.
+// when it styles it, else in the one it styles; its motif in its accent; or
+// its `preview` picture.
 ui::Swatch swatch_of(const brls::ThemeInfo& info)
 {
     const brls::ThemeVariant shown = brls::Application::getThemeVariant();
     const brls::ThemeVariant variant = info.styles(shown) ? shown : info.variant();
     const brls::ThemeInfo::Preview& p = variant == brls::ThemeVariant::LIGHT ? info.lightPreview : info.darkPreview;
-    return { p.background, p.surface, p.accent, info.icon };
+    // Its own thumbnail, when it has one (loaded off the UI thread, the
+    // colours shown meanwhile: CadranSwatch)
+    return { p.background, p.surface, p.accent, info.icon, info.pictures(variant).preview };
 }
 
 // Default's: the app's own colours (without a theme file), a palette.

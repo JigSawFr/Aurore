@@ -99,8 +99,21 @@ void CadranIcon::draw(NVGcontext* vg, float x, float y, float width, float heigh
     nvgRestore(vg);
 }
 
+// The theme's picture in the icon's place (its logo for "mark"), fitted in
+// the box: false while it has none, or it is not loaded
+static bool themed(NVGcontext* vg, const std::string& i, NVGcolor color, float width, float height)
+{
+    bool tint = false;
+    std::shared_ptr<brls::ThemeImage> picture = i == "mark" ? brls::Theme::logo() : brls::Theme::icon(i, &tint);
+    if (!picture || !picture->ready()) return false;
+    // The logo as it is, as the app's own; an icon at its colour's opacity
+    if (i == "mark") return picture->draw(vg, 0, 0, width, height, brls::BackgroundFit::CONTAIN);
+    return picture->draw(vg, 0, 0, width, height, brls::BackgroundFit::CONTAIN, tint ? &color : nullptr, tint ? 1.0f : color.a);
+}
+
 bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, float width, float height)
 {
+    if (themed(vg, i, color, width, height)) return true;
     if (i == "mark") {
         nvgSave(vg);
         mark(vg, width, height);
@@ -522,11 +535,33 @@ bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, flo
 
 brls::View* CadranIcon::create() { return new CadranIcon(); }
 
+const std::vector<std::string>& CadranIcon::names()
+{
+    // Each name glyph() draws, but "mark" (the theme's `logo`)
+    static const std::vector<std::string> NAMES = {
+        "today", "timer", "activity", "shield", "lock", "globe", "settings", "tools", "shelf", "info", "plus",
+        "stop", "eye", "sun", "tv", "text-normal", "text-large", "moon", "pause", "list", "rail-open",
+        "rail-icons", "rail-auto", "lines", "download", "chevron-down", "chevron-left", "chevron-right",
+        "caret-up", "caret-down", "check", "key", "unlock", "phone", "trash", "server", "pin", "refresh",
+        "history", "restore", "save", "upload", "language", "contrast", "home", "bolt", "sparkle", "bell",
+        "chip", "code", "heart", "folder", "file", "flag", "gamepad", "calendar", "alert", "pencil",
+        "pencil-off", "tag", "user", "snowflake", "lantern", "blossom", "wave", "leaf", "pumpkin", "tree",
+        "firework", "gem", "dune", "palette",
+    };
+    return NAMES;
+}
+
 CadranSwatch::CadranSwatch(Colors value) : colors(std::move(value))
 {
     this->setWidth(36);
     this->setHeight(36);
     this->setFocusable(false);
+    if (!this->colors.picture.empty()) {
+        brls::ThemeImageOptions options;
+        options.flags   = NVG_IMAGE_GENERATE_MIPMAPS;
+        options.maxSide = brls::ThemeImages::PREVIEW_SIZE;
+        this->preview   = brls::ThemeImages::load(this->colors.picture, options);
+    }
 }
 
 void CadranSwatch::draw(NVGcontext* vg, float x, float y, float width, float height,
@@ -535,6 +570,18 @@ void CadranSwatch::draw(NVGcontext* vg, float x, float y, float width, float hei
     (void)style;
     (void)ctx;
     const float corner = std::min(width, height) * 0.28f;
+    const auto hairline = [&] {
+        nvgBeginPath(vg);
+        nvgRoundedRect(vg, x + 0.5f, y + 0.5f, width - 1, height - 1, corner - 0.5f);
+        nvgStrokeColor(vg, brls::Application::getTheme()["cadran/line"]);
+        nvgStrokeWidth(vg, 1);
+        nvgStroke(vg);
+    };
+    // The theme's own thumbnail, once loaded
+    if (this->preview && this->preview->draw(vg, x, y, width, height, brls::BackgroundFit::COVER, nullptr, 1.0f, corner)) {
+        hairline();
+        return;
+    }
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, corner);
     nvgFillColor(vg, this->colors.background);
@@ -546,11 +593,7 @@ void CadranSwatch::draw(NVGcontext* vg, float x, float y, float width, float hei
     nvgStrokeWidth(vg, 2.5f);
     nvgStroke(vg);
     // The hairline, in the sheet's own colours
-    nvgBeginPath(vg);
-    nvgRoundedRect(vg, x + 0.5f, y + 0.5f, width - 1, height - 1, corner - 0.5f);
-    nvgStrokeColor(vg, brls::Application::getTheme()["cadran/line"]);
-    nvgStrokeWidth(vg, 1);
-    nvgStroke(vg);
+    hairline();
 
     const float side = std::min(width, height) * 0.55f;
     nvgSave(vg);

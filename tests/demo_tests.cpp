@@ -21,7 +21,9 @@
 #include <borealis.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
+#include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/ui.hpp>
+#include <borealis/cadran/view/cadran_icon.hpp>
 #include <borealis/core/theme_image.hpp>
 #include <borealis/test/harness.hpp>
 
@@ -507,6 +509,22 @@ struct ThemeFolder
         image.savePng((dir / name).string());
         return (dir / name).generic_string();
     }
+
+    // A square of one colour in the middle of a transparent picture
+    std::string spot(const std::string& name, unsigned char r, unsigned char g, unsigned char b, int size = 32)
+    {
+        brls::test::Image image;
+        image.width  = size;
+        image.height = size;
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                bool inside = x >= size / 4 && x < size * 3 / 4 && y >= size / 4 && y < size * 3 / 4;
+                image.rgba.insert(image.rgba.end(), { r, g, b, (unsigned char)(inside ? 255 : 0) });
+            }
+        image.savePng((dir / name).string());
+        return (dir / name).generic_string();
+    }
 };
 
 static bool hasErrorWith(const brls::ThemeInfo& info, const std::string& text)
@@ -779,6 +797,380 @@ BRLS_TEST(theme_background_switches_back_and_forth)
     brls::Theme::reset();
     h.settle();
     BRLS_CHECK(!brls::Application::hasThemeBackground());
+}
+
+// Waits for the pictures being decoded (in real time), then for the screen
+// (a picture that fails can ask for another, the app's own: a few rounds)
+static void settlePictures(Harness& h)
+{
+    for (int round = 0; round < 3; round++)
+    {
+        h.step();
+        while (brls::ThemeImages::decoding() > 0)
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        h.settle();
+    }
+}
+
+static bool hasWarningWith(const brls::ThemeInfo& info, const std::string& text)
+{
+    for (const std::string& warning : info.warnings)
+        if (warning.find(text) != std::string::npos)
+            return true;
+    return false;
+}
+
+BRLS_TEST(theme_logos_and_images_are_read_inherited_and_confined)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_pictures_test");
+    const std::string root = themes.dir.generic_string();
+    brls::Theme::addImageSlot("test/art", "");
+    brls::Theme::addImageSlot("test/cover", "");
+    for (const char* name : { "logo.png", "logo-day.png", "preview.png", "gear.png", "art.png", "base/logo.png", "base/i.png", "base/art.png" })
+        themes.picture(name, 120, 60, 200);
+    const std::string base = themes.write("base/theme.theme",
+        "name = Base\nlogo = logo.png\nicon.info = i.png\nicon.info.tint = true\nimage.test/art = art.png\n"
+        "[light]\nicon.settings = i.png\n");
+    const std::string full = themes.write("full.theme",
+        "name = Full\nlogo = logo.png\npreview = preview.png\nicon.settings = gear.png\nicon.settings.tint = yes\n"
+        "icon.gamepad = gear.png\nimage.test/art = art.png\n[light]\nlogo = logo-day.png\nicon.gamepad = none\n"
+        "[dark]\nimage.test/cover = art.png\n");
+
+    brls::ThemeInfo info = brls::Theme::inspect(full);
+    BRLS_CHECK(info.ok());
+    BRLS_CHECK(info.warnings.empty());
+    BRLS_CHECK_EQ(info.darkPictures.logo, root + "/logo.png");
+    BRLS_CHECK_EQ(info.lightPictures.logo, root + "/logo-day.png"); // its own variant's line wins
+    BRLS_CHECK_EQ(info.lightPictures.preview, root + "/preview.png");
+    BRLS_CHECK(info.darkPictures.icons.at("settings").tint);
+    BRLS_CHECK(!info.darkPictures.icons.at("gamepad").tint);
+    BRLS_CHECK(!info.lightPictures.icons.count("gamepad")); // none
+    BRLS_CHECK_EQ(info.lightPictures.images.at("test/art"), root + "/art.png");
+    BRLS_CHECK(info.darkPictures.images.count("test/cover") && !info.lightPictures.images.count("test/cover"));
+
+    // Inherited: the parent's pictures stay in the parent's folder, this
+    // file's lines win
+    const std::string child = themes.write("child.theme",
+        "inherit = base/theme.theme\nicon.settings = gear.png\n[dark]\nlogo = none\n");
+    info = brls::Theme::inspect(child);
+    BRLS_CHECK(info.ok());
+    BRLS_CHECK(info.darkPictures.logo.empty());
+    BRLS_CHECK_EQ(info.lightPictures.logo, root + "/base/logo.png");
+    BRLS_CHECK_EQ(info.darkPictures.icons.at("info").image, root + "/base/i.png");
+    BRLS_CHECK(info.darkPictures.icons.at("info").tint);
+    BRLS_CHECK_EQ(info.lightPictures.icons.at("settings").image, root + "/gear.png"); // over the parent's [light]
+    BRLS_CHECK_EQ(info.darkPictures.images.at("test/art"), root + "/base/art.png");
+
+    // Confined, read, named: errors and warnings, never a crash
+    const std::string wrong = themes.write("wrong.theme",
+        "logo = ../outside.png\npreview = /etc/passwd\nicon.settings = missing.png\nicon.settings.tint = maybe\n"
+        "icon.nosuchicon = gear.png\nimage.test/nosuchslot = art.png\n");
+    info = brls::Theme::inspect(wrong);
+    BRLS_CHECK(hasErrorWith(info, "logo ../outside.png: goes out of the theme's folder"));
+    BRLS_CHECK(hasErrorWith(info, "preview /etc/passwd: an absolute path is not allowed"));
+    BRLS_CHECK(hasErrorWith(info, "icon.settings: cannot read"));
+    BRLS_CHECK(hasErrorWith(info, "icon.settings.tint is true or false"));
+    BRLS_CHECK(hasWarningWith(info, "icon.nosuchicon: no icon has that name"));
+    BRLS_CHECK(hasWarningWith(info, "image.test/nosuchslot: the app has no such image slot (kept); its slots: "));
+    BRLS_CHECK(hasWarningWith(info, "test/art, test/cover"));
+    BRLS_CHECK(info.darkPictures.logo.empty() && info.darkPictures.preview.empty());
+
+    // Used, and back: the logo is the theme's for the variant on screen
+    BRLS_CHECK(!brls::Theme::logo());
+    BRLS_CHECK(brls::Theme::loadFile(full));
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+    h.settle();
+    // Loaded when asked for (by whoever draws it), off the UI thread
+    BRLS_CHECK(brls::Theme::logo() && brls::Theme::logo()->state == brls::ThemeImage::State::LOADING);
+    settlePictures(h);
+    std::shared_ptr<brls::ThemeImage> logo = brls::Theme::logo();
+    BRLS_CHECK(logo && logo->ready() && logo->path == root + "/logo.png");
+    BRLS_CHECK(logo->width <= brls::ThemeImages::LOGO_SIZE && logo->height <= brls::ThemeImages::LOGO_SIZE);
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::LIGHT);
+    h.settle();
+    BRLS_CHECK(brls::Theme::logo() && brls::Theme::logo()->path == root + "/logo-day.png");
+    bool tint = false;
+    BRLS_CHECK(brls::Theme::icon("settings", &tint) && tint);
+    BRLS_CHECK(!brls::Theme::icon("gamepad"));
+    brls::Theme::reset();
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+    h.settle();
+    BRLS_CHECK(!brls::Theme::logo() && !brls::Theme::icon("settings"));
+}
+
+BRLS_TEST(theme_pictures_are_capped_and_freed)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_pictures_cap_test");
+    themes.picture("big.png", 200, 100, 50, 1024, 512);
+    themes.write("big.theme", "logo = big.png\nicon.settings = big.png\nicon.settings.tint = true\n");
+    BRLS_CHECK(brls::Theme::loadFile((themes.dir / "big.theme").generic_string()));
+    h.settle();
+    std::weak_ptr<brls::ThemeImage> logo = brls::Theme::logo();
+    std::weak_ptr<brls::ThemeImage> icon = brls::Theme::icon("settings");
+    settlePictures(h);
+    BRLS_CHECK(logo.lock() && logo.lock()->ready());
+    BRLS_CHECK_EQ(logo.lock()->width, brls::ThemeImages::LOGO_SIZE);
+    BRLS_CHECK_EQ(logo.lock()->height, brls::ThemeImages::LOGO_SIZE / 2); // its ratio kept
+    BRLS_CHECK_EQ(icon.lock()->width, brls::ThemeImages::ICON_SIZE);
+    BRLS_CHECK(icon.lock()->mask);
+    // Another theme: the pictures are let go of, their textures freed
+    BRLS_CHECK(brls::Theme::loadFile("builtin:ocean"));
+    h.settle();
+    BRLS_CHECK(!brls::Theme::logo());
+    BRLS_CHECK(logo.expired() && icon.expired());
+    brls::Theme::reset();
+}
+
+BRLS_TEST(theme_image_slots_follow_the_theme)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_slots_test");
+    const std::string fallback = themes.picture("fallback.png", 10, 200, 10, 48, 48);
+    themes.picture("art.png", 200, 10, 10, 64, 32);
+    themes.write("broken.png", "not a png");
+    brls::Theme::addImageSlot("test/art", fallback, 256);
+    brls::Theme::addImageSlot("test/empty");
+    BRLS_CHECK(brls::Theme::getImageSlots() == (std::vector<std::string> { "test/art", "test/empty" }));
+    const std::string art = themes.write("art.theme", "image.test/art = art.png\nimage.test/empty = art.png\n");
+    const std::string broken = themes.write("broken.theme", "image.test/art = broken.png\n");
+
+    auto* image = new brls::Image();
+    image->setThemeImage("test/art");
+    auto* empty = new brls::Image();
+    empty->setThemeImage("test/empty");
+    h.push(new brls::Activity(screenOf({ image, empty })));
+    settlePictures(h);
+
+    // The app's own, without a theme; nothing for a slot without one
+    BRLS_CHECK(brls::Theme::image("test/art") && brls::Theme::image("test/art")->path == fallback);
+    BRLS_CHECK(!brls::Theme::image("test/empty"));
+    BRLS_CHECK(!brls::Theme::image("test/undeclared"));
+    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
+    BRLS_CHECK_EQ(empty->getTexture(), 0);
+
+    // The theme's, live
+    BRLS_CHECK(brls::Theme::loadFile(art));
+    settlePictures(h);
+    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 64.0f);
+    BRLS_CHECK_EQ(image->getTexture(), brls::Theme::image("test/art")->texture);
+    BRLS_CHECK(empty->getTexture() != 0);
+
+    // A picture that cannot be read: the app's
+    BRLS_CHECK(brls::Theme::loadFile(broken));
+    settlePictures(h);
+    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
+    BRLS_CHECK_EQ(empty->getTexture(), 0);
+
+    // Back to no theme: the app's again
+    BRLS_CHECK(brls::Theme::loadFile(art));
+    settlePictures(h);
+    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 64.0f);
+    brls::Theme::reset();
+    settlePictures(h);
+    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
+    BRLS_CHECK_EQ(empty->getTexture(), 0);
+
+    // Set another way: it stops following the theme
+    image->setImageFromFile(themes.picture("own.png", 1, 2, 3, 20, 20));
+    BRLS_CHECK(image->getThemeImage().empty());
+    BRLS_CHECK(brls::Theme::loadFile(art));
+    settlePictures(h);
+    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 20.0f);
+    brls::Theme::reset();
+}
+
+// An icon replaced by a picture: as it is, or as a mask in the icon's colour
+BRLS_TEST(theme_icons_are_tinted_or_drawn_as_they_are)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_icons_test");
+    themes.spot("red.png", 230, 20, 20);
+    themes.picture("ink.png", 0, 0, 0, 32, 32); // no transparency: a mask by its dark parts
+    themes.write("icons.theme",
+        "icon.today = red.png\nicon.today.tint = true\nicon.timer = red.png\nicon.lock = ink.png\nicon.lock.tint = true\n");
+    auto icon = [](const char* name)
+    {
+        auto* view = new CadranIcon();
+        view->setIcon(name);
+        view->setColor(nvgRGB(20, 40, 230));
+        view->setWidth(64);
+        view->setHeight(64);
+        view->setMarginBottom(10);
+        return view;
+    };
+    CadranIcon* tinted = icon("today");
+    CadranIcon* plain  = icon("timer");
+    CadranIcon* ink    = icon("lock");
+    CadranIcon* other  = icon("shield");
+    h.push(new brls::Activity(screenOf({ tinted, plain, ink, other })));
+    h.settle();
+    brls::test::Image before = h.screenshot();
+
+    auto middle = [&h](brls::View* view)
+    {
+        brls::Rect frame = view->getFrame();
+        brls::test::Image shot = h.screenshot();
+        const unsigned char* p = shot.at((int)frame.getMidX(), (int)frame.getMidY());
+        return std::vector<int> { p[0], p[1], p[2] };
+    };
+    auto corner = [&h](brls::View* view)
+    {
+        brls::Rect frame = view->getFrame();
+        brls::test::Image shot = h.screenshot();
+        const unsigned char* p = shot.at((int)frame.getMinX() + 4, (int)frame.getMinY() + 4);
+        return std::vector<int> { p[0], p[1], p[2] };
+    };
+    auto near = [](std::vector<int> a, std::vector<int> b)
+    {
+        for (int c = 0; c < 3; c++)
+            if (std::abs(a[c] - b[c]) > 6)
+                return false;
+        return true;
+    };
+
+    BRLS_CHECK(brls::Theme::loadFile((themes.dir / "icons.theme").generic_string()));
+    settlePictures(h);
+    BRLS_CHECK(near(middle(tinted), { 20, 40, 230 })); // the icon's colour
+    BRLS_CHECK(near(middle(plain), { 230, 20, 20 }));  // the picture's
+    BRLS_CHECK(near(corner(tinted), { 20, 20, 30 }));  // transparent around it
+    BRLS_CHECK(near(middle(ink), { 20, 40, 230 }));    // black on nothing: all ink
+
+    // Back: the drawings, pixel for pixel
+    brls::Theme::reset();
+    h.settle();
+    auto diff = brls::test::compareImages(h.screenshot(), before, 0);
+    BRLS_CHECK(diff.sameSize && diff.differingPixels == 0);
+}
+
+// The demo's Prism theme (resources/themes/prism): its logo in the header,
+// its icons on the rail (Settings focused: a tinted icon in the focus's
+// colours, the gamepad as it is)
+static void prismScreen(brls::ThemeVariant variant, const char* reference)
+{
+    DemoHarness h;
+    brls::test::Image before = h.screenshot();
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/prism/theme.theme"));
+    brls::Application::getPlatform()->setThemeVariant(variant);
+    settlePictures(h);
+    BRLS_CHECK(brls::Theme::logo() && brls::Theme::logo()->ready());
+    BRLS_CHECK(brls::Theme::checkContrast(variant).empty());
+    BRLS_CHECK(h.focusByText("Settings"));
+    settlePictures(h);
+    BRLS_CHECK(h.matchesReference(reference));
+
+    // Back to no theme, live: the screen as it was
+    BRLS_CHECK(h.focusByText("Cadran", brls::BUTTON_UP));
+    brls::Theme::reset();
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+    h.settle();
+    BRLS_CHECK(!brls::Theme::logo());
+    // (what does not move: the glow drifts) the mark within its corners, the
+    // header's right end
+    for (brls::Rect area : { brls::Rect(26, 29, 26, 26), brls::Rect(1000, 0, 280, 90) })
+    {
+        auto crop = [&area](const brls::test::Image& image)
+        { return image.crop((int)area.getMinX(), (int)area.getMinY(), (int)area.getWidth(), (int)area.getHeight()); };
+        auto diff = brls::test::compareImages(crop(h.screenshot()), crop(before), 0);
+        BRLS_CHECK(diff.sameSize && diff.differingPixels == 0);
+    }
+}
+
+BRLS_TEST(theme_logo_and_icons_dark)
+{
+    prismScreen(brls::ThemeVariant::DARK, "theme_images_dark");
+}
+
+BRLS_TEST(theme_logo_and_icons_light)
+{
+    prismScreen(brls::ThemeVariant::LIGHT, "theme_images_light");
+}
+
+// The demo's About tab draws its image slot (demo/about/art): Prism's
+BRLS_TEST(theme_image_slot_in_the_demo)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("About Aurore"));
+    settlePictures(h);
+    std::shared_ptr<brls::ThemeImage> own = brls::Theme::image("demo/about/art");
+    BRLS_CHECK(own && own->path == "@res/img/aurore_256.png");
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/prism/theme.theme"));
+    settlePictures(h);
+    BRLS_CHECK(brls::Theme::image("demo/about/art")->path == "@res/themes/prism/about.png");
+    BRLS_CHECK(h.matchesReference("theme_image_slot"));
+    brls::Theme::reset();
+    settlePictures(h);
+    BRLS_CHECK(brls::Theme::image("demo/about/art")->path == "@res/img/aurore_256.png");
+}
+
+// The palette picker with Prism's preview in its row: loaded when the
+// picker opens, off the UI thread, the colours shown until then
+static void pickPrism(const char* theme, const char* reference)
+{
+    DemoHarness h;
+    ui::prefs().theme = theme;
+    live_prefs::apply_theme();
+    h.settle();
+    const std::string preview = "@res/themes/prism/preview.png";
+    // Listing decodes nothing
+    for (const brls::ThemeInfo& info : brls::Theme::listThemes("@res/themes"))
+        if (info.id == "prism")
+            BRLS_CHECK_EQ(info.darkPictures.preview, preview);
+    ui::pick_palette();
+    // Asked for by the picker's swatch, not decoded on this thread: still loading
+    brls::ThemeImageOptions options;
+    options.flags   = NVG_IMAGE_GENERATE_MIPMAPS;
+    options.maxSide = brls::ThemeImages::PREVIEW_SIZE;
+    std::shared_ptr<brls::ThemeImage> image = brls::ThemeImages::load(preview, options);
+    BRLS_CHECK(image->state == brls::ThemeImage::State::LOADING);
+    BRLS_CHECK(h.focusByText("Prism", brls::BUTTON_DOWN, 40));
+    settlePictures(h);
+    BRLS_CHECK(image->ready());
+    BRLS_CHECK(h.matchesReference(reference));
+}
+
+BRLS_TEST(palette_picker_shows_previews)
+{
+    pickPrism("dark", "palette_picker_preview");
+}
+
+BRLS_TEST(palette_picker_shows_previews_light)
+{
+    pickPrism("light", "palette_picker_preview_light");
+}
+
+// Logos, icons and slot pictures still loading when the theme or the
+// variant changes again: dropped, never drawn late, never freed twice (run
+// under the sanitizers too)
+BRLS_TEST(theme_pictures_switch_back_and_forth)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("About Aurore"));
+    const char* themes[] = { "@res/themes/prism/theme.theme", "@res/themes/aurora/theme.theme", "@res/themes/prism/theme.theme", "" };
+    for (int round = 0; round < 16; round++)
+    {
+        const char* theme = themes[round % 4];
+        if (*theme)
+            BRLS_CHECK(brls::Theme::loadFile(theme));
+        else
+            brls::Theme::reset();
+        brls::Application::getPlatform()->setThemeVariant(round % 3 ? brls::ThemeVariant::DARK : brls::ThemeVariant::LIGHT);
+        h.step(round % 2 ? 1 : 2);
+        if (round == 9)
+            ui::pick_palette(); // its previews loading too
+        if (round == 12)
+            h.tap(brls::BUTTON_B);
+    }
+    BRLS_CHECK(brls::Theme::loadFile("@res/themes/prism/theme.theme"));
+    brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
+    settlePictures(h);
+    BRLS_CHECK(brls::Theme::logo() && brls::Theme::logo()->ready());
+    BRLS_CHECK(brls::Theme::image("demo/about/art")->path == "@res/themes/prism/about.png");
+    brls::Theme::reset();
+    settlePictures(h);
+    BRLS_CHECK(!brls::Theme::logo());
+    BRLS_CHECK(brls::Theme::image("demo/about/art")->path == "@res/img/aurore_256.png");
 }
 
 BRLS_TEST(images_compare_with_tolerance)

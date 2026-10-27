@@ -85,7 +85,7 @@
                 <brls:Image
                     width="auto"
                     height="33%"
-                    image="@res/img/aurore_256.png"
+                    themeImage="demo/about/art"
                     marginBottom="@style/about/description_margin"/>
 
                 <brls:Box
