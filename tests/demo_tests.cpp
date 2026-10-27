@@ -85,6 +85,20 @@ class Swatch : public brls::View
     NVGcolor color = nvgRGB(200, 40, 40);
 };
 
+// The pictures of a theme are decoded on a worker thread: waits for them, 10 s at most, so a stuck decode fails
+// the test instead of hanging the job
+bool themeImagesDecoded()
+{
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+    while (brls::ThemeImages::decoding() > 0)
+    {
+        if (std::chrono::steady_clock::now() > deadline)
+            return false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    return true;
+}
+
 brls::Box* screenOf(std::initializer_list<brls::View*> views)
 {
     auto* box = new brls::Box(brls::Axis::COLUMN);
@@ -104,6 +118,21 @@ BRLS_TEST(main_screen)
     BRLS_CHECK(h.hasText("Aurore Demo"));
     BRLS_CHECK(h.hasText("Monday, January 5")); // the harness' wall clock
     BRLS_CHECK(h.matchesReference("main_screen"));
+}
+
+BRLS_TEST(missing_reference_fails_in_ci)
+{
+    DemoHarness h;
+    const char* ci    = std::getenv("CI");
+    std::string saved = ci ? ci : "";
+    setenv("CI", "true", 1);
+    bool matched = h.matchesReference("no_such_reference");
+    if (ci)
+        setenv("CI", saved.c_str(), 1);
+    else
+        unsetenv("CI");
+    BRLS_CHECK(!matched);
+    BRLS_CHECK(!std::filesystem::exists(h.options().referenceDir + "/no_such_reference.png"));
 }
 
 BRLS_TEST(rail_focus_moves)
@@ -761,8 +790,7 @@ static void auroraScreen(brls::ThemeVariant variant, const char* reference)
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/aurora/theme.theme"));
     brls::Application::getPlatform()->setThemeVariant(variant);
     h.step(); // the picture asked for: decoded, as many frames on any machine
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::Application::hasThemeBackground());
     BRLS_CHECK(brls::Theme::checkContrast(variant).empty());
@@ -822,8 +850,7 @@ static void settlePictures(Harness& h)
     for (int round = 0; round < 3; round++)
     {
         h.step();
-        while (brls::ThemeImages::decoding() > 0)
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        BRLS_CHECK(themeImagesDecoded());
         h.settle();
     }
 }
@@ -1265,8 +1292,7 @@ BRLS_TEST(theme_decor_keys_are_read_and_inherited)
     BRLS_CHECK(brls::Theme::loadFile(base));
     brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP));
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::SIDEBAR));
@@ -1406,8 +1432,7 @@ BRLS_TEST(theme_decor_header_backdrop)
     themes.picture("red.png", 255, 0, 0);
     BRLS_CHECK(brls::Theme::loadFile(themes.write("red.theme", "inherit = dark\nbackdrop.header = red.png\n")));
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::HEADER));
     brls::test::Image shot = h.screenshot();
@@ -1429,8 +1454,7 @@ static void winterScreen(brls::ThemeVariant variant, const char* reference)
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/winter/theme.theme"));
     brls::Application::getPlatform()->setThemeVariant(variant);
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP));
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::BOTTOM));
@@ -1471,8 +1495,7 @@ BRLS_TEST(theme_decor_switches_back_and_forth)
     brls::Application::setReduceMotion(false);
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/winter/theme.theme"));
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP) && brls::ThemeDecorations::particlesRunning());
     brls::Theme::reset();
@@ -1488,8 +1511,7 @@ BRLS_TEST(theme_decor_dialog_over_a_picture)
     brls::Application::setReduceMotion(true);
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/aurora/theme.theme"));
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     h.tap(brls::BUTTON_RIGHT);
     h.tap(brls::BUTTON_DOWN);
