@@ -43,7 +43,8 @@ namespace
 int checkThemeFiles(const std::string& folder)
 {
     std::vector<brls::ThemeInfo> themes = brls::Theme::builtinThemes();
-    for (brls::ThemeInfo& info : brls::Theme::listThemes(folder))
+    // Off the screens: the pictures are decoded, to check them and the text on them
+    for (brls::ThemeInfo& info : brls::Theme::listThemes(folder, true))
         themes.push_back(std::move(info));
     int status = EXIT_SUCCESS;
     for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })

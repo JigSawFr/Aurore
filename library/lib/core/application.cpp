@@ -33,6 +33,7 @@
 #include <borealis/core/inspector.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/profiler.hpp>
+#include <borealis/core/theme_image.hpp>
 #include <borealis/core/thread.hpp>
 #include <borealis/core/time.hpp>
 #include <borealis/core/util.hpp>
@@ -981,7 +982,7 @@ void Application::frame(bool present)
 
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
-    Application::drawThemeBackground(frameContext.vg);
+    Application::drawThemeBackgroundImage(frameContext.vg, 0, 0, Application::contentWidth, Application::contentHeight);
 
     // Kept from frame to frame: no allocation once it is large enough
     static std::vector<View*> viewsToDraw;
@@ -1218,6 +1219,12 @@ void Application::exit()
     }
 
     exitDoneEvent.fire();
+
+    // The theme's pictures, while their context is there
+    Application::themeBackground.reset();
+    Application::themeBackgroundLoading.reset();
+    Application::themeBackgroundSpec = ThemeBackground();
+    ThemeImages::releaseAll();
 
     delete Application::notificationManager;
     delete Application::platform;
@@ -2013,52 +2020,126 @@ Event<ThemeVariant>* Application::getThemeChangedEvent()
 
 void Application::loadThemeBackground()
 {
-    std::string path = Theme::getBackgroundImage();
-    if (path == Application::themeBackgroundPath)
-        return;
-    NVGcontext* vg = Application::getNVGContext();
-    if (Application::themeBackground)
-        nvgDeleteImage(vg, Application::themeBackground);
-    Application::themeBackground     = 0;
-    Application::themeBackgroundPath = path;
-    if (path.empty())
-        return;
-#ifdef USE_LIBROMFS
-    if (path.rfind("@res/", 0) == 0)
+    static bool listening = false;
+    if (!listening)
     {
-        try
-        {
-            auto image                   = romfs::get(path.substr(5));
-            Application::themeBackground = nvgCreateImageMem(vg, 0, (unsigned char*)image.data(), (int)image.size());
-        }
-        catch (const std::exception& e)
-        {
-        }
+        ThemeImages::getLoadedEvent()->subscribe(&Application::onThemeImageLoaded);
+        listening = true;
     }
+
+    ThemeBackground background       = Theme::getBackground(Application::getThemeVariant());
+    Application::themeBackgroundSpec = background;
+    if (!background.hasImage())
+    {
+        Application::themeBackground.reset();
+        Application::themeBackgroundLoading.reset();
+        return;
+    }
+    int flags = background.fit == BackgroundFit::TILE ? NVG_IMAGE_REPEATX | NVG_IMAGE_REPEATY : 0;
+    std::shared_ptr<ThemeImage>& shown = Application::themeBackground;
+    if (shown && shown->path == background.image && shown->flags == flags)
+    {
+        Application::themeBackgroundLoading.reset();
+        return;
+    }
+    std::shared_ptr<ThemeImage> image = ThemeImages::load(background.image, flags);
+    if (image->state == ThemeImage::State::LOADING)
+        Application::themeBackgroundLoading = image;
     else
-#endif
-        Application::themeBackground = nvgCreateImage(vg,
-            (path.rfind("@res/", 0) == 0 ? std::string(BRLS_RESOURCES) + path.substr(5) : path).c_str(), 0);
-    if (!Application::themeBackground)
-        Logger::error("theme: cannot load the background image {}", path);
+    {
+        Application::themeBackground = image;
+        Application::themeBackgroundLoading.reset();
+    }
 }
 
-// Covering the window, centred, over the clear colour
-void Application::drawThemeBackground(NVGcontext* vg)
+void Application::onThemeImageLoaded(const ThemeImage* image)
 {
-    if (!Application::themeBackground)
+    if (image != Application::themeBackgroundLoading.get())
         return;
-    int width, height;
-    nvgImageSize(vg, Application::themeBackground, &width, &height);
-    if (width <= 0 || height <= 0)
+    Application::themeBackground = std::move(Application::themeBackgroundLoading);
+    Application::themeBackgroundLoading.reset();
+    if (!image->ready())
         return;
-    float scale = std::max(Application::contentWidth / width, Application::contentHeight / height);
-    float w = width * scale, h = height * scale;
-    float x = (Application::contentWidth - w) / 2, y = (Application::contentHeight - h) / 2;
+    // Its colour is known now: the text on it is checked
+    ThemeVariant variant = Application::getThemeVariant();
+    for (const std::string& warning : Theme::checkBackgroundContrast(variant))
+        Logger::warning("theme {}: {}: {}", Theme::getCurrentPath(), variant == ThemeVariant::LIGHT ? "light" : "dark", warning);
+}
+
+bool Application::hasThemeBackground()
+{
+    const ThemeImage* image = Application::themeBackground.get();
+    return image && image->ready() && image->width > 0 && image->height > 0;
+}
+
+void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height)
+{
+    if (!Application::hasThemeBackground())
+        return;
     nvgBeginPath(vg);
-    nvgRect(vg, 0, 0, Application::contentWidth, Application::contentHeight);
-    nvgFillPaint(vg, nvgImagePattern(vg, x, y, w, h, 0, Application::themeBackground, 1.0f));
+    nvgRect(vg, x, y, width, height);
+    nvgFillColor(vg, Application::getTheme().getColor("brls/clear"));
     nvgFill(vg);
+    Application::drawThemeBackgroundImage(vg, x, y, width, height);
+}
+
+// The background image as background_fit says, then its veil, over the
+// clear colour and under the screens: the part over x, y, width, height
+void Application::drawThemeBackgroundImage(NVGcontext* vg, float areaX, float areaY, float areaWidth, float areaHeight)
+{
+    if (!Application::hasThemeBackground())
+        return;
+    const ThemeImage* image           = Application::themeBackground.get();
+    const ThemeBackground& background = Application::themeBackgroundSpec;
+    float width = Application::contentWidth, height = Application::contentHeight;
+    float w = (float)image->width, h = (float)image->height;
+    float x = 0, y = 0;
+    switch (background.fit)
+    {
+        case BackgroundFit::COVER:
+        case BackgroundFit::CONTAIN:
+        {
+            float scale = background.fit == BackgroundFit::COVER ? std::max(width / w, height / h) : std::min(width / w, height / h);
+            w *= scale;
+            h *= scale;
+            x = (width - w) / 2;
+            y = (height - h) / 2;
+            break;
+        }
+        case BackgroundFit::CENTER:
+            x = std::round((width - w) / 2);
+            y = std::round((height - h) / 2);
+            break;
+        case BackgroundFit::TILE:
+            break;
+    }
+
+    // The image where it is (all over the window when tiled), in the area
+    float left = areaX, top = areaY, right = areaX + areaWidth, bottom = areaY + areaHeight;
+    if (background.fit != BackgroundFit::TILE)
+    {
+        left   = std::max(left, x);
+        top    = std::max(top, y);
+        right  = std::min(right, x + w);
+        bottom = std::min(bottom, y + h);
+    }
+    if (right > left && bottom > top)
+    {
+        nvgBeginPath(vg);
+        nvgRect(vg, left, top, right - left, bottom - top);
+        nvgFillPaint(vg, nvgImagePattern(vg, x, y, w, h, 0, image->texture, 1.0f));
+        nvgFill(vg);
+    }
+
+    if (background.dim > 0.0f)
+    {
+        NVGcolor veil = Application::getTheme().getColor("brls/background");
+        veil.a *= background.dim;
+        nvgBeginPath(vg);
+        nvgRect(vg, areaX, areaY, areaWidth, areaHeight);
+        nvgFillColor(vg, veil);
+        nvgFill(vg);
+    }
 }
 
 void Application::checkThemeChanged()
