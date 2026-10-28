@@ -24,6 +24,7 @@ background_dim = 0.5
 # only: a little darker, on the sky too
 cadran/text3 = #56606e
 brls/header/subtitle = #56606e
+brls/text_secondary = #56606e
 brls/highlight/color2 = #2a8f7a
 
 [dark]

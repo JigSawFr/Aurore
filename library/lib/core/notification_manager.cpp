@@ -57,10 +57,12 @@ void NotificationManager::notify(const std::string& text, View* leading)
     notification->timeoutTimer.addStep(0.0f, (int)timeout, EasingFunction::linear);
     notification->timeoutTimer.addStep(slide, (int)show, EasingFunction::quadraticOut);
 
-    notification->timeoutTimer.setTickCallback([notification, slide]()
+    // Reduced motion: the toast fades in and out where it stays
+    const bool still = Application::getReduceMotion();
+    notification->timeoutTimer.setTickCallback([notification, slide, still]()
         {
             float position = notification->timeoutTimer.getValue();
-            notification->setTranslationX(position);
+            notification->setTranslationX(still ? 0.0f : position);
             notification->setAlpha(1.0f - position / slide); });
 
     notification->timeoutTimer.setEndCallback([this, notification](bool finished)

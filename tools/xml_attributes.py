@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+# The XML attributes the library's views register (register*XMLAttribute,
+# BRLS_REGISTER_ENUM_XML_ATTRIBUTE), written as docs/xml-attributes.md.
+#
+#   python3 tools/xml_attributes.py          writes the page
+#   python3 tools/xml_attributes.py --check  1 when the page is not up to date
+#
+# Run from anywhere: the paths are the repository's.
+
+import os
+import re
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SOURCES = os.path.join(ROOT, "library", "lib")
+PAGE = os.path.join(ROOT, "docs", "xml-attributes.md")
+
+KINDS = {
+    "Float": "number",
+    "Percentage": "percentage (`50%`)",
+    "Auto": "`auto`",
+    "String": "text (`@i18n/…`)",
+    "Color": "colour (`#rrggbb`, `@theme/…`)",
+    "Bool": "`true` / `false`",
+    "FilePath": "file (`@res/…`)",
+}
+
+REGISTER = re.compile(r'register(Float|Percentage|Auto|String|Color|Bool|FilePath)XMLAttribute\(\s*"([^"]+)"')
+ENUM = re.compile(r'BRLS_REGISTER_ENUM_XML_ATTRIBUTE\(\s*"([^"]+)"\s*,[^{]*\{(.*?)\}\s*\)', re.S)
+ENUM_VALUE = re.compile(r'\{\s*"([^"]+)"\s*,')
+FUNCTION = re.compile(r'^(?:[\w:<>*&]+\s+)?((?:\w+::)*\w+)::~?\w+\([^;]*$', re.M)
+VIEW_TAG = re.compile(r'registerXMLView\("([^"]+)",\s*(?:\w+::)*(\w+)::create\)')
+
+
+def owner_at(text, offset):
+    # The class whose function the registration is in
+    owner = None
+    for match in FUNCTION.finditer(text, 0, offset):
+        owner = match.group(1).split("::")[-1]
+    return owner
+
+
+def collect():
+    tags = {}
+    attributes = {}  # class -> name -> (kinds, values)
+    files = []
+    for folder, _, names in os.walk(SOURCES):
+        if os.sep + "extern" in folder:
+            continue
+        for name in names:
+            if name.endswith(".cpp"):
+                files.append(os.path.join(folder, name))
+    for path in sorted(files):
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        for match in VIEW_TAG.finditer(text):
+            tags.setdefault(match.group(2), match.group(1))
+        for match in REGISTER.finditer(text):
+            owner = owner_at(text, match.start())
+            if not owner:
+                continue
+            entry = attributes.setdefault(owner, {}).setdefault(match.group(2), [set(), []])
+            entry[0].add(match.group(1))
+        for match in ENUM.finditer(text):
+            owner = owner_at(text, match.start())
+            if not owner:
+                continue
+            entry = attributes.setdefault(owner, {}).setdefault(match.group(1), [set(), []])
+            entry[1] = sorted(ENUM_VALUE.findall(match.group(2)))
+    return tags, attributes
+
+
+def render(tags, attributes):
+    lines = [
+        "# XML attributes",
+        "",
+        "Every attribute the library's views read from XML, by view: those of `View` are on every view, those of `Box` on every box (most views are boxes). Written by `tools/xml_attributes.py` from the sources; a test checks it is up to date. Styles per state (`focused:…`) are in [styles.md](styles.md), the theme keys (`@theme/…`) in [themes.md](themes.md).",
+        "",
+        "A misspelt attribute or a value outside the list stops the app with the file, the line and the closest name or the values expected (`View::fatalXML`).",
+    ]
+
+    def order(owner):
+        return (owner != "View", owner != "Box", tags.get(owner, owner))
+
+    for owner in sorted(attributes, key=order):
+        tag = tags.get(owner)
+        title = "`<%s>`" % tag if tag else "`%s`" % owner
+        if owner == "View":
+            title = "Every view (`View`)"
+        elif owner == "Box":
+            title = "Every box (`<brls:Box>`)"
+        lines += ["", "## " + title, "", "| Attribute | Value |", "|---|---|"]
+        for name in sorted(attributes[owner], key=str.lower):
+            kinds, values = attributes[owner][name]
+            described = [KINDS[k] for k in sorted(kinds) if not (values and k == "String")]
+            if values:
+                described.append(" · ".join("`%s`" % v for v in values))
+            lines.append("| `%s` | %s |" % (name, ", ".join(described)))
+    return "\n".join(lines) + "\n"
+
+
+def main():
+    page = render(*collect())
+    if "--check" in sys.argv:
+        try:
+            with open(PAGE, encoding="utf-8") as f:
+                current = f.read()
+        except OSError:
+            current = ""
+        if current != page:
+            sys.stderr.write("docs/xml-attributes.md is not up to date: run python3 tools/xml_attributes.py\n")
+            return 1
+        return 0
+    with open(PAGE, "w", encoding="utf-8", newline="\n") as f:
+        f.write(page)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

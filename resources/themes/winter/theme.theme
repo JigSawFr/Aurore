@@ -3,7 +3,7 @@
 # falling behind the screens. The pictures are drawn by
 # tools/make_winter_decor.py. Built on the Winter preset, which gives the
 # colours (and already lets snow fall).
-name = Winter
+name = Winter decor
 author = Aurore demo
 version = 1.0
 description = Icicles, a snowdrift and frost over the Winter preset.

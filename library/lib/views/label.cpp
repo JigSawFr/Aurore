@@ -499,6 +499,12 @@ void Label::setShrinkToFit(bool shrink)
     this->invalidate();
 }
 
+void Label::setShrinkToFitMin(float size)
+{
+    this->shrinkMin = size;
+    this->invalidate();
+}
+
 bool Label::isShrinkingToFit()
 {
     return this->shrinkToFit;
@@ -663,6 +669,10 @@ void Label::stopScrollingAnimation()
 
 void Label::onScrollTimerFinished()
 {
+    // Reduced motion: the text stays cut, it does not scroll
+    if (Application::getReduceMotion())
+        return;
+
     Style style = Application::getStyle();
 
     // Step 2: actual scrolling animation
@@ -686,6 +696,9 @@ void Label::onScrollTimerFinished()
 
 void Label::startScrollTimer()
 {
+    if (Application::getReduceMotion())
+        return;
+
     Style style = Application::getStyle();
 
     // Step 1: timer before starting to scroll
@@ -734,23 +747,24 @@ void Label::onLayout()
     this->fitScale = 1.0f;
     if (this->shrinkToFit && !this->fullText.empty() && width < required && !this->isWrapping)
     {
-        const float full = this->getFullFontSize();
-        if (full > this->fontSize)
+        const float full  = this->getFullFontSize();
+        const float floor = this->shrinkMin > 0 ? std::min(this->shrinkMin, this->fontSize) : this->fontSize;
+        if (full > floor)
         {
             auto vg = Application::getNVGContext();
             nvgFontFaceId(vg, this->font);
             nvgTextLineHeight(vg, this->lineHeight);
             nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
             float bounds[4];
-            float size = std::max(this->fontSize, full * width / required);
+            float size = std::max(floor, full * width / required);
             for (;;)
             {
                 nvgFontSize(vg, size);
                 nvgTextBounds(vg, 0, 0, this->fullText.c_str(), nullptr, bounds);
                 required = bounds[2] - bounds[0] - 0.5f;
-                if (required <= width || size <= this->fontSize)
+                if (required <= width || size <= floor)
                     break;
-                size = std::max(this->fontSize, size - 0.25f);
+                size = std::max(floor, size - 0.25f);
             }
             this->fitScale = size / full;
         }
