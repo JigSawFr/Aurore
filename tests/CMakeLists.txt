@@ -28,6 +28,12 @@ target_link_libraries(aurore_async_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_async_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_async_tests)
 
+# Every translation catalog parses and is loaded
+add_executable(aurore_i18n_tests i18n_tests.cpp)
+target_link_libraries(aurore_i18n_tests PRIVATE Aurore::test)
+target_compile_definitions(aurore_i18n_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+brls_add_tests(aurore_i18n_tests)
+
 # The debugging aids' environment variables, only in a build with BRLS_DEV_TOOLS
 add_executable(aurore_dev_tools_tests dev_tools_tests.cpp)
 target_link_libraries(aurore_dev_tools_tests PRIVATE Aurore::test)
