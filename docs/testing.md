@@ -44,7 +44,7 @@ What it gives:
 | `setKeyboardAnswer(text)` | the next keyboard opened (`ImeManager`) gets `text`; without one it is cancelled |
 | `focus()`, `focusText()`, `focusLog()`, `focusByText(text, button)` | the focused view, its text (a label's, a button's, a cell's title, else the first text in it), every focus change so far, the focus moved until it reads `text` |
 | `texts()`, `hasText(text)`, `findText(text)`, `cutTexts()` | the labels shown (one by its text, to tap it), and those their box cuts (`Label::isTruncated`): what `BRLS_FOCUS_LOG` and `BRLS_CUT_TEXT` wrote to the log and to `cut_text.txt`, as values |
-| `silentFocusables()`, `brls::Application::getLastAnnouncement()` | the views shown that take the focus with no accessibility label nor value (a role at most), and what the focus announcer was given last (docs/styles.md#accessibility) |
+| `silentFocusables()`, `brls::Application::getLastAnnouncement()` | the views shown that take the focus with no accessibility label nor value (a role at most), and what the focus announcer was given last (docs/styles.md, "Accessibility") |
 | `screenshot()` | the last frame drawn, as an `Image` (RGBA, `savePng`, `loadPng`, `crop`) |
 | `matchesReference(name, tolerance, maxRatio)`, also with an area | the screenshot (or a part) against `<references>/<name>.png`, see below |
 | `resize(w, h)` | a new window size |
