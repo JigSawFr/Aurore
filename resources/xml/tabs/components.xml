@@ -26,7 +26,7 @@
                 <brls:Header
                     width="auto"
                     height="auto"
-                    title="HScroll"
+                    title="@i18n/demo/components_more/hscroll"
                     marginBottom="30px" />
 
                 <brls:HScrollingFrame

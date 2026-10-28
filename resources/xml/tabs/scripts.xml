@@ -22,7 +22,7 @@
             <brls:Header
                 width="auto"
                 height="auto"
-                title="Emoji"
+                title="@i18n/demo/scripts/emoji"
                 marginBottom="20px" />
             <brls:Box
                 width="auto"
@@ -56,7 +56,7 @@
             <brls:Header
                 width="auto"
                 height="auto"
-                title="Scripts"
+                title="@i18n/demo/scripts/scripts"
                 marginBottom="20px" />
             <brls:Box
                 width="auto"

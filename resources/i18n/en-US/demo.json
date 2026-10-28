@@ -114,5 +114,83 @@
         "row_subtitle": "40 items: only those on screen exist",
         "grid_title": "A grid of pictures",
         "grid_subtitle": "{} of {} items: more load when the end comes into view"
-    }
+    },
+
+    "components_more": {
+        "hscroll": "Horizontal scrolling",
+        "honk": "Honk",
+        "dropdown": "Choose an option",
+        "option": "Option {}"
+    },
+
+    "styles": {
+        "states": "State styles and transitions",
+        "fade": "Fades in its colour",
+        "corners": "Rounds its corners",
+        "hover": "Lights up under the mouse",
+        "disabled": "A disabled button",
+        "toggle": "Enable or disable it",
+        "binding": "Data binding",
+        "add_one": "Add one",
+        "even": "Even",
+        "reduce_motion": "Reduce motion",
+        "announced_hint": "Move the focus: what a screen reader would say shows here.",
+        "announced": "Announced: {}"
+    },
+
+    "transform": {
+        "play": "Play",
+        "reset": "Reset"
+    },
+
+    "scripts": {
+        "emoji": "Emoji",
+        "scripts": "Scripts"
+    },
+
+    "settings": {
+        "radio": "Radio cell",
+        "switch": "Switch",
+        "debug": "Debug layer",
+        "screensaver": "Disable the screensaver",
+        "bottom_bar": "Bottom bar",
+        "fps": "Frames per second",
+        "swap_interval": "Swap interval",
+        "always_on_top": "Always on top",
+        "selector": "Selector",
+        "selected": "Option {} chosen",
+        "input": "Input text",
+        "input_placeholder": "Placeholder",
+        "input_hint": "Hint",
+        "input_number": "Input number",
+        "brightness": "Brightness",
+        "ip": "IP address",
+        "dns": "DNS server",
+        "notify": "Post a notification",
+        "themes": "Themes",
+        "themes_subtitle": "Aurore's presets, then resources/themes: used at once",
+        "dark": "Dark variant",
+        "default_theme": "Default (Cadran's palettes)",
+        "errors": "{} error(s): {}",
+        "warnings": "{} warning(s)",
+        "active": "Active"
+    },
+
+    "list": {
+        "section": "Section {}"
+    },
+
+    "gems": {
+        "amber": "Amber",
+        "coral": "Coral",
+        "jade": "Jade",
+        "lapis": "Lapis",
+        "onyx": "Onyx",
+        "opal": "Opal",
+        "pearl": "Pearl",
+        "ruby": "Ruby",
+        "topaz": "Topaz"
+    },
+
+    "close": "Close"
 }
