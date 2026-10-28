@@ -1,6 +1,7 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <borealis/cadran/view/header_settings.hpp>
 
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <string>
@@ -14,7 +15,11 @@
 #include <borealis/cadran/ui/ui.hpp>
 #include <borealis/cadran/view/version_badge.hpp>
 
-static constexpr float SIZE              = 40;
+static constexpr float SIZE = 40;
+static constexpr float GAP  = 10;
+// A finger's target: 56 high (about 6 mm on the Switch's screen), and to the
+// middle of the gap with its neighbours, the drawing keeping its size
+static constexpr float TOUCH             = 56;
 static constexpr const char* LANGUAGE_ID = "header_language";
 static constexpr const char* THEME_ID    = "header_theme";
 static constexpr const char* TEXT_ID     = "header_text_size";
@@ -45,7 +50,7 @@ HeaderSetting::HeaderSetting(Kind setting)
     this->setWidth(setting == Kind::LANGUAGE ? SIZE * 1.3f : SIZE);
     this->setHeight(SIZE);
     this->setAlignSelf(brls::AlignSelf::CENTER);
-    this->setMarginRight(10);
+    this->setMarginRight(GAP);
     // A tap opens its list (hitTest finds it, focusable or not); the tab on
     // screen shows the new choice (Preferences says it too).
     this->addGestureRecognizer(new brls::TapGestureRecognizer(this, [setting]()
@@ -69,7 +74,11 @@ brls::View* HeaderSetting::hitTest(brls::Point point)
     // brls::View::hitTest skips a view that cannot take the focus.
     if (this->getAlpha() == 0.0f || this->getVisibility() != brls::Visibility::VISIBLE)
         return nullptr;
-    return this->getFrame().pointInside(point) ? this : nullptr;
+    brls::Rect frame = this->getFrame();
+    const float dy   = std::max(0.0f, (TOUCH - frame.size.height) / 2);
+    const float dx   = GAP / 2;
+    brls::Rect touch(frame.origin.x - dx, frame.origin.y - dy, frame.size.width + 2 * dx, frame.size.height + 2 * dy);
+    return touch.pointInside(point) ? this : nullptr;
 }
 
 void HeaderSetting::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,

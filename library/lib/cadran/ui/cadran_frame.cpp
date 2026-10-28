@@ -100,11 +100,17 @@ void cadran::install_theme()
     style.addMetric("cadran/radius/card", kit::RADIUS_CARD);
     style.addMetric("cadran/radius/top", kit::RADIUS_TOP);
     style.addMetric("cadran/radius/modal", kit::RADIUS_MODAL);
+    // The gap between a filled button and the focus ring around it
+    style.addMetric("cadran/ring_gap", 4.0f);
     style.addMetric("brls/applet_frame/header_height", 84.0f);
     // 232 px, not the boards' 196: the console's font is wider than the
     // boards' (Nunito Sans), and the longest names must stay whole
     // (PlayGuard's "Tiempo de juego", "Einschränkungen" and their badges).
     style.addMetric("brls/tab_frame/sidebar_width", RAIL_OPEN);
+    // A tab's own content (@style/brls/tab_frame/content_padding_*): the
+    // margins of Cadran's pages, the cards' edges
+    style.addMetric("brls/tab_frame/content_padding_sides", 40.0f);
+    style.addMetric("brls/tab_frame/content_padding_top_bottom", 28.0f);
     style.addMetric("brls/sidebar/padding_top", 6.0f);
     style.addMetric("brls/sidebar/padding_right", 8.0f);
     style.addMetric("brls/sidebar/padding_bottom", 10.0f);
@@ -519,9 +525,8 @@ void add_crumb(brls::AppletFrame* frame)
 {
     auto* title = dynamic_cast<brls::Label*>(frame->getView("brls/applet_frame/title_label"));
     auto* row   = title ? dynamic_cast<brls::Box*>(title->getParent()) : nullptr;
-    // Not on a screen of its own (a view "child_root": PlayGuard's child
-    // screen), which is not a step of the one below.
-    const std::string crumb = row && !frame->getView("child_root") ? crumb_of(frame) : "";
+    // Not on a screen of its own, which is not a step of the one below.
+    const std::string crumb = row && !cadran::is_standalone_screen(frame) ? crumb_of(frame) : "";
     // Nothing said twice (a game's screen is titled as its tab: Activity).
     if (crumb.empty() || title->getFullText().empty() || crumb == title->getFullText())
         return;
@@ -546,6 +551,11 @@ void skin_screen_of(brls::View* focus)
     if (auto* dialog = dynamic_cast<brls::Dialog*>(focus))
     {
         cadran::style_dialog(dialog);
+        return;
+    }
+    if (auto* field = dynamic_cast<brls::EditTextDialog*>(focus))
+    {
+        cadran::style_edit_text_dialog(field);
         return;
     }
     auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
@@ -960,6 +970,9 @@ void cadran::style_rail(brls::View* tab_frame)
             label->setMarginRight(0);
             label->setMarginLeft(name.empty() ? 4 : 10);
             label->setSingleLine(true);
+            // A long tab name down to 80 % of its size rather than cut and
+            // scrolling
+            label->setShrinkToFitMin(17 * 0.8f);
         }
         // No icon from the app (ui::hooks' rail_icons): the label alone.
         if (!name.empty())
@@ -1002,6 +1015,18 @@ void cadran::style_rail(brls::View* tab_frame)
 bool cadran::is_main_frame(brls::View* frame)
 {
     return frame && (frame->getView("main_tabs") || frame->getView("brls/tab_frame/sidebar"));
+}
+
+bool cadran::is_standalone_screen(brls::View* frame)
+{
+    if (!frame)
+        return false;
+    const auto& standalone = ui::hooks::get().standalone_screen;
+    if (standalone)
+        return standalone(frame);
+    // "child_root": the id PlayGuard gave its child screen before the hook,
+    // kept until it sets the hook.
+    return frame->getView("cadran/standalone") || frame->getView("child_root");
 }
 
 void cadran::style_frame(brls::AppletFrame* frame, brls::View* tab_frame)

@@ -10,7 +10,7 @@
 #              (find_package(Aurore 0.1)) and run
 #   fetch      AURORE_FETCH_DEPS: fmt, tinyxml2 and GLFW downloaded
 #   fonts      FreeType and FriBidi
-#   unity      the unity build, the whole library in one batch
+#   unity      the unity build, the whole library in one batch, with the tests
 #   template   template/, the app to copy
 #   legacy     borealis' option names, still read (with a deprecation warning)
 #
@@ -59,7 +59,7 @@ fonts)
     ;;
 unity)
     cmake -S . -B "${out}/unity" "${desktop[@]}" -DAURORE_LIBROMFS=ON -DBRLS_UNITY_BUILD=ON \
-        -DCMAKE_UNITY_BUILD_BATCH_SIZE=0
+        -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DBRLS_BUILD_TESTS=ON
     cmake --build "${out}/unity" -j "${jobs}"
     ;;
 template)

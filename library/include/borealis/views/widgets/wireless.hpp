@@ -46,6 +46,7 @@ class WirelessWidget : public Box
     inline static bool hasWirelessConnection = false;
     inline static int wifiLevel              = 3;
     inline static bool hasEthernetConnection = false;
+    inline static bool updating              = false; // a read is under way
 };
 
 } // namespace brls

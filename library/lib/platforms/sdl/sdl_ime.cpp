@@ -231,6 +231,14 @@ void SDLImeManager::openInputDialog(
                 }
                 return true; }, true, true);
 
+    dialog->getClearEvent()->subscribe([this, updateText, updateTextCursor]()
+        {
+            if (this->isEditing) return;
+            this->inputBuffer.clear();
+            this->cursor = -1;
+            updateTextCursor();
+            updateText(); });
+
     // delete text
     dialog->getBackspaceEvent()->subscribe([this, updateText, updateTextCursor](...)
         {

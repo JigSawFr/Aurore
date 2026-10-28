@@ -18,6 +18,7 @@
 
 #include <unistd.h>
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
@@ -68,10 +69,12 @@ extern size_t delay(long milliseconds, std::function<void()> func);
 
 extern void cancelDelay(size_t iter);
 
+// The free functions above are the API for apps; Threading is what the
+// application runs them with (start, stop, performSyncTasks each frame)
 class Threading
 {
   public:
-    Threading();
+    [[deprecated("Threading is static; the application starts it")]] Threading();
 
     /**
      * Enqueue a function to be executed before
@@ -87,6 +90,13 @@ class Threading
      * parallel with application's main thread.
      */
     static void async(std::function<void()> func);
+
+    /**
+     * As async(), on a thread of its own for decoding pictures (ThemeImages,
+     * Image::setImageFromFileAsync): a large picture does not hold back the
+     * tasks of async() (the battery, the Wi-Fi, the app's own).
+     */
+    static void asyncDecode(std::function<void()> func);
 
     static size_t delay(long milliseconds, std::function<void()> func);
 
@@ -106,20 +116,24 @@ class Threading
      */
     static void setSyncTaskBudget(uint64_t microseconds);
 
-    static std::vector<std::function<void()>>* getSyncFunctions()
+    // The queue, read without its lock: not safe while other threads queue
+    // tasks
+    [[deprecated("not thread-safe; see isIdle()")]] static std::vector<std::function<void()>>* getSyncFunctions()
     {
         std::lock_guard<std::mutex> guard(m_sync_mutex);
         return &m_sync_functions;
     }
 
     /**
-     * True when no task is queued with sync() or async() and none is
-     * running on the async thread (delay()s are not counted). The test
+     * True when no task is queued with sync(), async() or asyncDecode()
+     * and none is running on their threads (delay()s are not counted). The test
      * harness waits for it before it calls a screen settled.
      */
     static bool isIdle();
 
-    static std::vector<std::function<void()>>* getAsyncTasks()
+    // The queue, read without its lock: not safe while other threads queue
+    // tasks
+    [[deprecated("not thread-safe; see isIdle()")]] static std::vector<std::function<void()>>* getAsyncTasks()
     {
         std::lock_guard<std::mutex> guard(m_async_mutex);
         return &m_async_tasks;
@@ -138,12 +152,15 @@ class Threading
     inline static std::mutex m_delay_mutex;
     inline static std::vector<DelayOperation> m_delay_tasks;
     inline static std::set<size_t> m_delay_cancel_set;
+    inline static std::set<size_t> m_delay_pending; // queued, not run nor cancelled
     inline static size_t m_delay_index = 0;
 
-    inline static volatile bool task_loop_active = true;
+    inline static std::atomic<bool> task_loop_active { true };
+    inline static bool task_loop_running = false; // started and not stopped
 
     static void* task_loop(void* a);
     static void std_task_loop();
+    static void* decode_loop(void* a);
 
     static void start_task_loop();
 };

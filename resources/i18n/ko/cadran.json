@@ -63,6 +63,7 @@
         "text_sizes": {
             "normal": "보통",
             "large": "크게",
+            "largest": "아주 크게",
             "auto": "자동: TV에서는 크게"
         },
         "rail": "사이드바",

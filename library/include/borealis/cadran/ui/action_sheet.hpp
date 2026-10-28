@@ -10,11 +10,11 @@
 namespace ui
 {
 
-// Pops the sheet (a fade), then runs `then` (if any) on the next frame.
+/// Pops the sheet (a fade), then runs `then` (if any) on the next frame.
 void close_sheet(std::function<void()> then);
 
-// Room around the panel, `width` wide or taking what is left (`grow`): a
-// touch there closes the sheet.
+/// Room around the panel, `width` wide or taking what is left (`grow`): a
+/// touch there closes the sheet.
 brls::Box* sheet_outside(float width, bool grow);
 
 } // namespace ui

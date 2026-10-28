@@ -15,10 +15,10 @@
             height="auto"
             axis="column"
             alignItems="stretch"
-            paddingTop="@style/brls/sidebar/padding_top"
-            paddingRight="@style/brls/sidebar/padding_right"
-            paddingBottom="@style/brls/sidebar/padding_bottom"
-            paddingLeft="@style/brls/sidebar/padding_left">
+            paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
+            paddingRight="@style/brls/tab_frame/content_padding_sides"
+            paddingBottom="@style/brls/tab_frame/content_padding_top_bottom"
+            paddingLeft="@style/brls/tab_frame/content_padding_sides">
             
             <brls:RadioCell
                 id="radio"/>
@@ -36,11 +36,11 @@
                 id="inputNumeric"/>
 
             <brls:DetailCell
-                title="IP"
+                title="@i18n/demo/settings/ip"
                 id="ipAddress"/>
             
             <brls:DetailCell
-                title="DNS"
+                title="@i18n/demo/settings/dns"
                 id="dnsServer"/>
 
             <brls:BooleanCell
@@ -65,17 +65,14 @@
                     id="slider"/>
 
             <brls:DetailCell
-                    title="Post a notification"
+                    title="@i18n/demo/settings/notify"
                     id="notify"/>
-
-            <brls:RadioCell title="Another radio cell"/>
-            <brls:RadioCell title="One more radio cell"/>
 
             <brls:Header
                 width="auto"
                 height="auto"
-                title="Themes"
-                subtitle="Aurore's presets, then resources/themes: used at once"
+                title="@i18n/demo/settings/themes"
+                subtitle="@i18n/demo/settings/themes_subtitle"
                 marginTop="40"/>
 
             <brls:BooleanCell

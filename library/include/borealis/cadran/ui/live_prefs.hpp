@@ -13,20 +13,20 @@
 
 namespace live_prefs
 {
-// Right after borealis starts, which reads the console's own theme and
-// language (what "system" means): those kept, and the strings loaded in the
-// preferences' language.
+/// Right after borealis starts, which reads the console's own theme and
+/// language (what "system" means): those kept, and the strings loaded in the
+/// preferences' language.
 void start();
 
-// The theme in the preferences: its variant (ui::Prefs::theme) and its file
-// (ui::Prefs::theme_file), the boards' palettes when it cannot be read.
-// The screens take it at their next frame.
+/// The theme in the preferences: its variant (ui::Prefs::theme) and its file
+/// (ui::Prefs::theme_file), the boards' palettes when it cannot be read.
+/// The screens take it at their next frame.
 void apply_theme();
 
-// The language the strings are in now: the preferences', or the console's.
+/// The language the strings are in now: the preferences', or the console's.
 std::string locale();
 
-// After the preferences' language changed: applied, and the screens built
-// again (ui::hooks' push_main; without it, the screen shown is read again).
+/// After the preferences' language changed: applied, and the screens built
+/// again (ui::hooks' push_main; without it, the screen shown is read again).
 void language_changed();
 } // namespace live_prefs

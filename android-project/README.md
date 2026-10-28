@@ -1,55 +1,56 @@
-# borealis android demo
+# Aurore on Android
 
 [中文](./README_ZH.md)
 
-The Android port of borealis follows SDL's documentation: [SDL/docs](https://github.com/libsdl-org/SDL/blob/release-2.28.x/docs/README-android.md)
+The Gradle project that builds Aurore's demo as an Android app. It follows SDL's Android port ([SDL 2.28's documentation](https://github.com/libsdl-org/SDL/blob/release-2.28.x/docs/README-android.md)): SDL's Java activity starts the app, which Aurore builds as a shared library with the SDL2 platform and OpenGL ES 2, its resources inside it (libromfs).
 
-Currently, this project uses SDL 2.28.*, but there are some interesting Android-specific features in SDL3. We plan to migrate to SDL3 once it is officially released.
+| | |
+| --- | --- |
+| SDL | 2.28.5, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it) |
+| Android Gradle Plugin, Gradle | 8.1.1 (the wrapper, `gradlew`) |
+| JDK | 17, as the Android Gradle Plugin 8 needs |
+| NDK | 22.1.7171670 (`ndkVersion` in `app/build.gradle`) |
+| CMake | 3.16 or later |
+| SDK | compiled against API 34; `minSdkVersion 21` (Android 5.0), `targetSdkVersion 34` |
+| ABIs | `armeabi-v7a`, `arm64-v8a` |
 
-Theoretically, it supports Android API 16 and later (Android 4.1+), but I have only tested it on devices running Android 5.0+ because I couldn't find older devices.
+The NDK sets the oldest Android the app runs on: r22 and r23 go down to API 16, r24 and r25 to 19, r26 to 21. An app published on Google Play has to target a recent API: raise `compileSdkVersion` and `targetSdkVersion` in `app/build.gradle` (and the NDK, `minSdkVersion` and `-DANDROID_PLATFORM` with it if needed; a target above 34 also needs a newer Android Gradle Plugin). The CI builds the debug APK with the versions above.
+
+The app's data is left out of Android's backups and of transfers to a new device: `android:allowBackup="false"` in `AndroidManifest.xml`, and `res/xml/data_extraction_rules.xml` for Android 12 and later. An app that wants its settings backed up includes those files there.
 
 ## Building
 
-```shell
-cd android-project
-```
+From the repository's root, the resources generator first: libromfs turns the resources into C++ sources while the app is built, so it has to run on the computer that builds, not on Android.
 
-On the Android platform, borealis uses libromfs to package all resource files directly into the shared library. We need to build the libromfs-generator first.
-
-> The libromfs-generator is responsible for converting resource files into C++ source code and linking them into the main program during the compilation process.
-
-```shell
+```sh
 ./build_libromfs_generator.sh
 ```
 
-After a successful run, `libromfs-generator` will be generated in the `android-project/app/jni/borealis` directory.
+It leaves `libromfs-generator` at the root of the repository, where `app/jni/CMakeLists.txt` finds it (`app/jni/borealis` is a link to the root). Then, with the Android SDK and NDK installed (Android Studio's SDK Manager, or `sdkmanager`):
 
-Then open Android Studio and build the project.
-
-```shell
-# macOS: compile and install from the command line
-export JAVA_HOME=/Applications/Android\ Studio.app/Contents/jbr/Contents/Home
-export ANDROID_SDK_ROOT=~/Library/Android/sdk
-# Once built, the APK will be located in the app/build/outputs/apk/debug directory by default
-./gradlew assembleDebug
-# Directly install the APK (requires the device or emulator to be connected via adb)
-./gradlew installDebug
+```sh
+cd android-project
+export ANDROID_SDK_ROOT=~/Android/Sdk          # macOS: ~/Library/Android/sdk
+./gradlew assembleDebug                        # app/build/outputs/apk/debug/*.apk
+./gradlew installDebug                         # onto a device or emulator connected with adb
 ```
 
-## Migrating your borealis project to Android
+Android Studio opens `android-project/` as it is. On macOS, its own JDK works: `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
 
-1. Place your project under the `app/jni` directory.
-2. Modify `app/jni/CMakeLists.txt` and replace the relevant parts of borealis with your project.
-3. Modify the `applicationId` in `app/build.gradle` and change it to your package name.
-4. Create your own activity by imitating `com.borealis.demo` in `app/src/main/java`.
-5. Modify `app/src/main/AndroidManifest.xml` and change the package to your package name, and change `DemoActivity` to the name of your created activity.
-6. Modify the app name in `app/src/main/res/values/strings.xml`.
-7. Replace `app/src/main/res/mipmap-*/ic_launcher.png` with your application icon.
+A release build (`./gradlew assembleRelease`) is signed with `app/borealis.jks`, which is not in the repository: make one (the `keytool` line in `app/build.gradle`), or point `signingConfigs.release` at your own key.
 
-You can refer to the early commit history of this project to get an idea of what needs to be modified.
+## Your app on Android
 
-## Known Issues
+1. Put your project in `app/jni/` (or make `app/jni/borealis` a link to your project's root instead of Aurore's), with Aurore as its submodule.
+2. In `app/jni/CMakeLists.txt`, `add_subdirectory` your project in place of `borealis`, and point `LIBROMFS_PREBUILT_GENERATOR` at the `libromfs-generator` your build made.
+3. In your `CMakeLists.txt`, make the program with `program_target()` (a shared library on Android) and give it your resources with `add_libromfs()`, as Aurore's root `CMakeLists.txt` does for the demo.
+4. In `app/build.gradle`, set `namespace` and `applicationId` to your package name.
+5. In `app/src/main/java/`, copy `com/borealis/demo/DemoActivity.java` under your package, and change `getLibraries()` to load `SDL2` and your library (your CMake target's name, in place of `aurore_demo`).
+6. In `app/src/main/AndroidManifest.xml`, name your activity in place of `DemoActivity`.
+7. Set the app's name in `app/src/main/res/values/strings.xml` and its icon in `app/src/main/res/mipmap-*/ic_launcher.png`.
 
-If you delete some resource files, libromfs may not recognize it, causing a compilation error. In such cases, a temporary solution is to:
+The activity calls `System.exit(0)` when it is destroyed: Aurore keeps its state in static variables, which SDL2 would otherwise reuse when Android creates the activity again.
 
-Make a minor adjustment in `app/jni/CMakeLists.txt` (add an empty line), to trigger cmake to run again.
+## Known issues
+
+When a resource file is deleted, libromfs may not notice and the build fails. Running CMake again fixes it: change something in `app/jni/CMakeLists.txt` (an empty line), or remove `app/.cxx`.

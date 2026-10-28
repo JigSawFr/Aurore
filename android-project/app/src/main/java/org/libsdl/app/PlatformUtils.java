@@ -1,6 +1,7 @@
 package org.libsdl.app;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Message;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -95,8 +97,12 @@ public class PlatformUtils {
 
         Uri webpage = Uri.parse(url);
         Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
-        if (intent.resolveActivity(context.getPackageManager()) != null) {
+        // Not resolveActivity(): from API 30 it sees no browser without a
+        // <queries> entry
+        try {
             context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.w("PlatformUtils", "no app opens " + webpage.getScheme() + " links");
         }
     }
 

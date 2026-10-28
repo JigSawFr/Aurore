@@ -34,9 +34,59 @@ namespace brls
 
 #ifdef BOREALIS_USE_STD_THREAD
 static std::thread* task_loop_thread = nullptr;
+static std::thread* decode_thread    = nullptr;
 #else
 static pthread_t task_loop_thread = pthread_t(0);
+static pthread_t decode_thread    = pthread_t(0);
 #endif
+
+// asyncDecode()'s queue, as async()'s
+static std::mutex decode_mutex;
+static std::condition_variable decode_cv;
+static std::vector<std::function<void()>> decode_tasks;
+static int decode_running = 0; // under decode_mutex
+static std::atomic<bool> decode_thread_running { false };
+
+// Runs the tasks of a queue as they come, until `active` is false
+static void runQueue(std::mutex& mutex, std::condition_variable& cv, std::vector<std::function<void()>>& queue,
+    int& running, const std::atomic<bool>& active, const char* what)
+{
+    while (true)
+    {
+        std::vector<std::function<void()>> tasks;
+        {
+            // Woken as soon as a task is queued, instead of polling the
+            // queue every 500 ms
+            std::unique_lock<std::mutex> lock(mutex);
+            cv.wait(lock, [&]
+                { return !active || !queue.empty(); });
+            if (!active)
+                break;
+            tasks.swap(queue);
+            running = (int)tasks.size();
+        }
+
+        for (auto& task : tasks)
+        {
+            // An exception thrown by a task would end the program from
+            // this thread: log it and go on with the next one
+            try
+            {
+                task();
+            }
+            catch (std::exception& e)
+            {
+                brls::Logger::error("error: {}: {}", what, e.what());
+            }
+            catch (...)
+            {
+                brls::Logger::error("error: {}: unknown exception", what);
+            }
+            std::lock_guard<std::mutex> lock(mutex);
+            running--;
+        }
+    }
+}
 
 Threading::Threading()
 {
@@ -78,6 +128,21 @@ void Threading::async(std::function<void()> task)
     m_async_cv.notify_one();
 }
 
+void Threading::asyncDecode(std::function<void()> task)
+{
+    // No thread of its own (it could not be made): with the other tasks
+    if (!decode_thread_running)
+    {
+        Threading::async(std::move(task));
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> guard(decode_mutex);
+        decode_tasks.push_back(std::move(task));
+    }
+    decode_cv.notify_one();
+}
+
 size_t Threading::delay(long milliseconds, std::function<void()> func)
 {
     std::lock_guard<std::mutex> guard(m_delay_mutex);
@@ -92,13 +157,17 @@ size_t Threading::delay(long milliseconds, std::function<void()> func)
     operation.func  = std::move(func);
     operation.index = ++m_delay_index;
     m_delay_tasks.push_back(operation);
+    m_delay_pending.insert(operation.index);
     return m_delay_index;
 }
 
 void Threading::cancelDelay(size_t iter)
 {
     std::lock_guard<std::mutex> guard(m_delay_mutex);
-    m_delay_cancel_set.insert(iter);
+    // An index run already, cancelled already or not given yet is ignored:
+    // kept, it would stay in the set (or cancel a later delay)
+    if (m_delay_pending.erase(iter))
+        m_delay_cancel_set.insert(iter);
 }
 
 bool Threading::isIdle()
@@ -106,6 +175,11 @@ bool Threading::isIdle()
     {
         std::lock_guard<std::mutex> guard(m_async_mutex);
         if (!m_async_tasks.empty() || m_async_running > 0)
+            return false;
+    }
+    {
+        std::lock_guard<std::mutex> guard(decode_mutex);
+        if (!decode_tasks.empty() || decode_running > 0)
             return false;
     }
     std::lock_guard<std::mutex> guard(m_sync_mutex);
@@ -180,6 +254,14 @@ void Threading::performSyncTasks()
 
         if (duration >= d.delayMilliseconds)
         {
+            // Cancelled since the check above, or run now
+            m_delay_mutex.lock();
+            bool cancelled = m_delay_cancel_set.erase(d.index) > 0;
+            m_delay_pending.erase(d.index);
+            m_delay_mutex.unlock();
+            if (cancelled)
+                continue;
+
             Application::requestRedraw();
             try
             {
@@ -193,11 +275,6 @@ void Threading::performSyncTasks()
             {
                 brls::Logger::error("error: performSyncTasks(delay): unknown exception");
             }
-
-            m_delay_mutex.lock();
-            if (m_delay_cancel_set.count(d.index))
-                m_delay_cancel_set.erase(d.index);
-            m_delay_mutex.unlock();
         }
         else
         {
@@ -210,25 +287,44 @@ void Threading::performSyncTasks()
 
 void Threading::start()
 {
+    if (task_loop_running)
+        return;
     task_loop_active = true;
     start_task_loop();
 }
 
 void Threading::stop()
 {
+    if (!task_loop_running)
+        return;
     {
         std::lock_guard<std::mutex> guard(m_async_mutex);
         task_loop_active = false;
     }
     m_async_cv.notify_all();
+    {
+        // Under its lock: the decode thread sees the flag or is woken
+        std::lock_guard<std::mutex> guard(decode_mutex);
+    }
+    decode_cv.notify_all();
 
 #ifdef BOREALIS_USE_STD_THREAD
     task_loop_thread->join();
     delete task_loop_thread;
     task_loop_thread = nullptr;
+    if (decode_thread)
+    {
+        decode_thread->join();
+        delete decode_thread;
+        decode_thread = nullptr;
+    }
 #else
     pthread_join(task_loop_thread, NULL);
+    if (decode_thread_running)
+        pthread_join(decode_thread, NULL);
 #endif
+    task_loop_running     = false;
+    decode_thread_running = false;
 }
 void Threading::std_task_loop()
 {
@@ -236,50 +332,27 @@ void Threading::std_task_loop()
 }
 void* Threading::task_loop(void* a)
 {
-    while (true)
-    {
-        std::vector<std::function<void()>> tasks;
-        {
-            // Woken as soon as a task is queued, instead of polling the
-            // queue every 500 ms
-            std::unique_lock<std::mutex> lock(m_async_mutex);
-            m_async_cv.wait(lock, []
-                { return !task_loop_active || !m_async_tasks.empty(); });
-            if (!task_loop_active)
-                break;
-            tasks.swap(m_async_tasks);
-            m_async_running = (int)tasks.size();
-        }
+    runQueue(m_async_mutex, m_async_cv, m_async_tasks, m_async_running, task_loop_active, "async task");
+    return NULL;
+}
 
-        for (auto& task : tasks)
-        {
-            // An exception thrown by a task would end the program from
-            // this thread: log it and go on with the next one
-            try
-            {
-                task();
-            }
-            catch (std::exception& e)
-            {
-                brls::Logger::error("error: async task: {}", e.what());
-            }
-            catch (...)
-            {
-                brls::Logger::error("error: async task: unknown exception");
-            }
-            std::lock_guard<std::mutex> lock(m_async_mutex);
-            m_async_running--;
-        }
-    }
+void* Threading::decode_loop(void* a)
+{
+    runQueue(decode_mutex, decode_cv, decode_tasks, decode_running, task_loop_active, "decode task");
     return NULL;
 }
 
 void Threading::start_task_loop()
 {
 #ifdef BOREALIS_USE_STD_THREAD
-    task_loop_thread = new std::thread(std_task_loop);
+    task_loop_thread      = new std::thread(std_task_loop);
+    task_loop_running     = true;
+    decode_thread         = new std::thread([]
+        { decode_loop(nullptr); });
+    decode_thread_running = true;
 #else
-    pthread_create(&task_loop_thread, NULL, task_loop, NULL);
+    task_loop_running     = pthread_create(&task_loop_thread, NULL, task_loop, NULL) == 0;
+    decode_thread_running = task_loop_running && pthread_create(&decode_thread, NULL, decode_loop, NULL) == 0;
 #endif
 }
 

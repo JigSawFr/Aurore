@@ -27,10 +27,17 @@ bool docked()
 #endif
 }
 
-bool larger()
+float scale()
 {
     const std::string& size = ui::prefs().text_size;
-    return size == "large" || (size == "auto" && docked());
+    if (size == "largest")
+        return LARGEST;
+    return size == "large" || (size == "auto" && docked()) ? LARGE : 1.0f;
+}
+
+bool larger()
+{
+    return scale() > 1.0f;
 }
 
 namespace
@@ -50,11 +57,11 @@ namespace
 
 void apply()
 {
-    const float scale = larger() ? LARGE : 1.0f;
-    if (scale == brls::Application::getTextScale())
+    const float wanted = scale();
+    if (wanted == brls::Application::getTextScale())
         return;
     // Every label of every screen measured and laid out again (the core's).
-    brls::Application::setTextScale(scale);
+    brls::Application::setTextScale(wanted);
     // The tab on screen, for what it lays out by the size (Today's room).
     ui::refresh_shown_tab();
 }

@@ -118,7 +118,7 @@ void BottomBar::updateText()
     tm.tm_sec  = lt.second;
 #else
     std::time_t in_time_t = getWallTime();
-    auto tm               = *std::localtime(&in_time_t);
+    auto tm               = localTime(in_time_t);
 #endif
     std::stringstream ss;
     ss << std::put_time(&tm, "%H:%M");

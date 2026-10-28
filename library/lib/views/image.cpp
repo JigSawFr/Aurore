@@ -19,6 +19,7 @@
 #include <yoga/Yoga.h>
 
 #include <algorithm>
+#include <climits>
 #include <cmath>
 
 #include <borealis/core/application.hpp>
@@ -444,15 +445,15 @@ void Image::setImageFromFileAsync(const std::string& path)
 
     unsigned generation = ++this->asyncGeneration;
     int flags           = this->getImageFlags();
-    ASYNC_RETAIN
-    brls::async([ASYNC_TOKEN, path, generation, flags]()
+    Threading::asyncDecode([this, alive = aliveToken(), path, generation, flags]()
         {
             int width = 0, height = 0;
             // Freed whatever happens to the image meanwhile
             std::shared_ptr<unsigned char> pixels(nvgDecodeImage(path.c_str(), &width, &height), nvgFreeImageData);
-            brls::sync([ASYNC_TOKEN, path, generation, flags, pixels, width, height]()
+            brls::sync([this, alive, path, generation, flags, pixels, width, height]()
                 {
-                    ASYNC_RELEASE
+                    if (alive.expired())
+                        return;
                     if (generation != this->asyncGeneration)
                         return; // set again since
                     if (!pixels)
@@ -567,14 +568,16 @@ void Image::releaseTexture()
 
 void Image::setImageAsync(std::function<void(std::function<void(const std::string&, size_t length)>)> cb)
 {
-    ASYNC_RETAIN
-    cb([ASYNC_TOKEN](const std::string& data, size_t length)
-        { brls::sync([ASYNC_TOKEN, data, length]()
+    // The callback may be called more than once, or after the image is gone
+    cb([this, alive = aliveToken()](const std::string& data, size_t length)
+        { brls::sync([this, alive, data, length]()
               {
-            ASYNC_RELEASE
-            if(length == 0)
-                return;
-            this->setImageFromMem((unsigned char *) data.c_str(),(int) length); }); });
+                  if (alive.expired())
+                      return;
+                  size_t size = std::min(length, data.size());
+                  if (size == 0 || size > (size_t)INT_MAX)
+                      return;
+                  this->setImageFromMem((unsigned char*)data.data(), (int)size); }); });
 }
 
 void Image::innerSetImage(int tex)

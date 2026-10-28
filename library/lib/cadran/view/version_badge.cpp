@@ -67,9 +67,9 @@ static void badge_screen_of(brls::View* focus)
     while (focus->hasParent())
         focus = focus->getParent();
     auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
-    // Not on the child screen: a version means nothing to a child, and its
-    // amber reads as a warning.
-    if (frame && frame->getView("child_root"))
+    // Not on a screen of its own (a child's: a version means nothing to a
+    // child, and its amber reads as a warning).
+    if (cadran::is_standalone_screen(frame))
         return;
     // An app that says no version (ui::hooks' version) gets no badge.
     const auto& version = ui::hooks::get().version;
@@ -96,6 +96,12 @@ brls::Box* VersionBadge::header_tools(brls::AppletFrame* frame)
     tools->setFocusable(false);
     tools->setAlignItems(brls::AlignItems::CENTER);
     tools->setAlignSelf(brls::AlignSelf::CENTER);
+    // 8 px more above and below, given back by the margins: the header's
+    // settings take a touch that far from their drawing (HeaderSetting::hitTest)
+    tools->setPaddingTop(8);
+    tools->setPaddingBottom(8);
+    tools->setMarginTop(-8);
+    tools->setMarginBottom(-8);
     header->addView(tools);
     return tools;
 }

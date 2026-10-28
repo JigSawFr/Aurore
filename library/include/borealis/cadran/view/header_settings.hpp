@@ -14,6 +14,8 @@
 
 #include <borealis.hpp>
 
+/// The language, theme and text size in the main screen's header: a tap opens
+/// their picker.
 class HeaderSetting : public brls::View
 {
   public:
@@ -26,17 +28,17 @@ class HeaderSetting : public brls::View
 
     explicit HeaderSetting(Kind kind);
 
-    // Puts them in the main screen's header, when it first takes the focus
-    // (after NoticeBell::install's bell). Called once, at start-up.
+    /// Puts them in the main screen's header, when it first takes the focus
+    /// (after NoticeBell::install's bell). Called once, at start-up.
     static void install();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
         brls::FrameContext* ctx) override;
-    // Touched although it is not focusable.
+    /// Touched although it is not focusable.
     brls::View* hitTest(brls::Point point) override;
 
   protected:
-    // A button: "Language, Français (France)", "Theme, Dark", "Text size, Larger".
+    /// A button: "Language, Français (France)", "Theme, Dark", "Text size, Larger".
     brls::AccessibilityRole getDefaultAccessibilityRole() override { return brls::AccessibilityRole::BUTTON; }
     std::string getDefaultAccessibilityLabel() override;
 

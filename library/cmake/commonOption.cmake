@@ -78,6 +78,15 @@ option(BRLS_FONTSTASH_STREAM "fontstash use stream" OFF)
 # (Application::setInspectorEnabled does it at run time)
 option(BRLS_INSPECTOR "Built-in inspector on" OFF)
 
+# The debugging aids read from the environment on a desktop: BRLS_INSPECTOR,
+# BRLS_HOT_RELOAD, BRLS_REDRAW_DEBUG, BRLS_PROFILE and Cadran's flags
+# (ui::env_flag). AUTO builds them in except in Release and MinSizeRel: a
+# distributed app does not read its screens from a folder an environment
+# variable names. Their functions (Inspector::setEnabled,
+# HotReload::setEnabled...) are in every build.
+set(BRLS_DEV_TOOLS "AUTO" CACHE STRING "Debugging aids from the environment: AUTO (not in Release and MinSizeRel), ON or OFF")
+set_property(CACHE BRLS_DEV_TOOLS PROPERTY STRINGS AUTO ON OFF)
+
 # The test harness (headless platform, brls::test::Harness: target
 # Aurore::test), and with this project the demo's tests, bench and
 # aurore-preview. Desktop with OpenGL 3 (the default driver) only.

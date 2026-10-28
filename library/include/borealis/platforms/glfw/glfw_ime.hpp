@@ -24,6 +24,14 @@ limitations under the License.
 namespace brls
 {
 
+/**
+ * The text GLFW's preedit callback describes (a word being composed with an
+ * input method), its focused block between [ ]; sizes that do not add up to
+ * the text leave the rest in no block.
+ */
+std::string glfwPreeditText(int preeditCount, const unsigned int* preeditString, int blockCount,
+    const int* blockSizes, int focusedBlock);
+
 class GLFWImeManager : public ImeManager
 {
   public:

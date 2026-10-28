@@ -9,7 +9,7 @@
 
 namespace cut_text
 {
-// Once per main-loop iteration (the app's main loop); does nothing without
-// the variable.
+/// Cadran calls it after each frame; an app may call it too, from its own
+/// main loop. It does nothing without the variable.
 void sample();
 } // namespace cut_text

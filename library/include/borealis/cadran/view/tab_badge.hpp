@@ -10,30 +10,32 @@
 
 #include <borealis.hpp>
 
+/// The number of things to do in a tab, an amber disc by its name in the sidebar
+/// (or on its icon) and on the row where they are done.
 class TabBadge : public brls::View
 {
   public:
     TabBadge();
 
     void set_count(int count);
-    // The sidebar's: `open` 1 at the right of the name, 0 on the icon's top
-    // right corner, smaller, and in between while the rail opens or folds.
-    // `floating`: out of the item's row, for a rail too narrow for it.
+    /// The sidebar's: `open` 1 at the right of the name, 0 on the icon's top
+    /// right corner, smaller, and in between while the rail opens or folds.
+    /// `floating`: out of the item's row, for a rail too narrow for it.
     void dock(float open, bool floating);
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
         brls::FrameContext* ctx) override;
 
-    // The sidebar item's badge, added the first time it is asked for.
+    /// The sidebar item's badge, added the first time it is asked for.
     static TabBadge* of(brls::SidebarItem* item);
-    // Its badge if it has one yet, else nullptr.
+    /// Its badge if it has one yet, else nullptr.
     static TabBadge* find(brls::SidebarItem* item);
-    // A row's (a DetailCell: its title, then its value): after the value.
+    /// A row's (a DetailCell: its title, then its value): after the value.
     static TabBadge* on_row(brls::Box* row);
 
   private:
     int count            = 0;
-    brls::Time pop_since = 0; // the number changed: the disc pops (µs; 0 at rest)
+    brls::Time pop_since = 0; ///< the number changed: the disc pops (µs; 0 at rest)
     float open           = 1.0f;
     bool floating        = false;
 };

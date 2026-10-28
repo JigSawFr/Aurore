@@ -8,8 +8,9 @@
   "on": "On",
   "off": "Off",
   "delete": "Delete",
+  "clear": "Clear",
   "save": "Save",
-  "input": "Please input...",
+  "input": "Enter text",
   "submit": "Submit",
   "options": "Options"
 }

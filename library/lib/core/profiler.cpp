@@ -37,7 +37,7 @@ bool Profiler::isMeasuring()
 
 void Profiler::beginFrame()
 {
-#if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+#if defined(BRLS_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
     static bool fromEnvironment = []
     {
         const char* value = std::getenv("BRLS_PROFILE");

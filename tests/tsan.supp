@@ -1,0 +1,6 @@
+# ThreadSanitizer: what the GL driver of the tests (Mesa's llvmpipe), not
+# built with it, does in its own threads and locks
+called_from_lib:libgallium
+race:libgallium
+deadlock:libLLVM
+deadlock:libEGL_mesa

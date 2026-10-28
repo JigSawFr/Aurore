@@ -38,7 +38,7 @@ What it gives:
 | `push(activity)`, `top()`, `find(id)` | a screen pushed (without transition), the one on top, a view of it by XML id |
 | `step(n)`, `advance(ms)`, `settle(maxMs)` | `n` frames; frames for `ms` of simulated time; frames until no animation runs and no `sync`/`async` task is queued or running |
 | `press`, `release`, `tap(button, times)`, `hold(button, ms)`, `setAxis` | the gamepad (`tap` presses for a frame, releases and settles; `hold` gets the repeats a device gets) |
-| `pressKey`, `releaseKey`, `tapKey` | the keyboard (`BRLS_KBD_KEY_*`): Enter is A, Escape is B, the arrows the D-pad, as on the desktop; watched keys (`Application::addToWatchedKeys`) and `getKeyboardKeyStateChanged()` see them |
+| `pressKey`, `releaseKey`, `tapKey` | the keyboard (`BRLS_KBD_KEY_*`): Enter is A, Escape is B, the arrows the D-pad and the other keys of [input.md](input.md), as on the desktop; watched keys (`Application::addToWatchedKeys`) and `getKeyboardKeyStateChanged()` see them |
 | `touchDown`, `touchMove`, `touchUp`, `tapAt`, `tapView`, `swipe` | touch, in the views' coordinates (`View::getFrame()`) |
 | `mouseMove`, `mouseClick`, `mouseScroll` | the mouse |
 | `setKeyboardAnswer(text)` | the next keyboard opened (`ImeManager`) gets `text`; without one it is cancelled |
@@ -98,6 +98,19 @@ They need `AURORE_LIBROMFS=ON`, which configuring says: their reference screensh
 
 `tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
 
+`tests/async_tests.cpp` covers what crosses threads: a task coming back to a deleted view (`View::aliveToken()`, the `ASYNC_*` macros), the battery and Wi-Fi widgets read on the task thread (`HeadlessPlatform::showStatus` shows them), `delay()`/`cancelDelay()`, `Threading::stop()`/`start()`, events fired from another thread, logging from the task thread. Built with ThreadSanitizer they check the locking too:
+
+```sh
+cmake -B build-tsan -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON \
+    -DCMAKE_CXX_FLAGS=-fsanitize=thread -DCMAKE_C_FLAGS=-fsanitize=thread -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=thread
+cmake --build build-tsan --target aurore_async_tests
+TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R aurore_async_tests --output-on-failure
+```
+
+`tests/tsan.supp` leaves out what Mesa's software renderer, which draws the tests and is not built with the sanitizer, does in its own threads.
+
+`tests/host/`: Cadran's plain C++ parts without a window, each suite linked only to the sources it tests: the palettes' contrast (every pair of `cadran::palette::CONTRAST`, both themes), safe text and the Markdown parser, `ui::guarded`, and the text helpers (`cadran_text`, `format_text`) over the real `cadran.json` catalogs. `ctest -R host` runs them alone.
+
 ## The bench
 
 `aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, nanovg draw calls, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, flush, swap, total).
@@ -111,7 +124,7 @@ aurore_bench --check tests/bench_baseline.json # exit 1 on a regression
 
 `--check` fails when a count is above the baseline's by more than `--margin` (25 %, and 1). Times depend on the machine: they are checked only with `--time-margin <factor>`. `ctest` runs the check.
 
-The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too, and logs averages every 120 frames. The [inspector](inspector.md)'s panel shows its figures, and it measures while the panel is open. Each `FrameProfile` has the time of each phase (`events`, `input`, `update`, `layout`, `draw`, `inspector`, `flush`, `swap`), the `total` and the `interval` since the iteration before, and counts: layouts, views laid out, nanovg's draw calls and triangles, allocations.
+The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too (a build with `BRLS_DEV_TOOLS`, see [hot reload](hot_reload.md#turning-it-on)), and logs averages every 120 frames. The [inspector](inspector.md)'s panel shows its figures, and it measures while the panel is open. Each `FrameProfile` has the time of each phase (`events`, `input`, `update`, `layout`, `draw`, `inspector`, `flush`, `swap`), the `total` and the `interval` since the iteration before, and counts: layouts, views laid out, nanovg's draw calls and triangles, allocations.
 
 ## aurore-preview
 
@@ -123,7 +136,7 @@ Draws an XML layout to a PNG with the harness: `--theme dark`, `light` or a them
 
 ## Redraw on demand: finding a missing invalidation
 
-With redraw on demand (`Application::setRedrawOnDemand(true)`), a view that changes how it looks without `invalidate()` or `requestRedraw()` stays stale on screen. `Application::setRedrawDebug(true)`, or `BRLS_REDRAW_DEBUG=1` on the desktop, draws each skipped frame all the same, without presenting it, compares it with the last frame presented, and logs a difference as a warning with its area and the views drawn there:
+With redraw on demand (`Application::setRedrawOnDemand(true)`), a view that changes how it looks without `invalidate()` or `requestRedraw()` stays stale on screen. `Application::setRedrawDebug(true)`, or `BRLS_REDRAW_DEBUG=1` on the desktop (a build with `BRLS_DEV_TOOLS`), draws each skipped frame all the same, without presenting it, compares it with the last frame presented, and logs a difference as a warning with its area and the views drawn there:
 
 ```
 redraw debug: a skipped frame differs from the last one presented (412 pixels in 1104,20 96x28): no redraw asked for Label (id: clock)

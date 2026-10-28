@@ -36,8 +36,6 @@ limitations under the License.
 namespace brls
 {
 static int currentIMEStatus = GLFW_FALSE;
-#define MAX_PREEDIT_LEN 128
-static char preeditBuf[MAX_PREEDIT_LEN] = "";
 
 static size_t encode_utf8(char* s, unsigned int ch)
 {
@@ -73,63 +71,39 @@ void GLFWImeManager::ime_callback(GLFWwindow* window)
     brls::Logger::info("IME switched: {}", currentIMEStatus ? "ON" : "OFF");
 }
 
+std::string glfwPreeditText(int preeditCount, const unsigned int* preeditString, int blockCount,
+    const int* blockSizes, int focusedBlock)
+{
+    std::string text;
+    if (preeditCount <= 0 || blockCount <= 0 || !preeditString || !blockSizes)
+        return text;
+    // Past the last block (sizes adding up to less than the text): in none
+    int blockIndex = -1, remainingBlockSize = 0;
+    for (int i = 0; i < preeditCount; i++)
+    {
+        while (remainingBlockSize <= 0 && blockIndex < blockCount)
+        {
+            if (blockIndex == focusedBlock)
+                text += "]";
+            blockIndex++;
+            remainingBlockSize = blockIndex < blockCount ? blockSizes[blockIndex] : preeditCount;
+            if (blockIndex < blockCount && blockIndex == focusedBlock)
+                text += "[";
+        }
+        char encoded[4];
+        text.append(encoded, encode_utf8(encoded, preeditString[i]));
+        remainingBlockSize--;
+    }
+    if (blockIndex < blockCount && blockIndex == focusedBlock)
+        text += "]";
+    return text;
+}
+
 void GLFWImeManager::preedit_callback(GLFWwindow* window, int preeditCount,
     unsigned int* preeditString, int blockCount,
     int* blockSizes, int focusedBlock, int caret)
 {
-    int blockIndex = -1, remainingBlockSize = 0;
-    if (preeditCount == 0 || blockCount == 0)
-    {
-        strcpy(preeditBuf, "(empty)");
-        preeditTextBuffer = "";
-        return;
-    }
-
-    strcpy(preeditBuf, "");
-
-    for (int i = 0; i < preeditCount; i++)
-    {
-        char encoded[5]     = "";
-        size_t encodedCount = 0;
-
-        if (i == caret)
-        {
-            if (strlen(preeditBuf) < MAX_PREEDIT_LEN)
-                strcat(preeditBuf, "");
-        }
-        if (remainingBlockSize == 0)
-        {
-            if (blockIndex == focusedBlock)
-            {
-                if (strlen(preeditBuf) + strlen("]") < MAX_PREEDIT_LEN)
-                    strcat(preeditBuf, "]");
-            }
-            blockIndex++;
-            remainingBlockSize = blockSizes[blockIndex];
-            if (blockIndex == focusedBlock)
-            {
-                if (strlen(preeditBuf) + strlen("[") < MAX_PREEDIT_LEN)
-                    strcat(preeditBuf, "[");
-            }
-        }
-        encodedCount          = encode_utf8(encoded, preeditString[i]);
-        encoded[encodedCount] = '\0';
-        if (strlen(preeditBuf) + strlen(encoded) < MAX_PREEDIT_LEN)
-            strcat(preeditBuf, encoded);
-        remainingBlockSize--;
-    }
-    if (blockIndex == focusedBlock)
-    {
-        if (strlen(preeditBuf) + strlen("]") < MAX_PREEDIT_LEN)
-            strcat(preeditBuf, "]");
-    }
-    if (caret == preeditCount)
-    {
-        if (strlen(preeditBuf) < MAX_PREEDIT_LEN)
-            strcat(preeditBuf, "");
-    }
-
-    preeditTextBuffer = std::string { preeditBuf };
+    preeditTextBuffer = glfwPreeditText(preeditCount, preeditString, blockCount, blockSizes, focusedBlock);
 }
 
 void GLFWImeManager::char_callback(GLFWwindow* window, unsigned int codepoint)
@@ -232,6 +206,13 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
                 dialog->setText(left + preeditTextBuffer + right);
                 dialog->setCursor(cursor + preeditTextBuffer.size());
             } });
+
+    dialog->getClearEvent()->subscribe([dialog]()
+        {
+            if (isEditing) return;
+            textBuffer.clear();
+            cursor = -1;
+            dialog->setCursor(cursor); });
 
     // delete text
     dialog->getBackspaceEvent()->subscribe([dialog](...)

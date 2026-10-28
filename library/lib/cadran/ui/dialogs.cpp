@@ -417,14 +417,18 @@ void hold_confirm(brls::Box* body, const std::string& hold_label, std::function<
 {
     namespace kit = cadran::kit;
     auto held     = std::make_shared<Held>();
-    // How: the A key's bubble, then the words.
+    // How: the A key's bubble, then the words; the bubble only for a
+    // controller or a keyboard, not for a finger or the mouse.
     auto* how = new brls::Box(brls::Axis::ROW);
     how->setAlignItems(brls::AlignItems::CENTER);
     how->setJustifyContent(brls::JustifyContent::CENTER);
     how->setMarginTop(16);
-    brls::Box* a = kit::key("A", 22);
-    a->setMarginRight(8);
-    how->addView(a);
+    if (brls::Application::getInputType() == brls::InputType::GAMEPAD)
+    {
+        brls::Box* a = kit::key("A", 22);
+        a->setMarginRight(8);
+        how->addView(a);
+    }
     how->addView(kit::label(brls::getStr("cadran/common/hold_hint", hold_label), 15, "cadran/text2"));
     body->addView(how);
     auto* dialog = box_dialog(body);
@@ -624,7 +628,11 @@ void pick_palette(std::function<void()> after)
     {
         if (info.path == ui::prefs().theme_file)
             selected = (int)labels.size();
-        labels.push_back(info.name);
+        // A user's theme named as one above it: told apart by its file
+        if (std::find(labels.begin(), labels.end(), info.name) != labels.end())
+            labels.push_back(info.name + " (" + info.id + ")");
+        else
+            labels.push_back(info.name);
         paths.push_back(info.path);
         only.push_back(info.light == info.dark ? "" : info.light ? "light"
                                                                  : "dark");
@@ -676,8 +684,8 @@ void pick_text_size(std::function<void()> after)
     std::vector<std::string> labels;
     for (const char* t : ui::TEXT_SIZES)
         labels.push_back(brls::getStr(std::string("cadran/prefs/text_sizes/") + t));
-    const std::vector<std::string> icons = { "tv", "text-normal", "text-large" };
-    static_assert(std::size(ui::TEXT_SIZES) == 3, "an icon for each text size");
+    const std::vector<std::string> icons = { "tv", "text-normal", "text-large", "text-largest" };
+    static_assert(std::size(ui::TEXT_SIZES) == 4, "an icon for each text size");
     pick("cadran/prefs/text_size"_i18n, labels, index_of(ui::TEXT_SIZES, ui::prefs().text_size), [after](int i)
         {
         // At once, no restart: every screen is laid out again.

@@ -21,9 +21,11 @@
 #include <borealis.hpp>
 #include <borealis/cadran/ui/cadran_kit.hpp>
 #include <borealis/cadran/ui/cadran_list.hpp>
+#include <borealis/cadran/ui/cadran_modal.hpp>
 #include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
+#include <borealis/cadran/ui/text_size.hpp>
 #include <borealis/cadran/ui/ui.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
 #include <borealis/core/hot_reload.hpp>
@@ -31,7 +33,12 @@
 #include <borealis/core/theme_image.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/platforms/desktop/desktop_font.hpp>
+#ifdef __GLFW__
+#include <borealis/platforms/glfw/glfw_ime.hpp>
+#endif
+#include <borealis/platforms/desktop/desktop_platform.hpp>
 #include <borealis/test/harness.hpp>
+#include <borealis/views/edit_text_dialog.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -42,6 +49,7 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <thread>
 #ifndef _WIN32
 #include <sys/stat.h>
@@ -821,8 +829,8 @@ BRLS_TEST(theme_errors_are_escaped_and_capped)
     BRLS_CHECK_EQ(info.errors.back(), std::string("and 400 more errors"));
 }
 
-// "@res/…" stays in the resources: in hot reload's folder and when a theme
-// is read
+// "@res/…" stays in the resources: in hot reload's folder, when a theme is
+// read and in an XML view's file paths
 BRLS_TEST(resource_names_stay_in_the_resources)
 {
     Harness h;
@@ -839,6 +847,12 @@ BRLS_TEST(resource_names_stay_in_the_resources)
     BRLS_CHECK(brls::HotReload::diskResource("@res/../secret.theme").empty());
     BRLS_CHECK(!brls::Theme::loadFile("@res/../secret.theme"));
     brls::HotReload::setEnabled(false);
+
+    // A file path attribute of an XML view
+    BRLS_CHECK(!brls::View::getFilePathXMLAttributeValue("@res/img/demo_icon.jpg").empty());
+    BRLS_CHECK(brls::View::getFilePathXMLAttributeValue("@res/../secret.theme").empty());
+    BRLS_CHECK(brls::View::getFilePathXMLAttributeValue("@res/img/../../secret.theme").empty());
+    BRLS_CHECK_EQ(brls::View::getFilePathXMLAttributeValue("/elsewhere/x.png"), std::string("/elsewhere/x.png"));
 
     // A language that is no locale's name is not a path either
     brls::loadTranslations("../../etc");
@@ -1052,6 +1066,35 @@ static void settlePictures(Harness& h)
         h.settle();
     }
 }
+
+#ifndef _WIN32
+// A theme's picture is looked at again just before it is decoded: a link
+// put in its place after Theme::resolveAsset looked is refused
+BRLS_TEST(theme_pictures_are_checked_again_before_they_are_read)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_recheck_test");
+    themes.picture("outside.png", 200, 30, 30);
+    themes.picture("mine/bg.png", 30, 30, 200);
+    std::string path, error;
+    const std::string folder = (themes.dir / "mine").generic_string();
+    BRLS_CHECK(brls::Theme::resolveAsset("bg.png", folder, folder, &path, &error));
+    BRLS_CHECK(brls::Theme::recheckAsset(path));
+
+    std::filesystem::remove(themes.dir / "mine" / "bg.png");
+    std::filesystem::create_symlink(themes.dir / "outside.png", themes.dir / "mine" / "bg.png");
+    BRLS_CHECK(!brls::Theme::recheckAsset(path, &error));
+    BRLS_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
+    std::shared_ptr<brls::ThemeImage> image = brls::ThemeImages::load(path);
+    settlePictures(h);
+    BRLS_CHECK(image->state == brls::ThemeImage::State::FAILED);
+    NVGcolor mean;
+    BRLS_CHECK(!brls::ThemeImages::meanColor(path, &mean));
+
+    // A path resolveAsset did not check: as it is
+    BRLS_CHECK(brls::Theme::recheckAsset((themes.dir / "outside.png").generic_string()));
+}
+#endif
 
 static bool hasWarningWith(const brls::ThemeInfo& info, const std::string& text)
 {
@@ -2046,6 +2089,53 @@ BRLS_TEST(cadran_pieces_have_roles_and_labels)
     BRLS_CHECK_EQ(line->getAccessibilityDescription(), std::string("Updates, 3 new, 4 of 4"));
 }
 
+namespace
+{
+// A screen with the applet frame's header, titled `title`
+brls::AppletFrame* titledScreen(const std::string& title, const std::string& markId = "")
+{
+    brls::Box* box = screenOf({ new brls::Button() });
+    if (!markId.empty())
+    {
+        auto* mark = new brls::Rectangle();
+        mark->setId(markId);
+        box->addView(mark);
+    }
+    auto* frame = new brls::AppletFrame(box);
+    frame->setTitle(title);
+    return frame;
+}
+} // namespace
+
+BRLS_TEST(cadran_crumb_skips_screens_of_their_own)
+{
+    CadranHarness h;
+    h.push(new brls::Activity(titledScreen("First")));
+    h.settle();
+    h.push(new brls::Activity(titledScreen("Second")));
+    h.settle();
+    BRLS_CHECK(h.hasText("First  ›")); // opened from First
+    // A screen of its own (a child's): no crumb, by the id in it…
+    h.push(new brls::Activity(titledScreen("Third", "cadran/standalone")));
+    h.settle();
+    BRLS_CHECK(h.hasText("Third"));
+    BRLS_CHECK(!h.hasText("Second  ›"));
+    // … or as the app's hook says
+    ui::hooks::get().standalone_screen = [](brls::View* frame)
+    {
+        auto* title = dynamic_cast<brls::Label*>(frame->getView("brls/applet_frame/title_label"));
+        return title && title->getFullText() == "Fourth";
+    };
+    h.push(new brls::Activity(titledScreen("Fourth")));
+    h.settle();
+    BRLS_CHECK(h.hasText("Fourth"));
+    BRLS_CHECK(!h.hasText("Third  ›"));
+    h.push(new brls::Activity(titledScreen("Fifth")));
+    h.settle();
+    BRLS_CHECK(h.hasText("Fourth  ›"));
+    ui::hooks::get().standalone_screen = nullptr;
+}
+
 BRLS_TEST(cadran_picker_says_its_title_and_the_choice)
 {
     CadranHarness h;
@@ -2087,4 +2177,669 @@ BRLS_TEST(every_focusable_demo_view_says_something)
 int main(int argc, char** argv)
 {
     return brls::test::runTests(argc, argv);
+}
+
+BRLS_TEST(switch_off_reads_as_secondary_text)
+{
+    Harness h;
+    auto* cell = new brls::BooleanCell();
+    cell->init("Switch", false, [](bool) {});
+    h.push(new brls::Activity(screenOf({ cell })));
+    h.settle();
+    for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })
+    {
+        brls::Application::getPlatform()->setThemeVariant(variant);
+        h.step(2);
+        brls::Theme theme = brls::Application::getTheme();
+        NVGcolor off      = cell->detail->getTextColor();
+        NVGcolor want     = theme["brls/text_secondary"];
+        BRLS_CHECK(std::fabs(off.r - want.r) < 0.01f && std::fabs(off.g - want.g) < 0.01f && std::fabs(off.b - want.b) < 0.01f);
+        BRLS_CHECK(brls::Theme::contrast(off, theme["brls/background"]) >= 4.5f);
+    }
+}
+
+BRLS_TEST(every_demo_theme_passes_the_contrast_check)
+{
+    DemoHarness h;
+    for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })
+        BRLS_CHECK(brls::Theme::checkContrast(variant).empty());
+    for (const brls::ThemeInfo& info : brls::Theme::listThemes("@res/themes", true))
+    {
+        for (const std::string& warning : info.warnings)
+            std::printf("%s: %s\n", info.path.c_str(), warning.c_str());
+        BRLS_CHECK(info.ok() && info.warnings.empty());
+    }
+}
+
+static std::string xmlError(const std::string& name, const std::string& xml)
+{
+    std::filesystem::path file = std::filesystem::temp_directory_path() / name;
+    std::ofstream(file) << xml;
+    try
+    {
+        brls::View::createFromXMLFile(file.string());
+    }
+    catch (const std::logic_error& e)
+    {
+        std::filesystem::remove(file);
+        return e.what();
+    }
+    std::filesystem::remove(file);
+    return "";
+}
+
+BRLS_TEST(xml_errors_say_where_and_what_was_meant)
+{
+    Harness h;
+    std::string typo = xmlError("aurore_typo.xml", "<brls:Box>\n\n    <brls:Label fontSise=\"20\"/>\n</brls:Box>\n");
+    BRLS_CHECK(typo.find("aurore_typo.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"") != std::string::npos);
+    BRLS_CHECK(typo.find("did you mean \"fontSize\"?") != std::string::npos);
+
+    std::string value = xmlError("aurore_value.xml", "<brls:Box\n    axis=\"colum\"/>\n");
+    BRLS_CHECK(value.find("aurore_value.xml:1: <brls:Box>: Illegal value \"colum\" for XML attribute \"axis\"; expected column, row") != std::string::npos);
+
+    std::string tag = xmlError("aurore_tag.xml", "<brls:Box>\n<brls:Lable/>\n</brls:Box>\n");
+    BRLS_CHECK(tag.find("aurore_tag.xml:2: <brls:Lable>: Unknown XML tag \"brls:Lable\"; did you mean \"brls:Label\"?") != std::string::npos);
+}
+
+BRLS_TEST(reduce_motion_stops_core_animations)
+{
+    Harness h;
+    brls::Application::setReduceMotion(true);
+    auto* cell = new brls::BooleanCell();
+    cell->init("Switch", false, [](bool) {});
+    h.push(new brls::Activity(screenOf({ cell })));
+    h.settle();
+    h.tap(brls::BUTTON_A);
+    BRLS_CHECK(cell->isOn());
+    BRLS_CHECK(brls::Ticking::runningTickings.empty() || std::none_of(brls::Ticking::runningTickings.begin(), brls::Ticking::runningTickings.end(), [](brls::Ticking* t)
+                   { return dynamic_cast<brls::FiniteTicking*>(t) != nullptr; }));
+
+    // A text cut short stays still while focused
+    auto* row   = new brls::Box(brls::Axis::ROW);
+    auto* label = new brls::Label();
+    label->setText("A text far too long for the narrow line it is written on");
+    label->setSingleLine(true);
+    row->setWidth(200);
+    row->setFocusable(true);
+    row->addView(label);
+    brls::setHighlightAnimationStill(true); // the focus ring's pulse aside
+    h.push(new brls::Activity(screenOf({ row })));
+    h.settle();
+    h.step(120);
+    brls::test::Image before = h.screenshot();
+    h.step(120);
+    BRLS_CHECK_EQ(brls::test::compareImages(h.screenshot(), before).differingPixels, 0);
+}
+
+BRLS_TEST(rail_names_are_not_cut)
+{
+    DemoHarness h;
+    for (const std::string& text : h.cutTexts())
+        BRLS_CHECK(text != "Basic components" && text != "Layout and alignment");
+}
+
+BRLS_TEST(hold_to_confirm_says_it_once)
+{
+    DemoHarness h;
+    // Opened by a finger: no A key bubble
+    BRLS_CHECK(h.tapView(h.findText("Cadran")));
+    ui::hold_confirm(cadran::dialog_body(brls::getStr("demo/cadran/hold_text")), brls::getStr("demo/cadran/hold"), [] {});
+    h.settle();
+    BRLS_CHECK(!h.hasText("A"));
+    BRLS_CHECK(!h.hasText("Reset everything?\n\nHold the button for 2 seconds."));
+    BRLS_CHECK(h.matchesReference("hold_confirm_touch"));
+}
+
+BRLS_TEST(cut_text_file_written_with_cadran)
+{
+    std::filesystem::path dir = std::filesystem::temp_directory_path() / "aurore_cut_text";
+    std::filesystem::remove_all(dir);
+    std::filesystem::create_directories(dir);
+    std::filesystem::path previous = std::filesystem::current_path();
+    std::filesystem::current_path(dir);
+    // Through the app's hook: BRLS_CUT_TEXT is read only with BRLS_DEV_TOOLS
+    ui::hooks::get().env_flag = [](const char* name)
+    { return std::string(name) == "CUT_TEXT"; };
+    {
+        DemoHarness h;
+        auto* cut = new brls::Label();
+        cut->setText("A sentence far too long for the narrow box it is given");
+        cut->setSingleLine(true);
+        cut->setWidth(120);
+        h.push(new brls::Activity(screenOf({ cut })));
+        h.settle();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+        h.step(2);
+        std::ifstream file(dir / "cut_text.txt");
+        std::string all((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        BRLS_CHECK(all.find("A sentence far too long for the narrow box it is given") != std::string::npos);
+    }
+    ui::hooks::get().env_flag = nullptr;
+    std::filesystem::current_path(previous);
+    std::filesystem::remove_all(dir);
+}
+
+BRLS_TEST(settings_tab_keeps_the_cards_margins)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("Settings"));
+    h.tap(brls::BUTTON_RIGHT);
+    h.settle();
+    brls::View* line = h.focus();
+    BRLS_CHECK(line != nullptr);
+    if (line)
+    {
+        brls::Rect frame = line->getFrame();
+        // Within the margins of Cadran's pages, the focus ring off the window's edge
+        BRLS_CHECK(frame.getMaxX() <= 1280 - 40 + 1);
+        BRLS_CHECK(frame.getMinY() >= 84 + 28 - 1);
+    }
+    BRLS_CHECK(h.matchesReference("settings_tab"));
+}
+
+BRLS_TEST(mouse_quick_click_is_not_lost)
+{
+    // Pressed and let go between two frames: a touchpad tap, a quick click
+    DemoHarness h;
+    brls::View* tab = h.findText("Layout and alignment");
+    BRLS_CHECK(tab != nullptr);
+    brls::Rect frame = tab->getFrame();
+    h.mouseQuickClick(frame.getMidX(), frame.getMidY());
+    BRLS_CHECK(h.hasText("alignItems: center"));
+}
+
+namespace
+{
+
+// A screen whose button counts the controller buttons it gets
+struct ButtonCounter
+{
+    brls::Button* button = new brls::Button();
+    std::map<brls::ControllerButton, int> pressed;
+
+    ButtonCounter(Harness& h)
+    {
+        button->setText("Count");
+        for (brls::ControllerButton b : { brls::BUTTON_X, brls::BUTTON_Y, brls::BUTTON_LB, brls::BUTTON_RB,
+                 brls::BUTTON_LT, brls::BUTTON_RT, brls::BUTTON_START, brls::BUTTON_BACK })
+            button->registerAction("", b, [this, b](brls::View*)
+                {
+                    pressed[b]++;
+                    return true; });
+        h.push(new brls::Activity(screenOf({ button })));
+        h.settle();
+    }
+};
+
+} // namespace
+
+BRLS_TEST(keyboard_keys_press_controller_buttons)
+{
+    Harness h;
+    ButtonCounter c(h);
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    h.tapKey(brls::BRLS_KBD_KEY_Y);
+    h.tapKey(brls::BRLS_KBD_KEY_L);
+    h.tapKey(brls::BRLS_KBD_KEY_R);
+    h.tapKey(brls::BRLS_KBD_KEY_P);
+    h.tapKey(brls::BRLS_KBD_KEY_KP_ADD);
+    h.tapKey(brls::BRLS_KBD_KEY_M);
+    h.tapKey(brls::BRLS_KBD_KEY_MINUS);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_Y], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LB], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_RB], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_START], 2);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_BACK], 2);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LT], 0);
+
+    // Shift for the triggers, and not the shoulder buttons then
+    h.pressKey(brls::BRLS_KBD_KEY_LEFT_SHIFT);
+    h.tapKey(brls::BRLS_KBD_KEY_L);
+    h.tapKey(brls::BRLS_KBD_KEY_R);
+    h.releaseKey(brls::BRLS_KBD_KEY_LEFT_SHIFT);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LT], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_RT], 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LB], 1);
+
+    // Ctrl+X is a shortcut, not X
+    h.pressKey(brls::BRLS_KBD_KEY_LEFT_CONTROL);
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    h.releaseKey(brls::BRLS_KBD_KEY_LEFT_CONTROL);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 1);
+}
+
+BRLS_TEST(keyboard_keys_can_be_mapped_again)
+{
+    Harness h;
+    ButtonCounter c(h);
+    brls::Application::mapKey(brls::BRLS_KBD_KEY_Q, brls::BUTTON_LB);
+    brls::Application::unmapKey(brls::BRLS_KBD_KEY_L);
+    h.tapKey(brls::BRLS_KBD_KEY_Q);
+    h.tapKey(brls::BRLS_KBD_KEY_L);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_LB], 1);
+
+    // A key the app handles itself is its own
+    int own = 0;
+    c.button->registerAction(brls::BrlsKeyCombination(brls::BRLS_KBD_KEY_X), [&own](brls::View*)
+        {
+            own++;
+            return true; });
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    BRLS_CHECK_EQ(own, 1);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 0);
+
+    brls::Application::clearKeyMap();
+    h.tapKey(brls::BRLS_KBD_KEY_Y);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_Y], 0);
+    BRLS_CHECK(brls::Application::getKeyMap().empty());
+}
+
+BRLS_TEST(keyboard_keys_type_text_in_a_text_field)
+{
+    Harness h;
+    ButtonCounter c(h);
+    auto* dialog = new brls::EditTextDialog();
+    dialog->open();
+    h.settle();
+    h.tapKey(brls::BRLS_KBD_KEY_M); // not Minus: the dialog's delete
+    h.tapKey(brls::BRLS_KBD_KEY_X);
+    BRLS_CHECK_EQ(c.pressed[brls::BUTTON_X], 0);
+    BRLS_CHECK(dynamic_cast<brls::EditTextDialog*>(h.top()->getContentView()) != nullptr);
+}
+
+BRLS_TEST(horizontal_carousel_lets_left_out)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("Basic components"));
+    h.tap(brls::BUTTON_RIGHT);
+    brls::View* first = h.focus();
+    BRLS_CHECK(first != nullptr);
+    bool inCarousel = false;
+    for (brls::View* v = first; v; v = v->hasParent() ? v->getParent() : nullptr)
+        inCarousel |= dynamic_cast<brls::HScrollingFrame*>(v) != nullptr;
+    BRLS_CHECK(inCarousel);
+    h.tapKey(brls::BRLS_KBD_KEY_LEFT);
+    BRLS_CHECK(dynamic_cast<brls::SidebarItem*>(h.focus()) != nullptr);
+}
+
+BRLS_TEST(focus_on_a_scrolling_frame_shows_its_place)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("Layout and alignment"));
+    h.tap(brls::BUTTON_RIGHT);
+    // Down through the tab until the focus waits on the frame itself
+    brls::ScrollingFrame* frame = nullptr;
+    for (int i = 0; i < 30 && !frame; i++)
+    {
+        h.tap(brls::BUTTON_DOWN);
+        frame = dynamic_cast<brls::ScrollingFrame*>(h.focus());
+    }
+    BRLS_CHECK(frame != nullptr);
+    if (!frame)
+        return;
+    brls::Rectangle* indicator = nullptr;
+    for (brls::View* child : frame->getChildren())
+        if (auto* r = dynamic_cast<brls::Rectangle*>(child))
+            indicator = r;
+    BRLS_CHECK(indicator != nullptr);
+    if (!indicator)
+        return;
+    BRLS_CHECK(indicator->getAlpha() > 0.99f);
+    NVGcolor want = brls::Application::getTheme()["brls/highlight/color1"];
+    NVGcolor got  = indicator->getColor();
+    BRLS_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
+    BRLS_CHECK(h.matchesReference("scrolling_frame_focus"));
+}
+
+#ifdef __GLFW__
+// A word being composed with an input method: its focused block in [ ], and
+// block sizes that do not add up to the text read no further than blockCount
+BRLS_TEST(ime_preedit_text_stays_in_its_blocks)
+{
+    const unsigned int word[] = { 'a', 'b', 'c', 0x1F600 };
+    const int sizes[]         = { 1, 2 };
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, sizes, 1), std::string("a[bc]"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, sizes, 0), std::string("[a]bc"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(4, word, 2, sizes, 5), std::string("abc\xF0\x9F\x98\x80"));
+    // One block said (sizes[1] is past it): the rest is in none, and block 1
+    // is never focused
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 1, sizes, 1), std::string("abc"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 1, sizes, 0), std::string("[a]bc"));
+    // An empty block, and nothing at all
+    const int empty[] = { 0, 3 };
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, empty, 1), std::string("[abc]"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(0, word, 2, sizes, 0), std::string(""));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 0, sizes, 0), std::string(""));
+}
+#endif
+
+// A pan recognizer that has seen no touch fires nothing: its last state is
+// set from the start, not whatever its memory held
+BRLS_TEST(pan_recognizer_fires_nothing_before_a_touch)
+{
+    Harness h;
+    int fired = 0;
+    alignas(brls::PanGestureRecognizer) unsigned char memory[sizeof(brls::PanGestureRecognizer)];
+    std::memset(memory, 0x01, sizeof(memory)); // GestureState::UNSURE in every byte
+    auto* pan         = new (memory) brls::PanGestureRecognizer([&](brls::PanGestureStatus, brls::Sound*)
+        { fired++; },
+        brls::PanAxis::ANY);
+    brls::Sound sound = brls::SOUND_NONE;
+    pan->recognitionLoop(brls::TouchState(), brls::MouseState(), nullptr, &sound);
+    BRLS_CHECK_EQ(fired, 0);
+    pan->~PanGestureRecognizer();
+}
+
+namespace
+{
+bool s_second_tab_broken = false;
+
+brls::View* tabWith(const std::string& text)
+{
+    auto* button = new brls::Button();
+    button->setText(text);
+    return screenOf({ button });
+}
+
+// Two tabs, the second one's content throwing as a bad XML file does
+class TwoTabs : public brls::Activity
+{
+  public:
+    brls::View* createContentView() override
+    {
+        auto* frame = new brls::TabFrame();
+        frame->addTab("One", []
+            { return tabWith("first"); });
+        frame->addTab("Two", []
+            {
+            if (s_second_tab_broken)
+                throw std::logic_error("two.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"");
+            return tabWith("second"); });
+        return frame;
+    }
+};
+} // namespace
+
+BRLS_TEST(hot_reload_keeps_the_screen_when_a_tab_fails)
+{
+    Harness h;
+    s_second_tab_broken = false;
+    h.push(new TwoTabs());
+    h.settle();
+    BRLS_CHECK(h.focusByText("Two"));
+    h.tap(brls::BUTTON_RIGHT);
+    BRLS_CHECK_EQ(h.focusText(), std::string("second"));
+    brls::View* content = h.top()->getContentView();
+    brls::View* focused = h.focus();
+
+    s_second_tab_broken = true;
+    BRLS_CHECK(!brls::Application::rebuildActivity());
+    h.settle();
+    BRLS_CHECK(h.top()->getContentView() == content);
+    BRLS_CHECK(h.focus() == focused);
+    BRLS_CHECK(h.hasText("second"));
+
+    s_second_tab_broken = false;
+    BRLS_CHECK(brls::Application::rebuildActivity());
+    h.settle();
+    BRLS_CHECK(h.top()->getContentView() != content);
+    BRLS_CHECK_EQ(h.focusText(), std::string("second"));
+}
+
+// What Windows, macOS and Linux give for the language, each to one of the
+// 15 catalogues
+BRLS_TEST(system_locales_map_to_the_catalogues)
+{
+    Harness h;
+    const std::pair<const char*, const char*> cases[] = {
+        { "fr_CA", "fr-CA" }, { "fr_FR.UTF-8", "fr" }, { "fr-CA", "fr-CA" }, { "zh_CN", "zh-Hans" },
+        { "zh-Hans", "zh-Hans" }, { "zh-Hans-CN", "zh-Hans" }, { "zh-Hant-TW", "zh-Hant" }, { "zh_TW", "zh-Hant" },
+        { "zh_HK", "zh-Hant" }, { "zh_SG", "zh-Hans" }, { "es_MX", "es-419" }, { "es-419", "es-419" },
+        { "es_ES", "es" }, { "es", "es" }, { "en_GB", "en-GB" }, { "en-AU", "en-GB" }, { "en_US", "en-US" },
+        { "pt_BR", "pt-BR" }, { "pt-PT", "pt" }, { "de_AT@euro", "de" }, { "ja_JP", "ja" }, { "ko-KR", "ko" },
+        { "nl_BE", "nl" }, { "ru_RU.KOI8-R", "ru" }, { "it_CH", "it" }, { "C", "en-US" }, { "sv_SE", "en-US" }, { "", "en-US" }
+    };
+    for (const auto& [system, locale] : cases)
+    {
+        std::string got = brls::localeFromSystem(system);
+        if (got != locale)
+            std::fprintf(stderr, "%s gave %s, not %s\n", system, got.c_str(), locale);
+        BRLS_CHECK_EQ(got, std::string(locale));
+    }
+}
+
+// The header's language, theme and text size: a finger a little beside the
+// drawing still finds them
+BRLS_TEST(header_settings_take_a_wider_touch)
+{
+    DemoHarness h;
+    brls::View* language = h.top()->getContentView()->getView("header_language");
+    brls::View* theme    = h.top()->getContentView()->getView("header_theme");
+    BRLS_CHECK(language != nullptr && theme != nullptr);
+    if (!language || !theme)
+        return;
+    brls::Rect frame = language->getFrame();
+    BRLS_CHECK_EQ(frame.size.height, 40.0f);
+    size_t screens = brls::Application::getActivitiesStack().size();
+
+    // 7 px above it: the language list
+    h.tapAt(frame.getMidX(), frame.getMinY() - 7);
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens + 1);
+    h.tap(brls::BUTTON_B);
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens);
+
+    // In the gap, nearer the theme: the theme's list, not the language's
+    brls::Rect next = theme->getFrame();
+    h.tapAt(next.getMinX() - 3, next.getMidY());
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens + 1);
+    BRLS_CHECK(!h.hasText("Français"));
+    h.tap(brls::BUTTON_B);
+
+    // Farther: nothing
+    h.tapAt(frame.getMidX(), frame.getMinY() - 12);
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens);
+}
+
+// BRLS_LANG (or the older BOREALIS_LANG) gives the language over the
+// system's, a locale's name as it is or a system's read
+BRLS_TEST(language_from_the_environment_wins)
+{
+    Harness h;
+    unsetenv("BRLS_LANG");
+    unsetenv("BOREALIS_LANG");
+    std::string locale = "unchanged";
+    BRLS_CHECK(!brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("unchanged"));
+
+    setenv("BOREALIS_LANG", "de_DE.UTF-8", 1);
+    BRLS_CHECK(brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("de"));
+
+    setenv("BRLS_LANG", "fr-CA", 1);
+    BRLS_CHECK(brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("fr-CA"));
+
+    setenv("BRLS_LANG", "../../etc", 1);
+    BRLS_CHECK(brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("en-US"));
+
+    setenv("BOREALIS_THEME", "LIGHT", 1);
+    BRLS_CHECK_EQ(std::string(brls::DesktopPlatform::environment("THEME")), std::string("LIGHT"));
+    setenv("BRLS_THEME", "DARK", 1);
+    BRLS_CHECK_EQ(std::string(brls::DesktopPlatform::environment("THEME")), std::string("DARK"));
+    for (const char* name : { "BRLS_LANG", "BOREALIS_LANG", "BRLS_THEME", "BOREALIS_THEME" })
+        unsetenv(name);
+}
+
+// The desktop's text field: Cadran's card with its title in it, the cursor
+// shown at the end of the text, Y to take the text out
+BRLS_TEST(text_field_is_a_card_with_a_cursor)
+{
+    DemoHarness h;
+    brls::Application::setReduceMotion(true); // the cursor still
+    auto* dialog = new brls::EditTextDialog();
+    dialog->setHeaderText("Input text");
+    dialog->setText("https://github.com");
+    dialog->setCursor((int)brls::CursorPosition::END);
+    dialog->setCountText("18/32");
+    bool cleared = false;
+    dialog->getClearEvent()->subscribe([&cleared]()
+        { cleared = true; });
+    dialog->open();
+    h.settle();
+
+    auto* card  = dynamic_cast<brls::Box*>(dialog->getView("brls/dialog/applet"));
+    auto* title = dialog->getView("brls/dialog/header");
+    BRLS_CHECK(card != nullptr && title != nullptr);
+    if (!card || !title)
+        return;
+    BRLS_CHECK(title->getParent() == card);
+    BRLS_CHECK(card->getView("cadran_dialog") != nullptr);
+    BRLS_CHECK(h.matchesReference("text_field_cadran"));
+
+    // The cursor is drawn: without it, the text's end differs
+    brls::test::Image with = h.screenshot();
+    dialog->setCursor((int)brls::CursorPosition::UNSET);
+    h.step(2);
+    BRLS_CHECK(brls::test::compareImages(h.screenshot(), with).differingPixels > 0);
+
+    h.tap(brls::BUTTON_Y);
+    BRLS_CHECK(cleared);
+    brls::Application::setReduceMotion(false);
+}
+
+namespace
+{
+// The demo in `locale`
+struct LocaleHarness : Demo, Harness
+{
+    explicit LocaleHarness(const std::string& locale)
+        : Harness(optionsFor(locale))
+    {
+        demo::registerViews();
+        push(new MainActivity());
+        settle();
+    }
+
+    static brls::test::Options optionsFor(const std::string& locale)
+    {
+        brls::test::Options options;
+        options.locale = locale;
+        return options;
+    }
+};
+
+// Each tab of the rail in turn (focusing its item shows it), `visit` on it
+template <typename H, typename F>
+size_t eachDemoTab(H& h, F visit)
+{
+    std::vector<std::string> seen;
+    for (int tab = 0; tab < 20; tab++)
+    {
+        std::string name = h.focusText();
+        if (std::find(seen.begin(), seen.end(), name) != seen.end())
+            break;
+        seen.push_back(name);
+        h.settle();
+        visit(name);
+        h.tapKey(brls::BRLS_KBD_KEY_DOWN);
+    }
+    return seen.size();
+}
+
+// The texts cut on the Cadran and Settings tabs at the very large text size
+std::vector<std::string> cutAtTheLargestSize(const std::string& locale)
+{
+    LocaleHarness h(locale);
+    ui::prefs().text_size = "largest";
+    text_size::apply();
+    h.settle();
+    BRLS_CHECK_EQ(brls::Application::getTextScale(), text_size::LARGEST);
+    std::vector<std::string> cut;
+    for (const char* tab : { "demo/tabs/cadran", "demo/tabs/settings" })
+    {
+        if (!h.focusByText(brls::getStr(tab), brls::BUTTON_DOWN, 20))
+            continue;
+        h.tap(brls::BUTTON_RIGHT);
+        // Down the tab, its texts as they scroll into view
+        for (int i = 0; i < 40; i++)
+        {
+            for (const std::string& text : h.cutTexts())
+                if (std::find(cut.begin(), cut.end(), text) == cut.end())
+                    cut.push_back(text);
+            h.tap(brls::BUTTON_DOWN);
+        }
+        h.tap(brls::BUTTON_B);
+    }
+    for (const std::string& text : cut)
+        std::fprintf(stderr, "%s, cut: %s\n", locale.c_str(), text.c_str());
+    ui::prefs().text_size = "auto";
+    text_size::apply();
+    return cut;
+}
+} // namespace
+
+// From the rail, the keyboard's arrows reach into every tab that has
+// something to focus, and Escape comes back
+BRLS_TEST(every_demo_screen_reachable_by_keyboard)
+{
+    DemoHarness h;
+    // A page to read, nothing on it to act on or to scroll
+    const std::string still = brls::getStr("demo/tabs/about");
+    std::vector<std::string> unreached;
+    size_t tabs = eachDemoTab(h, [&](const std::string& name)
+        {
+        brls::View* item = h.focus();
+        h.tapKey(brls::BRLS_KBD_KEY_RIGHT);
+        if (h.focus() == item || dynamic_cast<brls::SidebarItem*>(h.focus()))
+        {
+            if (name != still)
+                unreached.push_back(name);
+            return;
+        }
+        h.tapKey(brls::BRLS_KBD_KEY_ESCAPE);
+        BRLS_CHECK(h.focus() == item); });
+    BRLS_CHECK(tabs > 5);
+    for (const std::string& name : unreached)
+        std::fprintf(stderr, "not reached: %s\n", name.c_str());
+    BRLS_CHECK(unreached.empty());
+}
+
+BRLS_TEST(no_cut_text_in_de_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("de").empty());
+}
+
+BRLS_TEST(no_cut_text_in_ru_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("ru").empty());
+}
+
+BRLS_TEST(no_cut_text_in_fr_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("fr").empty());
+}
+
+BRLS_TEST(no_cut_text_in_ja_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("ja").empty());
+}
+
+// The rows of cells grow with the text: none cut at the very large size
+BRLS_TEST(cells_grow_with_the_text)
+{
+    Harness h;
+    auto* cell = new brls::DetailCell();
+    cell->setText("Brightness");
+    h.push(new brls::Activity(screenOf({ cell })));
+    h.settle();
+    float normal = cell->getHeight();
+    brls::Application::setTextScale(1.5f);
+    h.settle();
+    BRLS_CHECK(cell->getHeight() >= normal * 1.5f - 0.5f);
+    brls::Application::setTextScale(1.0f);
+    h.settle();
+    BRLS_CHECK_EQ(cell->getHeight(), normal);
 }

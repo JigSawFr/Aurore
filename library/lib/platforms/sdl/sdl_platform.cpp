@@ -73,8 +73,8 @@ SDLPlatform::SDLPlatform()
     // Platform impls
     this->audioPlayer = new NullAudioPlayer();
 
-    // override local
-    if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO)
+    // The system's language, unless BRLS_LANG (or BOREALIS_LANG) gave one
+    if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO && !this->localeFromEnvironment)
     {
         SDL_Locale* locales = SDL_GetPreferredLocales();
         if (locales != nullptr && locales->language != nullptr)

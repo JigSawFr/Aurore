@@ -7,7 +7,9 @@ On a desktop, the screen shown is built again when one of its XML files, or the 
 It is off unless asked for:
 
 - in code, after `init()`: `brls::Application::setHotReload(true);` or `setHotReload(true, "/path/to/my_app/resources");`
-- for one run: `BRLS_HOT_RELOAD=1 ./my_app`, or `BRLS_HOT_RELOAD=/path/to/my_app/resources ./my_app`.
+- for one run: `BRLS_HOT_RELOAD=1 ./my_app`, or `BRLS_HOT_RELOAD=/path/to/my_app/resources ./my_app`, in a build with the debugging aids (below).
+
+The environment variables of the debugging aids (`BRLS_HOT_RELOAD`, `BRLS_INSPECTOR`, `BRLS_REDRAW_DEBUG`, `BRLS_PROFILE` and Cadran's `BRLS_` flags) are read only in a build made with `BRLS_DEV_TOOLS`. It is `AUTO` by default: on, except in `Release` and `MinSizeRel` builds, so an app given to its users does not read its screens from a folder an environment variable names. `-DBRLS_DEV_TOOLS=ON` keeps them in a release build (a simulator built in `Release`), `OFF` leaves them out of every build. The functions (`setHotReload`, `setInspectorEnabled`...) work in every build.
 
 A theme file is watched when it is read by `Theme::loadFile()` after hot reload is on (with the environment variable, it is on from `init()`), with the files it `@include`s and `inherit`s (not the presets: they have no file). An `@res/…` theme is read from hot reload's resources folder when the file is there, as the XML files are (a name with `..` is not looked for there).
 
@@ -32,7 +34,7 @@ The files are looked at about three times a second; a file seen changed is acted
 
 ## Limits
 
-- An XML file with a mistake (a tag not closed, an unknown attribute) is logged, and the screen stays as it was until the next save.
+- An XML file with a mistake (a tag not closed, an unknown attribute, a `brls:View` that includes the file it is in: elements nest at most 64 levels deep) is logged and shown in a notification (`file:line: message`), and the screen stays as it was, the focus where it was, until the next save. This holds for the files of the tabs shown too: the new content is kept only once it has made them.
 - An activity given its view in its constructor (`new Activity(view)`) cannot be made again; one with `CONTENT_FROM_XML_RES` or its own `createContentView()` can.
 - What the activity set up outside its content view stays as it was: a subscription made in `onContentAvailable()` is made a second time, unless the activity takes it back in its destructor or before. Views bound with `BRLS_BIND` in the activity are looked up again in the new content.
 - A view's state not in its XML (a scroll position, a text typed) starts again.

@@ -380,18 +380,26 @@ void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float h
     nvgRoundedRect(vg, x, y, width, height, r);
     nvgFillColor(vg, this->a(ctx->theme[state ? "cadran/teal_fill" : "cadran/track"]));
     nvgFill(vg);
-    // A white knob either way: the track's colour says on or off.
-    nvgBeginPath(vg);
-    nvgCircle(vg, state ? x + width - r : x + r, y + r, r - 4);
-    nvgFillColor(vg, this->a(ctx->theme["cadran/knob"]));
-    nvgFill(vg);
-    // Off on a light track, a hairline keeps the knob's edge.
-    if (!state)
+    if (state)
     {
-        nvgStrokeColor(vg, this->a(ctx->theme["cadran/knob_line"]));
-        nvgStrokeWidth(vg, 1.0f);
-        nvgStroke(vg);
+        // On: a white knob on the filled track
+        nvgBeginPath(vg);
+        nvgCircle(vg, x + width - r, y + r, r - 4);
+        nvgFillColor(vg, this->a(ctx->theme["cadran/knob"]));
+        nvgFill(vg);
+        return;
     }
+    // Off: the pale track outlined and a smaller knob, both in the third ink,
+    // to be told from the card at 3:1 (WCAG 1.4.11)
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, x + 0.75f, y + 0.75f, width - 1.5f, height - 1.5f, r - 0.75f);
+    nvgStrokeColor(vg, this->a(ctx->theme["cadran/text3"]));
+    nvgStrokeWidth(vg, 1.5f);
+    nvgStroke(vg);
+    nvgBeginPath(vg);
+    nvgCircle(vg, x + r, y + r, r - 7);
+    nvgFillColor(vg, this->a(ctx->theme["cadran/text3"]));
+    nvgFill(vg);
 }
 
 // ---------------------------------------------------------------------------

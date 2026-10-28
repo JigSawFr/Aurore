@@ -49,6 +49,7 @@
 #include <borealis/views/cells/cell_slider.hpp>
 #include <borealis/views/debug_layer.hpp>
 #include <borealis/views/dialog.hpp>
+#include <borealis/views/edit_text_dialog.hpp>
 #include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/header.hpp>
 #include <borealis/views/hint.hpp>
@@ -113,6 +114,9 @@ bool Application::init()
 #ifdef BRLS_INSPECTOR
     Inspector::setEnabled(true);
 #endif
+    // From the environment only in a build with BRLS_DEV_TOOLS (not a
+    // release one, by default)
+#ifdef BRLS_DEV_TOOLS
     if (const char* inspector = std::getenv("BRLS_INSPECTOR"))
         Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
     if (const char* hotReload = std::getenv("BRLS_HOT_RELOAD"))
@@ -120,8 +124,9 @@ bool Application::init()
         if (std::strcmp(hotReload, "0") != 0)
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
     }
+#endif
 
-#if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+#if defined(BRLS_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
     const char* redrawDebugEnv = std::getenv("BRLS_REDRAW_DEBUG");
     if (redrawDebugEnv && *redrawDebugEnv && *redrawDebugEnv != '0')
         Application::setRedrawDebug(true);
@@ -438,6 +443,9 @@ void Application::processInput()
         for (int i = 0; i < ControllerButton::_BUTTON_MAX; i++)
             controllerState.buttons[i] = swapKeys[i];
     }
+
+    // After the swap: the keys stay as they are named
+    applyKeyMap(inputManager, &controllerState);
 
     // Its toggle, and the whole controller while it is browsing
     if (Inspector::isEnabled())
@@ -1344,6 +1352,7 @@ bool Application::rebuildActivity()
     {
         HotReload::building = nullptr;
         Logger::error("rebuild: {} kept as it was: {}", old ? old->describe() : "the activity", e.what());
+        Application::notify(std::string("XML: ") + e.what());
         return false;
     }
 
@@ -1354,37 +1363,65 @@ bool Application::rebuildActivity()
         return false;
     }
 
-    activity->setContentView(fresh);
+    // The old content is kept until the new one has made the tabs shown (a
+    // tab is made when it takes the focus, its own XML may throw then): a
+    // mistake anywhere leaves the screen as it was
+    View* oldFocus = Application::currentFocus && Application::currentFocus->getParentActivity() == activity ? Application::currentFocus : nullptr;
+    activity->swapContentView(fresh);
+    std::string error;
     try
     {
         activity->onContentAvailable();
     }
     catch (const std::exception& e)
     {
-        Logger::error("rebuild: onContentAvailable: {}", e.what());
+        error = std::string("onContentAvailable: ") + e.what();
     }
     HotReload::building = nullptr;
     activity->resizeToFitWindow();
 
-    if (Application::globalQuitEnabled)
-        Application::gloablQuitIdentifier = activity->registerExitAction();
-
-    activity->willAppear(true);
-    try
+    if (error.empty())
     {
-        // A tab is made when it takes the focus: its own XML may throw here
-        Application::giveFocus(activity->getDefaultFocus());
-        for (const auto& path : restore)
+        if (Application::globalQuitEnabled)
+            Application::gloablQuitIdentifier = activity->registerExitAction();
+
+        activity->willAppear(true);
+        try
         {
-            if (path.empty())
-                continue;
-            if (View* view = viewAtPath(fresh, path))
-                Application::giveFocus(view);
+            Application::giveFocus(activity->getDefaultFocus());
+            for (const auto& path : restore)
+            {
+                if (path.empty())
+                    continue;
+                if (View* view = viewAtPath(fresh, path))
+                    Application::giveFocus(view);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            error = e.what();
         }
     }
-    catch (const std::exception& e)
+
+    if (!error.empty())
     {
-        Logger::error("rebuild: {}", e.what());
+        Logger::error("rebuild: {} kept as it was: {}", old ? old->describe() : "the activity", error);
+        activity->swapContentView(old);
+        if (oldFocus)
+            Application::giveFocus(oldFocus);
+        else if (old)
+            Application::giveFocus(activity->getDefaultFocus());
+        fresh->willDisappear();
+        delete fresh;
+        Application::notify("XML: " + error);
+        Application::requestRedraw();
+        return false;
+    }
+
+    if (old)
+    {
+        old->willDisappear();
+        delete old;
     }
 
     Application::requestRedraw();
@@ -1967,6 +2004,84 @@ void Application::setSwapInputKeys(bool swap)
     getGlobalHintsUpdateEvent()->fire();
 }
 
+// As the web simulator's keys: X, Y, L, R and +/- as written on the
+// controller, Shift for the triggers
+std::vector<std::pair<BrlsKeyCombination, ControllerButton>> Application::keyMap = {
+    { BrlsKeyCombination(BRLS_KBD_KEY_X), BUTTON_X },
+    { BrlsKeyCombination(BRLS_KBD_KEY_Y), BUTTON_Y },
+    { BrlsKeyCombination(BRLS_KBD_KEY_L), BUTTON_LB },
+    { BrlsKeyCombination(BRLS_KBD_KEY_R), BUTTON_RB },
+    { BrlsKeyCombination(BRLS_KBD_KEY_L, BRLS_KBD_MODIFIER_SHIFT), BUTTON_LT },
+    { BrlsKeyCombination(BRLS_KBD_KEY_R, BRLS_KBD_MODIFIER_SHIFT), BUTTON_RT },
+    { BrlsKeyCombination(BRLS_KBD_KEY_P), BUTTON_START },
+    { BrlsKeyCombination(BRLS_KBD_KEY_EQUAL, BRLS_KBD_MODIFIER_SHIFT), BUTTON_START },
+    { BrlsKeyCombination(BRLS_KBD_KEY_KP_ADD), BUTTON_START },
+    { BrlsKeyCombination(BRLS_KBD_KEY_M), BUTTON_BACK },
+    { BrlsKeyCombination(BRLS_KBD_KEY_MINUS), BUTTON_BACK },
+    { BrlsKeyCombination(BRLS_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
+    { BrlsKeyCombination(BRLS_KBD_KEY_BACKSPACE), BUTTON_B },
+};
+
+void Application::mapKey(BrlsKeyCombination key, ControllerButton button)
+{
+    unmapKey(key);
+    keyMap.emplace_back(key, button);
+}
+
+void Application::unmapKey(BrlsKeyCombination key)
+{
+    keyMap.erase(std::remove_if(keyMap.begin(), keyMap.end(), [key](const auto& entry)
+                     { return (int)entry.first == (int)key; }),
+        keyMap.end());
+}
+
+void Application::clearKeyMap()
+{
+    keyMap.clear();
+}
+
+const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& Application::getKeyMap()
+{
+    return keyMap;
+}
+
+void Application::applyKeyMap(InputManager* inputManager, ControllerState* state)
+{
+    if (keyMap.empty())
+        return;
+
+    // Letters typed in a text field are text
+    if (!activitiesStack.empty() && dynamic_cast<EditTextDialog*>(activitiesStack.back()->getContentView()))
+        return;
+
+    int mods = 0;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SHIFT))
+        mods |= BRLS_KBD_MODIFIER_SHIFT;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_CONTROL))
+        mods |= BRLS_KBD_MODIFIER_CTRL;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_ALT))
+        mods |= BRLS_KBD_MODIFIER_ALT;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SUPER))
+        mods |= BRLS_KBD_MODIFIER_META;
+
+    for (const auto& [key, button] : keyMap)
+    {
+        if (key.mod != mods)
+            continue;
+        // An app that handles the key itself keeps it
+        auto watched = watchedKeysMap.find((int)key);
+        if (watched != watchedKeysMap.end() && watched->second > 0)
+            continue;
+        if (inputManager->getKeyboardKeyState(key.code))
+            state->buttons[button] = true;
+    }
+
+    state->buttons[BUTTON_NAV_UP] |= state->buttons[BUTTON_UP];
+    state->buttons[BUTTON_NAV_RIGHT] |= state->buttons[BUTTON_RIGHT];
+    state->buttons[BUTTON_NAV_DOWN] |= state->buttons[BUTTON_DOWN];
+    state->buttons[BUTTON_NAV_LEFT] |= state->buttons[BUTTON_LEFT];
+}
+
 NVGcontext* Application::getNVGContext()
 {
     return Application::platform->getVideoContext()->getNVGContext();
@@ -2315,6 +2430,14 @@ int Application::getDefaultFont()
 bool Application::XMLViewsRegisterContains(std::string name)
 {
     return Application::xmlViewsRegister.count(name) > 0;
+}
+
+std::vector<std::string> Application::getXMLViewNames()
+{
+    std::vector<std::string> names;
+    for (const auto& entry : Application::xmlViewsRegister)
+        names.push_back(entry.first);
+    return names;
 }
 
 XMLViewCreator Application::getXMLViewCreator(std::string name)

@@ -2,7 +2,7 @@
 // nanovg), every colour Cadran draws with: cadran::install_theme puts them
 // in borealis' themes under their keys (KEYS below), where a theme file
 // can change any of them (docs/themes.md), and a host suite checks the
-// contrast of every ink on every surface it is drawn on (tests/contrast;
+// contrast of every ink on every surface it is drawn on (tests/host;
 // Theme::checkContrast does the same at run time, with CONTRAST below).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
@@ -11,58 +11,59 @@
 
 namespace cadran::palette
 {
+/// A colour, 0 to 255 per channel.
 struct Rgba
 {
     uint8_t r, g, b, a;
 };
 
-// Dark: the boards' navy. Light: the style board's cool white, the inks
-// darkened to 4.5:1 on every surface they are drawn on, the rail's active
-// pill included (teal #0A705F, amber #8A5200, coral #B71C1C); the quiet
-// text too, on both (text3 4.5:1 on the second surface). The focus ring
-// in the dark teal, its glow no lighter than the fill teal: 3:1 or more
-// on the background at any point of its pulse (WCAG 1.4.11). The dark
-// theme's hairline at 14 % white: the cards stay apart on a TV that
-// crushes its blacks.
+/// Dark: the boards' navy. Light: the style board's cool white, the inks
+/// darkened to 4.5:1 on every surface they are drawn on, the rail's active
+/// pill included (teal `#0A705F`, amber `#8A5200`, coral `#B71C1C`); the quiet
+/// text too, on both (text3 4.5:1 on the second surface). The focus ring
+/// in the dark teal, its glow no lighter than the fill teal: 3:1 or more
+/// on the background at any point of its pulse (WCAG 1.4.11). The dark
+/// theme's hairline at 14 % white: the cards stay apart on a TV that
+/// crushes its blacks.
 struct Palette
 {
     Rgba bg, text, text2, text3, surf, surf2, line, teal, teal_fill, teal_soft, amber, amber_fill, coral, coral_fill,
         coral_line, track, glow, glow_strong, amber_surf, amber_line, pill_ok, pill_ok_ink, rail_active, key_bg,
         key_fg, hl1, hl2, border;
-    Rgba blue, violet; // a release note's alerts, a build's tags
-    // A removal's soft fill (the header's pill in danger).
+    Rgba blue, violet; ///< a release note's alerts, a build's tags
+    /// A removal's soft fill (the header's pill in danger).
     Rgba coral_soft;
-    // The empty part of a progress bar, behind a game's missing cover.
+    /// The empty part of a progress bar, behind a game's missing cover.
     Rgba well;
-    // The action tiles' fourth ink (cadran::List::tiles()), after teal, blue
-    // and violet: the third avatar's pink, darker on white.
+    /// The action tiles' fourth ink (cadran::List::tiles()), after teal, blue
+    /// and violet: the third avatar's pink, darker on white.
     Rgba pink;
-    // The accounts' avatars, in turn: fills under a navy initial, alike on
-    // both themes.
+    /// The accounts' avatars, in turn: fills under a navy initial, alike on
+    /// both themes.
     Rgba avatar0, avatar1, avatar2, avatar3;
-    // A switch's knob, white on either track, and its edge while off.
+    /// A switch's knob, white on either track, and its edge while off.
     Rgba knob, knob_line;
-    // A chart's bars, today's lighter.
+    /// A chart's bars, today's lighter.
     Rgba bar, bar_today;
-    // Behind a dialog or a picker: the navy, dimmed enough that the screen
-    // under it does not read through around a dialog's text and QR codes. A
-    // toast: a card of the second surface on the dark theme, navy on the
-    // light one, and its text.
+    /// Behind a dialog or a picker: the navy, dimmed enough that the screen
+    /// under it does not read through around a dialog's text and QR codes. A
+    /// toast: a card of the second surface on the dark theme, navy on the
+    /// light one, and its text.
     Rgba backdrop, toast, toast_text;
-    // The label on a teal or coral fill (a confirmation's, a primary
-    // button's): the navy.
+    /// The label on a teal or coral fill (a confirmation's, a primary
+    /// button's): the navy.
     Rgba on_fill;
-    // A held button filling up (ui::hold_confirm), over its own colour.
+    /// A held button filling up (ui::hold_confirm), over its own colour.
     Rgba hold_fill;
-    // The rail's shadow over the tab while it is out (its darkest).
+    /// The rail's shadow over the tab while it is out (its darkest).
     Rgba rail_shadow;
-    // A press's flash: the fill teal, faint.
+    /// A press's flash: the fill teal, faint.
     Rgba click_pulse;
-    // What the app cannot do now (a read-only mode, ui::show_writable): the
-    // text, faded.
+    /// What the app cannot do now (a read-only mode, ui::show_writable): the
+    /// text, faded.
     Rgba text_off;
-    // The loading screen's bar (LoadingBar::setBrand), alike in both themes:
-    // its track, its fill and the fill's lighter end.
+    /// The loading screen's bar (LoadingBar::setBrand), alike in both themes:
+    /// its track, its fill and the fill's lighter end.
     Rgba brand_track, brand_fill, brand_glow;
 };
 
@@ -108,8 +109,8 @@ constexpr Palette DARK = {
     { 0xE9, 0x6A, 0xA8, 255 }, // avatar3
     { 0xFF, 0xFF, 0xFF, 255 }, // knob
     { 0x0B, 0x14, 0x24, 40 }, // knob_line
-    { 0x33, 0x48, 0x6B, 255 }, // bar
-    { 0x5A, 0x71, 0x96, 255 }, // bar_today
+    { 0x5A, 0x71, 0x96, 255 }, // bar
+    { 0x9F, 0xB4, 0xD4, 255 }, // bar_today
     { 3, 8, 18, 225 }, // backdrop
     { 0x1A, 0x2A, 0x45, 250 }, // toast
     { 0xEE, 0xF2, 0xF8, 255 }, // toast_text
@@ -163,8 +164,8 @@ constexpr Palette LIGHT = {
     { 0xE9, 0x6A, 0xA8, 255 }, // avatar3
     { 0xFF, 0xFF, 0xFF, 255 }, // knob
     { 0x0B, 0x14, 0x24, 40 }, // knob_line
-    { 0xB9, 0xC6, 0xDA, 255 }, // bar
-    { 0x7E, 0x90, 0xAE, 255 }, // bar_today
+    { 0x7E, 0x90, 0xAE, 255 }, // bar
+    { 0x4A, 0x5D, 0x7E, 255 }, // bar_today
     { 0x0B, 0x14, 0x24, 160 }, // backdrop
     { 0x0B, 0x14, 0x24, 240 }, // toast
     { 0xEE, 0xF2, 0xF8, 255 }, // toast_text
@@ -178,8 +179,8 @@ constexpr Palette LIGHT = {
     { 0x9A, 0xF0, 0xDC, 255 } // brand_glow
 };
 
-// Each colour's theme keys: the Cadran one ("cadran/…"), and the core's it
-// also sets so that borealis' own views take the boards' look.
+/// Each colour's theme keys: the Cadran one ("cadran/…"), and the core's it
+/// also sets so that borealis' own views take the boards' look.
 struct Key
 {
     const char* name;
@@ -190,6 +191,10 @@ constexpr Key KEYS[] = {
     { "brls/background", &Palette::bg },
     { "brls/clear", &Palette::bg },
     { "brls/text", &Palette::text },
+    // A secondary text (a switch's Off, a placeholder) in the third ink,
+    // what cannot be used now in the faded one
+    { "brls/text_secondary", &Palette::text3 },
+    { "brls/text_disabled", &Palette::text_off },
     { "brls/sidebar/background", &Palette::bg },
     { "brls/sidebar/separator", &Palette::line },
     { "brls/sidebar/active_item", &Palette::teal },
@@ -260,10 +265,10 @@ constexpr Key KEYS[] = {
     { "cadran/brand/glow", &Palette::brand_glow },
 };
 
-// The pairs the palettes promise to keep readable (an ink on a surface, at
-// least `minimum`:1; a translucent one blended over the background first):
-// what tests/contrast checks of the palettes, and Theme::checkContrast of
-// a theme file changing them.
+/// The pairs the palettes promise to keep readable (an ink on a surface, at
+/// least `minimum`:1; a translucent one blended over the background first):
+/// what the host suite checks of the palettes (tests/host/contrast_tests.cpp),
+/// and Theme::checkContrast of a theme file changing them.
 struct Contrast
 {
     const char* ink;
@@ -304,8 +309,18 @@ constexpr Contrast CONTRAST[] = {
     { "cadran/key_fg", "cadran/key_bg", 4.5f },
     { "cadran/navy", "cadran/teal_fill", 4.5f },
     { "cadran/navy", "cadran/coral_fill", 4.5f },
-    // The focus ring, both ends of its pulse.
+    // The focus ring, both ends of its pulse, on the screen and on a card.
     { "brls/highlight/color1", "brls/background", 3.0f },
     { "brls/highlight/color2", "brls/background", 3.0f },
+    { "brls/highlight/color1", "cadran/surf", 3.0f },
+    { "brls/highlight/color2", "cadran/surf", 3.0f },
+    // Secondary text in borealis' cells, on a card too.
+    { "brls/text_secondary", "cadran/surf", 4.5f },
+    { "brls/list/listItem_value_color", "cadran/surf", 4.5f },
+    // Shapes that carry meaning, at 3:1 (WCAG 1.4.11): a tile's icon, a
+    // chart's bars. A switch off is told by its knob and outline, in text3.
+    { "cadran/pink", "cadran/surf", 3.0f },
+    { "cadran/bar", "cadran/surf", 3.0f },
+    { "cadran/bar_today", "cadran/surf", 3.0f },
 };
 } // namespace cadran::palette

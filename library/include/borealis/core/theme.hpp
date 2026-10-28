@@ -32,82 +32,86 @@
 namespace brls
 {
 
+/// The two sets of colours every theme has: light and dark.
 enum class ThemeVariant
 {
     LIGHT,
     DARK
 };
 
-// One variant's colours by key ("brls/text", "cadran/teal"…): the ones the
-// code adds (the base), and over them the ones of the theme file in use.
+/// One variant's colours by key ("brls/text", "cadran/teal"…): the ones the
+/// code adds (the base), and over them the ones of the theme file in use.
 class ThemeValues
 {
   public:
+    /// The base colours.
     ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>> list);
 
-    // A colour of the base: what the variant is without a theme file.
+    /// A colour of the base: what the variant is without a theme file.
     void addColor(const std::string&, NVGcolor color);
+    /// A colour as drawn now; an unknown key is fatal (check with hasColor()).
     NVGcolor getColor(const std::string&);
+    /// Whether the key exists.
     bool hasColor(const std::string&) const;
 
-    // The theme file's colours, over the base (empty: the base alone).
+    /// The theme file's colours, over the base (empty: the base alone).
     void setOverlay(const std::unordered_map<std::string, NVGcolor>& overlay);
 
-    // Every colour as drawn now, and the base alone.
+    /// Every colour as drawn now, and the base alone.
     const std::unordered_map<std::string, NVGcolor>& getColors() const { return this->values; }
     const std::unordered_map<std::string, NVGcolor>& getBaseColors() const { return this->base; }
 
   private:
     std::unordered_map<std::string, NVGcolor> base;
     std::unordered_map<std::string, NVGcolor> overlay;
-    std::unordered_map<std::string, NVGcolor> values; // base, then overlay
+    std::unordered_map<std::string, NVGcolor> values; ///< base, then overlay
 };
 
-// How a theme's background_image fills the window (background_fit)
+/// How a theme's background_image fills the window (background_fit)
 enum class BackgroundFit
 {
-    COVER, // scaled to cover it, centred, cut at the edges (the default)
-    CONTAIN, // scaled to fit in it whole, centred, brls/clear around it
-    TILE, // repeated from the top left, one pixel per unit of the layout
-    CENTER, // as is, one pixel per unit of the layout, centred
+    COVER, ///< scaled to cover it, centred, cut at the edges (the default)
+    CONTAIN, ///< scaled to fit in it whole, centred, brls/clear around it
+    TILE, ///< repeated from the top left, one pixel per unit of the layout
+    CENTER, ///< as is, one pixel per unit of the layout, centred
 };
 
-// A variant's background, as a theme file sets it (docs/themes.md)
+/// A variant's background, as a theme file sets it (docs/themes.md)
 struct ThemeBackground
 {
     static constexpr float DEFAULT_DIM = 0.35f;
 
-    // background_image: its path (Theme::resolveAsset), "" without one
+    /// background_image: its path (Theme::resolveAsset), "" without one
     std::string image;
     BackgroundFit fit = BackgroundFit::COVER;
-    // background_dim: how much of brls/background veils the image (0 to 1)
+    /// background_dim: how much of brls/background veils the image (0 to 1)
     float dim = DEFAULT_DIM;
-    // surface_opacity: the surfaces' opacity over the image (0 to 1), see
-    // Theme::addSurfaceKey; 1 without an image
+    /// surface_opacity: the surfaces' opacity over the image (0 to 1), see
+    /// Theme::addSurfaceKey; 1 without an image
     float surfaceOpacity = 1.0f;
 
     bool hasImage() const { return !this->image.empty(); }
 };
 
-// A Cadran icon a theme draws as a picture (icon.<name>, docs/themes.md)
+/// A Cadran icon a theme draws as a picture (`icon.<name>`, docs/themes.md)
 struct ThemeIcon
 {
-    std::string image; // its path (Theme::resolveAsset)
-    // icon.<name>.tint: the picture is a mask, drawn in the icon's colour
-    // (ThemeImageOptions::mask); else drawn as is
+    std::string image; ///< its path (Theme::resolveAsset)
+    /// `icon.<name>.tint`: the picture is a mask, drawn in the icon's colour
+    /// (ThemeImageOptions::mask); else drawn as is
     bool tint = false;
 
     bool operator==(const ThemeIcon&) const = default;
 };
 
-// A variant's pictures besides its background, as a theme file sets them
-// (docs/themes.md, "Logos and images"): paths made by Theme::resolveAsset
+/// A variant's pictures besides its background, as a theme file sets them
+/// (docs/themes.md, "Logos and images"): paths made by Theme::resolveAsset
 struct ThemePictures
 {
-    std::string logo; // logo: the app's mark, "" for the app's own
-    std::string preview; // preview: the theme's thumbnail in a picker
-    std::map<std::string, ThemeIcon> icons; // icon.<name>, by icon name
-    std::map<std::string, std::string> images; // image.<key>, by image slot
+    std::string logo; ///< logo: the app's mark, "" for the app's own
+    std::string preview; ///< preview: the theme's thumbnail in a picker
+    std::map<std::string, ThemeIcon> icons; ///< `icon.<name>`, by icon name
+    std::map<std::string, std::string> images; ///< `image.<key>`, by image slot
 
     bool empty() const { return this->logo.empty() && this->preview.empty() && this->icons.empty() && this->images.empty(); }
     bool operator==(const ThemePictures&) const = default;
@@ -120,31 +124,32 @@ struct ThemeImage;
 // a few areas, strips along the screen's edges, particles
 // ---------------------------------------------------------------------------
 
-// What a decoration picture is drawn in (View::setThemeArea)
+/// What a decoration picture is drawn in (View::setThemeArea)
 enum class ThemeArea
 {
     NONE,
-    HEADER, // backdrop.header: a screen's header, its whole width
-    SIDEBAR, // backdrop.sidebar: the sidebar (Cadran's rail)
-    DIALOG, // backdrop.dialog: dialogs, dropdowns, Cadran's sheets
-    TOP, // decor.top: a strip along the top edge of the screen
-    BOTTOM, // decor.bottom: along its bottom edge
+    HEADER, ///< backdrop.header: a screen's header, its whole width
+    SIDEBAR, ///< backdrop.sidebar: the sidebar (Cadran's rail)
+    DIALOG, ///< backdrop.dialog: dialogs, dropdowns, Cadran's sheets
+    TOP, ///< decor.top: a strip along the top edge of the screen
+    BOTTOM, ///< decor.bottom: along its bottom edge
 };
-constexpr int THEME_AREA_COUNT = 5; // HEADER to BOTTOM
+constexpr int THEME_AREA_COUNT = 5; ///< HEADER to BOTTOM
 
-// A picture of the decorations, as a theme file sets it
+/// A picture of the decorations, as a theme file sets it
 struct ThemePicture
 {
-    std::string image; // its path (Theme::resolveAsset), "" without one
+    std::string image; ///< its path (Theme::resolveAsset), "" without one
     BackgroundFit fit = BackgroundFit::COVER;
-    float opacity     = 1.0f; // 0 to 1
-    // decor.top_height, decor.bottom_height: the strip's height in layout
-    // units; 0: the picture's at the screen's width
+    float opacity     = 1.0f; ///< 0 to 1
+    /// decor.top_height, decor.bottom_height: the strip's height in layout
+    /// units; 0: the picture's at the screen's width
     float height = 0.0f;
 
     bool hasImage() const { return !this->image.empty(); }
 };
 
+/// The particles a theme may draw (`particles` in a theme file).
 enum class ParticleKind
 {
     NONE,
@@ -158,35 +163,38 @@ enum class ParticleKind
     BUBBLES,
 };
 
-// particles_layer: behind the screens (under every view) or in front of
-// them, fainter
+/// particles_layer: behind the screens (under every view) or in front of
+/// them, fainter
 enum class ParticleLayer
 {
     BACK,
     FRONT,
 };
 
+/// A variant's particles, as a theme file sets them (docs/themes.md).
 struct ThemeParticles
 {
     static constexpr float LOW = 0.3f, MEDIUM = 0.6f, HIGH = 1.0f;
     static constexpr int MAX_COLORS = 5;
 
     ParticleKind kind   = ParticleKind::NONE;
-    float density       = LOW; // 0 to 1, of ThemeDecorations::MAX_PARTICLES
-    float speed         = 1.0f; // 0.25 to 4
+    float density       = LOW; ///< 0 to 1, of ThemeDecorations::MAX_PARTICLES
+    float speed         = 1.0f; ///< 0.25 to 4
     ParticleLayer layer = ParticleLayer::BACK;
-    // particles_color: up to MAX_COLORS; empty: from the palette
+    /// particles_color: up to MAX_COLORS; empty: from the palette
     std::vector<NVGcolor> colors;
 
+    /// Whether any particle is drawn.
     bool enabled() const { return this->kind != ParticleKind::NONE && this->density > 0.0f; }
 };
 
-// A variant's decorations: one picture per area, and particles
+/// A variant's decorations: one picture per area, and particles
 struct ThemeDecor
 {
-    ThemePicture pictures[THEME_AREA_COUNT]; // by ThemeArea, HEADER first
+    ThemePicture pictures[THEME_AREA_COUNT]; ///< by ThemeArea, HEADER first
     ThemeParticles particles;
 
+    /// The picture of `area`.
     const ThemePicture& picture(ThemeArea area) const { return this->pictures[(int)area - 1]; }
     bool hasPictures() const
     {
@@ -197,33 +205,33 @@ struct ThemeDecor
     }
 };
 
-// A theme file as listThemes() or inspect() read it, without applying it.
+/// A theme file as listThemes() or inspect() read it, without applying it.
 struct ThemeInfo
 {
-    std::string path; // as given to loadFile(); "builtin:<id>" for a preset
-    std::string id; // the file's name without its extension
-    std::string name; // its `name`, else the id
-    std::string author;
-    std::string version;
-    std::string description;
-    // Its background_image: the dark variant's, else the light one's; ""
-    // without one (each variant's below)
+    std::string path; ///< as given to loadFile(); "builtin:<id>" for a preset
+    std::string id; ///< the file's name without its extension
+    std::string name; ///< its `name`, else the id
+    std::string author; ///< its `author`
+    std::string version; ///< its `version`
+    std::string description; ///< its `description`
+    /// Its background_image: the dark variant's, else the light one's; ""
+    /// without one (each variant's below)
     std::string backgroundImage;
-    // Its `icon`, the Cadran icon a picker shows it with ("snowflake"...),
-    // "" without one
+    /// Its `icon`, the Cadran icon a picker shows it with ("snowflake"...),
+    /// "" without one
     std::string icon;
 
-    // For a file that styles one variant, the theme file of the other one
-    // (`counterpart`, as given to loadFile; "" without one): what a picker
-    // switches to when the other variant is asked for.
+    /// For a file that styles one variant, the theme file of the other one
+    /// (`counterpart`, as given to loadFile; "" without one): what a picker
+    /// switches to when the other variant is asked for.
     std::string counterpart;
 
-    // The variants it styles: one when it inherits light or dark, both when
-    // it has [light] and [dark] (it then follows the system's mode).
+    /// The variants it styles: one when it inherits light or dark, both when
+    /// it has [light] and [dark] (it then follows the system's mode).
     bool light = false;
     bool dark  = false;
 
-    // A few colours to show it in a picker, per variant it styles.
+    /// A few colours to show it in a picker, per variant it styles.
     struct Preview
     {
         NVGcolor background;
@@ -235,7 +243,7 @@ struct ThemeInfo
     Preview lightPreview {};
     Preview darkPreview {};
 
-    // Each variant's background (image, fit, dim, surface opacity)
+    /// Each variant's background (image, fit, dim, surface opacity)
     ThemeBackground lightBackground;
     ThemeBackground darkBackground;
     const ThemeBackground& background(ThemeVariant variant) const
@@ -243,7 +251,7 @@ struct ThemeInfo
         return variant == ThemeVariant::LIGHT ? this->lightBackground : this->darkBackground;
     }
 
-    // Each variant's logo, icons, preview and image slots' pictures
+    /// Each variant's logo, icons, preview and image slots' pictures
     ThemePictures lightPictures;
     ThemePictures darkPictures;
     const ThemePictures& pictures(ThemeVariant variant) const
@@ -251,7 +259,7 @@ struct ThemeInfo
         return variant == ThemeVariant::LIGHT ? this->lightPictures : this->darkPictures;
     }
 
-    // Each variant's decorations (backdrops, strips, particles)
+    /// Each variant's decorations (backdrops, strips, particles)
     ThemeDecor lightDecor;
     ThemeDecor darkDecor;
     const ThemeDecor& decor(ThemeVariant variant) const
@@ -259,17 +267,19 @@ struct ThemeInfo
         return variant == ThemeVariant::LIGHT ? this->lightDecor : this->darkDecor;
     }
 
-    // "line 4: #12 is not a colour"…: lines skipped, files not found.
+    /// "line 4: #12 is not a colour"…: lines skipped, files not found.
     std::vector<std::string> errors;
-    // Unknown keys and text that reads badly on its background. Text on a
-    // background picture is checked only when the picture's colour is known:
-    // from an explicit check (inspect or listThemes with decodePictures), or
-    // once the picture was loaded in this run; a plain listing never decodes.
+    /// Unknown keys and text that reads badly on its background. Text on a
+    /// background picture is checked only when the picture's colour is known:
+    /// from an explicit check (inspect or listThemes with decodePictures), or
+    /// once the picture was loaded in this run; a plain listing never decodes.
     std::vector<std::string> warnings;
 
+    /// Whether it was read without errors.
     bool ok() const { return this->errors.empty(); }
-    // The variant to show it in when it styles one only.
+    /// The variant to show it in when it styles one only.
     ThemeVariant variant() const { return this->light && !this->dark ? ThemeVariant::LIGHT : ThemeVariant::DARK; }
+    /// Whether it styles `variant`.
     bool styles(ThemeVariant variant) const { return variant == ThemeVariant::LIGHT ? this->light : this->dark; }
 };
 
@@ -287,17 +297,25 @@ struct ThemeInfo
 class Theme
 {
   public:
+    /// A handle on one variant's colours (not owned).
     Theme(ThemeValues* values);
+    /// The colour `name` (getColor()).
     NVGcolor operator[](const std::string& name);
 
-    // A colour of the base (see ThemeValues::addColor).
+    /// A colour of the base (see ThemeValues::addColor).
     void addColor(const std::string&, NVGcolor color);
+    /// The colour `name` as drawn now; an unknown key is fatal (check with hasColor()).
     NVGcolor getColor(const std::string& name);
+    /// Whether the key exists.
     bool hasColor(const std::string& name);
+    /// The colours behind the handle.
     ThemeValues* getValues() { return this->values; }
 
+    /// The light variant's colours.
     static Theme& getLightTheme();
+    /// The dark variant's colours.
     static Theme& getDarkTheme();
+    /// The colours of `variant`.
     static Theme& get(ThemeVariant variant);
 
     /**
@@ -398,6 +416,16 @@ class Theme
         std::string* path, std::string* error);
 
     /**
+     * A path resolveAsset() made, looked at again just before the file is
+     * opened (from any thread): false, with the reason in `error`, when a
+     * link now takes it out of its theme's folder (put there after
+     * resolveAsset() looked). True for a path resolveAsset() did not check
+     * (a resource, a file named by the app). A hard link cannot be told from
+     * the file itself: a theme folder is only as safe as who can write in it.
+     */
+    static bool recheckAsset(const std::string& path, std::string* error = nullptr);
+
+    /**
      * The logo, icons, preview and image slots' pictures of `variant` with
      * the file in use (none without a file, or for a variant it does not
      * style): paths, nothing loaded.
@@ -429,7 +457,7 @@ class Theme
      * The picture of the image slot `key` now (UI thread): the theme's for
      * the variant in use, else the slot's fallback (also when the theme's
      * cannot be read); nullptr for neither, or a slot not declared. Loaded
-     * on the async thread (ThemeImages): it may still be LOADING, and
+     * on the decode thread (ThemeImages): it may still be LOADING, and
      * ThemeImages::getLoadedEvent() says when it is ready. Kept while the
      * theme and the variant stay; a view keeping it gets the new one on
      * Application::getThemeChangedEvent() (brls::Image::setThemeImage does).

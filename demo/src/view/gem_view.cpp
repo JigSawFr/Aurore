@@ -48,8 +48,8 @@ GemView::GemView(Gem gem)
     holder->addGestureRecognizer(new brls::TapGestureRecognizer(holder));
 
     holder->registerClickAction(dismissAction);
-    holder->registerAction("Close", brls::ControllerButton::BUTTON_RB, dismissAction, true);
-    registerAction("Close", brls::ControllerButton::BUTTON_RB, dismissAction, true);
+    holder->registerAction("demo/close"_i18n, brls::ControllerButton::BUTTON_RB, dismissAction, true);
+    registerAction("demo/close"_i18n, brls::ControllerButton::BUTTON_RB, dismissAction, true);
 
     getAppletFrameItem()->title = gem.name;
     getAppletFrameItem()->setIconFromRes("img/gallery/" + gem.id + ".png");

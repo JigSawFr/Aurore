@@ -62,7 +62,7 @@ const std::string editTextDialogXML = R"xml(
                 width="680"
                 horizontalAlign="right"
                 fontSize="18"
-                textColor="@theme/brls/text_disabled"
+                textColor="@theme/brls/text_secondary"
                 marginRight="30"
                 marginBottom="10"/>
 
@@ -126,6 +126,11 @@ EditTextDialog::EditTextDialog()
         {
                 this->backspaceEvent.fire();
                 return true; }, true, true);
+
+    this->registerAction("hints/clear"_i18n, BUTTON_Y, [this](...)
+        {
+                this->clearEvent.fire();
+                return true; });
 
     // cancel input
     this->registerAction(
@@ -215,6 +220,11 @@ Event<>* EditTextDialog::getBackspaceEvent()
     return &this->backspaceEvent;
 }
 
+Event<>* EditTextDialog::getClearEvent()
+{
+    return &this->clearEvent;
+}
+
 Event<>* EditTextDialog::getCancelEvent()
 {
     return &this->cancelEvent;
@@ -234,7 +244,7 @@ void EditTextDialog::updateUI()
 {
     if (content.empty())
     {
-        label->setThemeColor("textColor", "brls/text_disabled");
+        label->setThemeColor("textColor", "brls/text_secondary");
         label->setText(hint);
         label->setCursor((int)CursorPosition::START);
     }

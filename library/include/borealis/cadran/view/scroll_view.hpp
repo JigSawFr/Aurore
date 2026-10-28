@@ -15,6 +15,8 @@
 
 #include <borealis.hpp>
 
+/// The scrolling frame of Cadran's screens (`<ScrollView>`): each press moves to
+/// the next line and scrolls just enough to show it with its header and notes.
 class ScrollView : public brls::ScrollingFrame
 {
   public:
@@ -30,11 +32,12 @@ class ScrollView : public brls::ScrollingFrame
 
     static brls::View* create();
 
-    // The focused line shown again at the next frame, once laid out anew: a
-    // layout moved it (the rail's width changed, cadran::apply_rail).
+    /// The focused line shown again at the next frame, once laid out anew: a
+    /// layout moved it (the rail's width changed, cadran::apply_rail).
     static void reveal_focused();
 
   private:
+    /// A stretch of the content, from `top` to `bottom`.
     struct Span
     {
         float top, bottom;
@@ -42,7 +45,7 @@ class ScrollView : public brls::ScrollingFrame
     };
 
     bool reveal_pending = false;
-    bool parked         = false; // the focus waits on the frame: see step()
+    bool parked         = false; ///< the focus waits on the frame: see step()
 
     bool owns(brls::View* view) const;
     Span span_of(brls::View* view) const;

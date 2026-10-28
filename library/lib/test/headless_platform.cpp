@@ -280,7 +280,8 @@ void HeadlessInputManager::updateTouchStates(std::vector<RawTouchState>* states)
 
 void HeadlessInputManager::updateMouseStates(RawMouseState* state)
 {
-    *state = this->mouse;
+    this->mouse.leftButton = this->leftLatch.frame();
+    *state                 = this->mouse;
     // Offsets and scrolling are per frame
     this->mouse.offset = Point();
     this->mouse.scroll = Point();
@@ -337,8 +338,13 @@ void HeadlessInputManager::setMouse(Point position, bool leftButton)
 {
     this->mouse.offset.x += position.x - this->mouse.position.x;
     this->mouse.offset.y += position.y - this->mouse.position.y;
-    this->mouse.position   = position;
-    this->mouse.leftButton = leftButton;
+    this->mouse.position = position;
+    // As the GLFW platform: from press and release events, a click let go
+    // before the next frame still counts
+    if (leftButton)
+        this->leftLatch.press();
+    else
+        this->leftLatch.release();
 }
 
 void HeadlessInputManager::scroll(Point offset)

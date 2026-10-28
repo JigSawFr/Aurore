@@ -499,6 +499,12 @@ void Label::setShrinkToFit(bool shrink)
     this->invalidate();
 }
 
+void Label::setShrinkToFitMin(float size)
+{
+    this->shrinkMin = size;
+    this->invalidate();
+}
+
 bool Label::isShrinkingToFit()
 {
     return this->shrinkToFit;
@@ -591,15 +597,26 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     nvgTextLineHeight(vg, this->lineHeight);
     nvgFillColor(vg, a(this->textColor));
 
-    // Edit cursor
+    // Edit cursor: blinking, or still with the motion reduced
     if (this->cursor >= (int)CursorPosition::END)
     {
-        // blink
         auto blink = ((brls::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
+        bool still = Application::getReduceMotion();
         // The cursor blinks between frames nothing else asks for
-        Application::requestRedraw();
-        if (blink < 500)
+        if (!still)
+            Application::requestRedraw();
+        if (still || blink < 500)
+        {
             cursor_position = this->cursor;
+            // At the end: after the last character drawn
+            if (this->cursor == (int)CursorPosition::END)
+            {
+                const std::string& drawn = this->animating || this->isWrapping ? this->fullText : this->truncatedText;
+                cursor_position          = 0;
+                for (unsigned char c : drawn)
+                    cursor_position += (c & 0xC0) != 0x80;
+            }
+        }
     }
 
     // Animated text
@@ -663,6 +680,10 @@ void Label::stopScrollingAnimation()
 
 void Label::onScrollTimerFinished()
 {
+    // Reduced motion: the text stays cut, it does not scroll
+    if (Application::getReduceMotion())
+        return;
+
     Style style = Application::getStyle();
 
     // Step 2: actual scrolling animation
@@ -686,6 +707,9 @@ void Label::onScrollTimerFinished()
 
 void Label::startScrollTimer()
 {
+    if (Application::getReduceMotion())
+        return;
+
     Style style = Application::getStyle();
 
     // Step 1: timer before starting to scroll
@@ -734,23 +758,24 @@ void Label::onLayout()
     this->fitScale = 1.0f;
     if (this->shrinkToFit && !this->fullText.empty() && width < required && !this->isWrapping)
     {
-        const float full = this->getFullFontSize();
-        if (full > this->fontSize)
+        const float full  = this->getFullFontSize();
+        const float floor = this->shrinkMin > 0 ? std::min(this->shrinkMin, this->fontSize) : this->fontSize;
+        if (full > floor)
         {
             auto vg = Application::getNVGContext();
             nvgFontFaceId(vg, this->font);
             nvgTextLineHeight(vg, this->lineHeight);
             nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
             float bounds[4];
-            float size = std::max(this->fontSize, full * width / required);
+            float size = std::max(floor, full * width / required);
             for (;;)
             {
                 nvgFontSize(vg, size);
                 nvgTextBounds(vg, 0, 0, this->fullText.c_str(), nullptr, bounds);
                 required = bounds[2] - bounds[0] - 0.5f;
-                if (required <= width || size <= this->fontSize)
+                if (required <= width || size <= floor)
                     break;
-                size = std::max(this->fontSize, size - 0.25f);
+                size = std::max(floor, size - 0.25f);
             }
             this->fitScale = size / full;
         }

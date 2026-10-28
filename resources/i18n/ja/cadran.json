@@ -63,6 +63,7 @@
         "text_sizes": {
             "normal": "標準",
             "large": "大きめ",
+            "largest": "特大",
             "auto": "自動：テレビでは大きめ"
         },
         "rail": "サイドバー",

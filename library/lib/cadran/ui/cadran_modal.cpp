@@ -20,6 +20,8 @@ namespace
 {
 // The pills' looks (theme and style keys, as borealis' own button styles):
 // plain on the second surface with a hairline, the confirmation filled.
+// The focus ring stands off a filled pill (cadran/ring_gap): its colour is
+// often the fill's own.
 const brls::ButtonStyle PLAIN = {
     .shadowType              = brls::ShadowType::NONE,
     .hideHighlightBackground = true,
@@ -35,7 +37,7 @@ const brls::ButtonStyle PLAIN = {
 const brls::ButtonStyle PRIMARY = {
     .shadowType              = brls::ShadowType::NONE,
     .hideHighlightBackground = true,
-    .highlightPadding        = "",
+    .highlightPadding        = "cadran/ring_gap",
     .borderThickness         = "",
     .enabledBackgroundColor  = "cadran/teal_fill",
     .enabledLabelColor       = "cadran/navy",
@@ -47,7 +49,7 @@ const brls::ButtonStyle PRIMARY = {
 const brls::ButtonStyle DANGER = {
     .shadowType              = brls::ShadowType::NONE,
     .hideHighlightBackground = true,
-    .highlightPadding        = "",
+    .highlightPadding        = "cadran/ring_gap",
     .borderThickness         = "",
     .enabledBackgroundColor  = "cadran/coral_fill",
     .enabledLabelColor       = "cadran/navy",
@@ -430,6 +432,34 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
         row->setLineTop(0);
         row->setHeight(DIALOG_BUTTONS);
         row->setPadding(0, 24, DIALOG_BUTTONS - PILL, 24);
+    }
+}
+
+void cadran::style_edit_text_dialog(brls::EditTextDialog* dialog)
+{
+    auto* card = dialog ? dynamic_cast<brls::Box*>(dialog->getView("brls/dialog/applet")) : nullptr;
+    if (!card || dialog->getView("cadran_dialog"))
+        return;
+    card->setCornerRadius(kit::RADIUS_MODAL);
+    card->setThemeColor("backgroundColor", "cadran/surf");
+    card->setThemeColor("borderColor", "cadran/line");
+    card->setBorderThickness(1);
+    auto* mark = new brls::Box();
+    mark->setId("cadran_dialog");
+    mark->setVisibility(brls::Visibility::GONE);
+    card->addView(mark);
+    // The title in the card, over the text, where it stood above the card
+    auto* title = dynamic_cast<brls::Label*>(dialog->getView("brls/dialog/header"));
+    auto* above = title && title->hasParent() ? dynamic_cast<brls::Box*>(title->getParent()) : nullptr;
+    if (above && above != card)
+    {
+        card->setMarginTop(YGNodeStyleGetMargin(title->getYGNode(), YGEdgeTop).value);
+        above->removeView(title, false);
+        title->setMargins(24, 20, 0, 20);
+        title->setAlignSelf(brls::AlignSelf::FLEX_START);
+        title->setFontSize(kit::TEXT_TITLE);
+        title->setThemeColor("textColor", "cadran/text");
+        card->addView(title, 0);
     }
 }
 

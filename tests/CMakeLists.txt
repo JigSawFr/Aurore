@@ -22,6 +22,42 @@ target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_image_limits_tests)
 
+# XML layouts: bounds, errors
+add_executable(aurore_parser_tests parser_tests.cpp)
+target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
+brls_add_tests(aurore_parser_tests)
+
+# libFuzzer targets, with clang: -DBRLS_BUILD_FUZZERS=ON (docs/testing.md)
+option(BRLS_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
+if (BRLS_BUILD_FUZZERS)
+    set(FUZZ_FLAGS -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
+    add_executable(aurore_fuzz_markdown fuzz/markdown_fuzz.cpp
+            ${PROJECT_SOURCE_DIR}/library/lib/cadran/util/markdown.cpp
+            ${PROJECT_SOURCE_DIR}/library/lib/cadran/util/safe_text.cpp)
+    target_include_directories(aurore_fuzz_markdown PRIVATE ${PROJECT_SOURCE_DIR}/library/include)
+    target_compile_features(aurore_fuzz_markdown PRIVATE cxx_std_20)
+    target_compile_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
+    target_link_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
+endif ()
+
+# Tasks coming back to a view from another thread, task queues, events
+add_executable(aurore_async_tests async_tests.cpp)
+target_link_libraries(aurore_async_tests PRIVATE Aurore::test)
+target_compile_definitions(aurore_async_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
+brls_add_tests(aurore_async_tests)
+
+# Every translation catalog parses and is loaded
+add_executable(aurore_i18n_tests i18n_tests.cpp)
+target_link_libraries(aurore_i18n_tests PRIVATE Aurore::test)
+target_compile_definitions(aurore_i18n_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
+brls_add_tests(aurore_i18n_tests)
+
+# The debugging aids' environment variables, only in a build with BRLS_DEV_TOOLS
+add_executable(aurore_dev_tools_tests dev_tools_tests.cpp)
+target_link_libraries(aurore_dev_tools_tests PRIVATE Aurore::test)
+target_compile_definitions(aurore_dev_tools_tests PRIVATE ${BRLS_DEV_TOOLS_DEFINITION})
+brls_add_tests(aurore_dev_tools_tests)
+
 # The main loop's cost on the demo (Profiler), checked against a baseline
 add_executable(aurore_bench bench.cpp)
 target_link_libraries(aurore_bench PRIVATE aurore_demo_views Aurore::test)
@@ -34,3 +70,12 @@ add_test(NAME aurore_preview
         COMMAND aurore-preview ${PROJECT_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
 set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)
+
+# docs/xml-attributes.md as the sources register the attributes
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME xml_attributes_doc COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/xml_attributes.py --check)
+endif()
+
+# Cadran's plain C++ parts, without a window
+add_subdirectory(host)

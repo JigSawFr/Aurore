@@ -24,21 +24,31 @@
 namespace brls
 {
 
+/// In an Activity's class: its content is the XML file of the resources
+/// `x` ("activity/main.xml", under resources/xml/).
 #define CONTENT_FROM_XML_RES(x) \
     brls::View* createContentView() override { return brls::View::createFromXMLResource(x); }
+/// The same from the XML file at the path `x`.
 #define CONTENT_FROM_XML_FILE(x) \
     brls::View* createContentView() override { return brls::View::createFromXMLFile(x); }
+/// The same from the XML text `x`.
 #define CONTENT_FROM_XML_STR(x) \
     brls::View* createContentView() override { return brls::View::createFromXMLString(x); }
 
-// An activity is a "screen" of your app in which the library adds
-// the UI components. The app is made of a stack of activities, each activity
-// containing a views tree.
+/// An activity is a "screen" of your app in which the library adds
+/// the UI components. The app is made of a stack of activities, each activity
+/// containing a views tree.
+///
+/// Application::pushActivity() takes the activity and deletes it when it is
+/// popped; the activity owns its content view.
 class Activity
 {
   public:
+    /// An activity whose content comes from createContentView() when it is pushed.
     Activity();
+    /// An activity showing `view` (it then owns it).
     Activity(View* view);
+    /// Frees the content view (at the end of the frame).
     virtual ~Activity();
 
     /**
@@ -51,6 +61,11 @@ class Activity
      * to use XML in your activity.
      */
     void setContentView(View* view);
+
+    /// Sets the content view as setContentView() does, but gives the previous
+    /// one back instead of deleting it: detached from the activity, still
+    /// "appeared" (no willDisappear), for the caller to put back or delete.
+    View* swapContentView(View* view);
 
     /**
      * Called when the activity is created. Should return the activity content view, if any.
@@ -75,6 +90,7 @@ class Activity
      */
     virtual void onContentAvailable() {};
 
+    /// The root of the activity's views, nullptr before it is set.
     View* getContentView();
 
     /**
@@ -116,9 +132,13 @@ class Activity
      */
     virtual bool isTranslucent();
 
+    /// Passed on to the content view when the activity is shown.
     virtual void willAppear(bool resetState = false);
+    /// Passed on to the content view when the activity is hidden or popped.
     virtual void willDisappear(bool resetState = false);
+    /// Another activity was pushed over this one.
     virtual void onPause() { }
+    /// The activity over this one was popped: it is on top again.
     virtual void onResume() { }
 
     /**
@@ -137,6 +157,7 @@ class Activity
      */
     void hide(std::function<void(void)> cb, bool animate, float animationDuration);
 
+    /// Whether hide() hid the content view.
     bool isHidden();
 
     /**
@@ -155,6 +176,7 @@ class Activity
      */
     ActionIdentifier registerAction(const std::string& hintText, enum ControllerButton button, const ActionListener& actionListener, bool hidden = false, bool allowRepeating = false, enum Sound sound = SOUND_NONE);
 
+    /// The same on a keyboard key, on the content view.
     ActionIdentifier registerAction(BrlsKeyCombination key, const ActionListener& actionListener, bool allowRepeating = false);
 
     /**
@@ -174,10 +196,13 @@ class Activity
      */
     ActionIdentifier registerExitAction(enum ControllerButton button = brls::BUTTON_START);
 
+    /// Resizes the activity to the window (resizeToFitWindow()).
     void onWindowSizeChanged();
 
+    /// The view the focus goes to when the activity is shown: the content view's default.
     View* getDefaultFocus();
 
+    /// The content view's opacity.
     void setAlpha(float alpha);
 
   private:

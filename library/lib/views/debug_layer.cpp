@@ -43,9 +43,13 @@ DebugLayer::DebugLayer()
     contentView->setPadding(5);
     contentView->setBackgroundColor(RGBA(0, 0, 0, 160));
     YGNodeStyleSetFlexDirection(contentView->getYGNode(), YGFlexDirectionColumnReverse);
-    Logger::getLogEvent()->subscribe([this, contentView](Logger::TimePoint now, LogLevel level, const std::string& log)
-        { brls::sync([this, now, level, contentView, log]
+    // Lines logged from any thread, shown on the UI thread while the layer
+    // is there
+    logSubscription = Logger::getLogEvent()->subscribe([this, alive = aliveToken(), contentView](Logger::TimePoint now, LogLevel level, const std::string& log)
+        { brls::sync([this, alive, now, level, contentView, log]
               {
+            if (alive.expired())
+                return;
             uint64_t ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                 now.time_since_epoch()).count() % 1000;
 #ifdef PS4
@@ -55,7 +59,7 @@ DebugLayer::DebugLayer()
             std::string timeBase = fmt::format("{:02d}:{:02d}:{:02d}.{:03d}", lt.hour, lt.minute, lt.second, (int)ms);
 #else
             std::time_t tt = std::chrono::system_clock::to_time_t(now);
-            std::tm time_tm = *std::localtime(&tt);
+            std::tm time_tm = localTime(tt);
             std::string timeBase = fmt::format("{:%H:%M:%S}.{:03d}", time_tm, (int)ms);
 #endif
 
@@ -107,6 +111,11 @@ DebugLayer::DebugLayer()
                 contentView->removeView(old, false);
                 delete old;
             } }); });
+}
+
+DebugLayer::~DebugLayer()
+{
+    Logger::getLogEvent()->unsubscribe(logSubscription);
 }
 
 } // namespace brls
