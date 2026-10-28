@@ -34,10 +34,6 @@ The core calls Cadran from one file, `application.cpp`: `init()` and `createWind
 
 `<aurore.hpp>` includes the whole public API; `<aurore/cadran.hpp>` adds Cadran's. Everything is in the `aurore` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
 
-<!-- legacy-names: begin -->
-`include/borealis/` and `<borealis.hpp>` are generated: each includes its new header and `<aurore/legacy.hpp>`, which declares borealis' names (`namespace brls = aurore`, the `BRLS_` macros, the `Brls` types) as deprecated aliases until 1.0 ([migrating-from-borealis.md](migrating-from-borealis.md)). The library's own code uses the new names only.
-<!-- legacy-names: end -->
-
 ## The main loop
 
 An app is a loop around `Application::mainLoop()`:
@@ -92,7 +88,7 @@ Who owns what:
 - An activity owns its content view, and frees it when it is deleted.
 - A box owns its children: `removeView(view)` deletes the view unless asked not to, and a box deletes its children with itself.
 - Deleting is deferred: `freeView()` queues a view, which is deleted at the end of the loop iteration, after the frame and the sync tasks. Code that keeps a pointer to a view across that point holds it with `ptrLock()` / `ptrUnlock()`.
-- A callback that may run after its view is gone (a task on another thread, a timer) checks it is still there: it captures the view's `aliveToken()` and returns if it expired (the older `ASYNC_RETAIN` / `ASYNC_TOKEN` / `ASYNC_RELEASE` wrap the same), or uses Cadran's `ui::Alive` tokens (`cadran/ui/guarded.hpp`).
+- A callback that may run after its view is gone (a task on another thread, a timer) checks it is still there: it captures the view's `aliveToken()` and returns if it expired, or uses Cadran's `ui::Alive` tokens (`cadran/ui/guarded.hpp`).
 
 ## Themes and styles
 

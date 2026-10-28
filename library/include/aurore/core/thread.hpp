@@ -74,8 +74,6 @@ extern void cancelDelay(size_t iter);
 class Threading
 {
   public:
-    [[deprecated("Threading is static; the application starts it")]] Threading();
-
     /**
      * Enqueue a function to be executed before
      * the application is redrawn the next time.
@@ -116,28 +114,12 @@ class Threading
      */
     static void setSyncTaskBudget(uint64_t microseconds);
 
-    // The queue, read without its lock: not safe while other threads queue
-    // tasks
-    [[deprecated("not thread-safe; see isIdle()")]] static std::vector<std::function<void()>>* getSyncFunctions()
-    {
-        std::lock_guard<std::mutex> guard(m_sync_mutex);
-        return &m_sync_functions;
-    }
-
     /**
      * True when no task is queued with sync(), async() or asyncDecode()
      * and none is running on their threads (delay()s are not counted). The test
      * harness waits for it before it calls a screen settled.
      */
     static bool isIdle();
-
-    // The queue, read without its lock: not safe while other threads queue
-    // tasks
-    [[deprecated("not thread-safe; see isIdle()")]] static std::vector<std::function<void()>>* getAsyncTasks()
-    {
-        std::lock_guard<std::mutex> guard(m_async_mutex);
-        return &m_async_tasks;
-    }
 
   private:
     inline static std::mutex m_sync_mutex;

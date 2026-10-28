@@ -1,7 +1,7 @@
-package com.borealis.demo;
+package com.aurore.demo;
 import android.os.Bundle;
 
-import org.libsdl.app.BorealisHandler;
+import org.libsdl.app.AuroreHandler;
 import org.libsdl.app.PlatformUtils;
 import org.libsdl.app.SDLActivity;
 
@@ -13,8 +13,8 @@ public class DemoActivity extends SDLActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Currently we use handler to receive brightness changes from borealis
-        PlatformUtils.borealisHandler = new BorealisHandler();
+        // Currently we use handler to receive brightness changes from Aurore
+        PlatformUtils.auroreHandler = new AuroreHandler();
     }
 
     @Override
@@ -22,7 +22,7 @@ public class DemoActivity extends SDLActivity
         super.onDestroy();
 
         // Android does not recommend using exit(0) directly,
-        // but borealis heavily uses static variables,
+        // but Aurore heavily uses static variables,
         // which can cause some problems when reloading the program.
 
         // In SDL3, we can use SDL_HINT_ANDROID_ALLOW_RECREATE_ACTIVITY to control the behavior

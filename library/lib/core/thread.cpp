@@ -88,11 +88,6 @@ static void runQueue(std::mutex& mutex, std::condition_variable& cv, std::vector
     }
 }
 
-Threading::Threading()
-{
-    start_task_loop();
-}
-
 void sync(std::function<void()> func)
 {
     Threading::sync(std::move(func));

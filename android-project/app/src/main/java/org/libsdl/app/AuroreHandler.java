@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class BorealisHandler extends Handler {
+public class AuroreHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);

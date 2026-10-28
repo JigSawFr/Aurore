@@ -21,17 +21,7 @@ endif ()
 # working directory). An app sets it before add_subdirectory(); it can be
 # given with -DAURORE_RESOURCES_ROOT=... too (for an AppImage, say).
 if (NOT AURORE_RESOURCES_ROOT)
-    # legacy-names: begin
-    if (BRLS_RESOURCES_DIR)
-        message(DEPRECATION "BRLS_RESOURCES_DIR is deprecated: use -DAURORE_RESOURCES_ROOT=${BRLS_RESOURCES_DIR}")
-        set(AURORE_RESOURCES_ROOT "${BRLS_RESOURCES_DIR}")
-    elseif (CUSTOM_RESOURCES_DIR)
-    # legacy-names: end
-        message(DEPRECATION "CUSTOM_RESOURCES_DIR is deprecated: use -DAURORE_RESOURCES_ROOT=${CUSTOM_RESOURCES_DIR}")
-        set(AURORE_RESOURCES_ROOT "${CUSTOM_RESOURCES_DIR}")
-    else ()
-        set(AURORE_RESOURCES_ROOT ".")
-    endif ()
+    set(AURORE_RESOURCES_ROOT ".")
 endif ()
 
 # The version of library/include/aurore/version.hpp, which release-please updates
@@ -106,14 +96,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif ()
 
 # opencc
-# legacy-names: begin
-foreach (_aurore_name USE_OPENCC OPENCC_INCLUDE)
-    if (DEFINED BRLS_${_aurore_name} AND NOT DEFINED AURORE_${_aurore_name})
-        message(DEPRECATION "BRLS_${_aurore_name} is deprecated: use AURORE_${_aurore_name}")
-        set(AURORE_${_aurore_name} "${BRLS_${_aurore_name}}")
-    endif ()
-endforeach ()
-# legacy-names: end
 if (AURORE_USE_OPENCC)
     list(APPEND AURORE_PLATFORM_LIBS libopencc)
     list(APPEND AURORE_INCLUDE ${AURORE_OPENCC_INCLUDE})

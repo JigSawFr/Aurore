@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.borealis.demo"
+    namespace = "com.aurore.demo"
     compileSdkVersion 34
     defaultConfig {
         // Android 5.0 and later; Google Play asks for a recent target
@@ -11,7 +11,7 @@ android {
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
-        // borealis need at least ndk r22 (r21 don't have std::filesystem support)
+        // Aurore needs at least NDK r22 (r21 don't have std::filesystem support)
         // The newer NDK library will cause lower versions of Android failed to run.
         // r26: support api21 and later
         // r24/r25: support api19 and later
@@ -19,7 +19,7 @@ android {
         ndkVersion "22.1.7171670"
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_shared", "-DCMAKE_WARN_DEPRECATED=FALSE"
+                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_shared"
                 // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 abiFilters 'armeabi-v7a', 'arm64-v8a'
                 version = '3.16.0+'
@@ -28,10 +28,10 @@ android {
     }
     signingConfigs {
         release {
-            // keytool -genkey -alias borealis -keyalg RSA -keypass password -keystore borealis.jks -storepass password -validity 100000
-            storeFile file("borealis.jks")
+            // keytool -genkey -alias aurore -keyalg RSA -keypass password -keystore aurore.jks -storepass password -validity 100000
+            storeFile file("aurore.jks")
             storePassword 'password'
-            keyAlias 'borealis'
+            keyAlias 'aurore'
             keyPassword 'password'
             // Optional, specify signing versions used
             v1SigningEnabled true

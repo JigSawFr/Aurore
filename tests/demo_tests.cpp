@@ -2643,7 +2643,7 @@ AURORE_TEST(header_settings_take_a_wider_touch)
 }
 
 // AURORE_LANG gives the language over the system's, a locale's name as it
-// is or a system's read (borealis' names: tests/legacy_names_tests.cpp)
+// is or a system's read
 AURORE_TEST(language_from_the_environment_wins)
 {
     Harness h;

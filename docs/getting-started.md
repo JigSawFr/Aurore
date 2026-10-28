@@ -166,8 +166,6 @@ aurore::async([this, alive = aliveToken()] {
 });
 ```
 
-`ASYNC_RETAIN`, `ASYNC_TOKEN` and `ASYNC_RELEASE` (from borealis) still work and do the same; they are kept for older code.
-
 ## 5. A theme (2 minutes)
 
 Colours and metrics come from the theme (light or dark, following the system) and can be changed without rebuilding, from a file:

@@ -26,7 +26,7 @@ From the repository's root, the resources generator first: libromfs turns the re
 ./build_libromfs_generator.sh
 ```
 
-It leaves `libromfs-generator` at the root of the repository, where `app/jni/CMakeLists.txt` finds it (`app/jni/borealis` is a link to the root). Then, with the Android SDK and NDK installed (Android Studio's SDK Manager, or `sdkmanager`):
+It leaves `libromfs-generator` at the root of the repository, where `app/jni/CMakeLists.txt` finds it (`app/jni/aurore` is a link to the root). Then, with the Android SDK and NDK installed (Android Studio's SDK Manager, or `sdkmanager`):
 
 ```sh
 cd android-project
@@ -37,15 +37,15 @@ export ANDROID_SDK_ROOT=~/Android/Sdk          # macOS: ~/Library/Android/sdk
 
 Android Studio opens `android-project/` as it is. On macOS, its own JDK works: `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
 
-A release build (`./gradlew assembleRelease`) is signed with `app/borealis.jks`, which is not in the repository: make one (the `keytool` line in `app/build.gradle`), or point `signingConfigs.release` at your own key.
+A release build (`./gradlew assembleRelease`) is signed with `app/aurore.jks`, which is not in the repository: make one (the `keytool` line in `app/build.gradle`), or point `signingConfigs.release` at your own key.
 
 ## Your app on Android
 
-1. Put your project in `app/jni/` (or make `app/jni/borealis` a link to your project's root instead of Aurore's), with Aurore as its submodule.
-2. In `app/jni/CMakeLists.txt`, `add_subdirectory` your project in place of `borealis`, and point `LIBROMFS_PREBUILT_GENERATOR` at the `libromfs-generator` your build made.
+1. Put your project in `app/jni/` (or make `app/jni/aurore` a link to your project's root instead of Aurore's), with Aurore as its submodule.
+2. In `app/jni/CMakeLists.txt`, `add_subdirectory` your project in place of `aurore`, and point `LIBROMFS_PREBUILT_GENERATOR` at the `libromfs-generator` your build made.
 3. In your `CMakeLists.txt`, make the program with `program_target()` (a shared library on Android) and give it your resources with `add_libromfs()`, as Aurore's root `CMakeLists.txt` does for the demo.
 4. In `app/build.gradle`, set `namespace` and `applicationId` to your package name.
-5. In `app/src/main/java/`, copy `com/borealis/demo/DemoActivity.java` under your package, and change `getLibraries()` to load `SDL2` and your library (your CMake target's name, in place of `aurore_demo`).
+5. In `app/src/main/java/`, copy `com/aurore/demo/DemoActivity.java` under your package, and change `getLibraries()` to load `SDL2` and your library (your CMake target's name, in place of `aurore_demo`).
 6. In `app/src/main/AndroidManifest.xml`, name your activity in place of `DemoActivity`.
 7. Set the app's name in `app/src/main/res/values/strings.xml` and its icon in `app/src/main/res/mipmap-*/ic_launcher.png`.
 

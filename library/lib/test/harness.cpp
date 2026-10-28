@@ -141,7 +141,7 @@ std::string viewText(View* view)
     return "";
 }
 
-// AURORE_<name>, or the deprecated name borealis gave it
+// AURORE_<name>, else the fallback
 static std::string fromEnvironment(const char* name, const std::string& fallback)
 {
     const char* value = environmentVariable(name);
