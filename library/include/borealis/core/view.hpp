@@ -19,6 +19,7 @@
 
 #include <nanovg.h>
 #include <stdio.h>
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <memory>
@@ -47,7 +48,7 @@
         if (enumMap.count(value) > 0)                                                    \
             method(enumMap[value]);                                                      \
         else                                                                             \
-            brls::fatal("Illegal value \"" + value + "\" for XML attribute \"" + name + "\""); })
+            brls::View::fatalXML("Illegal value \"" + value + "\" for XML attribute \"" + name + "\"; expected " + brls::View::listXMLValues(enumMap)); })
 
 // Shortcut to register an A key action (generic click) on a view given its id, that calls any function or method
 // To be used in activities or derivates of Box (internally uses the getView() method)
@@ -56,37 +57,17 @@
 #define BRLS_REGISTER_CLICK_BY_ID(id, method) \
     this->getView(id)->registerClickAction([this](brls::View* view) { return method(view); })
 
-#define ASYNC_RETAIN                             \
-    if (!deletionToken && !deletionTokenCounter) \
-    {                                            \
-        deletionToken        = new bool(false);  \
-        deletionTokenCounter = new int(0);       \
-    }                                            \
-    (*deletionTokenCounter)++;                   \
-    bool* token       = deletionToken;           \
-    int* tokenCounter = deletionTokenCounter;
+// Deprecated: capture View::aliveToken() instead. Kept for older code: they
+// now wrap it, with no counter to keep balanced, so a callback run twice, or
+// after the view is deleted, does nothing. ASYNC_RELEASE is to be used on the
+// UI thread (in brls::sync()), where views are deleted.
+#define ASYNC_RETAIN auto token = this->aliveToken();
 
-#define ASYNC_RELEASE                           \
-    bool release = *token;                      \
-    int counter  = *tokenCounter;               \
-    if (counter > 0)                            \
-    {                                           \
-        (*tokenCounter)--;                      \
-        if (*tokenCounter == 0)                 \
-        {                                       \
-            delete token;                       \
-            delete tokenCounter;                \
-            if (!release)                       \
-            {                                   \
-                deletionToken        = nullptr; \
-                deletionTokenCounter = nullptr; \
-            }                                   \
-        }                                       \
-    }                                           \
-    if (release)                                \
+#define ASYNC_RELEASE    \
+    if (token.expired()) \
         return;
 
-#define ASYNC_TOKEN this, token, tokenCounter
+#define ASYNC_TOKEN this, token
 
 // Avoid conflicts with macro definitions in windows.h
 #undef RGB
@@ -106,6 +87,20 @@ namespace brls
 {
 
 const NVGcolor TRANSPARENT = nvgRGBA(0, 0, 0, 0);
+
+// For the XML errors (View::fatalXML): the file or resource a document was
+// read from, and the element being read while this lives
+void nameXMLDocument(const tinyxml2::XMLDocument* document, const std::string& name);
+struct ReadingXMLElement
+{
+    explicit ReadingXMLElement(const tinyxml2::XMLElement* element);
+    ~ReadingXMLElement();
+    ReadingXMLElement(const ReadingXMLElement&)            = delete;
+    ReadingXMLElement& operator=(const ReadingXMLElement&) = delete;
+
+  private:
+    const tinyxml2::XMLElement* previous;
+};
 
 // Focus direction when navigating
 enum class FocusDirection
@@ -436,6 +431,9 @@ class View
 
     static constexpr float AUTO = NAN;
 
+    // A folder whose xml/ files replace the built-in ones of the same name
+    // in createFromXMLResource(); one that cannot be read is logged, and the
+    // built-in one used
     inline static std::string CUSTOM_RESOURCES_PATH;
 
     View();
@@ -1075,6 +1073,9 @@ class View
     /**
      * Creates a view from the given XML element (node and attributes).
      *
+     * Elements nest at most 64 levels deep, the files brls:View includes
+     * counted (a file including itself is an error, not a stack overflow).
+     *
      * The method handleXMLElement() is executed for each child node in the XML.
      *
      * Uses the internal lookup table to instantiate the views.
@@ -1228,6 +1229,37 @@ class View
      * given as a string.
      */
     static std::string currentXMLResource;
+
+    /**
+     * Where an element is: "file:line" (the path or the resource it was
+     * loaded from), "line N" for an XML string.
+     */
+    static std::string describeXMLLocation(const tinyxml2::XMLElement* element);
+
+    /**
+     * fatal() for an XML error, the message prefixed with where the element
+     * being read is ("file:line: <tag>: ").
+     */
+    [[noreturn]] static void fatalXML(const std::string& message);
+
+    /**
+     * The known name closest to `name` (a typo's), or "" when none is close.
+     */
+    static std::string closestXMLName(const std::string& name, const std::vector<std::string>& known);
+
+    // An enumeration's values, sorted, for an error message
+    template <typename T>
+    static std::string listXMLValues(const std::unordered_map<std::string, T>& values)
+    {
+        std::vector<std::string> names;
+        for (const auto& entry : values)
+            names.push_back(entry.first);
+        std::sort(names.begin(), names.end());
+        std::string list;
+        for (const std::string& name : names)
+            list += (list.empty() ? "" : ", ") + name;
+        return list;
+    }
 
     /**
      * Sets the maximum number of allowed children XML elements
@@ -1697,8 +1729,23 @@ class View
     void present(View* view);
     virtual void dismiss(std::function<void(void)> cb = [] {});
 
-    bool* deletionToken       = nullptr;
-    int* deletionTokenCounter = nullptr;
+    /**
+     * A token that expires when this view is deleted. A task that comes back
+     * to the view from another thread captures it by value and checks it on
+     * the UI thread, before it touches the view:
+     *
+     *   brls::async([this, alive = aliveToken()] {
+     *       auto result = work(); // not `this`: the view may be gone
+     *       brls::sync([this, alive, result] {
+     *           if (alive.expired())
+     *               return;
+     *           ...
+     *       });
+     *   });
+     *
+     * Checked on another thread it only says the view was alive then.
+     */
+    std::weak_ptr<void> aliveToken();
     void ptrLock();
     void ptrUnlock();
     bool isPtrLocked();
@@ -1895,6 +1942,7 @@ class View
 
   private:
     friend class Application;
+    std::shared_ptr<void> alive; // see aliveToken()
     struct Extras;
     struct ExtrasDeleter
     {

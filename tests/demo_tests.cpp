@@ -21,6 +21,7 @@
 #include <borealis.hpp>
 #include <borealis/cadran/ui/cadran_kit.hpp>
 #include <borealis/cadran/ui/cadran_list.hpp>
+#include <borealis/cadran/ui/cadran_modal.hpp>
 #include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
@@ -2136,6 +2137,163 @@ BRLS_TEST(every_focusable_demo_view_says_something)
 int main(int argc, char** argv)
 {
     return brls::test::runTests(argc, argv);
+}
+
+BRLS_TEST(switch_off_reads_as_secondary_text)
+{
+    Harness h;
+    auto* cell = new brls::BooleanCell();
+    cell->init("Switch", false, [](bool) {});
+    h.push(new brls::Activity(screenOf({ cell })));
+    h.settle();
+    for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })
+    {
+        brls::Application::getPlatform()->setThemeVariant(variant);
+        h.step(2);
+        brls::Theme theme = brls::Application::getTheme();
+        NVGcolor off      = cell->detail->getTextColor();
+        NVGcolor want     = theme["brls/text_secondary"];
+        BRLS_CHECK(std::fabs(off.r - want.r) < 0.01f && std::fabs(off.g - want.g) < 0.01f && std::fabs(off.b - want.b) < 0.01f);
+        BRLS_CHECK(brls::Theme::contrast(off, theme["brls/background"]) >= 4.5f);
+    }
+}
+
+BRLS_TEST(every_demo_theme_passes_the_contrast_check)
+{
+    DemoHarness h;
+    for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })
+        BRLS_CHECK(brls::Theme::checkContrast(variant).empty());
+    for (const brls::ThemeInfo& info : brls::Theme::listThemes("@res/themes", true))
+    {
+        for (const std::string& warning : info.warnings)
+            std::printf("%s: %s\n", info.path.c_str(), warning.c_str());
+        BRLS_CHECK(info.ok() && info.warnings.empty());
+    }
+}
+
+static std::string xmlError(const std::string& name, const std::string& xml)
+{
+    std::filesystem::path file = std::filesystem::temp_directory_path() / name;
+    std::ofstream(file) << xml;
+    try
+    {
+        brls::View::createFromXMLFile(file.string());
+    }
+    catch (const std::logic_error& e)
+    {
+        std::filesystem::remove(file);
+        return e.what();
+    }
+    std::filesystem::remove(file);
+    return "";
+}
+
+BRLS_TEST(xml_errors_say_where_and_what_was_meant)
+{
+    Harness h;
+    std::string typo = xmlError("aurore_typo.xml", "<brls:Box>\n\n    <brls:Label fontSise=\"20\"/>\n</brls:Box>\n");
+    BRLS_CHECK(typo.find("aurore_typo.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"") != std::string::npos);
+    BRLS_CHECK(typo.find("did you mean \"fontSize\"?") != std::string::npos);
+
+    std::string value = xmlError("aurore_value.xml", "<brls:Box\n    axis=\"colum\"/>\n");
+    BRLS_CHECK(value.find("aurore_value.xml:1: <brls:Box>: Illegal value \"colum\" for XML attribute \"axis\"; expected column, row") != std::string::npos);
+
+    std::string tag = xmlError("aurore_tag.xml", "<brls:Box>\n<brls:Lable/>\n</brls:Box>\n");
+    BRLS_CHECK(tag.find("aurore_tag.xml:2: <brls:Lable>: Unknown XML tag \"brls:Lable\"; did you mean \"brls:Label\"?") != std::string::npos);
+}
+
+BRLS_TEST(reduce_motion_stops_core_animations)
+{
+    Harness h;
+    brls::Application::setReduceMotion(true);
+    auto* cell = new brls::BooleanCell();
+    cell->init("Switch", false, [](bool) {});
+    h.push(new brls::Activity(screenOf({ cell })));
+    h.settle();
+    h.tap(brls::BUTTON_A);
+    BRLS_CHECK(cell->isOn());
+    BRLS_CHECK(brls::Ticking::runningTickings.empty() || std::none_of(brls::Ticking::runningTickings.begin(), brls::Ticking::runningTickings.end(), [](brls::Ticking* t)
+                   { return dynamic_cast<brls::FiniteTicking*>(t) != nullptr; }));
+
+    // A text cut short stays still while focused
+    auto* row   = new brls::Box(brls::Axis::ROW);
+    auto* label = new brls::Label();
+    label->setText("A text far too long for the narrow line it is written on");
+    label->setSingleLine(true);
+    row->setWidth(200);
+    row->setFocusable(true);
+    row->addView(label);
+    brls::setHighlightAnimationStill(true); // the focus ring's pulse aside
+    h.push(new brls::Activity(screenOf({ row })));
+    h.settle();
+    h.step(120);
+    brls::test::Image before = h.screenshot();
+    h.step(120);
+    BRLS_CHECK_EQ(brls::test::compareImages(h.screenshot(), before).differingPixels, 0);
+}
+
+BRLS_TEST(rail_names_are_not_cut)
+{
+    DemoHarness h;
+    for (const std::string& text : h.cutTexts())
+        BRLS_CHECK(text != "Basic components" && text != "Layout and alignment");
+}
+
+BRLS_TEST(hold_to_confirm_says_it_once)
+{
+    DemoHarness h;
+    // Opened by a finger: no A key bubble
+    BRLS_CHECK(h.tapView(h.findText("Cadran")));
+    ui::hold_confirm(cadran::dialog_body(brls::getStr("demo/cadran/hold_text")), brls::getStr("demo/cadran/hold"), [] {});
+    h.settle();
+    BRLS_CHECK(!h.hasText("A"));
+    BRLS_CHECK(!h.hasText("Reset everything?\n\nHold the button for 2 seconds."));
+    BRLS_CHECK(h.matchesReference("hold_confirm_touch"));
+}
+
+BRLS_TEST(cut_text_file_written_with_cadran)
+{
+    std::filesystem::path dir = std::filesystem::temp_directory_path() / "aurore_cut_text";
+    std::filesystem::remove_all(dir);
+    std::filesystem::create_directories(dir);
+    std::filesystem::path previous = std::filesystem::current_path();
+    std::filesystem::current_path(dir);
+    setenv("BRLS_CUT_TEXT", "1", 1);
+    {
+        DemoHarness h;
+        auto* cut = new brls::Label();
+        cut->setText("A sentence far too long for the narrow box it is given");
+        cut->setSingleLine(true);
+        cut->setWidth(120);
+        h.push(new brls::Activity(screenOf({ cut })));
+        h.settle();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+        h.step(2);
+        std::ifstream file(dir / "cut_text.txt");
+        std::string all((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        BRLS_CHECK(all.find("A sentence far too long for the narrow box it is given") != std::string::npos);
+    }
+    unsetenv("BRLS_CUT_TEXT");
+    std::filesystem::current_path(previous);
+    std::filesystem::remove_all(dir);
+}
+
+BRLS_TEST(settings_tab_keeps_the_cards_margins)
+{
+    DemoHarness h;
+    BRLS_CHECK(h.focusByText("Settings"));
+    h.tap(brls::BUTTON_RIGHT);
+    h.settle();
+    brls::View* line = h.focus();
+    BRLS_CHECK(line != nullptr);
+    if (line)
+    {
+        brls::Rect frame = line->getFrame();
+        // Within the margins of Cadran's pages, the focus ring off the window's edge
+        BRLS_CHECK(frame.getMaxX() <= 1280 - 40 + 1);
+        BRLS_CHECK(frame.getMinY() >= 84 + 28 - 1);
+    }
+    BRLS_CHECK(h.matchesReference("settings_tab"));
 }
 
 BRLS_TEST(mouse_quick_click_is_not_lost)

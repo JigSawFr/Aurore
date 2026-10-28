@@ -97,6 +97,21 @@ inline void setSimulatedWallTime(int64_t seconds)
     detail::simulatedWallTime.store(seconds, std::memory_order_relaxed);
 }
 
+/**
+ * std::localtime() without its shared buffer: safe on any thread (the
+ * logger runs on the task thread too).
+ */
+inline std::tm localTime(std::time_t time)
+{
+    std::tm result {};
+#ifdef _WIN32
+    localtime_s(&result, &time);
+#else
+    localtime_r(&time, &result);
+#endif
+    return result;
+}
+
 typedef std::function<void()> TickingGenericCallback;
 
 typedef std::function<void(bool)> TickingEndCallback;

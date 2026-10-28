@@ -99,7 +99,8 @@ brls::Box* checklist_body(const std::string& title, const std::vector<CheckLine>
 void notice(const char* icon, Check tone, const std::string& title, const std::string& text);
 // `body` with Cancel and `hold_label`: A (or a finger) held on it for 2 s,
 // the button filling meanwhile, runs `on_yes`; let go sooner, it empties
-// and nothing happens. For what is hard to undo from the console.
+// and nothing happens. For what is hard to undo from the console. The dialog
+// says how itself (hold_hint, the A key for a controller): `body` need not.
 void hold_confirm(brls::Box* body, const std::string& hold_label, std::function<void()> on_yes,
     std::function<void()> on_no = nullptr);
 

@@ -3,8 +3,12 @@
 // between two characters; notes cut after a whole line), versions, and
 // GitHub-flavoured Markdown as blocks
 // (headings, paragraphs and their line breaks, lists, tasks, code, quotes and
-// alerts, rules, tables, HTML, inline marks, entities, emoji) with its bounds.
+// alerts, rules, tables, HTML, inline marks, entities, emoji) with its bounds
+// (MAX_SOURCE bytes read, at most MAX_BLOCKS blocks…), in linear time, and
+// the fuzzer's invariants on the hostile inputs known.
+#include <chrono>
 #include <string>
+#include <vector>
 #include "check.h"
 
 #include <borealis/cadran/util/markdown.hpp>
@@ -192,11 +196,113 @@ static void test_bounds()
     CHECK(bidi.size() == 1 && bidi[0].text == "ab");
 }
 
+namespace
+{
+double milliseconds_to_parse(const std::string& md, size_t* blocks = nullptr)
+{
+    const auto start  = std::chrono::steady_clock::now();
+    const auto parsed = markdown::parse(md);
+    const double ms   = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+    if (blocks)
+        *blocks = parsed.size();
+    return ms;
+}
+
+bool valid_utf8(const std::string& s)
+{
+    return safe_text::clean(s, s.size(), true) == s;
+}
+} // namespace
+
+// Runs of one character that took quadratic time. The bounds are generous:
+// they are met hundreds of times over, where the quadratic parse missed them.
+static void test_linear_time()
+{
+    // 60000 '>': 110 ms when each level copied the line, under 1 ms now
+    CHECK(milliseconds_to_parse(std::string(60000, '>')) < 60);
+    CHECK(milliseconds_to_parse(std::string(60000, '>') + " quoted") < 60);
+    std::string spaced;
+    for (int i = 0; i < 20000; i++)
+        spaced += "> ";
+    size_t blocks = 0;
+    CHECK(milliseconds_to_parse(spaced + "deep", &blocks) < 60);
+    CHECK(blocks == 1);
+
+    // Past MAX_SOURCE, the rest is not read: a megabyte of anything is quick
+    for (char c : { '>', '[', '<', '`', '*', '&', '|' })
+        CHECK(milliseconds_to_parse(std::string(1 << 20, c)) < 250);
+}
+
+static void test_nested_quotes()
+{
+    // Quotes in quotes are flattened into one
+    const auto b = markdown::parse("> > > deep\n>> also\n> >\t> [!TIP]\n> tip");
+    if (!CHECK(b.size() == 2))
+        return;
+    CHECK(b[0].kind == Block::Quote && b[0].text == "deep\nalso");
+    CHECK(b[1].kind == Block::Quote && b[1].alert == "tip" && b[1].text == "tip");
+}
+
+static void test_max_source()
+{
+    // The first MAX_SOURCE bytes are read, not what follows
+    const std::string md = "# Kept\n" + std::string(markdown::MAX_SOURCE, 'a') + "\n# Past the bound\n";
+    const auto b         = markdown::parse(md);
+    CHECK(!b.empty() && b[0].text == "Kept");
+    for (const Block& block : b)
+        CHECK(block.text.find("Past") == std::string::npos);
+}
+
+// What the fuzzer (tests/fuzz/markdown_fuzz.cpp) checks on each input, here
+// on the hostile ones known
+static void test_hostile_inputs()
+{
+    std::vector<std::string> inputs = {
+        std::string(100000, '['),
+        std::string(100000, '(') + "[](",
+        "[a](" + std::string(5000, '(') + ")",
+        std::string(3000, '-') + " x",
+        "```\n" + std::string(100000, '\n'),
+        std::string(20000, '|') + "\n" + std::string(20000, '-'),
+        "<details>" + std::string(2000, '<') + "<summary>",
+        std::string("a\0b\xff\xfe\xc0\x80", 8),
+        "&#x110000; &#xD800; &#99999999999; &;",
+    };
+    std::string nested;
+    for (int i = 0; i < 200; i++)
+        nested += std::string(i * 2, ' ') + "- item\n";
+    inputs.push_back(nested);
+
+    for (const std::string& in : inputs)
+    {
+        const auto blocks = markdown::parse(in);
+        CHECK(blocks.size() <= markdown::MAX_BLOCKS);
+        for (const Block& b : blocks)
+        {
+            CHECK(valid_utf8(b.text) && valid_utf8(b.alert) && valid_utf8(b.icon));
+            CHECK(b.icon.size() <= 8);
+            if (b.kind == Block::Heading)
+                CHECK(b.level >= 1 && b.level <= 6);
+            if (b.kind == Block::Item)
+                CHECK(b.level >= 0 && b.level <= markdown::MAX_DEPTH);
+            CHECK(b.lines.size() <= markdown::MAX_CODE_LINES + 1);
+            CHECK(b.rows.size() <= markdown::MAX_ROWS + 1);
+            for (const auto& row : b.rows)
+                CHECK(row.size() <= markdown::MAX_COLUMNS);
+        }
+        (void)markdown::inline_text(in);
+    }
+}
+
 int main()
 {
     test_safe_text();
     test_inline();
     test_blocks();
     test_bounds();
+    test_linear_time();
+    test_nested_quotes();
+    test_max_source();
+    test_hostile_inputs();
     return CHECK_DONE("safe text, versions, inline and block Markdown, and bounds assertions passed");
 }

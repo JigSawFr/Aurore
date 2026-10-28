@@ -18,6 +18,7 @@
 
 #include <unistd.h>
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
@@ -68,10 +69,12 @@ extern size_t delay(long milliseconds, std::function<void()> func);
 
 extern void cancelDelay(size_t iter);
 
+// The free functions above are the API for apps; Threading is what the
+// application runs them with (start, stop, performSyncTasks each frame)
 class Threading
 {
   public:
-    Threading();
+    [[deprecated("Threading is static; the application starts it")]] Threading();
 
     /**
      * Enqueue a function to be executed before
@@ -106,7 +109,9 @@ class Threading
      */
     static void setSyncTaskBudget(uint64_t microseconds);
 
-    static std::vector<std::function<void()>>* getSyncFunctions()
+    // The queue, read without its lock: not safe while other threads queue
+    // tasks
+    [[deprecated("not thread-safe; see isIdle()")]] static std::vector<std::function<void()>>* getSyncFunctions()
     {
         std::lock_guard<std::mutex> guard(m_sync_mutex);
         return &m_sync_functions;
@@ -119,7 +124,9 @@ class Threading
      */
     static bool isIdle();
 
-    static std::vector<std::function<void()>>* getAsyncTasks()
+    // The queue, read without its lock: not safe while other threads queue
+    // tasks
+    [[deprecated("not thread-safe; see isIdle()")]] static std::vector<std::function<void()>>* getAsyncTasks()
     {
         std::lock_guard<std::mutex> guard(m_async_mutex);
         return &m_async_tasks;
@@ -138,9 +145,11 @@ class Threading
     inline static std::mutex m_delay_mutex;
     inline static std::vector<DelayOperation> m_delay_tasks;
     inline static std::set<size_t> m_delay_cancel_set;
+    inline static std::set<size_t> m_delay_pending; // queued, not run nor cancelled
     inline static size_t m_delay_index = 0;
 
-    inline static volatile bool task_loop_active = true;
+    inline static std::atomic<bool> task_loop_active { true };
+    inline static bool task_loop_running = false; // started and not stopped
 
     static void* task_loop(void* a);
     static void std_task_loop();

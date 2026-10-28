@@ -496,7 +496,8 @@ void ScrollingFrame::startScrolling(bool animated, float newScroll)
     if (newScroll == this->contentOffsetY)
         return;
 
-    if (animated)
+    // Reduced motion: straight there
+    if (animated && !Application::getReduceMotion())
     {
         Style style = Application::getStyle();
         animateScrolling(newScroll, style["brls/animations/highlight"]);

@@ -108,8 +108,8 @@ constexpr Palette DARK = {
     { 0xE9, 0x6A, 0xA8, 255 }, // avatar3
     { 0xFF, 0xFF, 0xFF, 255 }, // knob
     { 0x0B, 0x14, 0x24, 40 }, // knob_line
-    { 0x33, 0x48, 0x6B, 255 }, // bar
-    { 0x5A, 0x71, 0x96, 255 }, // bar_today
+    { 0x5A, 0x71, 0x96, 255 }, // bar
+    { 0x9F, 0xB4, 0xD4, 255 }, // bar_today
     { 3, 8, 18, 225 }, // backdrop
     { 0x1A, 0x2A, 0x45, 250 }, // toast
     { 0xEE, 0xF2, 0xF8, 255 }, // toast_text
@@ -163,8 +163,8 @@ constexpr Palette LIGHT = {
     { 0xE9, 0x6A, 0xA8, 255 }, // avatar3
     { 0xFF, 0xFF, 0xFF, 255 }, // knob
     { 0x0B, 0x14, 0x24, 40 }, // knob_line
-    { 0xB9, 0xC6, 0xDA, 255 }, // bar
-    { 0x7E, 0x90, 0xAE, 255 }, // bar_today
+    { 0x7E, 0x90, 0xAE, 255 }, // bar
+    { 0x4A, 0x5D, 0x7E, 255 }, // bar_today
     { 0x0B, 0x14, 0x24, 160 }, // backdrop
     { 0x0B, 0x14, 0x24, 240 }, // toast
     { 0xEE, 0xF2, 0xF8, 255 }, // toast_text
@@ -190,6 +190,10 @@ constexpr Key KEYS[] = {
     { "brls/background", &Palette::bg },
     { "brls/clear", &Palette::bg },
     { "brls/text", &Palette::text },
+    // A secondary text (a switch's Off, a placeholder) in the third ink,
+    // what cannot be used now in the faded one
+    { "brls/text_secondary", &Palette::text3 },
+    { "brls/text_disabled", &Palette::text_off },
     { "brls/sidebar/background", &Palette::bg },
     { "brls/sidebar/separator", &Palette::line },
     { "brls/sidebar/active_item", &Palette::teal },
@@ -304,8 +308,18 @@ constexpr Contrast CONTRAST[] = {
     { "cadran/key_fg", "cadran/key_bg", 4.5f },
     { "cadran/navy", "cadran/teal_fill", 4.5f },
     { "cadran/navy", "cadran/coral_fill", 4.5f },
-    // The focus ring, both ends of its pulse.
+    // The focus ring, both ends of its pulse, on the screen and on a card.
     { "brls/highlight/color1", "brls/background", 3.0f },
     { "brls/highlight/color2", "brls/background", 3.0f },
+    { "brls/highlight/color1", "cadran/surf", 3.0f },
+    { "brls/highlight/color2", "cadran/surf", 3.0f },
+    // Secondary text in borealis' cells, on a card too.
+    { "brls/text_secondary", "cadran/surf", 4.5f },
+    { "brls/list/listItem_value_color", "cadran/surf", 4.5f },
+    // Shapes that carry meaning, at 3:1 (WCAG 1.4.11): a tile's icon, a
+    // chart's bars. A switch off is told by its knob and outline, in text3.
+    { "cadran/pink", "cadran/surf", 3.0f },
+    { "cadran/bar", "cadran/surf", 3.0f },
+    { "cadran/bar_today", "cadran/surf", 3.0f },
 };
 } // namespace cadran::palette

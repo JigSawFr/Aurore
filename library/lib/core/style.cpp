@@ -70,8 +70,8 @@ static StyleValues styleValues = {
 
     // TabFrame
     { "brls/tab_frame/sidebar_width", 410.0f },
-    { "brls/tab_frame/content_padding_top_bottom", 42.0f }, // unused by the library, here for users
-    { "brls/tab_frame/content_padding_sides", 60.0f }, // unused by the library, here for users
+    { "brls/tab_frame/content_padding_top_bottom", 42.0f }, // a tab's content, for the apps' XML (Cadran's margins with it)
+    { "brls/tab_frame/content_padding_sides", 60.0f }, // a tab's content, for the apps' XML
 
     // Sidebar
     { "brls/sidebar/border_height", 16.0f },

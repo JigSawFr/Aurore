@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <filesystem>
 #include <string>
 
@@ -111,7 +112,18 @@ int main(int argc, char** argv)
         brls::Application::getPlatform()->setThemeVariant(variant);
     }
 
-    brls::View* view = brls::View::createFromXMLFile(xml);
+    // A mistake in the file: its message (file:line, what was expected) and
+    // the exit code 1, not an abort
+    brls::View* view = nullptr;
+    try
+    {
+        view = brls::View::createFromXMLFile(xml);
+    }
+    catch (const std::exception& e)
+    {
+        std::fprintf(stderr, "%s\n", e.what());
+        return 1;
+    }
     if (!view)
     {
         std::fprintf(stderr, "%s: could not be read\n", xml.c_str());
