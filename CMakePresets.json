@@ -1,8 +1,8 @@
 {
-  "version": 3,
+  "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 21,
+    "minor": 25,
     "patch": 0
   },
   "configurePresets": [
@@ -38,6 +38,37 @@
       }
     },
     {
+      "name": "desktop-debug",
+      "displayName": "Desktop (GLFW, debug)",
+      "description": "desktop-glfw with debug information, no optimisation and the inspector on from the start",
+      "inherits": "desktop-glfw",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BRLS_INSPECTOR": "ON"
+      }
+    },
+    {
+      "name": "desktop-asan",
+      "displayName": "Desktop (GLFW, ASan + UBSan)",
+      "description": "desktop-glfw in debug with AddressSanitizer and UndefinedBehaviorSanitizer; GCC or Clang",
+      "inherits": "desktop-glfw",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    },
+    {
+      "name": "tests",
+      "displayName": "Tests (desktop, GLFW)",
+      "description": "The test harness, the demo's tests, the bench and aurore-preview (docs/testing.md)",
+      "inherits": "desktop-glfw",
+      "cacheVariables": {
+        "BRLS_BUILD_TESTS": "ON"
+      }
+    },
+    {
       "name": "switch-deko3d",
       "displayName": "Nintendo Switch (deko3d)",
       "description": "Switch homebrew drawn with deko3d; needs devkitPro and DEVKITPRO set",
@@ -69,6 +100,18 @@
       "configurePreset": "desktop-sdl"
     },
     {
+      "name": "desktop-debug",
+      "configurePreset": "desktop-debug"
+    },
+    {
+      "name": "desktop-asan",
+      "configurePreset": "desktop-asan"
+    },
+    {
+      "name": "tests",
+      "configurePreset": "tests"
+    },
+    {
       "name": "switch-deko3d",
       "configurePreset": "switch-deko3d",
       "targets": ["aurore_demo.nro"]
@@ -77,6 +120,35 @@
       "name": "switch-gl",
       "configurePreset": "switch-gl",
       "targets": ["aurore_demo.nro"]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "tests",
+      "configurePreset": "tests",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "tests",
+      "displayName": "Configure, build and run the tests",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "tests"
+        },
+        {
+          "type": "build",
+          "name": "tests"
+        },
+        {
+          "type": "test",
+          "name": "tests"
+        }
+      ]
     }
   ]
 }

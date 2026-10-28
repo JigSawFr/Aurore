@@ -234,12 +234,15 @@ cmake --build build_pc
 ./build_pc/aurore_demo
 ```
 
-With CMake 3.21 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>`:
+Aurore builds with CMake only (3.16 or later): upstream's xmake files (`xmake.lua`, `uwp.lua`), untested and behind the CMake build, are gone.
+
+With CMake 3.25 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>` (`cmake --list-presets`: also `desktop-debug`, `desktop-asan` and `tests`):
 
 ```sh
 cmake --preset desktop-glfw        # or desktop-sdl
 cmake --build --preset desktop-glfw
 ./build/desktop-glfw/aurore_demo
+cmake --workflow --preset tests    # configure, build and run the tests
 
 export DEVKITPRO=/opt/devkitpro    # Switch: switch-deko3d or switch-gl (OpenGL)
 cmake --preset switch-deko3d
