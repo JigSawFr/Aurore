@@ -10,7 +10,7 @@ function(check_libromfs_generator)
             # directory of the caller.
             set(LIBROMFS_PREBUILT_GENERATOR "${BOREALIS_LIBRARY}/../libromfs-generator" PARENT_SCOPE)
         else ()
-            message(FATAL_ERROR "libromfs-generator has not been built, please refer to borealis/build_libromfs_generator.sh for more information")
+            message(FATAL_ERROR "libromfs-generator has not been built: run build_libromfs_generator.sh at the root of Aurore's checkout")
         endif ()
     endif()
 endfunction()
@@ -100,7 +100,7 @@ elseif (PLATFORM_SWITCH)
         set(USE_GLFW ON)
     endif ()
 else()
-    message(FATAL_ERROR "Please set build target. Example: -DPLATFORM_DESKTOP=ON or -DPLATFORM_SWITCH=ON")
+    message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
 endif ()
 
 # graphics drivers
@@ -141,7 +141,7 @@ elseif (USE_GLFW)
     set(USE_GLFW ON)
     list(APPEND BRLS_TOOLCHAIN_DEFINITIONS __GLFW__)
 else ()
-    message(STATUS "SDL2 AND GLFW is both disabled, make sure this is what you want")
+    message(STATUS "Neither SDL2 nor GLFW: the platform has its own window and input")
 endif ()
 
 if (USE_EGL)
@@ -169,6 +169,17 @@ function(program_target target source)
         target_sources(${target} PRIVATE ${source})
     else ()
         add_executable(${target} ${source})
+    endif ()
+endfunction()
+
+# Links an app without the functions and data of the library it does not use
+# (the library is built with -ffunction-sections -fdata-sections). Linux and
+# macOS; the consoles' toolchains do it themselves.
+function(aurore_app_link_options target)
+    if (APPLE)
+        target_link_options(${target} PRIVATE -Wl,-dead_strip)
+    elseif (NOT WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_link_options(${target} PRIVATE -Wl,--gc-sections)
     endif ()
 endfunction()
 
@@ -279,7 +290,8 @@ function(git_info tag short)
 endfunction()
 
 # switch platform
-# glsl -> deko3d dksh
+# glsl -> deko3d dksh, in romfs_dir. The library builds these shaders in
+# (library/CMakeLists.txt): an app needs this only to ship its own copies.
 function(gen_dksh romfs_dir)
     find_program(NX_UAM_EXE NAMES uam HINTS "${DEVKITPRO}/tools/bin")
     if (NOT NX_UAM_EXE)

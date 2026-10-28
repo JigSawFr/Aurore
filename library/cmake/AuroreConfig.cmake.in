@@ -3,5 +3,6 @@
 include(CMakeFindDependencyMacro)
 @AURORE_DEPENDENCIES@
 include("${CMAKE_CURRENT_LIST_DIR}/AuroreTargets.cmake")
+@AURORE_TESTING@
 
 check_required_components(Aurore)

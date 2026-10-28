@@ -17,8 +17,12 @@ set(BRLS_EXTERN_EXCLUDE EXCLUDE_FROM_ALL)
 if (AURORE_INSTALL)
     set(BRLS_EXTERN_EXCLUDE)
 endif ()
+# Desktop: the directory that holds "resources/" at run time (default: the
+# working directory). An app sets it before add_subdirectory(); it can be
+# given with -DBRLS_RESOURCES_DIR=... too (for an AppImage, say).
 if (NOT BRLS_RESOURCES_DIR)
     if (CUSTOM_RESOURCES_DIR)
+        message(DEPRECATION "CUSTOM_RESOURCES_DIR is deprecated: use -DBRLS_RESOURCES_DIR=${CUSTOM_RESOURCES_DIR}")
         set(BRLS_RESOURCES_DIR "${CUSTOM_RESOURCES_DIR}")
     else ()
         set(BRLS_RESOURCES_DIR ".")
@@ -41,12 +45,13 @@ if (AURORE_FETCH_DEPS)
         message(FATAL_ERROR "AURORE_FETCH_DEPS needs CMake 3.24 or later (FIND_PACKAGE_ARGS)")
     endif ()
     include(FetchContent)
-    # The versions of the vendored copies
+    # The versions of the vendored copies: tools/check_extern_versions.py
+    # (CI) checks they match. A system fmt 12 or later will do.
     FetchContent_Declare(fmt
             GIT_REPOSITORY https://github.com/fmtlib/fmt.git
             GIT_TAG 12.2.0
             GIT_SHALLOW TRUE
-            FIND_PACKAGE_ARGS 10)
+            FIND_PACKAGE_ARGS 12)
     FetchContent_Declare(tinyxml2
             GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
             GIT_TAG 11.0.0
@@ -85,9 +90,15 @@ endif()
 
 # yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
 add_subdirectory(${BOREALIS_PATH}/lib/extern/yoga/yoga EXCLUDE_FROM_ALL)
-target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
-# C++20 library parts Yoga 3 needs that some toolchains' libraries lack
-target_compile_options(yogacore PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/yoga_std_compat.h)
+# Its headers' installed place, relative to the prefix (yoga's own is absolute)
+set_property(TARGET yogacore PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+        $<BUILD_INTERFACE:${BOREALIS_PATH}/lib/extern/yoga>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/yoga>)
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
+    # C++20 library parts Yoga 3 needs that some toolchains' libraries lack
+    target_compile_options(yogacore PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/yoga_std_compat.h)
+endif ()
 
 # opencc
 if (BRLS_USE_OPENCC)
@@ -104,7 +115,7 @@ if (USE_BOOST_FILESYSTEM)
         list(APPEND BRLS_PRIVATE_DEFINITIONS USE_BOOST_FILESYSTEM)
     endif()
 elseif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR
-    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32) AND NOT PLATFORM_ANDROID AND NOT PLATFORM_PS4)
+    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32 AND NOT PLATFORM_ANDROID AND NOT PLATFORM_PS4))
     list(APPEND BRLS_PLATFORM_LIBS stdc++fs)
 endif ()
 
@@ -133,11 +144,12 @@ else()
     list(APPEND BRLS_PLATFORM_LIBS tinyxml2)
 endif()
 
-# dbus
-if (UNIX AND NOT APPLE AND NOT USE_SDL2)
-    find_package(DBus)
-    list(APPEND BOREALIS_INCLUDE ${DBUS_INCLUDE_DIRS})
-    list(APPEND BRLS_PLATFORM_LIBS ${DBUS_LIBRARIES})
+# dbus (Linux with GLFW: keeps the screen saver off). An imported target,
+# so the installed package names no path of this machine.
+if (PLATFORM_DESKTOP AND UNIX AND NOT APPLE AND NOT USE_SDL2)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
+    list(APPEND BRLS_PLATFORM_LIBS PkgConfig::DBUS)
 endif ()
 
 if (PLATFORM_DESKTOP)
@@ -186,6 +198,9 @@ if (PLATFORM_DESKTOP)
         list(APPEND BRLS_PUBLIC_DEFINITIONS __GLFW__)
         list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/glfw)
     endif ()
+    if (BOREALIS_USE_D3D11 AND NOT WIN32)
+        message(FATAL_ERROR "AURORE_GRAPHICS=D3D11 is for Windows")
+    endif ()
     if (WIN32)
         if (BOREALIS_USE_D3D11)
             list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/driver/d3d11.cpp)
@@ -196,14 +211,8 @@ if (PLATFORM_DESKTOP)
         endif ()
         list(APPEND BRLS_PLATFORM_LIBS wlanapi iphlpapi ws2_32)
     elseif (APPLE)
-        if (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL "10.6")
-            list(APPEND BRLS_PLATFORM_LIBS "-framework CoreWLAN")
-        endif ()
-        if (CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL "10.7")
-            list(APPEND BRLS_PLATFORM_LIBS "-framework CoreGraphics")
-        else ()
-            list(APPEND BRLS_PLATFORM_LIBS "-framework ApplicationServices")
-        endif ()
+        # C++20 needs macOS 10.15, which has them all
+        list(APPEND BRLS_PLATFORM_LIBS "-framework CoreWLAN" "-framework CoreGraphics")
         list(APPEND BRLS_PLATFORM_LIBS "-framework SystemConfiguration" "-framework Cocoa")
         list(APPEND BRLS_PLATFORM_LIBS "-framework IOKit" "-framework CoreFoundation")
         list(APPEND BRLS_PLATFORM_LIBS "-framework AppKit" "-framework Foundation" "-framework CoreServices" "-lobjc")
@@ -225,7 +234,6 @@ elseif (PLATFORM_PSV)
             SceCommonDialog_stub
             SceTouch_stub
             SceAppUtil_stub
-            SceCtrl_stub
             SceIme_stub
             ScePower_stub
             SceAVConfig_stub
@@ -233,8 +241,9 @@ elseif (PLATFORM_PSV)
             -Wl,--whole-archive -lpthread -Wl,--no-whole-archive)
     if (BOREALIS_USE_GXM)
         if (USE_VITA_SHARK)
+                # libshacccg.suprx, which the app ships in its module folder
                 include(FetchContent)
-                FetchContent_Populate(
+                FetchContent_Declare(
                         libshacccg
                         # A fixed commit, not the moving main branch
                         URL "https://codeload.github.com/AnimMouse/SceShaccCg/zip/f9511fc20ce905704f384b3a99a17c5e97f9a92c"
@@ -242,6 +251,8 @@ elseif (PLATFORM_PSV)
                         SUBBUILD_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
                         BINARY_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
                 )
+                # No CMakeLists.txt in it: downloaded only
+                FetchContent_MakeAvailable(libshacccg)
                 list(APPEND BRLS_PLATFORM_LIBS
                         vitashark
                         SceShaccCgExt
@@ -249,7 +260,7 @@ elseif (PLATFORM_PSV)
                         SceShaccCg_stub
                 )
         endif ()
-        file(GLOB_RECURSE PSV_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/psv/*.cpp")
+        file(GLOB_RECURSE PSV_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/psv/*.cpp")
         list(APPEND BOREALIS_SRC ${PSV_PLATFORM_SRC})
     else()
         if (USE_SYSTEM_SDL2)
@@ -265,7 +276,7 @@ elseif (PLATFORM_PSV)
                 libIMGEGL_stub_weak
                 libGLESv2_stub_weak)
         # Using SDL implementation instead
-        file(GLOB_RECURSE SDL_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/sdl/*.cpp")
+        file(GLOB_RECURSE SDL_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/sdl/*.cpp")
         list(APPEND BOREALIS_SRC ${SDL_PLATFORM_SRC})
         list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/psv/psv_platform.cpp)
     endif ()
@@ -278,7 +289,7 @@ elseif(PLATFORM_PS4)
             ${BOREALIS_PATH}/lib/platforms/sdl
             ${BOREALIS_PATH}/lib/platforms/desktop
             ${BOREALIS_PATH}/lib/extern/nanovg/ps4)
-    file(GLOB_RECURSE PS4_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/ps4/*.cpp")
+    file(GLOB_RECURSE PS4_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/ps4/*.cpp")
     list(APPEND BOREALIS_SRC ${PS4_PLATFORM_SRC})
     list(APPEND BOREALIS_INCLUDE /opt/OpenOrbis-PS4-Toolchain/include)
     list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SceNetCtl SceImeDialog SceCommonDialog)
@@ -317,7 +328,7 @@ elseif(PLATFORM_IOS OR PLATFORM_TVOS)
         list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ TVOS)
     endif()
 elseif(PLATFORM_SWITCH)
-    file(GLOB_RECURSE SWITCH_PLATFORM_SRC "${BOREALIS_PATH}/lib/platforms/switch/*.cpp")
+    file(GLOB_RECURSE SWITCH_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/switch/*.cpp")
     list(APPEND BOREALIS_SRC ${SWITCH_PLATFORM_SRC})
     list(APPEND BRLS_PUBLIC_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>)
     list(APPEND BRLS_PUBLIC_DEFINITIONS SWITCH __SWITCH__ STBI_NO_THREAD_LOCALS)
@@ -341,16 +352,13 @@ elseif(PLATFORM_SWITCH)
     # tinyxml2.h and a glad/glad.h, which must not hide the library's own
     list(APPEND BOREALIS_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
 else ()
-    message(FATAL_ERROR "Please set build target. Example: -DPLATFORM_DESKTOP=ON or -DPLATFORM_SWITCH=ON")
+    message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
 endif ()
 
 # aurore c/cpp source
 list(APPEND BOREALIS_SOURCE
         ${BOREALIS_PATH}/lib/core
-        ${BOREALIS_PATH}/lib/core/touch
         ${BOREALIS_PATH}/lib/views
-        ${BOREALIS_PATH}/lib/views/cells
-        ${BOREALIS_PATH}/lib/views/widgets
         ${BOREALIS_PATH}/lib/extern/glad
         ${BOREALIS_PATH}/lib/extern/libretro-common/compat
         ${BOREALIS_PATH}/lib/extern/libretro-common/encodings
@@ -398,7 +406,7 @@ if (USE_FRIBIDI)
     message(STATUS "aurore: labels reorder right-to-left text with FriBidi")
 endif ()
 if (PLATFORM_SWITCH AND BOREALIS_USE_DEKO3D)
-    file(GLOB_RECURSE NANOVG_PLATFORM_SRC ${BOREALIS_PATH}/lib/extern/nanovg/*.cpp)
+    file(GLOB_RECURSE NANOVG_PLATFORM_SRC CONFIGURE_DEPENDS ${BOREALIS_PATH}/lib/extern/nanovg/*.cpp)
     list(APPEND BOREALIS_SRC ${NANOVG_PLATFORM_SRC})
 
     # nanovg's deko3d shaders, compiled and built into the library: an app
@@ -432,14 +440,15 @@ if (PLATFORM_SWITCH AND BOREALIS_USE_DEKO3D)
     file(WRITE "${DKSH_OUT}/dk_shaders.h" "${DKSH_HEADER}")
     set(BOREALIS_DKSH_INCLUDE "${DKSH_OUT}")
 endif ()
-message(STATUS "BOREALIS_SOURCE: ${BOREALIS_SOURCE}")
 
+# Every .c and .cpp under these directories: CONFIGURE_DEPENDS has the build
+# run CMake again when one is added or removed
 foreach (lib ${BOREALIS_SOURCE})
-    file(GLOB_RECURSE TEMP_SRC "${lib}/*.cpp" "${lib}/*.c")
+    file(GLOB_RECURSE TEMP_SRC CONFIGURE_DEPENDS "${lib}/*.cpp" "${lib}/*.c")
     list(APPEND BOREALIS_SRC ${TEMP_SRC})
 endforeach (lib)
 
-# aurore 图形 driver
+# The graphics driver
 set(BOREALIS_DRIVER BOREALIS_USE_OPENGL)
 if (BOREALIS_USE_METAL)
     set(BOREALIS_DRIVER BOREALIS_USE_METAL)
@@ -523,17 +532,13 @@ target_compile_definitions(aurore
         ${BRLS_PUBLIC_DEFINITIONS}
         PRIVATE
         ${BRLS_PRIVATE_DEFINITIONS})
-# Public: apps rely on them for --gc-sections to drop what they do not use
-target_compile_options(aurore PUBLIC
-        -ffunction-sections
-        -fdata-sections
-        ${BRLS_PUBLIC_OPTIONS})
-if (PLATFORM_DESKTOP)
+target_compile_options(aurore PUBLIC ${BRLS_PUBLIC_OPTIONS})
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # A section per function and per variable: an app linked with
+    # aurore_app_link_options() (toolchain.cmake) drops the ones it does not use
+    target_compile_options(aurore PRIVATE -ffunction-sections -fdata-sections)
+    # The same warnings on every platform; never errors
     target_compile_options(aurore PRIVATE -Wall)
-endif ()
-
-if (AURORE_INSTALL)
-    include(${BOREALIS_PATH}/cmake/install.cmake)
 endif ()
 
 # Test harness: a headless platform and brls::test::Harness (include/borealis/test/,
@@ -554,46 +559,23 @@ if (BRLS_BUILD_TESTS)
         # A context without any window system (Mesa's surfaceless EGL)
         find_package(OpenGL COMPONENTS EGL)
         if (OpenGL_EGL_FOUND)
-            # The library itself: OpenGL::EGL is only visible in this directory,
-            # and a static library hands its link dependencies to its users
+            # The library's path here, Aurore::egl for an installed copy (made
+            # by AuroreConfig.cmake): the imported target is only visible in
+            # this directory, a static library hands its link dependencies to
+            # its users, and OpenGL::EGL would also ask for libOpenGL
             target_include_directories(aurore_test SYSTEM PRIVATE ${OPENGL_EGL_INCLUDE_DIRS})
-            target_link_libraries(aurore_test PRIVATE ${OPENGL_egl_LIBRARY})
+            target_link_libraries(aurore_test PRIVATE
+                    $<BUILD_INTERFACE:${OPENGL_egl_LIBRARY}> $<INSTALL_INTERFACE:Aurore::egl>)
+            set(AURORE_TEST_EGL ON)
             target_compile_definitions(aurore_test PRIVATE BRLS_HEADLESS_EGL)
         else ()
             message(WARNING "EGL not found (libegl-dev): the test harness will need an X server (a hidden GLFW window)")
         endif ()
     endif ()
 
-    # Registers each case of a test executable (brls::test::runTests) with
-    # ctest, read from `<target> --list` when ctest runs. REFERENCES: the
-    # folder of the reference screenshots; what the tests get goes to
-    # <build dir>/test-output.
-    function(brls_add_tests target)
-        cmake_parse_arguments(ARG "" "REFERENCES" "" ${ARGN})
-        set(script "${CMAKE_CURRENT_BINARY_DIR}/${target}_cases.cmake")
-        set(env "BRLS_TEST_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/test-output")
-        if (ARG_REFERENCES)
-            set(env "${env};BRLS_TEST_REFERENCES=${ARG_REFERENCES}")
-        endif ()
-        file(GENERATE OUTPUT "${script}" CONTENT "
-execute_process(COMMAND \"$<TARGET_FILE:${target}>\" --list OUTPUT_VARIABLE cases RESULT_VARIABLE result)
-if (NOT result EQUAL 0)
-    add_test(${target}_not_built \"$<TARGET_FILE:${target}>\" --list)
-    return()
+    include(${BOREALIS_PATH}/cmake/AuroreTesting.cmake)
 endif ()
-# The names only, not what the program logged
-string(REGEX MATCHALL \"brls-test: [A-Za-z0-9_]+\" cases \"\${cases}\")
-list(TRANSFORM cases REPLACE \"^brls-test: \" \"\")
-foreach (case IN LISTS cases)
-    if (case)
-        add_test(${target}.\${case} \"$<TARGET_FILE:${target}>\" \${case})
-        set_tests_properties(${target}.\${case} PROPERTIES
-            WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\"
-            ENVIRONMENT \"${env}\"
-            TIMEOUT 300)
-    endif ()
-endforeach ()
-")
-        set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES "${script}")
-    endfunction()
+
+if (AURORE_INSTALL)
+    include(${BOREALIS_PATH}/cmake/install.cmake)
 endif ()

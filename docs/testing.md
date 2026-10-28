@@ -44,7 +44,7 @@ What it gives:
 | `setKeyboardAnswer(text)` | the next keyboard opened (`ImeManager`) gets `text`; without one it is cancelled |
 | `focus()`, `focusText()`, `focusLog()`, `focusByText(text, button)` | the focused view, its text (a label's, a button's, a cell's title, else the first text in it), every focus change so far, the focus moved until it reads `text` |
 | `texts()`, `hasText(text)`, `findText(text)`, `cutTexts()` | the labels shown (one by its text, to tap it), and those their box cuts (`Label::isTruncated`): what `BRLS_FOCUS_LOG` and `BRLS_CUT_TEXT` wrote to the log and to `cut_text.txt`, as values |
-| `silentFocusables()`, `brls::Application::getLastAnnouncement()` | the views shown that take the focus with no accessibility label nor value (a role at most), and what the focus announcer was given last (docs/styles.md#accessibility) |
+| `silentFocusables()`, `brls::Application::getLastAnnouncement()` | the views shown that take the focus with no accessibility label nor value (a role at most), and what the focus announcer was given last (docs/styles.md, "Accessibility") |
 | `screenshot()` | the last frame drawn, as an `Image` (RGBA, `savePng`, `loadPng`, `crop`) |
 | `matchesReference(name, tolerance, maxRatio)`, also with an area | the screenshot (or a part) against `<references>/<name>.png`, see below |
 | `resize(w, h)` | a new window size |
@@ -82,22 +82,26 @@ brls_add_tests(my_app_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/tests/referen
 
 `brls_add_tests` registers each case with `ctest` (read from `--list` when `ctest` runs), with the references folder and `<build>/test-output` for what the tests got. The app's `main()` stays out of the test executable: what it does before and after `createWindow()` goes in functions the tests call too (the demo's `demo/src/demo_app.cpp`).
 
+An Aurore installed with `-DAURORE_INSTALL=ON -DBRLS_BUILD_TESTS=ON` installs the harness too: after `find_package(Aurore)`, `Aurore::test` and `brls_add_tests` are there.
+
 A smoke scenario of an Xvfb script (start, press keys, wait, grab the screen, compare) becomes a case: `h.tap(brls::BUTTON_DOWN, 3)` for the key presses, `h.settle()` for the waits, `matchesReference` for the grab and the comparison, `focusText()` and `cutTexts()` for what was read in the log and in `cut_text.txt`.
 
 ## The demo's tests
 
 ```sh
-cmake -B build -G Ninja -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
+cmake -B build -G Ninja -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+They need `AURORE_LIBROMFS=ON`, which configuring says: their reference screenshots are drawn with the resources built in, and from files the desktop build picks other fonts. With CMake 3.25 or later, `cmake --workflow --preset tests` configures, builds and runs them in `build/tests`.
 
 `tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
 
 `tests/async_tests.cpp` covers what crosses threads: a task coming back to a deleted view (`View::aliveToken()`, the `ASYNC_*` macros), the battery and Wi-Fi widgets read on the task thread (`HeadlessPlatform::showStatus` shows them), `delay()`/`cancelDelay()`, `Threading::stop()`/`start()`, events fired from another thread, logging from the task thread. Built with ThreadSanitizer they check the locking too:
 
 ```sh
-cmake -B build-tsan -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON \
+cmake -B build-tsan -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON \
     -DCMAKE_CXX_FLAGS=-fsanitize=thread -DCMAKE_C_FLAGS=-fsanitize=thread -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=thread
 cmake --build build-tsan --target aurore_async_tests
 TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R aurore_async_tests --output-on-failure

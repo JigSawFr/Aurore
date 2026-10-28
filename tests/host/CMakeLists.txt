@@ -1,13 +1,13 @@
 # Host suites: Cadran's plain C++ parts (palettes, Markdown, text helpers),
 # each built without a window and linked only to the sources it tests.
 # ctest -R host runs them.
-set(CADRAN_SRC ${CMAKE_SOURCE_DIR}/library/lib/cadran)
+set(CADRAN_SRC ${PROJECT_SOURCE_DIR}/library/lib/cadran)
 
 function(aurore_host_test name)
     add_executable(aurore_host_${name} ${ARGN})
-    target_include_directories(aurore_host_${name} PRIVATE ${CMAKE_SOURCE_DIR}/library/include ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(aurore_host_${name} PRIVATE ${PROJECT_SOURCE_DIR}/library/include ${CMAKE_CURRENT_SOURCE_DIR})
     target_compile_features(aurore_host_${name} PRIVATE cxx_std_20)
-    target_compile_definitions(aurore_host_${name} PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+    target_compile_definitions(aurore_host_${name} PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
     add_test(NAME host_${name} COMMAND aurore_host_${name})
 endfunction()
 

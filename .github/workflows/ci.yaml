@@ -49,7 +49,7 @@ jobs:
       - name: Build
         run: |
           ./build_libromfs_generator.sh
-          cmake -B build -G Xcode -DPLATFORM_IOS=ON -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0
+          cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0
           cmake --build build
           ditto -ck --rsrc --sequesterRsrc --keepParent build/Debug-iphoneos/aurore_demo.app aurore_demo.zip
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
@@ -75,7 +75,7 @@ jobs:
       - name: Build
         run: |
           docker run --rm -v $(pwd):/src/ xfangfang/pacbrew@sha256:4774ccb28f5e05cd848a7c9204532ea409d1af63e9689d2dbb3e4cec925439d2 \
-            "cmake -B build -DPLATFORM_PS4=ON \
+            "cmake -B build -DAURORE_PLATFORM=PS4 \
                 -DCMAKE_BUILD_TYPE=Release && \
                 make -C build -j$(nproc)"
       - name: Upload dist
@@ -104,14 +104,14 @@ jobs:
         if: ${{ matrix.driver == 'gles2' }}
         run: |
           docker run --rm -v $(pwd):/src/ xfangfang/vitasdk_sdl2_gles2@sha256:53befdff3313d57040658d9f32d973c4f6419b126cfcaa602cca81848e0260b2 \
-            "cmake -B build -G Ninja -DPLATFORM_PSV=ON -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && \
+            "cmake -B build -G Ninja -DAURORE_PLATFORM=PSV -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && \
              cmake --build build"
 
       - name: Build GXM
         if: ${{ matrix.driver == 'gxm' }}
         run: |
           echo "cd /src" > build_gxm.sh
-          echo "cmake -B build -DPLATFORM_PSV=ON -DCMAKE_BUILD_TYPE=Release -DUSE_GXM=ON" >> build_gxm.sh
+          echo "cmake -B build -DAURORE_PLATFORM=PSV -DCMAKE_BUILD_TYPE=Release -DAURORE_GRAPHICS=GXM" >> build_gxm.sh
           echo "cmake --build build -- -j$(nproc)" >> build_gxm.sh
           docker run --rm -v $(pwd):/src/ vitasdk/vitasdk@sha256:61c173463b3d10d71464b6fc591f1fe1018736bf2e321e6852db06612eb05b07 sh -C /src/build_gxm.sh
 
@@ -131,9 +131,9 @@ jobs:
       matrix:
         driver: [ glfw, sdl2, deko3d ]
         include:
-          - { driver: glfw, cmake: "-DUSE_GLFW=ON", ext: "gl3-glfw" }
-          - { driver: sdl2, cmake: "-DUSE_SDL2=ON", ext: "gl3-sdl2" }
-          - { driver: deko3d, cmake: "-DUSE_DEKO3D=ON", ext: "deko3d" }
+          - { driver: glfw, cmake: "-DAURORE_WINDOW=GLFW", ext: "gl3-glfw" }
+          - { driver: sdl2, cmake: "-DAURORE_WINDOW=SDL2", ext: "gl3-sdl2" }
+          - { driver: deko3d, cmake: "-DAURORE_GRAPHICS=DEKO3D", ext: "deko3d" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -142,7 +142,7 @@ jobs:
           submodules: recursive
       - name: Build
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DPLATFORM_SWITCH=ON ${{ matrix.cmake }}
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=SWITCH ${{ matrix.cmake }}
           make -C build aurore_demo.nro -j$(nproc)
       - name: Upload dist
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -193,8 +193,8 @@ jobs:
     strategy:
       matrix:
         window:
-          - { name: glfw, cmake: "-DUSE_GLFW=ON" }
-          - { name: sdl2, cmake: "-DUSE_SDL2=ON" }
+          - { name: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
+          - { name: sdl2, cmake: "-DAURORE_WINDOW=SDL2" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -210,7 +210,7 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DBUNDLE_MACOS_APP=ON ${{ matrix.window.cmake }}
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=DESKTOP -DBUNDLE_MACOS_APP=ON ${{ matrix.window.cmake }}
           make -C build -j$(sysctl -n hw.ncpu)
           mkdir aurore-macos-${{ matrix.window.name }}
           mv build/aurore_demo.app aurore-macos-${{ matrix.window.name }}/
@@ -229,7 +229,7 @@ jobs:
       matrix:
         driver: [gl, d3d11]
         include:
-          - { driver: d3d11, cmake: "-DUSE_D3D11=ON" }
+          - { driver: d3d11, cmake: "-DAURORE_GRAPHICS=D3D11" }
     defaults:
       run:
         shell: msys2 {0}
@@ -252,9 +252,9 @@ jobs:
         run: |
           cmake -B build -G Ninja ${{ matrix.cmake }} \
             -DCMAKE_BUILD_TYPE=Release \
-            -DPLATFORM_DESKTOP=ON \
-            -DWIN32_TERMINAL=OFF \
-            -DUSE_LIBROMFS=ON \
+            -DAURORE_PLATFORM=DESKTOP \
+            -DAURORE_WIN32_TERMINAL=OFF \
+            -DAURORE_LIBROMFS=ON \
             -DZLIB_USE_STATIC_LIBS=ON
           cmake --build build
       - name: Upload dist
@@ -270,11 +270,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - { driver: gl2, cmake: "-DUSE_GL2=ON" }
-          - { driver: gles2, cmake: "-DUSE_GLES2=ON" }
-          - { driver: gles3, cmake: "-DUSE_GLES3=ON" }
-          - { driver: gl3, cmake: "-DUSE_GLFW=ON", ext: "-glfw" }
-          - { driver: gl3, cmake: "-DUSE_SDL2=ON", ext: "-sdl2" }
+          - { driver: gl2, cmake: "-DAURORE_GRAPHICS=GL2" }
+          - { driver: gles2, cmake: "-DAURORE_GRAPHICS=GLES2" }
+          - { driver: gles3, cmake: "-DAURORE_GRAPHICS=GLES3" }
+          - { driver: gl3, cmake: "-DAURORE_WINDOW=GLFW", ext: "-glfw" }
+          - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL2", ext: "-sdl2" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -296,8 +296,8 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake }} \
-              -DPLATFORM_DESKTOP=ON \
-              -DUSE_LIBROMFS=ON
+              -DAURORE_PLATFORM=DESKTOP \
+              -DAURORE_LIBROMFS=ON
           make -C build -j$(nproc)
           output_dir=aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
           strip build/aurore_demo
@@ -332,12 +332,9 @@ jobs:
         env:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
-          CFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer
-          CXXFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer
-          LDFLAGS: -fsanitize=address,undefined
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON -DUSE_LIBROMFS=ON
-          make -C build -j$(nproc)
+          cmake --preset desktop-asan
+          cmake --build --preset desktop-asan
       - name: Run the demo
         env:
           # The demo is stopped from outside, so leaks at exit are not reported
@@ -348,7 +345,7 @@ jobs:
           # it passes if it was still running (a crash or a sanitizer report
           # ends it before)
           dbus-run-session -- xvfb-run -a -s "-screen 0 1280x720x24" bash -c '
-            ./build/aurore_demo > demo.log 2>&1 &
+            ./build/desktop-asan/aurore_demo > demo.log 2>&1 &
             pid=$!
             sleep 10
             # F12 opens the inspector, follows the focus, browses the tree
@@ -416,20 +413,53 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON \
-              -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
-          cmake --build build
+          cmake --preset tests
+          cmake --build --preset tests
       - name: Third-party notices
         # Each vendored component and font listed, the versions they say (needs the submodules)
         run: python3 tools/check_notices.py
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --preset tests
       - name: Bench
         if: always()
-        run: ./build/tests/aurore_bench --json bench.json
+        run: ./build/tests/tests/aurore_bench --json bench.json
       - name: Upload screenshots
         if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: aurore-test-output
-          path: build/tests/test-output
+          path: build/tests/tests/test-output
+
+  linux-variants:
+    name: linux (variants, ${{ matrix.variant }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        # tools/ci_variant.sh says what each one builds
+        variant: [ presets, install, fetch, fonts, unity, template, legacy ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols xorg-dev ninja-build pkg-config \
+            libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri libfreetype-dev libfribidi-dev
+      - name: Compiler cache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: ${{ github.job }}-${{ matrix.variant }}
+      - name: Vendored versions
+        if: ${{ matrix.variant == 'fetch' }}
+        run: python3 tools/check_extern_versions.py
+      - name: Build
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+        run: tools/ci_variant.sh ${{ matrix.variant }}

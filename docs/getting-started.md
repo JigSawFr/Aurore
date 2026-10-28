@@ -16,12 +16,12 @@ Then:
 ```sh
 git clone --recursive https://github.com/JigSawFr/aurore.git
 cd aurore
-cmake -B build -G Ninja -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON -DUSE_LIBROMFS=ON
+cmake -B build -G Ninja -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON
 cmake --build build
 ./build/aurore_demo
 ```
 
-The arrows move the focus, Enter is A, Escape is B, X, Y, L and R are themselves ([the other keys](input.md)), the mouse and a controller work too. `-DUSE_LIBROMFS=ON` builds the `resources/` folder into the program; without it, the folder is copied next to it. Press **F12**: that is the [inspector](inspector.md), showing the views on screen, the focus and what a frame costs. Press it twice more to close it.
+The arrows move the focus, Enter is A, Escape is B, X, Y, L and R are themselves ([the other keys](input.md)), the mouse and a controller work too. `-DAURORE_LIBROMFS=ON` builds the `resources/` folder into the program; without it, the folder is copied next to it. Press **F12**: that is the [inspector](inspector.md), showing the views on screen, the focus and what a frame costs. Press it twice more to close it.
 
 The demo's code is in `demo/`, its screens in `resources/xml/`: they are the examples for what follows.
 
@@ -197,11 +197,11 @@ Install [devkitPro](https://devkitpro.org/wiki/Getting_Started) with the `switch
 
 ```sh
 export DEVKITPRO=/opt/devkitpro
-cmake -B build_switch -G Ninja -DPLATFORM_SWITCH=ON -DUSE_DEKO3D=ON -DCMAKE_BUILD_TYPE=Release
+cmake -B build_switch -G Ninja -DAURORE_PLATFORM=SWITCH -DAURORE_GRAPHICS=DEKO3D -DCMAKE_BUILD_TYPE=Release
 cmake --build build_switch --target aurore_demo.nro
 ```
 
-The `.nro` holds the program, its icon and its resources (built in with romfs). Copy it to `/switch/` on the SD card and start it from the Homebrew Menu, or send it to a console running the menu with `nxlink -s build_switch/aurore_demo.nro` (the app's logs come back to the terminal). `-DUSE_DEKO3D=OFF` builds the OpenGL driver instead. The inspector works there too, with **L3 + R3**.
+The `.nro` holds the program, its icon and its resources (built in with romfs). Copy it to `/switch/` on the SD card and start it from the Homebrew Menu, or send it to a console running the menu with `nxlink -s build_switch/aurore_demo.nro` (the app's logs come back to the terminal). Without `-DAURORE_GRAPHICS=DEKO3D` it builds the OpenGL driver instead. The inspector works there too, with **L3 + R3**.
 
 The same project builds for Windows, macOS, PS4, PS Vita, Android, iOS and a browser: [platforms.md](platforms.md#platforms) has their toolchains and commands, [porting.md](porting.md#porting-an-app) what an app should mind on each.
 

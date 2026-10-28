@@ -36,7 +36,7 @@ Pin a release rather than following `main`: `git -C library/aurore checkout vX.Y
   ```
 
   The test harness, if the app uses it, is `Aurore::test` (`-DBRLS_BUILD_TESTS=ON`, [testing.md](testing.md)).
-- **The options** keep their names (`PLATFORM_*`, `USE_GLFW`, `USE_SDL2`, `USE_DEKO3D`, `USE_LIBROMFS`…), and a few are new ([platforms.md](platforms.md#options-for-every-platform)). The presets in `CMakePresets.json` are Aurore's own, for the demo.
+- **The options** are prefixed: `AURORE_PLATFORM`, `AURORE_WINDOW`, `AURORE_GRAPHICS`, `AURORE_LIBROMFS`… ([platforms.md](platforms.md#options-for-every-platform)). borealis' names (`PLATFORM_*`, `USE_GLFW`, `USE_SDL2`, `USE_DEKO3D`, `USE_LIBROMFS`…) still work, with a deprecation warning, and stay set as plain variables for the app's own tests. The presets in `CMakePresets.json` are Aurore's own, for the demo.
 - **The Switch** keeps devkitPro's compiler flags now (the Cortex-A57 tuning, the TLS model): an app that put them back by hand can stop. libpulsar is no longer linked: borealis' Switch sounds had been off for years, and still are.
 
 ## 3. The resources

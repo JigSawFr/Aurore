@@ -259,7 +259,7 @@ std::string viewText(View* view);
 //     int main(int argc, char** argv) { return brls::test::runTests(argc, argv); }
 //
 // `program` runs every case, each in a process of its own; `program name`
-// runs one (what ctest calls, see brls_add_tests in library/CMakeLists.txt);
+// runs one (what ctest calls, see brls_add_tests in library/cmake/AuroreTesting.cmake);
 // `program --list` prints their names ("brls-test: name" lines).
 namespace brls::test
 {

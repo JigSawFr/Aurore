@@ -9,17 +9,17 @@
 #include <borealis/cadran/ui/ui.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
 
-static constexpr float SIZE           = 26;
-static constexpr const char* BADGE_ID = "tab_badge";
-static constexpr float POP_US         = 380000.0f;
-static constexpr float DOCKED         = 18; // on the icon's corner
+static constexpr float TAB_BADGE_SIZE     = 26;
+static constexpr const char* TAB_BADGE_ID = "tab_badge";
+static constexpr float TAB_BADGE_POP_US   = 380000.0f;
+static constexpr float DOCKED             = 18; // on the icon's corner
 
 TabBadge::TabBadge()
 {
-    this->setId(BADGE_ID);
+    this->setId(TAB_BADGE_ID);
     this->setFocusable(false);
-    this->setWidth(SIZE);
-    this->setHeight(SIZE);
+    this->setWidth(TAB_BADGE_SIZE);
+    this->setHeight(TAB_BADGE_SIZE);
     this->setAlignSelf(brls::AlignSelf::CENTER);
     this->setMarginRight(16);
     this->setVisibility(brls::Visibility::GONE);
@@ -72,7 +72,7 @@ void TabBadge::draw(NVGcontext* vg, float x, float y, float width, float height,
     nvgSave(vg);
     if (this->pop_since)
     {
-        const float t = motion::progress(this->pop_since, POP_US);
+        const float t = motion::progress(this->pop_since, TAB_BADGE_POP_US);
         if (t >= 1.0f)
         {
             this->pop_since = 0;
@@ -101,7 +101,7 @@ TabBadge* TabBadge::on_row(brls::Box* row)
 {
     if (!row)
         return nullptr;
-    if (auto* badge = dynamic_cast<TabBadge*>(row->getView(BADGE_ID)))
+    if (auto* badge = dynamic_cast<TabBadge*>(row->getView(TAB_BADGE_ID)))
         return badge;
     auto* badge = new TabBadge();
     // Last, so it lines up at the right whatever the value (an empty one
@@ -114,14 +114,14 @@ TabBadge* TabBadge::on_row(brls::Box* row)
 
 TabBadge* TabBadge::find(brls::SidebarItem* item)
 {
-    return item ? dynamic_cast<TabBadge*>(item->getView(BADGE_ID)) : nullptr;
+    return item ? dynamic_cast<TabBadge*>(item->getView(TAB_BADGE_ID)) : nullptr;
 }
 
 TabBadge* TabBadge::of(brls::SidebarItem* item)
 {
     if (!item)
         return nullptr;
-    if (auto* badge = dynamic_cast<TabBadge*>(item->getView(BADGE_ID)))
+    if (auto* badge = dynamic_cast<TabBadge*>(item->getView(TAB_BADGE_ID)))
         return badge;
     auto* badge = new TabBadge();
     item->addView(badge);

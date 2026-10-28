@@ -228,7 +228,7 @@ static NVGcolor over(NVGcolor top, NVGcolor under)
     return color;
 }
 
-static bool sameColor(NVGcolor a, NVGcolor b)
+static bool sameRgba(NVGcolor a, NVGcolor b)
 {
     return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
 }
@@ -507,7 +507,7 @@ ThemeValues::ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>>
 void ThemeValues::addColor(const std::string& name, NVGcolor color)
 {
     auto it = this->base.find(name);
-    if (it != this->base.end() && sameColor(it->second, color))
+    if (it != this->base.end() && sameRgba(it->second, color))
         return;
     this->base[name] = color;
     if (this->overlay.count(name) == 0)
@@ -751,9 +751,9 @@ static const char* SEASONAL_PATH     = "builtin:seasonal";
 static const int MAX_DEPTH           = 8;
 // What a theme may read: files (itself, what it includes and inherits, its
 // counterpart), their size, the errors kept
-static const int MAX_FILES         = 64;
-static const size_t MAX_FILE_BYTES = 256 * 1024;
-static const size_t MAX_ERRORS     = 100;
+static const int MAX_FILES               = 64;
+static const size_t MAX_THEME_FILE_BYTES = 256 * 1024;
+static const size_t MAX_ERRORS           = 100;
 // A metric's range: a layout's sizes, far beyond any screen's
 static const float MAX_METRIC = 10000.0f;
 
@@ -791,7 +791,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
         try
         {
             auto resource = romfs::get(path.substr(5));
-            if (resource.size() > MAX_FILE_BYTES)
+            if (resource.size() > MAX_THEME_FILE_BYTES)
                 return false;
             *text = std::string(resource.string());
             return true;
@@ -805,7 +805,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
     std::string file = path;
     if (startsWith(file, "@res/"))
         file = std::string(BRLS_RESOURCES) + file.substr(5);
-    return readSmallFile(file, MAX_FILE_BYTES, text);
+    return readSmallFile(file, MAX_THEME_FILE_BYTES, text);
 }
 
 // The text as read: a resource's ends with a NUL

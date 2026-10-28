@@ -1,9 +1,9 @@
 # The demo's views, without its main(): what the tests, the bench and
 # aurore-preview show
-file(GLOB_RECURSE DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/*.cpp)
-list(REMOVE_ITEM DEMO_VIEWS_SRC ${CMAKE_SOURCE_DIR}/demo/src/main.cpp)
+file(GLOB_RECURSE DEMO_VIEWS_SRC CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/demo/src/*.cpp)
+list(REMOVE_ITEM DEMO_VIEWS_SRC ${PROJECT_SOURCE_DIR}/demo/src/main.cpp)
 add_library(aurore_demo_views STATIC ${DEMO_VIEWS_SRC})
-target_include_directories(aurore_demo_views PUBLIC ${CMAKE_SOURCE_DIR}/demo/include ${CMAKE_SOURCE_DIR}/demo)
+target_include_directories(aurore_demo_views PUBLIC ${PROJECT_SOURCE_DIR}/demo/include ${PROJECT_SOURCE_DIR}/demo)
 target_link_libraries(aurore_demo_views PUBLIC Aurore::aurore)
 
 # Test cases over the demo (ctest runs each in a process of its own)
@@ -19,7 +19,7 @@ brls_add_tests(aurore_open_url_tests)
 # Pictures too large are refused before they are decoded
 add_executable(aurore_image_limits_tests image_limits_tests.cpp)
 target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
-target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_image_limits_tests)
 
 # XML layouts: bounds, errors
@@ -32,9 +32,9 @@ option(BRLS_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OF
 if (BRLS_BUILD_FUZZERS)
     set(FUZZ_FLAGS -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
     add_executable(aurore_fuzz_markdown fuzz/markdown_fuzz.cpp
-            ${CMAKE_SOURCE_DIR}/library/lib/cadran/util/markdown.cpp
-            ${CMAKE_SOURCE_DIR}/library/lib/cadran/util/safe_text.cpp)
-    target_include_directories(aurore_fuzz_markdown PRIVATE ${CMAKE_SOURCE_DIR}/library/include)
+            ${PROJECT_SOURCE_DIR}/library/lib/cadran/util/markdown.cpp
+            ${PROJECT_SOURCE_DIR}/library/lib/cadran/util/safe_text.cpp)
+    target_include_directories(aurore_fuzz_markdown PRIVATE ${PROJECT_SOURCE_DIR}/library/include)
     target_compile_features(aurore_fuzz_markdown PRIVATE cxx_std_20)
     target_compile_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
     target_link_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
@@ -43,13 +43,13 @@ endif ()
 # Tasks coming back to a view from another thread, task queues, events
 add_executable(aurore_async_tests async_tests.cpp)
 target_link_libraries(aurore_async_tests PRIVATE Aurore::test)
-target_compile_definitions(aurore_async_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+target_compile_definitions(aurore_async_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_async_tests)
 
 # Every translation catalog parses and is loaded
 add_executable(aurore_i18n_tests i18n_tests.cpp)
 target_link_libraries(aurore_i18n_tests PRIVATE Aurore::test)
-target_compile_definitions(aurore_i18n_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+target_compile_definitions(aurore_i18n_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_i18n_tests)
 
 # The debugging aids' environment variables, only in a build with BRLS_DEV_TOOLS
@@ -67,14 +67,14 @@ add_test(NAME aurore_bench COMMAND aurore_bench --check ${CMAKE_CURRENT_SOURCE_D
 add_executable(aurore-preview preview.cpp)
 target_link_libraries(aurore-preview PRIVATE aurore_demo_views Aurore::test)
 add_test(NAME aurore_preview
-        COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
+        COMMAND aurore-preview ${PROJECT_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
 set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)
 
 # docs/xml-attributes.md as the sources register the attributes
 find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
-    add_test(NAME xml_attributes_doc COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/xml_attributes.py --check)
+    add_test(NAME xml_attributes_doc COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tools/xml_attributes.py --check)
 endif()
 
 # Cadran's plain C++ parts, without a window

@@ -4,7 +4,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 
 ## The build
 
-- One `CMakeLists.txt` for every platform: `commonOption.cmake` and `toolchain.cmake` before `project()`, the platform picked with `-DPLATFORM_…=ON`. Make the program with `program_target(name sources)` rather than `add_executable`: on Android it is a shared library SDL's Java activity loads, on Windows a GUI program unless `WIN32_TERMINAL`.
+- One `CMakeLists.txt` for every platform: `commonOption.cmake` and `toolchain.cmake` before `project()`, the platform picked with `-DAURORE_PLATFORM=…`. Make the program with `program_target(name sources)` rather than `add_executable`: on Android it is a shared library SDL's Java activity loads, on Windows a GUI program unless `AURORE_WIN32_TERMINAL`.
 - Add the platform's own source where it has one: `library/lib/platforms/switch/switch_wrapper.c` on the Switch (as [`template/`](../template/CMakeLists.txt) does), `library/lib/platforms/ps4/crashlog.c` on the PS4 for a backtrace when the app crashes.
 - The packaging is per platform: the `.nro` and its romfs, the `.vpk` and its LiveArea, the PS4's `.pkg`, the macOS and iOS bundles, the Android project. Copy each from the demo's `CMakeLists.txt` (and `android-project/`), with the app's name, IDs and icon.
 - Keep `main()` as it is everywhere: `init()`, `createWindow()`, a first activity, `while (mainLoop())`. Android and iOS start it through SDL: include `<SDL2/SDL_main.h>` before it there; UWP includes `<borealis/core/main.hpp>` after it. The demo's `demo/src/main.cpp` does both:
@@ -58,8 +58,8 @@ When something is a platform's own (a Switch service, an Android intent), keep i
 
 ## Threads and speed
 
-- The UI belongs to the main thread on every platform ([architecture.md](architecture.md#threads)): slow work goes to `brls::async`, its result back with `brls::sync`. The Vita and the PS4 use pthreads; `-DUSE_STD_THREAD=ON` uses `std::thread` where pthreads are missing.
-- The consoles are slower than a desktop: long lists in a `RecyclerFrame` or `RecyclingGrid`, pictures no larger than shown (Aurore refuses those over 4096×4096), `setImageFromFileAsync` for covers. `-DSIMPLE_HIGHLIGHT=ON` and `Application::setRedrawOnDemand(true)` save frames on a Vita or on a battery.
+- The UI belongs to the main thread on every platform ([architecture.md](architecture.md#threads)): slow work goes to `brls::async`, its result back with `brls::sync`. The Vita and the PS4 use pthreads; `-DAURORE_STD_THREAD=ON` uses `std::thread` where pthreads are missing.
+- The consoles are slower than a desktop: long lists in a `RecyclerFrame` or `RecyclingGrid`, pictures no larger than shown (Aurore refuses those over 4096×4096), `setImageFromFileAsync` for covers. `-DAURORE_SIMPLE_HIGHLIGHT=ON` and `Application::setRedrawOnDemand(true)` save frames on a Vita or on a battery.
 - Quitting differs: the Switch's apps leave through the Home menu or `+` (`setGlobalQuit`), a desktop through its window, a phone never quits on its own.
 
 ## Licence

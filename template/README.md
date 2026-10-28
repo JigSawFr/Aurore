@@ -23,21 +23,21 @@ git submodule add -b main https://github.com/JigSawFr/aurore.git library/aurore
 git submodule update --init --recursive
 ```
 
-Rename `my_app` in `CMakeLists.txt` (`project()`), set the author, the version and the title in `app.json`, and replace `icon.jpg`.
+Rename `my_app` in `CMakeLists.txt` (`project()`) and set the author (`PROJECT_AUTHOR`) and the version (`VERSION_MAJOR`, `VERSION_MINOR`, `VERSION_ALTER`) there too; the title shown on screen is `title` in `resources/i18n/<lang>/app.json`. Replace `icon.jpg`.
 
 Inside Aurore's own repository the template finds Aurore around it (`..`) and builds as it is; elsewhere it looks in `library/aurore`, or where `-DAURORE_DIR=…` says.
 
 ## Desktop
 
-Linux needs a compiler with C++20, CMake, Ninja, and the X11/Wayland and OpenGL development packages GLFW asks for (`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl-dev` on Debian or Ubuntu).
+Linux needs a compiler with C++20, CMake 3.16 or later, Ninja, and the X11/Wayland and OpenGL development packages GLFW asks for (`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl-dev`, and `pkg-config libdbus-1-dev`, on Debian or Ubuntu).
 
 ```sh
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=DESKTOP
 cmake --build build
 ./build/my_app
 ```
 
-`-DUSE_SDL2=ON` builds with SDL2 instead of GLFW. The resources are copied to `build/resources` at each build; the binary reads them there.
+`-DAURORE_WINDOW=SDL2` builds with SDL2 instead of GLFW. The resources are copied to `build/resources` at each build; the binary reads them there.
 
 ## Nintendo Switch
 
@@ -45,11 +45,11 @@ With [devkitPro](https://devkitpro.org/wiki/Getting_Started) and its `switch-dev
 
 ```sh
 export DEVKITPRO=/opt/devkitpro
-cmake -B build-switch -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_SWITCH=ON -DUSE_DEKO3D=ON
+cmake -B build-switch -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=SWITCH -DAURORE_GRAPHICS=DEKO3D
 cmake --build build-switch --target my_app.nro
 ```
 
-`build-switch/my_app.nro` goes to `/switch/` on the SD card; nxlink sends it straight to a console (`nxlink -s build-switch/my_app.nro`). `-DUSE_DEKO3D=OFF` draws with OpenGL instead of deko3d.
+`build-switch/my_app.nro` goes to `/switch/` on the SD card; nxlink sends it straight to a console (`nxlink -s build-switch/my_app.nro`). Without `-DAURORE_GRAPHICS=DEKO3D` it draws with OpenGL instead of deko3d.
 
 ## Where to go next
 

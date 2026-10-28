@@ -91,6 +91,7 @@ The label on the fills (`cadran/navy`: a confirmation's, a primary button's) is 
 
 **State shades**: `brls/accent/hover`, `brls/accent/pressed`, `brls/accent/disabled` and `brls/accent/ink` (the text on the accent) exist in every theme, derived from `brls/accent` (from `accent` in a file), for an app's state styles: `pressed:backgroundColor="@theme/brls/accent/pressed"` (docs/styles.md).
 
+<a id="theme-folders-and-pictures"></a>
 ## Theme folders and pictures
 
 A theme stays a single `.theme` file, or becomes a folder when it has pictures: the folder is named after the theme (its id), its file is `theme.theme`, and its pictures are next to it or in subfolders.
@@ -174,6 +175,7 @@ To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BRLS_THEME=LIGHT` f
 A theme's pictures are loaded by `ThemeImages` (`borealis/core/theme_image.hpp`), the one loader for them: decoded on a thread of their own (`Threading::asyncDecode`, so a large one does not hold back the app's `brls::async` tasks), made smaller when larger than 1920×1080 (the ratio kept, an average of the pixels each one covers), the texture made on the UI thread (`brls::sync`), and freed when nothing holds it any more: the background's when the theme or the variant changes. Only the variant on screen has its picture loaded: a 1920×1080 picture is 8 MB of texture (RGBA), so at most 8 MB for the background, plus the picture being replaced while the next one loads. A JPEG that size takes a few tens of milliseconds to decode on a desktop, a few hundred on a Switch, on that thread. A picture larger than 4096×4096 pixels, or than 16384 on a side, is refused from its header without being decoded (`NVG_MAX_IMAGE_PIXELS`, `NVG_MAX_IMAGE_SIDE` in `nanovg.h`, the same for `brls::Image`): the theme reports it as a picture it cannot read.
 
 
+<a id="logos-and-images"></a>
 ## Logos and images
 
 Besides its background, a theme folder can bring pictures of its own: the app's logo, some of Cadran's icons, the pictures an app lets themes replace (its image slots), and a thumbnail of itself for a picker. Each key names a file in the theme's folder, confined like `background_image` (above: no absolute path, no `..` out of the folder, no link out of it), PNG or JPEG.
@@ -279,6 +281,7 @@ logo = logo-dark.png
 
 The demo declares its slot in `demo/src/demo_app.cpp` (`Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512)`), and the About tab's image follows it (`themeImage="demo/about/art"`, `resources/xml/activity/main.xml`). To see it: `aurore_demo -t @res/themes/prism/theme.theme`, or the palette picker.
 
+<a id="decorations"></a>
 ## Decorations
 
 Over the palette and the background, a theme can decorate the screens: a picture over the surface of the header, the sidebar or the dialogs (a **backdrop**), a strip along the top or the bottom edge of the screen (a garland, icicles, a snowdrift), and **particles** (snow, leaves, petals...) drifting behind the screens. Without these keys nothing is drawn and nothing changes: an app's screens stay pixel for pixel what they were.

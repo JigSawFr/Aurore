@@ -1,10 +1,10 @@
 # An app built on Aurore: a desktop binary (GLFW or SDL2) and a Switch .nro.
 #
-#   cmake -B build -DPLATFORM_DESKTOP=ON && cmake --build build
-#   cmake -B build-switch -DPLATFORM_SWITCH=ON && cmake --build build-switch --target my_app.nro
+#   cmake -B build -DAURORE_PLATFORM=DESKTOP && cmake --build build
+#   cmake -B build-switch -DAURORE_PLATFORM=SWITCH && cmake --build build-switch --target my_app.nro
 #
 # See README.md.
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16...3.31)
 
 # Aurore: a submodule at library/aurore (git submodule add -b main
 # https://github.com/JigSawFr/aurore.git library/aurore), or, inside Aurore's
@@ -19,7 +19,8 @@ endif ()
 get_filename_component(AURORE_DIR "${AURORE_DIR}" ABSOLUTE)
 set(BOREALIS_LIBRARY ${AURORE_DIR}/library)
 
-# Aurore's options (PLATFORM_*, USE_GLFW, USE_SDL2, USE_DEKO3D…) and toolchain
+# Aurore's options (AURORE_PLATFORM, AURORE_WINDOW, AURORE_GRAPHICS…) and toolchain;
+# they set PLATFORM_DESKTOP, PLATFORM_SWITCH, USE_DEKO3D… for the tests below
 include(${BOREALIS_LIBRARY}/cmake/commonOption.cmake)
 include(${BOREALIS_LIBRARY}/cmake/toolchain.cmake)
 
@@ -53,13 +54,17 @@ program_target(${PROJECT_NAME} "${APP_SRC}")
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore ${CMAKE_THREAD_LIBS_INIT})
+if (PLATFORM_DESKTOP)
+    aurore_app_link_options(${PROJECT_NAME})
+endif ()
 
-# Aurore's demo assets stay out; on the Switch, so do the fonts the system
-# already has (Cadran's own, Sora, stays).
+# Aurore's demo assets stay out (its screens, pictures, strings and example
+# themes: the built-in presets are in the library); on the Switch, so do the
+# fonts the system already has (Cadran's own, Sora, stays).
 set(ASSEMBLE_RESOURCES
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${AURORE_DIR}/resources ${MERGED_RESOURCES}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}/xml ${MERGED_RESOURCES}/img/gallery
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}/xml ${MERGED_RESOURCES}/img/gallery ${MERGED_RESOURCES}/themes
     COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/img/tiles.png ${MERGED_RESOURCES}/img/demo_icon.jpg
             ${MERGED_RESOURCES}/i18n/en-US/demo.json ${MERGED_RESOURCES}/i18n/en-US/scroll.json
             ${MERGED_RESOURCES}/i18n/fr/demo.json ${MERGED_RESOURCES}/i18n/zh-Hans/demo.json
@@ -69,20 +74,19 @@ set(ASSEMBLE_RESOURCES
 if (PLATFORM_SWITCH)
     list(APPEND ASSEMBLE_RESOURCES
         COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/font/aurore_text.ttf ${MERGED_RESOURCES}/font/aurore_buttons.ttf)
-    if (USE_DEKO3D)
-        # deko3d's shaders, compiled at configure time
-        gen_dksh(${CMAKE_BINARY_DIR}/shaders)
-        list(APPEND ASSEMBLE_RESOURCES COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/shaders ${MERGED_RESOURCES}/shaders)
-    endif ()
 endif ()
 
 add_custom_target(${PROJECT_NAME}_resources ${ASSEMBLE_RESOURCES} COMMENT "Assembling the resources")
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_resources)
 
 if (PLATFORM_SWITCH)
+    set(NACP_TITLEID)
+    if (PROJECT_TITLEID)
+        set(NACP_TITLEID --titleid=${PROJECT_TITLEID})
+    endif ()
     add_custom_target(${PROJECT_NAME}.nro ALL DEPENDS ${PROJECT_NAME}
         COMMAND ${NX_NACPTOOL_EXE} --create "${PROJECT_NAME}" "${PROJECT_AUTHOR}"
-                "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}" ${PROJECT_NAME}.nacp --titleid=${PROJECT_TITLEID}
+                "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}" ${PROJECT_NAME}.nacp ${NACP_TITLEID}
         COMMAND ${NX_ELF2NRO_EXE} ${PROJECT_NAME}.elf ${PROJECT_NAME}.nro --icon=${PROJECT_ICON}
                 --nacp=${PROJECT_NAME}.nacp --romfsdir=${MERGED_RESOURCES})
 endif ()

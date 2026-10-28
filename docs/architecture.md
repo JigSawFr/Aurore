@@ -104,7 +104,7 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 
 ## Platforms and drivers
 
-`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, or on the desktop SDL or GLFW (`-DUSE_SDL2=ON` or `-DUSE_GLFW=ON`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
+`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, or on the desktop SDL or GLFW (`-DAURORE_WINDOW=SDL2` or `-DAURORE_WINDOW=GLFW`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
 
 | Interface | Does |
 | --- | --- |
@@ -136,7 +136,7 @@ An app's resources (XML, pictures, translations, fonts, themes) live in its `res
 | Build | Read from |
 | --- | --- |
 | Desktop | the `resources/` folder next to the program (copied by the build), or the folder the CMake variable `BRLS_RESOURCES_DIR` names |
-| `-DUSE_LIBROMFS=ON` (forced on Android and iOS) | inside the program; `AURORE_RESOURCES_DIR` puts a folder in front ([environment.md](environment.md)) |
+| `-DAURORE_LIBROMFS=ON` (forced on Android and iOS) | inside the program; `AURORE_RESOURCES_DIR` puts a folder in front ([environment.md](environment.md)) |
 | Switch | the `.nro`'s romfs (`romfs:/`) |
 | PS4 | `/app0/resources/` in the package |
 | PS Vita | `app0:resources/` in the `.vpk` |
