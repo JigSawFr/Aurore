@@ -2305,3 +2305,20 @@ BRLS_TEST(ime_preedit_text_stays_in_its_blocks)
     BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 0, sizes, 0), std::string(""));
 }
 #endif
+
+// A pan recognizer that has seen no touch fires nothing: its last state is
+// set from the start, not whatever its memory held
+BRLS_TEST(pan_recognizer_fires_nothing_before_a_touch)
+{
+    Harness h;
+    int fired = 0;
+    alignas(brls::PanGestureRecognizer) unsigned char memory[sizeof(brls::PanGestureRecognizer)];
+    std::memset(memory, 0x01, sizeof(memory)); // GestureState::UNSURE in every byte
+    auto* pan         = new (memory) brls::PanGestureRecognizer([&](brls::PanGestureStatus, brls::Sound*)
+        { fired++; },
+        brls::PanAxis::ANY);
+    brls::Sound sound = brls::SOUND_NONE;
+    pan->recognitionLoop(brls::TouchState(), brls::MouseState(), nullptr, &sound);
+    BRLS_CHECK_EQ(fired, 0);
+    pan->~PanGestureRecognizer();
+}

@@ -283,15 +283,11 @@ namespace internal
         // operator[] added a null to it each time).
         for (const nlohmann::json* locale : { &table->currentLocale, &table->defaultLocale })
         {
-            if (locale->is_null() || locale->empty())
+            if (locale->is_null() || locale->empty() || !locale->contains(pointer))
                 continue;
-            try
-            {
-                return locale->at(pointer).get<std::string>();
-            }
-            catch (...)
-            {
-            }
+            const nlohmann::json& value = locale->at(pointer);
+            if (value.is_string())
+                return value.get<std::string>();
         }
 
         // Fallback to returning the string name
