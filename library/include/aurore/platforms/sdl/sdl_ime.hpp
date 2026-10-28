@@ -20,7 +20,7 @@ limitations under the License.
 #include <aurore/core/event.hpp>
 #include <aurore/core/ime.hpp>
 
-namespace brls
+namespace aurore
 {
 class SDLImeManager : public ImeManager
 {

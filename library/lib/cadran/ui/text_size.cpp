@@ -49,7 +49,7 @@ namespace
     void on_applet_hook(AppletHookType hook, void*)
     {
         if (hook == AppletHookType_OnOperationMode)
-            brls::sync([]()
+            aurore::sync([]()
                 { apply(); });
     }
 #endif
@@ -58,10 +58,10 @@ namespace
 void apply()
 {
     const float wanted = scale();
-    if (wanted == brls::Application::getTextScale())
+    if (wanted == aurore::Application::getTextScale())
         return;
     // Every label of every screen measured and laid out again (the core's).
-    brls::Application::setTextScale(wanted);
+    aurore::Application::setTextScale(wanted);
     // The tab on screen, for what it lays out by the size (Today's room).
     ui::refresh_shown_tab();
 }

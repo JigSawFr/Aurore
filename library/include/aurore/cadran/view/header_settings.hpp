@@ -16,7 +16,7 @@
 
 /// The language, theme and text size in the main screen's header: a tap opens
 /// their picker.
-class HeaderSetting : public brls::View
+class HeaderSetting : public aurore::View
 {
   public:
     enum class Kind
@@ -32,14 +32,14 @@ class HeaderSetting : public brls::View
     /// (after NoticeBell::install's bell). Called once, at start-up.
     static void install();
 
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-        brls::FrameContext* ctx) override;
+    void draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style,
+        aurore::FrameContext* ctx) override;
     /// Touched although it is not focusable.
-    brls::View* hitTest(brls::Point point) override;
+    aurore::View* hitTest(aurore::Point point) override;
 
   protected:
     /// A button: "Language, Français (France)", "Theme, Dark", "Text size, Larger".
-    brls::AccessibilityRole getDefaultAccessibilityRole() override { return brls::AccessibilityRole::BUTTON; }
+    aurore::AccessibilityRole getDefaultAccessibilityRole() override { return aurore::AccessibilityRole::BUTTON; }
     std::string getDefaultAccessibilityLabel() override;
 
   private:

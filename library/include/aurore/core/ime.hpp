@@ -21,7 +21,7 @@ limitations under the License.
 #include <functional>
 #include <string>
 
-namespace brls
+namespace aurore
 {
 
 enum KeyboardKeyDisableBitmask

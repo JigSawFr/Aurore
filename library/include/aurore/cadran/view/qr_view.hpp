@@ -12,14 +12,14 @@
 #include <aurore.hpp>
 
 /// A QR code of a text, dark on white with its quiet zone whatever the theme.
-class QrView : public brls::View
+class QrView : public aurore::View
 {
   public:
     QrView(const std::string& text, float side);
     ~QrView() override;
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-        brls::Style style, brls::FrameContext* ctx) override;
+        aurore::Style style, aurore::FrameContext* ctx) override;
 
   private:
     int size = 0; ///< modules per side (0: the text could not be encoded)

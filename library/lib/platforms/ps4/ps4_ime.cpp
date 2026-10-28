@@ -29,7 +29,7 @@ extern "C"
     int sceImeDialogTerm();
 }
 
-namespace brls
+namespace aurore
 {
 
 #define SCE_IME_DIALOG_MAX_TITLE_LENGTH (128)
@@ -148,7 +148,7 @@ int32_t ShowImeDialog(std::function<void(std::string)> f)
 
         if (status == ORBIS_DIALOG_STATUS_NONE)
         {
-            brls::Logger::info("ORBIS_DIALOG_STATUS_NONE");
+            aurore::Logger::info("ORBIS_DIALOG_STATUS_NONE");
             break;
         }
 
@@ -158,11 +158,11 @@ int32_t ShowImeDialog(std::function<void(std::string)> f)
 
         if (result.endstatus == ORBIS_DIALOG_CANCEL)
         {
-            brls::Logger::info("ORBIS_DIALOG_CANCEL");
+            aurore::Logger::info("ORBIS_DIALOG_CANCEL");
         }
         else if (result.endstatus == ORBIS_DIALOG_ABORD)
         {
-            brls::Logger::info("ORBIS_DIALOG_ABORD");
+            aurore::Logger::info("ORBIS_DIALOG_ABORD");
         }
         else if (result.endstatus == ORBIS_DIALOG_OK)
         {

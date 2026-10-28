@@ -21,7 +21,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A line of a ContextMenu: an icon (optional), a label, what it does.
@@ -41,7 +41,7 @@ class ContextMenuItem : public Box
 // (the screen stays visible around it); B, a touch or a click outside it,
 // or choosing a line closes it.
 //
-//     auto* menu = new brls::ContextMenu(cell);
+//     auto* menu = new aurore::ContextMenu(cell);
 //     menu->addItem("Rename", [] { ... }, "\uE3C9");   // a Material Icons glyph
 //     menu->addItem("Delete", [] { ... }, "@res/img/delete.png");
 //     menu->open();
@@ -93,4 +93,4 @@ class ContextMenu : public Box
     void dimBackground();
 };
 
-} // namespace brls
+} // namespace aurore

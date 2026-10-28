@@ -25,7 +25,7 @@ limitations under the License.
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 #ifdef BOREALIS_USE_GXM
@@ -70,4 +70,4 @@ class PsvPlatform : public SDLPlatform
 #endif
 };
 
-} // namespace brls
+} // namespace aurore

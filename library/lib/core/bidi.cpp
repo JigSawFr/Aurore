@@ -22,7 +22,7 @@
 #include <vector>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 #ifdef BRLS_USE_FRIBIDI
@@ -98,4 +98,4 @@ bool bidiAvailable()
 
 #endif
 
-} // namespace brls
+} // namespace aurore

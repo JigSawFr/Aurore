@@ -21,9 +21,9 @@
 #include <aurore/core/touch/tap_gesture.hpp>
 #include <aurore/views/sidebar.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 const std::string sidebarItemXML = R"xml(
@@ -244,4 +244,4 @@ void SidebarSeparator::draw(NVGcontext* vg, float x, float y, float width, float
     nvgFill(vg);
 }
 
-} // namespace brls
+} // namespace aurore

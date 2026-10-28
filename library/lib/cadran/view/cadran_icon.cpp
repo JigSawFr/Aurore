@@ -29,23 +29,23 @@ CadranIcon::CadranIcon()
 void CadranIcon::setIcon(const std::string& name) { this->icon = name; }
 void CadranIcon::setColor(NVGcolor value)
 {
-    if (!this->transitionStyle("color", brls::StyleValue::of(value)))
+    if (!this->transitionStyle("color", aurore::StyleValue::of(value)))
         this->color = value;
 }
 
-bool CadranIcon::getStyleProperty(const std::string& name, brls::StyleValue* value)
+bool CadranIcon::getStyleProperty(const std::string& name, aurore::StyleValue* value)
 {
     if (name != "color")
-        return brls::View::getStyleProperty(name, value);
-    *value = brls::StyleValue::of(this->color);
+        return aurore::View::getStyleProperty(name, value);
+    *value = aurore::StyleValue::of(this->color);
     return true;
 }
 
-bool CadranIcon::setStyleProperty(const std::string& name, const brls::StyleValue& value)
+bool CadranIcon::setStyleProperty(const std::string& name, const aurore::StyleValue& value)
 {
     if (name != "color")
-        return brls::View::setStyleProperty(name, value);
-    if (value.type != brls::StyleValue::Type::COLOR)
+        return aurore::View::setStyleProperty(name, value);
+    if (value.type != aurore::StyleValue::Type::COLOR)
         return false;
     if (!this->transitionStyle("color", value))
         this->color = value.color;
@@ -85,7 +85,7 @@ static void mark(NVGcontext* vg, float w, float h)
 }
 
 void CadranIcon::draw(NVGcontext* vg, float x, float y, float width, float height,
-    brls::Style style, brls::FrameContext* ctx)
+    aurore::Style style, aurore::FrameContext* ctx)
 {
     (void)style;
     (void)ctx;
@@ -115,14 +115,14 @@ void CadranIcon::draw(NVGcontext* vg, float x, float y, float width, float heigh
 // the box: false while it has none, or it is not loaded
 static bool themed(NVGcontext* vg, const std::string& i, NVGcolor color, float width, float height)
 {
-    bool tint                                 = false;
-    std::shared_ptr<brls::ThemeImage> picture = i == "mark" ? brls::Theme::logo() : brls::Theme::icon(i, &tint);
+    bool tint                                   = false;
+    std::shared_ptr<aurore::ThemeImage> picture = i == "mark" ? aurore::Theme::logo() : aurore::Theme::icon(i, &tint);
     if (!picture || !picture->ready())
         return false;
     // The logo as it is, as the app's own; an icon at its colour's opacity
     if (i == "mark")
-        return picture->draw(vg, 0, 0, width, height, brls::BackgroundFit::CONTAIN);
-    return picture->draw(vg, 0, 0, width, height, brls::BackgroundFit::CONTAIN, tint ? &color : nullptr, tint ? 1.0f : color.a);
+        return picture->draw(vg, 0, 0, width, height, aurore::BackgroundFit::CONTAIN);
+    return picture->draw(vg, 0, 0, width, height, aurore::BackgroundFit::CONTAIN, tint ? &color : nullptr, tint ? 1.0f : color.a);
 }
 
 bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, float width, float height)
@@ -347,7 +347,7 @@ bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, flo
     {
         // A text size: an A, small or large, on the same baseline (as the
         // header's button).
-        nvgFontFaceId(vg, brls::Application::getDefaultFont());
+        nvgFontFaceId(vg, aurore::Application::getDefaultFont());
         nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
         nvgFontSize(vg, i == "text-large" ? 28 : 18);
         nvgText(vg, 12, 20.5f, "A", nullptr);
@@ -355,7 +355,7 @@ bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, flo
     else if (i == "text-largest")
     {
         // The large A, a plus at its shoulder
-        nvgFontFaceId(vg, brls::Application::getDefaultFont());
+        nvgFontFaceId(vg, aurore::Application::getDefaultFont());
         nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
         nvgFontSize(vg, 26);
         nvgText(vg, 9.5f, 21.5f, "A", nullptr);
@@ -1137,7 +1137,7 @@ bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, flo
     return known;
 }
 
-brls::View* CadranIcon::create() { return new CadranIcon(); }
+aurore::View* CadranIcon::create() { return new CadranIcon(); }
 
 const std::vector<std::string>& CadranIcon::names()
 {
@@ -1228,15 +1228,15 @@ CadranSwatch::CadranSwatch(Colors value)
     this->setFocusable(false);
     if (!this->colors.picture.empty())
     {
-        brls::ThemeImageOptions options;
+        aurore::ThemeImageOptions options;
         options.flags   = NVG_IMAGE_GENERATE_MIPMAPS;
-        options.maxSide = brls::ThemeImages::PREVIEW_SIZE;
-        this->preview   = brls::ThemeImages::load(this->colors.picture, options);
+        options.maxSide = aurore::ThemeImages::PREVIEW_SIZE;
+        this->preview   = aurore::ThemeImages::load(this->colors.picture, options);
     }
 }
 
 void CadranSwatch::draw(NVGcontext* vg, float x, float y, float width, float height,
-    brls::Style style, brls::FrameContext* ctx)
+    aurore::Style style, aurore::FrameContext* ctx)
 {
     (void)style;
     (void)ctx;
@@ -1245,12 +1245,12 @@ void CadranSwatch::draw(NVGcontext* vg, float x, float y, float width, float hei
     {
         nvgBeginPath(vg);
         nvgRoundedRect(vg, x + 0.5f, y + 0.5f, width - 1, height - 1, corner - 0.5f);
-        nvgStrokeColor(vg, brls::Application::getTheme()["cadran/line"]);
+        nvgStrokeColor(vg, aurore::Application::getTheme()["cadran/line"]);
         nvgStrokeWidth(vg, 1);
         nvgStroke(vg);
     };
     // The theme's own thumbnail, once loaded
-    if (this->preview && this->preview->draw(vg, x, y, width, height, brls::BackgroundFit::COVER, nullptr, 1.0f, corner))
+    if (this->preview && this->preview->draw(vg, x, y, width, height, aurore::BackgroundFit::COVER, nullptr, 1.0f, corner))
     {
         hairline();
         return;

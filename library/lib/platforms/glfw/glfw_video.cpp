@@ -39,7 +39,7 @@ static void* METAL_CONTEXT = nullptr;
 #include <nanovg_d3d11.h>
 
 #include <aurore/platforms/driver/d3d11.hpp>
-std::unique_ptr<brls::D3D11Context> D3D11_CONTEXT;
+std::unique_ptr<aurore::D3D11Context> D3D11_CONTEXT;
 #endif
 
 #if defined(__linux__) || defined(_WIN32)
@@ -56,7 +56,7 @@ std::unique_ptr<brls::D3D11Context> D3D11_CONTEXT;
 #include <windows.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 static double scaleFactor = 1.0;
@@ -425,7 +425,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
 #ifdef __SWITCH__
     this->monitor    = glfwGetPrimaryMonitor();
     const char* name = glfwGetMonitorName(monitor);
-    brls::Logger::info("glfw: Monitor: {}", name);
+    aurore::Logger::info("glfw: Monitor: {}", name);
 #endif
 }
 
@@ -572,7 +572,7 @@ void GLFWVideoContext::fullScreen(bool fs)
 {
     VideoContext::FULLSCREEN = fs;
 
-    brls::Logger::info("Set fullscreen: {}", fs);
+    aurore::Logger::info("Set fullscreen: {}", fs);
     if (fs)
     {
         GLFWmonitor* monitor    = getCurrentMonitor(this->window);
@@ -625,4 +625,4 @@ GLFWwindow* GLFWVideoContext::getGLFWWindow()
     return this->window;
 }
 
-} // namespace brls
+} // namespace aurore

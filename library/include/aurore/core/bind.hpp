@@ -19,7 +19,7 @@
 #include <aurore/core/activity.hpp>
 #include <aurore/core/view.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Exception thrown when using a BoundView with an unknown ID for
@@ -36,7 +36,7 @@ class ViewNotFoundException : public std::exception
     std::string errorMessage;
 };
 
-#define BRLS_BIND(type, name, id) brls::BoundView<type> name = brls::BoundView<type>(id, this)
+#define BRLS_BIND(type, name, id) aurore::BoundView<type> name = aurore::BoundView<type>(id, this)
 
 // A BoundView represents a "child" view, bound to its "parent" view class.
 // Dereferencing operator has been overridden to directly resolve the view by ID and forward the call to the view pointer for you.
@@ -129,4 +129,4 @@ class BoundView
     }
 };
 
-} // namespace brls
+} // namespace aurore

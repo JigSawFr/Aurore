@@ -23,7 +23,7 @@
 #include <aurore/views/applet_frame.hpp>
 #include <aurore/views/sidebar.hpp>
 
-namespace brls
+namespace aurore
 {
 
 typedef std::function<View*(void)> TabViewCreator;
@@ -64,4 +64,4 @@ class TabFrame : public Box
     void freeKeptTabs();
 };
 
-} // namespace brls
+} // namespace aurore

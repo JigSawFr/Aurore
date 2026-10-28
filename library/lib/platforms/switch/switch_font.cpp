@@ -21,16 +21,16 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/switch/switch_font.hpp>
 
-namespace brls
+namespace aurore
 {
 
 void SwitchFontLoader::loadFonts()
 {
     PlFontData font;
     Result rc;
-    NVGcontext* vg = brls::Application::getNVGContext();
+    NVGcontext* vg = aurore::Application::getNVGContext();
 
-    brls::Logger::info("switch system locale: {}", brls::Application::getPlatform()->getLocale());
+    aurore::Logger::info("switch system locale: {}", aurore::Application::getPlatform()->getLocale());
 
     // Standard
     rc = plGetSharedFontByType(&font, PlSharedFontType_Standard);
@@ -43,7 +43,7 @@ void SwitchFontLoader::loadFonts()
     // custom Font
     if (access(USER_FONT_PATH.c_str(), F_OK) != -1)
     {
-        brls::Logger::info("Load custom font: {}", USER_FONT_PATH);
+        aurore::Logger::info("Load custom font: {}", USER_FONT_PATH);
         if (this->loadFontFromFile(FONT_CHINESE_SIMPLIFIED, USER_FONT_PATH))
             nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont(FONT_REGULAR));
         else
@@ -57,7 +57,7 @@ void SwitchFontLoader::loadFonts()
     }
     else
     {
-        brls::Logger::warning("Cannot find custom font, (Searched at: {})", USER_FONT_PATH);
+        aurore::Logger::warning("Cannot find custom font, (Searched at: {})", USER_FONT_PATH);
         rc = plGetSharedFontByType(&font, PlSharedFontType_ChineseSimplified);
         if (R_SUCCEEDED(rc) && Application::loadFontFromMemory(FONT_CHINESE_SIMPLIFIED, font.address, font.size, false))
             nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont(FONT_REGULAR));
@@ -111,15 +111,15 @@ void SwitchFontLoader::loadFonts()
     {
         if (access(USER_EMOJI_PATH.c_str(), F_OK) != -1)
         {
-            brls::Logger::info("Load emoji font: {}", USER_EMOJI_PATH);
+            aurore::Logger::info("Load emoji font: {}", USER_EMOJI_PATH);
             this->loadFontFromFile("emoji", USER_EMOJI_PATH);
             nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont("emoji"));
         }
         else
         {
-            brls::Logger::warning("Cannot find custom emoji, (Searched at: {})", USER_EMOJI_PATH);
+            aurore::Logger::warning("Cannot find custom emoji, (Searched at: {})", USER_EMOJI_PATH);
         }
     }
 }
 
-} // namespace brls
+} // namespace aurore

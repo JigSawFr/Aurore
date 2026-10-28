@@ -21,7 +21,7 @@
 #include <aurore/views/cells/cell_detail.hpp>
 #include <aurore/views/slider.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // The knob, which takes the focus: it says what its slider is set to.
@@ -341,4 +341,4 @@ View* Slider::create()
     return new Slider();
 }
 
-} // namespace brls
+} // namespace aurore

@@ -25,7 +25,7 @@
 #include <functional>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 typedef retro_time_t Time;
@@ -61,7 +61,7 @@ inline Time getRealTimeUsec()
  * Replaces the clock read by getCPUTimeUsec() (animations, timers, delay(),
  * button repeat...) with one that only moves when told: frames then run
  * without waiting for real time, the same way every run. Used by the test
- * harness (brls::test::Harness). A negative value goes back to the real clock.
+ * harness (aurore::test::Harness). A negative value goes back to the real clock.
  */
 inline void setSimulatedTimeUsec(Time usec)
 {
@@ -231,4 +231,4 @@ class FiniteTicking : public Ticking
     virtual void onReset() {};
 };
 
-} // namespace brls
+} // namespace aurore

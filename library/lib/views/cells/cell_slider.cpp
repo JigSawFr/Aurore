@@ -18,9 +18,9 @@ limitations under the License.
 
 #include <aurore/core/i18n.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 SliderCell::SliderCell()
@@ -60,4 +60,4 @@ View* SliderCell::create()
     return new SliderCell();
 }
 
-} // namespace brls
+} // namespace aurore

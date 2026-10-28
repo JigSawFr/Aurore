@@ -19,7 +19,7 @@
 
 #include <aurore/views/scrolling_frame.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A vertical-only frame that can scroll if its content overflows.
@@ -120,4 +120,4 @@ class HScrollingFrame : public Box
     Event<InputType>::Subscription inputTypeSubscription;
 };
 
-} // namespace brls
+} // namespace aurore

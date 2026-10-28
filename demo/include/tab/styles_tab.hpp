@@ -20,16 +20,16 @@
 
 // State styles, transitions, data binding and the focus announcer
 // (docs/styles.md), from resources/xml/tabs/styles.xml.
-class StylesTab : public brls::Box
+class StylesTab : public aurore::Box
 {
   public:
     StylesTab();
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(brls::Button, disabled, "styles/disabled");
-    BRLS_BIND(brls::Button, toggle, "styles/toggle");
-    BRLS_BIND(brls::Button, increment, "styles/increment");
-    BRLS_BIND(brls::BooleanCell, reduceMotion, "styles/reduce_motion");
+    BRLS_BIND(aurore::Button, disabled, "styles/disabled");
+    BRLS_BIND(aurore::Button, toggle, "styles/toggle");
+    BRLS_BIND(aurore::Button, increment, "styles/increment");
+    BRLS_BIND(aurore::BooleanCell, reduceMotion, "styles/reduce_motion");
 };

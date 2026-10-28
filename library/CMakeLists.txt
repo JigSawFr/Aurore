@@ -541,7 +541,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(aurore PRIVATE -Wall)
 endif ()
 
-# Test harness: a headless platform and brls::test::Harness (include/aurore/test/,
+# Test harness: a headless platform and aurore::test::Harness (include/aurore/test/,
 # docs/testing.md), for an app's tests to link: target Aurore::test
 if (BRLS_BUILD_TESTS)
     if (NOT PLATFORM_DESKTOP OR NOT BOREALIS_DRIVER STREQUAL "BOREALIS_USE_OPENGL" OR USE_GL2 OR USE_GLES2 OR USE_GLES3)

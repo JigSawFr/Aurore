@@ -24,7 +24,7 @@
 #include <GLFW/glfw3.h>
 #include <unistd.h>
 
-namespace brls
+namespace aurore
 {
 
 #define GLFW_GAMEPAD_BUTTON_NONE SIZE_MAX
@@ -119,7 +119,7 @@ void GLFWInputManager::keyboardCallback(GLFWwindow* window, int key, int scancod
 {
     auto* self = (GLFWInputManager*)Application::getPlatform()->getInputManager();
     KeyState state {};
-    state.key     = (BrlsKeyboardScancode)key;
+    state.key     = (AuroreKeyboardScancode)key;
     state.mods    = mods;
     state.pressed = action != GLFW_RELEASE;
     // A key that types a character is not logged: it may be a password
@@ -193,13 +193,13 @@ GLFWInputManager::GLFWInputManager(GLFWwindow* window)
 {
     if (access(DesktopPlatform::GAMEPAD_DB.c_str(), F_OK) == -1)
     {
-        brls::Logger::warning("Cannot find custom gamepad db, (Searched at: {})",
+        aurore::Logger::warning("Cannot find custom gamepad db, (Searched at: {})",
             DesktopPlatform::GAMEPAD_DB);
     }
     else
     {
         const std::string mappings = loadFileContents(DesktopPlatform::GAMEPAD_DB);
-        brls::Logger::info("Load custom gamepad db: {}", DesktopPlatform::GAMEPAD_DB);
+        aurore::Logger::info("Load custom gamepad db: {}", DesktopPlatform::GAMEPAD_DB);
         glfwUpdateGamepadMappings(mappings.c_str());
     }
 
@@ -321,8 +321,8 @@ void GLFWInputManager::updateControllerState(ControllerState* state, int control
     for (size_t i = 0; i < GLFW_GAMEPAD_BUTTON_MAX; i++)
     {
         // Translate GLFW gamepad to borealis controller
-        size_t brlsButton          = GLFW_BUTTONS_MAPPING[i];
-        state->buttons[brlsButton] = (bool)glfwState.buttons[i];
+        size_t auroreButton          = GLFW_BUTTONS_MAPPING[i];
+        state->buttons[auroreButton] = (bool)glfwState.buttons[i];
     }
 
     state->buttons[BUTTON_LT] = glfwState.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER] > 0.1f;
@@ -339,7 +339,7 @@ void GLFWInputManager::updateControllerState(ControllerState* state, int control
     }
 }
 
-bool GLFWInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
+bool GLFWInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
     return glfwGetKey(this->window, key);
 }
@@ -367,7 +367,7 @@ void GLFWInputManager::updateMouseStates(RawMouseState* state)
     state->position.x = x / Application::windowScale;
     state->position.y = y / Application::windowScale;
 #else
-    double scaleFactor = brls::Application::getPlatform()->getVideoContext()->getScaleFactor();
+    double scaleFactor = aurore::Application::getPlatform()->getVideoContext()->getScaleFactor();
     state->position.x  = x * scaleFactor / Application::windowScale;
     state->position.y  = y * scaleFactor / Application::windowScale;
 #endif

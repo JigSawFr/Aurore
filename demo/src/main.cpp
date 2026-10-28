@@ -34,7 +34,7 @@
 extern "C" unsigned int sceLibcHeapSize = 2 * 1024 * 1024;
 #endif
 
-using namespace brls::literals; // for _i18n
+using namespace aurore::literals; // for _i18n
 
 namespace
 {
@@ -42,18 +42,18 @@ namespace
 // and its warnings (contrast included); 1 when any has some.
 int checkThemeFiles(const std::string& folder)
 {
-    std::vector<brls::ThemeInfo> themes = brls::Theme::builtinThemes();
+    std::vector<aurore::ThemeInfo> themes = aurore::Theme::builtinThemes();
     // Off the screens: the pictures are decoded, to check them and the text on them
-    for (brls::ThemeInfo& info : brls::Theme::listThemes(folder, true))
+    for (aurore::ThemeInfo& info : aurore::Theme::listThemes(folder, true))
         themes.push_back(std::move(info));
     int status = EXIT_SUCCESS;
-    for (brls::ThemeVariant variant : { brls::ThemeVariant::LIGHT, brls::ThemeVariant::DARK })
-        for (const std::string& warning : brls::Theme::checkContrast(variant))
+    for (aurore::ThemeVariant variant : { aurore::ThemeVariant::LIGHT, aurore::ThemeVariant::DARK })
+        for (const std::string& warning : aurore::Theme::checkContrast(variant))
         {
-            std::printf("default %s: %s\n", variant == brls::ThemeVariant::LIGHT ? "light" : "dark", warning.c_str());
+            std::printf("default %s: %s\n", variant == aurore::ThemeVariant::LIGHT ? "light" : "dark", warning.c_str());
             status = EXIT_FAILURE;
         }
-    for (const brls::ThemeInfo& info : themes)
+    for (const aurore::ThemeInfo& info : themes)
     {
         std::printf("%s (%s): %s%s%s\n", info.name.c_str(), info.path.c_str(), info.light ? "light " : "",
             info.dark ? "dark " : "", info.errors.empty() && info.warnings.empty() ? "ok" : "");
@@ -77,16 +77,16 @@ int main(int argc, char* argv[])
     {
         if (std::strcmp(argv[i], "-d") == 0)
         { // Set log level
-            brls::Logger::setLogLevel(brls::LogLevel::LOG_DEBUG);
+            aurore::Logger::setLogLevel(aurore::LogLevel::LOG_DEBUG);
         }
         else if (std::strcmp(argv[i], "-o") == 0)
         {
             const char* path = (i + 1 < argc) ? argv[++i] : "borealis.log";
-            brls::Logger::setLogOutput(std::fopen(path, "w+"));
+            aurore::Logger::setLogOutput(std::fopen(path, "w+"));
         }
         else if (std::strcmp(argv[i], "-v") == 0)
         {
-            brls::Application::enableDebuggingView(true);
+            aurore::Application::enableDebuggingView(true);
         }
         else if (std::strcmp(argv[i], "-t") == 0 && i + 1 < argc)
         { // Theme file
@@ -98,23 +98,23 @@ int main(int argc, char* argv[])
         }
         else if (std::strcmp(argv[i], "-r") == 0)
         { // Redraw on demand
-            brls::Application::setRedrawOnDemand(true);
+            aurore::Application::setRedrawOnDemand(true);
         }
     }
 
-    brls::Platform::APP_LOCALE_DEFAULT = brls::LOCALE_AUTO;
+    aurore::Platform::APP_LOCALE_DEFAULT = aurore::LOCALE_AUTO;
 
     // Before init(): Cadran reads its preferences from it on
     demo::installHooks();
 
     // Init the app and i18n
-    if (!brls::Application::init())
+    if (!aurore::Application::init())
     {
-        brls::Logger::error("Unable to init Borealis application");
+        aurore::Logger::error("Unable to init Borealis application");
         return EXIT_FAILURE;
     }
 
-    brls::Application::createWindow("demo/title"_i18n);
+    aurore::Application::createWindow("demo/title"_i18n);
 
     // Out at once: nothing of the app to close
     if (checkThemes)
@@ -132,34 +132,34 @@ int main(int argc, char* argv[])
         if (std::FILE* file = std::fopen(path, "rb"))
         {
             std::fclose(file);
-            if (brls::Application::loadFontFromFile("rtl", path))
-                nvgAddFallbackFontId(brls::Application::getNVGContext(), brls::Application::getFont(brls::FONT_REGULAR), brls::Application::getFont("rtl"));
+            if (aurore::Application::loadFontFromFile("rtl", path))
+                nvgAddFallbackFontId(aurore::Application::getNVGContext(), aurore::Application::getFont(aurore::FONT_REGULAR), aurore::Application::getFont("rtl"));
             break;
         }
     }
 #endif
 
-    brls::ThemeVariant variant;
-    if (!themeFile.empty() && brls::Theme::loadFile(themeFile, &variant))
-        brls::Application::getPlatform()->setThemeVariant(variant);
+    aurore::ThemeVariant variant;
+    if (!themeFile.empty() && aurore::Theme::loadFile(themeFile, &variant))
+        aurore::Application::getPlatform()->setThemeVariant(variant);
 
     // The inspector: F12, or L3 + R3 on a controller (docs/inspector.md)
-    brls::Application::setInspectorEnabled(true);
+    aurore::Application::setInspectorEnabled(true);
 
     // Have the application register an action on every activity that will quit when you press BUTTON_START
-    brls::Application::setGlobalQuit(false);
+    aurore::Application::setGlobalQuit(false);
 
     // The demo's own views, theme colours and metrics
     demo::registerViews();
 
     // Create and push the main activity to the stack
-    brls::Application::pushActivity(new MainActivity());
+    aurore::Application::pushActivity(new MainActivity());
 
     // Run the app
-    while (brls::Application::mainLoop())
+    while (aurore::Application::mainLoop())
         ;
 
-    brls::Logger::info("{} frames drawn", brls::Application::getDrawnFrameCount());
+    aurore::Logger::info("{} frames drawn", aurore::Application::getDrawnFrameCount());
 
     // Exit
     return EXIT_SUCCESS;

@@ -65,7 +65,7 @@ option(AURORE_SIMPLE_HIGHLIGHT "Simple highlight" OFF)
 option(AURORE_FREETYPE "fontstash renders glyphs with FreeType" OFF)
 
 # Labels put right-to-left text (Hebrew, Arabic) in reading order and join
-# Arabic letters, with GNU FriBidi (LGPL-2.1+): brls::bidiVisual().
+# Arabic letters, with GNU FriBidi (LGPL-2.1+): aurore::bidiVisual().
 option(AURORE_FRIBIDI "labels reorder right-to-left text with FriBidi" OFF)
 
 # Unity build, CMAKE_UNITY_BUILD_BATCH_SIZE sets the batch size
@@ -87,7 +87,7 @@ option(BRLS_INSPECTOR "Built-in inspector on" OFF)
 set(BRLS_DEV_TOOLS "AUTO" CACHE STRING "Debugging aids from the environment: AUTO (not in Release and MinSizeRel), ON or OFF")
 set_property(CACHE BRLS_DEV_TOOLS PROPERTY STRINGS AUTO ON OFF)
 
-# The test harness (headless platform, brls::test::Harness: target
+# The test harness (headless platform, aurore::test::Harness: target
 # Aurore::test), and with this project the demo's tests, bench and
 # aurore-preview. Desktop with OpenGL 3 (the default driver) only.
 option(BRLS_BUILD_TESTS "Build the test harness" OFF)

@@ -20,7 +20,7 @@
 #include <switch.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 #ifdef __SWITCH__
@@ -60,7 +60,7 @@ AccountWidget::AccountWidget()
     Result rc = accountInitialize(AccountServiceType_Application);
     if (R_FAILED(rc))
     {
-        brls::Logger::error("accountInitialize() failed: {}\n", rc);
+        aurore::Logger::error("accountInitialize() failed: {}\n", rc);
     }
 
     AccountUid userID = { 0 };
@@ -70,7 +70,7 @@ AccountWidget::AccountWidget()
 
         if (R_FAILED(rc))
         {
-            brls::Logger::error("accountGetPreselectedUser() failed: {}\n", rc);
+            aurore::Logger::error("accountGetPreselectedUser() failed: {}\n", rc);
         }
     }
 
@@ -92,4 +92,4 @@ View* AccountWidget::create()
     return new AccountWidget();
 }
 
-} // namespace brls
+} // namespace aurore

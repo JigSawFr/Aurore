@@ -22,7 +22,7 @@
 #include <aurore/platforms/glfw/glfw_input.hpp>
 #include <aurore/platforms/glfw/glfw_video.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class GLFWPlatform : public DesktopPlatform
@@ -57,4 +57,4 @@ class GLFWPlatform : public DesktopPlatform
     GLFWImeManager* imeManager     = nullptr;
 };
 
-} // namespace brls
+} // namespace aurore

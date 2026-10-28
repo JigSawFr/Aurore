@@ -21,19 +21,19 @@
 
 #include <unordered_map>
 
-namespace brls
+namespace aurore
 {
 
 /// In an Activity's class: its content is the XML file of the resources
 /// `x` ("activity/main.xml", under resources/xml/).
 #define CONTENT_FROM_XML_RES(x) \
-    brls::View* createContentView() override { return brls::View::createFromXMLResource(x); }
+    aurore::View* createContentView() override { return aurore::View::createFromXMLResource(x); }
 /// The same from the XML file at the path `x`.
 #define CONTENT_FROM_XML_FILE(x) \
-    brls::View* createContentView() override { return brls::View::createFromXMLFile(x); }
+    aurore::View* createContentView() override { return aurore::View::createFromXMLFile(x); }
 /// The same from the XML text `x`.
 #define CONTENT_FROM_XML_STR(x) \
-    brls::View* createContentView() override { return brls::View::createFromXMLString(x); }
+    aurore::View* createContentView() override { return aurore::View::createFromXMLString(x); }
 
 /// An activity is a "screen" of your app in which the library adds
 /// the UI components. The app is made of a stack of activities, each activity
@@ -177,7 +177,7 @@ class Activity
     ActionIdentifier registerAction(const std::string& hintText, enum ControllerButton button, const ActionListener& actionListener, bool hidden = false, bool allowRepeating = false, enum Sound sound = SOUND_NONE);
 
     /// The same on a keyboard key, on the content view.
-    ActionIdentifier registerAction(BrlsKeyCombination key, const ActionListener& actionListener, bool allowRepeating = false);
+    ActionIdentifier registerAction(AuroreKeyCombination key, const ActionListener& actionListener, bool allowRepeating = false);
 
     /**
      * Unregisters an action with the given identifier on the content view.
@@ -194,7 +194,7 @@ class Activity
      * Returns the identifier for the action, so it can be unregistered later on. Returns ACTION_NONE if the
      * action was not registered.
      */
-    ActionIdentifier registerExitAction(enum ControllerButton button = brls::BUTTON_START);
+    ActionIdentifier registerExitAction(enum ControllerButton button = aurore::BUTTON_START);
 
     /// Resizes the activity to the window (resizeToFitWindow()).
     void onWindowSizeChanged();
@@ -212,4 +212,4 @@ class Activity
     unsigned contentGeneration = 0;
 };
 
-} // namespace brls
+} // namespace aurore

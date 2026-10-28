@@ -12,5 +12,5 @@ class CadranTab : public ScrollView
   public:
     CadranTab();
 
-    static brls::View* create();
+    static aurore::View* create();
 };

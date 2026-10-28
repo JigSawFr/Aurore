@@ -22,7 +22,7 @@
 #include <aurore/views/image.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // The footer's hints and clock with a larger text (Label::setFontScale):
@@ -100,4 +100,4 @@ void setHintsSteady(bool steady);
 void setHintsOptionalOwner(View* owner);
 View* getHintsOptionalOwner();
 
-} // namespace brls
+} // namespace aurore

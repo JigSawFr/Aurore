@@ -26,7 +26,7 @@
 #include <aurore/views/rectangle.hpp>
 #include <aurore/views/scrolling_frame.hpp>
 
-namespace brls
+namespace aurore
 {
 
 /// A cell's place in a RecyclerFrame: its section and row (`item`: the row, or the
@@ -300,4 +300,4 @@ class RecyclerFrame : public ScrollingFrame
     void removeCell(View* view);
 };
 
-} // namespace brls
+} // namespace aurore

@@ -10,7 +10,7 @@
 
 /// The running version by every screen's title: grey for a release, amber with
 /// the commit for any other build.
-class VersionBadge : public brls::Box
+class VersionBadge : public aurore::Box
 {
   public:
     VersionBadge();
@@ -22,5 +22,5 @@ class VersionBadge : public brls::Box
     /// The row at the right of `frame`'s header (the bell, the language and the
     /// theme go in it), made the first time it is asked for; null for a frame
     /// without the applet frame's header.
-    static brls::Box* header_tools(brls::AppletFrame* frame);
+    static aurore::Box* header_tools(aurore::AppletFrame* frame);
 };

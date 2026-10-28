@@ -23,10 +23,10 @@
 
 Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like the Nintendo Switch's own menus out of the box, and can be restyled into anything else.
 
-It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. The code keeps borealis' names (`brls`, `aurore.hpp`), so a borealis app moves to Aurore by changing its submodule.
+It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. The code keeps borealis' names (`aurore`, `aurore.hpp`), so a borealis app moves to Aurore by changing its submodule.
 
 > [!IMPORTANT]
-> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's default look: an app gets it without a line of code, and `brls::Application::setCadran(false)` keeps borealis' own. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
+> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's default look: an app gets it without a line of code, and `aurore::Application::setCadran(false)` keeps borealis' own. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
 
 ## ✨ Features
 
@@ -152,13 +152,13 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | FreeType instead of stb_truetype, hinted (an option) | `-DAURORE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
 | stb_truetype: a glyph read within its own data, a font's tables within the font (CVE-2026-18497); fonts still from trusted sources | — |
 | Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
-| Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DAURORE_FRIBIDI=ON` · `brls::bidiVisual()` |
+| Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DAURORE_FRIBIDI=ON` · `aurore::bidiVisual()` |
 
 **Languages**
 
 | Change | API |
 | --- | --- |
-| Load another language while the app runs | `brls::loadTranslations(locale)` |
+| Load another language while the app runs | `aurore::loadTranslations(locale)` |
 | Lookups safe from other threads while the language changes | — |
 | Lookups without exceptions (about 6× faster in English) | — |
 
@@ -181,7 +181,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | Change | API |
 | --- | --- |
 | SDL: the right controller closed when one is unplugged, every controller read after a reconnection | — |
-| SDL in a browser (Emscripten), with an on-screen pad | `brls_web_button()` |
+| SDL in a browser (Emscripten), with an on-screen pad | `aurore_web_button()` |
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
 | deko3d: the command memory grows instead of aborting; image descriptors reused | — |
 | Switch: the applet hook removed first at shutdown | — |

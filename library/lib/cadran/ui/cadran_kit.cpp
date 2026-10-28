@@ -23,12 +23,12 @@ namespace cadran::kit
 
 NVGcolor color(const char* key)
 {
-    return brls::Application::getTheme()[key];
+    return aurore::Application::getTheme()[key];
 }
 
-brls::Label* label(const std::string& text, float size, const char* color_key)
+aurore::Label* label(const std::string& text, float size, const char* color_key)
 {
-    auto* l = new brls::Label();
+    auto* l = new aurore::Label();
     l->setText(text);
     l->setFontSize(size);
     l->setThemeColor("textColor", color_key);
@@ -38,19 +38,19 @@ brls::Label* label(const std::string& text, float size, const char* color_key)
 namespace
 {
     // A label in the display face: Sora, the other scripts from the app's fonts.
-    class DisplayLabel : public brls::Label
+    class DisplayLabel : public aurore::Label
     {
       public:
         DisplayLabel()
         {
-            const int face = brls::Application::getFont("cadran/digits");
-            if (face != brls::FONT_INVALID)
+            const int face = aurore::Application::getFont("cadran/digits");
+            if (face != aurore::FONT_INVALID)
                 this->font = face;
         }
     };
 } // namespace
 
-brls::Label* display(const std::string& text, float size, const char* color_key)
+aurore::Label* display(const std::string& text, float size, const char* color_key)
 {
     auto* l = new DisplayLabel();
     l->setText(text);
@@ -69,10 +69,10 @@ CadranIcon* icon(const char* name, float size, const char* color_key)
     return view;
 }
 
-brls::Box* card(bool focusable, bool grow)
+aurore::Box* card(bool focusable, bool grow)
 {
-    auto* box = new brls::Box(brls::Axis::COLUMN);
-    box->setAlignItems(brls::AlignItems::STRETCH);
+    auto* box = new aurore::Box(aurore::Axis::COLUMN);
+    box->setAlignItems(aurore::AlignItems::STRETCH);
     box->setThemeColor("backgroundColor", "cadran/surf");
     box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
@@ -83,7 +83,7 @@ brls::Box* card(bool focusable, bool grow)
         box->setFocusable(true);
         box->setHideHighlightBackground(true);
         box->setHighlightCornerRadius(RADIUS_CARD);
-        box->setAccessibilityRole(brls::AccessibilityRole::CELL);
+        box->setAccessibilityRole(aurore::AccessibilityRole::CELL);
     }
     if (grow)
     {
@@ -93,16 +93,16 @@ brls::Box* card(bool focusable, bool grow)
     return box;
 }
 
-brls::Box* top_card(bool grow)
+aurore::Box* top_card(bool grow)
 {
-    brls::Box* box = card(false, grow);
+    aurore::Box* box = card(false, grow);
     box->setCornerRadius(RADIUS_TOP);
     box->setHighlightCornerRadius(RADIUS_TOP);
     box->setPadding(22, 26, 22, 26);
     return box;
 }
 
-void set_kicker(brls::Label* label, const std::string& text)
+void set_kicker(aurore::Label* label, const std::string& text)
 {
     if (!label)
         return;
@@ -112,12 +112,12 @@ void set_kicker(brls::Label* label, const std::string& text)
         label->setText(cadran::upper(text));
 }
 
-brls::Box* kicker(const char* icon_name, const std::string& title)
+aurore::Box* kicker(const char* icon_name, const std::string& title)
 {
-    auto* head = new brls::Box(brls::Axis::ROW);
-    head->setAlignItems(brls::AlignItems::CENTER);
+    auto* head = new aurore::Box(aurore::Axis::ROW);
+    head->setAlignItems(aurore::AlignItems::CENTER);
     head->addView(icon(icon_name, 18, "cadran/text2"));
-    auto* text = new brls::Label();
+    auto* text = new aurore::Label();
     set_kicker(text, title);
     text->setSingleLine(true);
     text->setMarginLeft(8);
@@ -142,7 +142,7 @@ void Mark::set(const char* color_key)
                                                                                            : Shape::DOT;
 }
 
-void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx)
+void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style, aurore::FrameContext* ctx)
 {
     const NVGcolor color = ctx->theme[this->key];
     const float cx = x + width / 2, cy = y + height / 2;
@@ -184,10 +184,10 @@ void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, brl
     }
 }
 
-brls::Box* pill(const std::string& text, const char* dot_key)
+aurore::Box* pill(const std::string& text, const char* dot_key)
 {
-    auto* box = new brls::Box(brls::Axis::ROW);
-    box->setAlignItems(brls::AlignItems::CENTER);
+    auto* box = new aurore::Box(aurore::Axis::ROW);
+    box->setAlignItems(aurore::AlignItems::CENTER);
     box->setHeight(30);
     box->setPaddingLeft(14);
     box->setPaddingRight(16);
@@ -200,22 +200,22 @@ brls::Box* pill(const std::string& text, const char* dot_key)
     auto* mark = new Mark(dot_key);
     mark->setMarginRight(7);
     box->addView(mark);
-    brls::Label* l = label(text, TEXT_META, "cadran/text2");
+    aurore::Label* l = label(text, TEXT_META, "cadran/text2");
     l->setSingleLine(true);
     box->addView(l);
     return box;
 }
 
-brls::Box* key(const char* letter, float size)
+aurore::Box* key(const char* letter, float size)
 {
-    auto* bubble = new brls::Box(brls::Axis::ROW);
+    auto* bubble = new aurore::Box(aurore::Axis::ROW);
     bubble->setWidth(size);
     bubble->setHeight(size);
     bubble->setCornerRadius(size / 2);
     bubble->setShrink(0);
     bubble->setThemeColor("backgroundColor", "cadran/key_bg");
-    bubble->setAlignItems(brls::AlignItems::CENTER);
-    bubble->setJustifyContent(brls::JustifyContent::CENTER);
+    bubble->setAlignItems(aurore::AlignItems::CENTER);
+    bubble->setJustifyContent(aurore::JustifyContent::CENTER);
     auto* text = new CadranDigits();
     text->setFontSize(12);
     text->setThemeColor("textColor", "cadran/key_fg");
@@ -225,35 +225,35 @@ brls::Box* key(const char* letter, float size)
 }
 
 Chip::Chip()
-    : brls::Box(brls::Axis::ROW)
+    : aurore::Box(aurore::Axis::ROW)
 {
 }
 
-void Chip::frame(brls::FrameContext* ctx)
+void Chip::frame(aurore::FrameContext* ctx)
 {
     // The press's flash (borealis' click animation, 0 → 1 → 0) as a dip of
     // the whole chip, background and words, about its middle.
     const float press = effects::motion() ? this->getClickAlpha() : 0.0f;
     if (press <= 0.0f)
     {
-        brls::Box::frame(ctx);
+        aurore::Box::frame(ctx);
         return;
     }
-    const brls::Rect at = this->getFrame();
+    const aurore::Rect at = this->getFrame();
     const float cx = at.getMidX(), cy = at.getMidY();
     const float scale = 1.0f - 0.05f * press;
     nvgSave(ctx->vg);
     nvgTranslate(ctx->vg, cx, cy);
     nvgScale(ctx->vg, scale, scale);
     nvgTranslate(ctx->vg, -cx, -cy);
-    brls::Box::frame(ctx);
+    aurore::Box::frame(ctx);
     nvgRestore(ctx->vg);
 }
 
-brls::Box* chip(const std::string& text, float height)
+aurore::Box* chip(const std::string& text, float height)
 {
     auto* box = new Chip();
-    box->setAlignItems(brls::AlignItems::CENTER);
+    box->setAlignItems(aurore::AlignItems::CENTER);
     box->setHeight(height);
     box->setPaddingLeft(22);
     box->setPaddingRight(22);
@@ -272,10 +272,10 @@ brls::Box* chip(const std::string& text, float height)
     return box;
 }
 
-brls::Box* qr(const std::string& payload, float side, const std::string& title, const std::string& caption, float width)
+aurore::Box* qr(const std::string& payload, float side, const std::string& title, const std::string& caption, float width)
 {
-    auto* box = new brls::Box(brls::Axis::COLUMN);
-    box->setAlignItems(brls::AlignItems::CENTER);
+    auto* box = new aurore::Box(aurore::Axis::COLUMN);
+    box->setAlignItems(aurore::AlignItems::CENTER);
     if (width > 0)
         box->setWidth(width);
     box->addView(new QrView(payload, side));
@@ -284,9 +284,9 @@ brls::Box* qr(const std::string& payload, float side, const std::string& title, 
     {
         if (text.empty())
             continue;
-        brls::Label* l = label(text, size, key);
-        l->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-        l->setAlignSelf(brls::AlignSelf::STRETCH); // wraps at the box's width
+        aurore::Label* l = label(text, size, key);
+        l->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
+        l->setAlignSelf(aurore::AlignSelf::STRETCH); // wraps at the box's width
         l->setMarginTop(&text == &title ? 10 : 2);
         box->addView(l);
     }
@@ -317,10 +317,10 @@ float Bar::drawn() const
     return this->from + (this->fraction - this->from) * t;
 }
 
-void Bar::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext*)
+void Bar::draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style, aurore::FrameContext*)
 {
-    brls::Theme theme  = brls::Application::getTheme();
-    const float radius = height / 2.0f;
+    aurore::Theme theme = aurore::Application::getTheme();
+    const float radius  = height / 2.0f;
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, radius);
     nvgFillColor(vg, this->a(theme["cadran/well"]));
@@ -339,33 +339,33 @@ Empty empty(const char* icon_name)
 {
     Empty e;
     e.box = card(false, false);
-    e.box->setAlignItems(brls::AlignItems::CENTER);
+    e.box->setAlignItems(aurore::AlignItems::CENTER);
     e.box->setPadding(32, 40, 32, 40);
-    auto* circle = new brls::Box(brls::Axis::ROW);
+    auto* circle = new aurore::Box(aurore::Axis::ROW);
     circle->setWidth(64);
     circle->setHeight(64);
     circle->setCornerRadius(32);
     circle->setThemeColor("backgroundColor", "cadran/teal_soft");
-    circle->setAlignItems(brls::AlignItems::CENTER);
-    circle->setJustifyContent(brls::JustifyContent::CENTER);
+    circle->setAlignItems(aurore::AlignItems::CENTER);
+    circle->setJustifyContent(aurore::JustifyContent::CENTER);
     circle->addView(icon(icon_name, 28, "cadran/teal"));
     e.box->addView(circle);
     e.title = label("", TEXT_LEAD, "cadran/text");
-    e.title->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-    e.title->setAlignSelf(brls::AlignSelf::STRETCH); // wraps at the card's width
+    e.title->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
+    e.title->setAlignSelf(aurore::AlignSelf::STRETCH); // wraps at the card's width
     e.title->setMarginTop(16);
     e.box->addView(e.title);
     e.text = label("", TEXT_META, "cadran/text2");
-    e.text->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-    e.text->setAlignSelf(brls::AlignSelf::STRETCH);
+    e.text->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
+    e.text->setAlignSelf(aurore::AlignSelf::STRETCH);
     e.text->setMarginTop(6);
     e.box->addView(e.text);
     return e;
 }
 
-brls::Box* empty_around(brls::Label* label, const char* icon_name)
+aurore::Box* empty_around(aurore::Label* label, const char* icon_name)
 {
-    auto* parent = label ? dynamic_cast<brls::Box*>(label->getParent()) : nullptr;
+    auto* parent = label ? dynamic_cast<aurore::Box*>(label->getParent()) : nullptr;
     if (!parent)
         return nullptr;
     Empty e = empty(icon_name);
@@ -380,33 +380,33 @@ brls::Box* empty_around(brls::Label* label, const char* icon_name)
     label->setFontSize(TEXT_LEAD);
     label->setThemeColor("textColor", "cadran/text");
     label->setSingleLine(false);
-    label->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-    label->setAlignSelf(brls::AlignSelf::STRETCH);
+    label->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
+    label->setAlignSelf(aurore::AlignSelf::STRETCH);
     label->setMargins(16, 0, 0, 0);
     e.box->addView(label, 1);
     e.box->removeView(e.text); // the screen's label says it all
     parent->addView(e.box, at);
     e.box->setVisibility(label->getVisibility());
-    label->setVisibility(brls::Visibility::VISIBLE);
+    label->setVisibility(aurore::Visibility::VISIBLE);
     return e.box;
 }
 
-void wrap(brls::View* row)
+void wrap(aurore::View* row)
 {
     if (row)
         YGNodeStyleSetFlexWrap(row->getYGNode(), YGWrapWrap);
 }
 
-void fit_button(brls::Button* button)
+void fit_button(aurore::Button* button)
 {
-    auto* label = button ? dynamic_cast<brls::Label*>(button->getView("brls/button/label")) : nullptr;
+    auto* label = button ? dynamic_cast<aurore::Label*>(button->getView("brls/button/label")) : nullptr;
     if (!label)
         return;
     label->setSingleLine(true);
     label->setShrinkToFit(true);
     // Its width at the normal size: the text's at the size asked, its
     // padding, and the views beside it (an icon), whose sizes are fixed.
-    NVGcontext* vg = brls::Application::getNVGContext();
+    NVGcontext* vg = aurore::Application::getNVGContext();
     nvgFontSize(vg, label->getFontSize());
     nvgFontFaceId(vg, label->getFont());
     nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
@@ -417,9 +417,9 @@ void fit_button(brls::Button* button)
     { return v.unit == YGUnitPoint ? v.value : 0.0f; };
     float width = bounds[2] - bounds[0] + points(YGNodeStyleGetPadding(node, YGEdgeLeft))
         + points(YGNodeStyleGetPadding(node, YGEdgeRight)) + 1.0f;
-    for (brls::View* child : button->getChildren())
+    for (aurore::View* child : button->getChildren())
     {
-        if (child == label || child->getVisibility() == brls::Visibility::GONE)
+        if (child == label || child->getVisibility() == aurore::Visibility::GONE)
             continue;
         YGNodeRef c = child->getYGNode();
         width += points(YGNodeStyleGetWidth(c)) + points(YGNodeStyleGetMargin(c, YGEdgeLeft))
@@ -430,12 +430,12 @@ void fit_button(brls::Button* button)
     button->invalidate();
 }
 
-void fit_head(brls::Box* row)
+void fit_head(aurore::Box* row)
 {
     if (!row || row->getChildren().size() < 2)
         return;
-    auto* title = dynamic_cast<brls::Label*>(row->getChildren()[0]);
-    auto* state = dynamic_cast<brls::Label*>(row->getChildren()[1]);
+    auto* title = dynamic_cast<aurore::Label*>(row->getChildren()[0]);
+    auto* state = dynamic_cast<aurore::Label*>(row->getChildren()[1]);
     if (!title || !state)
         return;
     wrap(row);
@@ -446,13 +446,13 @@ void fit_head(brls::Box* row)
     state->setShrink(0.0f);
 }
 
-void draw_more_below(NVGcontext* vg, brls::ScrollingFrame* frame, float x, float y, float width, float height,
+void draw_more_below(NVGcontext* vg, aurore::ScrollingFrame* frame, float x, float y, float width, float height,
     const char* color_key, float corner)
 {
     // The content: the frame's tallest child (the other is its scroll bar).
-    brls::View* content = nullptr;
+    aurore::View* content = nullptr;
     if (frame)
-        for (brls::View* child : frame->getChildren())
+        for (aurore::View* child : frame->getChildren())
             if (!content || child->getHeight() > content->getHeight())
                 content = child;
     if (!content)
@@ -461,7 +461,7 @@ void draw_more_below(NVGcontext* vg, brls::ScrollingFrame* frame, float x, float
     if (below <= 1.0f)
         return;
     constexpr float FADE = 32.0f;
-    NVGcolor solid       = brls::Application::getTheme()[color_key];
+    NVGcolor solid       = aurore::Application::getTheme()[color_key];
     solid.a *= frame->getAlpha();
     NVGcolor clear  = solid;
     clear.a         = 0.0f;
@@ -504,9 +504,9 @@ namespace
     // {0} the day's name, {1} the same in lower case, {2} the day, {3} the month.
     std::string date_text(int weekday, int day, int month)
     {
-        return brls::getStr("cadran/date", brls::getStr(fmt::format("cadran/days/{}", weekday)),
-            brls::getStr(fmt::format("cadran/days_lower/{}", weekday)), day,
-            brls::getStr(fmt::format("cadran/months/{}", month)));
+        return aurore::getStr("cadran/date", aurore::getStr(fmt::format("cadran/days/{}", weekday)),
+            aurore::getStr(fmt::format("cadran/days_lower/{}", weekday)), day,
+            aurore::getStr(fmt::format("cadran/months/{}", month)));
     }
 } // namespace
 
@@ -516,9 +516,9 @@ std::string long_date()
     // system's.
     if (ui::hooks::get().today)
         return long_date(ui::hooks::get().today());
-    const std::time_t now = brls::getWallTime();
+    const std::time_t now = aurore::getWallTime();
     char ymd[16]          = "";
-    const std::tm tm      = brls::localTime(now);
+    const std::tm tm      = aurore::localTime(now);
     std::strftime(ymd, sizeof ymd, "%Y-%m-%d", &tm);
     return long_date(std::string(ymd));
 }

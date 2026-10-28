@@ -28,7 +28,7 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/android/android_platform.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A Java exception left pending makes the next JNI call abort: logged and
@@ -280,4 +280,4 @@ bool AndroidPlatform::canSetBacklightBrightness()
     return true;
 }
 
-} // namespace brls
+} // namespace aurore

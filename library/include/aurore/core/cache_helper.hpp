@@ -23,7 +23,7 @@
 
 #include "aurore/core/singleton.hpp"
 
-namespace brls
+namespace aurore
 {
 
 template <typename K, typename T>
@@ -225,7 +225,7 @@ class LRUCache
      */
     void trimUnused()
     {
-        auto vg = brls::Application::getNVGContext();
+        auto vg = aurore::Application::getNVGContext();
         for (auto i = cacheList.begin(); i != cacheList.end();)
         {
             if (i->count <= 0)
@@ -268,7 +268,7 @@ class LRUCache
     {
         if (budget == 0 || totalBytes <= budget || cacheList.size() < 2)
             return;
-        auto vg = brls::Application::getNVGContext();
+        auto vg = aurore::Application::getNVGContext();
         auto i  = cacheList.end();
         while (totalBytes > budget && i != std::next(cacheList.begin()))
         {
@@ -301,7 +301,7 @@ class LRUCache
             return 0;
         // From the least recently used. (A reverse iterator erased through
         // its base was invalidated, and the next entry was skipped.)
-        auto vg = brls::Application::getNVGContext();
+        auto vg = aurore::Application::getNVGContext();
         auto i  = cacheList.end();
         while (num > 0 && i != cacheList.begin())
         {
@@ -336,11 +336,11 @@ class TextureCache : public Singleton<TextureCache>
   public:
     TextureCache()
     {
-        brls::Application::getWindowSizeChangedEvent()->subscribe(
+        aurore::Application::getWindowSizeChangedEvent()->subscribe(
             [this]()
             { this->cache.markAllDirty(); });
 
-        brls::Application::getExitEvent()->subscribe([this]()
+        aurore::Application::getExitEvent()->subscribe([this]()
             { this->clean(); });
     }
 
@@ -394,7 +394,7 @@ class TextureCache : public Singleton<TextureCache>
         cache.setMemoryBudget(bytes, [](size_t texture) -> size_t
             {
                 int w = 0, h = 0;
-                nvgImageSize(brls::Application::getNVGContext(), (int)texture, &w, &h);
+                nvgImageSize(aurore::Application::getNVGContext(), (int)texture, &w, &h);
                 return (size_t)w * (size_t)h * 4; });
     }
 
@@ -403,7 +403,7 @@ class TextureCache : public Singleton<TextureCache>
 
     void clean()
     {
-        auto vg = brls::Application::getNVGContext();
+        auto vg = aurore::Application::getNVGContext();
         for (auto& i : cache.getCacheList())
         {
             nvgDeleteImage(vg, i.value);

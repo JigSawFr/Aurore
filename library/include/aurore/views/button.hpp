@@ -21,7 +21,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Style and colors of different buttons styles
@@ -209,4 +209,4 @@ class Button : public Box
     BRLS_BIND(Label, label, "brls/button/label");
 };
 
-} // namespace brls
+} // namespace aurore

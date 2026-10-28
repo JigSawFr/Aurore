@@ -22,7 +22,7 @@ QrView::QrView(const std::string& text, float side)
     }
     catch (const std::exception& e)
     {
-        brls::Logger::error("QR code of \"{}\": {}", text, e.what());
+        aurore::Logger::error("QR code of \"{}\": {}", text, e.what());
         this->size = 0;
     }
 }
@@ -30,11 +30,11 @@ QrView::QrView(const std::string& text, float side)
 QrView::~QrView()
 {
     if (this->image)
-        nvgDeleteImage(brls::Application::getNVGContext(), this->image);
+        nvgDeleteImage(aurore::Application::getNVGContext(), this->image);
 }
 
 void QrView::draw(NVGcontext* vg, float x, float y, float width, float height,
-    brls::Style, brls::FrameContext*)
+    aurore::Style, aurore::FrameContext*)
 {
     if (this->size == 0)
         return;

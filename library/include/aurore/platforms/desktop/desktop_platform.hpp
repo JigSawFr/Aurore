@@ -30,7 +30,7 @@
 #include <IOKit/pwr_mgt/IOPMLib.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 class DesktopPlatform : public Platform
@@ -115,4 +115,4 @@ class DesktopPlatform : public Platform
 #endif
 };
 
-} // namespace brls
+} // namespace aurore

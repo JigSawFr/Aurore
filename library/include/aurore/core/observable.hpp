@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 // What subscribe() returns: the subscriber stays subscribed as long as the
@@ -88,13 +88,13 @@ class Subscription
 
 // A value that tells its subscribers when it changes:
 //
-//     brls::Observable<std::string> name { "Ada" };
+//     aurore::Observable<std::string> name { "Ada" };
 //     label->bindText(name);   // the label shows "Ada"
 //     name = "Grace";          // ... then "Grace"
 //
 // set() notifies only when the value changes (operator== when T has one).
 // Subscribers are called on the thread that calls set(): set it from the UI
-// thread (brls::sync from a worker).
+// thread (aurore::sync from a worker).
 template <typename T>
 class Observable
 {
@@ -212,12 +212,12 @@ class Observable
 // Activity (its own screen, looked up first); its observables must outlive
 // it, or be removed first.
 //
-//     brls::Observable<std::string> name { "Ada" };
-//     brls::Observable<bool> online { true };
-//     brls::DataModel profile;
+//     aurore::Observable<std::string> name { "Ada" };
+//     aurore::Observable<bool> online { true };
+//     aurore::DataModel profile;
 //     profile.add("name", name);
 //     profile.add("online", online);
-//     brls::Application::registerModel("profile", &profile);
+//     aurore::Application::registerModel("profile", &profile);
 class DataModel
 {
   public:
@@ -257,4 +257,4 @@ class DataModel
     std::unordered_map<std::string, Entry> entries;
 };
 
-} // namespace brls
+} // namespace aurore

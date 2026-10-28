@@ -32,7 +32,7 @@ namespace fs = std::experimental::filesystem;
 #define BRLS_NO_HOT_RELOAD
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // Named: in a unity build, the other files' helpers do not meet these
@@ -250,4 +250,4 @@ void HotReload::poll()
         Application::rebuildActivity();
 }
 
-} // namespace brls
+} // namespace aurore

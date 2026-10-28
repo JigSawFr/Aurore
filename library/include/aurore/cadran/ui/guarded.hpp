@@ -1,10 +1,10 @@
 // guarded — a callback that does nothing once its screen is gone.
 //
 // A screen (a tab, an activity) owns an `alive` token; what finishes later
-// (brls::sync after a background task, a flow that waits for the network or
+// (aurore::sync after a background task, a flow that waits for the network or
 // a dialog) takes guarded(alive, fn) instead of a bare [this]: fn runs only
 // while the token is held and true. Checked where the callback is called,
-// which is the UI thread: a worker thread hands it to brls::sync, never calls
+// which is the UI thread: a worker thread hands it to aurore::sync, never calls
 // it itself. No borealis: host-tested (tests/host/guarded_tests.cpp).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
@@ -19,7 +19,7 @@ namespace ui
 /// set to false, for a screen that closes before it is freed).
 using Alive = std::shared_ptr<bool>;
 /// What a background task holds of it: the task never keeps the screen's
-/// token, it wraps with it the callback it hands to brls::sync.
+/// token, it wraps with it the callback it hands to aurore::sync.
 using Weak = std::weak_ptr<bool>;
 inline Alive make_alive() { return std::make_shared<bool>(true); }
 

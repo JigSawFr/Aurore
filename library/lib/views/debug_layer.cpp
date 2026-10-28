@@ -25,28 +25,28 @@
 #include <aurore/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 DebugLayer::DebugLayer()
     : Box(Axis::COLUMN)
 {
-    setWidth(brls::Application::contentWidth);
-    setHeight(brls::Application::contentHeight);
+    setWidth(aurore::Application::contentWidth);
+    setHeight(aurore::Application::contentHeight);
 
     setJustifyContent(JustifyContent::FLEX_START);
     setAlignItems(AlignItems::FLEX_END);
 
     Box* contentView = new Box(Axis::COLUMN);
     this->addView(contentView);
-    contentView->setWidth(brls::Application::contentWidth / 2);
+    contentView->setWidth(aurore::Application::contentWidth / 2);
     contentView->setPadding(5);
     contentView->setBackgroundColor(RGBA(0, 0, 0, 160));
     YGNodeStyleSetFlexDirection(contentView->getYGNode(), YGFlexDirectionColumnReverse);
     // Lines logged from any thread, shown on the UI thread while the layer
     // is there
     logSubscription = Logger::getLogEvent()->subscribe([this, alive = aliveToken(), contentView](Logger::TimePoint now, LogLevel level, const std::string& log)
-        { brls::sync([this, alive, now, level, contentView, log]
+        { aurore::sync([this, alive, now, level, contentView, log]
               {
             if (alive.expired())
                 return;
@@ -104,7 +104,7 @@ DebugLayer::DebugLayer()
             box->addView(label);
             contentView->addView(box, 0);
 
-            if (contentView->getChildren().size() > brls::Application::contentHeight / 10 - 1)
+            if (contentView->getChildren().size() > aurore::Application::contentHeight / 10 - 1)
             {
                 // Not freeView(): it logs (Logger::verbose), which would add a line again, and so on
                 View* old = contentView->getChildren()[contentView->getChildren().size() - 1];
@@ -118,4 +118,4 @@ DebugLayer::~DebugLayer()
     Logger::getLogEvent()->unsubscribe(logSubscription);
 }
 
-} // namespace brls
+} // namespace aurore

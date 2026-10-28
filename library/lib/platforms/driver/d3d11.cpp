@@ -17,7 +17,7 @@
 #include <winrt/Windows.Graphics.Display.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 static const int SwapChainBufferCount    = 2;

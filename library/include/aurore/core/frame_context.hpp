@@ -23,7 +23,7 @@
 #include <aurore/core/style.hpp>
 #include <aurore/core/theme.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class FrameContext
@@ -35,4 +35,4 @@ class FrameContext
     Theme theme          = nullptr;
 };
 
-} // namespace brls
+} // namespace aurore

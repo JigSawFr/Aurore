@@ -27,7 +27,7 @@
 #include <aurore/core/touch/tap_gesture.hpp>
 #include <aurore/views/recycling_grid.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // RecyclingGridItem
@@ -764,4 +764,4 @@ View* HRecyclerFrame::create()
     return new HRecyclerFrame();
 }
 
-} // namespace brls
+} // namespace aurore

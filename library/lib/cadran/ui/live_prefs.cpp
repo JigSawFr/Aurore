@@ -12,7 +12,7 @@ namespace live_prefs
 {
 namespace
 {
-    brls::ThemeVariant s_system_theme = brls::ThemeVariant::DARK;
+    aurore::ThemeVariant s_system_theme = aurore::ThemeVariant::DARK;
     std::string s_system_locale; // the console's language
     std::string s_locale; // the strings' language now
 
@@ -31,7 +31,7 @@ namespace
     // Every screen above the loading one closed, one at a time; then `next`.
     void close_all(std::function<void()> next)
     {
-        if (!brls::Application::popActivity(brls::TransitionAnimation::NONE, [next]()
+        if (!aurore::Application::popActivity(aurore::TransitionAnimation::NONE, [next]()
                 { close_all(next); }))
             next();
     }
@@ -43,13 +43,13 @@ namespace
         const auto& is_tab = ui::hooks::get().is_tab;
         if (!is_tab)
             return "";
-        for (brls::View* v = brls::Application::getCurrentFocus(); v; v = v->getParent())
+        for (aurore::View* v = aurore::Application::getCurrentFocus(); v; v = v->getParent())
         {
             if (is_tab(v))
                 return "";
             if (!v->getId().empty())
             {
-                for (brls::View* up = v->getParent(); up; up = up->getParent())
+                for (aurore::View* up = v->getParent(); up; up = up->getParent())
                     if (is_tab(up))
                         return v->getId();
                 return "";
@@ -67,12 +67,12 @@ namespace
     {
         if (!ui::hooks::get().push_main)
         {
-            brls::sync([]()
+            aurore::sync([]()
                 {
             if (ui::hooks::get().refresh_shown) ui::hooks::get().refresh_shown(); });
             return;
         }
-        brls::sync([]()
+        aurore::sync([]()
             {
         const int tab = shown_tab();
         const std::string row = focused_row();
@@ -93,32 +93,32 @@ void start()
     done = true;
     // The platform read the console's language (the app leaves borealis'
     // locale on auto), and the strings are in it: the preferences' instead.
-    s_system_theme            = brls::Application::getPlatform()->getThemeVariant();
-    s_system_locale           = brls::Application::getLocale();
+    s_system_theme            = aurore::Application::getPlatform()->getThemeVariant();
+    s_system_locale           = aurore::Application::getLocale();
     const std::string& chosen = ui::prefs().language;
     s_locale                  = chosen == "system" ? s_system_locale : chosen;
     if (s_locale != s_system_locale)
-        brls::loadTranslations(s_locale);
+        aurore::loadTranslations(s_locale);
 }
 
 void apply_theme()
 {
-    ui::Prefs& p               = ui::prefs();
-    brls::ThemeVariant variant = p.theme == "dark" ? brls::ThemeVariant::DARK
-        : p.theme == "light"                       ? brls::ThemeVariant::LIGHT
-                                                   : s_system_theme;
-    if (p.theme_file.empty() || !brls::Theme::loadFile(p.theme_file))
-        brls::Theme::reset();
+    ui::Prefs& p                 = ui::prefs();
+    aurore::ThemeVariant variant = p.theme == "dark" ? aurore::ThemeVariant::DARK
+        : p.theme == "light"                         ? aurore::ThemeVariant::LIGHT
+                                                     : s_system_theme;
+    if (p.theme_file.empty() || !aurore::Theme::loadFile(p.theme_file))
+        aurore::Theme::reset();
     // A file for one variant only: that one, which the header's button and
     // the pickers then show too (the pickers keep the two in step; older
     // preferences may not).
-    if (!brls::Theme::styles(variant))
+    if (!aurore::Theme::styles(variant))
     {
-        variant = variant == brls::ThemeVariant::DARK ? brls::ThemeVariant::LIGHT : brls::ThemeVariant::DARK;
+        variant = variant == aurore::ThemeVariant::DARK ? aurore::ThemeVariant::LIGHT : aurore::ThemeVariant::DARK;
         if (p.theme != "system")
-            p.theme = variant == brls::ThemeVariant::DARK ? "dark" : "light";
+            p.theme = variant == aurore::ThemeVariant::DARK ? "dark" : "light";
     }
-    brls::Application::getPlatform()->setThemeVariant(variant);
+    aurore::Application::getPlatform()->setThemeVariant(variant);
 }
 
 std::string locale()
@@ -130,7 +130,7 @@ void language_changed()
 {
     const std::string& chosen = ui::prefs().language;
     s_locale                  = chosen == "system" ? s_system_locale : chosen;
-    brls::loadTranslations(s_locale);
+    aurore::loadTranslations(s_locale);
     ui::use_font_for(s_locale); // Chinese has its own (made again with the screens)
     rebuild();
 }

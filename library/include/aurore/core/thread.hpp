@@ -28,7 +28,7 @@
 #include <thread>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 struct DelayOperation
@@ -53,7 +53,7 @@ typedef std::vector<DelayOperation>::iterator DelayOperationIterator;
  * Borealis is not thread-safe, and sync() provides a mechanism
  * for queuing up UI-related state changes from other threads.
  *
- * It's a shortcut for brls::Application::sync(&func);
+ * It's a shortcut for aurore::Application::sync(&func);
  */
 extern void sync(std::function<void()> func);
 
@@ -61,7 +61,7 @@ extern void sync(std::function<void()> func);
  * Enqueue a function to be executed in
  * parallel with application's main thread.
  *
- * It's a shortcut for brls::Application::async(&func);
+ * It's a shortcut for aurore::Application::async(&func);
  */
 extern void async(std::function<void()> func);
 
@@ -165,4 +165,4 @@ class Threading
     static void start_task_loop();
 };
 
-} // namespace brls
+} // namespace aurore

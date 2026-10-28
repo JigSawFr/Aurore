@@ -1,4 +1,4 @@
-// The installed harness: Aurore::test and brls_add_tests()
+// The installed harness: Aurore::test and aurore_add_tests()
 #include <aurore/test/harness.hpp>
 
 BRLS_TEST(consumer_links)
@@ -8,5 +8,5 @@ BRLS_TEST(consumer_links)
 
 int main(int argc, char** argv)
 {
-    return brls::test::runTests(argc, argv);
+    return aurore::test::runTests(argc, argv);
 }

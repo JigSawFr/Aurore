@@ -23,7 +23,7 @@
 
 /// One of Cadran's vector icons (`<CadranIcon icon="today">` in XML), drawn as
 /// nanovg paths, or as the theme's picture for it (`icon.<name>`).
-class CadranIcon : public brls::View
+class CadranIcon : public aurore::View
 {
   public:
     CadranIcon();
@@ -31,17 +31,17 @@ class CadranIcon : public brls::View
     void setIcon(const std::string& name);
     void setColor(NVGcolor color);
     /// "color" (setThemeColor, XML color="@theme/…")
-    bool getStyleProperty(const std::string& name, brls::StyleValue* value) override;
-    bool setStyleProperty(const std::string& name, const brls::StyleValue& value) override;
+    bool getStyleProperty(const std::string& name, aurore::StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const aurore::StyleValue& value) override;
     /// The icon pops into place (grows from nothing, a little past its size,
     /// then settles): a check that was just earned. Nothing with the motion
     /// off (ui/effects).
     void pop();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-        brls::Style style, brls::FrameContext* ctx) override;
+        aurore::Style style, aurore::FrameContext* ctx) override;
 
-    static brls::View* create();
+    static aurore::View* create();
 
     /// Draws the icon `name` in `color`, filling a `width` by `height` box at
     /// the origin (nvgTranslate first): what a view of its own draws in an
@@ -56,7 +56,7 @@ class CadranIcon : public brls::View
   private:
     std::string icon = "today";
     NVGcolor color;
-    brls::Time pop_since = 0; ///< pop(): when it began (µs), 0 at rest
+    aurore::Time pop_since = 0; ///< pop(): when it began (µs), 0 at rest
 };
 
 /// A few colours shown in an icon's place, the size of a row's icon square
@@ -69,7 +69,7 @@ class CadranIcon : public brls::View
 /// in the rounded square with the hairline: decoded on the decode thread
 /// when the swatch is made (ThemeImages), the colours shown until it is
 /// ready, or when it cannot be read; freed with the swatch.
-class CadranSwatch : public brls::View
+class CadranSwatch : public aurore::View
 {
   public:
     struct Colors
@@ -84,9 +84,9 @@ class CadranSwatch : public brls::View
     explicit CadranSwatch(Colors colors);
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-        brls::Style style, brls::FrameContext* ctx) override;
+        aurore::Style style, aurore::FrameContext* ctx) override;
 
   private:
     Colors colors;
-    std::shared_ptr<brls::ThemeImage> preview;
+    std::shared_ptr<aurore::ThemeImage> preview;
 };

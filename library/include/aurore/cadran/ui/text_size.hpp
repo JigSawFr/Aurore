@@ -1,9 +1,9 @@
 // text_size — Preferences › Text size: "auto"
 // (the default: larger while the console is docked, on a TV), "normal",
 // "large" or "largest". Larger draws every label LARGE times its size,
-// largest LARGEST times (brls::Application::setTextScale); the rail's too,
+// largest LARGEST times (aurore::Application::setTextScale); the rail's too,
 // the header's and the footer's a little less, each as its room allows
-// (ui/cadran_frame); the cells' rows grow with it (brls::RecyclerCell).
+// (ui/cadran_frame); the cells' rows grow with it (aurore::RecyclerCell).
 // Applied at start-up, then again, live, when the setting changes or the
 // console leaves or joins its dock: every label of every screen is laid
 // out again.
@@ -21,7 +21,7 @@ bool docked();
 /// and whether it is more than 1.
 float scale();
 bool larger();
-/// brls::Label's scale from larger(); the screens laid out again when it changed.
+/// aurore::Label's scale from larger(); the screens laid out again when it changed.
 void apply();
 /// apply() before the first view, then follows the dock. Once, at start-up.
 void install();

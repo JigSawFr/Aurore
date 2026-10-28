@@ -21,7 +21,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/image.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class AccountWidget : public Box
@@ -37,4 +37,4 @@ class AccountWidget : public Box
 #endif
 };
 
-} // namespace brls
+} // namespace aurore

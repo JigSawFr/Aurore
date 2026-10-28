@@ -25,7 +25,7 @@
 #include <aurore/views/hint.hpp>
 #include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Fired when the user has selected a value
@@ -87,4 +87,4 @@ class Dropdown : public Box, private RecyclerDataSource
     }
 };
 
-} // namespace brls
+} // namespace aurore

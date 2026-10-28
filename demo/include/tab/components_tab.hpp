@@ -18,15 +18,15 @@
 
 #include <aurore.hpp>
 
-class ComponentsTab : public brls::Box
+class ComponentsTab : public aurore::Box
 {
   public:
     ComponentsTab();
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(brls::Label, progress, "progress");
-    BRLS_BIND(brls::Slider, slider, "slider");
-    bool onPrimaryButtonClicked(brls::View* view);
+    BRLS_BIND(aurore::Label, progress, "progress");
+    BRLS_BIND(aurore::Slider, slider, "slider");
+    bool onPrimaryButtonClicked(aurore::View* view);
 };

@@ -37,8 +37,8 @@ bool motion()
     static const bool still = ui::env_flag("STILL_FOCUS");
     if (still)
         return false;
-    // The app's own reduced motion (brls::Application::setReduceMotion).
-    if (brls::Application::isReduceMotionSet())
+    // The app's own reduced motion (aurore::Application::setReduceMotion).
+    if (aurore::Application::isReduceMotionSet())
         return false;
     const std::string& setting = ui::prefs().effects;
     if (setting == "reduced")

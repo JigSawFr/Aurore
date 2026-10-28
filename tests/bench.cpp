@@ -97,7 +97,7 @@ using Metrics = std::map<std::string, double>;
 // What a scenario measured, over its frames
 struct Run
 {
-    std::vector<brls::FrameProfile> frames;
+    std::vector<aurore::FrameProfile> frames;
 
     Metrics metrics() const
     {
@@ -156,17 +156,17 @@ bool isTime(const std::string& metric)
 }
 
 // Runs `frames` frames, calling `each(i)` before each one, and records them
-Run measure(brls::test::Harness& h, int frames, const std::function<void(int)>& each)
+Run measure(aurore::test::Harness& h, int frames, const std::function<void(int)>& each)
 {
     Run run;
-    auto subscription = brls::Profiler::getFrameEvent()->subscribe([&run]()
-        { run.frames.push_back(brls::Profiler::getLastFrame()); });
+    auto subscription = aurore::Profiler::getFrameEvent()->subscribe([&run]()
+        { run.frames.push_back(aurore::Profiler::getLastFrame()); });
     for (int i = 0; i < frames; i++)
     {
         each(i);
         h.step();
     }
-    brls::Profiler::getFrameEvent()->unsubscribe(subscription);
+    aurore::Profiler::getFrameEvent()->unsubscribe(subscription);
     return run;
 }
 
@@ -272,17 +272,17 @@ int main(int argc, char** argv)
         }
     }
 
-    brls::Logger::setLogLevel(brls::LogLevel::LOG_WARNING);
+    aurore::Logger::setLogLevel(aurore::LogLevel::LOG_WARNING);
     demo::installHooks();
     std::map<std::string, Metrics> results;
     {
-        brls::test::Harness h;
+        aurore::test::Harness h;
         demo::registerViews();
-        brls::Profiler::setAllocationCounter([]()
+        aurore::Profiler::setAllocationCounter([]()
             { return allocations.load(std::memory_order_relaxed); });
         h.push(new MainActivity());
         h.settle();
-        brls::Profiler::setEnabled(true);
+        aurore::Profiler::setEnabled(true);
 
         // The main screen, still, every frame drawn
         results["idle"] = measure(h, frames, [](int) {}).metrics();
@@ -291,7 +291,7 @@ int main(int argc, char** argv)
         results["navigate"] = measure(h, frames * 2, [&](int i)
             {
             int phase = i % 40;
-            brls::ControllerButton button = (i / 40) % 6 < 3 ? brls::BUTTON_DOWN : brls::BUTTON_UP;
+            aurore::ControllerButton button = (i / 40) % 6 < 3 ? aurore::BUTTON_DOWN : aurore::BUTTON_UP;
             if (phase == 0)
                 h.press(button);
             else if (phase == 1)
@@ -300,12 +300,12 @@ int main(int argc, char** argv)
         h.settle();
 
         // Still again, with redraw on demand: frames skipped
-        brls::Application::setRedrawOnDemand(true);
+        aurore::Application::setRedrawOnDemand(true);
         h.step(3);
         results["idle_on_demand"] = measure(h, frames, [](int) {}).metrics();
-        brls::Application::setRedrawOnDemand(false);
+        aurore::Application::setRedrawOnDemand(false);
 
-        brls::Profiler::setEnabled(false);
+        aurore::Profiler::setEnabled(false);
     }
 
     std::printf("%-16s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s\n", "scenario", "drawn", "layouts", "laid out", "allocs",

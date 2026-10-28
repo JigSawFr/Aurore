@@ -21,7 +21,7 @@
 #include <aurore/views/image.hpp>
 #include <aurore/views/rectangle.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class BatteryWidget : public Box
@@ -47,4 +47,4 @@ class BatteryWidget : public Box
     inline static bool updating          = false; // a read is under way
 };
 
-} // namespace brls
+} // namespace aurore

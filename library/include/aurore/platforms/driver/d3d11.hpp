@@ -26,7 +26,7 @@
 #include <SDL2/SDL.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 class D3D11Context

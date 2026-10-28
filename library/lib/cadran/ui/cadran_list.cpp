@@ -65,47 +65,47 @@ uint32_t upper_cp(uint32_t cp)
     return cp;
 }
 
-brls::ScrollingFrame* find_scroll(brls::View* view)
+aurore::ScrollingFrame* find_scroll(aurore::View* view)
 {
-    if (auto* frame = dynamic_cast<brls::ScrollingFrame*>(view))
+    if (auto* frame = dynamic_cast<aurore::ScrollingFrame*>(view))
         return frame;
-    if (auto* box = dynamic_cast<brls::Box*>(view))
-        for (brls::View* child : box->getChildren())
-            if (brls::ScrollingFrame* frame = find_scroll(child))
+    if (auto* box = dynamic_cast<aurore::Box*>(view))
+        for (aurore::View* child : box->getChildren())
+            if (aurore::ScrollingFrame* frame = find_scroll(child))
                 return frame;
     return nullptr;
 }
 
-int index_in(brls::Box* parent, brls::View* child)
+int index_in(aurore::Box* parent, aurore::View* child)
 {
     const auto& children = parent->getChildren();
     const auto at        = std::find(children.begin(), children.end(), child);
     return at == children.end() ? -1 : (int)(at - children.begin());
 }
 
-float margin_top(brls::View* view)
+float margin_top(aurore::View* view)
 {
     const YGValue margin = YGNodeStyleGetMargin(view->getYGNode(), YGEdgeTop);
     return margin.unit == YGUnitPoint ? margin.value : 0.0f;
 }
 
-float margin_bottom(brls::View* view)
+float margin_bottom(aurore::View* view)
 {
     const YGValue margin = YGNodeStyleGetMargin(view->getYGNode(), YGEdgeBottom);
     return margin.unit == YGUnitPoint ? margin.value : 0.0f;
 }
 
 // A row of a card that starts with its icon (row_icon(): the only box among a cell's lines).
-bool has_icon(brls::View* row)
+bool has_icon(aurore::View* row)
 {
-    auto* box = dynamic_cast<brls::Box*>(row);
-    return box && !box->getChildren().empty() && dynamic_cast<brls::Box*>(box->getChildren()[0]);
+    auto* box = dynamic_cast<aurore::Box*>(row);
+    return box && !box->getChildren().empty() && dynamic_cast<aurore::Box*>(box->getChildren()[0]);
 }
 
 // Moves a line to another box, keeping the view.
-void move_to(brls::View* view, brls::Box* to)
+void move_to(aurore::View* view, aurore::Box* to)
 {
-    if (brls::Box* from = view->getParent())
+    if (aurore::Box* from = view->getParent())
         from->removeView(view, false);
     to->addView(view);
 }
@@ -125,20 +125,20 @@ CadranIcon* make_icon(const char* name, float size, const char* color_key)
 // brighter while it has the focus. Gradients, not a blur: a few fills, no
 // texture. Off with the screens' background glow (lighter effects on the
 // battery, ui::prefs' glow, BRLS_CADRAN_NOGLOW).
-class TileGlow : public brls::View
+class TileGlow : public aurore::View
 {
   public:
-    TileGlow(brls::View* cell, const char* own, const char* next)
+    TileGlow(aurore::View* cell, const char* own, const char* next)
         : tile(cell)
         , ink(own)
         , far(next)
     {
         this->setFocusable(false);
-        this->setPositionType(brls::PositionType::ABSOLUTE);
+        this->setPositionType(aurore::PositionType::ABSOLUTE);
         this->setPositionTop(0);
         this->setPositionLeft(0);
     }
-    void draw(NVGcontext* vg, float x, float y, float, float, brls::Style, brls::FrameContext* ctx) override
+    void draw(NVGcontext* vg, float x, float y, float, float, aurore::Style, aurore::FrameContext* ctx) override
     {
         // At the tile's corner (top and left 0), as large as the tile: a
         // percentage of it does not follow its height.
@@ -147,7 +147,7 @@ class TileGlow : public brls::View
         if (off || !ui::prefs().glow || effects::light() || width <= 0 || height <= 0)
             return;
         // Fainter on the light theme's white, where a tint shows more.
-        const bool light = brls::Application::getThemeVariant() == brls::ThemeVariant::LIGHT;
+        const bool light = aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT;
         const float lift = this->tile->isFocused() ? 1.5f : 1.0f;
         light_at(vg, x, y, width, height, x + width * 0.12f, y + height * 0.1f, width * 0.9f, ctx->theme[this->ink], (light ? 0.14f : 0.28f) * lift);
         light_at(vg, x, y, width, height, x + width, y + height, width * 0.75f, ctx->theme[this->far], (light ? 0.10f : 0.18f) * lift);
@@ -166,7 +166,7 @@ class TileGlow : public brls::View
         nvgFill(vg);
     }
 
-    brls::View* tile;
+    aurore::View* tile;
     const char* ink; // theme keys
     const char* far;
 };
@@ -181,26 +181,26 @@ constexpr const char* TILE_INKS[] = { "cadran/teal", "cadran/blue", "cadran/viol
 // then ends in "…" and scrolls while the tile has the focus. A new text, or
 // a tile of another width, starts again from the full size. Drawn as
 // nothing (no size), once the tile is laid out.
-class TileFit : public brls::View
+class TileFit : public aurore::View
 {
   public:
-    TileFit(brls::Box* cell, brls::Label* its_title)
+    TileFit(aurore::Box* cell, aurore::Label* its_title)
         : tile(cell)
         , title(its_title)
     {
         this->setFocusable(false);
-        this->setPositionType(brls::PositionType::ABSOLUTE);
+        this->setPositionType(aurore::PositionType::ABSOLUTE);
         this->setWidth(0);
         this->setHeight(0);
     }
-    void draw(NVGcontext* vg, float, float, float, float, brls::Style, brls::FrameContext*) override
+    void draw(NVGcontext* vg, float, float, float, float, aurore::Style, aurore::FrameContext*) override
     {
         // The labels as they are now: one added later (a reason) joins in.
-        std::vector<brls::Label*> labels = { this->title };
-        for (brls::View* child : this->tile->getChildren())
-            if (auto* label = dynamic_cast<brls::Label*>(child))
+        std::vector<aurore::Label*> labels = { this->title };
+        for (aurore::View* child : this->tile->getChildren())
+            if (auto* label = dynamic_cast<aurore::Label*>(child))
                 labels.push_back(label);
-        for (brls::Label* label : labels)
+        for (aurore::Label* label : labels)
             if (std::none_of(this->fits.begin(), this->fits.end(), [label](const Fit& f)
                     { return f.label == label; }))
             {
@@ -244,27 +244,27 @@ class TileFit : public brls::View
   private:
     struct Fit
     {
-        brls::Label* label;
+        aurore::Label* label;
         float size; // its own size, the largest
         std::string text; // the text it was fitted to
     };
-    brls::Box* tile;
-    brls::Label* title;
+    aurore::Box* tile;
+    aurore::Label* title;
     std::vector<Fit> fits;
     float width = 0; // the tile's, when last fitted
 };
 
 // The icon before a row's title, in a soft rounded square.
-brls::Box* row_icon(const char* name)
+aurore::Box* row_icon(const char* name)
 {
-    auto* square = new brls::Box(brls::Axis::ROW);
+    auto* square = new aurore::Box(aurore::Axis::ROW);
     square->setWidth(ICON_SQUARE);
     square->setHeight(ICON_SQUARE);
     square->setCornerRadius(10);
     square->setShrink(0);
     square->setThemeColor("backgroundColor", "cadran/surf2");
-    square->setAlignItems(brls::AlignItems::CENTER);
-    square->setJustifyContent(brls::JustifyContent::CENTER);
+    square->setAlignItems(aurore::AlignItems::CENTER);
+    square->setJustifyContent(aurore::JustifyContent::CENTER);
     square->setMarginRight(ICON_GAP);
     square->addView(make_icon(name, 19, "cadran/text2"));
     return square;
@@ -302,9 +302,9 @@ std::string cadran::upper(const std::string& text)
 // ---------------------------------------------------------------------------
 
 cadran::Card::Card()
-    : brls::Box(brls::Axis::COLUMN)
+    : aurore::Box(aurore::Axis::COLUMN)
 {
-    this->setAlignItems(brls::AlignItems::STRETCH);
+    this->setAlignItems(aurore::AlignItems::STRETCH);
 }
 
 void cadran::Card::setAccent(const std::string& key) { this->border = key; }
@@ -313,24 +313,24 @@ void cadran::Card::setFill(const std::string& key) { this->fill = key; }
 void cadran::Card::follow_rows()
 {
     bool shown = false;
-    for (brls::View* row : this->getChildren())
-        shown |= row->getVisibility() != brls::Visibility::GONE;
-    const brls::Visibility v = shown ? brls::Visibility::VISIBLE : brls::Visibility::GONE;
+    for (aurore::View* row : this->getChildren())
+        shown |= row->getVisibility() != aurore::Visibility::GONE;
+    const aurore::Visibility v = shown ? aurore::Visibility::VISIBLE : aurore::Visibility::GONE;
     if (this->getVisibility() != v)
         this->setVisibility(v);
 }
 
-void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx)
+void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style, aurore::FrameContext* ctx)
 {
     if (height < 1)
         return; // every row hidden
     // Its rows hidden, its foot (a note) still shown: the note alone, no card.
     bool rows = false;
-    for (brls::View* row : this->getChildren())
-        rows |= row->getVisibility() != brls::Visibility::GONE && !dynamic_cast<brls::Label*>(row);
+    for (aurore::View* row : this->getChildren())
+        rows |= row->getVisibility() != aurore::Visibility::GONE && !dynamic_cast<aurore::Label*>(row);
     if (!rows)
     {
-        brls::Box::draw(vg, x, y, width, height, style, ctx);
+        aurore::Box::draw(vg, x, y, width, height, style, ctx);
         return;
     }
     nvgBeginPath(vg);
@@ -342,13 +342,13 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
     nvgStrokeWidth(vg, 1);
     nvgStroke(vg);
     // A line between the visible rows, from the title (after the icon) to the end.
-    brls::View* previous = nullptr;
-    for (brls::View* row : this->getChildren())
+    aurore::View* previous = nullptr;
+    for (aurore::View* row : this->getChildren())
     {
-        if (row->getVisibility() == brls::Visibility::GONE)
+        if (row->getVisibility() == aurore::Visibility::GONE)
             continue;
         // No line above a card's foot (a note): it belongs to the rows.
-        if (previous && !dynamic_cast<brls::Label*>(row))
+        if (previous && !dynamic_cast<aurore::Label*>(row))
         {
             const float inset = has_icon(previous) ? ROW_PAD_ICON + ICON_SQUARE + ICON_GAP : ROW_PAD;
             nvgBeginPath(vg);
@@ -358,12 +358,12 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
         }
         previous = row;
     }
-    brls::Box::draw(vg, x, y, width, height, style, ctx);
+    aurore::Box::draw(vg, x, y, width, height, style, ctx);
 }
 
 // ---------------------------------------------------------------------------
 
-cadran::Switch::Switch(brls::BooleanCell* boolean_cell)
+cadran::Switch::Switch(aurore::BooleanCell* boolean_cell)
     : cell(boolean_cell)
 {
     this->setFocusable(false);
@@ -372,7 +372,7 @@ cadran::Switch::Switch(brls::BooleanCell* boolean_cell)
     this->setShrink(0);
 }
 
-void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style, brls::FrameContext* ctx)
+void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style, aurore::FrameContext* ctx)
 {
     const bool state = this->cell->isOn();
     const float r    = height / 2;
@@ -404,12 +404,12 @@ void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float h
 
 // ---------------------------------------------------------------------------
 
-cadran::List::List(brls::View* screen, bool sub_screen)
+cadran::List::List(aurore::View* screen, bool sub_screen)
     : tab(screen)
 {
-    if (brls::ScrollingFrame* frame = find_scroll(screen))
-        for (brls::View* child : frame->getChildren())
-            if (auto* column = dynamic_cast<brls::Box*>(child))
+    if (aurore::ScrollingFrame* frame = find_scroll(screen))
+        for (aurore::View* child : frame->getChildren())
+            if (auto* column = dynamic_cast<aurore::Box*>(child))
                 this->box = column;
     if (!this->box)
         return;
@@ -419,7 +419,7 @@ cadran::List::List(brls::View* screen, bool sub_screen)
         this->box->setPadding(16, 48, 36, 32);
 }
 
-cadran::List::List(brls::View* screen, brls::Box* column)
+cadran::List::List(aurore::View* screen, aurore::Box* column)
     : tab(screen)
     , box(column)
 {
@@ -434,7 +434,7 @@ void cadran::List::state(const char* id, const char* color_key)
         auto* mark = static_cast<kit::Mark*>(view);
         if (color_key)
             mark->set(color_key);
-        mark->setVisibility(color_key ? brls::Visibility::VISIBLE : brls::Visibility::GONE);
+        mark->setVisibility(color_key ? aurore::Visibility::VISIBLE : aurore::Visibility::GONE);
     }
 }
 
@@ -444,27 +444,27 @@ void cadran::List::tag(const char* id, const std::string& text, bool warn, const
     {
         if (cell != this->tab->getView(id))
             continue;
-        auto* words = static_cast<brls::Label*>(pill->getChildren()[0]);
+        auto* words = static_cast<aurore::Label*>(pill->getChildren()[0]);
         words->setText(text);
         words->setThemeColor("textColor", warn ? "cadran/amber" : "cadran/pill_ok_ink");
         pill->setThemeColor("backgroundColor", warn ? "cadran/amber_surf" : "cadran/pill_ok");
         pill->setThemeColor("borderColor", warn ? "cadran/amber_line" : "cadran/none");
-        pill->setVisibility(text.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
+        pill->setVisibility(text.empty() ? aurore::Visibility::GONE : aurore::Visibility::VISIBLE);
         cell->setThemeColor("borderColor", warn && (!text.empty() || !note.empty()) ? "cadran/amber_line" : "cadran/line");
         // The note: the view right after the pill (tiles()).
         const auto& children = cell->getChildren();
         const auto at        = std::find(children.begin(), children.end(), pill);
         if (at != children.end() && at + 1 != children.end())
-            if (auto* under = dynamic_cast<brls::Label*>(*(at + 1)))
+            if (auto* under = dynamic_cast<aurore::Label*>(*(at + 1)))
             {
                 under->setText(note);
                 under->setThemeColor("textColor", warn ? "cadran/amber" : "cadran/text3");
-                under->setVisibility(note.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
+                under->setVisibility(note.empty() ? aurore::Visibility::GONE : aurore::Visibility::VISIBLE);
             }
     }
 }
 
-brls::Box* cadran::List::head(const char* id) const
+aurore::Box* cadran::List::head(const char* id) const
 {
     for (const auto& [cell, head] : this->heads)
         if (cell == this->tab->getView(id))
@@ -472,16 +472,16 @@ brls::Box* cadran::List::head(const char* id) const
     return nullptr;
 }
 
-brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const char*>>& cells, bool status)
+aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const char*>>& cells, bool status)
 {
     if (!this->box || cells.empty())
         return nullptr;
-    brls::View* first = this->tab->getView(cells[0].first);
-    const int at      = first ? index_in(this->box, first) : -1;
+    aurore::View* first = this->tab->getView(cells[0].first);
+    const int at        = first ? index_in(this->box, first) : -1;
     if (at < 0)
         return nullptr;
-    auto* row = new brls::Box(brls::Axis::ROW);
-    row->setAlignItems(brls::AlignItems::STRETCH);
+    auto* row = new aurore::Box(aurore::Axis::ROW);
+    row->setAlignItems(aurore::AlignItems::STRETCH);
     row->setMarginBottom(12);
     // Spaced by the row, not by the tiles' margins: a hidden tile (hekate
     // without its update.bin) leaves no gap behind.
@@ -489,18 +489,18 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
     this->box->addView(row, at);
     for (size_t i = 0; i < cells.size(); i++)
     {
-        auto* cell = dynamic_cast<brls::DetailCell*>(this->tab->getView(cells[i].first));
+        auto* cell = dynamic_cast<aurore::DetailCell*>(this->tab->getView(cells[i].first));
         if (!cell)
             continue;
         move_to(cell, row);
-        cell->setAxis(brls::Axis::COLUMN);
-        cell->setAlignItems(brls::AlignItems::STRETCH);
-        cell->setJustifyContent(brls::JustifyContent::FLEX_START);
+        cell->setAxis(aurore::Axis::COLUMN);
+        cell->setAlignItems(aurore::AlignItems::STRETCH);
+        cell->setJustifyContent(aurore::JustifyContent::FLEX_START);
         cell->setGrow(1.0f);
         cell->setWidth(0);
         // At least this tall, taller when a title takes two lines (larger
         // text); an action tile as tall as its line (and its words, if any).
-        cell->setHeight(brls::View::AUTO);
+        cell->setHeight(aurore::View::AUTO);
         cell->setMinHeight(status ? 128 : 0);
         if (status)
             this->readings.push_back(cell);
@@ -517,13 +517,13 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         cell->setLineBottom(0);
         // The icon on its own line above a status tile's title; before an
         // action tile's, on the same line.
-        auto* head = new brls::Box(brls::Axis::ROW);
-        head->setAlignItems(brls::AlignItems::CENTER);
+        auto* head = new aurore::Box(aurore::Axis::ROW);
+        head->setAlignItems(aurore::AlignItems::CENTER);
         head->setMarginBottom(status ? 10 : 0);
         // A tile's ink: its icon, and an action tile's light (TileGlow).
-        const size_t inks = sizeof(TILE_INKS) / sizeof(TILE_INKS[0]);
-        const char* ink   = TILE_INKS[i % inks];
-        brls::View* icon  = make_icon(cells[i].second, ACTION_ICON, ink);
+        const size_t inks  = sizeof(TILE_INKS) / sizeof(TILE_INKS[0]);
+        const char* ink    = TILE_INKS[i % inks];
+        aurore::View* icon = make_icon(cells[i].second, ACTION_ICON, ink);
         head->addView(icon);
         cell->addView(head, 0);
         this->heads.push_back({ cell, head });
@@ -541,7 +541,7 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         cell->title->setFontSize(status ? kit::TEXT_META : kit::TEXT_BODY);
         if (status)
             cell->title->setThemeColor("textColor", "cadran/text3");
-        cell->detail->setHorizontalAlign(brls::HorizontalAlign::LEFT);
+        cell->detail->setHorizontalAlign(aurore::HorizontalAlign::LEFT);
         cell->detail->setMaxWidth(10000);
         cell->detail->setFontSize(status ? 22.0f : kit::TEXT_META);
         cell->detail->setMarginTop(status ? 4 : 2);
@@ -558,14 +558,14 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
         if (status)
         {
             // Its value after a mark of its state (state()), hidden until set.
-            auto* value = new brls::Box(brls::Axis::ROW);
-            value->setAlignItems(brls::AlignItems::CENTER);
+            auto* value = new aurore::Box(aurore::Axis::ROW);
+            value->setAlignItems(aurore::AlignItems::CENTER);
             value->setMarginTop(4);
             cell->detail->setMarginTop(0);
             auto* mark = new kit::Mark("cadran/text3");
             mark->setMarginRight(10);
             mark->setShrink(0);
-            mark->setVisibility(brls::Visibility::GONE);
+            mark->setVisibility(aurore::Visibility::GONE);
             const int detail_at = index_in(cell, cell->detail);
             cell->removeView(cell->detail, false);
             value->addView(mark);
@@ -574,22 +574,22 @@ brls::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const ch
             this->marks.push_back({ cell, mark });
             // Its pill under the value (tag()), hidden until set: as wide as
             // its words, which wrap rather than end in "…".
-            auto* pill = new brls::Box(brls::Axis::ROW);
-            pill->setAlignSelf(brls::AlignSelf::FLEX_START);
-            pill->setAlignItems(brls::AlignItems::CENTER);
+            auto* pill = new aurore::Box(aurore::Axis::ROW);
+            pill->setAlignSelf(aurore::AlignSelf::FLEX_START);
+            pill->setAlignItems(aurore::AlignItems::CENTER);
             pill->setMarginTop(10);
             pill->setPadding(4, 12, 5, 12);
             pill->setCornerRadius(13);
             pill->setBorderThickness(1);
-            pill->setVisibility(brls::Visibility::GONE);
-            brls::Label* words = kit::label("", kit::TEXT_META, "cadran/text2");
+            pill->setVisibility(aurore::Visibility::GONE);
+            aurore::Label* words = kit::label("", kit::TEXT_META, "cadran/text2");
             words->setSingleLine(false);
             pill->addView(words);
             cell->addView(pill, detail_at + 1);
-            brls::Label* note = kit::label("", kit::TEXT_META, "cadran/text3");
+            aurore::Label* note = kit::label("", kit::TEXT_META, "cadran/text3");
             note->setSingleLine(false);
             note->setMarginTop(6);
-            note->setVisibility(brls::Visibility::GONE);
+            note->setVisibility(aurore::Visibility::GONE);
             cell->addView(note, detail_at + 2);
             this->tags.push_back({ cell, pill });
         }
@@ -602,11 +602,11 @@ void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>&
     if (!this->box)
         return;
     // Marks the column as dressed (the screens' skin leaves it alone).
-    auto* mark = new brls::Box();
+    auto* mark = new aurore::Box();
     mark->setId("cadran_list");
-    mark->setVisibility(brls::Visibility::GONE);
+    mark->setVisibility(aurore::Visibility::GONE);
     this->box->addView(mark);
-    const auto icon_of = [this, &icons](brls::View* cell) -> const char*
+    const auto icon_of = [this, &icons](aurore::View* cell) -> const char*
     {
         for (const auto& [id, icon] : icons)
             if (this->tab->getView(id) == cell)
@@ -614,24 +614,24 @@ void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>&
         return nullptr;
     };
 
-    Card* card                           = nullptr; // the card the next cell joins, while cells follow each other
-    const std::vector<brls::View*> lines = this->box->getChildren();
-    for (brls::View* line : lines)
+    Card* card                             = nullptr; // the card the next cell joins, while cells follow each other
+    const std::vector<aurore::View*> lines = this->box->getChildren();
+    for (aurore::View* line : lines)
     {
         Card* above = card; // the card just before this line, if any
-        if (auto* header = dynamic_cast<brls::Header*>(line))
+        if (auto* header = dynamic_cast<aurore::Header*>(line))
         {
             card = nullptr;
             this->headers.push_back(header);
             section(header);
             continue;
         }
-        auto* cell = dynamic_cast<brls::DetailCell*>(line);
+        auto* cell = dynamic_cast<aurore::DetailCell*>(line);
         if (!cell)
         {
             card = nullptr;
             // A note (a headline, larger, keeps its size).
-            if (auto* note = dynamic_cast<brls::Label*>(line); note && note->getFontSize() <= 20.5f)
+            if (auto* note = dynamic_cast<aurore::Label*>(line); note && note->getFontSize() <= 20.5f)
             {
                 note->setFontSize(kit::TEXT_NOTE);
                 note->setMarginLeft(0);
@@ -668,21 +668,21 @@ void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>&
         move_to(cell, card);
         row(cell, icon_of(cell));
     }
-    for (brls::View* line : this->box->getChildren())
+    for (aurore::View* line : this->box->getChildren())
         if (auto* c = dynamic_cast<Card*>(line))
             c->follow_rows();
     this->sync();
     // The screen's lines rise into place one after the other, the first
     // ones only (the rest are below the fold, or come as they are): its top
     // board, its tile rows and its cards. A kicker is a label: left as it is.
-    std::vector<brls::View*> rising;
-    for (brls::View* line : this->box->getChildren())
-        if (dynamic_cast<brls::Box*>(line) && line->getId() != "cadran_list")
+    std::vector<aurore::View*> rising;
+    for (aurore::View* line : this->box->getChildren())
+        if (dynamic_cast<aurore::Box*>(line) && line->getId() != "cadran_list")
             rising.push_back(line);
     motion::reveal_all(rising);
 }
 
-void cadran::List::section(brls::Header* header)
+void cadran::List::section(aurore::Header* header)
 {
     header->setLineBottom(0);
     header->setPaddingTop(0);
@@ -692,13 +692,13 @@ void cadran::List::section(brls::Header* header)
     if (margin_top(header) > 0)
         header->setMarginTop(26);
     if (!header->getChildren().empty())
-        header->getChildren()[0]->setVisibility(brls::Visibility::GONE); // the bar
+        header->getChildren()[0]->setVisibility(aurore::Visibility::GONE); // the bar
     // A kicker: read from across the room (its capitals: sync()).
     for (const char* part : { "brls/header/title", "brls/header/subtitle" })
-        kit::set_kicker(dynamic_cast<brls::Label*>(header->getView(part)));
+        kit::set_kicker(dynamic_cast<aurore::Label*>(header->getView(part)));
 }
 
-void cadran::List::row(brls::DetailCell* cell, const char* icon, bool alone)
+void cadran::List::row(aurore::DetailCell* cell, const char* icon, bool alone)
 {
     cell->setHeight(60);
     cell->setPaddingLeft(ROW_PAD_ICON);
@@ -712,9 +712,9 @@ void cadran::List::row(brls::DetailCell* cell, const char* icon, bool alone)
         cell->addView(row_icon(icon), 0);
     else
         cell->setPaddingLeft(ROW_PAD);
-    if (auto* toggle = dynamic_cast<brls::BooleanCell*>(cell))
+    if (auto* toggle = dynamic_cast<aurore::BooleanCell*>(cell))
     {
-        toggle->detail->setVisibility(brls::Visibility::GONE);
+        toggle->detail->setVisibility(aurore::Visibility::GONE);
         toggle->addView(new Switch(toggle));
     }
     if (alone)
@@ -727,20 +727,20 @@ void cadran::List::row(brls::DetailCell* cell, const char* icon, bool alone)
     }
 }
 
-void cadran::List::row_image(brls::DetailCell* cell, const std::string& image)
+void cadran::List::row_image(aurore::DetailCell* cell, const std::string& image)
 {
     row(cell);
     cell->setPaddingLeft(ROW_PAD_ICON);
     // In a box as row_icon()'s square, so the rows' lines start after it too.
-    auto* square = new brls::Box(brls::Axis::ROW);
+    auto* square = new aurore::Box(aurore::Axis::ROW);
     square->setWidth(ICON_SQUARE);
     square->setHeight(ICON_SQUARE);
     square->setShrink(0);
-    square->setAlignItems(brls::AlignItems::CENTER);
-    square->setJustifyContent(brls::JustifyContent::CENTER);
+    square->setAlignItems(aurore::AlignItems::CENTER);
+    square->setJustifyContent(aurore::JustifyContent::CENTER);
     square->setMarginRight(ICON_GAP);
-    auto* picture = new brls::Image();
-    picture->setScalingType(brls::ImageScalingType::FIT);
+    auto* picture = new aurore::Image();
+    picture->setScalingType(aurore::ImageScalingType::FIT);
     picture->setImageFromRes(image);
     picture->setWidth(30);
     picture->setHeight(30);
@@ -748,7 +748,7 @@ void cadran::List::row_image(brls::DetailCell* cell, const std::string& image)
     cell->addView(square, 0);
 }
 
-void cadran::List::row_swatch(brls::DetailCell* cell, const CadranSwatch::Colors& colors)
+void cadran::List::row_swatch(aurore::DetailCell* cell, const CadranSwatch::Colors& colors)
 {
     row(cell);
     cell->setPaddingLeft(ROW_PAD_ICON);
@@ -761,13 +761,13 @@ void cadran::List::row_swatch(brls::DetailCell* cell, const CadranSwatch::Colors
     cell->addView(swatch, 0);
 }
 
-void cadran::List::recolor_icon(brls::DetailCell* cell, const char* icon, const char* color_key, const char* square_key)
+void cadran::List::recolor_icon(aurore::DetailCell* cell, const char* icon, const char* color_key, const char* square_key)
 {
-    auto* square = cell && !cell->getChildren().empty() ? dynamic_cast<brls::Box*>(cell->getChildren()[0]) : nullptr;
+    auto* square = cell && !cell->getChildren().empty() ? dynamic_cast<aurore::Box*>(cell->getChildren()[0]) : nullptr;
     if (!square)
         return; // a row without its icon
     square->setThemeColor("backgroundColor", square_key ? square_key : "cadran/surf2");
-    for (brls::View* v : square->getChildren())
+    for (aurore::View* v : square->getChildren())
         if (auto* glyph = dynamic_cast<CadranIcon*>(v))
         {
             if (icon)
@@ -776,11 +776,11 @@ void cadran::List::recolor_icon(brls::DetailCell* cell, const char* icon, const 
         }
 }
 
-brls::Box* cadran::List::rows_in(brls::Box* list)
+aurore::Box* cadran::List::rows_in(aurore::Box* list)
 {
     if (!list)
         return list;
-    for (brls::View* child : list->getChildren())
+    for (aurore::View* child : list->getChildren())
         if (auto* card = dynamic_cast<Card*>(child))
             return card;
     auto* card = new Card();
@@ -790,8 +790,8 @@ brls::Box* cadran::List::rows_in(brls::Box* list)
 
 cadran::Card* cadran::List::wrap(const char* id)
 {
-    brls::View* line = this->box ? this->tab->getView(id) : nullptr;
-    const int at     = line ? index_in(this->box, line) : -1;
+    aurore::View* line = this->box ? this->tab->getView(id) : nullptr;
+    const int at       = line ? index_in(this->box, line) : -1;
     if (at < 0)
         return nullptr;
     auto* card = new Card();
@@ -803,15 +803,15 @@ cadran::Card* cadran::List::wrap(const char* id)
 
 cadran::Card* cadran::List::card_of(const char* id) const
 {
-    brls::View* view = this->tab->getView(id);
+    aurore::View* view = this->tab->getView(id);
     return view ? dynamic_cast<Card*>(view->getParent()) : nullptr;
 }
 
 void cadran::List::sync()
 {
-    for (brls::Header* header : this->headers)
+    for (aurore::Header* header : this->headers)
     {
-        auto* text = dynamic_cast<brls::Label*>(header->getView("brls/header/title"));
+        auto* text = dynamic_cast<aurore::Label*>(header->getView("brls/header/title"));
         if (!text)
             continue;
         const std::string title    = text->getFullText();
@@ -819,9 +819,9 @@ void cadran::List::sync()
         if (capitals != title)
             text->setText(capitals);
     }
-    brls::Theme theme      = brls::Application::getTheme();
+    aurore::Theme theme    = aurore::Application::getTheme();
     const NVGcolor neutral = theme["brls/list/listItem_value_color"];
-    for (brls::DetailCell* cell : this->readings)
+    for (aurore::DetailCell* cell : this->readings)
     {
         // A reading that also opens something: the tile is the way in, no "›".
         const std::string value = cell->detail->getFullText();

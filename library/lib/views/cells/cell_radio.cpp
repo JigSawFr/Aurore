@@ -16,7 +16,7 @@
 
 #include "aurore/views/cells/cell_radio.hpp"
 
-namespace brls
+namespace aurore
 {
 
 const std::string radioCellXML = R"xml(
@@ -125,4 +125,4 @@ View* RadioCell::create()
     return new RadioCell();
 }
 
-} // namespace brls
+} // namespace aurore

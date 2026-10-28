@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace brls
+namespace aurore
 {
 
 template <typename T>

@@ -10,7 +10,7 @@
 #include "aurore/core/application.hpp"
 #include "aurore/views/cells/cell_radio.hpp"
 
-namespace brls
+namespace aurore
 {
 
 const std::string dropdownFrameXML = R"xml(
@@ -227,4 +227,4 @@ void Dropdown::offsetTick()
     content->setTranslationY(showOffset);
 }
 
-} // namespace brls
+} // namespace aurore

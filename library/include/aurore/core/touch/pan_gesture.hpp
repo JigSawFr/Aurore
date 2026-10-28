@@ -19,7 +19,7 @@
 #include <aurore/core/event.hpp>
 #include <aurore/core/gesture.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Contains info about acceleration on pan ends
@@ -90,4 +90,4 @@ class PanGestureRecognizer : public GestureRecognizer
     GestureState lastState = GestureState::FAILED;
 };
 
-} // namespace brls
+} // namespace aurore

@@ -23,7 +23,7 @@
 #include <aurore/views/recycler.hpp>
 #include <aurore/views/slider.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class SliderCell : public DetailCell
@@ -45,4 +45,4 @@ class SliderCell : public DetailCell
     AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::SLIDER; }
 };
 
-} // namespace brls
+} // namespace aurore

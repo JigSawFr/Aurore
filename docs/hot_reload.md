@@ -6,7 +6,7 @@ On a desktop, the screen shown is built again when one of its XML files, or the 
 
 It is off unless asked for:
 
-- in code, after `init()`: `brls::Application::setHotReload(true);` or `setHotReload(true, "/path/to/my_app/resources");`
+- in code, after `init()`: `aurore::Application::setHotReload(true);` or `setHotReload(true, "/path/to/my_app/resources");`
 - for one run: `BRLS_HOT_RELOAD=1 ./my_app`, or `BRLS_HOT_RELOAD=/path/to/my_app/resources ./my_app`, in a build with the debugging aids (below).
 
 The environment variables of the debugging aids (`BRLS_HOT_RELOAD`, `BRLS_INSPECTOR`, `BRLS_REDRAW_DEBUG`, `BRLS_PROFILE` and Cadran's `BRLS_` flags) are read only in a build made with `BRLS_DEV_TOOLS`. It is `AUTO` by default: on, except in `Release` and `MinSizeRel` builds, so an app given to its users does not read its screens from a folder an environment variable names. `-DBRLS_DEV_TOOLS=ON` keeps them in a release build (a simulator built in `Release`), `OFF` leaves them out of every build. The functions (`setHotReload`, `setInspectorEnabled`...) work in every build.

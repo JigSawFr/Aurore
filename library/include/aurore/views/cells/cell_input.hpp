@@ -23,7 +23,7 @@
 #include <aurore/views/cells/cell_detail.hpp>
 #include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class InputCell : public DetailCell
@@ -126,4 +126,4 @@ class InputNumericCell : public DetailCell
     AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::TEXT_FIELD; }
 };
 
-} // namespace brls
+} // namespace aurore

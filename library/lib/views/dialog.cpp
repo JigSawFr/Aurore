@@ -21,11 +21,11 @@
 #include <aurore/views/dialog.hpp>
 #include <aurore/views/label.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 // TODO: different open animation?
 
-namespace brls
+namespace aurore
 {
 
 const std::string dialogXML = R"xml(
@@ -328,4 +328,4 @@ Dialog::~Dialog()
     }
 }
 
-} // namespace brls
+} // namespace aurore

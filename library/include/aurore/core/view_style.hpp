@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <string>
 
-namespace brls
+namespace aurore
 {
 
 // The states a view can be styled for (focus:backgroundColor="…" in XML,
@@ -101,4 +101,4 @@ std::string accessibilityRoleWord(AccessibilityRole role);
 std::string accessibilityStateWord(const std::string& state);
 std::string accessibilityPercent(float fraction);
 
-} // namespace brls
+} // namespace aurore

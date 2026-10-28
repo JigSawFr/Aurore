@@ -17,7 +17,7 @@
 
 #include <aurore/views/header.hpp>
 
-namespace brls
+namespace aurore
 {
 
 const std::string headerXML = R"xml(
@@ -83,4 +83,4 @@ View* Header::create()
     return new Header();
 }
 
-} // namespace brls
+} // namespace aurore

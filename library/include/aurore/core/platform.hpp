@@ -28,7 +28,7 @@
 #include <aurore/core/theme.hpp>
 #include <aurore/core/video.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Interface to provide everything platform specific required to run borealis: graphics context, inputs, audio...
@@ -301,4 +301,4 @@ class Platform
     static inline std::function<Platform*()> factory;
 };
 
-} // namespace brls
+} // namespace aurore

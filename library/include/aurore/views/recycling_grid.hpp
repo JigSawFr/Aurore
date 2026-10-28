@@ -29,7 +29,7 @@
 #include <aurore/views/h_scrolling_frame.hpp>
 #include <aurore/views/scrolling_frame.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class RecyclingView;
@@ -308,4 +308,4 @@ class HRecyclerFrame : public HScrollingFrame, public RecyclingView
     float oldHeight = -1;
 };
 
-} // namespace brls
+} // namespace aurore

@@ -20,7 +20,7 @@
 #include <aurore/core/audio.hpp>
 #include <aurore/core/input.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class View;
@@ -91,4 +91,4 @@ class GestureRecognizer
     bool enabled       = true;
 };
 
-} // namespace brls
+} // namespace aurore

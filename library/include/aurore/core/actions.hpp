@@ -21,7 +21,7 @@
 #include <aurore/core/audio.hpp>
 #include <aurore/core/input.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class View;
@@ -30,31 +30,31 @@ typedef std::function<bool(View*)> ActionListener;
 
 typedef int ActionIdentifier;
 
-typedef int BrlsKeyCode;
+typedef int AuroreKeyCode;
 
-struct BrlsKeyCombination
+struct AuroreKeyCombination
 {
-    BrlsKeyboardScancode code;
+    AuroreKeyboardScancode code;
     int mod {};
 
-    explicit BrlsKeyCombination(const int key)
+    explicit AuroreKeyCombination(const int key)
     {
         if (key == BRLS_KBD_KEY_UNKNOWN)
         {
             code = BRLS_KBD_KEY_UNKNOWN;
             return;
         }
-        code = static_cast<BrlsKeyboardScancode>(key & 0xFFFF);
-        mod  = static_cast<BrlsKeyboardModifiers>((key >> 16) & 0xFFFF);
+        code = static_cast<AuroreKeyboardScancode>(key & 0xFFFF);
+        mod  = static_cast<AuroreKeyboardModifiers>((key >> 16) & 0xFFFF);
     }
 
-    BrlsKeyCombination(const BrlsKeyboardScancode code)
+    AuroreKeyCombination(const AuroreKeyboardScancode code)
         : code(code)
         , mod(BRLS_KBD_MODIFIER_NONE)
     {
     }
 
-    BrlsKeyCombination(const BrlsKeyboardScancode code, const int mod)
+    AuroreKeyCombination(const AuroreKeyboardScancode code, const int mod)
         : code(code)
         , mod(mod)
     {
@@ -76,15 +76,15 @@ struct BrlsKeyCombination
     }
 };
 
-class BrlsKeyState
+class AuroreKeyState
 {
   public:
-    explicit BrlsKeyState(const BrlsKeyCombination keyComb)
+    explicit AuroreKeyState(const AuroreKeyCombination keyComb)
         : key(keyComb)
     {
     }
 
-    BrlsKeyCombination key;
+    AuroreKeyCombination key;
     bool pressed {};
     Time repeatingStop {};
 
@@ -93,7 +93,7 @@ class BrlsKeyState
         return this->key.mod;
     }
 
-    [[nodiscard]] BrlsKeyboardScancode getScancode() const
+    [[nodiscard]] AuroreKeyboardScancode getScancode() const
     {
         return this->key.code;
     }
@@ -132,7 +132,7 @@ class Action
         return this->type == ACTION_GAMEPAD && this->button == other;
     }
 
-    virtual bool operator==(const BrlsKeyCode other) const
+    virtual bool operator==(const AuroreKeyCode other) const
     {
         return this->type == ACTION_KEYBOARD && this->button == other;
     }
@@ -212,7 +212,7 @@ class Action
 class KeyboardAction final : public Action
 {
   public:
-    KeyboardAction(const BrlsKeyCode button, const ActionIdentifier identifier, const std::string& hintText,
+    KeyboardAction(const AuroreKeyCode button, const ActionIdentifier identifier, const std::string& hintText,
         const bool available, const bool hidden, const bool allowRepeating, const Sound sound, const ActionListener& actionListener)
         : Action(button, identifier, hintText, available, hidden, allowRepeating, sound, actionListener)
     {
@@ -231,4 +231,4 @@ class GamepadAction final : public Action
     }
 };
 
-} // namespace brls
+} // namespace aurore

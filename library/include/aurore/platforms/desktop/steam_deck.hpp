@@ -22,7 +22,7 @@ limitations under the License.
 
 #include <string>
 
-namespace brls
+namespace aurore
 {
 
 /**

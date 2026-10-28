@@ -48,19 +48,19 @@
         if (enumMap.count(value) > 0)                                                    \
             method(enumMap[value]);                                                      \
         else                                                                             \
-            brls::View::fatalXML("Illegal value \"" + value + "\" for XML attribute \"" + name + "\"; expected " + brls::View::listXMLValues(enumMap)); })
+            aurore::View::fatalXML("Illegal value \"" + value + "\" for XML attribute \"" + name + "\"; expected " + aurore::View::listXMLValues(enumMap)); })
 
 /// Shortcut to register an A key action (generic click) on a view given its id, that calls any function or method
 /// To be used in activities or derivates of Box (internally uses the getView() method)
-/// The function or method must return a boolean (true if the action was consumed, false otherwise) and take a single brls::View*
+/// The function or method must return a boolean (true if the action was consumed, false otherwise) and take a single aurore::View*
 /// parameter (useful to know what was clicked if you use the same listener for multiple views)
 #define BRLS_REGISTER_CLICK_BY_ID(id, method) \
-    this->getView(id)->registerClickAction([this](brls::View* view) { return method(view); })
+    this->getView(id)->registerClickAction([this](aurore::View* view) { return method(view); })
 
 /// Deprecated: capture View::aliveToken() instead. Kept for older code: they
 /// now wrap it, with no counter to keep balanced, so a callback run twice, or
 /// after the view is deleted, does nothing. ASYNC_RELEASE is to be used on the
-/// UI thread (in brls::sync()), where views are deleted.
+/// UI thread (in aurore::sync()), where views are deleted.
 #define ASYNC_RETAIN auto token = this->aliveToken();
 
 /// See ASYNC_RETAIN.
@@ -85,7 +85,7 @@ class XMLElement;
 struct YGNode;
 struct YGConfig;
 
-namespace brls
+namespace aurore
 {
 
 const NVGcolor TRANSPARENT = nvgRGBA(0, 0, 0, 0);
@@ -498,7 +498,7 @@ class View
     // -----------------------------------------------------------
 
     /**
-     * Sets the preferred width of the view. Use brls::View::AUTO
+     * Sets the preferred width of the view. Use aurore::View::AUTO
      * to have the layout automatically resize the view.
      *
      * If set to anything else than AUTO, the view is guaranteed
@@ -507,7 +507,7 @@ class View
     void setWidth(float width);
 
     /**
-     * Sets the preferred height of the view. Use brls::View::AUTO
+     * Sets the preferred height of the view. Use aurore::View::AUTO
      * to have the layout automatically resize the view.
      *
      * If set to anything else than AUTO, the view is guaranteed
@@ -516,7 +516,7 @@ class View
     void setHeight(float height);
 
     /**
-     * Sets the preferred width and height of the view. Use brls::View::AUTO
+     * Sets the preferred width and height of the view. Use aurore::View::AUTO
      * to have the layout automatically resize the view.
      *
      * If set to anything else than AUTO, the view is guaranteed
@@ -643,7 +643,7 @@ class View
      * Sets the margin of the view, aka the space that separates
      * this view and the surrounding ones in all 4 directions.
      *
-     * Use brls::View::AUTO to have the layout automatically select the
+     * Use aurore::View::AUTO to have the layout automatically select the
      * margin.
      *
      * Only works with views that have parents - top level views that are pushed
@@ -660,7 +660,7 @@ class View
      * Only works with views that have parents - top level views that are pushed
      * on the stack don't have parents.
      *
-     * Use brls::View::AUTO to have the layout automatically select the
+     * Use aurore::View::AUTO to have the layout automatically select the
      * margin.
      */
     void setMarginTop(float top);
@@ -672,7 +672,7 @@ class View
      * Only works with views that have parents - top level views that are pushed
      * on the stack don't have parents.
      *
-     * Use brls::View::AUTO to have the layout automatically select the
+     * Use aurore::View::AUTO to have the layout automatically select the
      * margin.
      */
     void setMarginRight(float right);
@@ -687,7 +687,7 @@ class View
      * Only works with views that have parents - top level views that are pushed
      * on the stack don't have parents.
      *
-     * Use brls::View::AUTO to have the layout automatically select the
+     * Use aurore::View::AUTO to have the layout automatically select the
      * margin.
      */
     void setMarginBottom(float right);
@@ -699,7 +699,7 @@ class View
      * Only works with views that have parents - top level views that are pushed
      * on the stack don't have parents.
      *
-     * Use brls::View::AUTO to have the layout automatically select the
+     * Use aurore::View::AUTO to have the layout automatically select the
      * margin.
      */
     void setMarginLeft(float left);
@@ -1386,9 +1386,9 @@ class View
     ActionIdentifier registerAction(const std::string& hintText, ControllerButton button, const ActionListener& actionListener, bool hidden = false, bool allowRepeating = false, enum Sound sound = SOUND_NONE);
 
     /// An action on a keyboard key (a combination with modifiers): no hint, no sound.
-    ActionIdentifier registerAction(BrlsKeyCombination key, const ActionListener& actionListener, bool allowRepeating = false);
+    ActionIdentifier registerAction(AuroreKeyCombination key, const ActionListener& actionListener, bool allowRepeating = false);
 
-    void func(BrlsKeyCombination key);
+    void func(AuroreKeyCombination key);
 
     /**
      * Unregisters an action with the given identifier.
@@ -1771,9 +1771,9 @@ class View
      * to the view from another thread captures it by value and checks it on
      * the UI thread, before it touches the view:
      *
-     *   brls::async([this, alive = aliveToken()] {
+     *   aurore::async([this, alive = aliveToken()] {
      *       auto result = work(); // not `this`: the view may be gone
-     *       brls::sync([this, alive, result] {
+     *       aurore::sync([this, alive, result] {
      *           if (alive.expired())
      *               return;
      *           ...
@@ -2016,4 +2016,4 @@ class View
     std::unique_ptr<std::vector<ThemeColor>> themeColors;
 };
 
-} // namespace brls
+} // namespace aurore

@@ -21,7 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <aurore/core/logger.hpp>
 #include <aurore/core/notification_manager.hpp>
 
-namespace brls
+namespace aurore
 {
 
 NotificationManager::NotificationManager()
@@ -35,7 +35,7 @@ NotificationManager::NotificationManager()
 void NotificationManager::notify(const std::string& text, View* leading)
 {
     // Create the notification
-    brls::Logger::debug("Showing notification \"{}\"", text);
+    aurore::Logger::debug("Showing notification \"{}\"", text);
 
     auto* notification = new Notification(text, leading);
     this->addView(notification, 0);
@@ -112,4 +112,4 @@ Notification::Notification(const std::string& text, View* leading)
 
 Notification::~Notification() = default;
 
-}; // namespace brls
+}; // namespace aurore

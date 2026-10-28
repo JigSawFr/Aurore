@@ -16,7 +16,7 @@
 
 #include <aurore/core/timer.hpp>
 
-namespace brls
+namespace aurore
 {
 
 void Timer::start(Time duration)
@@ -96,4 +96,4 @@ bool RepeatingTimer::onUpdate(Time delta)
     return true; // never stop
 }
 
-} // namespace brls
+} // namespace aurore

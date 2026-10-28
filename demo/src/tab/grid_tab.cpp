@@ -18,7 +18,7 @@
 
 #include <array>
 
-using namespace brls::literals; // for _i18n
+using namespace aurore::literals; // for _i18n
 
 namespace
 {
@@ -27,7 +27,7 @@ const std::array<const char*, 9> ids = { "amber", "coral", "jade", "lapis", "ony
 // A gem's name in the language shown
 std::string gemName(size_t index)
 {
-    return brls::getStr(std::string("demo/gems/") + ids[index % ids.size()]);
+    return aurore::getStr(std::string("demo/gems/") + ids[index % ids.size()]);
 }
 
 constexpr size_t PAGE      = 24;
@@ -64,12 +64,12 @@ const std::string pictureCellXML = R"xml(
 )xml";
 
 // The row: always the same 40 thumbnails
-class RowSource : public brls::RecyclingGridDataSource
+class RowSource : public aurore::RecyclingGridDataSource
 {
   public:
     size_t getItemCount() override { return 40; }
 
-    brls::RecyclingGridItem* cellForRow(brls::RecyclingView* recycler, size_t index) override
+    aurore::RecyclingGridItem* cellForRow(aurore::RecyclingView* recycler, size_t index) override
     {
         auto* cell = (PictureCell*)recycler->dequeueReusableCell("Picture");
         cell->image->setImageFromRes(std::string("img/gallery/thumbnails/") + ids[index % ids.size()] + ".png");
@@ -77,9 +77,9 @@ class RowSource : public brls::RecyclingGridDataSource
         return cell;
     }
 
-    void onItemSelected(brls::View* recycler, size_t index) override
+    void onItemSelected(aurore::View* recycler, size_t index) override
     {
-        brls::Application::notify(gemName(index) + " (#" + std::to_string(index + 1) + ")");
+        aurore::Application::notify(gemName(index) + " (#" + std::to_string(index + 1) + ")");
     }
 };
 }
@@ -89,11 +89,11 @@ PictureCell::PictureCell()
     this->inflateFromXMLString(pictureCellXML);
 
     // X or a long press: the item's menu, next to it
-    brls::ContextMenu::attach(this, [this](brls::ContextMenu* menu)
+    aurore::ContextMenu::attach(this, [this](aurore::ContextMenu* menu)
         {
         std::string name = gemName(this->getIndex());
         auto chosen      = [name](const std::string& what) {
-            return [name, what]() { brls::Application::notify(name + ": " + what); };
+            return [name, what]() { aurore::Application::notify(name + ": " + what); };
         };
         menu->setTitle(name);
         menu->addItem("demo/components/menu_open"_i18n, chosen("demo/components/menu_open"_i18n), "\uE89E");
@@ -112,7 +112,7 @@ PictureCell* PictureCell::create()
     return new PictureCell();
 }
 
-brls::RecyclingGridItem* PictureSource::cellForRow(brls::RecyclingView* recycler, size_t index)
+aurore::RecyclingGridItem* PictureSource::cellForRow(aurore::RecyclingView* recycler, size_t index)
 {
     auto* cell = (PictureCell*)recycler->dequeueReusableCell("Picture");
     cell->image->setImageFromRes(std::string("img/gallery/") + ids[index % ids.size()] + ".png");
@@ -120,9 +120,9 @@ brls::RecyclingGridItem* PictureSource::cellForRow(brls::RecyclingView* recycler
     return cell;
 }
 
-void PictureSource::onItemSelected(brls::View* recycler, size_t index)
+void PictureSource::onItemSelected(aurore::View* recycler, size_t index)
 {
-    brls::Application::notify(gemName(index) + " (#" + std::to_string(index + 1) + ")");
+    aurore::Application::notify(gemName(index) + " (#" + std::to_string(index + 1) + ")");
 }
 
 GridTab::GridTab()
@@ -154,8 +154,8 @@ void GridTab::loadMore()
         return;
 
     std::weak_ptr<bool> alive = this->alive;
-    brls::delay(400, [this, alive]()
-        { brls::sync([this, alive]()
+    aurore::delay(400, [this, alive]()
+        { aurore::sync([this, alive]()
               {
             if (alive.expired())
                 return;
@@ -166,10 +166,10 @@ void GridTab::loadMore()
 
 void GridTab::updateHeader()
 {
-    this->gridHeader->setSubtitle(brls::getStr("demo/grid/grid_subtitle", this->gridSource->count, MAX_ITEMS));
+    this->gridHeader->setSubtitle(aurore::getStr("demo/grid/grid_subtitle", this->gridSource->count, MAX_ITEMS));
 }
 
-brls::View* GridTab::create()
+aurore::View* GridTab::create()
 {
     return new GridTab();
 }

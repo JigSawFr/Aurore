@@ -24,9 +24,9 @@
 #include <aurore/views/dialog.hpp>
 #include <aurore/views/hint.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 const std::string appletFrameXML = R"xml(
@@ -179,7 +179,7 @@ void AppletFrame::popContentView(std::function<void(void)> cb)
         if (!Application::popActivity(TransitionAnimation::FADE, cb))
         {
 #ifndef IOS // Do not close the app in iOS
-            auto dialog = new brls::Dialog("hints/exit_hint"_i18n);
+            auto dialog = new aurore::Dialog("hints/exit_hint"_i18n);
             dialog->addButton("hints/cancel"_i18n, []() {});
             dialog->addButton("hints/ok"_i18n, []()
                 { Application::quit(); });
@@ -278,4 +278,4 @@ View* AppletFrame::create()
     return new AppletFrame();
 }
 
-} // namespace brls
+} // namespace aurore

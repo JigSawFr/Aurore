@@ -16,7 +16,7 @@
 
 #include "aurore/views/cells/cell_detail.hpp"
 
-namespace brls
+namespace aurore
 {
 
 const std::string detailCellXML = R"xml(
@@ -118,4 +118,4 @@ std::string DetailCell::getDefaultAccessibilityValue()
     return value;
 }
 
-} // namespace brls
+} // namespace aurore

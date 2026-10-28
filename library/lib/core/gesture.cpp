@@ -16,7 +16,7 @@
 
 #include <aurore/core/gesture.hpp>
 
-namespace brls
+namespace aurore
 {
 
 GestureState GestureRecognizer::recognitionLoop(TouchState touch, MouseState mouse, View* view, Sound* soundToPlay)

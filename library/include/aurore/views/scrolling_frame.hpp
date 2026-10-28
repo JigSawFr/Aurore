@@ -23,7 +23,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/rectangle.hpp>
 
-namespace brls
+namespace aurore
 {
 
 /// How a ScrollingFrame follows the focus.
@@ -152,4 +152,4 @@ class ScrollingFrame : public Box
     Event<InputType>::Subscription inputTypeSubscription;
 };
 
-} // namespace brls
+} // namespace aurore

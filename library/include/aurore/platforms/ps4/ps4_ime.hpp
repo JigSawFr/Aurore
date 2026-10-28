@@ -18,7 +18,7 @@ limitations under the License.
 
 #include <aurore/core/ime.hpp>
 
-namespace brls
+namespace aurore
 {
 class Ps4ImeManager : public ImeManager
 {

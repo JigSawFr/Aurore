@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <aurore/views/label.hpp>
 
 // TODO: check in HOS that the animation duration + notification timeout are correct
-namespace brls
+namespace aurore
 {
 
 class Notification : public Box
@@ -49,4 +49,4 @@ class NotificationManager : public Box
     void notify(const std::string& text, View* leading = nullptr);
 };
 
-}; // namespace brls
+}; // namespace aurore

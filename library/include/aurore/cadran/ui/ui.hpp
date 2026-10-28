@@ -59,7 +59,7 @@ void show_failure(const cadran_text::Failure& f);
 /// `next` in place of the current screen. Borealis never pops the first
 /// activity (the loading screen, under every start screen): a screen that
 /// cannot be popped gets `next` pushed over it instead.
-void replace_screen(brls::Activity* next);
+void replace_screen(aurore::Activity* next);
 /// Two-button dialog. Cancel (left) has the focus when it opens;
 /// `confirm_label` (right) runs `on_yes`, Cancel or B runs `on_no`.
 /// `danger`: the confirm button is drawn in the "bad" colour (see below).
@@ -91,10 +91,10 @@ struct CheckLine
     std::string text;
 };
 /// One of them: the mark, then the text (`size` px).
-brls::Box* check_row(const CheckLine& line, float size = 17);
+aurore::Box* check_row(const CheckLine& line, float size = 17);
 /// Under `title` (and `subtitle`), the lines in rounded panels, one per
 /// Header line (its name small above it); `note` with an info icon last.
-brls::Box* checklist_body(const std::string& title, const std::vector<CheckLine>& lines, const std::string& note = "",
+aurore::Box* checklist_body(const std::string& title, const std::vector<CheckLine>& lines, const std::string& note = "",
     const std::string& subtitle = "");
 /// A dialog that only says something: a badge (`icon` in `tone`'s colour),
 /// `title`, `text`, OK.
@@ -103,25 +103,25 @@ void notice(const char* icon, Check tone, const std::string& title, const std::s
 /// the button filling meanwhile, runs `on_yes`; let go sooner, it empties
 /// and nothing happens. For what is hard to undo from the console. The dialog
 /// says how itself (hold_hint, the A key for a controller): `body` need not.
-void hold_confirm(brls::Box* body, const std::string& hold_label, std::function<void()> on_yes,
+void hold_confirm(aurore::Box* body, const std::string& hold_label, std::function<void()> on_yes,
     std::function<void()> on_no = nullptr);
 
 /// A dialog showing `text`, laid out by cadran::dialog_body (its question as
 /// the title, its tables, its notes), the caller adding its buttons; a text
 /// taller than the dialog's room scrolls.
-brls::Dialog* dialog(const std::string& text);
+aurore::Dialog* dialog(const std::string& text);
 /// The same with `below` under the text, the card's width unless it aligns
 /// itself: a QR code, a code to read out, the cards to support the app.
-brls::Dialog* dialog(const std::string& text, brls::View* below);
+aurore::Dialog* dialog(const std::string& text, aurore::View* below);
 /// The same for a body already laid out (a checklist, a sheet): as it is, or
 /// in a scrolling frame when taller than the dialog's room.
-brls::Dialog* box_dialog(brls::Box* body);
+aurore::Dialog* box_dialog(aurore::Box* body);
 
 /// B closes `dialog` and runs `on_cancel` (borealis' own B only closes it).
-void on_cancel(brls::Dialog* dialog, std::function<void()> on_cancel);
+void on_cancel(aurore::Dialog* dialog, std::function<void()> on_cancel);
 /// A Cancel button and B, both closing `dialog` and running `cancel`: a
 /// dialog that waits for something (a check, an answer from the network).
-void add_cancel(brls::Dialog* dialog, std::function<void()> cancel);
+void add_cancel(aurore::Dialog* dialog, std::function<void()> cancel);
 
 /// A row's colours in pick()'s `swatches` (CadranSwatch).
 using Swatch = CadranSwatch::Colors;
@@ -195,7 +195,7 @@ struct Choice
 void pick_actions(const std::string& title, const std::vector<Choice>& choices, const std::string& subtitle = "",
     int image = 0);
 /// The sheet those open: its view, on top of the activities' stack.
-bool is_sheet(brls::View* view);
+bool is_sheet(aurore::View* view);
 
 /// The system keyboard for a text. The callback only on confirm.
 void prompt_text(const std::string& header, const std::string& initial, int max_len,
@@ -205,31 +205,31 @@ void prompt_text(const std::string& header, const std::string& initial, int max_
 /// read-only mode), greyed (title and value), so the user sees what exists.
 /// `title_key` / `detail_key`: the theme colours when writable. A
 /// BooleanCell gets its own colours back from its state.
-void show_writable(brls::DetailCell* cell, bool writable, const char* title_key = "cadran/text",
+void show_writable(aurore::DetailCell* cell, bool writable, const char* title_key = "cadran/text",
     const char* detail_key = "cadran/text2");
 
 /// Hides a view when `visible` is false (Visibility::GONE frees its space).
 /// When the hidden view had the focus, the focus moves to the nearest visible
 /// focusable sibling (the next one on a tie), so it never lands on the list
 /// container or jumps far away.
-void set_visible(brls::View* view, bool visible);
+void set_visible(aurore::View* view, bool visible);
 
 /// Applies several visibility changes, showing views before hiding others, so a
 /// cell that replaces the focused one (Unlock -> Lock now) is there to take
 /// the focus.
-void set_visible_all(std::initializer_list<std::pair<brls::View*, bool>> changes);
+void set_visible_all(std::initializer_list<std::pair<aurore::View*, bool>> changes);
 
 /// A label's text, or a cell's detail, set only when it changes: borealis lays
 /// the whole screen out again on every setText, and the tabs that refresh
 /// themselves every few seconds mostly write the same values back.
-void set_text(brls::Label* label, const std::string& text);
-void set_detail(brls::DetailCell* cell, const std::string& text);
+void set_text(aurore::Label* label, const std::string& text);
+void set_detail(aurore::DetailCell* cell, const std::string& text);
 
 /// Runs `fill`, which adds many views to `box` (or changes them), with the box
 /// out of the screen's layout, then lays the screen out once. borealis lays
 /// the whole screen out again on each addView and setText: a list of n rows
 /// built in place cost n layouts of the whole screen, n of them on screen.
-void batch_layout(brls::Box* box, const std::function<void()>& fill);
+void batch_layout(aurore::Box* box, const std::function<void()>& fill);
 
 /// For an activity's onResume(): borealis then gives the focus back to the
 /// view that opened the dialog (or screen) just closed, and gives none when
@@ -237,17 +237,17 @@ void batch_layout(brls::Box* box, const std::function<void()>& fill);
 /// dialog's button, deleted after its animation, and no button answer any
 /// more. In that case only, `fallback` (else the activity's first focusable
 /// view) gets it first.
-void keep_focus(brls::Activity* activity, brls::View* fallback = nullptr);
+void keep_focus(aurore::Activity* activity, aurore::View* fallback = nullptr);
 
 /// Whether `activity` has the focus: nothing (a dialog, another screen) is
 /// open over it. Unlike the top of borealis' stack, true again as soon as a
 /// dialog over it starts closing.
-bool has_focus(brls::Activity* activity);
+bool has_focus(aurore::Activity* activity);
 /// Whether `activity` is the top of borealis' stack: no screen or dialog
 /// pushed over it, one closing included.
-bool on_top(brls::Activity* activity);
+bool on_top(aurore::Activity* activity);
 /// The main screen, wherever it is in the stack; nullptr before it opens.
-brls::Activity* main_screen();
+aurore::Activity* main_screen();
 /// Shows its tab `position` (ui::tab) and focuses its content: the view with
 /// id `row` when given and shown, else its first one. Nothing before it opens.
 void open_tab(int position, const std::string& row = "");
@@ -258,10 +258,10 @@ void refresh_shown_tab();
 /// Opens another tab of the main screen and focuses its first item. `from` is
 /// any view inside the current tab; the switch happens on the next frame
 /// because the current tab is deleted by it.
-void go_to_tab(brls::View* from, int position);
+void go_to_tab(aurore::View* from, int position);
 /// `content` (a tab's view, such as the network clock) on a screen of its own,
 /// over the current one, titled `title`; B closes it.
-void open_screen(brls::View* content, const std::string& title);
+void open_screen(aurore::View* content, const std::string& title);
 
 /// The language and theme pickers, shared by Preferences and the main
 /// screen's header: save the choice (ui::prefs, through
@@ -270,7 +270,7 @@ void open_screen(brls::View* content, const std::string& title);
 /// refresh). language_name / theme_name: the choice saved, as text;
 /// text_size_name, language_name and theme_name their shorter words on a tile
 /// (Preferences). The theme picker ends with the palette's row, which opens
-/// pick_palette: the boards' colours, Aurore's presets (brls::Theme::
+/// pick_palette: the boards' colours, Aurore's presets (aurore::Theme::
 /// builtinThemes) or the user's theme files (ui::hooks' themes_dir);
 /// palette_name, the one saved (ui::Prefs::theme_file), by its name.
 /// @{

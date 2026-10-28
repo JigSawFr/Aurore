@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace brls
+namespace aurore
 {
 
 typedef struct OrbisTick
@@ -39,4 +39,4 @@ typedef struct
 extern int (*sceShellUIUtilLaunchByUri)(const char* uri, SceShellUIUtilLaunchByUriParam* param);
 extern int (*sceShellUIUtilInitialize)();
 
-} // namespace brls
+} // namespace aurore

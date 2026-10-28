@@ -38,7 +38,7 @@
 #include <GLFW/glfw3.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // HeadlessVideoContext
@@ -266,7 +266,7 @@ void HeadlessInputManager::updateUnifiedControllerState(ControllerState* state)
     state->buttons[BUTTON_NAV_LEFT] |= state->buttons[BUTTON_LEFT] || axes[LEFT_X] < -0.5f || axes[RIGHT_X] < -0.5f;
 }
 
-bool HeadlessInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
+bool HeadlessInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
     return keys.count(key) > 0;
 }
@@ -297,7 +297,7 @@ void HeadlessInputManager::setAxis(ControllerAxis axis, float value)
     this->axes[axis] = value;
 }
 
-void HeadlessInputManager::setKey(BrlsKeyboardScancode key, bool pressed)
+void HeadlessInputManager::setKey(AuroreKeyboardScancode key, bool pressed)
 {
     if (pressed == (keys.count(key) > 0))
         return;
@@ -411,4 +411,4 @@ HeadlessPlatform::~HeadlessPlatform()
     delete this->videoContext;
 }
 
-} // namespace brls
+} // namespace aurore

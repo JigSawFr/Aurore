@@ -18,7 +18,7 @@
 
 #include <aurore/core/timer.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A RepeatingTask is a task executed repeatedly on the main thread at a given period in ms
@@ -48,4 +48,4 @@ class RepeatingTask : private RepeatingTimer
      */
     void stop();
 };
-} // namespace brls
+} // namespace aurore

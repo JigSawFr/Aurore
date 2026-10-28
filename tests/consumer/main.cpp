@@ -7,6 +7,6 @@
 int main()
 {
     std::printf("Aurore %s\n", AURORE_VERSION);
-    brls::Logger::info("linked with {}", "Aurore::aurore");
+    aurore::Logger::info("linked with {}", "Aurore::aurore");
     return 0;
 }

@@ -18,7 +18,7 @@
 
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class AndroidPlatform : public SDLPlatform
@@ -39,4 +39,4 @@ class AndroidPlatform : public SDLPlatform
     bool canSetBacklightBrightness() override;
 };
 
-} // namespace brls
+} // namespace aurore

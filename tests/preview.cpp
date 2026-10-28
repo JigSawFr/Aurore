@@ -21,7 +21,7 @@
 //                  [--size WxH] [-o out.png]
 //
 // The XML may use borealis' views, Cadran's and the demo's (an app with
-// views of its own builds the same tool with brls::test::Harness, after
+// views of its own builds the same tool with aurore::test::Harness, after
 // registering them). Resources are the demo's: "@res/..." and i18n strings.
 
 #include <aurore.hpp>
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     if (output.empty())
         output = std::filesystem::path(xml).stem().string() + ".png";
 
-    brls::Logger::setLogLevel(brls::LogLevel::LOG_WARNING);
+    aurore::Logger::setLogLevel(aurore::LogLevel::LOG_WARNING);
 
     // Cadran's preferences: the theme and language asked for
     static ui::Prefs prefs;
@@ -93,31 +93,31 @@ int main(int argc, char** argv)
     demo::installHooks();
     ui::use_prefs(prefs); // after the demo's, which sets its own
 
-    brls::test::Options options;
+    aurore::test::Options options;
     options.width  = width;
     options.height = height;
     options.locale = lang;
-    options.theme  = theme == "light" ? brls::ThemeVariant::LIGHT : brls::ThemeVariant::DARK;
-    brls::test::Harness h(options);
+    options.theme  = theme == "light" ? aurore::ThemeVariant::LIGHT : aurore::ThemeVariant::DARK;
+    aurore::test::Harness h(options);
     demo::registerViews();
 
     if (themeFile)
     {
-        brls::ThemeVariant variant;
-        if (!brls::Theme::loadFile(theme, &variant))
+        aurore::ThemeVariant variant;
+        if (!aurore::Theme::loadFile(theme, &variant))
         {
             std::fprintf(stderr, "%s: not a theme file\n", theme.c_str());
             return 1;
         }
-        brls::Application::getPlatform()->setThemeVariant(variant);
+        aurore::Application::getPlatform()->setThemeVariant(variant);
     }
 
     // A mistake in the file: its message (file:line, what was expected) and
     // the exit code 1, not an abort
-    brls::View* view = nullptr;
+    aurore::View* view = nullptr;
     try
     {
-        view = brls::View::createFromXMLFile(xml);
+        view = aurore::View::createFromXMLFile(xml);
     }
     catch (const std::exception& e)
     {
@@ -129,10 +129,10 @@ int main(int argc, char** argv)
         std::fprintf(stderr, "%s: could not be read\n", xml.c_str());
         return 1;
     }
-    h.push(new brls::Activity(view));
+    h.push(new aurore::Activity(view));
     h.settle();
 
-    brls::test::Image image = h.screenshot();
+    aurore::test::Image image = h.screenshot();
     if (!image.savePng(output))
     {
         std::fprintf(stderr, "%s: could not be written\n", output.c_str());

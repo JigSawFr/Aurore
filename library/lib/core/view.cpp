@@ -46,9 +46,9 @@
 #undef RELATIVE
 #undef ABSOLUTE
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 void AppletFrameItem::setHintView(View* hintView)
@@ -990,10 +990,10 @@ ActionIdentifier View::registerAction(const std::string& hintText, const Control
     return registerAction<ControllerButton, GamepadAction>(hintText, button, actionListener, hidden, allowRepeating, sound);
 }
 
-ActionIdentifier View::registerAction(const BrlsKeyCombination key, const ActionListener& actionListener, const bool allowRepeating)
+ActionIdentifier View::registerAction(const AuroreKeyCombination key, const ActionListener& actionListener, const bool allowRepeating)
 {
     Application::addToWatchedKeys(key);
-    return registerAction<BrlsKeyCode, KeyboardAction>("", key, actionListener, true, allowRepeating, SOUND_NONE);
+    return registerAction<AuroreKeyCode, KeyboardAction>("", key, actionListener, true, allowRepeating, SOUND_NONE);
 }
 
 void View::unregisterAction(ActionIdentifier identifier)
@@ -1002,7 +1002,7 @@ void View::unregisterAction(ActionIdentifier identifier)
     {
         if ((*it)->getType() == ACTION_KEYBOARD)
         {
-            Application::removeWatchedKeys(BrlsKeyCombination { (*it)->getButton() });
+            Application::removeWatchedKeys(AuroreKeyCombination { (*it)->getButton() });
         }
         this->actions.erase(it);
     }
@@ -1247,7 +1247,7 @@ void View::setMaxHeightPercentage(float percentage)
 
 void View::setMarginTop(float top)
 {
-    if (top == brls::View::AUTO)
+    if (top == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeTop);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeTop, top);
@@ -1257,7 +1257,7 @@ void View::setMarginTop(float top)
 
 void View::setMarginRight(float right)
 {
-    if (right == brls::View::AUTO)
+    if (right == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeRight);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeRight, right);
@@ -1277,7 +1277,7 @@ float View::getMarginLeft()
 
 void View::setMarginBottom(float bottom)
 {
-    if (bottom == brls::View::AUTO)
+    if (bottom == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeBottom);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeBottom, bottom);
@@ -1287,7 +1287,7 @@ void View::setMarginBottom(float bottom)
 
 void View::setMarginLeft(float left)
 {
-    if (left == brls::View::AUTO)
+    if (left == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeLeft);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeLeft, left);
@@ -1297,22 +1297,22 @@ void View::setMarginLeft(float left)
 
 void View::setMargins(float top, float right, float bottom, float left)
 {
-    if (top == brls::View::AUTO)
+    if (top == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeTop);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeTop, top);
 
-    if (right == brls::View::AUTO)
+    if (right == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeRight);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeRight, right);
 
-    if (bottom == brls::View::AUTO)
+    if (bottom == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeBottom);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeBottom, bottom);
 
-    if (left == brls::View::AUTO)
+    if (left == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeLeft);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeLeft, left);
@@ -1617,7 +1617,7 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
         return;
     }
 
-    brls::Logger::debug("Showing {}", this->describe());
+    aurore::Logger::debug("Showing {}", this->describe());
 
     this->hidden = false;
 
@@ -1662,7 +1662,7 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
         return;
     }
 
-    brls::Logger::debug("Hiding {}", this->describe());
+    aurore::Logger::debug("Hiding {}", this->describe());
 
     this->hidden = true;
     this->fadeIn = false;
@@ -1785,7 +1785,7 @@ View::~View()
     {
         if (action->getType() == ACTION_KEYBOARD)
         {
-            Application::removeWatchedKeys(BrlsKeyCombination { action->getButton() });
+            Application::removeWatchedKeys(AuroreKeyCombination { action->getButton() });
         }
     }
 
@@ -2307,7 +2307,7 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
     // Special case where element name is brls:View: create from given XML file.
     // XML attributes are explicitely not passed down to the created view.
     // To create a custom view from XML that you can reuse in other XML files,
-    // make a class inheriting brls::Box and use the inflateFromXML* methods.
+    // make a class inheriting aurore::Box and use the inflateFromXML* methods.
     if (viewName == "brls:View")
     {
         const tinyxml2::XMLAttribute* xmlAttribute = element->FindAttribute("xml");
@@ -3050,4 +3050,4 @@ void View::setParentActivity(Activity* activity)
     parentActivity = activity;
 }
 
-} // namespace brls
+} // namespace aurore

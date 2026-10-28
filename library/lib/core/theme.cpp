@@ -57,7 +57,7 @@ namespace fs = std::experimental::filesystem;
 
 #include "theme_presets.hpp"
 
-namespace brls
+namespace aurore
 {
 
 static const std::initializer_list<std::pair<std::string, NVGcolor>> LIGHT_COLORS = {
@@ -2320,4 +2320,4 @@ std::vector<ThemeInfo> Theme::builtinThemes()
     return themes;
 }
 
-} // namespace brls
+} // namespace aurore

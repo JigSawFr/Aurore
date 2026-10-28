@@ -21,7 +21,7 @@
 #include <aurore/core/style.hpp>
 #include <aurore/core/util.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static StyleValues styleValues = {
@@ -191,7 +191,7 @@ float StyleValues::getMetric(const std::string& name)
 {
     if (this->values.count(name) == 0)
     {
-        brls::Logger::error("Unknown style metric {} in size: {}", name, std::to_string(this->values.size()));
+        aurore::Logger::error("Unknown style metric {} in size: {}", name, std::to_string(this->values.size()));
         return 0;
     }
 
@@ -462,4 +462,4 @@ HorizonStyle::HorizonStyle()
     };
 }
 */
-} // namespace brls
+} // namespace aurore

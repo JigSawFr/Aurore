@@ -19,7 +19,7 @@
 #include <stdexcept>
 #include <aurore/core/logger.hpp>
 
-namespace brls
+namespace aurore
 {
 bool endsWith(const std::string& data, const std::string& suffix);
 
@@ -50,4 +50,4 @@ bool isResourceNameSafe(const std::string& name);
  */
 std::string escapeControlChars(const std::string& text);
 
-} // namespace brls
+} // namespace aurore

@@ -24,7 +24,7 @@
 #include <aurore/core/event.hpp>
 #include <aurore/core/theme.hpp>
 
-namespace brls
+namespace aurore
 {
 
 /**
@@ -87,7 +87,7 @@ struct ThemeImage
  * The one loader of theme pictures. load() hands back the image at once,
  * still loading: it is decoded on the decode thread (Threading::asyncDecode), made
  * smaller when larger than MAX_WIDTH x MAX_HEIGHT (its ratio kept), and its
- * texture is made on the UI thread (brls::sync), which draws again. A file
+ * texture is made on the UI thread (aurore::sync), which draws again. A file
  * that cannot be read is logged once and stays FAILED.
  *
  * The images are shared by path and flags while someone holds them, and
@@ -161,4 +161,4 @@ class ThemeImages
     static void releaseAll();
 };
 
-} // namespace brls
+} // namespace aurore

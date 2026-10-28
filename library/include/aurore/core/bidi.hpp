@@ -18,7 +18,7 @@
 
 #include <string>
 
-namespace brls
+namespace aurore
 {
 
 // `text` in the order it is drawn: the right-to-left runs (Hebrew, Arabic…)
@@ -32,4 +32,4 @@ std::string bidiVisual(const std::string& text);
 // Built with USE_FRIBIDI.
 bool bidiAvailable();
 
-} // namespace brls
+} // namespace aurore

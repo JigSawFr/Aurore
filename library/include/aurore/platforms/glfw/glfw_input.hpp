@@ -21,7 +21,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-namespace brls
+namespace aurore
 {
 
 // Input manager for GLFW gamepad and keyboard
@@ -36,7 +36,7 @@ class GLFWInputManager : public InputManager
 
     void updateControllerState(ControllerState* state, int controller) override;
 
-    bool getKeyboardKeyState(BrlsKeyboardScancode state) override;
+    bool getKeyboardKeyState(AuroreKeyboardScancode state) override;
 
     void updateTouchStates(std::vector<RawTouchState>* states) override;
 

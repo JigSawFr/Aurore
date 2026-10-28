@@ -18,7 +18,7 @@
 #include <aurore/core/application.hpp>
 #include <aurore/core/touch/long_press_gesture.hpp>
 
-namespace brls
+namespace aurore
 {
 
 LongPressGestureRecognizer::LongPressGestureRecognizer(View* view, std::function<void()> respond, Time duration, float slop)
@@ -89,4 +89,4 @@ GestureState LongPressGestureRecognizer::recognitionLoop(TouchState touch, Mouse
     return this->state;
 }
 
-} // namespace brls
+} // namespace aurore

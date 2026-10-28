@@ -23,7 +23,7 @@
 #include <aurore/platforms/sdl/sdl_input.hpp>
 #include <aurore/platforms/sdl/sdl_video.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class SDLPlatform : public DesktopPlatform
@@ -62,4 +62,4 @@ class SDLPlatform : public DesktopPlatform
     Event<SDL_Event*> otherEvent;
 };
 
-} // namespace brls
+} // namespace aurore

@@ -20,7 +20,7 @@
 #include <aurore/core/gesture.hpp>
 #include <aurore/core/time.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Long press recognizer: a touch (or the mouse's left button) held still
@@ -46,4 +46,4 @@ class LongPressGestureRecognizer : public GestureRecognizer
     Point position;
 };
 
-} // namespace brls
+} // namespace aurore

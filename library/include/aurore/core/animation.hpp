@@ -21,7 +21,7 @@
 
 #include <aurore/core/time.hpp>
 
-namespace brls
+namespace aurore
 {
 
 using EasingFunction = tweeny::easing::enumerated;
@@ -106,4 +106,4 @@ void getHighlightAnimation(float* gradient_x, float* gradient_y, float* color);
 // does not depend on when it was taken.
 void setHighlightAnimationStill(bool still);
 
-} // namespace brls
+} // namespace aurore

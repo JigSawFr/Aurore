@@ -10,7 +10,7 @@
 #include <aurore.hpp>
 
 /// A line of text in Cadran's display face (Sora): big figures, card values, chips.
-class CadranDigits : public brls::View
+class CadranDigits : public aurore::View
 {
   public:
     CadranDigits();
@@ -20,8 +20,8 @@ class CadranDigits : public brls::View
     void setFontSize(float size);
     void setTextColor(NVGcolor color);
     /// "textColor" (setThemeColor, XML textColor="@theme/…")
-    bool getStyleProperty(const std::string& name, brls::StyleValue* value) override;
-    bool setStyleProperty(const std::string& name, const brls::StyleValue& value) override;
+    bool getStyleProperty(const std::string& name, aurore::StyleValue* value) override;
+    bool setStyleProperty(const std::string& name, const aurore::StyleValue& value) override;
     /// At most that wide: a longer text is drawn smaller to fit (0: never).
     void setFitWidth(float width);
     /// At most as wide as its parent is laid out: a longer text is drawn
@@ -44,13 +44,13 @@ class CadranDigits : public brls::View
     void onTextScaleChanged() override { this->measure(); }
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-        brls::Style style, brls::FrameContext* ctx) override;
+        aurore::Style style, aurore::FrameContext* ctx) override;
 
-    static brls::View* create();
+    static aurore::View* create();
 
   protected:
     /// Said as a label's text (a chip, a card say it).
-    brls::AccessibilityRole getDefaultAccessibilityRole() override { return brls::AccessibilityRole::LABEL; }
+    aurore::AccessibilityRole getDefaultAccessibilityRole() override { return aurore::AccessibilityRole::LABEL; }
     std::string getDefaultAccessibilityLabel() override { return this->text; }
 
   private:
@@ -64,9 +64,9 @@ class CadranDigits : public brls::View
     bool rolls           = false;
     /// The text before, leaving (rolls): until when (µs), and its size.
     std::string leaving;
-    brls::Time roll_since = 0;
-    float leaving_size    = 32.0f;
-    bool drawn            = false; ///< shown at least once: a change may roll
+    aurore::Time roll_since = 0;
+    float leaving_size      = 32.0f;
+    bool drawn              = false; ///< shown at least once: a change may roll
     NVGcolor color;
     int font;
 

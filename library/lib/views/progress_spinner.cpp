@@ -18,7 +18,7 @@
 #include <aurore/core/application.hpp>
 #include <aurore/views/progress_spinner.hpp>
 
-namespace brls
+namespace aurore
 {
 
 ProgressSpinner::ProgressSpinner(ProgressSpinnerSize size)
@@ -140,9 +140,9 @@ bool ProgressSpinner::setStyleProperty(const std::string& name, const StyleValue
     return true;
 }
 
-brls::View* ProgressSpinner::create()
+aurore::View* ProgressSpinner::create()
 {
     return new ProgressSpinner();
 }
 
-} // namespace brls
+} // namespace aurore

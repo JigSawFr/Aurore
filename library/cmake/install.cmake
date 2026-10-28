@@ -20,7 +20,7 @@ set(AURORE_EXPORTED aurore yogacore)
 if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
     list(APPEND AURORE_EXPORTED tinyxml2)
 endif ()
-# The test harness, with brls_add_tests() (AuroreTesting.cmake), when built
+# The test harness, with aurore_add_tests() (AuroreTesting.cmake), when built
 if (TARGET aurore_test)
     list(APPEND AURORE_EXPORTED aurore_test)
     set_target_properties(aurore_test PROPERTIES EXPORT_NAME test)

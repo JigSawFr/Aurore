@@ -35,7 +35,7 @@
 #include <tuple>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 namespace
@@ -373,7 +373,7 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, const The
             if (ok && mask)
                 makeMask(pixels.get());
             decodingCount--;
-            brls::sync([weak, pixels, ok]()
+            aurore::sync([weak, pixels, ok]()
                 {
                     std::shared_ptr<ThemeImage> image = weak.lock();
                     if (!image)
@@ -490,4 +490,4 @@ bool ThemeImages::meanColor(const std::string& path, NVGcolor* color)
     return true;
 }
 
-} // namespace brls
+} // namespace aurore

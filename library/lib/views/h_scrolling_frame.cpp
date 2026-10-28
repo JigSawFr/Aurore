@@ -20,7 +20,7 @@
 #include <aurore/core/touch/tap_gesture.hpp>
 #include <aurore/views/h_scrolling_frame.hpp>
 
-namespace brls
+namespace aurore
 {
 
 #define SCROLLING_INDICATOR_HEIGHT 4
@@ -142,7 +142,7 @@ HScrollingFrame::HScrollingFrame()
         PanAxis::HORIZONTAL));
 
     // Stop scrolling on tap
-    addGestureRecognizer(new TapGestureRecognizer([this](brls::TapGestureStatus status, Sound* soundToPlay)
+    addGestureRecognizer(new TapGestureRecognizer([this](aurore::TapGestureStatus status, Sound* soundToPlay)
         {
         if (status.state == GestureState::UNSURE)
         {
@@ -729,4 +729,4 @@ HScrollingFrame::~HScrollingFrame()
     Application::getGlobalInputTypeChangeEvent()->unsubscribe(inputTypeSubscription);
 }
 
-} // namespace brls
+} // namespace aurore

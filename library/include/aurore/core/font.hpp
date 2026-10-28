@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <aurore/core/assets.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static constexpr const int FONT_INVALID = -1;
@@ -69,4 +69,4 @@ class FontLoader
     bool loadMaterialFromResources();
 };
 
-} // namespace brls
+} // namespace aurore

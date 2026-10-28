@@ -11,7 +11,7 @@
 
 /// The footer's hints fitted to the footer: the clock keeps its line, the hints
 /// come closer, then their texts are cut.
-class FooterHints : public brls::Hints
+class FooterHints : public aurore::Hints
 {
   public:
     FooterHints();
@@ -20,20 +20,20 @@ class FooterHints : public brls::Hints
     /// Takes brls:Hints' place in borealis' footer. Called once, at start-up,
     /// before the first screen opens.
     static void install();
-    static brls::View* create();
+    static aurore::View* create();
 
     /// The hint whose text is `hint_text` is on offer until `until` (µs,
-    /// brls::getCPUTimeUsec), out of `total_us`: a thin teal line under it
+    /// aurore::getCPUTimeUsec), out of `total_us`: a thin teal line under it
     /// drains meanwhile, and the hint fades over its last second (ZR Undo).
     /// An empty text, or `until` 0, ends it. Nothing with the motion off.
-    static void set_timed(const std::string& hint_text, brls::Time until, brls::Time total_us);
+    static void set_timed(const std::string& hint_text, aurore::Time until, aurore::Time total_us);
 
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-        brls::FrameContext* ctx) override;
+    void draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style,
+        aurore::FrameContext* ctx) override;
 
   private:
     void fit();
 
-    brls::VoidEvent::Subscription subscription;
+    aurore::VoidEvent::Subscription subscription;
     std::shared_ptr<bool> alive = std::make_shared<bool>(true); ///< guards the fit after the first frame
 };

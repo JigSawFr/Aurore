@@ -13,7 +13,7 @@
 #define EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT true
 #endif
 
-namespace brls
+namespace aurore
 {
 
 const std::string editTextDialogXML = R"xml(
@@ -143,9 +143,9 @@ EditTextDialog::EditTextDialog()
 
 #if defined(__PSV__) and !defined(BOREALIS_USE_GXM)
     // After turning off the on-screen keyboard, tap on the input area to reopen
-    this->addGestureRecognizer(new brls::TapGestureRecognizer([](brls::TapGestureStatus status, brls::Sound*)
+    this->addGestureRecognizer(new aurore::TapGestureRecognizer([](aurore::TapGestureStatus status, aurore::Sound*)
         {
-            if (status.state == brls::GestureState::END) {
+            if (status.state == aurore::GestureState::END) {
                 auto* videoContext = (SDLVideoContext*)Application::getPlatform()->getVideoContext();
                 if (!SDL_IsScreenKeyboardShown(videoContext->getSDLWindow()))
                 {

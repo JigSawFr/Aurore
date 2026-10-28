@@ -27,7 +27,7 @@
 // glfw video and input code inspired from the glfw hybrid app by fincs
 // https://github.com/fincs/hybrid_app
 
-namespace brls
+namespace aurore
 {
 
 #if defined(__APPLE__)
@@ -102,7 +102,7 @@ GLFWPlatform::GLFWPlatform()
             this->locale     = localeFromSystem(lang);
         }
 #endif
-        brls::Logger::info("Auto detect app locale: {}", this->locale);
+        aurore::Logger::info("Auto detect app locale: {}", this->locale);
     }
 
     // Platform impls
@@ -228,4 +228,4 @@ GLFWPlatform::~GLFWPlatform()
     delete this->videoContext;
 }
 
-} // namespace brls
+} // namespace aurore

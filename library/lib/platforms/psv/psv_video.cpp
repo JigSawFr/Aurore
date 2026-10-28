@@ -21,7 +21,7 @@ limitations under the License.
 #define NANOVG_GXM_UTILS_IMPLEMENTATION
 #include <nanovg_gxm.h>
 
-namespace brls
+namespace aurore
 {
 
 PsvVideoContext::PsvVideoContext()
@@ -51,7 +51,7 @@ PsvVideoContext::PsvVideoContext()
     this->nvgContext = nvgCreateGXM(window->context, window->shader_patcher, 0);
     if (!this->nvgContext)
     {
-        brls::fatal("gxm: unable to init nanovg");
+        aurore::fatal("gxm: unable to init nanovg");
     }
 
     Application::setWindowSize(DISPLAY_WIDTH, DISPLAY_HEIGHT);

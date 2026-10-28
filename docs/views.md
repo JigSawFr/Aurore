@@ -81,13 +81,13 @@ Dialogs, dropdowns, the text input dialog and context menus are made in code, no
 
 ## Cadran's views
 
-[Cadran](cadran.md)'s views are `brls::View`s in `cadran/view/`, made in code. Those with a `create()` can be registered for XML under the name the app chooses, as the apps on Cadran do:
+[Cadran](cadran.md)'s views are `aurore::View`s in `cadran/view/`, made in code. Those with a `create()` can be registered for XML under the name the app chooses, as the apps on Cadran do:
 
 ```cpp
-brls::Application::registerXMLView("ScrollView", ScrollView::create);
-brls::Application::registerXMLView("CadranIcon", CadranIcon::create);
-brls::Application::registerXMLView("CadranDigits", CadranDigits::create);
-brls::Application::registerXMLView("LoadingBar", LoadingBar::create);
+aurore::Application::registerXMLView("ScrollView", ScrollView::create);
+aurore::Application::registerXMLView("CadranIcon", CadranIcon::create);
+aurore::Application::registerXMLView("CadranDigits", CadranDigits::create);
+aurore::Application::registerXMLView("LoadingBar", LoadingBar::create);
 ```
 
 | Class (header) | What it is |

@@ -34,7 +34,7 @@ static bool isIPad()
 }
 #endif
 
-namespace brls
+namespace aurore
 {
 
 SDLPlatform::SDLPlatform()
@@ -87,7 +87,7 @@ SDLPlatform::SDLPlatform()
                 lang += "_" + std::string { locales->country };
             }
             this->locale = localeFromSystem(lang);
-            brls::Logger::info("Set app locale: {}", this->locale);
+            aurore::Logger::info("Set app locale: {}", this->locale);
             SDL_free(locales);
         }
     }
@@ -224,18 +224,18 @@ bool SDLPlatform::processEvent(SDL_Event* event)
 #if defined(IOS) || defined(ANDROID)
     else if (event->type == SDL_APP_WILLENTERBACKGROUND)
     {
-        brls::Application::getWindowFocusChangedEvent()->fire(false);
+        aurore::Application::getWindowFocusChangedEvent()->fire(false);
     }
     else if (event->type == SDL_APP_WILLENTERFOREGROUND)
     {
-        brls::Application::getWindowFocusChangedEvent()->fire(true);
+        aurore::Application::getWindowFocusChangedEvent()->fire(true);
     }
     else if (event->type == SDL_APP_TERMINATING)
     {
         // OS 正要杀我们（Android swipe-to-recents / iOS 强杀）。在这个窗口期主动走
         // 清理路径，让 MPVCore::clean() + mpv_terminate_destroy 有机会释放
         // MediaCodec / Surface 等底层资源，避免 Tegra 驱动层 slot 泄漏。
-        brls::Application::quit();
+        aurore::Application::quit();
         return false;
     }
 #endif
@@ -244,7 +244,7 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         // 其它没有处理的事件
         this->otherEvent.fire(event);
     }
-    brls::Application::setActiveEvent(true);
+    aurore::Application::setActiveEvent(true);
     return true;
 }
 
@@ -262,7 +262,7 @@ bool SDLPlatform::mainLoopIteration()
     }
     if (!hasEvent && !Application::hasActiveEvent())
     {
-        if (SDL_WaitEventTimeout(&event, (int)(brls::Application::getDeactivatedFrameTime() * 1000))
+        if (SDL_WaitEventTimeout(&event, (int)(aurore::Application::getDeactivatedFrameTime() * 1000))
             && !processEvent(&event))
         {
             return false;
@@ -299,4 +299,4 @@ SDLPlatform::~SDLPlatform()
     delete this->videoContext;
 }
 
-} // namespace brls
+} // namespace aurore

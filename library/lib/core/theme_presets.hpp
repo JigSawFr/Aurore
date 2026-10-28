@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 // A theme file built into the library: "builtin:<id>"
@@ -38,4 +38,4 @@ std::string builtinThemeText(const BuiltinTheme& theme, std::time_t now);
 // The id of the preset builtin:seasonal uses at `now` (in local time)
 const char* seasonalThemeId(std::time_t now);
 
-} // namespace brls
+} // namespace aurore

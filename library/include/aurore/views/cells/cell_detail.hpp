@@ -21,7 +21,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class DetailCell : public RecyclerCell
@@ -49,4 +49,4 @@ class DetailCell : public RecyclerCell
     std::string getDefaultAccessibilityValue() override;
 };
 
-} // namespace brls
+} // namespace aurore

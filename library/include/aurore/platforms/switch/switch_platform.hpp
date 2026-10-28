@@ -30,7 +30,7 @@
 #include <aurore/platforms/switch/switch_ime.hpp>
 #include <aurore/platforms/switch/switch_input.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class SwitchPlatform : public Platform
@@ -92,4 +92,4 @@ class SwitchPlatform : public Platform
     AppletHookCookie applet_hook_cookie;
 };
 
-} // namespace brls
+} // namespace aurore

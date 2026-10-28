@@ -43,7 +43,7 @@ namespace fs = std::experimental::filesystem;
 #define BRLS_I18N_PREFIX ""
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // The strings of the default locale and of the current one, never changed
@@ -313,4 +313,4 @@ inline namespace literals
 
 } // namespace literals
 
-} // namespace brls
+} // namespace aurore

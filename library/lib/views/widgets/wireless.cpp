@@ -25,7 +25,7 @@ extern "C"
 }
 #endif
 
-namespace brls
+namespace aurore
 {
 
 WirelessWidget::WirelessWidget()
@@ -98,7 +98,7 @@ void WirelessWidget::updateState()
     Time now         = getCPUTimeUsec();
     if ((now - time) > 5000000 || time == 0)
     {
-        brls::Logger::verbose("hasWirelessConnection: {}; wifiLevel: {}", hasWirelessConnection, wifiLevel);
+        aurore::Logger::verbose("hasWirelessConnection: {}; wifiLevel: {}", hasWirelessConnection, wifiLevel);
 #ifdef ANDROID
         hasEthernetConnection = Application::getPlatform()->hasEthernetConnection();
         hasWirelessConnection = Application::getPlatform()->hasWirelessConnection();
@@ -109,7 +109,7 @@ void WirelessWidget::updateState()
         if (updating)
             return;
         updating = true;
-        brls::async([]()
+        aurore::async([]()
             {
                 bool ethernet = false, wireless = false;
                 int level     = 0;
@@ -132,7 +132,7 @@ void WirelessWidget::updateState()
                 wireless = Application::getPlatform()->hasWirelessConnection();
                 level    = Application::getPlatform()->getWirelessLevel();
 #endif
-                brls::sync([ethernet, wireless, level]()
+                aurore::sync([ethernet, wireless, level]()
                     {
                         hasEthernetConnection = ethernet;
                         hasWirelessConnection = wireless;
@@ -204,4 +204,4 @@ View* WirelessWidget::create()
     return new WirelessWidget();
 }
 
-} // namespace brls
+} // namespace aurore

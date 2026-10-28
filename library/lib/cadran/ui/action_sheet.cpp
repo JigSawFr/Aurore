@@ -21,27 +21,27 @@
 #include <aurore/cadran/ui/ui.hpp>
 #include <aurore/cadran/view/cadran_icon.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 namespace ui
 {
 
 void close_sheet(std::function<void()> then)
 {
-    brls::Application::popActivity(brls::TransitionAnimation::FADE, [then]()
+    aurore::Application::popActivity(aurore::TransitionAnimation::FADE, [then]()
         {
-        if (then) brls::sync(then); });
+        if (then) aurore::sync(then); });
 }
 
-brls::Box* sheet_outside(float width, bool grow)
+aurore::Box* sheet_outside(float width, bool grow)
 {
-    auto* box = new brls::Box();
+    auto* box = new aurore::Box();
     if (grow)
         box->setGrow(1);
     else
         box->setWidth(width);
     box->setShrink(0);
-    box->addGestureRecognizer(new brls::TapGestureRecognizer(box, []()
+    box->addGestureRecognizer(new aurore::TapGestureRecognizer(box, []()
         { close_sheet(nullptr); }));
     return box;
 }
@@ -68,57 +68,57 @@ namespace
     };
 
     // The lines' column: once laid out, its height sizes the panel.
-    class Column : public brls::Box
+    class Column : public aurore::Box
     {
       public:
         Column()
-            : brls::Box(brls::Axis::COLUMN)
+            : aurore::Box(aurore::Axis::COLUMN)
         {
         }
         std::function<void(float)> measured;
         void onLayout() override
         {
-            brls::Box::onLayout();
+            aurore::Box::onLayout();
             if (this->measured && this->getHeight() > 0)
                 this->measured(this->getHeight());
         }
     };
 
     // The panel: its list's foot fades into it while more lines follow.
-    class Panel : public brls::Box
+    class Panel : public aurore::Box
     {
       public:
         Panel()
-            : brls::Box(brls::Axis::COLUMN)
+            : aurore::Box(aurore::Axis::COLUMN)
         {
         }
-        brls::ScrollingFrame* frame = nullptr;
+        aurore::ScrollingFrame* frame = nullptr;
 
-        void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-            brls::FrameContext* ctx) override
+        void draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style,
+            aurore::FrameContext* ctx) override
         {
-            brls::Box::draw(vg, x, y, width, height, style, ctx);
+            aurore::Box::draw(vg, x, y, width, height, style, ctx);
             if (this->frame)
                 kit::draw_more_below(vg, this->frame, this->frame->getX(), this->frame->getY(), this->frame->getWidth(),
                     this->frame->getHeight(), "cadran/surf", cadran::PICKER_CORNER);
         }
     };
 
-    class Sheet : public brls::Box
+    class Sheet : public aurore::Box
     {
       public:
         Sheet(const std::string& title, const std::string& subtitle, int image, std::vector<Line> choices, size_t first,
             int columns = 0)
-            : brls::Box(brls::Axis::COLUMN)
+            : aurore::Box(aurore::Axis::COLUMN)
             , lines(std::move(choices))
             , focus(first)
         {
             this->setId("cadran_sheet");
             // Said when the focus enters it: its title, then its row.
-            this->setAccessibilityRole(brls::AccessibilityRole::LIST);
+            this->setAccessibilityRole(aurore::AccessibilityRole::LIST);
             this->setAccessibilityLabel(subtitle.empty() ? title : title + ", " + subtitle);
             this->setThemeColor("backgroundColor", "brls/backdrop");
-            this->setAlignItems(brls::AlignItems::STRETCH);
+            this->setAlignItems(aurore::AlignItems::STRETCH);
             this->addView(sheet_outside(0, true));
 
             auto* panel = new Panel();
@@ -127,16 +127,16 @@ namespace
             panel->setThemeColor("backgroundColor", "cadran/surf");
             panel->setThemeColor("borderColor", "cadran/line");
             panel->setBorderThickness(1);
-            panel->setAlignItems(brls::AlignItems::STRETCH);
-            panel->setThemeArea(brls::ThemeArea::DIALOG); // backdrop.dialog, and over a theme's picture
-            brls::Box* head = this->header(title, subtitle, image);
+            panel->setAlignItems(aurore::AlignItems::STRETCH);
+            panel->setThemeArea(aurore::ThemeArea::DIALOG); // backdrop.dialog, and over a theme's picture
+            aurore::Box* head = this->header(title, subtitle, image);
             panel->addView(head);
 
-            auto* frame = new brls::ScrollingFrame();
+            auto* frame = new aurore::ScrollingFrame();
             frame->setGrow(1);
-            frame->setScrollingBehavior(brls::ScrollingBehavior::CENTERED);
+            frame->setScrollingBehavior(aurore::ScrollingBehavior::CENTERED);
             auto* column = new Column();
-            column->setAlignItems(brls::AlignItems::STRETCH);
+            column->setAlignItems(aurore::AlignItems::STRETCH);
             column->setPadding(18, 28, 22, 28);
             if (columns > 0)
                 this->grid(column, (size_t)columns);
@@ -151,7 +151,7 @@ namespace
                     {
                         if (!l.group.empty())
                         {
-                            auto* kicker = new brls::Label();
+                            auto* kicker = new aurore::Label();
                             kit::set_kicker(kicker, l.group);
                             kicker->setSingleLine(true);
                             kicker->setMarginLeft(6);
@@ -173,7 +173,7 @@ namespace
 
             // As tall as its lines, up to most of the screen; the rest scrolls.
             // A first guess, then the lines' own height once laid out.
-            const float most = brls::Application::contentHeight * 0.8f;
+            const float most = aurore::Application::contentHeight * 0.8f;
             const float body = columns > 0
                 ? (TILE_HEIGHT + TILE_GAP) * (float)((this->lines.size() + columns - 1) / columns)
                 : 60.0f * (float)this->lines.size();
@@ -182,70 +182,70 @@ namespace
             {
                 const float want = std::min(head->getHeight() + lines_height + 2, most);
                 if (std::fabs(want - panel->getHeight()) > 1)
-                    brls::sync([panel, want]()
+                    aurore::sync([panel, want]()
                         { panel->setHeight(want); });
             };
 
-            auto* row = new brls::Box(brls::Axis::ROW);
-            row->setAlignItems(brls::AlignItems::STRETCH);
+            auto* row = new aurore::Box(aurore::Axis::ROW);
+            row->setAlignItems(aurore::AlignItems::STRETCH);
             row->setShrink(0);
             row->addView(sheet_outside(SIDE, false));
             row->addView(panel);
             row->addView(sheet_outside(SIDE, false));
             this->addView(row);
             this->addView(sheet_outside(20, false)); // the gap above the hints
-            this->addView(new brls::BottomBar());
+            this->addView(new aurore::BottomBar());
 
-            this->registerAction("hints/back"_i18n, brls::BUTTON_B, [](brls::View*)
+            this->registerAction("hints/back"_i18n, aurore::BUTTON_B, [](aurore::View*)
                 {
             close_sheet(nullptr);
-            return true; }, false, false, brls::SOUND_BACK);
+            return true; }, false, false, aurore::SOUND_BACK);
         }
 
         bool isTranslucent() override { return true; }
 
-        brls::View* getDefaultFocus() override
+        aurore::View* getDefaultFocus() override
         {
             if (this->focus < this->cells.size())
                 return this->cells[this->focus];
-            return brls::Box::getDefaultFocus();
+            return aurore::Box::getDefaultFocus();
         }
 
       private:
         std::vector<Line> lines;
         size_t focus;
-        std::vector<brls::View*> cells;
+        std::vector<aurore::View*> cells;
 
-        brls::Box* header(const std::string& title, const std::string& subtitle, int image)
+        aurore::Box* header(const std::string& title, const std::string& subtitle, int image)
         {
-            auto* head = new brls::Box(brls::Axis::ROW);
-            head->setAlignItems(brls::AlignItems::CENTER);
+            auto* head = new aurore::Box(aurore::Axis::ROW);
+            head->setAlignItems(aurore::AlignItems::CENTER);
             head->setPadding(subtitle.empty() ? 24 : 20, 36, subtitle.empty() ? 20 : 18, image ? 28 : 36);
             head->setThemeColor("lineColor", "cadran/line");
             head->setLineBottom(1);
             head->setShrink(0);
             if (image)
             {
-                auto* icon = new brls::Image();
+                auto* icon = new aurore::Image();
                 icon->setWidth(48);
                 icon->setHeight(48);
                 icon->setCornerRadius(10);
-                icon->setScalingType(brls::ImageScalingType::FIT);
+                icon->setScalingType(aurore::ImageScalingType::FIT);
                 icon->innerSetImage(image);
                 icon->setFreeTexture(false); // the list's, or the icon cache's
                 icon->setMarginRight(16);
                 icon->setShrink(0);
                 head->addView(icon);
             }
-            auto* words = new brls::Box(brls::Axis::COLUMN);
+            auto* words = new aurore::Box(aurore::Axis::COLUMN);
             words->setGrow(1);
             words->setShrink(1);
-            brls::Label* name = kit::label(title, 22, "cadran/text");
+            aurore::Label* name = kit::label(title, 22, "cadran/text");
             name->setSingleLine(true);
             words->addView(name);
             if (!subtitle.empty())
             {
-                brls::Label* line = kit::label(subtitle, kit::TEXT_META, "cadran/text2");
+                aurore::Label* line = kit::label(subtitle, kit::TEXT_META, "cadran/text2");
                 line->setMarginTop(5);
                 words->addView(line);
             }
@@ -255,15 +255,15 @@ namespace
 
         // The lines as tiles, `columns` to a row: the icon large above the
         // label, the value chosen in teal. Up and down keep the column.
-        void grid(brls::Box* column, size_t columns)
+        void grid(aurore::Box* column, size_t columns)
         {
-            brls::Box* row = nullptr;
+            aurore::Box* row = nullptr;
             for (size_t i = 0; i < this->lines.size(); i++)
             {
                 if (i % columns == 0)
                 {
-                    row = new brls::Box(brls::Axis::ROW);
-                    row->setAlignItems(brls::AlignItems::STRETCH);
+                    row = new aurore::Box(aurore::Axis::ROW);
+                    row->setAlignItems(aurore::AlignItems::STRETCH);
                     if (i > 0)
                         row->setMarginTop(TILE_GAP);
                     YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, TILE_GAP);
@@ -274,7 +274,7 @@ namespace
             // The last row's empty places, so its tiles keep their width.
             for (size_t i = this->lines.size(); row && i % columns != 0; i++)
             {
-                auto* gap = new brls::Box();
+                auto* gap = new aurore::Box();
                 gap->setGrow(1);
                 gap->setWidth(0);
                 row->addView(gap);
@@ -282,21 +282,21 @@ namespace
             for (size_t i = 0; i < this->cells.size(); i++)
             {
                 if (i >= columns)
-                    this->cells[i]->setCustomNavigationRoute(brls::FocusDirection::UP, this->cells[i - columns]);
+                    this->cells[i]->setCustomNavigationRoute(aurore::FocusDirection::UP, this->cells[i - columns]);
                 if (i + columns < this->cells.size())
-                    this->cells[i]->setCustomNavigationRoute(brls::FocusDirection::DOWN, this->cells[i + columns]);
+                    this->cells[i]->setCustomNavigationRoute(aurore::FocusDirection::DOWN, this->cells[i + columns]);
             }
         }
 
-        brls::DetailCell* tile(const Line& l, size_t index)
+        aurore::DetailCell* tile(const Line& l, size_t index)
         {
-            auto* cell = new brls::DetailCell();
+            auto* cell = new aurore::DetailCell();
             cell->setText(l.label);
             cell->setDetailText("");
-            cell->detail->setVisibility(brls::Visibility::GONE);
-            cell->setAxis(brls::Axis::COLUMN);
-            cell->setAlignItems(brls::AlignItems::CENTER);
-            cell->setJustifyContent(brls::JustifyContent::CENTER);
+            cell->detail->setVisibility(aurore::Visibility::GONE);
+            cell->setAxis(aurore::Axis::COLUMN);
+            cell->setAlignItems(aurore::AlignItems::CENTER);
+            cell->setJustifyContent(aurore::JustifyContent::CENTER);
             cell->setGrow(1);
             cell->setWidth(0);
             cell->setHeight(TILE_HEIGHT);
@@ -314,7 +314,7 @@ namespace
             // On one line: a tile's width holds the longest name ("Einschränkungen")
             // at the larger text size.
             cell->title->setSingleLine(true);
-            cell->title->setHorizontalAlign(brls::HorizontalAlign::CENTER);
+            cell->title->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
             if (l.checked)
                 cell->title->setThemeColor("textColor", "cadran/teal");
             if (!l.icon.empty())
@@ -325,7 +325,7 @@ namespace
                 cell->addView(icon, 0);
             }
             const std::function<void()> run = l.run;
-            cell->registerClickAction([run](brls::View*)
+            cell->registerClickAction([run](aurore::View*)
                 {
             close_sheet(run);
             return true; });
@@ -334,18 +334,18 @@ namespace
             return cell;
         }
 
-        brls::DetailCell* line(const Line& l, size_t index)
+        aurore::DetailCell* line(const Line& l, size_t index)
         {
-            brls::DetailCell* cell;
+            aurore::DetailCell* cell;
             if (l.toggle >= 0)
             {
-                auto* toggle = new brls::BooleanCell();
+                auto* toggle = new aurore::BooleanCell();
                 toggle->init(l.label, l.toggle == 1, [](bool) {});
                 cell = toggle;
             }
             else
             {
-                cell = new brls::DetailCell();
+                cell = new aurore::DetailCell();
                 cell->setText(l.label);
                 cell->setDetailText(l.detail);
             }
@@ -359,7 +359,7 @@ namespace
             {
                 cell->detail->setMaxWidth(340);
                 cell->detail->setSingleLine(true);
-                cell->detail->setVisibility(l.detail.empty() ? brls::Visibility::GONE : brls::Visibility::VISIBLE);
+                cell->detail->setVisibility(l.detail.empty() ? aurore::Visibility::GONE : aurore::Visibility::VISIBLE);
             }
             const char* tint = nullptr;
             switch (l.tone)
@@ -397,7 +397,7 @@ namespace
             }
             // Chosen: the sheet goes, then the line's action (none: it only closes).
             const std::function<void()> run = l.run;
-            cell->registerClickAction([run](brls::View*)
+            cell->registerClickAction([run](aurore::View*)
                 {
             close_sheet(run);
             return true; });
@@ -414,8 +414,8 @@ namespace
             return;
         if (focus >= lines.size())
             focus = 0;
-        brls::Application::pushActivity(new brls::Activity(new Sheet(title, subtitle, image, std::move(lines), focus, columns)),
-            brls::TransitionAnimation::FADE);
+        aurore::Application::pushActivity(new aurore::Activity(new Sheet(title, subtitle, image, std::move(lines), focus, columns)),
+            aurore::TransitionAnimation::FADE);
     }
 
     std::vector<Line> value_lines(const std::vector<std::string>& values, const std::vector<std::string>& details,
@@ -447,7 +447,7 @@ namespace
     }
 } // namespace
 
-bool is_sheet(brls::View* view)
+bool is_sheet(aurore::View* view)
 {
     return view && view->getId() == "cadran_sheet";
 }

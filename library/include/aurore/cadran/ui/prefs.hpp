@@ -17,7 +17,7 @@ struct Prefs
 {
     std::string language = "system"; ///< "system" or one of LANGUAGES
     std::string theme    = "dark"; ///< one of THEMES: the light or dark variant
-    /// A theme file over the boards' palettes (brls::Theme::loadFile: a
+    /// A theme file over the boards' palettes (aurore::Theme::loadFile: a
     /// preset "builtin:<id>" or a file of the app's themes folder,
     /// ui::hooks' themes_dir); "" for the boards' own. A file that styles one
     /// variant only takes it, whatever `theme` says.

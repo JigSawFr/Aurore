@@ -45,7 +45,7 @@
 #define main SDL_main
 #endif
 
-namespace brls
+namespace aurore
 {
 
 /// Input types for entire app
@@ -271,10 +271,10 @@ class Application
      */
     static View* getHoveredView() { return Application::hoveredView; }
 
-    /// The metrics in use (brls::getStyle()).
+    /// The metrics in use (aurore::getStyle()).
     inline static Style getStyle()
     {
-        return brls::getStyle();
+        return aurore::getStyle();
     }
 
     /// The colours of the variant in use (light or dark), with the theme file's over them.
@@ -359,7 +359,7 @@ class Application
     static void onControllerButtonPressed(enum ControllerButton button, bool repeating);
 
     /// Handles a key as the main loop does (the actions registered on keys).
-    static void onKeyboardPressed(BrlsKeyCombination key, bool repeating);
+    static void onKeyboardPressed(AuroreKeyCombination key, bool repeating);
 
     /**
      * "Crashes" the app (displays a fullscreen CrashFrame)
@@ -654,10 +654,10 @@ class Application
     /// A key a view registers an action for keeps that action only, and
     /// none applies while a text is being typed.
     /// @{
-    static void mapKey(BrlsKeyCombination key, ControllerButton button);
-    static void unmapKey(BrlsKeyCombination key);
+    static void mapKey(AuroreKeyCombination key, ControllerButton button);
+    static void unmapKey(AuroreKeyCombination key);
     static void clearKeyMap();
-    static const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& getKeyMap();
+    static const std::vector<std::pair<AuroreKeyCombination, ControllerButton>>& getKeyMap();
     /// @}
 
     inline static bool isSwapInputKeys()
@@ -692,10 +692,10 @@ class Application
     static void tryDeinitFirstResponder(View* view);
 
     /// Reads `key` each frame from now on (counted: one removeWatchedKeys() per add).
-    static void addToWatchedKeys(const BrlsKeyCombination key);
+    static void addToWatchedKeys(const AuroreKeyCombination key);
 
     /// See addToWatchedKeys().
-    static void removeWatchedKeys(const BrlsKeyCombination key);
+    static void removeWatchedKeys(const AuroreKeyCombination key);
 
   private:
     static void updateHover(Point position, bool inside);
@@ -733,10 +733,10 @@ class Application
     static bool setInputType(InputType type);
 
     inline static InputType inputType = InputType::GAMEPAD;
-    inline static std::vector<BrlsKeyState> watchedKeys;
-    inline static std::vector<BrlsKeyState> oldWatchedKeys;
+    inline static std::vector<AuroreKeyState> watchedKeys;
+    inline static std::vector<AuroreKeyState> oldWatchedKeys;
     inline static std::unordered_map<int, int> watchedKeysMap;
-    static std::vector<std::pair<BrlsKeyCombination, ControllerButton>> keyMap;
+    static std::vector<std::pair<AuroreKeyCombination, ControllerButton>> keyMap;
     static void applyKeyMap(InputManager* inputManager, ControllerState* state);
     inline static ControllerState controllerState = {};
 
@@ -825,4 +825,4 @@ class Application
     inline static DebugLayer* debugLayer = nullptr;
 };
 
-} // namespace brls
+} // namespace aurore

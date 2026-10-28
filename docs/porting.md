@@ -58,7 +58,7 @@ When something is a platform's own (a Switch service, an Android intent), keep i
 
 ## Threads and speed
 
-- The UI belongs to the main thread on every platform ([architecture.md](architecture.md#threads)): slow work goes to `brls::async`, its result back with `brls::sync`. The Vita and the PS4 use pthreads; `-DAURORE_STD_THREAD=ON` uses `std::thread` where pthreads are missing.
+- The UI belongs to the main thread on every platform ([architecture.md](architecture.md#threads)): slow work goes to `aurore::async`, its result back with `aurore::sync`. The Vita and the PS4 use pthreads; `-DAURORE_STD_THREAD=ON` uses `std::thread` where pthreads are missing.
 - The consoles are slower than a desktop: long lists in a `RecyclerFrame` or `RecyclingGrid`, pictures no larger than shown (Aurore refuses those over 4096×4096), `setImageFromFileAsync` for covers. `-DAURORE_SIMPLE_HIGHLIGHT=ON` and `Application::setRedrawOnDemand(true)` save frames on a Vita or on a battery.
 - Quitting differs: the Switch's apps leave through the Home menu or `+` (`setGlobalQuit`), a desktop through its window, a phone never quits on its own.
 

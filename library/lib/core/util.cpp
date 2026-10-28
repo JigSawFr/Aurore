@@ -35,7 +35,7 @@ namespace fs = std::experimental::filesystem;
 #include <psp2/kernel/processmgr.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 bool endsWith(const std::string& data, const std::string& suffix)
@@ -50,7 +50,7 @@ bool startsWith(const std::string& data, const std::string& prefix)
 
 [[noreturn]] void fatal(std::string message)
 {
-    brls::Logger::error("Fatal error: {}", message);
+    aurore::Logger::error("Fatal error: {}", message);
 #ifdef __PSV__
     sceKernelExitProcess(1);
 #else
@@ -64,7 +64,7 @@ std::string loadFileContents(const std::string& path)
     fin.open(path, std::ios::in);
     if (!fin.is_open())
     {
-        brls::Logger::error("cannot open file: {}", path);
+        aurore::Logger::error("cannot open file: {}", path);
         return "";
     }
 
@@ -145,4 +145,4 @@ std::string escapeControlChars(const std::string& text)
     return out;
 }
 
-} // namespace brls
+} // namespace aurore

@@ -21,7 +21,7 @@
 #include <cxxabi.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // Named: in a unity build, the other files' helpers do not meet these
@@ -100,7 +100,7 @@ namespace inspector_detail
             result = demangled;
         std::free(demangled);
 #endif
-        for (const char* prefix : { "brls::", "(anonymous namespace)::" })
+        for (const char* prefix : { "aurore::", "(anonymous namespace)::" })
         {
             size_t at;
             while ((at = result.find(prefix)) != std::string::npos)
@@ -839,4 +839,4 @@ void Inspector::recordMetric(const std::string& name, float value)
     metrics.emplace_back(name, value);
 }
 
-} // namespace brls
+} // namespace aurore

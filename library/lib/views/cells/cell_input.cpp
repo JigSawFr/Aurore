@@ -20,7 +20,7 @@
 
 #include <algorithm>
 
-namespace brls
+namespace aurore
 {
 
 InputCell::InputCell()
@@ -151,4 +151,4 @@ View* InputNumericCell::create()
     return new InputNumericCell();
 }
 
-} // namespace brls
+} // namespace aurore

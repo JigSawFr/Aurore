@@ -30,7 +30,7 @@
 #include <sstream>
 #include <string>
 
-using brls::test::Harness;
+using aurore::test::Harness;
 
 namespace
 {
@@ -87,7 +87,7 @@ BRLS_TEST(every_catalog_is_valid_and_loaded)
     Harness harness;
     std::map<std::string, std::string> english;
     std::string error;
-    for (const auto& file : std::filesystem::directory_iterator(I18N / brls::LOCALE_DEFAULT))
+    for (const auto& file : std::filesystem::directory_iterator(I18N / aurore::LOCALE_DEFAULT))
         BRLS_CHECK(readCatalog(file.path(), &english, &error));
     BRLS_CHECK(!english.empty());
 
@@ -100,27 +100,27 @@ BRLS_TEST(every_catalog_is_valid_and_loaded)
         {
             error.clear();
             if (!readCatalog(file.path(), &strings, &error))
-                brls::test::reportFailure(__FILE__, __LINE__, locale + "/" + file.path().filename().string() + ": " + error);
+                aurore::test::reportFailure(__FILE__, __LINE__, locale + "/" + file.path().filename().string() + ": " + error);
         }
 
-        brls::loadTranslations(locale);
+        aurore::loadTranslations(locale);
         for (const auto& [name, text] : strings)
         {
             auto en = english.find(name);
             if (en == english.end())
-                brls::test::reportFailure(__FILE__, __LINE__, locale + ": " + name + " is not in " + brls::LOCALE_DEFAULT);
+                aurore::test::reportFailure(__FILE__, __LINE__, locale + ": " + name + " is not in " + aurore::LOCALE_DEFAULT);
             else if (placeholders(text) != placeholders(en->second))
-                brls::test::reportFailure(__FILE__, __LINE__, locale + ": " + name + " has other placeholders than in " + brls::LOCALE_DEFAULT);
-            if (brls::internal::getRawStr(name) != text)
-                brls::test::reportFailure(__FILE__, __LINE__, locale + ": " + name + " is not what loadTranslations() read");
+                aurore::test::reportFailure(__FILE__, __LINE__, locale + ": " + name + " has other placeholders than in " + aurore::LOCALE_DEFAULT);
+            if (aurore::internal::getRawStr(name) != text)
+                aurore::test::reportFailure(__FILE__, __LINE__, locale + ": " + name + " is not what loadTranslations() read");
         }
         locales++;
     }
     BRLS_CHECK_EQ(locales, 15);
-    brls::loadTranslations(brls::LOCALE_DEFAULT);
+    aurore::loadTranslations(aurore::LOCALE_DEFAULT);
 }
 
 int main(int argc, char** argv)
 {
-    return brls::test::runTests(argc, argv);
+    return aurore::test::runTests(argc, argv);
 }

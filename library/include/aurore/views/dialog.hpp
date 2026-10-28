@@ -25,7 +25,7 @@
 #include <aurore/views/button.hpp>
 #include <aurore/views/rectangle.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // TODO: Add the blurred dialog type once the blur is finished
@@ -129,4 +129,4 @@ class Dialog : public Box
     }
 };
 
-} // namespace brls
+} // namespace aurore

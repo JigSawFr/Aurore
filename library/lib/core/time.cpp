@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <aurore/core/time.hpp>
 
-namespace brls
+namespace aurore
 {
 
 void Ticking::updateTickings()
@@ -121,4 +121,4 @@ void FiniteTicking::reset()
     this->onReset();
 }
 
-} // namespace brls
+} // namespace aurore

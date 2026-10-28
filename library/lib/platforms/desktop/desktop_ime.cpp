@@ -21,7 +21,7 @@ limitations under the License.
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/desktop/desktop_ime.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static std::string terminalInput(std::string text)

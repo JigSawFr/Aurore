@@ -21,7 +21,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class CheckBox : public View
@@ -61,4 +61,4 @@ class RadioCell : public RecyclerCell
     bool selected = false;
 };
 
-} // namespace brls
+} // namespace aurore

@@ -9,23 +9,23 @@ target_link_libraries(aurore_demo_views PUBLIC Aurore::aurore)
 # Test cases over the demo (ctest runs each in a process of its own)
 add_executable(aurore_tests demo_tests.cpp)
 target_link_libraries(aurore_tests PRIVATE aurore_demo_views Aurore::test)
-brls_add_tests(aurore_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/references)
+aurore_add_tests(aurore_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/references)
 
 # openBrowser(): accepted links, no shell between the link and the opener
 add_executable(aurore_open_url_tests open_url_tests.cpp)
 target_link_libraries(aurore_open_url_tests PRIVATE Aurore::test)
-brls_add_tests(aurore_open_url_tests)
+aurore_add_tests(aurore_open_url_tests)
 
 # Pictures too large are refused before they are decoded
 add_executable(aurore_image_limits_tests image_limits_tests.cpp)
 target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
-brls_add_tests(aurore_image_limits_tests)
+aurore_add_tests(aurore_image_limits_tests)
 
 # XML layouts: bounds, errors
 add_executable(aurore_parser_tests parser_tests.cpp)
 target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
-brls_add_tests(aurore_parser_tests)
+aurore_add_tests(aurore_parser_tests)
 
 # libFuzzer targets, with clang: -DBRLS_BUILD_FUZZERS=ON (docs/testing.md)
 option(BRLS_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
@@ -44,19 +44,19 @@ endif ()
 add_executable(aurore_async_tests async_tests.cpp)
 target_link_libraries(aurore_async_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_async_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
-brls_add_tests(aurore_async_tests)
+aurore_add_tests(aurore_async_tests)
 
 # Every translation catalog parses and is loaded
 add_executable(aurore_i18n_tests i18n_tests.cpp)
 target_link_libraries(aurore_i18n_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_i18n_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
-brls_add_tests(aurore_i18n_tests)
+aurore_add_tests(aurore_i18n_tests)
 
 # The debugging aids' environment variables, only in a build with BRLS_DEV_TOOLS
 add_executable(aurore_dev_tools_tests dev_tools_tests.cpp)
 target_link_libraries(aurore_dev_tools_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_dev_tools_tests PRIVATE ${BRLS_DEV_TOOLS_DEFINITION})
-brls_add_tests(aurore_dev_tools_tests)
+aurore_add_tests(aurore_dev_tools_tests)
 
 # The main loop's cost on the demo (Profiler), checked against a baseline
 add_executable(aurore_bench bench.cpp)

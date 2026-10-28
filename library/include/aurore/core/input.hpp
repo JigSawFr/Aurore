@@ -26,7 +26,7 @@
 
 #define GAMEPADS_MAX 5
 
-namespace brls
+namespace aurore
 {
 
 typedef enum
@@ -36,7 +36,7 @@ typedef enum
     BRLS_KBD_MODIFIER_CTRL  = 0x02,
     BRLS_KBD_MODIFIER_ALT   = 0x04,
     BRLS_KBD_MODIFIER_META  = 0x08,
-} BrlsKeyboardModifiers;
+} AuroreKeyboardModifiers;
 
 /// HidKeyboardScancode
 /// Uses the same key codes as GLFW
@@ -170,7 +170,7 @@ typedef enum
     BRLS_KBD_KEY_MENU          = 348,
 
     BRLS_KBD_KEY_LAST
-} BrlsKeyboardScancode;
+} AuroreKeyboardScancode;
 
 // Abstract buttons enum - names correspond to a generic Xbox controller
 // LT and RT should not be buttons but for the sake of simplicity we'll assume they are.
@@ -226,7 +226,7 @@ enum ControllerAxis
 
 struct KeyState
 {
-    BrlsKeyboardScancode key;
+    AuroreKeyboardScancode key;
     short mods;
     bool pressed;
 };
@@ -343,7 +343,7 @@ class InputManager
      */
     virtual void updateControllerState(ControllerState* state, int controller) = 0;
 
-    virtual bool getKeyboardKeyState(BrlsKeyboardScancode state) = 0;
+    virtual bool getKeyboardKeyState(AuroreKeyboardScancode state) = 0;
 
     /**
      * Called once every frame to fill the given RawTouchState struct with the raw touch data.
@@ -415,4 +415,4 @@ class InputManager
     Event<SensorEvent> controllerSensorStateChanged;
 };
 
-}; // namespace brls
+}; // namespace aurore

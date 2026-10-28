@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 class HeadlessVideoContext : public VideoContext
@@ -73,14 +73,14 @@ class HeadlessInputManager : public InputManager
     short getControllersConnectedCount() override { return 1; }
     void updateUnifiedControllerState(ControllerState* state) override;
     void updateControllerState(ControllerState* state, int controller) override;
-    bool getKeyboardKeyState(BrlsKeyboardScancode key) override;
+    bool getKeyboardKeyState(AuroreKeyboardScancode key) override;
     void updateTouchStates(std::vector<RawTouchState>* states) override;
     void updateMouseStates(RawMouseState* state) override;
     void sendRumble(unsigned short controller, unsigned short lowFreqMotor, unsigned short highFreqMotor) override { }
 
     void setButton(ControllerButton button, bool pressed);
     void setAxis(ControllerAxis axis, float value);
-    void setKey(BrlsKeyboardScancode key, bool pressed);
+    void setKey(AuroreKeyboardScancode key, bool pressed);
     void setTouch(int fingerId, bool pressed, Point position);
     void setMouse(Point position, bool leftButton);
     void scroll(Point offset);
@@ -88,7 +88,7 @@ class HeadlessInputManager : public InputManager
   private:
     bool buttons[_BUTTON_MAX] = {};
     float axes[_AXES_MAX]     = {};
-    std::set<BrlsKeyboardScancode> keys;
+    std::set<AuroreKeyboardScancode> keys;
     std::vector<RawTouchState> touches;
     RawMouseState mouse;
     ButtonLatch leftLatch;
@@ -169,4 +169,4 @@ class HeadlessPlatform : public DesktopPlatform
     bool closeRequested   = false;
 };
 
-} // namespace brls
+} // namespace aurore

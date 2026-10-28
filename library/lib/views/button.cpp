@@ -21,7 +21,7 @@
 #include <aurore/core/touch/tap_gesture.hpp>
 #include <aurore/views/button.hpp>
 
-namespace brls
+namespace aurore
 {
 
 const std::string buttonXML = R"xml(
@@ -232,4 +232,4 @@ View* Button::create()
     return new Button();
 }
 
-} // namespace brls
+} // namespace aurore

@@ -39,7 +39,7 @@
 #include <aurore/core/event.hpp>
 #include <aurore/core/time.hpp>
 
-namespace brls
+namespace aurore
 {
 
 enum class LogLevel
@@ -65,11 +65,11 @@ enum class LogLevel
 #define BRLS_VERBOSE_COLOR "[0;37m"
 #endif
 
-#define BRLS_LOG_ERROR(format, ...) brls::Logger::error("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_WARNING(format, ...) brls::Logger::warning("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_INFO(format, ...) brls::Logger::info("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_DEBUG(format, ...) brls::Logger::debug("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_VERBOSE(format, ...) brls::Logger::verbose("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define BRLS_LOG_ERROR(format, ...) aurore::Logger::error("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define BRLS_LOG_WARNING(format, ...) aurore::Logger::warning("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define BRLS_LOG_INFO(format, ...) aurore::Logger::info("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define BRLS_LOG_DEBUG(format, ...) aurore::Logger::debug("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define BRLS_LOG_VERBOSE(format, ...) aurore::Logger::verbose("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
 
 class Logger
 {
@@ -204,4 +204,4 @@ class Logger
     inline static LogLevel logLevel = LogLevel::LOG_INFO;
 };
 
-} // namespace brls
+} // namespace aurore

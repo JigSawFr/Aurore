@@ -49,11 +49,11 @@ HeaderSetting::HeaderSetting(Kind setting)
     this->setFocusable(false);
     this->setWidth(setting == Kind::LANGUAGE ? SIZE * 1.3f : SIZE);
     this->setHeight(SIZE);
-    this->setAlignSelf(brls::AlignSelf::CENTER);
+    this->setAlignSelf(aurore::AlignSelf::CENTER);
     this->setMarginRight(GAP);
     // A tap opens its list (hitTest finds it, focusable or not); the tab on
     // screen shows the new choice (Preferences says it too).
-    this->addGestureRecognizer(new brls::TapGestureRecognizer(this, [setting]()
+    this->addGestureRecognizer(new aurore::TapGestureRecognizer(this, [setting]()
         {
         if (setting == Kind::LANGUAGE) ui::pick_language(ui::refresh_shown_tab);
         else if (setting == Kind::THEME) ui::pick_theme(ui::refresh_shown_tab);
@@ -63,26 +63,26 @@ HeaderSetting::HeaderSetting(Kind setting)
 std::string HeaderSetting::getDefaultAccessibilityLabel()
 {
     if (this->kind == Kind::LANGUAGE)
-        return brls::getStr("cadran/tools/language") + ", " + ui::language_name();
+        return aurore::getStr("cadran/tools/language") + ", " + ui::language_name();
     if (this->kind == Kind::THEME)
-        return brls::getStr("cadran/tools/theme") + ", " + ui::theme_name();
-    return brls::getStr("cadran/prefs/text_size") + ", " + ui::text_size_name();
+        return aurore::getStr("cadran/tools/theme") + ", " + ui::theme_name();
+    return aurore::getStr("cadran/prefs/text_size") + ", " + ui::text_size_name();
 }
 
-brls::View* HeaderSetting::hitTest(brls::Point point)
+aurore::View* HeaderSetting::hitTest(aurore::Point point)
 {
-    // brls::View::hitTest skips a view that cannot take the focus.
-    if (this->getAlpha() == 0.0f || this->getVisibility() != brls::Visibility::VISIBLE)
+    // aurore::View::hitTest skips a view that cannot take the focus.
+    if (this->getAlpha() == 0.0f || this->getVisibility() != aurore::Visibility::VISIBLE)
         return nullptr;
-    brls::Rect frame = this->getFrame();
-    const float dy   = std::max(0.0f, (TOUCH - frame.size.height) / 2);
-    const float dx   = GAP / 2;
-    brls::Rect touch(frame.origin.x - dx, frame.origin.y - dy, frame.size.width + 2 * dx, frame.size.height + 2 * dy);
+    aurore::Rect frame = this->getFrame();
+    const float dy     = std::max(0.0f, (TOUCH - frame.size.height) / 2);
+    const float dx     = GAP / 2;
+    aurore::Rect touch(frame.origin.x - dx, frame.origin.y - dy, frame.size.width + 2 * dx, frame.size.height + 2 * dy);
     return touch.pointInside(point) ? this : nullptr;
 }
 
-void HeaderSetting::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-    brls::FrameContext* ctx)
+void HeaderSetting::draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style,
+    aurore::FrameContext* ctx)
 {
     (void)style;
     (void)ctx;
@@ -104,7 +104,7 @@ void HeaderSetting::draw_language(NVGcontext* vg, float x, float y, float width,
     nvgStrokeColor(vg, ink);
     nvgStrokeWidth(vg, 2);
     nvgStroke(vg);
-    nvgFontFaceId(vg, brls::Application::getDefaultFont());
+    nvgFontFaceId(vg, aurore::Application::getDefaultFont());
     nvgFontSize(vg, height * 0.45f);
     nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
     nvgFillColor(vg, ink);
@@ -179,7 +179,7 @@ void HeaderSetting::draw_text_size(NVGcontext* vg, float x, float y, float width
     // the text is larger.
     const NVGcolor ink = cadran::kit::color("cadran/text");
     const float base   = y + height * 0.78f;
-    nvgFontFaceId(vg, brls::Application::getDefaultFont());
+    nvgFontFaceId(vg, aurore::Application::getDefaultFont());
     nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE);
     nvgFontSize(vg, height * 0.5f);
     float bounds[4];
@@ -192,20 +192,20 @@ void HeaderSetting::draw_text_size(NVGcontext* vg, float x, float y, float width
     nvgFillColor(vg, ink);
     nvgText(vg, left, base, "A", nullptr);
     nvgFontSize(vg, height * 0.78f);
-    nvgFillColor(vg, text_size::larger() ? brls::Application::getTheme()["cadran/teal"] : ink);
+    nvgFillColor(vg, text_size::larger() ? aurore::Application::getTheme()["cadran/teal"] : ink);
     nvgText(vg, left + small + gap, base, "A", nullptr);
 }
 
 // The main screen (its tab frame) holding `focus`: the language then the
 // theme go first in the header's row at the right (the bell is there
 // already), unless it has them.
-static void settings_screen_of(brls::View* focus)
+static void settings_screen_of(aurore::View* focus)
 {
     if (!focus)
         return;
     while (focus->hasParent())
         focus = focus->getParent();
-    auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
+    auto* frame = dynamic_cast<aurore::AppletFrame*>(focus);
     if (!frame || !cadran::is_main_frame(frame))
         return;
     auto* tools = VersionBadge::header_tools(frame);
@@ -222,5 +222,5 @@ void HeaderSetting::install()
     if (done)
         return;
     done = true;
-    brls::Application::getGlobalFocusChangeEvent()->subscribe(settings_screen_of);
+    aurore::Application::getGlobalFocusChangeEvent()->subscribe(settings_screen_of);
 }

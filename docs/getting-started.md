@@ -43,13 +43,13 @@ Aurore's `template/` folder (see its `README.md`) is such an app, with the `CMak
 
 int main(int argc, char* argv[])
 {
-    if (!brls::Application::init())
+    if (!aurore::Application::init())
         return EXIT_FAILURE;
-    brls::Application::createWindow("Hello");
+    aurore::Application::createWindow("Hello");
 
-    brls::Application::pushActivity(new HelloActivity());
+    aurore::Application::pushActivity(new HelloActivity());
 
-    while (brls::Application::mainLoop())
+    while (aurore::Application::mainLoop())
         ;
     return EXIT_SUCCESS;
 }
@@ -64,21 +64,21 @@ A screen is an **activity**. Its content can come from an XML file in `resources
 #pragma once
 #include <aurore.hpp>
 
-class HelloActivity : public brls::Activity
+class HelloActivity : public aurore::Activity
 {
   public:
     CONTENT_FROM_XML_RES("activity/hello.xml");
 
     void onContentAvailable() override
     {
-        this->button->registerClickAction([](brls::View*) {
-            brls::Application::notify("Hello!");
+        this->button->registerClickAction([](aurore::View*) {
+            aurore::Application::notify("Hello!");
             return true;
         });
     }
 
   private:
-    BRLS_BIND(brls::Button, button, "hello_button");
+    BRLS_BIND(aurore::Button, button, "hello_button");
 };
 ```
 
@@ -108,7 +108,7 @@ class HelloActivity : public brls::Activity
 </brls:AppletFrame>
 ```
 
-Every XML tag is a view (`brls:Box`, `brls:Label`, `brls:Button`, `brls:Image`, `brls:ScrollingFrame`, `brls:TabFrame`…); its attributes are the yoga layout (`width`, `height`, `grow`, `margin`, `padding`, `gap`, `axis`, `alignItems`…) and the view's own (`text`, `fontSize`, `backgroundColor`, `cornerRadius`…). `@i18n/…` reads a translation, `@theme/…` a theme colour, `@style/…` a metric, `@res/…` a resource. `BRLS_BIND` finds a view by its `id` the first time it is used. A second screen is pushed with `brls::Application::pushActivity(new OtherActivity())`, and B takes it off.
+Every XML tag is a view (`brls:Box`, `brls:Label`, `brls:Button`, `brls:Image`, `brls:ScrollingFrame`, `brls:TabFrame`…); its attributes are the yoga layout (`width`, `height`, `grow`, `margin`, `padding`, `gap`, `axis`, `alignItems`…) and the view's own (`text`, `fontSize`, `backgroundColor`, `cornerRadius`…). `@i18n/…` reads a translation, `@theme/…` a theme colour, `@style/…` a metric, `@res/…` a resource. `BRLS_BIND` finds a view by its `id` the first time it is used. A second screen is pushed with `aurore::Application::pushActivity(new OtherActivity())`, and B takes it off.
 
 While you work on the XML, start the app with `BRLS_HOT_RELOAD=$PWD/resources ./build/my_app`: each save builds the screen again, the focus where it was ([hot reload](hot_reload.md)).
 
@@ -117,7 +117,7 @@ While you work on the XML, start the app with `BRLS_HOT_RELOAD=$PWD/resources ./
 A view of your own is a `Box` that fills itself from its own XML, and is registered under a tag name:
 
 ```cpp
-class ScoreCard : public brls::Box
+class ScoreCard : public aurore::Box
 {
   public:
     ScoreCard()
@@ -128,11 +128,11 @@ class ScoreCard : public brls::Box
 
     void setScore(int score) { this->score->setText(std::to_string(score)); }
 
-    static brls::View* create() { return new ScoreCard(); }
+    static aurore::View* create() { return new ScoreCard(); }
 
   private:
-    BRLS_BIND(brls::Label, name, "name");
-    BRLS_BIND(brls::Label, score, "score");
+    BRLS_BIND(aurore::Label, name, "name");
+    BRLS_BIND(aurore::Label, score, "score");
 };
 ```
 
@@ -151,14 +151,14 @@ class ScoreCard : public brls::Box
 </brls:Box>
 ```
 
-Register it before the first screen that uses it, `brls::Application::registerXMLView("ScoreCard", ScoreCard::create);`, and it can be written in any XML: `<ScoreCard id="p1" player="Ada" />`. Override `draw()` for a view that draws itself with nanovg (`demo/src/view/` has both kinds), and `onFocusGained()`, `registerAction()` or gesture recognizers to react.
+Register it before the first screen that uses it, `aurore::Application::registerXMLView("ScoreCard", ScoreCard::create);`, and it can be written in any XML: `<ScoreCard id="p1" player="Ada" />`. Override `draw()` for a view that draws itself with nanovg (`demo/src/view/` has both kinds), and `onFocusGained()`, `registerAction()` or gesture recognizers to react.
 
-Slow work (a file, the network) runs on the task thread with `brls::async`, and its result comes back to the UI thread with `brls::sync`; views are only touched there. The view may be gone by then: capture its `aliveToken()` and check it first.
+Slow work (a file, the network) runs on the task thread with `aurore::async`, and its result comes back to the UI thread with `aurore::sync`; views are only touched there. The view may be gone by then: capture its `aliveToken()` and check it first.
 
 ```cpp
-brls::async([this, alive = aliveToken()] {
+aurore::async([this, alive = aliveToken()] {
     std::string text = loadScore(); // the task thread: not `this`
-    brls::sync([this, alive, text] {
+    aurore::sync([this, alive, text] {
         if (alive.expired())
             return; // the view was deleted meanwhile
         this->score->setText(text);
@@ -184,12 +184,12 @@ brls/sidebar/width = 320
 ```
 
 ```cpp
-brls::ThemeVariant variant;
-if (brls::Theme::loadFile("my_theme.ini", &variant))
-    brls::Application::getPlatform()->setThemeVariant(variant);
+aurore::ThemeVariant variant;
+if (aurore::Theme::loadFile("my_theme.ini", &variant))
+    aurore::Application::getPlatform()->setThemeVariant(variant);
 ```
 
-An app adds its own values with `brls::Theme::getDarkTheme().addColor("my_app/score", nvgRGB(…))` and `brls::getStyle().addMetric(…)`, and its XML reads them with `@theme/my_app/score`. With hot reload on, a save of the theme file restyles the screen at once. Aurore draws everything in [Cadran](cadran.md)'s look by default; `brls::Application::setCadran(false)` before `init()` keeps borealis' own.
+An app adds its own values with `aurore::Theme::getDarkTheme().addColor("my_app/score", nvgRGB(…))` and `aurore::getStyle().addMetric(…)`, and its XML reads them with `@theme/my_app/score`. With hot reload on, a save of the theme file restyles the screen at once. Aurore draws everything in [Cadran](cadran.md)'s look by default; `aurore::Application::setCadran(false)` before `init()` keeps borealis' own.
 
 ## 6. Ship it on the Switch (4 minutes)
 

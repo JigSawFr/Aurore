@@ -1,5 +1,5 @@
 // Cadran — Aurore's look (docs/cadran.md): every header of aurore/cadran
-// at once, and its start-up, which brls::Application runs itself unless the
+// at once, and its start-up, which aurore::Application runs itself unless the
 // app turned it off (Application::setCadran(false)).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once

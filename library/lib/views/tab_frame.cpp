@@ -23,7 +23,7 @@
 #include <aurore/core/util.hpp>
 #include <aurore/views/tab_frame.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 const std::string tabFrameContentXML = R"xml(
     <brls:Box
@@ -41,7 +41,7 @@ const std::string tabFrameContentXML = R"xml(
     </brls:Box>
 )xml";
 
-namespace brls
+namespace aurore
 {
 
 TabFrame::TabFrame()
@@ -52,7 +52,7 @@ TabFrame::TabFrame()
 void TabFrame::addTab(std::string label, TabViewCreator creator)
 {
     int index = this->tabCount++;
-    this->sidebar->addItem(label, [this, creator, index](brls::View* view)
+    this->sidebar->addItem(label, [this, creator, index](aurore::View* view)
         {
         // Only trigger when the sidebar item gains focus
         if (!view->isFocused())
@@ -190,4 +190,4 @@ View* TabFrame::create()
     return new TabFrame();
 }
 
-} // namespace brls
+} // namespace aurore

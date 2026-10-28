@@ -21,9 +21,9 @@ namespace ui::hooks
 struct Hooks
 {
     /// The main screen.
-    std::function<bool(brls::Activity* activity)> is_main; ///< `activity` is it
-    std::function<void(brls::Activity* main, int position, const std::string& row)> open_tab;
-    std::function<void(brls::Activity* main)> update_title;
+    std::function<bool(aurore::Activity* activity)> is_main; ///< `activity` is it
+    std::function<void(aurore::Activity* main, int position, const std::string& row)> open_tab;
+    std::function<void(aurore::Activity* main)> update_title;
     /// A new main screen, pushed, on tab `position`, the focus on `row`.
     std::function<void(int position, const std::string& row)> push_main;
 
@@ -32,7 +32,7 @@ struct Hooks
     std::function<void()> refresh_shown;
     std::function<std::string()> shown_screen;
     std::function<std::string()> main_screen;
-    std::function<bool(brls::View* view)> is_tab;
+    std::function<bool(aurore::View* view)> is_tab;
 
     /// The sidebar position of the tab whose screen name is `screen`, -1 when
     /// there is none; and the position to fall back on.
@@ -66,7 +66,7 @@ struct Hooks
     /// step from the one under it: a child's screen, a lock screen. It gets
     /// no crumb and no version badge (cadran::is_standalone_screen). Unset:
     /// the screens holding a view with the id "cadran/standalone".
-    std::function<bool(brls::View* frame)> standalone_screen;
+    std::function<bool(aurore::View* frame)> standalone_screen;
     /// Today, "2026-10-08", by the app's own clock (the console's user clock).
     /// Unset: the system's local date.
     std::function<std::string()> today;

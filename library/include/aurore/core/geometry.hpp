@@ -18,7 +18,7 @@
 
 #include <string>
 
-namespace brls
+namespace aurore
 {
 
 // A structure that contains a point in a two-dimensional coordinate system.
@@ -118,4 +118,4 @@ struct Rect
     Rect offsetBy(const Point& origin) const;
 };
 
-} // namespace brls
+} // namespace aurore

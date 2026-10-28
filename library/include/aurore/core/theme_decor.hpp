@@ -21,7 +21,7 @@
 #include <aurore/core/theme.hpp>
 #include <aurore/core/time.hpp>
 
-namespace brls
+namespace aurore
 {
 
 /**
@@ -107,4 +107,4 @@ class ThemeDecorations
     static void reset();
 };
 
-} // namespace brls
+} // namespace aurore

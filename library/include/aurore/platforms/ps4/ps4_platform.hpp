@@ -18,7 +18,7 @@ limitations under the License.
 
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class Ps4Platform : public SDLPlatform
@@ -53,4 +53,4 @@ class Ps4Platform : public SDLPlatform
     ImeManager* imeManager = nullptr;
 };
 
-} // namespace brls
+} // namespace aurore

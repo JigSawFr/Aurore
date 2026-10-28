@@ -23,7 +23,7 @@ limitations under the License.
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/psv/psv_ime.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static void utf16_to_utf8(const uint16_t* src, uint8_t* dst)
@@ -143,7 +143,7 @@ class PsvImeView : public View
         SceInt32 res = sceImeDialogInit(&param);
         if (res < 0)
         {
-            brls::Logger::error("Failed to init IME dialog: {}", res);
+            aurore::Logger::error("Failed to init IME dialog: {}", res);
             return false;
         }
         running = true;

@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace brls
+namespace aurore
 {
 
 // What one iteration of the main loop cost, measured while the Profiler is
@@ -106,4 +106,4 @@ class Profiler
     inline static std::function<uint64_t()> allocationCounter;
 };
 
-} // namespace brls
+} // namespace aurore

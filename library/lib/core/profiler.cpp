@@ -20,7 +20,7 @@
 
 #include <cstdlib>
 
-namespace brls
+namespace aurore
 {
 
 static const int LOG_EVERY = 120;
@@ -162,4 +162,4 @@ void Profiler::setDrawStats(uint32_t drawCalls, uint32_t triangles)
     current.triangles = triangles;
 }
 
-} // namespace brls
+} // namespace aurore

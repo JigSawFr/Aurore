@@ -25,7 +25,7 @@
 
 #include <algorithm>
 
-namespace brls
+namespace aurore
 {
 
 #define SDL_GAMEPAD_BUTTON_NONE SIZE_MAX
@@ -40,26 +40,26 @@ static float normalizeSdlAxis(Sint16 axis)
 
 /// HidKeyboardScancode
 /// Uses the same key codes as GLFW
-static const BrlsKeyboardScancode sdlToBrlsKeyboardScancode(SDL_Scancode scancode)
+static const AuroreKeyboardScancode sdlToAuroreKeyboardScancode(SDL_Scancode scancode)
 {
     if (scancode == SDL_SCANCODE_UNKNOWN)
         return BRLS_KBD_KEY_UNKNOWN;
 
     // 1 - 9
     if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_9)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_1 + scancode - SDL_SCANCODE_1);
+        return (AuroreKeyboardScancode)(BRLS_KBD_KEY_1 + scancode - SDL_SCANCODE_1);
 
     // KP1 - KP9
     if (scancode >= SDL_SCANCODE_KP_1 && scancode <= SDL_SCANCODE_KP_9)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_KP_1 + scancode - SDL_SCANCODE_KP_1);
+        return (AuroreKeyboardScancode)(BRLS_KBD_KEY_KP_1 + scancode - SDL_SCANCODE_KP_1);
 
     // A - Z
     if (scancode >= SDL_SCANCODE_A && scancode <= SDL_SCANCODE_Z)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_A + scancode - SDL_SCANCODE_A);
+        return (AuroreKeyboardScancode)(BRLS_KBD_KEY_A + scancode - SDL_SCANCODE_A);
 
     // F1 - F12
     if (scancode >= SDL_SCANCODE_F1 && scancode <= SDL_SCANCODE_F12)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_F1 + scancode - SDL_SCANCODE_F1);
+        return (AuroreKeyboardScancode)(BRLS_KBD_KEY_F1 + scancode - SDL_SCANCODE_F1);
 
     switch (scancode)
     {
@@ -174,7 +174,7 @@ static const BrlsKeyboardScancode sdlToBrlsKeyboardScancode(SDL_Scancode scancod
     }
 }
 
-static const SDL_Scancode brlsToSdlKeyboardScancode(BrlsKeyboardScancode scancode)
+static const SDL_Scancode auroreToSdlKeyboardScancode(AuroreKeyboardScancode scancode)
 {
     if (scancode == BRLS_KBD_KEY_UNKNOWN)
         return SDL_SCANCODE_UNKNOWN;
@@ -336,7 +336,7 @@ static std::unordered_map<SDL_Scancode, int> keyboardKeys {};
 static bool webButtonsHeld[_BUTTON_MAX] {};
 static bool webButtonsPressed[_BUTTON_MAX] {};
 
-extern "C" EMSCRIPTEN_KEEPALIVE void brls_web_button(int button, int down)
+extern "C" EMSCRIPTEN_KEEPALIVE void aurore_web_button(int button, int down)
 {
     if (button < 0 || button >= _BUTTON_MAX)
         return;
@@ -458,7 +458,7 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
 #endif
     if (SDL_Init(flags) < 0)
     {
-        brls::fatal("Couldn't initialize joystick: " + std::string(SDL_GetError()));
+        aurore::fatal("Couldn't initialize joystick: " + std::string(SDL_GetError()));
     }
 
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
@@ -468,7 +468,7 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
 #endif
 
     int controllersCount = SDL_NumJoysticks();
-    brls::Logger::info("joystick num: {}", controllersCount);
+    aurore::Logger::info("joystick num: {}", controllersCount);
 
     {
         std::lock_guard<std::recursive_mutex> lock(controllersMutex);
@@ -605,8 +605,8 @@ void SDLInputManager::updateControllerState(ControllerState* state, int controll
     for (size_t i = 0; i < SDL_GAMEPAD_BUTTON_MAX; i++)
     {
         // Translate SDL gamepad to borealis controller
-        size_t brlsButton          = SDL_BUTTONS_MAPPING[i];
-        state->buttons[brlsButton] = (bool)SDL_GameControllerGetButton(c, (SDL_GameControllerButton)i);
+        size_t auroreButton          = SDL_BUTTONS_MAPPING[i];
+        state->buttons[auroreButton] = (bool)SDL_GameControllerGetButton(c, (SDL_GameControllerButton)i);
     }
 
     state->buttons[BUTTON_LT] = SDL_GameControllerGetAxis(c, SDL_CONTROLLER_AXIS_TRIGGERLEFT) > 3276.7f;
@@ -623,9 +623,9 @@ void SDLInputManager::updateControllerState(ControllerState* state, int controll
     }
 }
 
-bool SDLInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
+bool SDLInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
-    return getKeyboardKeys(brlsToSdlKeyboardScancode(key));
+    return getKeyboardKeys(auroreToSdlKeyboardScancode(key));
 }
 
 void SDLInputManager::updateTouchStates(std::vector<RawTouchState>* states)
@@ -666,7 +666,7 @@ void SDLInputManager::updateMouseStates(RawMouseState* state)
     state->position.x = x / Application::windowScale;
     state->position.y = y / Application::windowScale;
 #else
-    double scaleFactor = brls::Application::getPlatform()->getVideoContext()->getScaleFactor();
+    double scaleFactor = aurore::Application::getPlatform()->getVideoContext()->getScaleFactor();
     state->position.x  = x * scaleFactor / Application::windowScale;
     state->position.y  = y * scaleFactor / Application::windowScale;
 #endif
@@ -684,7 +684,7 @@ void SDLInputManager::setPointerLock(bool lock)
 
     if (SDL_SetRelativeMouseMode(lock ? SDL_TRUE : SDL_FALSE) < 0)
     {
-        brls::Logger::warning("sdl: failed to set relative mouse mode: {}", SDL_GetError());
+        aurore::Logger::warning("sdl: failed to set relative mouse mode: {}", SDL_GetError());
     }
 
     SDL_ShowCursor(lock ? SDL_FALSE : SDL_TRUE);
@@ -752,7 +752,7 @@ void SDLInputManager::updateKeyboardState(SDL_KeyboardEvent event)
 {
     auto* self = (SDLInputManager*)Application::getPlatform()->getInputManager();
     KeyState state {};
-    state.key     = sdlToBrlsKeyboardScancode(event.keysym.scancode);
+    state.key     = sdlToAuroreKeyboardScancode(event.keysym.scancode);
     state.pressed = event.type == SDL_KEYDOWN;
     state.mods |= event.keysym.mod & KMOD_SHIFT ? BRLS_KBD_MODIFIER_SHIFT : 0;
     state.mods |= event.keysym.mod & KMOD_CTRL ? BRLS_KBD_MODIFIER_CTRL : 0;

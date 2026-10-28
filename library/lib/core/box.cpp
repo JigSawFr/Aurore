@@ -27,7 +27,7 @@
 #include <aurore/core/hot_reload.hpp>
 #include <aurore/core/util.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static YGFlexDirection getYGFlexDirection(Axis axis)
@@ -964,4 +964,4 @@ Box::~Box()
     }
 }
 
-} // namespace brls
+} // namespace aurore

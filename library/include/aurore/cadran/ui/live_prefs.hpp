@@ -1,8 +1,8 @@
 // live_prefs — Preferences › Theme and Language applied at once, without
 // restarting. The theme: its variant and its file set, every view of the
 // screens drawn in it from the next frame (View::setThemeColor,
-// brls::Application::getThemeChangedEvent). The language: its strings loaded
-// again (brls::loadTranslations), then the main screen built again on the tab
+// aurore::Application::getThemeChangedEvent). The language: its strings loaded
+// again (aurore::loadTranslations), then the main screen built again on the tab
 // that was shown, the focus on the line it was on (every view takes its
 // words and font when it is made; Chinese has its own font, ui::use_font_for
 // and the default font looked up for each label).

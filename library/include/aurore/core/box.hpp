@@ -19,7 +19,7 @@
 
 #include <aurore/core/view.hpp>
 
-namespace brls
+namespace aurore
 {
 
 /// How a box spreads its children along its axis (`justifyContent` in XML).
@@ -307,10 +307,10 @@ class Box : public View
     /**
      * Inflates the Box with the given XML string.
      *
-     * The root element MUST be a brls::Box, corresponding to the inflated Box itself. Its
+     * The root element MUST be a aurore::Box, corresponding to the inflated Box itself. Its
      * attributes will be applied to the Box.
      *
-     * Each child node in the root brls::Box will be treated as a view and added
+     * Each child node in the root aurore::Box will be treated as a view and added
      * as a child of the Box.
      */
     void inflateFromXMLString(std::string_view xml);
@@ -318,10 +318,10 @@ class Box : public View
     /**
      * Inflates the Box with the given XML element.
      *
-     * The root element MUST be a brls::Box, corresponding to the inflated Box itself. Its
+     * The root element MUST be a aurore::Box, corresponding to the inflated Box itself. Its
      * attributes will be applied to the Box.
      *
-     * Each child node in the root brls::Box will be treated as a view and added
+     * Each child node in the root aurore::Box will be treated as a view and added
      * as a child of the Box.
      */
     void inflateFromXMLElement(tinyxml2::XMLElement* element);
@@ -329,10 +329,10 @@ class Box : public View
     /**
      * Inflates the Box with the given XML resource.
      *
-     * The root element MUST be a brls::Box, corresponding to the inflated Box itself. Its
+     * The root element MUST be a aurore::Box, corresponding to the inflated Box itself. Its
      * attributes will be applied to the Box.
      *
-     * Each child node in the root brls::Box will be treated as a view and added
+     * Each child node in the root aurore::Box will be treated as a view and added
      * as a child of the Box.
      */
     void inflateFromXMLRes(const std::string& res);
@@ -340,10 +340,10 @@ class Box : public View
     /**
      * Inflates the Box with the given XML file path.
      *
-     * The root element MUST be a brls::Box, corresponding to the inflated Box itself. Its
+     * The root element MUST be a aurore::Box, corresponding to the inflated Box itself. Its
      * attributes will be applied to the Box.
      *
-     * Each child node in the root brls::Box will be treated as a view and added
+     * Each child node in the root aurore::Box will be treated as a view and added
      * as a child of the Box.
      */
     void inflateFromXMLFile(const std::string& path);
@@ -369,4 +369,4 @@ class Padding : public View
     static View* create();
 };
 
-} // namespace brls
+} // namespace aurore

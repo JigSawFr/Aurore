@@ -19,7 +19,7 @@
 
 #include <aurore/core/view.hpp>
 
-namespace brls
+namespace aurore
 {
 
 enum ProgressSpinnerSize
@@ -50,7 +50,7 @@ class ProgressSpinner : public View
 
     void animate(bool animate);
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
     NVGcolor barColor;
@@ -65,4 +65,4 @@ class ProgressSpinner : public View
     void restartAnimation();
 };
 
-} // namespace brls
+} // namespace aurore

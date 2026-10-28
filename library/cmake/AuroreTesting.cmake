@@ -1,12 +1,12 @@
-# brls_add_tests(), for the tests of an app on the test harness (Aurore::test,
+# aurore_add_tests(), for the tests of an app on the test harness (Aurore::test,
 # docs/testing.md). Included by the library when BRLS_BUILD_TESTS is on, and
 # by the installed package along with Aurore::test.
 
-# Registers each case of a test executable (brls::test::runTests) with
+# Registers each case of a test executable (aurore::test::runTests) with
 # ctest, read from `<target> --list` when ctest runs. REFERENCES: the
 # folder of the reference screenshots; what the tests get goes to
 # <build dir>/test-output.
-function(brls_add_tests target)
+function(aurore_add_tests target)
     cmake_parse_arguments(ARG "" "REFERENCES" "" ${ARGN})
     set(script "${CMAKE_CURRENT_BINARY_DIR}/${target}_cases.cmake")
     set(env "BRLS_TEST_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/test-output")
@@ -20,8 +20,8 @@ add_test(${target}_not_built \"$<TARGET_FILE:${target}>\" --list)
 return()
 endif ()
 # The names only, not what the program logged
-string(REGEX MATCHALL \"brls-test: [A-Za-z0-9_]+\" cases \"\${cases}\")
-list(TRANSFORM cases REPLACE \"^brls-test: \" \"\")
+string(REGEX MATCHALL \"aurore-test: [A-Za-z0-9_]+\" cases \"\${cases}\")
+list(TRANSFORM cases REPLACE \"^aurore-test: \" \"\")
 foreach (case IN LISTS cases)
 if (case)
     add_test(${target}.\${case} \"$<TARGET_FILE:${target}>\" \${case})

@@ -24,7 +24,7 @@
 #include <aurore/core/util.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 #define ELLIPSIS "\u2026"
@@ -216,7 +216,7 @@ static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode w
 void Label::setCursor(int cursor)
 {
     this->cursor       = cursor;
-    this->cursor_blink = brls::getCPUTimeUsec();
+    this->cursor_blink = aurore::getCPUTimeUsec();
 }
 
 Label::Label()
@@ -600,7 +600,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     // Edit cursor: blinking, or still with the motion reduced
     if (this->cursor >= (int)CursorPosition::END)
     {
-        auto blink = ((brls::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
+        auto blink = ((aurore::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
         bool still = Application::getReduceMotion();
         // The cursor blinks between frames nothing else asks for
         if (!still)
@@ -897,4 +897,4 @@ View* Label::create()
     return new Label();
 }
 
-} // namespace brls
+} // namespace aurore

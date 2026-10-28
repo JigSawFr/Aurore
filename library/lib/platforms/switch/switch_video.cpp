@@ -32,7 +32,7 @@ limitations under the License.
 #define CODE_POOL_SIZE 128 * 1024
 #define DATA_POOL_SIZE 1 * 1024 * 1024
 
-namespace brls
+namespace aurore
 {
 
 static constexpr const unsigned STATIC_CMD_SIZE = 0x1000;
@@ -203,7 +203,7 @@ void SwitchVideoContext::resetState()
 
 void SwitchVideoContext::resetFramebuffer()
 {
-    brls::Logger::error("resetFramebuffer");
+    aurore::Logger::error("resetFramebuffer");
     this->destroyFramebufferResources();
     this->updateWindowSize();
     this->createFramebufferResources();
@@ -331,4 +331,4 @@ void SwitchVideoContext::queueFlush()
     dkQueueFlush(this->queue);
 }
 
-} // namespace brls
+} // namespace aurore

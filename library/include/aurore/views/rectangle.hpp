@@ -20,7 +20,7 @@
 #include <aurore/core/frame_context.hpp>
 #include <aurore/core/view.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A solid color rectangle
@@ -45,4 +45,4 @@ class Rectangle : public View
     NVGcolor color = nvgRGB(0, 0, 255);
 };
 
-} // namespace brls
+} // namespace aurore

@@ -18,7 +18,7 @@
 
 #include <aurore/core/time.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A Timer allows to run a callback once after a given period of time, in ms
@@ -90,4 +90,4 @@ class RepeatingTimer : public Ticking
     TickingGenericCallback callback = [] {};
 };
 
-} // namespace brls
+} // namespace aurore

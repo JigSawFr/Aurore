@@ -26,9 +26,9 @@ limitations under the License.
 #include <optional>
 #include <aurore/core/video.hpp>
 
-typedef Event _LibNXEvent; // "Event" alone clashes with brls::Event
+typedef Event _LibNXEvent; // "Event" alone clashes with aurore::Event
 
-namespace brls
+namespace aurore
 {
 
 static constexpr const unsigned FRAMEBUFFERS_COUNT = 2;
@@ -105,4 +105,4 @@ class SwitchVideoContext : public VideoContext
     NVGcontext* nvgContext;
 };
 
-} // namespace brls
+} // namespace aurore

@@ -17,7 +17,7 @@
 #include <aurore/core/application.hpp>
 #include <aurore/views/icon_button.hpp>
 
-namespace brls
+namespace aurore
 {
 
 IconButton::IconButton()
@@ -141,4 +141,4 @@ View* IconButton::create()
     return new IconButton();
 }
 
-} // namespace brls
+} // namespace aurore

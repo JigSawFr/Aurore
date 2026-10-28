@@ -19,7 +19,7 @@ limitations under the License.
 #include <aurore/core/platform.hpp>
 #include <aurore/platforms/desktop/steam_deck.hpp>
 
-namespace brls
+namespace aurore
 {
 
 #define STEAM_CLIENT_PIPE_PATH "/home/deck/.steam/steam.pipe"

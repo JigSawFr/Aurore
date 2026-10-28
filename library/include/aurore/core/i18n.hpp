@@ -21,7 +21,7 @@
 #include <string>
 #include <aurore/core/logger.hpp>
 
-namespace brls
+namespace aurore
 {
 
 const std::string LOCALE_JA      = "ja";
@@ -104,8 +104,8 @@ inline namespace literals
     /**
      * Returns the translation for the given string, without
      * injecting any parameters
-     * Shortcut to brls::getStr(stringName)
+     * Shortcut to aurore::getStr(stringName)
      */
     std::string operator""_i18n(const char* str, size_t len);
 } // namespace literals
-} // namespace brls
+} // namespace aurore

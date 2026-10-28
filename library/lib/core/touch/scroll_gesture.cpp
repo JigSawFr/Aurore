@@ -16,7 +16,7 @@
 
 #include <aurore.hpp>
 
-namespace brls
+namespace aurore
 {
 
 ScrollGestureRecognizer::ScrollGestureRecognizer(PanGestureEvent::Callback respond, PanAxis axis)

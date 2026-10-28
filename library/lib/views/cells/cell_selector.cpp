@@ -18,7 +18,7 @@
 
 #include "aurore/views/dropdown.hpp"
 
-namespace brls
+namespace aurore
 {
 
 SelectorCell::SelectorCell()
@@ -64,4 +64,4 @@ View* SelectorCell::create()
     return new SelectorCell();
 }
 
-} // namespace brls
+} // namespace aurore

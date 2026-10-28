@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 class Activity;
@@ -48,4 +48,4 @@ class HotReload
     inline static bool enabled = false;
 };
 
-} // namespace brls
+} // namespace aurore

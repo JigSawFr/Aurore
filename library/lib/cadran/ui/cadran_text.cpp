@@ -5,7 +5,7 @@
 
 #include <aurore/cadran/ui/tr.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 namespace cadran_text
 {
@@ -70,7 +70,7 @@ Failure failure(const std::string& what, const std::string& hint, uint32_t rc, b
         f.reason[0] = (char)(f.reason[0] - 'a' + 'A');
     if (!app_result)
     {
-        f.code   = brls::getStr("cadran/error/code", fmt::format("0x{:08X}", (unsigned)rc));
+        f.code   = aurore::getStr("cadran/error/code", fmt::format("0x{:08X}", (unsigned)rc));
         f.report = true;
     }
     return f;

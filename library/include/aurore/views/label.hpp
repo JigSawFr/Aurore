@@ -26,7 +26,7 @@
 #include <opencc.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 /// Where a label's lines sit across its width.
@@ -263,4 +263,4 @@ class Label : public View
     enum NVGalign getNVGVerticalAlign();
 };
 
-} // namespace brls
+} // namespace aurore

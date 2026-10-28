@@ -32,7 +32,7 @@
 
 #include <memory>
 
-namespace brls
+namespace aurore
 {
 
 static float measureWidth(YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode, float originalWidth, ImageScalingType type)
@@ -316,10 +316,10 @@ void Image::invalidateImageBounds()
 
 size_t Image::checkCache(const std::string& path)
 {
-    int tex = brls::TextureCache::instance().getCache(path);
+    int tex = aurore::TextureCache::instance().getCache(path);
     if (tex > 0)
     {
-        brls::Logger::verbose("cache hit: {} {}", path, tex);
+        aurore::Logger::verbose("cache hit: {} {}", path, tex);
         this->innerSetImage(tex);
         return tex;
     }
@@ -450,7 +450,7 @@ void Image::setImageFromFileAsync(const std::string& path)
             int width = 0, height = 0;
             // Freed whatever happens to the image meanwhile
             std::shared_ptr<unsigned char> pixels(nvgDecodeImage(path.c_str(), &width, &height), nvgFreeImageData);
-            brls::sync([this, alive, path, generation, flags, pixels, width, height]()
+            aurore::sync([this, alive, path, generation, flags, pixels, width, height]()
                 {
                     if (alive.expired())
                         return;
@@ -570,7 +570,7 @@ void Image::setImageAsync(std::function<void(std::function<void(const std::strin
 {
     // The callback may be called more than once, or after the image is gone
     cb([this, alive = aliveToken()](const std::string& data, size_t length)
-        { brls::sync([this, alive, data, length]()
+        { aurore::sync([this, alive, data, length]()
               {
                   if (alive.expired())
                       return;
@@ -669,4 +669,4 @@ View* Image::create()
     return new Image();
 }
 
-} // namespace brls
+} // namespace aurore

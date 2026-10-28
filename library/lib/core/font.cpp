@@ -23,7 +23,7 @@
 #define MATERIAL_ICONS "material/MaterialIcons-Regular.ttf"
 #define MATERIAL_ICONS_PATH BRLS_ASSET(MATERIAL_ICONS)
 
-namespace brls
+namespace aurore
 {
 
 bool FontLoader::loadFontFromFile(std::string fontName, std::string filePath)
@@ -62,4 +62,4 @@ bool FontLoader::loadMaterialFromResources()
 #endif
 }
 
-} // namespace brls
+} // namespace aurore

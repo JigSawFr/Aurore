@@ -18,7 +18,7 @@
 
 #include <aurore.hpp>
 
-class MainActivity : public brls::Activity
+class MainActivity : public aurore::Activity
 {
   public:
     // Declare that the content of this activity is the given XML file
@@ -28,5 +28,5 @@ class MainActivity : public brls::Activity
     ~MainActivity();
 
   private:
-    brls::Event<bool>::Subscription enterSubscription;
+    aurore::Event<bool>::Subscription enterSubscription;
 };

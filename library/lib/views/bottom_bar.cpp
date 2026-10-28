@@ -25,7 +25,7 @@
 #include <aurore/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 const std::string bottomBarXML = R"xml(
@@ -141,4 +141,4 @@ View* BottomBar::create()
     return new BottomBar();
 }
 
-} // namespace brls
+} // namespace aurore

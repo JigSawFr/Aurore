@@ -74,7 +74,7 @@
 #define BUTTOM_REPEAT_TRIGGER 250000 // 250ms
 #define BUTTON_REPEAT_DELAY 100000 // 100 ms
 
-namespace brls
+namespace aurore
 {
 
 static std::thread::id mainThreadId;
@@ -141,7 +141,7 @@ void Application::createWindow(std::string windowTitle)
 {
     if (!Application::inited)
     {
-        fatal("Please call brls::Application::init() before calling brls::Application::createWindow().");
+        fatal("Please call aurore::Application::init() before calling aurore::Application::createWindow().");
         return;
     }
 
@@ -326,7 +326,7 @@ bool Application::internalMainLoop()
             else
             {
                 undeletedViews.push_back(view);
-                brls::Logger::verbose("Application: will delete view: {}", view->describe());
+                aurore::Logger::verbose("Application: will delete view: {}", view->describe());
             }
         }
 
@@ -616,7 +616,7 @@ void Application::processInput()
         auto& watchedKey    = watchedKeys[i];
         auto& oldWatchedKey = oldWatchedKeys[i];
 
-        const BrlsKeyboardScancode scancode = watchedKey.getScancode();
+        const AuroreKeyboardScancode scancode = watchedKey.getScancode();
         if (scancode == BRLS_KBD_KEY_UNKNOWN)
         {
             continue;
@@ -652,7 +652,7 @@ void Application::processInput()
     }
 }
 
-void Application::addToWatchedKeys(const BrlsKeyCombination key)
+void Application::addToWatchedKeys(const AuroreKeyCombination key)
 {
     if (key.code == BRLS_KBD_KEY_UNKNOWN)
         return;
@@ -665,7 +665,7 @@ void Application::addToWatchedKeys(const BrlsKeyCombination key)
     watchedKeysMap[key] = watchedKeysMap[key] + 1;
 }
 
-void Application::removeWatchedKeys(const BrlsKeyCombination key)
+void Application::removeWatchedKeys(const AuroreKeyCombination key)
 {
     if (key.code == BRLS_KBD_KEY_UNKNOWN)
         return;
@@ -814,7 +814,7 @@ void Application::onControllerButtonPressed(enum ControllerButton button, bool r
     Application::getAudioPlayer()->play(SOUND_CLICK_ERROR);
 }
 
-void Application::onKeyboardPressed(BrlsKeyCombination key, bool repeating)
+void Application::onKeyboardPressed(AuroreKeyCombination key, bool repeating)
 {
     Application::handleAction(ACTION_KEYBOARD, key, repeating);
 }
@@ -1728,7 +1728,7 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
         // Deleted after this frame's animations: this callback runs while
         // they update, and the activity owns some of them.
         if (free)
-            brls::sync([last]() { delete last; });
+            aurore::sync([last]() { delete last; });
 
         Application::unblockInputs(); },
         fade, last->getShowAnimationDuration(animation));
@@ -1776,7 +1776,7 @@ void Application::pushActivity(Activity* activity, TransitionAnimation animation
 
     if (!fadeIn) // No animations
     {
-        brls::Logger::debug("push activity to the stack");
+        aurore::Logger::debug("push activity to the stack");
         Application::activitiesStack.push_back(activity);
         Application::unblockInputs();
     }
@@ -1784,7 +1784,7 @@ void Application::pushActivity(Activity* activity, TransitionAnimation animation
     {
         activity->hide([]() {}, false, 0);
 
-        brls::Logger::debug("push activity to the stack");
+        aurore::Logger::debug("push activity to the stack");
         Application::activitiesStack.push_back(activity);
         float duration = activity->getShowAnimationDuration(animation);
         activity->show([]()
@@ -1824,9 +1824,9 @@ void Application::replaceActivity(Activity* activity, TransitionAnimation animat
     bool animated  = animation == TransitionAnimation::FADE || animation == TransitionAnimation::SLIDE_LEFT || animation == TransitionAnimation::SLIDE_RIGHT;
     float duration = animated ? activity->getShowAnimationDuration(animation) : 0;
     if (duration > 0)
-        brls::delay((long)duration + 1, remove);
+        aurore::delay((long)duration + 1, remove);
     else
-        brls::sync(remove);
+        aurore::sync(remove);
 }
 
 void Application::clear()
@@ -1872,7 +1872,7 @@ void Application::addToFreeQueue(View* view)
     if (std::find(deletionPool.cbegin(), deletionPool.cend(), view) != deletionPool.cend())
         return;
 
-    brls::Logger::verbose("Application::addToFreeQueue {}", view->describe());
+    aurore::Logger::verbose("Application::addToFreeQueue {}", view->describe());
 
     Application::deletionPool.push_back(view);
 }
@@ -1970,7 +1970,7 @@ void Application::crash(std::string text)
     if (std::this_thread::get_id() == mainThreadId)
         show();
     else
-        brls::sync(show);
+        aurore::sync(show);
 }
 
 void Application::blockInputs(bool muteSounds)
@@ -2006,29 +2006,29 @@ void Application::setSwapInputKeys(bool swap)
 
 // As the web simulator's keys: X, Y, L, R and +/- as written on the
 // controller, Shift for the triggers
-std::vector<std::pair<BrlsKeyCombination, ControllerButton>> Application::keyMap = {
-    { BrlsKeyCombination(BRLS_KBD_KEY_X), BUTTON_X },
-    { BrlsKeyCombination(BRLS_KBD_KEY_Y), BUTTON_Y },
-    { BrlsKeyCombination(BRLS_KBD_KEY_L), BUTTON_LB },
-    { BrlsKeyCombination(BRLS_KBD_KEY_R), BUTTON_RB },
-    { BrlsKeyCombination(BRLS_KBD_KEY_L, BRLS_KBD_MODIFIER_SHIFT), BUTTON_LT },
-    { BrlsKeyCombination(BRLS_KBD_KEY_R, BRLS_KBD_MODIFIER_SHIFT), BUTTON_RT },
-    { BrlsKeyCombination(BRLS_KBD_KEY_P), BUTTON_START },
-    { BrlsKeyCombination(BRLS_KBD_KEY_EQUAL, BRLS_KBD_MODIFIER_SHIFT), BUTTON_START },
-    { BrlsKeyCombination(BRLS_KBD_KEY_KP_ADD), BUTTON_START },
-    { BrlsKeyCombination(BRLS_KBD_KEY_M), BUTTON_BACK },
-    { BrlsKeyCombination(BRLS_KBD_KEY_MINUS), BUTTON_BACK },
-    { BrlsKeyCombination(BRLS_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
-    { BrlsKeyCombination(BRLS_KBD_KEY_BACKSPACE), BUTTON_B },
+std::vector<std::pair<AuroreKeyCombination, ControllerButton>> Application::keyMap = {
+    { AuroreKeyCombination(BRLS_KBD_KEY_X), BUTTON_X },
+    { AuroreKeyCombination(BRLS_KBD_KEY_Y), BUTTON_Y },
+    { AuroreKeyCombination(BRLS_KBD_KEY_L), BUTTON_LB },
+    { AuroreKeyCombination(BRLS_KBD_KEY_R), BUTTON_RB },
+    { AuroreKeyCombination(BRLS_KBD_KEY_L, BRLS_KBD_MODIFIER_SHIFT), BUTTON_LT },
+    { AuroreKeyCombination(BRLS_KBD_KEY_R, BRLS_KBD_MODIFIER_SHIFT), BUTTON_RT },
+    { AuroreKeyCombination(BRLS_KBD_KEY_P), BUTTON_START },
+    { AuroreKeyCombination(BRLS_KBD_KEY_EQUAL, BRLS_KBD_MODIFIER_SHIFT), BUTTON_START },
+    { AuroreKeyCombination(BRLS_KBD_KEY_KP_ADD), BUTTON_START },
+    { AuroreKeyCombination(BRLS_KBD_KEY_M), BUTTON_BACK },
+    { AuroreKeyCombination(BRLS_KBD_KEY_MINUS), BUTTON_BACK },
+    { AuroreKeyCombination(BRLS_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
+    { AuroreKeyCombination(BRLS_KBD_KEY_BACKSPACE), BUTTON_B },
 };
 
-void Application::mapKey(BrlsKeyCombination key, ControllerButton button)
+void Application::mapKey(AuroreKeyCombination key, ControllerButton button)
 {
     unmapKey(key);
     keyMap.emplace_back(key, button);
 }
 
-void Application::unmapKey(BrlsKeyCombination key)
+void Application::unmapKey(AuroreKeyCombination key)
 {
     keyMap.erase(std::remove_if(keyMap.begin(), keyMap.end(), [key](const auto& entry)
                      { return (int)entry.first == (int)key; }),
@@ -2040,7 +2040,7 @@ void Application::clearKeyMap()
     keyMap.clear();
 }
 
-const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& Application::getKeyMap()
+const std::vector<std::pair<AuroreKeyCombination, ControllerButton>>& Application::getKeyMap()
 {
     return keyMap;
 }
@@ -2125,7 +2125,7 @@ void Application::setWindowSize(int width, int height)
     for (Activity* activity : Application::activitiesStack)
         activity->onWindowSizeChanged();
 
-    brls::Application::setActiveEvent(true);
+    aurore::Application::setActiveEvent(true);
 }
 
 void Application::onWindowResized(int width, int height)
@@ -2133,15 +2133,15 @@ void Application::onWindowResized(int width, int height)
     Application::requestRedraw();
     // Trigger event when Window size is stable
     static size_t iter = 0;
-    brls::cancelDelay(iter);
-    iter = brls::delay(100, [width, height]()
+    aurore::cancelDelay(iter);
+    iter = aurore::delay(100, [width, height]()
         {
             Application::setWindowSize(width, height);
             Application::getWindowSizeChangedEvent()->fire();
 
             Logger::info("Window size changed to {}x{}, content size: {}x{} windowScale: {}",
                 width, height, contentWidth, contentHeight, Application::windowScale);
-            brls::Logger::info("scale factor: {}",
+            aurore::Logger::info("scale factor: {}",
                 Application::getPlatform()->getVideoContext()->getScaleFactor()); });
 }
 
@@ -2154,8 +2154,8 @@ void Application::setWindowPosition(int x, int y)
 void Application::onWindowReposition(int x, int y)
 {
     static size_t iter = 0;
-    brls::cancelDelay(iter);
-    iter = brls::delay(500, [x, y]()
+    aurore::cancelDelay(iter);
+    iter = aurore::delay(500, [x, y]()
         {
             Logger::info("Window position changed to {}x{}", x, y);
             Application::setWindowPosition(x, y); });
@@ -2489,4 +2489,4 @@ void Application::registerXMLView(std::string name, XMLViewCreator creator)
     Application::xmlViewsRegister[name] = creator;
 }
 
-} // namespace brls
+} // namespace aurore

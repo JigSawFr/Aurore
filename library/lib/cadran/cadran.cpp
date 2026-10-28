@@ -29,7 +29,7 @@ void start_window()
     if (!sampling)
     {
         sampling = true;
-        brls::Application::getPostFrameEvent()->subscribe([]
+        aurore::Application::getPostFrameEvent()->subscribe([]
             { cut_text::sample(); });
     }
 }

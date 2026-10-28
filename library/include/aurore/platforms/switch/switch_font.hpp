@@ -18,7 +18,7 @@
 
 #include <aurore/core/font.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Font loader using the pl system service
@@ -28,4 +28,4 @@ class SwitchFontLoader : public FontLoader
     void loadFonts() override;
 };
 
-} // namespace brls
+} // namespace aurore

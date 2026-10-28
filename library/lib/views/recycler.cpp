@@ -19,7 +19,7 @@
 #include <aurore/core/touch/tap_gesture.hpp>
 #include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 RecyclerCell::RecyclerCell()
@@ -138,7 +138,7 @@ RecyclerHeader* RecyclerHeader::create()
 
 RecyclerCell* RecyclerDataSource::cellForHeader(RecyclerFrame* recycler, int section)
 {
-    RecyclerHeader* header = (RecyclerHeader*)recycler->dequeueReusableCell("brls::Header");
+    RecyclerHeader* header = (RecyclerHeader*)recycler->dequeueReusableCell("aurore::Header");
     std::string title      = this->titleForHeader(recycler, section);
     header->setTitle(title);
     header->setVisibility(title.empty() ? Visibility::GONE : Visibility::VISIBLE);
@@ -209,7 +209,7 @@ View* RecyclerFrame::getNextCellFocus(FocusDirection direction, View* currentVie
 
 RecyclerFrame::RecyclerFrame()
 {
-    registerCell("brls::Header", []()
+    registerCell("aurore::Header", []()
         { return RecyclerHeader::create(); });
 
     // Padding
@@ -658,4 +658,4 @@ View* RecyclerFrame::create()
     return new RecyclerFrame();
 }
 
-} // namespace brls
+} // namespace aurore

@@ -41,7 +41,7 @@
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 Platform* Platform::createPlatform()
@@ -84,4 +84,4 @@ bool Platform::isBrowserUrl(const std::string& url)
     return true;
 }
 
-} // namespace brls
+} // namespace aurore

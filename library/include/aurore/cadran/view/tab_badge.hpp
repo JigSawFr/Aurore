@@ -12,7 +12,7 @@
 
 /// The number of things to do in a tab, an amber disc by its name in the sidebar
 /// (or on its icon) and on the row where they are done.
-class TabBadge : public brls::View
+class TabBadge : public aurore::View
 {
   public:
     TabBadge();
@@ -23,19 +23,19 @@ class TabBadge : public brls::View
     /// `floating`: out of the item's row, for a rail too narrow for it.
     void dock(float open, bool floating);
 
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style,
-        brls::FrameContext* ctx) override;
+    void draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style,
+        aurore::FrameContext* ctx) override;
 
     /// The sidebar item's badge, added the first time it is asked for.
-    static TabBadge* of(brls::SidebarItem* item);
+    static TabBadge* of(aurore::SidebarItem* item);
     /// Its badge if it has one yet, else nullptr.
-    static TabBadge* find(brls::SidebarItem* item);
+    static TabBadge* find(aurore::SidebarItem* item);
     /// A row's (a DetailCell: its title, then its value): after the value.
-    static TabBadge* on_row(brls::Box* row);
+    static TabBadge* on_row(aurore::Box* row);
 
   private:
-    int count            = 0;
-    brls::Time pop_since = 0; ///< the number changed: the disc pops (µs; 0 at rest)
-    float open           = 1.0f;
-    bool floating        = false;
+    int count              = 0;
+    aurore::Time pop_since = 0; ///< the number changed: the disc pops (µs; 0 at rest)
+    float open             = 1.0f;
+    bool floating          = false;
 };

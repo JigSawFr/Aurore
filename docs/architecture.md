@@ -32,17 +32,17 @@ flowchart TB
 
 The core calls Cadran from one file, `application.cpp`: `init()` and `createWindow()` start it (`cadran::start`, `cadran::start_window`) unless `Application::setCadran(false)` was called before, and `getReduceMotion()` asks whether its effects are reduced. Nothing else in the core or the views knows about it (the theme only knows its keys, `cadran/…`, as strings): Cadran restyles screens from the outside, through the theme keys, the XML views it registers and the hooks the core already has.
 
-`<aurore.hpp>` includes the whole public API; `<aurore/cadran.hpp>` adds Cadran's. Everything is in the `brls` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
+`<aurore.hpp>` includes the whole public API; `<aurore/cadran.hpp>` adds Cadran's. Everything is in the `aurore` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
 
 ## The main loop
 
 An app is a loop around `Application::mainLoop()`:
 
 ```cpp
-brls::Application::init();              // the platform, translations, Cadran, the async thread
-brls::Application::createWindow("App"); // the window, fonts, sounds, XML views, Cadran's look
-brls::Application::pushActivity(new MainActivity());
-while (brls::Application::mainLoop())
+aurore::Application::init();              // the platform, translations, Cadran, the async thread
+aurore::Application::createWindow("App"); // the window, fonts, sounds, XML views, Cadran's look
+aurore::Application::pushActivity(new MainActivity());
+while (aurore::Application::mainLoop())
     ;
 ```
 
@@ -52,7 +52,7 @@ while (brls::Application::mainLoop())
 2. **Inputs**: buttons, keys, touches and the mouse, unless `blockInputs()` is in force. A button goes to the actions of the focused view, then of its parents; if none takes it, a direction moves the focus. Touches go to the gesture recognizers of the view under the finger.
 3. **Animations and theme**: the highlight, every running `Animatable` and timer (`Ticking`), the seasonal theme, a theme change noticed (views told through `View::onThemeChanged`), the theme's particles.
 4. **Frame**: every activity from the top down to the first one that is not translucent is drawn, bottom first, then the focus highlight, the particles in front, the toasts, the inspector. With redraw on demand (`setRedrawOnDemand`) this step is skipped when nothing asked for it, but not for more than a second.
-5. **Sync tasks**: the functions queued with `brls::sync()` and the `brls::delay()`s that are due, then hot reload's check of its files, then `getRunLoopEvent()`.
+5. **Sync tasks**: the functions queued with `aurore::sync()` and the `aurore::delay()`s that are due, then hot reload's check of its files, then `getRunLoopEvent()`.
 6. **Deletion pool**: the views given to `freeView()` (or `Application::addToFreeQueue`) during the iteration are deleted, except those a `ptrLock()` still holds, which wait for the next one.
 7. **Pacing**: a frame not drawn waits a frame's time; a frame limit (`setLimitedFPS`) keeps to its schedule. Otherwise the swap's vsync paces the loop.
 
@@ -60,7 +60,7 @@ while (brls::Application::mainLoop())
 
 ## Views and layout
 
-Every view is a `brls::View` with a [Yoga](https://github.com/facebook/yoga) node. A `brls::Box` is a view with children, laid out by Yoga as a flexbox: its axis, alignment, gaps, wrapping and padding, and each child's size, margins, grow and shrink. Aurore uses Yoga 3 with the web's defaults and standard CSS behaviour (`Application::getYogaConfig()`).
+Every view is a `aurore::View` with a [Yoga](https://github.com/facebook/yoga) node. A `aurore::Box` is a view with children, laid out by Yoga as a flexbox: its axis, alignment, gaps, wrapping and padding, and each child's size, margins, grow and shrink. Aurore uses Yoga 3 with the web's defaults and standard CSS behaviour (`Application::getYogaConfig()`).
 
 Layout is synchronous. A change that affects a size (`setWidth`, `setText`, a child added) calls `View::invalidate()`, which walks up to the root of the tree and has Yoga compute it again at once; Yoga then calls `onLayout()` on each view whose frame changed. A view whose size depends on its content (a label, an image) gives Yoga a measure function. Positions are relative to the parent; `getX()`, `getY()` and `getFrame()` add the parents' to give the place on the screen, in layout units. The window is 1280 units wide whatever its pixels (`Application::windowScale`; wider when `setMaximumUIScale` caps the scale), and as high as its ratio gives.
 
@@ -80,7 +80,7 @@ When the focus moves, the views that lose and gain it are told (`onFocusLost`, `
 
 ## Activities and ownership
 
-A screen is a `brls::Activity`: the root of a tree of views (its content view, made by `createContentView()`, often from XML with `CONTENT_FROM_XML_RES`). The application keeps a stack of them: `pushActivity()` puts one on top with a transition, `popActivity()` takes it off and gives the focus back to the one below, `replaceActivity()` swaps the top one. The first activity pushed cannot be popped.
+A screen is a `aurore::Activity`: the root of a tree of views (its content view, made by `createContentView()`, often from XML with `CONTENT_FROM_XML_RES`). The application keeps a stack of them: `pushActivity()` puts one on top with a transition, `popActivity()` takes it off and gives the focus back to the one below, `replaceActivity()` swaps the top one. The first activity pushed cannot be popped.
 
 Who owns what:
 
@@ -94,13 +94,13 @@ Who owns what:
 
 Colours come from the **theme**, by key (`brls/text`, `brls/highlight/color1`, `cadran/teal`…): two sets of values, light and dark (`Theme::getLightTheme()`, `getDarkTheme()`), the variant in use given by the platform (the system's mode, or `Platform::setThemeVariant`). Each set is the colours the code adds (the core's, Cadran's, the app's) with those of a theme file over them (`Theme::loadFile`, [themes.md](themes.md)). A view keeps a key rather than a colour (`View::setThemeColor`, `@theme/…` in XML), so a new theme is drawn from the next frame on without rebuilding anything; `Application::getThemeChangedEvent()` tells what keeps colours of its own.
 
-Sizes, margins and durations come from the **style** (`brls::getStyle()`, `@style/…` in XML), by key too, with a theme file's `[metrics]` over them. A view's look in each state (focused, pressed, disabled, hovered), transitions and data bindings are its **view style** ([styles.md](styles.md)).
+Sizes, margins and durations come from the **style** (`aurore::getStyle()`, `@style/…` in XML), by key too, with a theme file's `[metrics]` over them. A view's look in each state (focused, pressed, disabled, hovered), transitions and data bindings are its **view style** ([styles.md](styles.md)).
 
 A theme file may also bring pictures: a background, a logo, icons, image slots, decorations. They are decoded on the async thread (`ThemeImages`) and drawn once ready.
 
 ## Cadran
 
-[Cadran](cadran.md) is the default look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `brls:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `brls::View`s.
+[Cadran](cadran.md) is the default look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `brls:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `aurore::View`s.
 
 ## Platforms and drivers
 
@@ -123,9 +123,9 @@ Aurore is single-threaded: views, activities, the focus, the theme and the style
 
 | Call | Runs | Where |
 | --- | --- | --- |
-| `brls::sync(fn)` | before the next frame | on the main thread |
-| `brls::async(fn)` | as soon as possible | on Aurore's one worker thread, in order |
-| `brls::delay(ms, fn)` | once `ms` have gone by (`cancelDelay` stops it) | on the main thread |
+| `aurore::sync(fn)` | before the next frame | on the main thread |
+| `aurore::async(fn)` | as soon as possible | on Aurore's one worker thread, in order |
+| `aurore::delay(ms, fn)` | once `ms` have gone by (`cancelDelay` stops it) | on the main thread |
 
 The usual pattern: `async` does the slow part (a file, the network, decoding), then `sync` hands the result to the views. `Threading::setSyncTaskBudget` spreads a burst of sync tasks over several frames. What is safe from any thread: `sync`, `async`, `delay` and `cancelDelay` themselves, an `Event`'s subscribing and firing (its callbacks run on the thread that fires), translations (`"key"_i18n`, even while the language changes), the logger, `View::aliveToken()` (checked on the main thread), `Image::setImageFromFileAsync` and `setImageAsync` (the bytes from any thread, the image set on the main thread), `Application::crash`. Anything else on a view or the application, from another thread, is a race; `tests/async_tests.cpp` checks these paths, under ThreadSanitizer too ([testing.md](testing.md)).
 

@@ -3,7 +3,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 class EditTextDialog : public Box
 {
@@ -35,9 +35,9 @@ class EditTextDialog : public Box
     Event<std::string> clipboardEvent;
     bool init = false;
 
-    BRLS_BIND(brls::Label, header, "brls/dialog/header");
-    BRLS_BIND(brls::Label, label, "brls/dialog/label");
-    BRLS_BIND(brls::Label, count, "brls/dialog/count");
-    BRLS_BIND(brls::Box, container, "brls/container");
+    BRLS_BIND(aurore::Label, header, "brls/dialog/header");
+    BRLS_BIND(aurore::Label, label, "brls/dialog/label");
+    BRLS_BIND(aurore::Label, count, "brls/dialog/count");
+    BRLS_BIND(aurore::Box, container, "brls/container");
 };
 }

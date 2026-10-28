@@ -29,7 +29,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 /// The two sets of colours every theme has: light and dark.
@@ -460,7 +460,7 @@ class Theme
      * on the decode thread (ThemeImages): it may still be LOADING, and
      * ThemeImages::getLoadedEvent() says when it is ready. Kept while the
      * theme and the variant stay; a view keeping it gets the new one on
-     * Application::getThemeChangedEvent() (brls::Image::setThemeImage does).
+     * Application::getThemeChangedEvent() (aurore::Image::setThemeImage does).
      */
     static std::shared_ptr<ThemeImage> image(const std::string& key);
 
@@ -556,4 +556,4 @@ class Theme
     ThemeValues* values;
 };
 
-} // namespace brls
+} // namespace aurore

@@ -23,9 +23,9 @@
 #include <aurore/views/applet_frame.hpp>
 #include <aurore/views/hint.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 const std::string hintXML = R"xml(
@@ -324,7 +324,7 @@ void Hints::onLayout()
     if (!roomUnknown || !hintsOptionalOwner || room() <= 0)
         return;
     roomUnknown = false;
-    brls::sync([]()
+    aurore::sync([]()
         { Application::getGlobalHintsUpdateEvent()->fire(); });
 }
 
@@ -333,4 +333,4 @@ View* Hints::create()
     return new Hints();
 }
 
-} // namespace brls
+} // namespace aurore

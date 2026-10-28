@@ -31,7 +31,7 @@ extern "C" uint32_t vita_ime_type;
 __attribute__((weak)) uint32_t vita_ime_type = 0;
 #endif
 
-namespace brls
+namespace aurore
 {
 SDLImeManager::SDLImeManager(Event<SDL_Event*>* event)
     : event(event)

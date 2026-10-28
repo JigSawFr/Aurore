@@ -23,7 +23,7 @@
 #include <aurore/views/label.hpp>
 #include <aurore/views/rectangle.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class Slider : public Box
@@ -92,4 +92,4 @@ class Slider : public Box
     void updateUI();
 };
 
-} // namespace brls
+} // namespace aurore

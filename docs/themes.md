@@ -172,7 +172,7 @@ To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BRLS_THEME=LIGHT` f
 
 ### Pictures in memory
 
-A theme's pictures are loaded by `ThemeImages` (`aurore/core/theme_image.hpp`), the one loader for them: decoded on a thread of their own (`Threading::asyncDecode`, so a large one does not hold back the app's `brls::async` tasks), made smaller when larger than 1920×1080 (the ratio kept, an average of the pixels each one covers), the texture made on the UI thread (`brls::sync`), and freed when nothing holds it any more: the background's when the theme or the variant changes. Only the variant on screen has its picture loaded: a 1920×1080 picture is 8 MB of texture (RGBA), so at most 8 MB for the background, plus the picture being replaced while the next one loads. A JPEG that size takes a few tens of milliseconds to decode on a desktop, a few hundred on a Switch, on that thread. A picture larger than 4096×4096 pixels, or than 16384 on a side, is refused from its header without being decoded (`NVG_MAX_IMAGE_PIXELS`, `NVG_MAX_IMAGE_SIDE` in `nanovg.h`, the same for `brls::Image`): the theme reports it as a picture it cannot read.
+A theme's pictures are loaded by `ThemeImages` (`aurore/core/theme_image.hpp`), the one loader for them: decoded on a thread of their own (`Threading::asyncDecode`, so a large one does not hold back the app's `aurore::async` tasks), made smaller when larger than 1920×1080 (the ratio kept, an average of the pixels each one covers), the texture made on the UI thread (`aurore::sync`), and freed when nothing holds it any more: the background's when the theme or the variant changes. Only the variant on screen has its picture loaded: a 1920×1080 picture is 8 MB of texture (RGBA), so at most 8 MB for the background, plus the picture being replaced while the next one loads. A JPEG that size takes a few tens of milliseconds to decode on a desktop, a few hundred on a Switch, on that thread. A picture larger than 4096×4096 pixels, or than 16384 on a side, is refused from its header without being decoded (`NVG_MAX_IMAGE_PIXELS`, `NVG_MAX_IMAGE_SIDE` in `nanovg.h`, the same for `aurore::Image`): the theme reports it as a picture it cannot read.
 
 
 <a id="logos-and-images"></a>
@@ -203,8 +203,8 @@ An app declares, once at start-up and before it loads the user's theme, the pict
 ```cpp
 // PlayGuard: the loading screen's art; PlayShelf: the placeholder of a game
 // without a cover, made at most 512 px
-brls::Theme::addImageSlot("playguard/loading/art", "@res/img/loading_art.png");
-brls::Theme::addImageSlot("playshelf/cover/placeholder", "@res/img/no_cover.png", 512);
+aurore::Theme::addImageSlot("playguard/loading/art", "@res/img/loading_art.png");
+aurore::Theme::addImageSlot("playshelf/cover/placeholder", "@res/img/no_cover.png", 512);
 ```
 
 A theme then replaces it:
@@ -228,21 +228,21 @@ image->setThemeImage("playguard/loading/art");   // the same, in code
 // Drawn by the app's own view: the picture now (the theme's for the
 // variant on screen, else the fallback; nullptr for neither), maybe still
 // loading
-std::shared_ptr<brls::ThemeImage> art = brls::Theme::image("playguard/loading/art");
+std::shared_ptr<aurore::ThemeImage> art = aurore::Theme::image("playguard/loading/art");
 if (art && art->ready())
-    art->draw(vg, x, y, width, height, brls::BackgroundFit::COVER);
+    art->draw(vg, x, y, width, height, aurore::BackgroundFit::COVER);
 // ...asked again when the theme changes, and drawn again once it is loaded
-brls::Application::getThemeChangedEvent()->subscribe([](brls::ThemeVariant) { /* Theme::image(key) again */ });
-brls::ThemeImages::getLoadedEvent()->subscribe([](const brls::ThemeImage* image) { /* redraw */ });
+aurore::Application::getThemeChangedEvent()->subscribe([](aurore::ThemeVariant) { /* Theme::image(key) again */ });
+aurore::ThemeImages::getLoadedEvent()->subscribe([](const aurore::ThemeImage* image) { /* redraw */ });
 ```
 
-Slot keys are the app's: prefix them with its name (`myapp/…`). A slot without a fallback (`addImageSlot("myapp/banner")`) shows nothing unless a theme gives it a picture: `Theme::image` is `nullptr`, `setThemeImage` clears the image. `brls::Image::setThemeImage` keeps the picture it shows until the next one is loaded, takes the fallback back when the theme's cannot be read or the theme goes, and stops following the slot when the image is set another way (`setImageFromFile`, `clear`). `Theme::getImageSlots()` lists them, for a theme author's documentation. Keep a transparent edge around a slot's picture that a `brls::Image` draws larger than it is: the picture's edge pixels are stretched over the rest of the view (borealis' images do this).
+Slot keys are the app's: prefix them with its name (`myapp/…`). A slot without a fallback (`addImageSlot("myapp/banner")`) shows nothing unless a theme gives it a picture: `Theme::image` is `nullptr`, `setThemeImage` clears the image. `aurore::Image::setThemeImage` keeps the picture it shows until the next one is loaded, takes the fallback back when the theme's cannot be read or the theme goes, and stops following the slot when the image is set another way (`setImageFromFile`, `clear`). `Theme::getImageSlots()` lists them, for a theme author's documentation. Keep a transparent edge around a slot's picture that a `aurore::Image` draws larger than it is: the picture's edge pixels are stretched over the rest of the view (borealis' images do this).
 
-Apps that draw their logo themselves (a loading screen of their own, a splash) ask for the theme's the same way: `brls::Theme::logo()` (`nullptr` without one), drawn with `logo->draw(vg, x, y, size, size, brls::BackgroundFit::CONTAIN)` when `ready()`, their own otherwise. `brls::Theme::icon(name, &tint)` is an icon's picture, for a view that draws Cadran's icons its own way, and `brls::Theme::getPictures(variant)` the paths of all of them.
+Apps that draw their logo themselves (a loading screen of their own, a splash) ask for the theme's the same way: `aurore::Theme::logo()` (`nullptr` without one), drawn with `logo->draw(vg, x, y, size, size, aurore::BackgroundFit::CONTAIN)` when `ready()`, their own otherwise. `aurore::Theme::icon(name, &tint)` is an icon's picture, for a view that draws Cadran's icons its own way, and `aurore::Theme::getPictures(variant)` the paths of all of them.
 
 ### The preview in a picker
 
-`preview` is shown by Cadran's palette picker in the theme's row (`ui::pick_palette`), in the swatch's rounded square, filling it (cut at its edges, centred), with its hairline. Listing the themes decodes nothing: the picker asks for each preview when it opens, they are decoded on the decode thread, and each row shows the swatch of its colours until its preview is ready. A square picture of a screen of the theme, or its emblem on its background, at least 72×72 (the square is 36 units wide, 54 pixels on a 1080p screen), made 128×128 at most when loaded. `ThemeInfo::lightPictures`/`darkPictures` (`pictures(variant)`) have it for an app's own picker: `brls::ThemeImages::load(info.pictures(variant).preview, options)` with `options.maxSide = brls::ThemeImages::PREVIEW_SIZE`.
+`preview` is shown by Cadran's palette picker in the theme's row (`ui::pick_palette`), in the swatch's rounded square, filling it (cut at its edges, centred), with its hairline. Listing the themes decodes nothing: the picker asks for each preview when it opens, they are decoded on the decode thread, and each row shows the swatch of its colours until its preview is ready. A square picture of a screen of the theme, or its emblem on its background, at least 72×72 (the square is 36 units wide, 54 pixels on a 1080p screen), made 128×128 at most when loaded. `ThemeInfo::lightPictures`/`darkPictures` (`pictures(variant)`) have it for an app's own picker: `aurore::ThemeImages::load(info.pictures(variant).preview, options)` with `options.maxSide = aurore::ThemeImages::PREVIEW_SIZE`.
 
 ### The demo's Prism
 
@@ -328,7 +328,7 @@ Each key is read at the top or in `[light]`/`[dark]`, inherited and taken away (
 
 What to draw: a backdrop is under text, so keep it quiet (a texture, a faint pattern, a gradient) or lower its opacity; the screen's text is not checked on it. A strip is behind the screens: the header's title and the footer's hints are drawn over it, so a top strip stays within the header's first 30 units or so (icicles, a garland), a bottom strip under about 20 (the footer's text is above that), or stays faint. A header backdrop covers the top strip: use one or the other. PNG with transparency is the usual form of a strip.
 
-Which views: the core's AppletFrame header, `Sidebar`, `Dialog`, `Dropdown` and `EditTextDialog`, and Cadran's sheets; an app's own panel opts in with `view->setThemeArea(brls::ThemeArea::DIALOG)` (or `HEADER`, `SIDEBAR`).
+Which views: the core's AppletFrame header, `Sidebar`, `Dialog`, `Dropdown` and `EditTextDialog`, and Cadran's sheets; an app's own panel opts in with `view->setThemeArea(aurore::ThemeArea::DIALOG)` (or `HEADER`, `SIDEBAR`).
 
 ### Particles
 
@@ -370,12 +370,12 @@ A file built on one keeps them (`inherit = builtin:winter`), or says `particles 
 ### The API
 
 ```cpp
-brls::Theme::getDecor(brls::ThemeVariant::DARK);   // pictures by area, particles
+aurore::Theme::getDecor(aurore::ThemeVariant::DARK);   // pictures by area, particles
 info.decor(variant);                                // the same, from ThemeInfo (lightDecor, darkDecor)
-view->setThemeArea(brls::ThemeArea::DIALOG);        // an app's panel takes backdrop.dialog
-brls::ThemeDecorations::particlesRunning();         // shown and moving now
-brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP);
-brls::Application::getLastInputTime();              // what the particles' pause counts from
+view->setThemeArea(aurore::ThemeArea::DIALOG);        // an app's panel takes backdrop.dialog
+aurore::ThemeDecorations::particlesRunning();         // shown and moving now
+aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP);
+aurore::Application::getLastInputTime();              // what the particles' pause counts from
 ```
 
 ## Every key
@@ -494,23 +494,23 @@ The seasons are the northern hemisphere's.
 // Use a file (or a preset), replacing the one in use; the screens take it at
 // their next frame. `variant`: the one it styles (or the one in use when it
 // styles both), for setThemeVariant.
-brls::ThemeVariant variant;
-if (brls::Theme::loadFile("sdmc:/config/myapp/themes/mint.theme", &variant))
-    brls::Application::getPlatform()->setThemeVariant(variant);
-brls::Theme::loadFile("builtin:high-contrast-dark");
-brls::Theme::reset();                       // back to the look without a file
+aurore::ThemeVariant variant;
+if (aurore::Theme::loadFile("sdmc:/config/myapp/themes/mint.theme", &variant))
+    aurore::Application::getPlatform()->setThemeVariant(variant);
+aurore::Theme::loadFile("builtin:high-contrast-dark");
+aurore::Theme::reset();                       // back to the look without a file
 
 // A picker: metadata, a preview, errors and warnings per file, never a crash
-for (const brls::ThemeInfo& info : brls::Theme::listThemes("sdmc:/config/myapp/themes"))
+for (const aurore::ThemeInfo& info : aurore::Theme::listThemes("sdmc:/config/myapp/themes"))
     if (info.ok())
         addRow(info.name, info.author, info.dark ? info.darkPreview : info.lightPreview, info.path);
-std::vector<brls::ThemeInfo> presets = brls::Theme::builtinThemes();
+std::vector<aurore::ThemeInfo> presets = aurore::Theme::builtinThemes();
 
-brls::Theme::getCurrentPath();              // the file in use, "" without one
-brls::Theme::styles(brls::ThemeVariant::LIGHT);   // whether it styles that variant
-brls::Theme::inspect(path);                 // one file, read without using it
-brls::Theme::checkContrast(variant);        // the pairs under their minimum
-brls::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
+aurore::Theme::getCurrentPath();              // the file in use, "" without one
+aurore::Theme::styles(aurore::ThemeVariant::LIGHT);   // whether it styles that variant
+aurore::Theme::inspect(path);                 // one file, read without using it
+aurore::Theme::checkContrast(variant);        // the pairs under their minimum
+aurore::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
 ```
 
 `ThemeInfo` has `path`, `id` (a theme folder's name for its `theme.theme`), `name`, `author`, `version`, `description`, `icon` (its `icon`, "" without one), `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `lightBackground`/`darkBackground` (`ThemeBackground`: `image`, `fit`, `dim`, `surfaceOpacity`; `background(variant)`), `lightPictures`/`darkPictures` (`ThemePictures`: `logo`, `preview`, `icons`, `images`; `pictures(variant)`), `backgroundImage` (the dark variant's picture, else the light one's), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`), and lists its `*.theme` files and theme folders, cheaply (no picture decoded unless asked, above); a file's `@include`s are best named `*.inc`, so that they are not listed.
@@ -518,27 +518,27 @@ brls::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
 For what a theme's pictures need (the background, and what later keys draw):
 
 ```cpp
-brls::Theme::getBackground(brls::ThemeVariant::DARK);   // image, fit, dim, surfaceOpacity
-brls::Theme::resolveAsset(name, directory, root, &path, &error); // a theme's picture, confined
-brls::Theme::addSurfaceKey("myapp/card");   // an app's surface, translucent over a picture
-brls::Theme::checkBackgroundContrast(variant); // the text on the picture, once it is loaded
+aurore::Theme::getBackground(aurore::ThemeVariant::DARK);   // image, fit, dim, surfaceOpacity
+aurore::Theme::resolveAsset(name, directory, root, &path, &error); // a theme's picture, confined
+aurore::Theme::addSurfaceKey("myapp/card");   // an app's surface, translucent over a picture
+aurore::Theme::checkBackgroundContrast(variant); // the text on the picture, once it is loaded
 
 // The loader: shared by path while held, freed with its last holder
-std::shared_ptr<brls::ThemeImage> image = brls::ThemeImages::load(path);
-brls::ThemeImages::getLoadedEvent()->subscribe([](const brls::ThemeImage* image) { /* ready or failed */ });
+std::shared_ptr<aurore::ThemeImage> image = aurore::ThemeImages::load(path);
+aurore::ThemeImages::getLoadedEvent()->subscribe([](const aurore::ThemeImage* image) { /* ready or failed */ });
 if (image->ready()) nvgImagePattern(vg, x, y, image->width, image->height, 0, image->texture, 1.0f);
-brls::ThemeImages::meanColor(path, &color);  // its average colour, remembered
-brls::ThemeImages::decoding();               // pictures on the decode thread (a test waits for 0)
+aurore::ThemeImages::meanColor(path, &color);  // its average colour, remembered
+aurore::ThemeImages::decoding();               // pictures on the decode thread (a test waits for 0)
 
-brls::Theme::addImageSlot("myapp/art", "@res/img/art.png");   // a picture themes may replace
-brls::Theme::image("myapp/art");             // the picture now: the theme's, else the app's
-image->setThemeImage("myapp/art");           // a brls::Image that follows it
-brls::Theme::logo();                         // the theme's logo, nullptr without one
-brls::Theme::icon("settings", &tint);        // an icon's picture, nullptr without one
-art->draw(vg, x, y, width, height, brls::BackgroundFit::CONTAIN); // a ThemeImage, fitted
+aurore::Theme::addImageSlot("myapp/art", "@res/img/art.png");   // a picture themes may replace
+aurore::Theme::image("myapp/art");             // the picture now: the theme's, else the app's
+image->setThemeImage("myapp/art");           // a aurore::Image that follows it
+aurore::Theme::logo();                         // the theme's logo, nullptr without one
+aurore::Theme::icon("settings", &tint);        // an icon's picture, nullptr without one
+art->draw(vg, x, y, width, height, aurore::BackgroundFit::CONTAIN); // a ThemeImage, fitted
 
-brls::Application::hasThemeBackground();    // a picture is behind the screens
-brls::Application::drawThemeBackground(vg, x, y, width, height); // under a translucent panel
+aurore::Application::hasThemeBackground();    // a picture is behind the screens
+aurore::Application::drawThemeBackground(vg, x, y, width, height); // under a translucent panel
 ```
 
 ### Colours that follow the theme

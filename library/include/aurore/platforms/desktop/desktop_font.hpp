@@ -21,7 +21,7 @@
 #include <vector>
 #include <aurore/core/font.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Font loader of every platform but the Switch: the text and the buttons
@@ -62,4 +62,4 @@ class DesktopFontLoader : public FontLoader
     void loadSystemCjkFonts(NVGcontext* vg);
 };
 
-} // namespace brls
+} // namespace aurore

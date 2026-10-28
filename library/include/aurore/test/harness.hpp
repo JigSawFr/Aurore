@@ -16,15 +16,15 @@
 
 #pragma once
 
-// brls::test::Harness runs an app's screens with no window: inputs given
+// aurore::test::Harness runs an app's screens with no window: inputs given
 // through calls, a simulated clock (frames advance without waiting, the
 // same way every run), screenshots compared with references. Built with
 // -DBRLS_BUILD_TESTS=ON (target Aurore::test); docs/testing.md has a guide.
 //
-//     brls::test::Harness h;                  // Application::init + window
+//     aurore::test::Harness h;                  // Application::init + window
 //     h.push(new MainActivity());
 //     h.settle();                             // animations done
-//     h.tap(brls::BUTTON_DOWN);
+//     h.tap(aurore::BUTTON_DOWN);
 //     BRLS_CHECK(h.focusText() == "Settings");
 //     BRLS_CHECK(h.matchesReference("main_settings"));
 //
@@ -42,13 +42,13 @@
 #include <type_traits>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 class HeadlessPlatform;
 class View;
 }
 
-namespace brls::test
+namespace aurore::test
 {
 
 struct Options
@@ -156,9 +156,9 @@ class Harness
 
     // Keyboard (BRLS_KBD_KEY_*, GLFW's codes): Enter is A, Escape is B and
     // the arrows are the D-pad, as on the desktop
-    void pressKey(BrlsKeyboardScancode key);
-    void releaseKey(BrlsKeyboardScancode key);
-    void tapKey(BrlsKeyboardScancode key, int times = 1);
+    void pressKey(AuroreKeyboardScancode key);
+    void releaseKey(AuroreKeyboardScancode key);
+    void tapKey(AuroreKeyboardScancode key, int times = 1);
 
     // Touch, in the views' coordinates (View::getFrame()). tapAt() and
     // tapView() touch down, wait a frame, lift and settle.
@@ -251,48 +251,48 @@ class Harness
 // Text of a view as focusText() reads it
 std::string viewText(View* view);
 
-} // namespace brls::test
+} // namespace aurore::test
 
 // A small test runner, for executables of test cases (tests/main.cpp):
 //
-//     BRLS_TEST(focus_moves) { brls::test::Harness h; ... BRLS_CHECK(...); }
-//     int main(int argc, char** argv) { return brls::test::runTests(argc, argv); }
+//     BRLS_TEST(focus_moves) { aurore::test::Harness h; ... BRLS_CHECK(...); }
+//     int main(int argc, char** argv) { return aurore::test::runTests(argc, argv); }
 //
 // `program` runs every case, each in a process of its own; `program name`
-// runs one (what ctest calls, see brls_add_tests in library/cmake/AuroreTesting.cmake);
-// `program --list` prints their names ("brls-test: name" lines).
-namespace brls::test
+// runs one (what ctest calls, see aurore_add_tests in library/cmake/AuroreTesting.cmake);
+// `program --list` prints their names ("aurore-test: name" lines).
+namespace aurore::test
 {
 using TestFunction = void (*)();
 bool registerTest(const char* name, TestFunction function);
 void reportFailure(const char* file, int line, const std::string& what);
 int runTests(int argc, char** argv);
-} // namespace brls::test
+} // namespace aurore::test
 
-#define BRLS_TEST(name)                                                                                \
-    static void brls_test_##name();                                                                    \
-    static const bool brls_test_registered_##name = brls::test::registerTest(#name, brls_test_##name); \
-    static void brls_test_##name()
+#define BRLS_TEST(name)                                                                                      \
+    static void aurore_test_##name();                                                                        \
+    static const bool aurore_test_registered_##name = aurore::test::registerTest(#name, aurore_test_##name); \
+    static void aurore_test_##name()
 
-#define BRLS_CHECK(condition)                                                            \
-    do                                                                                   \
-    {                                                                                    \
-        if (!(condition))                                                                \
-            brls::test::reportFailure(__FILE__, __LINE__, "BRLS_CHECK(" #condition ")"); \
+#define BRLS_CHECK(condition)                                                              \
+    do                                                                                     \
+    {                                                                                      \
+        if (!(condition))                                                                  \
+            aurore::test::reportFailure(__FILE__, __LINE__, "BRLS_CHECK(" #condition ")"); \
     } while (0)
 
-#define BRLS_CHECK_EQ(actual, expected)                                                                                  \
-    do                                                                                                                   \
-    {                                                                                                                    \
-        auto brls_actual_   = (actual);                                                                                  \
-        auto brls_expected_ = (expected);                                                                                \
-        if (!(brls_actual_ == brls_expected_))                                                                           \
-            brls::test::reportFailure(__FILE__, __LINE__,                                                                \
-                std::string("BRLS_CHECK_EQ(" #actual ", " #expected "): got ") + brls::test::describeValue(brls_actual_) \
-                    + ", expected " + brls::test::describeValue(brls_expected_));                                        \
+#define BRLS_CHECK_EQ(actual, expected)                                                                                      \
+    do                                                                                                                       \
+    {                                                                                                                        \
+        auto aurore_actual_   = (actual);                                                                                    \
+        auto aurore_expected_ = (expected);                                                                                  \
+        if (!(aurore_actual_ == aurore_expected_))                                                                           \
+            aurore::test::reportFailure(__FILE__, __LINE__,                                                                  \
+                std::string("BRLS_CHECK_EQ(" #actual ", " #expected "): got ") + aurore::test::describeValue(aurore_actual_) \
+                    + ", expected " + aurore::test::describeValue(aurore_expected_));                                        \
     } while (0)
 
-namespace brls::test
+namespace aurore::test
 {
 inline std::string describeValue(const std::string& value) { return "\"" + value + "\""; }
 inline std::string describeValue(const char* value) { return "\"" + std::string(value) + "\""; }
@@ -306,4 +306,4 @@ std::string describeValue(const T& value)
     else
         return "(value)";
 }
-} // namespace brls::test
+} // namespace aurore::test

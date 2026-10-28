@@ -33,7 +33,7 @@ limitations under the License.
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-namespace brls
+namespace aurore
 {
 static int currentIMEStatus = GLFW_FALSE;
 
@@ -68,7 +68,7 @@ static size_t encode_utf8(char* s, unsigned int ch)
 void GLFWImeManager::ime_callback(GLFWwindow* window)
 {
     currentIMEStatus = glfwGetInputMode(window, GLFW_IME);
-    brls::Logger::info("IME switched: {}", currentIMEStatus ? "ON" : "OFF");
+    aurore::Logger::info("IME switched: {}", currentIMEStatus ? "ON" : "OFF");
 }
 
 std::string glfwPreeditText(int preeditCount, const unsigned int* preeditString, int blockCount,
@@ -133,7 +133,7 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
 #ifdef __linux__
     if (isSteamDeck())
     {
-        brls::delay(200, []()
+        aurore::delay(200, []()
             { runSteamDeckCommand("steam://open/keyboard?Mode=0\n"); });
     }
 #endif

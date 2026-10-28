@@ -21,7 +21,7 @@
 #include <aurore/views/image.hpp>
 #include <aurore/views/rectangle.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class WirelessWidget : public Box
@@ -49,4 +49,4 @@ class WirelessWidget : public Box
     inline static bool updating              = false; // a read is under way
 };
 
-} // namespace brls
+} // namespace aurore

@@ -22,7 +22,7 @@
 #include <aurore/views/image.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class BottomBar : public Box
@@ -41,4 +41,4 @@ class BottomBar : public Box
     BRLS_BIND(View, wireless, "brls/wireless");
 };
 
-} // namespace brls
+} // namespace aurore

@@ -25,7 +25,7 @@
 
 extern "C" u32 __nx_applet_exit_mode;
 
-namespace brls
+namespace aurore
 {
 
 static AppletHookCookie applet_hook_cookie;
@@ -35,20 +35,20 @@ static void on_applet_hook(AppletHookType hook, void* arg)
     switch (hook)
     {
         case AppletHookType_OnExitRequest:
-            brls::Logger::info("AppletHookType_OnExitRequest");
-            brls::Application::quit();
+            aurore::Logger::info("AppletHookType_OnExitRequest");
+            aurore::Application::quit();
             break;
         case AppletHookType_OnFocusState:
             switch (appletGetFocusState())
             {
                 case AppletFocusState_InFocus:
-                    brls::Logger::info("AppletFocusState_InFocus");
-                    brls::Application::getWindowFocusChangedEvent()->fire(true);
+                    aurore::Logger::info("AppletFocusState_InFocus");
+                    aurore::Application::getWindowFocusChangedEvent()->fire(true);
                     break;
                 case AppletFocusState_OutOfFocus:
                 case AppletFocusState_Background:
-                    brls::Logger::info("AppletFocusState_OutOfFocus");
-                    brls::Application::getWindowFocusChangedEvent()->fire(false);
+                    aurore::Logger::info("AppletFocusState_OutOfFocus");
+                    aurore::Application::getWindowFocusChangedEvent()->fire(false);
                     break;
                 default:
                     break;
@@ -318,4 +318,4 @@ SwitchPlatform::~SwitchPlatform()
     delete this->imeManager;
 }
 
-} // namespace brls
+} // namespace aurore

@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 class View;
@@ -74,4 +74,4 @@ class Inspector
     inline static Mode mode    = Mode::CLOSED;
 };
 
-} // namespace brls
+} // namespace aurore

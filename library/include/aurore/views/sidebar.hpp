@@ -23,7 +23,7 @@
 #include <aurore/views/rectangle.hpp>
 #include <aurore/views/scrolling_frame.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class SidebarItem;
@@ -111,4 +111,4 @@ class Sidebar : public ScrollingFrame
     Box* contentBox;
 };
 
-} // namespace brls
+} // namespace aurore

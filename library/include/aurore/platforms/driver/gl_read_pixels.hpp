@@ -22,7 +22,7 @@
 #include <cstring>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 // The framebuffer bound for reading, `width` x `height` from its corner:
@@ -46,4 +46,4 @@ inline bool glReadPixelsTopDown(int width, int height, std::vector<unsigned char
     return true;
 }
 
-} // namespace brls
+} // namespace aurore

@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace brls
+namespace aurore
 {
 
 enum Sound
@@ -80,4 +80,4 @@ class NullAudioPlayer : public AudioPlayer
     }
 };
 
-} // namespace brls
+} // namespace aurore

@@ -19,7 +19,7 @@ limitations under the License.
 #include <nanovg_gxm_utils.h>
 #include <aurore/core/video.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class PsvVideoContext : public VideoContext
@@ -43,4 +43,4 @@ class PsvVideoContext : public VideoContext
     NVGXMwindow* window;
 };
 
-} // namespace brls
+} // namespace aurore

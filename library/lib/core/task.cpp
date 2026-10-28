@@ -16,7 +16,7 @@
 
 #include <aurore/core/task.hpp>
 
-namespace brls
+namespace aurore
 {
 
 RepeatingTask::RepeatingTask(Time period)
@@ -37,4 +37,4 @@ void RepeatingTask::stop()
     RepeatingTimer::stop();
 }
 
-} // namespace brls
+} // namespace aurore

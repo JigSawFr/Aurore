@@ -9,20 +9,20 @@
 namespace motion
 {
 
-brls::Time now()
+aurore::Time now()
 {
-    return brls::getCPUTimeUsec();
+    return aurore::getCPUTimeUsec();
 }
 
-float progress(brls::Time since, float duration_us)
+float progress(aurore::Time since, float duration_us)
 {
     if (since == 0 || duration_us <= 0.0f)
         return 1.0f;
-    const brls::Time at = now();
+    const aurore::Time at = now();
     if ((float)(at - since) >= duration_us)
         return 1.0f;
     // An animation under way keeps the frames coming (redraw on demand)
-    brls::Application::requestRedraw();
+    aurore::Application::requestRedraw();
     if (at <= since)
         return 0.0f;
     return (float)(at - since) / duration_us;
@@ -53,7 +53,7 @@ namespace
     // The child that moves its parent: at each frame, the parent's translation
     // and alpha from the time elapsed. Drawn as nothing (no size, absolute, not
     // culled: its parent may be a line scrolled to the edge).
-    class Mover : public brls::View
+    class Mover : public aurore::View
     {
       public:
         enum class Kind
@@ -64,25 +64,25 @@ namespace
             BREATHE, // alpha down to `low` and back
         };
 
-        Mover(brls::Box* owner, Kind what, float move_x, float move_y, float low_alpha, int ms, int delay_ms)
+        Mover(aurore::Box* owner, Kind what, float move_x, float move_y, float low_alpha, int ms, int delay_ms)
             : box(owner)
             , kind(what)
             , dx(move_x)
             , dy(move_y)
             , low(low_alpha)
             , duration((float)ms * 1000.0f)
-            , since(now() + (brls::Time)delay_ms * 1000)
+            , since(now() + (aurore::Time)delay_ms * 1000)
             , rest_alpha(own_alpha(owner))
         {
             this->setFocusable(false);
-            this->setPositionType(brls::PositionType::ABSOLUTE);
+            this->setPositionType(aurore::PositionType::ABSOLUTE);
             this->setWidth(0);
             this->setHeight(0);
             this->setCulled(false);
             this->apply(0.0f);
         }
 
-        void draw(NVGcontext*, float, float, float, float, brls::Style, brls::FrameContext*) override
+        void draw(NVGcontext*, float, float, float, float, aurore::Style, aurore::FrameContext*) override
         {
             if (this->done)
                 return;
@@ -97,7 +97,7 @@ namespace
         // movement ends now, or the box stays where it was, nearly clear.
         void willDisappear(bool resetState) override
         {
-            brls::View::willDisappear(resetState);
+            aurore::View::willDisappear(resetState);
             if (this->done)
                 return;
             this->apply(1.0f);
@@ -110,9 +110,9 @@ namespace
         // clear, and the box would stay there (About › Help & diagnostics drawn
         // blank, its icons only). A mover still running on the box knows its
         // alpha at rest better than the box, which it has dimmed.
-        static float own_alpha(brls::Box* box)
+        static float own_alpha(aurore::Box* box)
         {
-            for (brls::View* child : box->getChildren())
+            for (aurore::View* child : box->getChildren())
                 if (auto* m = dynamic_cast<Mover*>(child); m && !m->done)
                     return m->rest_alpha;
             const float above = box->hasParent() ? box->getParent()->getAlpha() : 1.0f;
@@ -157,19 +157,19 @@ namespace
             }
         }
 
-        brls::Box* box;
+        aurore::Box* box;
         Kind kind;
         float dx, dy, low, duration;
-        brls::Time since;
+        aurore::Time since;
         float rest_alpha;
         bool done = false;
     };
 
     // Puts a mover on `view`; false when it cannot move (not a box, or the
     // motion off).
-    bool move(brls::View* view, Mover::Kind kind, float dx, float dy, float low, int ms, int delay_ms)
+    bool move(aurore::View* view, Mover::Kind kind, float dx, float dy, float low, int ms, int delay_ms)
     {
-        auto* box = dynamic_cast<brls::Box*>(view);
+        auto* box = dynamic_cast<aurore::Box*>(view);
         if (!box || !effects::motion())
             return false;
         // The mover first among the children: what it sets holds for the frame
@@ -179,17 +179,17 @@ namespace
     }
 } // namespace
 
-void reveal(brls::View* view, float rise, int ms, int delay_ms)
+void reveal(aurore::View* view, float rise, int ms, int delay_ms)
 {
     move(view, Mover::Kind::REVEAL, 0.0f, rise, 0.0f, ms, delay_ms);
 }
 
-void reveal_all(const std::vector<brls::View*>& views, float rise, int ms, int stagger_ms, int limit)
+void reveal_all(const std::vector<aurore::View*>& views, float rise, int ms, int stagger_ms, int limit)
 {
     int shown = 0;
-    for (brls::View* view : views)
+    for (aurore::View* view : views)
     {
-        if (!view || view->getVisibility() != brls::Visibility::VISIBLE)
+        if (!view || view->getVisibility() != aurore::Visibility::VISIBLE)
             continue;
         if (shown >= limit)
             return;
@@ -198,7 +198,7 @@ void reveal_all(const std::vector<brls::View*>& views, float rise, int ms, int s
     }
 }
 
-void dismiss(brls::View* view, std::function<void()> then, float rise, int ms)
+void dismiss(aurore::View* view, std::function<void()> then, float rise, int ms)
 {
     if (!move(view, Mover::Kind::DISMISS, 0.0f, rise, 0.0f, ms, 0))
     {
@@ -207,17 +207,17 @@ void dismiss(brls::View* view, std::function<void()> then, float rise, int ms)
         return;
     }
     if (then)
-        brls::delay(ms, then);
+        aurore::delay(ms, then);
 }
 
-void slide_from(brls::View* view, float dx, float dy, int ms)
+void slide_from(aurore::View* view, float dx, float dy, int ms)
 {
     if (std::fabs(dx) < 0.5f && std::fabs(dy) < 0.5f)
         return;
     move(view, Mover::Kind::SLIDE, dx, dy, 0.0f, ms, 0);
 }
 
-void breathe(brls::View* view, float low, int ms)
+void breathe(aurore::View* view, float low, int ms)
 {
     move(view, Mover::Kind::BREATHE, 0.0f, 0.0f, low, ms, 0);
 }

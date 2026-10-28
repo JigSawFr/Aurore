@@ -30,7 +30,7 @@
 #import <CoreWLAN/CoreWLAN.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // Interface method, fetching the current connection info.

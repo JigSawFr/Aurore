@@ -20,7 +20,7 @@
 #include <aurore.hpp>
 
 // A picture and its caption, in the grid and in the row.
-class PictureCell : public brls::RecyclingGridItem
+class PictureCell : public aurore::RecyclingGridItem
 {
   public:
     PictureCell();
@@ -29,12 +29,12 @@ class PictureCell : public brls::RecyclingGridItem
 
     static PictureCell* create();
 
-    BRLS_BIND(brls::Image, image, "picture/image");
-    BRLS_BIND(brls::Label, label, "picture/label");
+    BRLS_BIND(aurore::Image, image, "picture/image");
+    BRLS_BIND(aurore::Label, label, "picture/label");
 };
 
 // Items the grid shows: a page more each time its end comes into view.
-class PictureSource : public brls::RecyclingGridDataSource
+class PictureSource : public aurore::RecyclingGridDataSource
 {
   public:
     explicit PictureSource(size_t count)
@@ -43,25 +43,25 @@ class PictureSource : public brls::RecyclingGridDataSource
     }
 
     size_t getItemCount() override { return this->count; }
-    brls::RecyclingGridItem* cellForRow(brls::RecyclingView* recycler, size_t index) override;
-    void onItemSelected(brls::View* recycler, size_t index) override;
+    aurore::RecyclingGridItem* cellForRow(aurore::RecyclingView* recycler, size_t index) override;
+    void onItemSelected(aurore::View* recycler, size_t index) override;
     void clearData() override { this->count = 0; }
 
     size_t count;
 };
 
-class GridTab : public brls::Box
+class GridTab : public aurore::Box
 {
   public:
     GridTab();
     ~GridTab() override;
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(brls::HRecyclerFrame, row, "row");
-    BRLS_BIND(brls::RecyclingGrid, grid, "grid");
-    BRLS_BIND(brls::Header, gridHeader, "grid_header");
+    BRLS_BIND(aurore::HRecyclerFrame, row, "row");
+    BRLS_BIND(aurore::RecyclingGrid, grid, "grid");
+    BRLS_BIND(aurore::Header, gridHeader, "grid_header");
 
     PictureSource* gridSource;
     std::shared_ptr<bool> alive = std::make_shared<bool>(true);

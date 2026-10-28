@@ -19,7 +19,7 @@
 #include <aurore/views/button.hpp>
 #include <aurore/views/image.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A Button with an icon before its text, or an icon alone (a round button)
@@ -56,4 +56,4 @@ class IconButton : public Button
     void updateShape();
 };
 
-} // namespace brls
+} // namespace aurore

@@ -21,7 +21,7 @@
 #include <list>
 #include <mutex>
 
-namespace brls
+namespace aurore
 {
 
 // Simple observer pattern implementation
@@ -126,4 +126,4 @@ bool Event<Ts...>::fire(Ts... args)
     return true;
 }
 
-}; // namespace brls
+}; // namespace aurore

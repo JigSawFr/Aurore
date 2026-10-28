@@ -32,7 +32,7 @@
 #include <aurore/core/view.hpp>
 #include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 bool StyleValue::operator==(const StyleValue& other) const
@@ -1042,9 +1042,9 @@ std::string Box::getDefaultAccessibilityLabel()
     return this->isFocusable() ? textUnder(this) : "";
 }
 
-} // namespace brls
+} // namespace aurore
 
-namespace brls
+namespace aurore
 {
 
 // ---------------------------------------------------------------------------
@@ -1159,4 +1159,4 @@ void View::onThemeChanged()
     }
 }
 
-} // namespace brls
+} // namespace aurore

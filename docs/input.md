@@ -23,13 +23,13 @@ Enter and Escape stay A and B when `Application::setSwapInputKeys(true)` swaps t
 An app changes them before or after `Application::init()`:
 
 ```cpp
-brls::Application::mapKey(brls::BRLS_KBD_KEY_Q, brls::BUTTON_LB);   // Q as L as well
-brls::Application::unmapKey(brls::BRLS_KBD_KEY_M);                  // M types nothing
-brls::Application::mapKey({ brls::BRLS_KBD_KEY_F, brls::BRLS_KBD_MODIFIER_CTRL }, brls::BUTTON_Y);
-brls::Application::clearKeyMap();                                   // Enter, Escape and the arrows only
+aurore::Application::mapKey(aurore::BRLS_KBD_KEY_Q, aurore::BUTTON_LB);   // Q as L as well
+aurore::Application::unmapKey(aurore::BRLS_KBD_KEY_M);                  // M types nothing
+aurore::Application::mapKey({ aurore::BRLS_KBD_KEY_F, aurore::BRLS_KBD_MODIFIER_CTRL }, aurore::BUTTON_Y);
+aurore::Application::clearKeyMap();                                   // Enter, Escape and the arrows only
 ```
 
-A key a view registers an action for (`registerAction(BrlsKeyCombination(...), ...)`) keeps that action only: an app that already gave X its own meaning on the desktop is not pressed twice.
+A key a view registers an action for (`registerAction(AuroreKeyCombination(...), ...)`) keeps that action only: an app that already gave X its own meaning on the desktop is not pressed twice.
 
 ## The mouse
 

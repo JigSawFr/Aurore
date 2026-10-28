@@ -19,7 +19,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/core/logger.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class DebugLayer : public Box
@@ -32,4 +32,4 @@ class DebugLayer : public Box
     Event<Logger::TimePoint, LogLevel, std::string>::Subscription logSubscription;
 };
 
-} // namespace brls
+} // namespace aurore

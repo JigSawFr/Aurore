@@ -34,7 +34,7 @@
 #include <sstream>
 #include <string>
 
-using brls::Platform;
+using aurore::Platform;
 
 BRLS_TEST(browser_urls_are_http_or_https)
 {
@@ -86,13 +86,13 @@ std::string readFile(const std::filesystem::path& path)
 
 BRLS_TEST(open_url_passes_the_link_as_one_argument)
 {
-    std::vector<std::string> cmd = brls::DesktopPlatform::browserCommand("https://x/$(id)");
+    std::vector<std::string> cmd = aurore::DesktopPlatform::browserCommand("https://x/$(id)");
     BRLS_CHECK(cmd.size() == 2);
     BRLS_CHECK_EQ(cmd[0], std::string("xdg-open"));
     BRLS_CHECK_EQ(cmd[1], std::string("https://x/$(id)"));
-    BRLS_CHECK(brls::DesktopPlatform::browserCommand("file:///etc/passwd").empty());
-    BRLS_CHECK(brls::DesktopPlatform::browserCommand("https://x/\nfoo").empty());
-    BRLS_CHECK_EQ(brls::DesktopPlatform::spawnProcess({}), -1);
+    BRLS_CHECK(aurore::DesktopPlatform::browserCommand("file:///etc/passwd").empty());
+    BRLS_CHECK(aurore::DesktopPlatform::browserCommand("https://x/\nfoo").empty());
+    BRLS_CHECK_EQ(aurore::DesktopPlatform::spawnProcess({}), -1);
 
     // A stand-in xdg-open, first in PATH, that writes down its arguments
     std::filesystem::path dir = std::filesystem::temp_directory_path() / ("aurore-open-url-" + std::to_string(getpid()));
@@ -111,7 +111,7 @@ BRLS_TEST(open_url_passes_the_link_as_one_argument)
 
     std::string pwned = (dir / "pwned").string();
     std::string url   = "https://example.org/$(touch " + pwned + ")`touch " + pwned + "`\"; touch " + pwned + "; \"'";
-    int pid           = brls::DesktopPlatform::spawnProcess(brls::DesktopPlatform::browserCommand(url));
+    int pid           = aurore::DesktopPlatform::spawnProcess(aurore::DesktopPlatform::browserCommand(url));
     BRLS_CHECK(pid > 0);
     int status = 0;
     if (pid > 0)
@@ -126,14 +126,14 @@ BRLS_TEST(open_url_passes_the_link_as_one_argument)
 
 BRLS_TEST(steam_open_url_is_one_line)
 {
-    BRLS_CHECK_EQ(brls::steamOpenUrlCommand("https://example.org/a"), std::string("steam://openurl/https://example.org/a\n"));
-    BRLS_CHECK(brls::steamOpenUrlCommand("https://example.org/\nsteam://run/440").empty());
-    BRLS_CHECK(brls::steamOpenUrlCommand("steam://run/440").empty());
+    BRLS_CHECK_EQ(aurore::steamOpenUrlCommand("https://example.org/a"), std::string("steam://openurl/https://example.org/a\n"));
+    BRLS_CHECK(aurore::steamOpenUrlCommand("https://example.org/\nsteam://run/440").empty());
+    BRLS_CHECK(aurore::steamOpenUrlCommand("steam://run/440").empty());
 }
 
 #endif
 
 int main(int argc, char** argv)
 {
-    return brls::test::runTests(argc, argv);
+    return aurore::test::runTests(argc, argv);
 }

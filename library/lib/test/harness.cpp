@@ -32,7 +32,7 @@
 #define STB_IMAGE_WRITE_STATIC
 #include "stb_image_write.h"
 
-namespace brls::test
+namespace aurore::test
 {
 
 // Image
@@ -308,17 +308,17 @@ void Harness::setAxis(ControllerAxis axis, float value)
     headless->getHeadlessInput()->setAxis(axis, value);
 }
 
-void Harness::pressKey(BrlsKeyboardScancode key)
+void Harness::pressKey(AuroreKeyboardScancode key)
 {
     headless->getHeadlessInput()->setKey(key, true);
 }
 
-void Harness::releaseKey(BrlsKeyboardScancode key)
+void Harness::releaseKey(AuroreKeyboardScancode key)
 {
     headless->getHeadlessInput()->setKey(key, false);
 }
 
-void Harness::tapKey(BrlsKeyboardScancode key, int times)
+void Harness::tapKey(AuroreKeyboardScancode key, int times)
 {
     for (int i = 0; i < times; i++)
     {
@@ -621,9 +621,9 @@ int runTests(int argc, char** argv)
 
     if (argc > 1 && std::string(argv[1]) == "--list")
     {
-        // Marked: the program may log before (brls_add_tests reads them)
+        // Marked: the program may log before (aurore_add_tests reads them)
         for (auto& test : tests)
-            std::printf("brls-test: %s\n", test.name);
+            std::printf("aurore-test: %s\n", test.name);
         return 0;
     }
 
@@ -655,4 +655,4 @@ int runTests(int argc, char** argv)
     return failed ? 1 : 0;
 }
 
-} // namespace brls::test
+} // namespace aurore::test

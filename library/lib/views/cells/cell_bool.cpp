@@ -19,9 +19,9 @@
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 BooleanCell::BooleanCell()
@@ -116,4 +116,4 @@ View* BooleanCell::create()
     return new BooleanCell();
 }
 
-} // namespace brls
+} // namespace aurore

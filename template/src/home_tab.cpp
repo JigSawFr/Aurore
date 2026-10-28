@@ -4,14 +4,14 @@ HomeTab::HomeTab()
 {
     this->inflateFromXMLRes("xml/tabs/home.xml");
 
-    this->counter->registerClickAction([this](brls::View*)
+    this->counter->registerClickAction([this](aurore::View*)
         {
         this->clicks++;
-        this->counter->setText(brls::getStr("app/home/clicked", this->clicks));
+        this->counter->setText(aurore::getStr("app/home/clicked", this->clicks));
         return true; });
 }
 
-brls::View* HomeTab::create()
+aurore::View* HomeTab::create()
 {
     return new HomeTab();
 }

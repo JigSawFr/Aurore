@@ -18,7 +18,7 @@
 
 #include <aurore/core/gesture.hpp>
 
-namespace brls
+namespace aurore
 {
 
 struct TapGestureConfig
@@ -83,4 +83,4 @@ class TapGestureRecognizer : public GestureRecognizer
     bool forceRecognision {};
 };
 
-} // namespace brls
+} // namespace aurore

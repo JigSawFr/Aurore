@@ -52,10 +52,10 @@ extern "C"
 #include <nanovg_d3d11.h>
 
 #include <aurore/platforms/driver/d3d11.hpp>
-std::unique_ptr<brls::D3D11Context> D3D11_CONTEXT;
+std::unique_ptr<aurore::D3D11Context> D3D11_CONTEXT;
 #endif
 
-namespace brls
+namespace aurore
 {
 
 static double scaleFactor = 1.0;
@@ -71,7 +71,7 @@ static void sdlWindowFramebufferSizeCallback(SDL_Window* window, int width, int 
     scaleFactor = fWidth * 1.0 / width;
 #if defined(ANDROID)
     // On Android, doing this is to ensure that glViewport is called from the main thread
-    brls::sync([fWidth, fHeight]()
+    aurore::sync([fWidth, fHeight]()
         { glViewport(0, 0, fWidth, fHeight); });
 #else
     glViewport(0, 0, fWidth, fHeight);
@@ -328,7 +328,7 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 #endif
     if (!this->nvgContext)
     {
-        brls::fatal("sdl: unable to init nanovg");
+        aurore::fatal("sdl: unable to init nanovg");
     }
 
     setSwapInterval(VideoContext::swapInterval);
@@ -487,4 +487,4 @@ void SDLVideoContext::fullScreen(bool fs)
     SDL_SetWindowFullscreen(this->window, fs ? flag : 0);
 }
 
-} // namespace brls
+} // namespace aurore

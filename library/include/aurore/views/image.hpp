@@ -23,7 +23,7 @@
 #include <aurore/core/theme.hpp>
 #include <aurore/core/view.hpp>
 
-namespace brls
+namespace aurore
 {
 
 /// This dictates what to do with the image if there is not
@@ -227,4 +227,4 @@ class Image : public View
     void stopFollowingTheme();
 };
 
-} // namespace brls
+} // namespace aurore

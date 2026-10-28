@@ -20,7 +20,7 @@
 
 #include <aurore/core/video.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // SDL Video Context
@@ -49,4 +49,4 @@ class SDLVideoContext : public VideoContext
     NVGcontext* nvgContext = nullptr;
 };
 
-} // namespace brls
+} // namespace aurore

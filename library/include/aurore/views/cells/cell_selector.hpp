@@ -23,7 +23,7 @@
 #include <aurore/views/cells/cell_detail.hpp>
 #include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 class SelectorCell : public DetailCell
@@ -60,4 +60,4 @@ class SelectorCell : public DetailCell
     void updateUI();
 };
 
-} // namespace brls
+} // namespace aurore

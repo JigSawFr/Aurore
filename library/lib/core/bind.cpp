@@ -16,7 +16,7 @@
 
 #include <aurore/core/bind.hpp>
 
-namespace brls
+namespace aurore
 {
 
 ViewNotFoundException::ViewNotFoundException(View* owner, std::string searchedId)
@@ -34,4 +34,4 @@ const char* ViewNotFoundException::what() const noexcept
     return this->errorMessage.c_str();
 }
 
-} // namespace brls
+} // namespace aurore

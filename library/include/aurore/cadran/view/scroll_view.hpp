@@ -17,20 +17,20 @@
 
 /// The scrolling frame of Cadran's screens (`<ScrollView>`): each press moves to
 /// the next line and scrolls just enough to show it with its header and notes.
-class ScrollView : public brls::ScrollingFrame
+class ScrollView : public aurore::ScrollingFrame
 {
   public:
     ScrollView();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height,
-        brls::Style style, brls::FrameContext* ctx) override;
+        aurore::Style style, aurore::FrameContext* ctx) override;
     void willAppear(bool resetState) override;
-    void onChildFocusGained(brls::View* directChild, brls::View* focusedView) override;
-    brls::View* getNextFocus(brls::FocusDirection direction, brls::View* currentView) override;
-    brls::View* getDefaultFocus() override;
+    void onChildFocusGained(aurore::View* directChild, aurore::View* focusedView) override;
+    aurore::View* getNextFocus(aurore::FocusDirection direction, aurore::View* currentView) override;
+    aurore::View* getDefaultFocus() override;
     void onFocusLost() override;
 
-    static brls::View* create();
+    static aurore::View* create();
 
     /// The focused line shown again at the next frame, once laid out anew: a
     /// layout moved it (the rail's width changed, cadran::apply_rail).
@@ -47,12 +47,12 @@ class ScrollView : public brls::ScrollingFrame
     bool reveal_pending = false;
     bool parked         = false; ///< the focus waits on the frame: see step()
 
-    bool owns(brls::View* view) const;
-    Span span_of(brls::View* view) const;
-    Span context_of(brls::View* view) const;
-    brls::View* neighbour(brls::FocusDirection direction) const;
+    bool owns(aurore::View* view) const;
+    Span span_of(aurore::View* view) const;
+    Span context_of(aurore::View* view) const;
+    aurore::View* neighbour(aurore::FocusDirection direction) const;
     float bottom_limit();
-    brls::View* visible_line(bool first);
-    void reveal(brls::View* view, bool animated);
-    bool step(brls::FocusDirection direction);
+    aurore::View* visible_line(bool first);
+    void reveal(aurore::View* view, bool animated);
+    bool step(aurore::FocusDirection direction);
 };

@@ -14,7 +14,7 @@
 #include <aurore/cadran/view/cadran_digits.hpp>
 #include <aurore/cadran/view/cadran_icon.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 namespace
 {
@@ -22,8 +22,8 @@ namespace
 // plain on the second surface with a hairline, the confirmation filled.
 // The focus ring stands off a filled pill (cadran/ring_gap): its colour is
 // often the fill's own.
-const brls::ButtonStyle PLAIN = {
-    .shadowType              = brls::ShadowType::NONE,
+const aurore::ButtonStyle PLAIN = {
+    .shadowType              = aurore::ShadowType::NONE,
     .hideHighlightBackground = true,
     .highlightPadding        = "",
     .borderThickness         = "cadran/hairline",
@@ -34,8 +34,8 @@ const brls::ButtonStyle PLAIN = {
     .disabledLabelColor      = "cadran/text3",
     .disabledBorderColor     = "cadran/line",
 };
-const brls::ButtonStyle PRIMARY = {
-    .shadowType              = brls::ShadowType::NONE,
+const aurore::ButtonStyle PRIMARY = {
+    .shadowType              = aurore::ShadowType::NONE,
     .hideHighlightBackground = true,
     .highlightPadding        = "cadran/ring_gap",
     .borderThickness         = "",
@@ -46,8 +46,8 @@ const brls::ButtonStyle PRIMARY = {
     .disabledLabelColor      = "cadran/text3",
     .disabledBorderColor     = "",
 };
-const brls::ButtonStyle DANGER = {
-    .shadowType              = brls::ShadowType::NONE,
+const aurore::ButtonStyle DANGER = {
+    .shadowType              = aurore::ShadowType::NONE,
     .hideHighlightBackground = true,
     .highlightPadding        = "cadran/ring_gap",
     .borderThickness         = "",
@@ -61,7 +61,7 @@ const brls::ButtonStyle DANGER = {
 
 constexpr float PILL = 56;
 
-void pill(brls::Button* button, const brls::ButtonStyle* style)
+void pill(aurore::Button* button, const aurore::ButtonStyle* style)
 {
     button->setStyle(style);
     button->setFontSize(21);
@@ -69,16 +69,16 @@ void pill(brls::Button* button, const brls::ButtonStyle* style)
     button->setHighlightCornerRadius(PILL / 2);
 }
 
-brls::Button* button(brls::Dialog* dialog, const char* id)
+aurore::Button* button(aurore::Dialog* dialog, const char* id)
 {
-    auto* b = dynamic_cast<brls::Button*>(dialog->getView(id));
-    return b && b->getVisibility() == brls::Visibility::VISIBLE ? b : nullptr;
+    auto* b = dynamic_cast<aurore::Button*>(dialog->getView(id));
+    return b && b->getVisibility() == aurore::Visibility::VISIBLE ? b : nullptr;
 }
 
-void hide(brls::View* parent, const char* id)
+void hide(aurore::View* parent, const char* id)
 {
-    if (brls::View* v = parent->getView(id))
-        v->setVisibility(brls::Visibility::GONE);
+    if (aurore::View* v = parent->getView(id))
+        v->setVisibility(aurore::Visibility::GONE);
 }
 } // namespace
 
@@ -150,7 +150,7 @@ const char* note_icon(const std::string& paragraph, bool* warn)
     {
         // Read each time: the language may have changed since (live_prefs).
         // Raw: a text with a "{}" to fill would not format without its value.
-        const std::string text = brls::internal::getRawStr(k.key);
+        const std::string text = aurore::internal::getRawStr(k.key);
         if (starts_with(paragraph, text.substr(0, text.find("{}"))))
         {
             *warn = k.warn;
@@ -166,12 +166,12 @@ void cadran::add_note(const std::string& key, const char* icon, bool warn)
     note_kinds().push_back({ key, icon, warn });
 }
 
-brls::Box* cadran::dialog_body(const std::string& text)
+aurore::Box* cadran::dialog_body(const std::string& text)
 {
     namespace kit = cadran::kit;
-    auto* body    = new brls::Box(brls::Axis::COLUMN);
+    auto* body    = new aurore::Box(aurore::Axis::COLUMN);
     body->setId("cadran_dialog_body");
-    body->setAlignItems(brls::AlignItems::STRETCH);
+    body->setAlignItems(aurore::AlignItems::STRETCH);
     body->setPadding(34, 40, 26, 40);
 
     std::vector<std::string> paragraphs = split(text, "\n\n");
@@ -194,10 +194,10 @@ brls::Box* cadran::dialog_body(const std::string& text)
     }
     if (!title.empty())
     {
-        auto* head = new brls::Box(brls::Axis::ROW);
+        auto* head = new aurore::Box(aurore::Axis::ROW);
         head->setId("cadran_dialog_head");
-        head->setAlignItems(brls::AlignItems::CENTER);
-        brls::Label* label = kit::display(title, kit::TEXT_TITLE);
+        head->setAlignItems(aurore::AlignItems::CENTER);
+        aurore::Label* label = kit::display(title, kit::TEXT_TITLE);
         label->setGrow(1.0f);
         label->setWidth(0);
         head->addView(label);
@@ -225,16 +225,16 @@ brls::Box* cadran::dialog_body(const std::string& text)
             // A week of lines: the days that change alike on one line
             // ("Monday – Friday  2 h → 0 min").
             rows        = cadran_text::group_rows(rows);
-            auto* table = new brls::Box(brls::Axis::COLUMN);
-            table->setAlignItems(brls::AlignItems::STRETCH);
+            auto* table = new aurore::Box(aurore::Axis::COLUMN);
+            table->setAlignItems(aurore::AlignItems::STRETCH);
             table->setThemeColor("backgroundColor", "cadran/surf2");
             table->setCornerRadius(kit::RADIUS_ROW);
             table->setPadding(12, 20, 12, 20);
             table->setMarginTop(body->getChildren().empty() ? 0 : 18);
             for (size_t i = 0; i < rows.size(); i++)
             {
-                auto* row = new brls::Box(brls::Axis::ROW);
-                row->setAlignItems(brls::AlignItems::CENTER);
+                auto* row = new aurore::Box(aurore::Axis::ROW);
+                row->setAlignItems(aurore::AlignItems::CENTER);
                 row->setPaddingTop(7);
                 row->setPaddingBottom(7);
                 if (i + 1 < rows.size())
@@ -242,13 +242,13 @@ brls::Box* cadran::dialog_body(const std::string& text)
                     row->setLineBottom(1);
                     row->setThemeColor("lineColor", "cadran/line");
                 }
-                brls::Label* key = kit::label(rows[i].first, kit::TEXT_BODY, "cadran/text2");
+                aurore::Label* key = kit::label(rows[i].first, kit::TEXT_BODY, "cadran/text2");
                 key->setGrow(1.0f);
                 key->setWidth(0);
                 key->setMarginRight(16);
                 row->addView(key);
-                brls::Label* value = kit::label(rows[i].second, kit::TEXT_BODY, "cadran/text");
-                value->setHorizontalAlign(brls::HorizontalAlign::RIGHT);
+                aurore::Label* value = kit::label(rows[i].second, kit::TEXT_BODY, "cadran/text");
+                value->setHorizontalAlign(aurore::HorizontalAlign::RIGHT);
                 value->setMaxWidth(300);
                 value->setShrink(0);
                 row->addView(value);
@@ -257,7 +257,7 @@ brls::Box* cadran::dialog_body(const std::string& text)
             body->addView(table);
             continue;
         }
-        brls::Label* label = kit::label(paragraph, kit::TEXT_LEAD, "cadran/text2");
+        aurore::Label* label = kit::label(paragraph, kit::TEXT_LEAD, "cadran/text2");
         label->setMarginTop(body->getChildren().empty() ? 0 : 14);
         body->addView(label);
     }
@@ -269,8 +269,8 @@ brls::Box* cadran::dialog_body(const std::string& text)
     {
         if (!note.warn)
             continue;
-        auto* card = new brls::Box(brls::Axis::ROW);
-        card->setAlignItems(brls::AlignItems::FLEX_START);
+        auto* card = new aurore::Box(aurore::Axis::ROW);
+        card->setAlignItems(aurore::AlignItems::FLEX_START);
         card->setThemeColor("backgroundColor", "cadran/amber_surf");
         card->setThemeColor("borderColor", "cadran/amber_line");
         card->setBorderThickness(1);
@@ -282,7 +282,7 @@ brls::Box* cadran::dialog_body(const std::string& text)
         icon->setMarginRight(12);
         icon->setShrink(0);
         card->addView(icon);
-        brls::Label* label = kit::label(note.text, 17, "cadran/amber");
+        aurore::Label* label = kit::label(note.text, 17, "cadran/amber");
         label->setGrow(1.0f);
         label->setWidth(0);
         card->addView(label);
@@ -296,8 +296,8 @@ brls::Box* cadran::dialog_body(const std::string& text)
         body->getChildren()[at]->setMarginTop(14);
     for (size_t i = 0; i < notes.size(); i++)
     {
-        auto* row = new brls::Box(brls::Axis::ROW);
-        row->setAlignItems(brls::AlignItems::FLEX_START);
+        auto* row = new aurore::Box(aurore::Axis::ROW);
+        row->setAlignItems(aurore::AlignItems::FLEX_START);
         if (i == 0 && !body->getChildren().empty())
         {
             row->setMarginTop(20);
@@ -314,7 +314,7 @@ brls::Box* cadran::dialog_body(const std::string& text)
         icon->setMarginRight(12);
         icon->setShrink(0);
         row->addView(icon);
-        brls::Label* label = kit::label(notes[i].text, 16, notes[i].warn ? "cadran/amber" : "cadran/text2");
+        aurore::Label* label = kit::label(notes[i].text, 16, notes[i].warn ? "cadran/amber" : "cadran/text2");
         label->setGrow(1.0f);
         label->setWidth(0);
         row->addView(label);
@@ -324,90 +324,90 @@ brls::Box* cadran::dialog_body(const std::string& text)
     // keep their height there. A label offered less than its wrapped text
     // needs draws one cut line, and borealis caps a label at its parent's
     // height (100 %), which a scrolling body does not settle before it.
-    std::function<void(brls::View*)> unbounded = [&unbounded](brls::View* view)
+    std::function<void(aurore::View*)> unbounded = [&unbounded](aurore::View* view)
     {
         view->setShrink(0);
-        if (dynamic_cast<brls::Label*>(view))
+        if (dynamic_cast<aurore::Label*>(view))
             YGNodeStyleSetMaxHeight(view->getYGNode(), YGUndefined);
-        if (auto* box = dynamic_cast<brls::Box*>(view))
-            for (brls::View* child : box->getChildren())
+        if (auto* box = dynamic_cast<aurore::Box*>(view))
+            for (aurore::View* child : box->getChildren())
                 unbounded(child);
     };
-    for (brls::View* child : body->getChildren())
+    for (aurore::View* child : body->getChildren())
         unbounded(child);
     return body;
 }
 
-brls::Label* cadran::dialog_title(const std::string& text)
+aurore::Label* cadran::dialog_title(const std::string& text)
 {
     return cadran::kit::display(text, cadran::kit::TEXT_TITLE);
 }
 
-brls::Box* cadran::dialog_badge(const char* icon, const char* color_key, const char* soft_key)
+aurore::Box* cadran::dialog_badge(const char* icon, const char* color_key, const char* soft_key)
 {
-    auto* badge = new brls::Box(brls::Axis::ROW);
+    auto* badge = new aurore::Box(aurore::Axis::ROW);
     badge->setWidth(44);
     badge->setHeight(44);
     badge->setShrink(0);
     badge->setCornerRadius(22);
     badge->setThemeColor("backgroundColor", soft_key);
-    badge->setAlignItems(brls::AlignItems::CENTER);
-    badge->setJustifyContent(brls::JustifyContent::CENTER);
+    badge->setAlignItems(aurore::AlignItems::CENTER);
+    badge->setJustifyContent(aurore::JustifyContent::CENTER);
     badge->addView(cadran::kit::icon(icon, 22, color_key));
     return badge;
 }
 
-void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
+void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
 {
     if (!dialog || dialog->getView("cadran_dialog"))
         return;
-    brls::AppletFrame* card = dialog->getAppletFrame();
+    aurore::AppletFrame* card = dialog->getAppletFrame();
     card->setCornerRadius(kit::RADIUS_MODAL);
     card->setThemeColor("backgroundColor", "cadran/surf");
     card->setThemeColor("borderColor", "cadran/line");
     card->setBorderThickness(1);
-    auto* mark = new brls::Box();
+    auto* mark = new aurore::Box();
     mark->setId("cadran_dialog");
-    mark->setVisibility(brls::Visibility::GONE);
+    mark->setVisibility(aurore::Visibility::GONE);
     card->addView(mark);
     // Something removed or stopped: a coral warning before the title (above
     // the text when it has none).
-    auto* head       = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_head"));
-    auto* body       = dynamic_cast<brls::Box*>(dialog->getView("cadran_dialog_body"));
+    auto* head       = dynamic_cast<aurore::Box*>(dialog->getView("cadran_dialog_head"));
+    auto* body       = dynamic_cast<aurore::Box*>(dialog->getView("cadran_dialog_body"));
     const bool warns = emphasis == Emphasis::DANGER || emphasis == Emphasis::FAILURE;
     if (warns && !head && body)
     {
-        head = new brls::Box(brls::Axis::ROW);
+        head = new aurore::Box(aurore::Axis::ROW);
         head->setMarginBottom(14);
         body->addView(head, 0);
     }
     if (warns && head)
     {
-        auto* badge = new brls::Box(brls::Axis::ROW);
+        auto* badge = new aurore::Box(aurore::Axis::ROW);
         badge->setWidth(44);
         badge->setHeight(44);
         badge->setShrink(0);
         badge->setCornerRadius(22);
         badge->setThemeColor("backgroundColor", "cadran/coral_soft");
-        badge->setAlignItems(brls::AlignItems::CENTER);
-        badge->setJustifyContent(brls::JustifyContent::CENTER);
+        badge->setAlignItems(aurore::AlignItems::CENTER);
+        badge->setJustifyContent(aurore::JustifyContent::CENTER);
         badge->setMarginRight(16);
         badge->addView(cadran::kit::icon("alert", 22, "cadran/coral"));
         head->addView(badge, 0);
     }
 
     // borealis' order: button3 alone above, button1 and button2 in a row.
-    brls::Button* b1     = button(dialog, "brls/dialog/button1");
-    brls::Button* b2     = button(dialog, "brls/dialog/button2");
-    brls::Button* b3     = button(dialog, "brls/dialog/button3");
-    brls::Button* last   = b3 ? b3 : b2 ? b2
+    aurore::Button* b1   = button(dialog, "brls/dialog/button1");
+    aurore::Button* b2   = button(dialog, "brls/dialog/button2");
+    aurore::Button* b3   = button(dialog, "brls/dialog/button3");
+    aurore::Button* last = b3 ? b3 : b2 ? b2
                                         : b1;
     const std::string ok = "hints/ok"_i18n;
-    for (brls::Button* b : { b1, b2, b3 })
+    for (aurore::Button* b : { b1, b2, b3 })
     {
         if (!b)
             continue;
-        const brls::ButtonStyle* look = &PLAIN;
+        const aurore::ButtonStyle* look = &PLAIN;
         if (b == last && emphasis == Emphasis::PRIMARY)
             look = &PRIMARY;
         else if (b == last && emphasis == Emphasis::DANGER)
@@ -416,7 +416,7 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
             look = &PRIMARY;
         pill(b, look);
         // A says what the focused button does ("A Cancel"), not borealis' "OK".
-        b->updateActionHint(brls::BUTTON_A, b->getText());
+        b->updateActionHint(aurore::BUTTON_A, b->getText());
     }
     hide(dialog, "brls/dialog/button2/separator");
     hide(dialog, "brls/dialog/button3/separator");
@@ -427,7 +427,7 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
         b3->setHeight(PILL);
         b3->setMargins(0, 24, 12, 24);
     }
-    if (brls::Box* row = b1 ? b1->getParent() : nullptr)
+    if (aurore::Box* row = b1 ? b1->getParent() : nullptr)
     {
         row->setLineTop(0);
         row->setHeight(DIALOG_BUTTONS);
@@ -435,53 +435,53 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
     }
 }
 
-void cadran::style_edit_text_dialog(brls::EditTextDialog* dialog)
+void cadran::style_edit_text_dialog(aurore::EditTextDialog* dialog)
 {
-    auto* card = dialog ? dynamic_cast<brls::Box*>(dialog->getView("brls/dialog/applet")) : nullptr;
+    auto* card = dialog ? dynamic_cast<aurore::Box*>(dialog->getView("brls/dialog/applet")) : nullptr;
     if (!card || dialog->getView("cadran_dialog"))
         return;
     card->setCornerRadius(kit::RADIUS_MODAL);
     card->setThemeColor("backgroundColor", "cadran/surf");
     card->setThemeColor("borderColor", "cadran/line");
     card->setBorderThickness(1);
-    auto* mark = new brls::Box();
+    auto* mark = new aurore::Box();
     mark->setId("cadran_dialog");
-    mark->setVisibility(brls::Visibility::GONE);
+    mark->setVisibility(aurore::Visibility::GONE);
     card->addView(mark);
     // The title in the card, over the text, where it stood above the card
-    auto* title = dynamic_cast<brls::Label*>(dialog->getView("brls/dialog/header"));
-    auto* above = title && title->hasParent() ? dynamic_cast<brls::Box*>(title->getParent()) : nullptr;
+    auto* title = dynamic_cast<aurore::Label*>(dialog->getView("brls/dialog/header"));
+    auto* above = title && title->hasParent() ? dynamic_cast<aurore::Box*>(title->getParent()) : nullptr;
     if (above && above != card)
     {
         card->setMarginTop(YGNodeStyleGetMargin(title->getYGNode(), YGEdgeTop).value);
         above->removeView(title, false);
         title->setMargins(24, 20, 0, 20);
-        title->setAlignSelf(brls::AlignSelf::FLEX_START);
+        title->setAlignSelf(aurore::AlignSelf::FLEX_START);
         title->setFontSize(kit::TEXT_TITLE);
         title->setThemeColor("textColor", "cadran/text");
         card->addView(title, 0);
     }
 }
 
-void cadran::style_button(brls::Button* button, Emphasis emphasis)
+void cadran::style_button(aurore::Button* button, Emphasis emphasis)
 {
     pill(button, emphasis == Emphasis::PRIMARY ? &PRIMARY : emphasis == Emphasis::DANGER ? &DANGER
                                                                                          : &PLAIN);
     button->setHeight(PILL);
 }
 
-brls::Box* cadran::wait_body(const std::string& text)
+aurore::Box* cadran::wait_body(const std::string& text)
 {
-    auto* spinner = new brls::ProgressSpinner(brls::ProgressSpinnerSize::LARGE);
+    auto* spinner = new aurore::ProgressSpinner(aurore::ProgressSpinnerSize::LARGE);
     spinner->setWidth(60);
     spinner->setHeight(60);
     spinner->setMarginBottom(24);
-    brls::Label* label = kit::label(text, kit::TEXT_LEAD, "cadran/text");
-    label->setHorizontalAlign(brls::HorizontalAlign::CENTER);
-    label->setAlignSelf(brls::AlignSelf::STRETCH);
-    auto* box = new brls::Box(brls::Axis::COLUMN);
-    box->setAlignItems(brls::AlignItems::CENTER);
-    box->setJustifyContent(brls::JustifyContent::CENTER);
+    aurore::Label* label = kit::label(text, kit::TEXT_LEAD, "cadran/text");
+    label->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
+    label->setAlignSelf(aurore::AlignSelf::STRETCH);
+    auto* box = new aurore::Box(aurore::Axis::COLUMN);
+    box->setAlignItems(aurore::AlignItems::CENTER);
+    box->setJustifyContent(aurore::JustifyContent::CENTER);
     box->setPadding(40, 40, 32, 40);
     box->addView(spinner);
     box->addView(label);
@@ -499,20 +499,20 @@ void cadran::Progress::show(float fraction, const std::string& text)
 cadran::Progress cadran::progress_body(const std::string& heading, const std::string& title, const std::string& note)
 {
     Progress p;
-    p.box = new brls::Box(brls::Axis::COLUMN);
-    p.box->setAlignItems(brls::AlignItems::STRETCH);
+    p.box = new aurore::Box(aurore::Axis::COLUMN);
+    p.box->setAlignItems(aurore::AlignItems::STRETCH);
     p.box->setPadding(26, 36, 20, 36);
 
-    auto* head = new brls::Box(brls::Axis::ROW);
-    head->setAlignItems(brls::AlignItems::CENTER);
-    p.image = new brls::Image();
-    p.image->setScalingType(brls::ImageScalingType::FIT);
+    auto* head = new aurore::Box(aurore::Axis::ROW);
+    head->setAlignItems(aurore::AlignItems::CENTER);
+    p.image = new aurore::Image();
+    p.image->setScalingType(aurore::ImageScalingType::FIT);
     p.image->setWidth(56);
     p.image->setHeight(56);
     p.image->setMarginRight(16);
     ui::set_visible(p.image, false);
     head->addView(p.image);
-    auto* titles = new brls::Box(brls::Axis::COLUMN);
+    auto* titles = new aurore::Box(aurore::Axis::COLUMN);
     titles->setGrow(1.0f);
     titles->setShrink(1.0f);
     p.heading = kit::label(heading, 18, "cadran/text3");
@@ -527,8 +527,8 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
     p.bar = new kit::Bar();
     p.bar->setMarginTop(22);
     p.box->addView(p.bar);
-    auto* numbers = new brls::Box(brls::Axis::ROW);
-    numbers->setAlignItems(brls::AlignItems::CENTER);
+    auto* numbers = new aurore::Box(aurore::Axis::ROW);
+    numbers->setAlignItems(aurore::AlignItems::CENTER);
     numbers->setMarginTop(10);
     p.percent = kit::label("", 22, "cadran/text");
     p.percent->setSingleLine(true);
@@ -538,13 +538,13 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
     p.detail->setSingleLine(true);
     p.detail->setGrow(1.0f);
     p.detail->setShrink(1.0f);
-    p.detail->setHorizontalAlign(brls::HorizontalAlign::RIGHT);
+    p.detail->setHorizontalAlign(aurore::HorizontalAlign::RIGHT);
     numbers->addView(p.detail);
     p.box->addView(numbers);
 
     if (!note.empty())
     {
-        brls::Label* label = kit::label(note, 18, "cadran/text3");
+        aurore::Label* label = kit::label(note, 18, "cadran/text3");
         label->setMarginTop(16);
         p.box->addView(label);
     }
@@ -562,11 +562,11 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     while (first + 1 < times.size() && times[first] < initial)
         first++;
     auto at    = std::make_shared<size_t>(first);
-    auto* body = new brls::Box(brls::Axis::COLUMN);
-    body->setAlignItems(brls::AlignItems::CENTER);
+    auto* body = new aurore::Box(aurore::Axis::COLUMN);
+    body->setAlignItems(aurore::AlignItems::CENTER);
     body->setPadding(30, 40, 22, 40);
-    brls::Label* title = kit::display(header, kit::TEXT_TITLE);
-    title->setHorizontalAlign(brls::HorizontalAlign::CENTER);
+    aurore::Label* title = kit::display(header, kit::TEXT_TITLE);
+    title->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
     body->addView(title);
     CadranIcon* up = kit::icon("caret-up", 30, "cadran/teal");
     up->setMarginTop(18);
@@ -582,30 +582,30 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     body->addView(down);
     // The keys: the arrows a step, L and R an hour, Y the other way to
     // choose.
-    auto* keys = new brls::Box(brls::Axis::ROW);
-    keys->setAlignItems(brls::AlignItems::CENTER);
+    auto* keys = new aurore::Box(aurore::Axis::ROW);
+    keys->setAlignItems(aurore::AlignItems::CENTER);
     keys->setMarginTop(16);
     const auto key = [](const char* letter)
     {
-        brls::Box* bubble = kit::key(letter);
+        aurore::Box* bubble = kit::key(letter);
         bubble->setMarginRight(4);
         return bubble;
     };
     keys->addView(kit::icon("caret-up", 18, "cadran/text3"));
     keys->addView(kit::icon("caret-down", 18, "cadran/text3"));
-    const int step_min     = times.size() > 1 ? std::max(1, times[1] - times[0]) : 15;
-    brls::Label* step_text = kit::label(ui::fmt_minutes((uint32_t)step_min), 16, "cadran/text3");
+    const int step_min       = times.size() > 1 ? std::max(1, times[1] - times[0]) : 15;
+    aurore::Label* step_text = kit::label(ui::fmt_minutes((uint32_t)step_min), 16, "cadran/text3");
     step_text->setMarginLeft(6);
     step_text->setMarginRight(22);
     keys->addView(step_text);
     keys->addView(key("L"));
     keys->addView(key("R"));
     keys->addView(kit::label(ui::fmt_minutes(60), 16, "cadran/text3"));
-    brls::Box* other_key = nullptr;
+    aurore::Box* other_key = nullptr;
     if (other.action)
     {
-        other_key = new brls::Box(brls::Axis::ROW);
-        other_key->setAlignItems(brls::AlignItems::CENTER);
+        other_key = new aurore::Box(aurore::Axis::ROW);
+        other_key->setAlignItems(aurore::AlignItems::CENTER);
         other_key->setMarginLeft(22);
         other_key->addView(key("Y"));
         other_key->addView(kit::label(other.label, 16, "cadran/text3"));
@@ -613,41 +613,41 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     }
     body->addView(keys);
 
-    auto* dialog    = new brls::Dialog(body);
+    auto* dialog    = new aurore::Dialog(body);
     const auto move = [at, value, times, text](int delta)
     {
         *at = (size_t)std::max(0, std::min((int)times.size() - 1, (int)*at + delta));
         value->setText(text(times[*at]));
     };
-    const int per_hour = std::max(1, 60 / step_min);
-    brls::View* frame  = dialog->getAppletFrame();
-    for (const auto& [button, delta] : { std::pair<brls::ControllerButton, int> { brls::BUTTON_NAV_UP, 1 },
-             { brls::BUTTON_NAV_DOWN, -1 }, { brls::BUTTON_RB, per_hour },
-             { brls::BUTTON_LB, -per_hour } })
-        frame->registerAction("", button, [move, delta = delta](brls::View*)
+    const int per_hour  = std::max(1, 60 / step_min);
+    aurore::View* frame = dialog->getAppletFrame();
+    for (const auto& [button, delta] : { std::pair<aurore::ControllerButton, int> { aurore::BUTTON_NAV_UP, 1 },
+             { aurore::BUTTON_NAV_DOWN, -1 }, { aurore::BUTTON_RB, per_hour },
+             { aurore::BUTTON_LB, -per_hour } })
+        frame->registerAction("", button, [move, delta = delta](aurore::View*)
             {
             move(delta);
-            return true; }, true, true, brls::SOUND_FOCUS_CHANGE);
-    up->addGestureRecognizer(new brls::TapGestureRecognizer(up, [move]()
+            return true; }, true, true, aurore::SOUND_FOCUS_CHANGE);
+    up->addGestureRecognizer(new aurore::TapGestureRecognizer(up, [move]()
         { move(1); }));
-    down->addGestureRecognizer(new brls::TapGestureRecognizer(down, [move]()
+    down->addGestureRecognizer(new aurore::TapGestureRecognizer(down, [move]()
         { move(-1); }));
     if (other.action)
     {
         const auto open_other = [dialog, action = other.action]()
         { dialog->close(action); };
-        frame->registerAction(other.label, brls::BUTTON_Y, [open_other](brls::View*)
+        frame->registerAction(other.label, aurore::BUTTON_Y, [open_other](aurore::View*)
             {
             open_other();
             return true; });
 #if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
         // The desktop build: the keyboard has no Ⓨ, so the Y key (as the main screen).
-        frame->registerAction(brls::BrlsKeyCombination(brls::BRLS_KBD_KEY_Y), [open_other](brls::View*)
+        frame->registerAction(aurore::AuroreKeyCombination(aurore::BRLS_KBD_KEY_Y), [open_other](aurore::View*)
             {
             open_other();
             return true; });
 #endif
-        other_key->addGestureRecognizer(new brls::TapGestureRecognizer(other_key, open_other));
+        other_key->addGestureRecognizer(new aurore::TapGestureRecognizer(other_key, open_other));
     }
     if (off.action)
         dialog->addButton(off.label, off.action);
@@ -659,12 +659,12 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     dialog->setCancelable(true);
     style_dialog(dialog, Emphasis::PRIMARY);
     // A time is set, then confirmed: A right after the arrows is OK.
-    if (brls::View* ok = dialog->getView("brls/dialog/button2"))
+    if (aurore::View* ok = dialog->getView("brls/dialog/button2"))
         dialog->setLastFocusedView(ok);
     dialog->open();
 }
 
-brls::View* cadran::toast_icon(bool done)
+aurore::View* cadran::toast_icon(bool done)
 {
     CadranIcon* icon = cadran::kit::icon(done ? "check" : "alert", 22, done ? "cadran/teal_fill" : "cadran/amber_fill");
     icon->setMarginRight(14);

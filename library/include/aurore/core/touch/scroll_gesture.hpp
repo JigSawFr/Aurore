@@ -18,7 +18,7 @@
 
 #include <aurore/core/touch/pan_gesture.hpp>
 
-namespace brls
+namespace aurore
 {
 
 /*
@@ -40,4 +40,4 @@ class ScrollGestureRecognizer : public PanGestureRecognizer
     GestureState recognitionLoop(TouchState touch, MouseState mouse, View* view, Sound* soundToPlay) override;
 };
 
-} // namespace brls
+} // namespace aurore

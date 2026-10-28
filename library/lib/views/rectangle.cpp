@@ -18,7 +18,7 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/views/rectangle.hpp>
 
-namespace brls
+namespace aurore
 {
 
 Rectangle::Rectangle(NVGcolor color)
@@ -90,4 +90,4 @@ View* Rectangle::create()
     return new Rectangle();
 }
 
-} // namespace brls
+} // namespace aurore

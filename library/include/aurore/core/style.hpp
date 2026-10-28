@@ -22,7 +22,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace brls
+namespace aurore
 {
 
 /// The metrics (sizes, margins, durations) by name, "brls/sidebar/width"…: the ones
@@ -74,4 +74,4 @@ class Style
 /// The app's metrics: what XML reads with `@style/…`.
 Style getStyle();
 
-} // namespace brls
+} // namespace aurore

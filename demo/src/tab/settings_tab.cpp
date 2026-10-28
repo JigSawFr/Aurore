@@ -20,7 +20,7 @@
 #include <aurore/cadran/ui/prefs.hpp>
 #include <aurore/cadran/ui/ui.hpp>
 
-using namespace brls::literals; // for _i18n
+using namespace aurore::literals; // for _i18n
 
 bool radioSelected = false;
 
@@ -29,7 +29,7 @@ static std::vector<std::string> options(int count)
 {
     std::vector<std::string> names;
     for (int i = 1; i <= count; i++)
-        names.push_back(brls::getStr("demo/components_more/option", i));
+        names.push_back(aurore::getStr("demo/components_more/option", i));
     return names;
 }
 
@@ -52,7 +52,7 @@ SettingsTab::SettingsTab()
 
     radio->title->setText("demo/settings/radio"_i18n);
     radio->setSelected(radioSelected);
-    radio->registerClickAction([this](brls::View* view)
+    radio->registerClickAction([this](aurore::View* view)
         {
         radioSelected = !radioSelected;
         this->radio->setSelected(radioSelected);
@@ -60,40 +60,40 @@ SettingsTab::SettingsTab()
 
     boolean->title->setText("demo/settings/switch"_i18n);
 
-    debug->init("demo/settings/debug"_i18n, brls::Application::isDebuggingViewEnabled(), [](bool value)
+    debug->init("demo/settings/debug"_i18n, aurore::Application::isDebuggingViewEnabled(), [](bool value)
         {
-        brls::Application::enableDebuggingView(value);
-        brls::sync([value](){
-            brls::Logger::info("{} the debug layer", value ? "Open" : "Close");
+        aurore::Application::enableDebuggingView(value);
+        aurore::sync([value](){
+            aurore::Logger::info("{} the debug layer", value ? "Open" : "Close");
         }); });
 
-    screenSaver->init("demo/settings/screensaver"_i18n, brls::Application::getPlatform()->isScreenDimmingDisabled(), [](bool value)
-        { brls::Application::getPlatform()->disableScreenDimming(value); });
+    screenSaver->init("demo/settings/screensaver"_i18n, aurore::Application::getPlatform()->isScreenDimmingDisabled(), [](bool value)
+        { aurore::Application::getPlatform()->disableScreenDimming(value); });
 
-    bottomBar->init("demo/settings/bottom_bar"_i18n, !brls::AppletFrame::HIDE_BOTTOM_BAR, [](bool value)
+    bottomBar->init("demo/settings/bottom_bar"_i18n, !aurore::AppletFrame::HIDE_BOTTOM_BAR, [](bool value)
         {
-        brls::AppletFrame::HIDE_BOTTOM_BAR = !value;
-        auto stack = brls::Application::getActivitiesStack();
+        aurore::AppletFrame::HIDE_BOTTOM_BAR = !value;
+        auto stack = aurore::Application::getActivitiesStack();
         for (auto& activity : stack) {
-            auto* frame = dynamic_cast<brls::AppletFrame*>(
+            auto* frame = dynamic_cast<aurore::AppletFrame*>(
                 activity->getContentView());
             if (!frame) continue;
-            frame->setFooterVisibility(!value ? brls::Visibility::GONE
-                                             : brls::Visibility::VISIBLE);
+            frame->setFooterVisibility(!value ? aurore::Visibility::GONE
+                                             : aurore::Visibility::VISIBLE);
         } });
 
-    fps->init("demo/settings/fps"_i18n, brls::Application::getFPSStatus(), [](bool value)
-        { brls::Application::setFPSStatus(value); });
+    fps->init("demo/settings/fps"_i18n, aurore::Application::getFPSStatus(), [](bool value)
+        { aurore::Application::setFPSStatus(value); });
 
     swapInterval->init("demo/settings/swap_interval"_i18n, { "0", "1", "2", "3", "4" }, 1, [](int selected) {}, [](int selected)
-        { brls::Application::setSwapInterval(selected); });
+        { aurore::Application::setSwapInterval(selected); });
 
     alwaysOnTop->init("demo/settings/always_on_top"_i18n, false, [](bool value)
-        { brls::Application::getPlatform()->setWindowAlwaysOnTop(value); });
+        { aurore::Application::getPlatform()->setWindowAlwaysOnTop(value); });
 
     selector->init("demo/settings/selector"_i18n, options(13), 0, [](int selected) {}, [](int selected)
         {
-        auto dialog = new brls::Dialog(brls::getStr("demo/settings/selected", selected + 1));
+        auto dialog = new aurore::Dialog(aurore::getStr("demo/settings/selected", selected + 1));
         dialog->addButton("hints/ok"_i18n, []() {});
         dialog->open(); });
 
@@ -109,26 +109,26 @@ SettingsTab::SettingsTab()
         },
         "demo/settings/input_hint"_i18n);
 
-    ipAddress->setDetailText(brls::Application::getPlatform()->getIpAddress());
-    dnsServer->setDetailText(brls::Application::getPlatform()->getDnsServer());
+    ipAddress->setDetailText(aurore::Application::getPlatform()->getIpAddress());
+    dnsServer->setDetailText(aurore::Application::getPlatform()->getDnsServer());
 
-    input->registerAction("hints/open"_i18n, brls::BUTTON_X, [](brls::View* view)
+    input->registerAction("hints/open"_i18n, aurore::BUTTON_X, [](aurore::View* view)
         {
-        brls::DetailCell *cell = dynamic_cast<brls::DetailCell *>(view);
-        brls::Application::getPlatform()->openBrowser(cell->detail->getFullText());
-        return true; }, false, false, brls::SOUND_CLICK);
+        aurore::DetailCell *cell = dynamic_cast<aurore::DetailCell *>(view);
+        aurore::Application::getPlatform()->openBrowser(cell->detail->getFullText());
+        return true; }, false, false, aurore::SOUND_CLICK);
 
-    float brightness = brls::Application::getPlatform()->getBacklightBrightness();
+    float brightness = aurore::Application::getPlatform()->getBacklightBrightness();
     slider->init("demo/settings/brightness"_i18n, brightness, [this](float value)
         {
-        brls::Application::getPlatform()->setBacklightBrightness(value);
+        aurore::Application::getPlatform()->setBacklightBrightness(value);
         slider->setDetailText(fmt::format("{:.2f}", value)); });
     slider->setDetailText(fmt::format("{:.2f}", brightness));
 
     notify->registerClickAction([](...)
         {
         std::string notification = NOTIFICATIONS[std::rand() % NOTIFICATIONS.size()];
-        brls::Application::notify(notification);
+        aurore::Application::notify(notification);
         return true; });
 
     // The variant and the theme file go through Cadran's preferences, as
@@ -143,30 +143,30 @@ SettingsTab::SettingsTab()
 
 void SettingsTab::listThemes()
 {
-    std::vector<brls::ThemeInfo> files = brls::Theme::builtinThemes();
-    for (brls::ThemeInfo& info : brls::Theme::listThemes("@res/themes"))
+    std::vector<aurore::ThemeInfo> files = aurore::Theme::builtinThemes();
+    for (aurore::ThemeInfo& info : aurore::Theme::listThemes("@res/themes"))
         files.push_back(std::move(info));
 
-    brls::ThemeInfo none;
+    aurore::ThemeInfo none;
     none.name  = "demo/settings/default_theme"_i18n;
     none.light = none.dark = true;
     files.insert(files.begin(), none);
 
-    for (const brls::ThemeInfo& info : files)
+    for (const aurore::ThemeInfo& info : files)
     {
-        auto* cell = new brls::DetailCell();
+        auto* cell = new aurore::DetailCell();
         cell->setText(info.author.empty() ? info.name : info.name + "  ·  " + info.author);
 
         // Its colours, as it draws the variant it shows first
         if (!info.path.empty())
         {
-            const brls::ThemeInfo::Preview& preview = info.dark ? info.darkPreview : info.lightPreview;
-            auto* swatches                          = new brls::Box(brls::Axis::ROW);
+            const aurore::ThemeInfo::Preview& preview = info.dark ? info.darkPreview : info.lightPreview;
+            auto* swatches                            = new aurore::Box(aurore::Axis::ROW);
             swatches->setMarginRight(16);
             for (NVGcolor color : { preview.background, preview.surface, preview.text, preview.accent, preview.highlight })
             {
-                auto* swatch = new brls::Rectangle(color);
-                swatch->setSize(brls::Size(22, 22));
+                auto* swatch = new aurore::Rectangle(color);
+                swatch->setSize(aurore::Size(22, 22));
                 swatch->setCornerRadius(11);
                 swatch->setMarginLeft(6);
                 swatch->setBorderThickness(1);
@@ -177,18 +177,18 @@ void SettingsTab::listThemes()
         }
 
         if (!info.ok())
-            cell->setDetailText(brls::getStr("demo/settings/errors", info.errors.size(), info.errors.front()));
+            cell->setDetailText(aurore::getStr("demo/settings/errors", info.errors.size(), info.errors.front()));
         else if (!info.warnings.empty())
-            cell->setDetailText(brls::getStr("demo/settings/warnings", info.warnings.size()));
+            cell->setDetailText(aurore::getStr("demo/settings/warnings", info.warnings.size()));
 
         std::string path = info.path;
-        cell->registerClickAction([this, path](brls::View*)
+        cell->registerClickAction([this, path](aurore::View*)
             {
             ui::prefs().theme_file = path;
             live_prefs::apply_theme();
             for (auto& [line, file] : this->themeCells)
                 line->setDetailText(file == path ? "demo/settings/active"_i18n : "");
-            this->themeDark->setOn(brls::Application::getThemeVariant() == brls::ThemeVariant::DARK, false);
+            this->themeDark->setOn(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK, false);
             return true; });
         if (info.path == ui::prefs().theme_file)
             cell->setDetailText("demo/settings/active"_i18n);
@@ -197,7 +197,7 @@ void SettingsTab::listThemes()
     }
 }
 
-brls::View* SettingsTab::create()
+aurore::View* SettingsTab::create()
 {
     return new SettingsTab();
 }

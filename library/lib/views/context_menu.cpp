@@ -24,9 +24,9 @@
 #include <aurore/views/image.hpp>
 #include <aurore/views/rectangle.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 namespace
@@ -274,4 +274,4 @@ void ContextMenu::attach(View* view, std::function<void(ContextMenu* menu)> fill
             show(); }));
 }
 
-} // namespace brls
+} // namespace aurore

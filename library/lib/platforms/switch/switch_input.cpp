@@ -17,7 +17,7 @@
 #include <aurore/core/application.hpp>
 #include <aurore/platforms/switch/switch_input.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static const uint64_t HidNpadButton_None = ((uint64_t)1 << (63));
@@ -298,9 +298,9 @@ void SwitchInputManager::updateControllerStateInner(ControllerState* state, PadS
     state->axes[RIGHT_Z] = 0; // SWITCH NOT SUPPORT ZR AXIS
 }
 
-bool SwitchInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
+bool SwitchInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
-    return m_hid_keyboard_state[m_brls_hid_map[key]];
+    return m_hid_keyboard_state[m_aurore_hid_map[key]];
 }
 
 void SwitchInputManager::updateTouchStates(std::vector<RawTouchState>* states)
@@ -428,11 +428,11 @@ void SwitchInputManager::handleKeyboard()
             auto is_pressed = (state.keys[i / 64] & (1ul << (i % 64))) != 0;
             if (m_hid_keyboard_state[i] != is_pressed)
             {
-                m_hid_keyboard_state[i]            = is_pressed;
-                const BrlsKeyboardScancode brlsKey = m_hid_brls_map[i];
+                m_hid_keyboard_state[i]                = is_pressed;
+                const AuroreKeyboardScancode auroreKey = m_hid_aurore_map[i];
 
                 KeyState keyState {};
-                keyState.key     = brlsKey;
+                keyState.key     = auroreKey;
                 keyState.pressed = is_pressed;
 
                 if (state.modifiers & HidKeyboardModifier_LeftAlt)
@@ -541,23 +541,23 @@ void SwitchInputManager::initCursor(NVGcontext* vg)
     }
 }
 
-static BrlsKeyboardScancode hidKey2BrlsKey(int key)
+static AuroreKeyboardScancode hidKey2AuroreKey(int key)
 {
     if (KBD_A <= key && key <= KBD_Z)
     {
-        return (BrlsKeyboardScancode)(key - KBD_A + BRLS_KBD_KEY_A);
+        return (AuroreKeyboardScancode)(key - KBD_A + BRLS_KBD_KEY_A);
     }
     if (KBD_1 <= key && key <= KBD_9)
     {
-        return (BrlsKeyboardScancode)(key - KBD_1 + BRLS_KBD_KEY_1);
+        return (AuroreKeyboardScancode)(key - KBD_1 + BRLS_KBD_KEY_1);
     }
     if (KBD_F1 <= key && key <= KBD_F12)
     {
-        return (BrlsKeyboardScancode)(key - KBD_F1 + BRLS_KBD_KEY_F1);
+        return (AuroreKeyboardScancode)(key - KBD_F1 + BRLS_KBD_KEY_F1);
     }
     if (KBD_KP1 <= key && key <= KBD_KP9)
     {
-        return (BrlsKeyboardScancode)(key - KBD_KP1 + BRLS_KBD_KEY_KP_1);
+        return (AuroreKeyboardScancode)(key - KBD_KP1 + BRLS_KBD_KEY_KP_1);
     }
 
     switch (key)
@@ -670,17 +670,17 @@ static BrlsKeyboardScancode hidKey2BrlsKey(int key)
 
 void SwitchInputManager::hidInitializeKeyboardMap()
 {
-    m_hid_brls_map[KBD_NONE]             = BRLS_KBD_KEY_UNKNOWN;
-    m_brls_hid_map[BRLS_KBD_KEY_UNKNOWN] = KBD_NONE;
+    m_hid_aurore_map[KBD_NONE]             = BRLS_KBD_KEY_UNKNOWN;
+    m_aurore_hid_map[BRLS_KBD_KEY_UNKNOWN] = KBD_NONE;
 
     for (int i = 0; i < 256; ++i)
     {
-        const auto brlsKey = hidKey2BrlsKey(i);
-        if (brlsKey == BRLS_KBD_KEY_UNKNOWN)
+        const auto auroreKey = hidKey2AuroreKey(i);
+        if (auroreKey == BRLS_KBD_KEY_UNKNOWN)
             continue;
-        m_hid_brls_map[i]       = brlsKey;
-        m_brls_hid_map[brlsKey] = i;
+        m_hid_aurore_map[i]         = auroreKey;
+        m_aurore_hid_map[auroreKey] = i;
     }
 }
 
-} // namespace brls
+} // namespace aurore

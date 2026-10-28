@@ -11,18 +11,18 @@ static constexpr const char* BADGE_ID = "version_badge";
 static constexpr const char* TOOLS_ID = "header_tools";
 
 VersionBadge::VersionBadge()
-    : brls::Box(brls::Axis::ROW)
+    : aurore::Box(aurore::Axis::ROW)
 {
     this->setId(BADGE_ID);
     this->setFocusable(false);
-    this->setAlignItems(brls::AlignItems::CENTER);
-    this->setAlignSelf(brls::AlignSelf::CENTER);
+    this->setAlignItems(aurore::AlignItems::CENTER);
+    this->setAlignSelf(aurore::AlignSelf::CENTER);
     this->setMarginLeft(16);
     // Level with the title, which borealis moves down by this much, less 8:
     // centred like the title's box, the tag and the commit sat 4 px below
     // the middle of its capitals (the larger font has more room under them),
     // and a centred box moves by half its margin.
-    this->setMarginTop(brls::getStyle()["brls/applet_frame/header_title_top_offset"] - 8);
+    this->setMarginTop(aurore::getStyle()["brls/applet_frame/header_title_top_offset"] - 8);
 
     // The app's (ui::hooks): its version, its commit, a release or not.
     const auto& h             = ui::hooks::get();
@@ -32,11 +32,11 @@ VersionBadge::VersionBadge()
     // The tag: filled (the amber of the warnings, or the notes' grey for a
     // release), the version in the background's colour.
     const char* ink = release ? "cadran/text3" : "cadran/amber";
-    auto* tag       = new brls::Box(brls::Axis::ROW);
+    auto* tag       = new aurore::Box(aurore::Axis::ROW);
     tag->setThemeColor("backgroundColor", ink);
     tag->setCornerRadius(4);
     tag->setPadding(2, 8, 2, 8);
-    auto* number = new brls::Label();
+    auto* number = new aurore::Label();
     number->setText(version);
     number->setFontSize(18);
     number->setFontScaled(false); // a tag: the same size with the larger text
@@ -46,7 +46,7 @@ VersionBadge::VersionBadge()
     this->addView(tag);
     if (release || commit.empty())
         return;
-    auto* text = new brls::Label();
+    auto* text = new aurore::Label();
     text->setFontSize(18);
     text->setFontScaled(false);
     text->setSingleLine(true);
@@ -60,13 +60,13 @@ VersionBadge::VersionBadge()
 // root view: borealis gives a new screen the focus before putting it on the
 // activity stack), unless it has one. Screens without the applet frame's
 // header (the loading screen, dialogs) are left alone.
-static void badge_screen_of(brls::View* focus)
+static void badge_screen_of(aurore::View* focus)
 {
     if (!focus)
         return;
     while (focus->hasParent())
         focus = focus->getParent();
-    auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
+    auto* frame = dynamic_cast<aurore::AppletFrame*>(focus);
     // Not on a screen of its own (a child's: a version means nothing to a
     // child, and its amber reads as a warning).
     if (cadran::is_standalone_screen(frame))
@@ -76,7 +76,7 @@ static void badge_screen_of(brls::View* focus)
     if (!version || version().empty())
         return;
     auto* label = frame ? frame->getView("brls/applet_frame/title_label") : nullptr;
-    auto* row   = label ? dynamic_cast<brls::Box*>(label->getParent()) : nullptr;
+    auto* row   = label ? dynamic_cast<aurore::Box*>(label->getParent()) : nullptr;
     if (!row || row->getView(BADGE_ID))
         return;
     const auto& views = row->getChildren();
@@ -84,18 +84,18 @@ static void badge_screen_of(brls::View* focus)
     row->addView(new VersionBadge(), at);
 }
 
-brls::Box* VersionBadge::header_tools(brls::AppletFrame* frame)
+aurore::Box* VersionBadge::header_tools(aurore::AppletFrame* frame)
 {
-    auto* header = frame ? dynamic_cast<brls::Box*>(frame->getView("brls/applet_frame/header")) : nullptr;
+    auto* header = frame ? dynamic_cast<aurore::Box*>(frame->getView("brls/applet_frame/header")) : nullptr;
     if (!header)
         return nullptr;
-    if (auto* tools = dynamic_cast<brls::Box*>(header->getView(TOOLS_ID)))
+    if (auto* tools = dynamic_cast<aurore::Box*>(header->getView(TOOLS_ID)))
         return tools;
-    auto* tools = new brls::Box(brls::Axis::ROW);
+    auto* tools = new aurore::Box(aurore::Axis::ROW);
     tools->setId(TOOLS_ID);
     tools->setFocusable(false);
-    tools->setAlignItems(brls::AlignItems::CENTER);
-    tools->setAlignSelf(brls::AlignSelf::CENTER);
+    tools->setAlignItems(aurore::AlignItems::CENTER);
+    tools->setAlignSelf(aurore::AlignSelf::CENTER);
     // 8 px more above and below, given back by the margins: the header's
     // settings take a touch that far from their drawing (HeaderSetting::hitTest)
     tools->setPaddingTop(8);
@@ -112,5 +112,5 @@ void VersionBadge::install()
     if (done)
         return;
     done = true;
-    brls::Application::getGlobalFocusChangeEvent()->subscribe(badge_screen_of);
+    aurore::Application::getGlobalFocusChangeEvent()->subscribe(badge_screen_of);
 }

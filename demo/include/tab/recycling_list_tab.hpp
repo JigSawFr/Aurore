@@ -19,41 +19,41 @@
 #include <aurore.hpp>
 
 class RecyclerHeader
-    : public brls::RecyclerHeader
+    : public aurore::RecyclerHeader
 {
 };
 
 class RecyclerCell
-    : public brls::RecyclerCell
+    : public aurore::RecyclerCell
 {
   public:
     RecyclerCell();
 
-    BRLS_BIND(brls::Rectangle, accent, "brls/sidebar/item_accent");
-    BRLS_BIND(brls::Label, label, "title");
-    BRLS_BIND(brls::Image, image, "image");
+    BRLS_BIND(aurore::Rectangle, accent, "brls/sidebar/item_accent");
+    BRLS_BIND(aurore::Label, label, "title");
+    BRLS_BIND(aurore::Image, image, "image");
 
     static RecyclerCell* create();
 };
 
 class DataSource
-    : public brls::RecyclerDataSource
+    : public aurore::RecyclerDataSource
 {
   public:
-    int numberOfSections(brls::RecyclerFrame* recycler) override;
-    int numberOfRows(brls::RecyclerFrame* recycler, int section) override;
-    brls::RecyclerCell* cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath index) override;
-    void didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath) override;
-    std::string titleForHeader(brls::RecyclerFrame* recycler, int section) override;
+    int numberOfSections(aurore::RecyclerFrame* recycler) override;
+    int numberOfRows(aurore::RecyclerFrame* recycler, int section) override;
+    aurore::RecyclerCell* cellForRow(aurore::RecyclerFrame* recycler, aurore::IndexPath index) override;
+    void didSelectRowAt(aurore::RecyclerFrame* recycler, aurore::IndexPath indexPath) override;
+    std::string titleForHeader(aurore::RecyclerFrame* recycler, int section) override;
 };
 
-class RecyclingListTab : public brls::Box
+class RecyclingListTab : public aurore::Box
 {
   public:
     RecyclingListTab();
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(brls::RecyclerFrame, recycler, "recycler");
+    BRLS_BIND(aurore::RecyclerFrame, recycler, "recycler");
 };

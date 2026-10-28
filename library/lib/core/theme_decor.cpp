@@ -30,7 +30,7 @@
 #include <memory>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 namespace
@@ -721,4 +721,4 @@ void ThemeDecorations::reset()
     pool = Pool();
 }
 
-} // namespace brls
+} // namespace aurore

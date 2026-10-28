@@ -16,7 +16,7 @@
 
 #include <aurore/core/geometry.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // Point
@@ -176,4 +176,4 @@ Rect Rect::offsetBy(const Point& origin) const
     return Rect(this->origin + origin, this->size);
 }
 
-} // namespace brls
+} // namespace aurore

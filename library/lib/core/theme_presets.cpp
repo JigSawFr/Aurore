@@ -24,7 +24,7 @@
 
 #include <iterator>
 
-namespace brls
+namespace aurore
 {
 
 const std::vector<BuiltinTheme>& builtinThemeTexts()
@@ -774,4 +774,4 @@ std::string builtinThemeText(const BuiltinTheme& theme, std::time_t now)
         + seasonalThemeId(now) + "\n";
 }
 
-} // namespace brls
+} // namespace aurore

@@ -25,7 +25,7 @@
 #endif
 #include <GLFW/glfw3.h>
 
-namespace brls
+namespace aurore
 {
 
 // GLFW Video Context
@@ -59,4 +59,4 @@ class GLFWVideoContext : public VideoContext
 #endif
 };
 
-} // namespace brls
+} // namespace aurore

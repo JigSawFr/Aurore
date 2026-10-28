@@ -21,7 +21,7 @@
 #include <aurore/core/box.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A simple header with a title, an optional subtitle, a rectangle on the left
@@ -41,4 +41,4 @@ class Header : public Box
     BRLS_BIND(Label, subtitle, "brls/header/subtitle");
 };
 
-} // namespace brls
+} // namespace aurore

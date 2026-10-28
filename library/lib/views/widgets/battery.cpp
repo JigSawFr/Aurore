@@ -20,7 +20,7 @@
 
 #define BATTERY_MAX_WIDTH 23.0f
 
-namespace brls
+namespace aurore
 {
 
 BatteryWidget::BatteryWidget()
@@ -53,7 +53,7 @@ void BatteryWidget::updateState()
     Time now         = getCPUTimeUsec();
     if ((now - time) > 5000000)
     {
-        brls::Logger::verbose("isBatteryCharging: {}; batteryLevel: {}", isBatteryCharging, batteryLevel);
+        aurore::Logger::verbose("isBatteryCharging: {}; batteryLevel: {}", isBatteryCharging, batteryLevel);
 #ifdef ANDROID
         isBatteryCharging = Application::getPlatform()->isBatteryCharging();
         batteryLevel      = Application::getPlatform()->getBatteryLevel() / 100.0f;
@@ -63,11 +63,11 @@ void BatteryWidget::updateState()
         if (updating)
             return;
         updating = true;
-        brls::async([]()
+        aurore::async([]()
             {
                 bool charging = Application::getPlatform()->isBatteryCharging();
                 float level   = Application::getPlatform()->getBatteryLevel() / 100.0f;
-                brls::sync([charging, level]()
+                aurore::sync([charging, level]()
                     {
                         isBatteryCharging = charging;
                         batteryLevel      = level;
@@ -113,4 +113,4 @@ View* BatteryWidget::create()
     return new BatteryWidget();
 }
 
-} // namespace brls
+} // namespace aurore

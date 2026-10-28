@@ -25,7 +25,7 @@
 #include <aurore/views/image.hpp>
 #include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 enum class HeaderStyle
@@ -43,7 +43,7 @@ class AppletFrame : public Box
 
     ~AppletFrame()
     {
-        brls::Logger::debug("delete AppletFrame {}", this->describe());
+        aurore::Logger::debug("delete AppletFrame {}", this->describe());
     }
 
     void handleXMLElement(tinyxml2::XMLElement* element) override;
@@ -101,4 +101,4 @@ class AppletFrame : public Box
     void setContentView(View* view);
 };
 
-} // namespace brls
+} // namespace aurore
