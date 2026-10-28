@@ -2582,3 +2582,20 @@ BRLS_TEST(text_field_is_a_card_with_a_cursor)
     BRLS_CHECK(cleared);
     brls::Application::setReduceMotion(false);
 }
+
+// The rows of cells grow with the text: none cut at the very large size
+BRLS_TEST(cells_grow_with_the_text)
+{
+    Harness h;
+    auto* cell = new brls::DetailCell();
+    cell->setText("Brightness");
+    h.push(new brls::Activity(screenOf({ cell })));
+    h.settle();
+    float normal = cell->getHeight();
+    brls::Application::setTextScale(1.5f);
+    h.settle();
+    BRLS_CHECK(cell->getHeight() >= normal * 1.5f - 0.5f);
+    brls::Application::setTextScale(1.0f);
+    h.settle();
+    BRLS_CHECK_EQ(cell->getHeight(), normal);
+}

@@ -63,6 +63,7 @@
         "text_sizes": {
             "normal": "标准",
             "large": "较大",
+            "largest": "特大",
             "auto": "自动：电视上较大"
         },
         "rail": "侧边栏",

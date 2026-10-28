@@ -88,9 +88,20 @@ class RecyclerCell : public Box
 
     void onFocusGained() override;
     void onFocusLost() override;
+    void onTextScaleChanged() override;
+
+  protected:
+    /*
+     * The height set grows with the text (Application::setTextScale), as a
+     * minimum height: a larger text keeps the cell's padding. DetailCell and
+     * RadioCell (and the cells made from them) do it.
+     */
+    void growWithText();
 
   private:
     void showSeparator(bool show);
+    bool growsWithText = false;
+    bool grown         = false;
     IndexPath indexPath;
     Event<InputType>::Subscription subscription;
 };

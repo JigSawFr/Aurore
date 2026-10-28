@@ -684,8 +684,8 @@ void pick_text_size(std::function<void()> after)
     std::vector<std::string> labels;
     for (const char* t : ui::TEXT_SIZES)
         labels.push_back(brls::getStr(std::string("cadran/prefs/text_sizes/") + t));
-    const std::vector<std::string> icons = { "tv", "text-normal", "text-large" };
-    static_assert(std::size(ui::TEXT_SIZES) == 3, "an icon for each text size");
+    const std::vector<std::string> icons = { "tv", "text-normal", "text-large", "text-largest" };
+    static_assert(std::size(ui::TEXT_SIZES) == 4, "an icon for each text size");
     pick("cadran/prefs/text_size"_i18n, labels, index_of(ui::TEXT_SIZES, ui::prefs().text_size), [after](int i)
         {
         // At once, no restart: every screen is laid out again.
