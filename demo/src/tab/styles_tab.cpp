@@ -28,7 +28,7 @@ struct StylesModel
     brls::Observable<int> counter { 0 };
     brls::Observable<NVGcolor> swatch;
     brls::Observable<bool> even { true };
-    brls::Observable<std::string> announced { "Move the focus: what a screen reader would say shows here." };
+    brls::Observable<std::string> announced { brls::getStr("demo/styles/announced_hint") };
     brls::DataModel model;
 
     StylesModel()
@@ -62,7 +62,7 @@ StylesTab::StylesTab()
     brls::Application::registerModel("styles", &data.model);
 
     brls::Application::setFocusAnnouncer([](const std::string& description)
-        { stylesModel().announced = "Announced: " + description; });
+        { stylesModel().announced = brls::getStr("demo/styles/announced", description); });
 
     this->inflateFromXMLRes("xml/tabs/styles.xml");
 
@@ -87,7 +87,7 @@ StylesTab::StylesTab()
         data.even = data.counter.get() % 2 == 0;
         return true; });
 
-    this->reduceMotion->init("Reduce motion", brls::Application::isReduceMotionSet(), [](bool on)
+    this->reduceMotion->init(brls::getStr("demo/styles/reduce_motion"), brls::Application::isReduceMotionSet(), [](bool on)
         { brls::Application::setReduceMotion(on); });
 }
 

@@ -22,7 +22,7 @@
                 <brls:Box>
                     <brls:Button
                             id="play"
-                            text="Play"
+                            text="@i18n/demo/transform/play"
                             grow="1"
                             margin="10"
                             style="primary"/>
@@ -31,7 +31,7 @@
                             id="reset"
                             grow="1"
                             margin="10"
-                            text="Reset"/>
+                            text="@i18n/demo/transform/reset"/>
                 </brls:Box>
                 <brls:SliderCell
                         grow="1"

@@ -15,6 +15,8 @@
 */
 
 #include "tab/recycling_list_tab.hpp"
+
+using namespace brls::literals; // for _i18n
 #include "view/gem_view.hpp"
 
 std::vector<Gem> gems;
@@ -45,7 +47,7 @@ std::string DataSource::titleForHeader(brls::RecyclerFrame* recycler, int sectio
 {
     if (section == 0)
         return "";
-    return "Section #" + std::to_string(section + 1);
+    return brls::getStr("demo/list/section", section + 1);
 }
 
 brls::RecyclerCell* DataSource::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
@@ -70,15 +72,15 @@ RecyclingListTab::RecyclingListTab()
     this->inflateFromXMLRes("xml/tabs/recycling_list.xml");
 
     gems.clear();
-    gems.push_back(Gem("amber", "Amber"));
-    gems.push_back(Gem("coral", "Coral"));
-    gems.push_back(Gem("jade", "Jade"));
-    gems.push_back(Gem("lapis", "Lapis"));
-    gems.push_back(Gem("onyx", "Onyx"));
-    gems.push_back(Gem("opal", "Opal"));
-    gems.push_back(Gem("pearl", "Pearl"));
-    gems.push_back(Gem("ruby", "Ruby"));
-    gems.push_back(Gem("topaz", "Topaz"));
+    gems.push_back(Gem("amber", "demo/gems/amber"_i18n));
+    gems.push_back(Gem("coral", "demo/gems/coral"_i18n));
+    gems.push_back(Gem("jade", "demo/gems/jade"_i18n));
+    gems.push_back(Gem("lapis", "demo/gems/lapis"_i18n));
+    gems.push_back(Gem("onyx", "demo/gems/onyx"_i18n));
+    gems.push_back(Gem("opal", "demo/gems/opal"_i18n));
+    gems.push_back(Gem("pearl", "demo/gems/pearl"_i18n));
+    gems.push_back(Gem("ruby", "demo/gems/ruby"_i18n));
+    gems.push_back(Gem("topaz", "demo/gems/topaz"_i18n));
 
     recycler->estimatedRowHeight = 70;
     recycler->registerCell("Header", []()

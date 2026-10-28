@@ -63,6 +63,7 @@
         "text_sizes": {
             "normal": "Normal",
             "large": "Maior",
+            "largest": "Muito grande",
             "auto": "Automático: maior na TV"
         },
         "rail": "Barra lateral",

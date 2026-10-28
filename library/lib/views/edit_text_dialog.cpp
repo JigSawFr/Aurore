@@ -127,6 +127,11 @@ EditTextDialog::EditTextDialog()
                 this->backspaceEvent.fire();
                 return true; }, true, true);
 
+    this->registerAction("hints/clear"_i18n, BUTTON_Y, [this](...)
+        {
+                this->clearEvent.fire();
+                return true; });
+
     // cancel input
     this->registerAction(
         "hints/back"_i18n, BUTTON_B, [this](...)
@@ -213,6 +218,11 @@ Event<Point>* EditTextDialog::getLayoutEvent()
 Event<>* EditTextDialog::getBackspaceEvent()
 {
     return &this->backspaceEvent;
+}
+
+Event<>* EditTextDialog::getClearEvent()
+{
+    return &this->clearEvent;
 }
 
 Event<>* EditTextDialog::getCancelEvent()

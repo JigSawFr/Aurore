@@ -553,6 +553,11 @@ void skin_screen_of(brls::View* focus)
         cadran::style_dialog(dialog);
         return;
     }
+    if (auto* field = dynamic_cast<brls::EditTextDialog*>(focus))
+    {
+        cadran::style_edit_text_dialog(field);
+        return;
+    }
     auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
     if (!frame || frame->getView("cadran_mark"))
         return;

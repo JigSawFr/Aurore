@@ -4,13 +4,58 @@
     "tabs": {
         "cadran": "Cadran",
         "styles": "Styles et données",
+        "components": "Composants de base",
+        "transform": "Test de transformation",
+        "text": "Test de texte",
         "scripts": "Emoji et écritures",
+        "scroll": "Test de défilement",
+        "layout": "Mise en page",
         "list": "Liste recyclée",
         "grid": "Grille",
+        "settings": "Réglages",
+        "popups": "Fenêtres, notifications et dialogues",
+        "hos_layout": "Mises en page d’Horizon",
+        "misc_layouts": "Mises en page diverses",
+        "misc_components": "Composants divers",
+        "misc_tools": "Outils de développement divers",
         "about": "À propos d’Aurore"
     },
 
     "welcome": "Bienvenue dans la démo d’Aurore ! Explorez et découvrez ce que la bibliothèque sait faire.",
+
+    "components": {
+        "buttons_header": "Boutons",
+        "button_primary": "Bouton principal",
+        "button_highlight": "\uE13C  Bouton mis en avant",
+        "button_wrapping": "Bouton par défaut au texte sur plusieurs lignes",
+        "button_bordered": "Bouton avec bordure",
+        "button_borderless": "Bouton sans bordure",
+        "icon_buttons_header": "Boutons à icône et menu contextuel",
+        "icon_buttons_subtitle": "Le premier ouvre un menu ; X, ou un appui long, sur une image de l’onglet Grille aussi",
+        "icon_menu": "Options",
+        "icon_play": "Lecture",
+        "icon_image": "Une image",
+        "icon_settings": "Réglages",
+        "menu_title": "Options",
+        "menu_open": "Ouvrir",
+        "menu_favourite": "Ajouter aux favoris",
+        "menu_share": "Partager",
+        "menu_delete": "Supprimer",
+        "menu_chosen": "Choisi : {}",
+        "slider_header": "Curseur",
+        "labels_header": "Textes",
+        "regular_label": "Ceci est un texte. Par défaut, les textes passent à la ligne et prennent la hauteur qu’il leur faut, si la place restante le permet. Sinon, ils sont coupés, comme certains onglets de la barre latérale.\nCeci est un texte. Par défaut, les textes passent à la ligne et prennent la hauteur qu’il leur faut, si la place restante le permet. Sinon, ils sont coupés, comme certains onglets de la barre latérale.",
+        "label_left": "Ce texte est aligné à gauche",
+        "label_center": "Ce texte est centré",
+        "label_right": "Ce texte est aligné à droite",
+        "images_header_title": "Images",
+        "images_header_subtitle": "Mettez-les en avant pour voir comment elles sont mises à l’échelle",
+        "images_downscaled": "Réduite",
+        "images_original": "Originale",
+        "images_upscaled": "Agrandie",
+        "images_stretched": "Étirée",
+        "images_cropped": "Rognée"
+    },
 
     "about": {
         "title": "Aurore",
@@ -66,5 +111,83 @@
         "row_subtitle": "40 éléments : seuls ceux à l’écran existent",
         "grid_title": "Une grille d’images",
         "grid_subtitle": "{} éléments sur {} : la suite se charge quand la fin arrive à l’écran"
-    }
+    },
+
+    "components_more": {
+        "hscroll": "Défilement horizontal",
+        "honk": "Klaxon",
+        "dropdown": "Choisir une option",
+        "option": "Option {}"
+    },
+
+    "styles": {
+        "states": "Styles d’état et transitions",
+        "fade": "Change de couleur en fondu",
+        "corners": "Arrondit ses angles",
+        "hover": "S’éclaire sous la souris",
+        "disabled": "Un bouton désactivé",
+        "toggle": "L’activer ou le désactiver",
+        "binding": "Liaison de données",
+        "add_one": "Ajouter un",
+        "even": "Pair",
+        "reduce_motion": "Réduire les animations",
+        "announced_hint": "Déplacez le focus : ce que dirait un lecteur d’écran s’affiche ici.",
+        "announced": "Annoncé : {}"
+    },
+
+    "transform": {
+        "play": "Lecture",
+        "reset": "Réinitialiser"
+    },
+
+    "scripts": {
+        "emoji": "Emoji",
+        "scripts": "Écritures"
+    },
+
+    "settings": {
+        "radio": "Case d’option",
+        "switch": "Interrupteur",
+        "debug": "Calque de débogage",
+        "screensaver": "Désactiver l’économiseur d’écran",
+        "bottom_bar": "Barre du bas",
+        "fps": "Images par seconde",
+        "swap_interval": "Intervalle de synchronisation",
+        "always_on_top": "Toujours au premier plan",
+        "selector": "Sélecteur",
+        "selected": "Option {} choisie",
+        "input": "Saisir du texte",
+        "input_placeholder": "Texte indicatif",
+        "input_hint": "Indication",
+        "input_number": "Saisir un nombre",
+        "brightness": "Luminosité",
+        "ip": "Adresse IP",
+        "dns": "Serveur DNS",
+        "notify": "Afficher une notification",
+        "themes": "Thèmes",
+        "themes_subtitle": "Les préréglages d’Aurore, puis resources/themes : appliqués tout de suite",
+        "dark": "Variante sombre",
+        "default_theme": "Par défaut (palettes de Cadran)",
+        "errors": "{} erreur(s) : {}",
+        "warnings": "{} avertissement(s)",
+        "active": "Actif"
+    },
+
+    "list": {
+        "section": "Section {}"
+    },
+
+    "gems": {
+        "amber": "Ambre",
+        "coral": "Corail",
+        "jade": "Jade",
+        "lapis": "Lapis",
+        "onyx": "Onyx",
+        "opal": "Opale",
+        "pearl": "Perle",
+        "ruby": "Rubis",
+        "topaz": "Topaze"
+    },
+
+    "close": "Fermer"
 }

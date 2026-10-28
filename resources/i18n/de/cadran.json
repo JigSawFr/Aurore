@@ -63,6 +63,7 @@
         "text_sizes": {
             "normal": "Normal",
             "large": "Größer",
+            "largest": "Sehr groß",
             "auto": "Automatisch: größer am Fernseher"
         },
         "rail": "Seitenleiste",

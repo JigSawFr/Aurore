@@ -96,6 +96,12 @@ brls::Box* VersionBadge::header_tools(brls::AppletFrame* frame)
     tools->setFocusable(false);
     tools->setAlignItems(brls::AlignItems::CENTER);
     tools->setAlignSelf(brls::AlignSelf::CENTER);
+    // 8 px more above and below, given back by the margins: the header's
+    // settings take a touch that far from their drawing (HeaderSetting::hitTest)
+    tools->setPaddingTop(8);
+    tools->setPaddingBottom(8);
+    tools->setMarginTop(-8);
+    tools->setMarginBottom(-8);
     header->addView(tools);
     return tools;
 }

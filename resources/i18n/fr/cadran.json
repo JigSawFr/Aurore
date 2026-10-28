@@ -63,6 +63,7 @@
         "text_sizes": {
             "normal": "Normale",
             "large": "Plus grande",
+            "largest": "Très grande",
             "auto": "Automatique : plus grande sur la TV"
         },
         "rail": "Barre latérale",

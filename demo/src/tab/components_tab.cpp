@@ -31,7 +31,7 @@ ComponentsTab::ComponentsTab()
     // Get a handle to the button and register the action directly
     brls::Button* highlightButton = (brls::Button*)this->getView("button_highlight");
     highlightButton->registerAction(
-        "Honk", brls::BUTTON_A, [](brls::View* view)
+        "demo/components_more/honk"_i18n, brls::BUTTON_A, [](brls::View* view)
         { return true; }, false, false, brls::SOUND_HONK);
 
     // A context menu under the "more" button, its icons Cadran's
@@ -65,8 +65,11 @@ bool ComponentsTab::onPrimaryButtonClicked(brls::View* view)
     //    frame->setFooterVisibility(brls::Visibility::GONE);
     //    brls::Application::pushActivity(new brls::Activity(frame));
 
+    std::vector<std::string> options;
+    for (int i = 1; i <= 13; i++)
+        options.push_back(brls::getStr("demo/components_more/option", i));
     brls::Dropdown* dropdown = new brls::Dropdown(
-        "Test", std::vector<std::string> { "Test 1", "Test 2", "Test 3", "Test 4", "Test 5", "Test 6", "Test 7", "Test 8", "Test 9", "Test 10", "Test 11", "Test 12", "Test 13" }, [](int _selected)
+        "demo/components_more/dropdown"_i18n, options, [](int _selected)
         { selected = _selected; },
         selected);
     //    brls::Dropdown* dropdown = new brls::Dropdown(

@@ -14,6 +14,7 @@
     limitations under the License.
 */
 
+#include <yoga/Yoga.h>
 #include <borealis/core/application.hpp>
 #include <borealis/core/touch/tap_gesture.hpp>
 #include <borealis/views/recycler.hpp>
@@ -70,6 +71,30 @@ void RecyclerCell::onFocusGained()
 }
 
 // The separator lines, hidden under the focus highlight
+void RecyclerCell::growWithText()
+{
+    this->growsWithText = true;
+    YGValue height      = YGNodeStyleGetHeight(this->getYGNode());
+    float scale         = Application::getTextScale();
+    if (height.unit == YGUnitPoint && scale > 1.0f)
+    {
+        YGNodeStyleSetMinHeight(this->getYGNode(), height.value * scale);
+        this->grown = true;
+    }
+    else if (this->grown)
+    {
+        YGNodeStyleSetMinHeight(this->getYGNode(), YGUndefined);
+        this->grown = false;
+    }
+}
+
+void RecyclerCell::onTextScaleChanged()
+{
+    Box::onTextScaleChanged();
+    if (this->growsWithText)
+        this->growWithText();
+}
+
 void RecyclerCell::showSeparator(bool show)
 {
     if (show)

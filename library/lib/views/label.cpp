@@ -597,15 +597,26 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     nvgTextLineHeight(vg, this->lineHeight);
     nvgFillColor(vg, a(this->textColor));
 
-    // Edit cursor
+    // Edit cursor: blinking, or still with the motion reduced
     if (this->cursor >= (int)CursorPosition::END)
     {
-        // blink
         auto blink = ((brls::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
+        bool still = Application::getReduceMotion();
         // The cursor blinks between frames nothing else asks for
-        Application::requestRedraw();
-        if (blink < 500)
+        if (!still)
+            Application::requestRedraw();
+        if (still || blink < 500)
+        {
             cursor_position = this->cursor;
+            // At the end: after the last character drawn
+            if (this->cursor == (int)CursorPosition::END)
+            {
+                const std::string& drawn = this->animating || this->isWrapping ? this->fullText : this->truncatedText;
+                cursor_position          = 0;
+                for (unsigned char c : drawn)
+                    cursor_position += (c & 0xC0) != 0x80;
+            }
+        }
     }
 
     // Animated text
