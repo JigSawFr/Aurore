@@ -15,11 +15,12 @@ Aurore's website, on GitHub Pages: <https://aurore.boreale.dev/>. English at the
 `tools/build_site.py <out-dir>` (Python 3 and Python-Markdown) writes the pages; no framework.
 
 - `site/i18n/<language>.json`: the texts around the content, one catalog per language (`en.json` the reference). They are HTML; `{{repo}}` is the repository's address. A new language is a catalog and its line in `LANGUAGES`.
-- `site/assets/`: `site.css`, `site.js` (the aurora behind the home page, the screenshots' lightbox, the copy buttons, the search, the table of contents), `lang.js` (a first visit from a French browser goes to `/fr/`; the header's link changes it, remembered as `aurore-lang`), `mark.svg` (Boréale's drawing of Aurore's icon) and the fonts (Sora, Figtree, JetBrains Mono, SIL Open Font License), served with the site so that no visitor's browser asks anyone else for anything.
+- `site/assets/`: `site.css`, `site.js` (the aurora behind the home page, the screenshots' lightbox, the copy buttons, the search, the table of contents), `lang.js` (a first visit from a French browser goes to `/fr/`; the header's link changes it, remembered as `aurore-lang`), `mark.svg` (Boréale's drawing of Aurore's icon) and the fonts (Sora, Figtree, JetBrains Mono, SIL Open Font License), served with the site so that no visitor's browser loads anything from anyone else.
 - The screenshots are the README's (`.github/readme/`), the icon and the preview image Aurore's (`.github/branding/`).
 - The documentation's sidebar is `DOCS` in `build_site.py`: a new page of `docs/` is a line there.
 - `SITE_URL` is the site's address; `SITE_NOINDEX=1` keeps a build out of search engines; `SITE_API=<folder>` publishes Doxygen's HTML in `/api/` and links to it; `SITE_DEMO=<folder>` the demo built for a browser (`build-web/web/`) in `/demo/`.
-- A **Content-Security-Policy** on every page (a `<meta>`: GitHub Pages sends no headers): only the site's own files, no inline script or style.
+- **The audience**, counted by Umami Cloud (<https://cloud.umami.is>): `assets/umami.js` is its tracker, served with the site, that sends each page seen to `gateway.umami.is`, without cookie, and only from the site's own address (`SITE_URL`'s, not a local copy); a pull request's build has none. It is a copy: take it again from <https://cloud.umami.is/script.js> when Umami changes it. Its site in Umami (`UMAMI_WEBSITE` in `build_site.py`) is Boréale's, shared with the other projects' sites: Umami's *Hostname* filter tells them apart.
+- A **Content-Security-Policy** on every page (a `<meta>`: GitHub Pages sends no headers): only the site's own files, no inline script or style; the one address it may send to is Umami's (`connect-src`).
 
 To look at it locally:
 

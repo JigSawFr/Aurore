@@ -39,6 +39,13 @@ import markdown
 REPO_URL = "https://github.com/JigSawFr/Aurore"
 SITE_URL = os.environ.get("SITE_URL", "https://aurore.boreale.dev/").rstrip("/") + "/"
 NOINDEX = os.environ.get("SITE_NOINDEX") == "1"
+# The audience, counted by Umami Cloud (site/README.md): its tracker, served
+# from assets/, sends each page seen to gateway.umami.is, without cookie, and
+# only from the site's own address; a pull request's preview has none. The
+# site in Umami is Boréale's, shared by its projects' sites: Umami tells them
+# apart by their address (its "Hostname" filter).
+UMAMI_WEBSITE = "6410ffdd-ae2e-4ddb-8e18-0a77e9fa374e"
+UMAMI_DOMAIN = urlsplit(SITE_URL).hostname
 API_DIR = os.environ.get("SITE_API", "")
 DEMO_DIR = os.environ.get("SITE_DEMO", "")
 # (code, folder, name in its own words, Open Graph's locale): English at the root.
@@ -80,9 +87,10 @@ MADE_WITH = [
     ("SimpleModDownloader", "https://github.com/PoloNX/SimpleModDownloader", "smd"),
 ]
 # Only the site's own files, no inline script or style (a <meta>: GitHub
-# Pages sends no headers). connect-src: the documentation's search index.
+# Pages sends no headers). connect-src: the documentation's search index, and
+# Umami, which counts the audience (UMAMI_WEBSITE).
 CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; "
-       "connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'")
+       "connect-src 'self' https://gateway.umami.is; manifest-src 'self'; base-uri 'none'; form-action 'none'")
 # Each feature's icon: a line drawing on a 24px grid, in the text's colour.
 ICONS = {
     "controllers": '<path d="M7 9v4M5 11h4"/><circle cx="15.5" cy="10" r=".8"/><circle cx="17.5" cy="12.5" r=".8"/>'
@@ -324,6 +332,8 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     main = body[1] if home else body
     docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
                          for p, g, n in DOCS if g == "start")
+    umami = "" if NOINDEX else (f'<script src="{to_root}assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
+                               f'data-domains="{UMAMI_DOMAIN}"></script>\n')
     return f"""<!doctype html>
 <html lang="{code}"{first_visit}>
 <head>
@@ -354,7 +364,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <meta name="twitter:card" content="summary_large_image">
 {"".join(json_ld(d) for d in structured)}<script src="{to_root}assets/lang.js"></script>
 <script src="{to_root}assets/site.js" defer></script>
-</head>
+{umami}</head>
 <body class="{'home' if home else 'inner'}">
 <a class="skip" href="#main">{t("skip")}</a>
 <div class="sky{' sky-home' if home else ''}">
