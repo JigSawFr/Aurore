@@ -250,17 +250,18 @@ With the resources built in (`USE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the a
 
 New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
-For the other platforms, upstream's wiki has the toolchains and the commands:
-
-- 🖥️ [Windows, macOS, Linux](https://github.com/xfangfang/borealis/wiki/Windows-macOS-Linux)
-- 🎮 [Nintendo Switch](https://github.com/xfangfang/borealis/wiki/NintendoSwitch) · [PS4](https://github.com/xfangfang/borealis/wiki/PS4) · [PS Vita](https://github.com/xfangfang/borealis/wiki/PS-Vita)
-- 📱 [Android](https://github.com/xfangfang/borealis/wiki/Android) · [iOS](https://github.com/xfangfang/borealis/wiki/iOS)
+The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
 
 | Page | |
 | --- | --- |
 | [Aurore in 15 minutes](docs/getting-started.md) | From the demo to a screen of your own on the Switch |
+| [Migrating from borealis](docs/migrating-from-borealis.md) | The submodule, the CMake target, the resources, Cadran, what changes on screen |
+| [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, Android, iOS and in a browser |
+| [Porting an app](docs/porting.md) | What an app's code and resources should mind on each platform |
+| [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
+| [Views](docs/views.md) · [XML attributes](docs/xml-attributes.md) | Every XML tag and its class; every attribute |
 | [Themes](docs/themes.md) | Theme files and folders, presets, pictures, decorations, keys |
 | [Cadran](docs/cadran.md) | The default look and its kit |
 | [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
@@ -268,6 +269,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 | [Testing](docs/testing.md) | The test harness |
 | [Fonts](docs/fonts.md) | The fonts on each platform, the buttons' code points, Chinese, Japanese and Korean |
 | [Inspector](docs/inspector.md) · [Hot reload](docs/hot_reload.md) | Debugging aids |
+| [Environment variables](docs/environment.md) | Every variable Aurore reads, for debugging and tests |
 | [Overlay](docs/overlay.md) | Design note on a Switch overlay mode (not built) |
 
 ## 🕹️ Made with borealis
