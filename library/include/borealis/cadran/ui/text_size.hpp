@@ -13,12 +13,12 @@ namespace text_size
 {
 constexpr float LARGE = 1.25f;
 
-// The console on its dock (the desktop: BRLS_DOCKED=1, ui::env_flag).
+/// The console on its dock (the desktop: BRLS_DOCKED=1, ui::env_flag).
 bool docked();
-// What the setting and the console's mode ask for now.
+/// What the setting and the console's mode ask for now.
 bool larger();
-// brls::Label's scale from larger(); the screens laid out again when it changed.
+/// brls::Label's scale from larger(); the screens laid out again when it changed.
 void apply();
-// apply() before the first view, then follows the dock. Once, at start-up.
+/// apply() before the first view, then follows the dock. Once, at start-up.
 void install();
 } // namespace text_size

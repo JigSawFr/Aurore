@@ -35,7 +35,7 @@ git submodule update --init --recursive
 cp -r library/aurore/resources resources
 ```
 
-Aurore's `template/` folder (see its `README.md`) is such an app, with the `CMakeLists.txt` for the desktop and the Switch (upstream's [template](https://github.com/xfangfang/borealis_template) has the other platforms'). The program itself starts the app, pushes a first screen and runs the loop:
+Aurore's `template/` folder (see its `README.md`) is such an app, with the `CMakeLists.txt` for the desktop and the Switch ([platforms.md](platforms.md#platforms) has the other platforms'). The program itself starts the app, pushes a first screen and runs the loop:
 
 ```cpp
 #include <borealis.hpp>
@@ -203,4 +203,11 @@ cmake --build build_switch --target aurore_demo.nro
 
 The `.nro` holds the program, its icon and its resources (built in with romfs). Copy it to `/switch/` on the SD card and start it from the Homebrew Menu, or send it to a console running the menu with `nxlink -s build_switch/aurore_demo.nro` (the app's logs come back to the terminal). `-DUSE_DEKO3D=OFF` builds the OpenGL driver instead. The inspector works there too, with **L3 + R3**.
 
-The same project builds for Windows, macOS, PS4, PS Vita, Android and iOS: upstream's [wiki](https://github.com/xfangfang/borealis/wiki) has their toolchains.
+The same project builds for Windows, macOS, PS4, PS Vita, Android, iOS and a browser: [platforms.md](platforms.md#platforms) has their toolchains and commands, [porting.md](porting.md#porting-an-app) what an app should mind on each.
+
+## Further
+
+- Coming from borealis: [migrating-from-borealis.md](migrating-from-borealis.md#migrating-from-borealis).
+- How it works inside (the loop, layout, focus, ownership, threads): [architecture.md](architecture.md#architecture).
+- Every XML tag: [views.md](views.md#views), and every attribute: [xml-attributes.md](xml-attributes.md#xml-attributes).
+- Every environment variable (the inspector, hot reload, the profiler, the tests): [environment.md](environment.md#environment-variables).

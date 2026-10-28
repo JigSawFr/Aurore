@@ -15,16 +15,16 @@
 namespace ui
 {
 
-// The token a screen's late callbacks check: it goes with the screen (or is
-// set to false, for a screen that closes before it is freed).
+/// The token a screen's late callbacks check: it goes with the screen (or is
+/// set to false, for a screen that closes before it is freed).
 using Alive = std::shared_ptr<bool>;
-// What a background task holds of it: the task never keeps the screen's
-// token, it wraps with it the callback it hands to brls::sync.
+/// What a background task holds of it: the task never keeps the screen's
+/// token, it wraps with it the callback it hands to brls::sync.
 using Weak = std::weak_ptr<bool>;
 inline Alive make_alive() { return std::make_shared<bool>(true); }
 
-// fn(args…), or nothing once `alive` is gone or false. Converts to the
-// std::function a flow takes, whatever its arguments.
+/// fn(args…), or nothing once `alive` is gone or false. Converts to the
+/// std::function a flow takes, whatever its arguments.
 template <typename F>
 auto guarded(Weak alive, F fn)
 {

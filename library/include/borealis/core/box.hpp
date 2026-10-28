@@ -22,6 +22,7 @@
 namespace brls
 {
 
+/// How a box spreads its children along its axis (`justifyContent` in XML).
 enum class JustifyContent
 {
     FLEX_START,
@@ -32,6 +33,7 @@ enum class JustifyContent
     SPACE_EVENLY,
 };
 
+/// How a box places its children across its axis (`alignItems` in XML).
 enum class AlignItems
 {
     AUTO,
@@ -44,12 +46,14 @@ enum class AlignItems
     SPACE_AROUND,
 };
 
+/// The direction a box lays its children out in (`axis` in XML).
 enum class Axis
 {
     ROW,
     COLUMN,
 };
 
+/// Whether a box's children go on to new lines when they do not fit (`flexWrap`).
 enum class Wrap
 {
     NO_WRAP,
@@ -57,6 +61,7 @@ enum class Wrap
     WRAP_REVERSE,
 };
 
+/// The writing direction a box lays its children out in.
 enum class Direction
 {
     INHERIT,
@@ -64,12 +69,15 @@ enum class Direction
     RIGHT_TO_LEFT,
 };
 
-// Generic FlexBox layout
+/// Generic FlexBox layout
 class Box : public View
 {
   public:
+    /// An empty box laying its children out along `flexDirection`.
     Box(Axis flexDirection);
+    /// An empty row.
     Box();
+    /// Deletes the children (those a ptrLock() holds go to the deletion pool).
     ~Box();
 
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
@@ -88,6 +96,8 @@ class Box : public View
 
     static View* create();
 
+    /// The focus about to move from `from` to `newFocus`: a box may give another view
+    /// instead. Asked of every parent up the tree; returns `newFocus` by default.
     virtual View* getParentNavigationDecision(View* from, View* newFocus, FocusDirection direction);
 
     /**
@@ -207,6 +217,7 @@ class Box : public View
      */
     void setDirection(Direction direction);
 
+    /// The axis the children are laid out along.
     void setAxis(Axis axis);
     Axis getAxis() const;
 
@@ -220,6 +231,7 @@ class Box : public View
      */
     Wrap getWrap() const;
 
+    /// The children, in order. The box owns them: it deletes them with itself.
     std::vector<View*>& getChildren();
 
     /**
@@ -264,14 +276,18 @@ class Box : public View
 
     View* getView(std::string id) override;
 
+    /// The child the focus goes back to when the box gets it again.
     void setLastFocusedView(View* view);
 
+    /// The child that takes the focus first (negative values are ignored).
     void setDefaultFocusedIndex(int index);
 
     size_t getDefaultFocusedIndex() const;
 
+    /// See setLastFocusedView().
     View* getLastFocusedView() const;
 
+    /// Whether the focus is on one of the children, at any depth.
     virtual bool isChildFocused();
 
   private:
@@ -285,7 +301,7 @@ class Box : public View
     std::unordered_map<std::string, std::pair<std::string, View*>> forwardedAttributes;
 
   protected:
-    // A focusable box says the texts shown in it (getAccessibilityText).
+    /// A focusable box says the texts shown in it (getAccessibilityText).
     std::string getDefaultAccessibilityLabel() override;
 
     /**
@@ -341,8 +357,8 @@ class Box : public View
     void handleXMLElement(tinyxml2::XMLElement* element) override;
 };
 
-// An empty view that has auto x auto and grow=1.0 to push
-// all the next views in its box to the right (or to the bottom)
+/// An empty view that has auto x auto and grow=1.0 to push
+/// all the next views in its box to the right (or to the bottom)
 class Padding : public View
 {
   public:
