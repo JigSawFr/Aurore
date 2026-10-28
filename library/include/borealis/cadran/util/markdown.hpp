@@ -12,7 +12,7 @@
 // Nothing in it is ever run or opened: it is text. It is cleaned first
 // (util/safe_text.hpp), and bounded: at most MAX_BLOCKS blocks, MAX_CODE_LINES
 // lines of a code block, MAX_COLUMNS columns and MAX_ROWS rows of a table,
-// MAX_DEPTH levels of nesting. Plain C++ for the host tests (tests/markdown).
+// MAX_DEPTH levels of nesting. Plain C++ for the host tests (tests/host/markdown_tests.cpp).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 

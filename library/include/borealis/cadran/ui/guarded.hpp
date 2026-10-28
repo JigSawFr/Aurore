@@ -5,7 +5,7 @@
 // a dialog) takes guarded(alive, fn) instead of a bare [this]: fn runs only
 // while the token is held and true. Checked where the callback is called,
 // which is the UI thread: a worker thread hands it to brls::sync, never calls
-// it itself. No borealis: host-tested (tests/guarded).
+// it itself. No borealis: host-tested (tests/host/guarded_tests.cpp).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 

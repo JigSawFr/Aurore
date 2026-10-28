@@ -1,7 +1,7 @@
 // ui — durations, days and short answers as text: the formatting helpers
 // that only translate (ui.hpp includes this header). Plain C++ over
 // ui/tr.hpp, so a host suite can run them against a catalog of its own
-// (tests/format_text).
+// (tests/host/format_text_tests.cpp).
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 

@@ -34,3 +34,6 @@ add_test(NAME aurore_preview
         COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
 set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)
+
+# Cadran's plain C++ parts, without a window
+add_subdirectory(host)
