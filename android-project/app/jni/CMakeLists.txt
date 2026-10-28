@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
 
-project(BOREALIS_DEMO)
+project(AURORE_DEMO)
 
 # armeabi-v7a requires cpufeatures library
 # include(AndroidNdkModules)
@@ -18,10 +18,10 @@ add_subdirectory(SDL)
 
 
 set(AURORE_PLATFORM ANDROID CACHE STRING "")
-SET(LIBROMFS_PREBUILT_GENERATOR "${CMAKE_CURRENT_SOURCE_DIR}/borealis/libromfs-generator" CACHE STRING "")
+SET(LIBROMFS_PREBUILT_GENERATOR "${CMAKE_CURRENT_SOURCE_DIR}/aurore/libromfs-generator" CACHE STRING "")
 
 if (NOT EXISTS "${LIBROMFS_PREBUILT_GENERATOR}")
-    message(FATAL_ERROR "libromfs-generator has not been built, please refer to borealis/build_libromfs_generator.sh for more information")
+    message(FATAL_ERROR "libromfs-generator has not been built, please refer to aurore/build_libromfs_generator.sh for more information")
 endif()
 
-add_subdirectory(borealis)
+add_subdirectory(aurore)

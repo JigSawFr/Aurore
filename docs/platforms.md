@@ -147,4 +147,4 @@ Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): th
 | `AURORE_STD_THREAD`, `AURORE_BOOST_FILESYSTEM` | `std::thread` instead of pthreads; Boost's filesystem for a toolchain without `std::filesystem` |
 | `AURORE_INSTALL` | Desktop: installs the library for `find_package(Aurore)` |
 
-`library/cmake/commonOption.cmake` lists them all with their defaults. borealis' names (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`, `USE_LIBROMFS`…) still work, with a deprecation warning, and are set as plain variables after `commonOption.cmake` for an app's own tests (`if (PLATFORM_SWITCH)`).
+`library/cmake/commonOption.cmake` lists them all with their defaults. The unprefixed names borealis used (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`, `USE_LIBROMFS`…) still work, with a deprecation warning, and are set as plain variables after `commonOption.cmake` for an app's own tests (`if (PLATFORM_SWITCH)`).

@@ -345,13 +345,6 @@ extern "C" EMSCRIPTEN_KEEPALIVE void aurore_web_button(int button, int down)
         webButtonsPressed[button] = true;
 }
 
-// legacy-names: begin
-// borealis' name for it, for a page not changed yet (deprecated)
-extern "C" EMSCRIPTEN_KEEPALIVE void brls_web_button(int button, int down)
-{
-    aurore_web_button(button, down);
-}
-// legacy-names: end
 #endif
 
 static const size_t SDL_AXIS_MAPPING[SDL_GAMEPAD_AXIS_MAX] = {

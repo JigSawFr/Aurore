@@ -26,7 +26,7 @@ NDK 决定应用能运行的最低安卓版本：r22 和 r23 支持到 API 16，
 ./build_libromfs_generator.sh
 ```
 
-生成的 `libromfs-generator` 位于仓库根目录，`app/jni/CMakeLists.txt` 会在那里找到它（`app/jni/borealis` 是指向根目录的链接）。然后在安装好 Android SDK 和 NDK 之后（通过 Android Studio 的 SDK Manager 或 `sdkmanager`）：
+生成的 `libromfs-generator` 位于仓库根目录，`app/jni/CMakeLists.txt` 会在那里找到它（`app/jni/aurore` 是指向根目录的链接）。然后在安装好 Android SDK 和 NDK 之后（通过 Android Studio 的 SDK Manager 或 `sdkmanager`）：
 
 ```sh
 cd android-project
@@ -37,15 +37,15 @@ export ANDROID_SDK_ROOT=~/Android/Sdk          # macOS: ~/Library/Android/sdk
 
 也可以直接用 Android Studio 打开 `android-project/`。在 macOS 上可以使用其自带的 JDK：`export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`。
 
-release 构建（`./gradlew assembleRelease`）使用 `app/borealis.jks` 签名，该文件不在仓库中：请自行生成（参见 `app/build.gradle` 中的 `keytool` 命令），或让 `signingConfigs.release` 指向你自己的密钥。
+release 构建（`./gradlew assembleRelease`）使用 `app/aurore.jks` 签名，该文件不在仓库中：请自行生成（参见 `app/build.gradle` 中的 `keytool` 命令），或让 `signingConfigs.release` 指向你自己的密钥。
 
 ## 将你的应用移植到安卓
 
-1. 把你的项目放到 `app/jni/` 下（或让 `app/jni/borealis` 指向你的项目根目录而不是 Aurore），Aurore 作为它的子模块。
-2. 在 `app/jni/CMakeLists.txt` 中用 `add_subdirectory` 添加你的项目以替代 `borealis`，并让 `LIBROMFS_PREBUILT_GENERATOR` 指向你构建出的 `libromfs-generator`。
+1. 把你的项目放到 `app/jni/` 下（或让 `app/jni/aurore` 指向你的项目根目录而不是 Aurore），Aurore 作为它的子模块。
+2. 在 `app/jni/CMakeLists.txt` 中用 `add_subdirectory` 添加你的项目以替代 `aurore`，并让 `LIBROMFS_PREBUILT_GENERATOR` 指向你构建出的 `libromfs-generator`。
 3. 在你的 `CMakeLists.txt` 中用 `program_target()` 创建程序（在安卓上是共享库），并用 `add_libromfs()` 打包你的资源，参考 Aurore 根目录 `CMakeLists.txt` 对演示程序的做法。
 4. 在 `app/build.gradle` 中把 `namespace` 和 `applicationId` 改为你的包名。
-5. 在 `app/src/main/java/` 中，把 `com/borealis/demo/DemoActivity.java` 复制到你的包下，并修改 `getLibraries()`，加载 `SDL2` 和你的库（你的 CMake 目标名，替代 `aurore_demo`）。
+5. 在 `app/src/main/java/` 中，把 `com/aurore/demo/DemoActivity.java` 复制到你的包下，并修改 `getLibraries()`，加载 `SDL2` 和你的库（你的 CMake 目标名，替代 `aurore_demo`）。
 6. 在 `app/src/main/AndroidManifest.xml` 中用你的 Activity 替代 `DemoActivity`。
 7. 在 `app/src/main/res/values/strings.xml` 中设置应用名，在 `app/src/main/res/mipmap-*/ic_launcher.png` 中替换图标。
 

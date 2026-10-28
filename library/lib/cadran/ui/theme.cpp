@@ -45,7 +45,7 @@ namespace
 void use_font_for(const std::string& locale)
 {
 #ifdef __SWITCH__
-    // borealis (wiliwili's branch) draws every label with the Simplified
+    // The core draws every label with the Simplified
     // Chinese system font, the Latin one only filling its gaps. That font has
     // the pinyin letters é, è, ê… as full-width glyphs ("prot é g é e"), and a
     // full-width "·" and "…". Chinese keeps it: the han in its own style. The

@@ -51,6 +51,3 @@ Read by the [test harness](testing.md) (`-DAURORE_BUILD_TESTS=ON`) and the demo'
 
 Every variable starts with `AURORE_`. `AURORE_RESOURCES_DIR` belongs to the bundled libromfs; the CMake variable `AURORE_RESOURCES_ROOT`, the folder that holds `resources/` on a desktop, is another thing. The build options are `AURORE_` too, see [platforms.md](platforms.md#options-for-every-platform): those are set when building, not in the environment.
 
-<!-- legacy-names: begin -->
-borealis' names are still read, deprecated, after the new one: `BRLS_<name>`, then `BOREALIS_<name>` (`BRLS_LANG`, `BOREALIS_THEME`, `BRLS_INSPECTOR`…); the log says once which one was used and its new name ([migrating-from-borealis.md](migrating-from-borealis.md)).
-<!-- legacy-names: end -->

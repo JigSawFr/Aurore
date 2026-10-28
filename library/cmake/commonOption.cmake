@@ -2,11 +2,8 @@
 # toolchain.cmake (README.md, "Use it in your project").
 #
 # The options are prefixed (AURORE_), so they do not clash with a parent
-# project's own. The names borealis used still work for now:
-# legacy-names: begin
-# PLATFORM_DESKTOP, USE_GLFW, USE_LIBROMFS… and the BRLS_ ones (BRLS_BUILD_TESTS,
-# BRLS_DEV_TOOLS, BRLS_INSPECTOR, BRLS_UNITY_BUILD, BRLS_FONTSTASH_STREAM):
-# legacy-names: end
+# project's own. The old unprefixed names (PLATFORM_DESKTOP, USE_GLFW,
+# USE_LIBROMFS…) still work for now:
 # given on the command line or set before this file, they are copied to the new
 # options, with a deprecation warning. Either way this file then sets the
 # old names as plain variables, which the build files read: an app can
@@ -208,24 +205,6 @@ _aurore_legacy_bool(AURORE_LIBROMFS USE_LIBROMFS)
 _aurore_legacy_bool(AURORE_SIMPLE_HIGHLIGHT SIMPLE_HIGHLIGHT)
 _aurore_legacy_bool(AURORE_FREETYPE USE_FREETYPE)
 _aurore_legacy_bool(AURORE_FRIBIDI USE_FRIBIDI)
-# legacy-names: begin
-_aurore_legacy_bool(AURORE_UNITY_BUILD BRLS_UNITY_BUILD)
-_aurore_legacy_bool(AURORE_FONTSTASH_STREAM BRLS_FONTSTASH_STREAM)
-_aurore_legacy_bool(AURORE_INSPECTOR BRLS_INSPECTOR)
-_aurore_legacy_bool(AURORE_BUILD_TESTS BRLS_BUILD_TESTS)
-set(_aurore_value "")
-if (DEFINED BRLS_DEV_TOOLS)
-    string(TOUPPER "${BRLS_DEV_TOOLS}" _aurore_value)
-    if (NOT _aurore_value STREQUAL "AUTO")
-        if (BRLS_DEV_TOOLS)
-            set(_aurore_value ON)
-        else ()
-            set(_aurore_value OFF)
-        endif ()
-    endif ()
-endif ()
-_aurore_legacy(AURORE_DEV_TOOLS "${_aurore_value}" BRLS_DEV_TOOLS)
-# legacy-names: end
 
 # The plain variables the build files read. toolchain.cmake changes some of
 # them for the platforms that impose a choice (iOS and Android: SDL2 and

@@ -2429,7 +2429,7 @@ int Application::getDefaultFont()
 
 bool Application::XMLViewsRegisterContains(std::string name)
 {
-    return Application::xmlViewsRegister.count(canonicalXMLName(name)) > 0;
+    return Application::xmlViewsRegister.count(name) > 0;
 }
 
 std::vector<std::string> Application::getXMLViewNames()
@@ -2442,7 +2442,7 @@ std::vector<std::string> Application::getXMLViewNames()
 
 XMLViewCreator Application::getXMLViewCreator(std::string name)
 {
-    return Application::xmlViewsRegister[canonicalXMLName(name)];
+    return Application::xmlViewsRegister[name];
 }
 
 void Application::registerBuiltInXMLViews()
@@ -2486,8 +2486,7 @@ void Application::registerBuiltInXMLViews()
 
 void Application::registerXMLView(std::string name, XMLViewCreator creator)
 {
-    // borealis' prefix (deprecated) still registers (and replaces) an aurore: view
-    Application::xmlViewsRegister[canonicalXMLName(name)] = creator;
+    Application::xmlViewsRegister[name] = creator;
 }
 
 } // namespace aurore

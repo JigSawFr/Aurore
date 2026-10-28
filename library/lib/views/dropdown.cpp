@@ -1,6 +1,6 @@
 //
 //  dropdown.cpp
-//  borealis
+//  aurore
 //
 //  Created by Даниил Виноградов on 14.05.2021.
 //

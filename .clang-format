@@ -11,7 +11,7 @@ PointerAlignment: Left
 SortIncludes: CaseSensitive
 IncludeBlocks: Preserve
 IncludeCategories:
-  - Regex: '^<(aurore|borealis)(\.hpp|/)'
+  - Regex: '^<aurore(\.hpp|/)'
     Priority: 3
   - Regex: '^<.*\.h>'
     Priority: 1
