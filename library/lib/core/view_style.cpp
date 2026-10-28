@@ -30,6 +30,7 @@
 #include <borealis/core/observable.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/core/view.hpp>
+#include <borealis/views/recycler.hpp>
 
 namespace brls
 {
@@ -79,6 +80,7 @@ static const std::pair<AccessibilityRole, const char*> ROLE_NAMES[] = {
     { AccessibilityRole::TEXT_FIELD, "text_field" },
     { AccessibilityRole::TAB, "tab" },
     { AccessibilityRole::LIST, "list" },
+    { AccessibilityRole::DIALOG, "dialog" },
 };
 
 std::string accessibilityRoleName(AccessibilityRole role)
@@ -149,6 +151,10 @@ struct View::Extras
     AccessibilityRole role = AccessibilityRole::NONE;
     bool labelSet          = false;
     std::string label;
+    bool valueSet = false;
+    std::string value;
+    bool selectedSet = false;
+    bool selected    = false;
 
     ~Extras()
     {
@@ -824,6 +830,87 @@ std::string View::getAccessibilityLabel()
     return this->getDefaultAccessibilityLabel();
 }
 
+void View::setAccessibilityValue(const std::string& value)
+{
+    Extras& extras  = this->getExtras();
+    extras.valueSet = true;
+    extras.value    = value;
+}
+
+std::string View::getAccessibilityValue()
+{
+    if (this->extras && this->extras->valueSet)
+        return this->extras->value;
+    return this->getDefaultAccessibilityValue();
+}
+
+void View::setAccessibilitySelected(bool selected)
+{
+    Extras& extras     = this->getExtras();
+    extras.selectedSet = true;
+    extras.selected    = selected;
+}
+
+bool View::isAccessibilitySelected()
+{
+    if (this->extras && this->extras->selectedSet)
+        return this->extras->selected;
+    return this->getDefaultAccessibilitySelected();
+}
+
+bool View::getAccessibilityPosition(int* index, int* count)
+{
+    switch (this->getAccessibilityRole())
+    {
+        case AccessibilityRole::BUTTON:
+        case AccessibilityRole::CELL:
+        case AccessibilityRole::TOGGLE:
+        case AccessibilityRole::SLIDER:
+        case AccessibilityRole::TEXT_FIELD:
+        case AccessibilityRole::TAB:
+            break;
+        default:
+            return false;
+    }
+    if (!this->hasParent())
+        return false;
+
+    // A recycler's cell: its row among all of its section's, shown or not.
+    if (auto* cell = dynamic_cast<RecyclerCell*>(this))
+    {
+        View* up = this->getParent();
+        for (int depth = 0; up && depth < 3; depth++, up = up->hasParent() ? up->getParent() : nullptr)
+            if (auto* recycler = dynamic_cast<RecyclerFrame*>(up))
+            {
+                RecyclerDataSource* source = recycler->getDataSource();
+                if (!source)
+                    return false;
+                IndexPath path = cell->getIndexPath();
+                int rows       = source->numberOfRows(recycler, (int)path.section);
+                if (rows < 2 || path.row < 0 || path.row >= rows)
+                    return false;
+                *index = path.row + 1;
+                *count = rows;
+                return true;
+            }
+    }
+
+    int at = 0, focusable = 0;
+    for (View* sibling : this->getParent()->getChildren())
+    {
+        if (!sibling->isFocusable())
+            continue;
+        focusable++;
+        if (sibling == this)
+            at = focusable;
+    }
+    if (focusable < 2 || at == 0)
+        return false;
+    *index = at;
+    *count = focusable;
+    return true;
+}
+
 // A word of the a11y catalogue, in English when the app ships none.
 static std::string accessibilityWord(const std::string& key, const char* english)
 {
@@ -832,7 +919,7 @@ static std::string accessibilityWord(const std::string& key, const char* english
     return value == name ? english : value;
 }
 
-std::string View::getAccessibilityDescription()
+std::string accessibilityRoleWord(AccessibilityRole role)
 {
     static const std::unordered_map<std::string, const char*> ENGLISH = {
         { "button", "button" },
@@ -845,29 +932,114 @@ std::string View::getAccessibilityDescription()
         { "text_field", "text field" },
         { "tab", "tab" },
         { "list", "list" },
+        { "dialog", "dialog" },
     };
+    std::string name = accessibilityRoleName(role);
+    if (name.empty())
+        return "";
+    auto english = ENGLISH.find(name);
+    return accessibilityWord("role/" + name, english != ENGLISH.end() ? english->second : name.c_str());
+}
 
-    std::vector<std::string> parts;
-    std::string label = this->getAccessibilityLabel();
-    if (!label.empty())
-        parts.push_back(label);
+std::string accessibilityStateWord(const std::string& state)
+{
+    static const std::unordered_map<std::string, const char*> ENGLISH = {
+        { "on", "on" },
+        { "off", "off" },
+        { "selected", "selected" },
+        { "disabled", "disabled" },
+    };
+    auto english = ENGLISH.find(state);
+    return accessibilityWord(state, english != ENGLISH.end() ? english->second : state.c_str());
+}
 
-    std::string role = accessibilityRoleName(this->getAccessibilityRole());
-    if (!role.empty())
+std::string accessibilityPercent(float fraction)
+{
+    int percent        = (int)std::lround(std::clamp(fraction, 0.0f, 1.0f) * 100.0f);
+    std::string format = accessibilityWord("percent", "{}%");
+    try
     {
-        auto english     = ENGLISH.find(role);
-        std::string word = accessibilityWord("role/" + role, english != ENGLISH.end() ? english->second : role.c_str());
-        if (!word.empty())
-            parts.push_back(word);
+        return fmt::format(fmt::runtime(format), percent);
     }
+    catch (const fmt::format_error&)
+    {
+        return std::to_string(percent) + "%";
+    }
+}
 
-    if (this->hasStyleState(StyleState::DISABLED))
-        parts.push_back(accessibilityWord("disabled", "disabled"));
+static void joinTo(std::string& to, const std::string& part)
+{
+    if (!part.empty())
+        to += (to.empty() ? "" : ", ") + part;
+}
 
+std::string View::getAccessibilityDescription()
+{
     std::string description;
-    for (auto& part : parts)
-        description += (description.empty() ? "" : ", ") + part;
+    joinTo(description, this->getAccessibilityLabel());
+    joinTo(description, accessibilityRoleWord(this->getAccessibilityRole()));
+    joinTo(description, this->getAccessibilityValue());
+    if (this->isAccessibilitySelected())
+        joinTo(description, accessibilityStateWord("selected"));
+    if (this->hasStyleState(StyleState::DISABLED))
+        joinTo(description, accessibilityStateWord("disabled"));
+
+    int index = 0, count = 0;
+    if (this->getAccessibilityPosition(&index, &count))
+    {
+        std::string format = accessibilityWord("position", "{} of {}");
+        try
+        {
+            joinTo(description, fmt::format(fmt::runtime(format), index, count));
+        }
+        catch (const fmt::format_error&)
+        {
+            joinTo(description, std::to_string(index) + "/" + std::to_string(count));
+        }
+    }
     return description;
+}
+
+// The texts under a box, its focusable views left out.
+static std::string textUnder(Box* box)
+{
+    std::string text;
+    for (View* child : box->getChildren())
+        if (!child->isFocusable())
+            joinTo(text, child->getAccessibilityText());
+    return text;
+}
+
+std::string View::getAccessibilityText()
+{
+    if (this->visibility != Visibility::VISIBLE)
+        return "";
+    if (this->extras && this->extras->labelSet)
+        return this->extras->label;
+    Box* box = dynamic_cast<Box*>(this);
+    if (!box)
+        return this->getAccessibilityLabel();
+    std::string own = this->getDefaultAccessibilityLabel();
+    return own.empty() ? textUnder(box) : own;
+}
+
+void View::announceAccessibilityValue()
+{
+    if (Application::getCurrentFocus() != this)
+        return;
+    // A change the user just made: a value that changes on its own (a
+    // clock, a download's share) is not read out at each step.
+    if (getCPUTimeUsec() - Application::getLastInputTime() > 2000000)
+        return;
+    std::string text = this->getAccessibilityValue();
+    if (this->isAccessibilitySelected())
+        joinTo(text, accessibilityStateWord("selected"));
+    Application::announce(text);
+}
+
+std::string Box::getDefaultAccessibilityLabel()
+{
+    return this->isFocusable() ? textUnder(this) : "";
 }
 
 } // namespace brls

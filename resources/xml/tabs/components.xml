@@ -205,6 +205,7 @@
                     <brls:IconButton
                         id="icon_menu"
                         glyph="&#xE5D4;"
+                        accessibilityLabel="@i18n/demo/components/icon_menu"
                         marginRight="30px" />
 
                     <brls:IconButton
@@ -223,7 +224,8 @@
 
                     <brls:IconButton
                         style="borderless"
-                        glyph="&#xE8B8;" />
+                        glyph="&#xE8B8;"
+                        accessibilityLabel="@i18n/demo/components/icon_settings" />
 
                 </brls:Box>
 

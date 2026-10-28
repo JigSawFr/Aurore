@@ -17,6 +17,7 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/assets.hpp>
 #include <borealis/core/i18n.hpp>
+#include <borealis/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -34,6 +35,7 @@ namespace fs = std::experimental::filesystem;
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -74,10 +76,29 @@ static void setTable(std::shared_ptr<const Translations> table)
 // One load at a time (each one builds on the table in place).
 static std::mutex loadMutex;
 
+// A catalog larger than this is not read (the core's are a few kilobytes)
+static const size_t MAX_CATALOG_BYTES = 4 * 1024 * 1024;
+
+// A locale names a folder of i18n/: letters, digits, '-' and '_' only
+static bool isLocaleName(const std::string& locale)
+{
+    if (locale.empty() || locale.size() > 32)
+        return false;
+    for (char c : locale)
+        if (!std::isalnum((unsigned char)c) && c != '-' && c != '_')
+            return false;
+    return true;
+}
+
 static void loadLocale(std::string locale, nlohmann::json* target)
 {
     if (locale.empty())
         return;
+    if (!isLocaleName(locale))
+    {
+        Logger::error("Cannot load locale {}: not a locale name", escapeControlChars(locale));
+        return;
+    }
 #ifdef USE_LIBROMFS
     auto localePath = romfs::list("i18n/" + locale);
     if (localePath.empty())
@@ -92,7 +113,20 @@ static void loadLocale(std::string locale, nlohmann::json* target)
         if (!endsWith(name, ".json"))
             continue;
 
-        (*target)[name.substr(0, name.length() - 5)] = nlohmann::json::parse(romfs::get(path).string());
+        // A catalog that cannot be read is left out, as from a folder
+        nlohmann::json strings;
+        try
+        {
+            auto resource = romfs::get(path);
+            if (resource.size() > MAX_CATALOG_BYTES)
+                throw std::runtime_error("larger than 4 MB");
+            strings = nlohmann::json::parse(resource.string());
+        }
+        catch (const std::exception& e)
+        {
+            Logger::error("Error while loading \"{}\": {}", path, e.what());
+        }
+        (*target)[name.substr(0, name.length() - 5)] = strings;
     }
 #else
     std::string localePath = BRLS_ASSET("i18n/" + locale);
@@ -122,20 +156,18 @@ static void loadLocale(std::string locale, nlohmann::json* target)
         std::string path = entry.path().string();
 
         nlohmann::json strings;
-
-        std::ifstream jsonStream;
-        jsonStream.open(path);
+        std::string text;
 
         try
         {
-            jsonStream >> strings;
+            if (!readSmallFile(path, MAX_CATALOG_BYTES, &text))
+                throw std::runtime_error("not a file, or larger than 4 MB");
+            strings = nlohmann::json::parse(text);
         }
         catch (const std::exception& e)
         {
             Logger::error("Error while loading \"{}\": {}", path, e.what());
         }
-
-        jsonStream.close();
 
         (*target)[name.substr(0, name.length() - 5)] = strings;
     }

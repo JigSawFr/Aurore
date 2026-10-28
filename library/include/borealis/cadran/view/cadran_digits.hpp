@@ -15,6 +15,7 @@ class CadranDigits : public brls::View
     CadranDigits();
 
     void setText(const std::string& text);
+    const std::string& getText() const { return this->text; }
     void setFontSize(float size);
     void setTextColor(NVGcolor color);
     // "textColor" (setThemeColor, XML textColor="@theme/…")
@@ -45,6 +46,11 @@ class CadranDigits : public brls::View
         brls::Style style, brls::FrameContext* ctx) override;
 
     static brls::View* create();
+
+  protected:
+    // Said as a label's text (a chip, a card say it).
+    brls::AccessibilityRole getDefaultAccessibilityRole() override { return brls::AccessibilityRole::LABEL; }
+    std::string getDefaultAccessibilityLabel() override { return this->text; }
 
   private:
     std::string text;

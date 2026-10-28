@@ -617,7 +617,7 @@ bool Theme::parseColor(const std::string& raw, NVGcolor* color)
         return true;
     }
 
-    // rgb(r, g, b) or rgba(r, g, b, a), a from 0 to 1
+    // rgb(r, g, b) or rgba(r, g, b, a), r, g and b from 0 to 255, a from 0 to 1
     bool alpha = text.rfind("rgba(", 0) == 0;
     if (!alpha && text.rfind("rgb(", 0) != 0)
         return false;
@@ -635,7 +635,9 @@ bool Theme::parseColor(const std::string& raw, NVGcolor* color)
         char* end;
         std::string number = trim(part);
         values[count]      = std::strtof(number.c_str(), &end);
-        if (number.empty() || *end != '\0')
+        float maximum      = count == 3 ? 1.0f : 255.0f;
+        // Not NaN (its comparisons are false), nor out of range
+        if (number.empty() || *end != '\0' || !(values[count] >= 0.0f && values[count] <= maximum))
             return false;
         count++;
     }
@@ -740,6 +742,13 @@ static const char* BUILTIN_PREFIX = "builtin:";
 static const char* THEME_FOLDER_FILE = "theme.theme";
 static const char* SEASONAL_PATH     = "builtin:seasonal";
 static const int MAX_DEPTH           = 8;
+// What a theme may read: files (itself, what it includes and inherits, its
+// counterpart), their size, the errors kept
+static const int MAX_FILES         = 64;
+static const size_t MAX_FILE_BYTES = 256 * 1024;
+static const size_t MAX_ERRORS     = 100;
+// A metric's range: a layout's sizes, far beyond any screen's
+static const float MAX_METRIC = 10000.0f;
 
 static const BuiltinTheme* findBuiltin(std::string id)
 {
@@ -757,6 +766,8 @@ static const BuiltinTheme* findBuiltin(std::string id)
 // it has the file) or a preset ("builtin:…")
 static bool readThemeRaw(const std::string& name, std::string* text)
 {
+    if (startsWith(name, "@res/") && !isResourceNameSafe(name))
+        return false;
     std::string disk        = HotReload::diskResource(name);
     const std::string& path = disk.empty() ? name : disk;
     if (startsWith(path, BUILTIN_PREFIX))
@@ -772,7 +783,10 @@ static bool readThemeRaw(const std::string& name, std::string* text)
     {
         try
         {
-            *text = std::string(romfs::get(path.substr(5)).string());
+            auto resource = romfs::get(path.substr(5));
+            if (resource.size() > MAX_FILE_BYTES)
+                return false;
+            *text = std::string(resource.string());
             return true;
         }
         catch (const std::exception& e)
@@ -784,13 +798,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
     std::string file = path;
     if (startsWith(file, "@res/"))
         file = std::string(BRLS_RESOURCES) + file.substr(5);
-    std::ifstream stream(file);
-    if (!stream)
-        return false;
-    std::stringstream buffer;
-    buffer << stream.rdbuf();
-    *text = buffer.str();
-    return true;
+    return readSmallFile(file, MAX_FILE_BYTES, text);
 }
 
 // The text as read: a resource's ends with a NUL
@@ -810,22 +818,6 @@ static std::string directoryOf(const std::string& path)
         return BUILTIN_PREFIX;
     size_t slash = path.find_last_of('/');
     return slash == std::string::npos ? "" : path.substr(0, slash);
-}
-
-// `name` (an @include's or an inherit's) as a path from `directory`: a
-// preset when no such file exists
-static std::string resolvePath(const std::string& name, const std::string& directory)
-{
-    if (startsWith(name, BUILTIN_PREFIX) || startsWith(name, "@res/") || startsWith(name, "/")
-        || name.find(":/") != std::string::npos)
-        return name;
-    if (directory == BUILTIN_PREFIX)
-        return BUILTIN_PREFIX + name;
-    std::string path = directory.empty() ? name : directory + "/" + name;
-    std::string text;
-    if (!readThemeText(path, &text) && findBuiltin(name))
-        return BUILTIN_PREFIX + name;
-    return path;
 }
 
 // `text` cut at each '/'
@@ -858,7 +850,7 @@ bool Theme::resolveAsset(const std::string& raw, const std::string& directory, c
     if (startsWith(name, "@res/"))
     {
         if (!trusted)
-            return refuse("a theme file's pictures are in its folder, not in the app's resources");
+            return refuse("a theme's files are in its folder, not in the app's resources");
         if (name.find("..") != std::string::npos)
             return refuse("\"..\" is not allowed");
         *path = name;
@@ -867,7 +859,7 @@ bool Theme::resolveAsset(const std::string& raw, const std::string& directory, c
     if (root == BUILTIN_PREFIX)
         return refuse("a preset's pictures are resources (@res/...)");
     if (name.front() == '/' || name.find(':') != std::string::npos || name.find('\\') != std::string::npos)
-        return refuse("an absolute path is not allowed: a theme's pictures are in its folder");
+        return refuse("an absolute path is not allowed: a theme's files are in its folder");
 
     // From the root, through the including file's folder, to the file
     std::string inside = directory;
@@ -898,28 +890,33 @@ bool Theme::resolveAsset(const std::string& raw, const std::string& directory, c
         relative += (relative.empty() ? "" : "/") + segment;
     std::string resolved = root.empty() ? relative : root + "/" + relative;
 
-    // A link inside the folder to a file out of it is refused too (where
-    // the file system has links and can say where they go: the path is
-    // already in the folder by its name)
+    // A link inside the folder to a file out of it is refused too, and a file
+    // not there yet is looked at through its nearest folder that is (a link
+    // to a folder out of it). Where that cannot be told, refused. (The
+    // consoles' cards have no links.)
+#if !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
     if (!trusted)
     {
-        bool out = false;
+        std::string why;
         try
         {
-            if (fs::exists(resolved))
-            {
-                fs::path within = fs::canonical(resolved).lexically_relative(fs::canonical(root.empty() ? "." : root));
-                out             = within.empty() || *within.begin() == "..";
-            }
+            fs::path there = resolved;
+            while (!there.empty() && !fs::exists(fs::symlink_status(there)))
+                there = there.parent_path();
+            if (there.empty())
+                there = ".";
+            fs::path within = fs::canonical(there).lexically_relative(fs::canonical(root.empty() ? "." : root));
+            if (within.empty() || *within.begin() == "..")
+                why = "a link out of the theme's folder";
         }
         catch (const std::exception& e)
         {
-            // Not resolved (a broken link): no file to read either
-            Logger::debug("theme: cannot resolve {}: {}", resolved, e.what());
+            why = "cannot tell where it leads (a broken link?)";
         }
-        if (out)
-            return refuse("a link out of the theme's folder");
+        if (!why.empty())
+            return refuse(why);
     }
+#endif
     *path = resolved;
     return true;
 }
@@ -986,8 +983,60 @@ namespace
         std::vector<std::pair<std::string, NVGcolor>> colors[3];
         std::vector<std::pair<std::string, float>> metrics;
 
-        std::vector<std::string> errors;
+        std::vector<std::string> errors; // at most MAX_ERRORS
+        size_t moreErrors = 0; // the ones past them
     };
+
+    // What reading a theme has read: its files, at most MAX_FILES, and the
+    // ones being read, each including or inheriting the next (a file met
+    // again there is a loop)
+    struct ThemeReading
+    {
+        int files = 0;
+        std::vector<std::string> chain;
+    };
+}
+
+// An error of the file, kept with the first MAX_ERRORS, cut when long (it
+// may quote a line)
+static void report(ParsedTheme* out, std::string error)
+{
+    if (out->errors.size() >= MAX_ERRORS)
+    {
+        out->moreErrors++;
+        return;
+    }
+    if (error.size() > 200)
+    {
+        size_t cut = 200;
+        while (cut > 0 && ((unsigned char)error[cut] & 0xC0) == 0x80) // not in a character
+            cut--;
+        error = error.substr(0, cut) + "...";
+    }
+    out->errors.push_back(std::move(error));
+}
+
+// The file an @include, an inherit or a counterpart names, from `directory`:
+// a preset ("builtin:…"), else a file confined to the theme's folder `root`
+// as its pictures are (Theme::resolveAsset: a resource only for a preset or
+// a resource theme), else a preset's name when there is no such file
+static bool resolveThemeFile(const std::string& raw, const std::string& directory, const std::string& root,
+    std::string* path, std::string* error)
+{
+    std::string name = trim(raw);
+    if (name.size() >= 2 && name.front() == '"' && name.back() == '"')
+        name = name.substr(1, name.size() - 2);
+    if (startsWith(name, BUILTIN_PREFIX) || directory == BUILTIN_PREFIX)
+    {
+        *path = startsWith(name, BUILTIN_PREFIX) ? name : BUILTIN_PREFIX + name;
+        return true;
+    }
+    if (!Theme::resolveAsset(name, directory, root, path, error))
+        return false;
+    std::string text;
+    if (findBuiltin(name) && !readThemeText(*path, &text))
+        *path = BUILTIN_PREFIX + name;
+    return true;
 }
 
 static bool parseFit(const std::string& value, BackgroundFit* fit)
@@ -1342,7 +1391,7 @@ static ThemeDecor resolveDecor(const DecorSpec* spec, int v)
 // `directory`: the folder of the file read; `assets`: the folder its
 // pictures must stay in (the theme's, Theme::resolveAsset)
 static void parseThemeText(const std::string& text, const std::string& directory, const std::string& assets,
-    const std::string& label, int depth, bool root, ParsedTheme* out)
+    const std::string& label, int depth, bool root, ThemeReading* reading, ParsedTheme* out)
 {
     auto where = [&label](int number)
     { return (label.empty() ? std::string("line ") : label + ":") + std::to_string(number); };
@@ -1379,19 +1428,27 @@ static void parseThemeText(const std::string& text, const std::string& directory
             std::string name = trim(line.substr(8));
             if (name.size() >= 2 && name.front() == '"' && name.back() == '"')
                 name = name.substr(1, name.size() - 2);
-            std::string path = resolvePath(name, directory);
-            std::string included;
+            std::string path, error, included;
+            std::vector<std::string>& chain = reading->chain;
             if (depth >= MAX_DEPTH)
-                out->errors.push_back(where(number) + ": @include " + name + " goes too deep (a loop?)");
-            else if (!readThemeText(path, &included))
-                out->errors.push_back(where(number) + ": @include " + name + ": cannot read " + path);
+                report(out, where(number) + ": @include " + name + " goes too deep (a loop?)");
+            else if (reading->files >= MAX_FILES)
+                report(out, where(number) + ": @include " + name + ": skipped, the theme reads more than " + std::to_string(MAX_FILES) + " files");
+            else if (!resolveThemeFile(name, directory, assets, &path, &error))
+                report(out, where(number) + ": @include " + error);
+            else if (std::find(chain.begin(), chain.end(), path) != chain.end())
+                report(out, where(number) + ": @include " + name + " includes itself (a loop)");
+            else if (reading->files++, !readThemeText(path, &included))
+                report(out, where(number) + ": @include " + name + ": cannot read " + path);
             else
             {
                 // An include in the theme's folder keeps its pictures there
                 std::string folder = directoryOf(path);
                 bool inside        = folder == assets || startsWith(folder, assets + "/");
                 out->files.push_back(path);
-                parseThemeText(included, folder, inside ? assets : folder, name, depth + 1, false, out);
+                chain.push_back(path);
+                parseThemeText(included, folder, inside ? assets : folder, name, depth + 1, false, reading, out);
+                chain.pop_back();
             }
             continue;
         }
@@ -1401,7 +1458,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
             section      = trim(line.substr(1, line.size() - 2));
             sectionKnown = section == "colors" || section == "metrics" || section == "light" || section == "dark";
             if (!sectionKnown)
-                out->errors.push_back(where(number) + ": unknown section [" + section + "], its lines skipped");
+                report(out, where(number) + ": unknown section [" + section + "], its lines skipped");
             out->lightSection = out->lightSection || section == "light";
             out->darkSection  = out->darkSection || section == "dark";
             continue;
@@ -1412,7 +1469,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
         equals = line.find('=');
         if (equals == std::string::npos)
         {
-            out->errors.push_back(where(number) + ": no '=' in \"" + (line.size() > 40 ? line.substr(0, 40) + "..." : line) + "\"");
+            report(out, where(number) + ": no '=' in \"" + (line.size() > 40 ? line.substr(0, 40) + "..." : line) + "\"");
             continue;
         }
         std::string key   = trim(line.substr(0, equals));
@@ -1420,12 +1477,11 @@ static void parseThemeText(const std::string& text, const std::string& directory
 
         if (section == "metrics")
         {
-            char* end;
-            float metric = std::strtof(value.c_str(), &end);
-            if (!value.empty() && *end == '\0')
+            float metric;
+            if (parseNumber(value, -MAX_METRIC, MAX_METRIC, &metric))
                 out->metrics.emplace_back(key, metric);
             else
-                out->errors.push_back(where(number) + ": " + value + " is not a number");
+                report(out, where(number) + ": " + value + " is not a number from -10000 to 10000");
             continue;
         }
 
@@ -1444,7 +1500,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
                 else if (Theme::resolveAsset(value, directory, assets, &path, &error))
                     background.image = path;
                 else
-                    out->errors.push_back(where(number) + ": background_image " + error);
+                    report(out, where(number) + ": background_image " + error);
             }
             else if (key == "background_fit")
             {
@@ -1452,14 +1508,14 @@ static void parseThemeText(const std::string& text, const std::string& directory
                 if (parseFit(value, &fit))
                     background.fit = fit;
                 else
-                    out->errors.push_back(where(number) + ": background_fit is cover, contain, tile or center, not " + value);
+                    report(out, where(number) + ": background_fit is cover, contain, tile or center, not " + value);
             }
             else
             {
                 char* end;
                 float number_ = std::strtof(value.c_str(), &end);
                 if (value.empty() || *end != '\0' || !(number_ >= 0.0f && number_ <= 1.0f))
-                    out->errors.push_back(where(number) + ": " + key + " is a number from 0 to 1, not " + value);
+                    report(out, where(number) + ": " + key + " is a number from 0 to 1, not " + value);
                 else if (key == "background_dim")
                     background.dim = number_;
                 else
@@ -1475,7 +1531,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
             PictureSpec& pictures = out->pictures[section == "light" ? 1 : section == "dark" ? 2
                                                                                              : 0];
             if (!parsePictureKey(key, value, directory, assets, &pictures, &error))
-                out->errors.push_back(where(number) + ": " + error);
+                report(out, where(number) + ": " + error);
             continue;
         }
 
@@ -1486,7 +1542,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
             DecorSpec& decor = out->decor[section == "light" ? 1 : section == "dark" ? 2
                                                                                      : 0];
             if (!parseDecorLine(key, value, directory, assets, &decor, &error))
-                out->errors.push_back(where(number) + ": " + key + " " + error);
+                report(out, where(number) + ": " + key + " " + error);
             continue;
         }
 
@@ -1513,7 +1569,13 @@ static void parseThemeText(const std::string& text, const std::string& directory
             else if (key == "description")
                 out->description = value;
             else if (key == "counterpart")
-                out->counterpart = resolvePath(value, directory);
+            {
+                std::string path, error;
+                if (resolveThemeFile(value, directory, assets, &path, &error))
+                    out->counterpart = path;
+                else
+                    report(out, where(number) + ": counterpart " + error);
+            }
             else
                 out->inherit = value;
             continue;
@@ -1521,14 +1583,14 @@ static void parseThemeText(const std::string& text, const std::string& directory
 
         if (section.empty() && !isSeed(key) && key.find('/') == std::string::npos)
         {
-            out->errors.push_back(where(number) + ": unknown key " + key);
+            report(out, where(number) + ": unknown key " + key);
             continue;
         }
 
         NVGcolor color;
         if (!Theme::parseColor(value, &color))
         {
-            out->errors.push_back(where(number) + ": " + value + " is not a colour");
+            report(out, where(number) + ": " + value + " is not a colour");
             continue;
         }
         int slot = section == "light" ? 1 : section == "dark" ? 2
@@ -1559,7 +1621,7 @@ static void inheritBackground(BackgroundSpec* own, const BackgroundSpec* parent)
 
 // The file's `inherit` and the variants it styles: the inherited file's
 // lines come first, this one's over them
-static void resolveInherit(ParsedTheme* theme, const std::string& directory, int depth)
+static void resolveInherit(ParsedTheme* theme, const std::string& directory, int depth, ThemeReading* reading)
 {
     const std::string& inherit = theme->inherit;
     if (inherit.empty() || inherit == "light" || inherit == "dark")
@@ -1570,18 +1632,26 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
         return;
     }
 
-    std::string path = resolvePath(inherit, directory);
-    std::string text;
+    std::string path, error, text;
+    std::vector<std::string>& chain = reading->chain;
     ParsedTheme parent;
     if (depth >= MAX_DEPTH)
-        theme->errors.push_back("inherit " + inherit + " goes too deep (a loop?)");
-    else if (!readThemeText(path, &text))
-        theme->errors.push_back("inherit " + inherit + ": cannot read " + path);
+        report(theme, "inherit " + inherit + " goes too deep (a loop?)");
+    else if (reading->files >= MAX_FILES)
+        report(theme, "inherit " + inherit + ": skipped, the theme reads more than " + std::to_string(MAX_FILES) + " files");
+    else if (!resolveThemeFile(inherit, directory, directory, &path, &error))
+        report(theme, "inherit " + error);
+    else if (std::find(chain.begin(), chain.end(), path) != chain.end())
+        report(theme, "inherit " + inherit + " inherits itself (a loop)");
+    else if (reading->files++, !readThemeText(path, &text))
+        report(theme, "inherit " + inherit + ": cannot read " + path);
     else
     {
         theme->files.push_back(path);
-        parseThemeText(text, directoryOf(path), directoryOf(path), inherit, depth + 1, true, &parent);
-        resolveInherit(&parent, directoryOf(path), depth + 1);
+        chain.push_back(path);
+        parseThemeText(text, directoryOf(path), directoryOf(path), inherit, depth + 1, true, reading, &parent);
+        resolveInherit(&parent, directoryOf(path), depth + 1, reading);
+        chain.pop_back();
         theme->files.insert(theme->files.end(), parent.files.begin(), parent.files.end());
     }
 
@@ -1597,6 +1667,12 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
     if (theme->icon.empty())
         theme->icon = parent.icon;
     theme->errors.insert(theme->errors.begin(), parent.errors.begin(), parent.errors.end());
+    theme->moreErrors += parent.moreErrors;
+    if (theme->errors.size() > MAX_ERRORS)
+    {
+        theme->moreErrors += theme->errors.size() - MAX_ERRORS;
+        theme->errors.resize(MAX_ERRORS);
+    }
     theme->light = parent.light || theme->lightSection;
     theme->dark  = parent.dark || theme->darkSection;
     if (!theme->light && !theme->dark)
@@ -1692,16 +1768,27 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = 
         resolved.metrics[key] = metric;
     }
     // Several warnings for one unknown key styled in both variants: once
+    for (std::string& warning : resolved.warnings)
+        warning = escapeControlChars(warning);
     std::sort(resolved.warnings.begin(), resolved.warnings.end());
     resolved.warnings.erase(std::unique(resolved.warnings.begin(), resolved.warnings.end()), resolved.warnings.end());
     return resolved;
 }
 
-static ParsedTheme parseTheme(const std::string& text, const std::string& directory)
+// `path`: the file's, when it is one (a file that includes itself is a loop)
+static ParsedTheme parseTheme(const std::string& text, const std::string& directory, const std::string& path = "")
 {
     ParsedTheme theme;
-    parseThemeText(text, directory, directory, "", 0, true, &theme);
-    resolveInherit(&theme, directory, 0);
+    ThemeReading reading;
+    if (!path.empty())
+        reading.chain.push_back(path);
+    parseThemeText(text, directory, directory, "", 0, true, &reading, &theme);
+    resolveInherit(&theme, directory, 0, &reading);
+    if (theme.moreErrors > 0)
+        theme.errors.push_back("and " + std::to_string(theme.moreErrors) + " more errors");
+    // They quote the file: no control character reaches a terminal
+    for (std::string& error : theme.errors)
+        error = escapeControlChars(error);
     return theme;
 }
 
@@ -1750,9 +1837,9 @@ static void reapplyTheme()
 
 static bool applyTheme(const std::string& text, const std::string& directory, const std::string& path, ThemeVariant* variant)
 {
-    ParsedTheme theme      = parseTheme(text, directory);
+    ParsedTheme theme      = parseTheme(text, directory, path);
     ResolvedTheme resolved = resolveTheme(theme);
-    std::string label      = path.empty() ? "theme" : "theme " + path;
+    std::string label      = path.empty() ? "theme" : "theme " + escapeControlChars(path);
     for (const std::string& error : theme.errors)
         Logger::warning("{}: {}", label, error);
     for (const std::string& warning : resolved.warnings)
@@ -1779,7 +1866,7 @@ static bool applyTheme(const std::string& text, const std::string& directory, co
         else
             *variant = Application::getPlatform() ? Application::getThemeVariant() : ThemeVariant::DARK;
     }
-    Logger::info("{}: {} for the {} variant{}", label, theme.name.empty() ? "read" : localized(theme.name),
+    Logger::info("{}: {} for the {} variant{}", label, theme.name.empty() ? "read" : escapeControlChars(localized(theme.name)),
         theme.light && theme.dark ? "light and dark" : theme.light ? "light"
                                                                    : "dark",
         theme.light && theme.dark ? "s" : "");
@@ -1912,7 +1999,7 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
     std::string file = named.substr(named.find_last_of("/:") == std::string::npos ? 0 : named.find_last_of("/:") + 1);
     info.id          = endsWith(file, ".theme") ? file.substr(0, file.size() - 6) : file;
 
-    ParsedTheme theme      = parseTheme(text, directoryOf(path));
+    ParsedTheme theme      = parseTheme(text, directoryOf(path), path);
     ResolvedTheme resolved = resolveTheme(theme, decodePictures);
     info.name              = theme.name.empty() ? info.id : localized(theme.name);
     info.author            = localized(theme.author);
@@ -1992,6 +2079,8 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
                     + " variant");
         }
     }
+    for (std::string& error : info.errors)
+        error = escapeControlChars(error);
     return info;
 }
 

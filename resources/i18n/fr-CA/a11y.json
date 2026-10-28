@@ -7,7 +7,13 @@
         "slider": "curseur",
         "text_field": "champ de texte",
         "tab": "onglet",
-        "list": "liste"
+        "list": "liste",
+        "dialog": "boîte de dialogue"
     },
-    "disabled": "désactivé"
+    "disabled": "indisponible",
+    "on": "activé",
+    "off": "désactivé",
+    "selected": "sélectionné",
+    "position": "{} sur {}",
+    "percent": "{} %"
 }

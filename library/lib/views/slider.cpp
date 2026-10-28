@@ -18,16 +18,35 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/touch/pan_gesture.hpp>
 #include <borealis/core/util.hpp>
+#include <borealis/views/cells/cell_detail.hpp>
 #include <borealis/views/slider.hpp>
 
 namespace brls
 {
 
+// The knob, which takes the focus: it says what its slider is set to.
+class SliderPointer : public Rectangle
+{
+  public:
+    explicit SliderPointer(Slider* slider)
+        : slider(slider)
+    {
+    }
+
+  protected:
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::SLIDER; }
+    std::string getDefaultAccessibilityLabel() override { return this->slider->getAccessibilityLabel(); }
+    std::string getDefaultAccessibilityValue() override { return this->slider->getAccessibilityValue(); }
+
+  private:
+    Slider* slider;
+};
+
 Slider::Slider()
 {
     line      = new Rectangle();
     lineEmpty = new Rectangle();
-    pointer   = new Rectangle();
+    pointer   = new SliderPointer(this);
 
     line->detach();
     lineEmpty->detach();
@@ -117,6 +136,7 @@ Slider::Slider()
             Application::getPlatform()->getAudioPlayer()->play(SOUND_SLIDER_RELEASE);
             progressing = false;
             inputProgressEvent.fire(progress);
+            announceValue();
         } },
         PanAxis::HORIZONTAL));
 
@@ -158,6 +178,7 @@ void Slider::buttonsProcessing()
             // Let go: the value is chosen
             progressing = false;
             inputProgressEvent.fire(progress);
+            announceValue();
         }
 
         // A discrete step moves on each press, in the actions
@@ -216,6 +237,34 @@ void Slider::setProgress(float progress)
 
     progressEvent.fire(this->progress);
     updateUI();
+
+    // While held or dragged, the value is said once let go.
+    if (!this->progressing || this->discreteStep > 0)
+        this->announceValue();
+}
+
+void Slider::announceValue()
+{
+    int percent = (int)std::lround(this->progress * 100);
+    if (percent == this->announced || Application::getCurrentFocus() != pointer)
+        return;
+    this->announced = percent;
+    pointer->announceAccessibilityValue();
+}
+
+std::string Slider::getDefaultAccessibilityLabel()
+{
+    // A slider cell's title
+    View* up = this->hasParent() ? this->getParent() : nullptr;
+    for (int depth = 0; up && depth < 3; depth++, up = up->hasParent() ? up->getParent() : nullptr)
+        if (auto* cell = dynamic_cast<DetailCell*>(up))
+            return cell->title->getFullText();
+    return "";
+}
+
+std::string Slider::getDefaultAccessibilityValue()
+{
+    return accessibilityPercent(this->progress);
 }
 
 void Slider::updateUI()
