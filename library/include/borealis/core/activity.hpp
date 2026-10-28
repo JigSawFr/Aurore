@@ -122,6 +122,13 @@ class Activity
     void resizeToFitWindow();
 
     /**
+     * The content view and the views in it take the safe area
+     * (Application::getSafeArea, Box::setSafeArea). Called with
+     * resizeToFitWindow() and when the safe area changes.
+     */
+    void applySafeArea();
+
+    /**
      * Returns the duration of the activity show / hide animation.
      */
     virtual float getShowAnimationDuration(TransitionAnimation animation);

@@ -265,6 +265,7 @@ The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a b
 | [Migrating from borealis](docs/migrating-from-borealis.md) | The submodule, the CMake target, the resources, Cadran, what changes on screen |
 | [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, Android, iOS and in a browser |
 | [Porting an app](docs/porting.md) | What an app's code and resources should mind on each platform |
+| [Safe areas](docs/safe-areas.md) | Notches, rounded corners, system bars and a TV's overscan: edge to edge, content clear of them |
 | [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
 | [Views](docs/views.md) | Every XML tag, its class and its header |
 | [Themes](docs/themes.md) | Theme files and folders, presets, pictures, decorations, keys |

@@ -33,6 +33,7 @@
 #include <borealis/core/activity.hpp>
 #include <borealis/core/geometry.hpp>
 #include <borealis/core/input.hpp>
+#include <borealis/core/safe_area.hpp>
 #include <borealis/core/theme.hpp>
 #include <borealis/core/time.hpp>
 
@@ -236,6 +237,9 @@ class Harness
 
     // A new window size, then settles
     void resize(int width, int height);
+    // The platform reports this safe area (framebuffer pixels: a notch, the
+    // system's bars), then settles
+    void setSafeArea(const Insets& insets);
 
   private:
     void walkShown(const std::function<void(View*)>& visit);

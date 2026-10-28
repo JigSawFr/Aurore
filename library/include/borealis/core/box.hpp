@@ -171,6 +171,32 @@ class Box : public View
     float getPaddingLeft();
 
     /**
+     * The edges of the box kept clear of the window's safe area (display
+     * cutouts, rounded corners, system bars, overscan:
+     * Application::getSafeArea): on those, the safe area is added to the
+     * box's padding, so its children move in while its background still
+     * reaches the window's edge. `safeArea="top|bottom"` in XML.
+     *
+     * AUTO (the default) is NONE, but ALL for the content view of an
+     * activity; AppletFrame sets its own. A box that keeps clear of an edge
+     * does it for the views in it: they take the safe area no more (a box
+     * that sets NONE lets them). For a box at the window's edges: the
+     * safe area is the window's, not the box's.
+     *
+     * A fixed height (or width) is the whole box with the safe area in it,
+     * unless the box is CONTENT_BOX (setBoxSizing): it then grows by it.
+     */
+    virtual void setSafeArea(SafeAreaEdges edges);
+    SafeAreaEdges getSafeArea() const { return this->safeArea; }
+
+    /// The safe area this box adds to its padding now, in layout units (zero
+    /// on the edges it does not keep clear of). getPaddingTop() and the
+    /// others give the box's own padding, without it.
+    Insets getSafeAreaPadding() const { return this->safePadding; }
+
+    void applySafeArea(SafeAreaEdges reach) override;
+
+    /**
      * Sets the gap between child elements inside this view.
      * This is typically used in layouts like grids or lists.
      */
@@ -295,6 +321,10 @@ class Box : public View
 
     std::vector<View*> children;
 
+    SafeAreaEdges safeArea      = SafeAreaEdges::AUTO;
+    SafeAreaEdges safeAreaReach = SafeAreaEdges::NONE; // what reached the box last
+    Insets safePadding;
+
     size_t defaultFocusedIndex = 0;
     View* lastFocusedView      = nullptr;
 
@@ -303,6 +333,22 @@ class Box : public View
   protected:
     /// A focusable box says the texts shown in it (getAccessibilityText).
     std::string getDefaultAccessibilityLabel() override;
+
+    /// The edges the box keeps clear of when `reach` reached it
+    virtual SafeAreaEdges appliedSafeArea(SafeAreaEdges reach);
+
+    /**
+     * The edges of the safe area that reach `child`, given those that
+     * reached this box and those it kept clear of: by default all of them
+     * when it kept clear of none, else none. A box that places its children
+     * at different edges (AppletFrame: its header at the top, its footer at
+     * the bottom) gives each its own.
+     */
+    virtual SafeAreaEdges childSafeAreaReach(View* child, SafeAreaEdges reach, SafeAreaEdges applied);
+
+    /// Applies the safe area again to this box and the views in it, with
+    /// what reached it last (its edges changed)
+    void reapplySafeArea();
 
     /**
      * Inflates the Box with the given XML string.

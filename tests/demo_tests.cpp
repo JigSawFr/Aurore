@@ -2843,3 +2843,271 @@ BRLS_TEST(cells_grow_with_the_text)
     h.settle();
     BRLS_CHECK_EQ(cell->getHeight(), normal);
 }
+
+// Safe areas (docs/safe-areas.md)
+
+namespace
+{
+
+// The focusable views shown under `view`
+void focusablesIn(brls::View* view, std::vector<brls::View*>* found)
+{
+    if (!view || view->getVisibility() != brls::Visibility::VISIBLE)
+        return;
+    if (view->isFocusable())
+        found->push_back(view);
+    if (auto* box = dynamic_cast<brls::Box*>(view))
+        for (brls::View* child : box->getChildren())
+            focusablesIn(child, found);
+}
+
+bool sameRect(const brls::Rect& a, const brls::Rect& b)
+{
+    return a.getMinX() == b.getMinX() && a.getMinY() == b.getMinY() && a.getWidth() == b.getWidth()
+        && a.getHeight() == b.getHeight();
+}
+
+// A notch on the left, as a phone held in landscape with its bars: in
+// framebuffer pixels, layout units at 1280 x 720
+const brls::Insets NOTCH = { 24, 48, 20, 48 };
+
+} // namespace
+
+BRLS_TEST(safe_area_zero_by_default)
+{
+    DemoHarness h;
+    BRLS_CHECK(brls::Application::getSafeArea().empty());
+    BRLS_CHECK(!brls::Application::isSafeAreaInUse());
+    auto* frame = dynamic_cast<brls::AppletFrame*>(h.top()->getContentView());
+    BRLS_CHECK(frame != nullptr);
+    BRLS_CHECK(frame->getSafeAreaPadding().empty());
+}
+
+BRLS_TEST(safe_area_moves_the_frame_in)
+{
+    DemoHarness h;
+    auto* frame = dynamic_cast<brls::AppletFrame*>(h.top()->getContentView());
+    BRLS_CHECK(frame != nullptr);
+    brls::Box* header   = frame->getHeader();
+    brls::Box* footer   = frame->getFooter();
+    brls::View* title   = h.find("brls/applet_frame/title_label");
+    brls::View* content = frame->getContentView();
+    BRLS_CHECK(header && footer && title && content);
+    const brls::Rect header0 = header->getFrame(), footer0 = footer->getFrame();
+    const brls::Rect title0 = title->getFrame(), content0 = content->getFrame();
+    const brls::test::Image plain = h.screenshot();
+
+    h.setSafeArea(NOTCH);
+    BRLS_CHECK(brls::Application::getSafeArea() == NOTCH);
+
+    // The header reaches the top and grows by the inset; its title moves in
+    BRLS_CHECK_EQ(header->getFrame().getMinY(), 0.0f);
+    BRLS_CHECK_EQ(header->getFrame().getHeight(), header0.getHeight() + NOTCH.top);
+    BRLS_CHECK_EQ(title->getFrame().getMinY(), title0.getMinY() + NOTCH.top);
+    BRLS_CHECK_EQ(title->getFrame().getMinX(), title0.getMinX() + NOTCH.left);
+    // The footer reaches the bottom and grows by the inset
+    BRLS_CHECK_EQ(footer->getFrame().getMaxY(), 720.0f);
+    BRLS_CHECK_EQ(footer->getFrame().getHeight(), footer0.getHeight() + NOTCH.bottom);
+    // The content between them, clear of the sides
+    BRLS_CHECK_EQ(content->getFrame().getMinX(), content0.getMinX() + NOTCH.left);
+    BRLS_CHECK_EQ(content->getFrame().getWidth(), content0.getWidth() - NOTCH.left - NOTCH.right);
+    BRLS_CHECK_EQ(content->getFrame().getMinY(), header->getFrame().getMaxY());
+    // The frame's own padding is the app's: the safe area is apart
+    BRLS_CHECK_EQ(frame->getPaddingLeft(), 0.0f);
+    BRLS_CHECK_EQ(frame->getSafeAreaPadding().left, NOTCH.left);
+    // Nothing to focus under the insets
+    std::vector<brls::View*> focusables;
+    focusablesIn(frame, &focusables);
+    BRLS_CHECK(!focusables.empty());
+    for (brls::View* view : focusables)
+    {
+        const brls::Rect at = view->getFrame();
+        bool inside         = at.getMinX() >= NOTCH.left && at.getMaxX() <= 1280 - NOTCH.right && at.getMinY() >= NOTCH.top;
+        if (!inside)
+            std::fprintf(stderr, "under the safe area: %s at %s\n", view->describe().c_str(), view->getFrame().describe().c_str());
+        BRLS_CHECK(inside);
+    }
+
+    // Edge to edge: the corners drawn as without the insets (the
+    // backgrounds reach them)
+    const brls::test::Image notched = h.screenshot();
+    for (auto [x, y] : { std::pair { 2, 2 }, { 1277, 2 }, { 2, 717 }, { 1277, 717 } })
+        BRLS_CHECK(std::equal(notched.at(x, y), notched.at(x, y) + 4, plain.at(x, y)));
+    BRLS_CHECK(h.matchesReference("safe_area_main_screen"));
+
+    // And back
+    h.setSafeArea({});
+    BRLS_CHECK(brls::Application::getSafeArea().empty());
+    BRLS_CHECK(sameRect(header->getFrame(), header0));
+    BRLS_CHECK(sameRect(footer->getFrame(), footer0));
+    BRLS_CHECK(sameRect(title->getFrame(), title0));
+    BRLS_CHECK(sameRect(content->getFrame(), content0));
+}
+
+BRLS_TEST(safe_area_header_hidden_gives_the_top_to_the_content)
+{
+    DemoHarness h;
+    auto* frame = dynamic_cast<brls::AppletFrame*>(h.top()->getContentView());
+    BRLS_CHECK(frame != nullptr);
+    h.setSafeArea(NOTCH);
+    frame->setHeaderVisibility(brls::Visibility::GONE);
+    frame->setFooterVisibility(brls::Visibility::GONE);
+    h.settle();
+    const brls::Insets padding = frame->getSafeAreaPadding();
+    BRLS_CHECK(padding == NOTCH);
+    BRLS_CHECK_EQ(frame->getContentView()->getFrame().getMinY(), NOTCH.top);
+    BRLS_CHECK_EQ(frame->getContentView()->getFrame().getMaxY(), 720.0f - NOTCH.bottom);
+    frame->setHeaderVisibility(brls::Visibility::VISIBLE);
+    h.settle();
+    BRLS_CHECK_EQ(frame->getSafeAreaPadding().top, 0.0f);
+    BRLS_CHECK_EQ(frame->getHeader()->getSafeAreaPadding().top, NOTCH.top);
+}
+
+BRLS_TEST(safe_area_from_xml)
+{
+    Harness h;
+    h.setSafeArea(NOTCH);
+    // The content view of an activity keeps clear of every edge (auto)
+    auto* plain = new brls::Box(brls::Axis::COLUMN);
+    h.push(new brls::Activity(plain));
+    h.settle();
+    BRLS_CHECK(plain->getSafeAreaPadding() == NOTCH);
+
+    // none lets the views in it take it: a bar at the top, edge to edge
+    brls::View* root = brls::View::createFromXMLString(R"xml(
+        <brls:Box width="auto" height="auto" axis="column" safeArea="none" backgroundColor="#202838">
+            <brls:Box id="bar" width="auto" height="60" padding="10" boxSizing="contentBox" safeArea="top|horizontal"
+                backgroundColor="#2f6f8f">
+                <brls:Box id="inner" width="auto" height="20" grow="1" safeArea="all" backgroundColor="#e0e0e0"/>
+            </brls:Box>
+            <brls:Box id="rest" width="auto" grow="1" safeArea="bottom | left,right" backgroundColor="#303040">
+                <brls:Box width="auto" grow="1" backgroundColor="#8fbf5f"/>
+            </brls:Box>
+        </brls:Box>)xml");
+    h.push(new brls::Activity(root));
+    h.settle();
+    auto* bar   = dynamic_cast<brls::Box*>(h.find("bar"));
+    auto* inner = dynamic_cast<brls::Box*>(h.find("inner"));
+    auto* rest  = dynamic_cast<brls::Box*>(h.find("rest"));
+    BRLS_CHECK(bar && inner && rest);
+    BRLS_CHECK(dynamic_cast<brls::Box*>(root)->getSafeAreaPadding().empty());
+    BRLS_CHECK_EQ(bar->getPaddingTop(), 10.0f); // its own
+    BRLS_CHECK(bar->getSafeAreaPadding() == (brls::Insets { NOTCH.top, NOTCH.right, 0, NOTCH.left }));
+    BRLS_CHECK_EQ(bar->getFrame().getMinY(), 0.0f);
+    BRLS_CHECK_EQ(bar->getFrame().getHeight(), 60.0f + 20.0f + NOTCH.top);
+    BRLS_CHECK_EQ(inner->getFrame().getMinY(), 10.0f + NOTCH.top);
+    BRLS_CHECK_EQ(inner->getFrame().getMinX(), 10.0f + NOTCH.left);
+    BRLS_CHECK(inner->getSafeAreaPadding().empty()); // the bar took it
+    BRLS_CHECK(rest->getSafeAreaPadding() == (brls::Insets { 0, NOTCH.right, NOTCH.bottom, NOTCH.left }));
+    // The bar's colour up to the window's edges, the views in it clear of them
+    BRLS_CHECK(h.matchesReference("safe_area_xml"));
+
+    // Padding set afterwards keeps the safe area on top of it
+    bar->setPaddingTop(4);
+    h.settle();
+    BRLS_CHECK_EQ(bar->getPaddingTop(), 4.0f);
+    BRLS_CHECK_EQ(inner->getFrame().getMinY(), 4.0f + NOTCH.top);
+
+    // A view added later takes it as the others
+    auto* late = new brls::Box();
+    late->setSafeArea(brls::SafeAreaEdges::RIGHT);
+    dynamic_cast<brls::Box*>(root)->addView(late);
+    BRLS_CHECK_EQ(late->getSafeAreaPadding().right, NOTCH.right);
+    late->setSafeArea(brls::SafeAreaEdges::NONE);
+    BRLS_CHECK(late->getSafeAreaPadding().empty());
+}
+
+BRLS_TEST(safe_area_words_and_numbers)
+{
+    brls::SafeAreaEdges edges = brls::SafeAreaEdges::NONE;
+    BRLS_CHECK(brls::parseSafeAreaEdges("top|bottom", &edges));
+    BRLS_CHECK(edges == brls::SafeAreaEdges::VERTICAL);
+    BRLS_CHECK(brls::parseSafeAreaEdges("left, top", &edges));
+    BRLS_CHECK(edges == (brls::SafeAreaEdges::LEFT | brls::SafeAreaEdges::TOP));
+    BRLS_CHECK(brls::parseSafeAreaEdges("all", &edges));
+    BRLS_CHECK(edges == brls::SafeAreaEdges::ALL);
+    BRLS_CHECK(brls::parseSafeAreaEdges("none", &edges));
+    BRLS_CHECK(edges == brls::SafeAreaEdges::NONE);
+    BRLS_CHECK(brls::parseSafeAreaEdges("auto", &edges));
+    BRLS_CHECK(edges == brls::SafeAreaEdges::AUTO);
+    BRLS_CHECK(!brls::parseSafeAreaEdges("auto|top", &edges));
+    BRLS_CHECK(!brls::parseSafeAreaEdges("up", &edges));
+    BRLS_CHECK(!brls::parseSafeAreaEdges("", &edges));
+    BRLS_CHECK(edges == brls::SafeAreaEdges::AUTO); // unchanged
+
+    brls::Insets insets;
+    BRLS_CHECK(brls::Insets::parse("10", &insets));
+    BRLS_CHECK(insets == (brls::Insets { 10, 10, 10, 10 }));
+    BRLS_CHECK(brls::Insets::parse("10,20", &insets));
+    BRLS_CHECK(insets == (brls::Insets { 10, 20, 10, 20 }));
+    BRLS_CHECK(brls::Insets::parse("1 2 3", &insets));
+    BRLS_CHECK(insets == (brls::Insets { 1, 2, 3, 2 }));
+    BRLS_CHECK(brls::Insets::parse("47,0,34,0", &insets));
+    BRLS_CHECK(insets == (brls::Insets { 47, 0, 34, 0 }));
+    BRLS_CHECK(!brls::Insets::parse("1,2,3,4,5", &insets));
+    BRLS_CHECK(!brls::Insets::parse("-1", &insets));
+    BRLS_CHECK(!brls::Insets::parse("top", &insets));
+    BRLS_CHECK(!brls::Insets::parse("nan", &insets));
+    BRLS_CHECK(!brls::Insets::parse("", &insets));
+    BRLS_CHECK(insets == (brls::Insets { 47, 0, 34, 0 })); // unchanged
+}
+
+BRLS_TEST(safe_area_override_overscan_and_scale)
+{
+    Harness h;
+    brls::Insets seen;
+    int fired = 0;
+    brls::Application::getSafeAreaChangedEvent()->subscribe([&](brls::Insets insets)
+        { seen = insets; fired++; });
+
+    // The platform's, in framebuffer pixels: layout units at 1920 x 1080
+    h.resize(1920, 1080);
+    h.setSafeArea({ 60, 0, 30, 0 });
+    BRLS_CHECK(brls::Application::getSafeArea() == (brls::Insets { 40, 0, 20, 0 }));
+    BRLS_CHECK(seen == brls::Application::getSafeArea());
+    BRLS_CHECK_EQ(fired, 1);
+    // The same again: no event
+    brls::Application::updateSafeArea();
+    BRLS_CHECK_EQ(fired, 1);
+
+    // The override in place of the platform's
+    const brls::Insets tv = { 0, 0, 0, 0 };
+    brls::Application::setSafeAreaOverride(&tv);
+    BRLS_CHECK(brls::Application::getSafeArea().empty());
+    // A TV's overscan: 5 % of the window at least
+    brls::Application::setOverscan(0.05f);
+    BRLS_CHECK(brls::Application::getSafeArea() == (brls::Insets { 36, 64, 36, 64 }));
+    brls::Application::setOverscan(1.0f); // at most a quarter
+    BRLS_CHECK_EQ(brls::Application::getOverscan(), 0.25f);
+    brls::Application::setOverscan(0.0f);
+    brls::Application::setSafeAreaOverride(nullptr);
+    BRLS_CHECK(brls::Application::getSafeArea() == (brls::Insets { 40, 0, 20, 0 }));
+
+    // Nonsense from a platform: at most a third of the window
+    h.setSafeArea({ 5000, -10, NAN, 0 });
+    BRLS_CHECK(brls::Application::getSafeArea() == (brls::Insets { 240, 0, 0, 0 }));
+}
+
+BRLS_TEST(safe_area_dialog_keeps_clear)
+{
+    DemoHarness h;
+    h.setSafeArea(NOTCH);
+    auto* dialog = new brls::Dialog("Leave the safe area?");
+    dialog->addButton("Cancel", []() {});
+    dialog->addButton("OK", []() {});
+    dialog->open();
+    h.settle();
+    // An activity's content view: every edge
+    auto* root = dynamic_cast<brls::Box*>(h.top()->getContentView());
+    BRLS_CHECK(root != nullptr);
+    BRLS_CHECK(root->getSafeAreaPadding() == NOTCH);
+    std::vector<brls::View*> focusables;
+    focusablesIn(root, &focusables);
+    BRLS_CHECK(!focusables.empty());
+    for (brls::View* view : focusables)
+    {
+        const brls::Rect at = view->getFrame();
+        BRLS_CHECK(at.getMinX() >= NOTCH.left && at.getMaxX() <= 1280 - NOTCH.right);
+        BRLS_CHECK(at.getMinY() >= NOTCH.top && at.getMaxY() <= 720 - NOTCH.bottom);
+    }
+}

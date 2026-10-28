@@ -11,6 +11,7 @@ A flag is on when it is set to anything but `0` (Cadran's: `1`, `true` or `yes`)
 | `BRLS_INSPECTOR` | `Application::init()` | `1` turns the [inspector](inspector.md) on (F12, or L3 + R3), `0` off, even in a build made with `-DBRLS_INSPECTOR=ON` |
 | `BRLS_HOT_RELOAD` | `Application::init()` | `1` turns [hot reload](hot_reload.md) on; a folder (`$PWD/resources`) also reads the XML from there instead of the copy next to the program. Not on the consoles |
 | `BRLS_PROFILE` | `Profiler` | `1` measures every frame and logs averages every 120 frames ([testing.md](testing.md#the-bench)). Not on the Switch nor in a browser |
+| `BRLS_SAFE_AREA` | `Application::init()` | A [safe area](safe-areas.md) in place of the platform's, in the window's unit: `top,right,bottom,left` as a CSS padding (`47,0,34,0`, `0,48`, `30`), a phone's notch or a TV seen on the desktop |
 | `BRLS_REDRAW_DEBUG` | `Application::init()` | `1` checks redraw on demand: each frame it skips is drawn anyway and compared, a difference logged as a warning (`Application::setRedrawDebug`, OpenGL only). Not on the Switch nor in a browser |
 | `AURORE_RESOURCES_DIR` | libromfs | With the resources built in (`-DAURORE_LIBROMFS=ON`): a folder laid out like `resources/` whose files are read before the built-in ones, so changed XML, pictures or translations need only a restart |
 | `BRLS_THEME` (older name `BOREALIS_THEME`) | the desktop platform | `DARK` starts in the dark variant, anything else in the light one, instead of the system's mode. With Cadran on, the preferences' theme (`ui::Prefs::theme`, dark by default) is applied over it: the demo maps `BRLS_THEME=LIGHT` onto them. `BRLS_THEME` wins when both are set |
@@ -19,7 +20,7 @@ A flag is on when it is set to anything but `0` (Cadran's: `1`, `true` or `yes`)
 | `SteamDeck` | the desktop platform, on Linux | Set by Steam on a Steam Deck: the screen's brightness through the Deck's backlight, links opened and the keyboard shown through Steam (GLFW) |
 | `systemroot` | the desktop fonts, on Windows | Where Windows' fonts are (`C:\Windows\Fonts`), for Chinese, Japanese and Korean |
 
-The debugging aids above (`BRLS_INSPECTOR`, `BRLS_HOT_RELOAD`, `BRLS_PROFILE`, `BRLS_REDRAW_DEBUG`) are read only in a build made with `BRLS_DEV_TOOLS`. It is `AUTO` by default: on, except in `Release` and `MinSizeRel` builds, where these variables do nothing. `-DBRLS_DEV_TOOLS=ON` reads them in a release build too (a simulator built in `Release`), `OFF` in none ([hot reload](hot_reload.md#turning-it-on)). Their functions (`Application::setInspectorEnabled`, `setHotReload`, `Profiler::setEnabled`, `setRedrawDebug`) work in every build.
+The debugging aids above (`BRLS_INSPECTOR`, `BRLS_HOT_RELOAD`, `BRLS_PROFILE`, `BRLS_SAFE_AREA`, `BRLS_REDRAW_DEBUG`) are read only in a build made with `BRLS_DEV_TOOLS`. It is `AUTO` by default: on, except in `Release` and `MinSizeRel` builds, where these variables do nothing. `-DBRLS_DEV_TOOLS=ON` reads them in a release build too (a simulator built in `Release`), `OFF` in none ([hot reload](hot_reload.md#turning-it-on)). Their functions (`Application::setInspectorEnabled`, `setHotReload`, `Profiler::setEnabled`, `setSafeAreaOverride`, `setRedrawDebug`) work in every build.
 
 ## Cadran
 

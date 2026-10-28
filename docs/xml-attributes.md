@@ -96,6 +96,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `paddingRight` | number |
 | `paddingTop` | number |
 | `rowGap` | number |
+| `safeArea` | edges joined with `\|`: `top` · `right` · `bottom` · `left` · `vertical` · `horizontal` · `all` · `none`; or `auto` ([safe areas](safe-areas.md)) |
 
 ## `CadranDigits`
 

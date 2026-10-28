@@ -41,12 +41,14 @@ void NotificationManager::notify(const std::string& text, View* leading)
     this->addView(notification, 0);
 
     // Where the stack sits, from the style as it is now (an app may set it
-    // after the manager is made)
+    // after the manager is made),
     auto style  = Application::getStyle();
     float width = style.getMetric("brls/notification/width");
     this->setWidth(width);
-    this->setTranslationX(Application::ORIGINAL_WINDOW_WIDTH - width - style.getMetric("brls/notification/margin_right"));
-    this->setTranslationY(style.getMetric("brls/notification/margin_top"));
+    // and clear of the safe area
+    const Insets safe = Application::getSafeArea();
+    this->setTranslationX(Application::ORIGINAL_WINDOW_WIDTH - width - style.getMetric("brls/notification/margin_right") - safe.right);
+    this->setTranslationY(style.getMetric("brls/notification/margin_top") + safe.top);
 
     // Timeout timer
     float timeout = style.getMetric("brls/animations/notification_timeout");

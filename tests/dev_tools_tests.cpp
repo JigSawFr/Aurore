@@ -42,6 +42,7 @@ BRLS_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
     setenv("BRLS_REDRAW_DEBUG", "1", 1);
     setenv("BRLS_PROFILE", "1", 1);
     setenv("BRLS_STILL_FOCUS", "1", 1);
+    setenv("BRLS_SAFE_AREA", "10,20", 1);
 
     Harness harness;
     harness.step(2);
@@ -50,6 +51,7 @@ BRLS_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
     BRLS_CHECK_EQ(brls::Application::isRedrawDebug(), BUILT_IN);
     BRLS_CHECK_EQ(brls::Profiler::isEnabled(), BUILT_IN);
     BRLS_CHECK_EQ(ui::env_flag("STILL_FOCUS"), BUILT_IN);
+    BRLS_CHECK_EQ(brls::Application::getSafeArea() == (brls::Insets { 10, 20, 10, 20 }), BUILT_IN);
 }
 
 BRLS_TEST(the_debugging_aids_functions_work_in_every_build)
@@ -64,6 +66,11 @@ BRLS_TEST(the_debugging_aids_functions_work_in_every_build)
     brls::Application::setRedrawDebug(true);
     BRLS_CHECK(brls::Application::isRedrawDebug());
     brls::Application::setRedrawDebug(false);
+    const brls::Insets notch = { 0, 48, 0, 48 };
+    brls::Application::setSafeAreaOverride(&notch);
+    BRLS_CHECK(brls::Application::getSafeArea() == notch);
+    brls::Application::setSafeAreaOverride(nullptr);
+    BRLS_CHECK(brls::Application::getSafeArea().empty());
 }
 
 int main(int argc, char** argv)

@@ -78,6 +78,12 @@ class AppletFrame : public Box
 
     static View* create();
 
+    /// Edge to edge: the frame keeps clear of the left and right of the safe
+    /// area, its header of the top and its footer of the bottom (the content
+    /// of either when hidden). Set, the frame keeps clear of what it is told
+    /// instead, and its header and footer of nothing more.
+    void setSafeArea(SafeAreaEdges edges) override;
+
     inline static bool HIDE_BOTTOM_BAR = false;
 
   private:
@@ -89,7 +95,12 @@ class AppletFrame : public Box
 
     HeaderStyle style = HeaderStyle::REGULAR;
 
+    bool safeAreaManaged = true; // setSafeArea() not called
+
   protected:
+    SafeAreaEdges appliedSafeArea(SafeAreaEdges reach) override;
+    SafeAreaEdges childSafeAreaReach(View* child, SafeAreaEdges reach, SafeAreaEdges applied) override;
+
     std::vector<View*> contentViewStack;
     View* contentView = nullptr;
 
