@@ -14,22 +14,22 @@
     limitations under the License.
 */
 
-#include "view/pokemon_view.hpp"
+#include "view/gem_view.hpp"
 
 #include <borealis/core/i18n.hpp>
 
 using namespace brls::literals;
 
-bool dismissView(brls::View* view, PokemonView* pock)
+bool dismissView(brls::View* view, GemView* gem)
 {
     return true;
 }
 
-PokemonView::PokemonView(Pokemon pokemon)
-    : pokemon(pokemon)
+GemView::GemView(Gem gem)
+    : gem(gem)
 {
     // Inflate the tab from the XML file
-    this->inflateFromXMLRes("xml/views/pokemon.xml");
+    this->inflateFromXMLRes("xml/views/gem.xml");
 
     auto dismissAction = [this](View* view)
     {
@@ -51,12 +51,12 @@ PokemonView::PokemonView(Pokemon pokemon)
     holder->registerAction("Close", brls::ControllerButton::BUTTON_RB, dismissAction, true);
     registerAction("Close", brls::ControllerButton::BUTTON_RB, dismissAction, true);
 
-    getAppletFrameItem()->title = pokemon.name;
-    getAppletFrameItem()->setIconFromRes("img/pokemon/" + pokemon.id + ".png");
+    getAppletFrameItem()->title = gem.name;
+    getAppletFrameItem()->setIconFromRes("img/gallery/" + gem.id + ".png");
     //    getAppletFrameItem()->hintView = holder;
-    image->setImageFromRes("img/pokemon/" + pokemon.id + ".png");
+    image->setImageFromRes("img/gallery/" + gem.id + ".png");
 
-    description->setText("It's a pokemon with name: " + pokemon.name + "\nCollect them all to became a Shaman king!");
+    description->setText(gem.name + ", one of the gems of the list.\nA picture, a text and a button, presented over the tab.");
 
     this->getView("close_button")->registerAction("hints/ok"_i18n, brls::BUTTON_A, [this](brls::View* view)
         {
@@ -64,8 +64,8 @@ PokemonView::PokemonView(Pokemon pokemon)
             return true; }, false, false, brls::SOUND_BACK);
 }
 
-brls::View* PokemonView::create()
+brls::View* GemView::create()
 {
     // Called by the XML engine to create a new ComponentsTab
-    return new PokemonView();
+    return new GemView();
 }

@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+# Copyright 2026 JigSawFr
+# Licensed under the Apache License, Version 2.0.
+#
+# Checks resources/THIRD_PARTY_NOTICES.md against the source: each folder of
+# library/lib/extern and library/include/borealis/extern and each font has an
+# entry, the versions read from the vendored sources are the ones it gives
+# (and the ones library/CMakeLists.txt fetches with AURORE_FETCH_DEPS), and
+# no font is a console maker's.
+#
+#     python3 tools/check_notices.py
+#
+# Exits 1 with the list of what is wrong.
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+NOTICES = ROOT / "resources" / "THIRD_PARTY_NOTICES.md"
+EXTERN = [ROOT / "library" / "lib" / "extern", ROOT / "library" / "include" / "borealis" / "extern"]
+FONTS = [ROOT / "resources" / "font", ROOT / "resources" / "material"]
+# Names that must not be in a font's file: proprietary system fonts
+FORBIDDEN = ["Nintendo", "Morisawa"]
+
+
+def read(path):
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+def define(path, name):
+    m = re.search(r"#\s*define\s+" + name + r"\s+(\d+)", read(path))
+    return int(m.group(1)) if m else None
+
+
+def versions():
+    """{component as in the notices: version read from the source}"""
+    lib = ROOT / "library" / "lib" / "extern"
+    inc = ROOT / "library" / "include" / "borealis" / "extern"
+    found = {}
+    sdl = lib / "SDL" / "include" / "SDL_version.h"
+    if sdl.exists():
+        found["SDL"] = "{}.{}.{}".format(define(sdl, "SDL_MAJOR_VERSION"), define(sdl, "SDL_MINOR_VERSION"),
+                                         define(sdl, "SDL_PATCHLEVEL"))
+    glfw = lib / "glfw" / "include" / "GLFW" / "glfw3.h"
+    if glfw.exists():
+        found["GLFW"] = "{}.{}".format(define(glfw, "GLFW_VERSION_MAJOR"), define(glfw, "GLFW_VERSION_MINOR"))
+    fmt = define(lib / "fmt" / "include" / "fmt" / "base.h", "FMT_VERSION")
+    found["{fmt}"] = "{}.{}.{}".format(fmt // 10000, fmt // 100 % 100, fmt % 100)
+    xml = read(inc / "tinyxml2" / "tinyxml2.h")
+    found["TinyXML-2"] = ".".join(re.search(r"TIXML2_%s_VERSION = (\d+)" % part, xml).group(1)
+                                  for part in ("MAJOR", "MINOR", "PATCH"))
+    json = inc / "nlohmann" / "json.hpp"
+    found["JSON for Modern C++"] = "{}.{}.{}".format(define(json, "NLOHMANN_JSON_VERSION_MAJOR"),
+                                                     define(json, "NLOHMANN_JSON_VERSION_MINOR"),
+                                                     define(json, "NLOHMANN_JSON_VERSION_PATCH"))
+    for name, file in (("stb_image", "stb_image.h"), ("stb_truetype", "stb_truetype.h"), ("stb_dxt", "stb_dxt.h")):
+        m = re.search(r" - v(\d+\.\d+)", read(inc / "nanovg" / file).splitlines()[0])
+        found[name] = m.group(1)
+    m = re.search(r"Version (\S+)", read(lib / "tweeny" / "CHANGELOG.md"))
+    found["Tweeny"] = m.group(1)
+    return found
+
+
+def main():
+    text = read(NOTICES)
+    rows = {}
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if line.startswith("|") and len(cells) >= 3:
+            rows[cells[0]] = cells[1]
+    paths = set(re.findall(r"`([^`]+)`", text))
+    errors = []
+
+    for folder in EXTERN:
+        for entry in sorted(folder.iterdir()):
+            rel = entry.relative_to(ROOT).as_posix()
+            if not any(p == rel or p.startswith(rel + "/") for p in paths):
+                errors.append(f"{rel}: no entry in {NOTICES.name}")
+
+    for folder in FONTS:
+        for font in sorted(folder.glob("*.[ot]t[fc]")):
+            rel = font.relative_to(ROOT).as_posix()
+            if not any(p == rel or rel.startswith(p.rstrip("/") + "/") or p == folder.relative_to(ROOT).as_posix()
+                       for p in paths):
+                errors.append(f"{rel}: no entry in {NOTICES.name}")
+            data = font.read_bytes()
+            for name in FORBIDDEN:
+                if name.encode() in data or name.encode("utf-16-be") in data:
+                    errors.append(f"{rel}: names {name}: a proprietary font")
+
+    for name, version in versions().items():
+        listed = rows.get(name)
+        if listed is None:
+            errors.append(f"{name}: not in {NOTICES.name}")
+        elif not listed.startswith(version):
+            errors.append(f"{name}: {NOTICES.name} says {listed}, the source is {version}")
+
+    # What AURORE_FETCH_DEPS downloads: the vendored versions
+    cmake = read(ROOT / "library" / "CMakeLists.txt")
+    sdl = re.search(r"FetchContent_Declare\(SDL2[^)]*GIT_TAG release-([\d.]+)", cmake)
+    if sdl and sdl.group(1) != versions().get("SDL"):
+        errors.append(f"library/CMakeLists.txt fetches SDL {sdl.group(1)}, the vendored copy is {versions().get('SDL')}")
+    fmt = re.search(r"FetchContent_Declare\(fmt[^)]*GIT_TAG ([\d.]+)", cmake)
+    if fmt and fmt.group(1) != versions()["{fmt}"]:
+        errors.append(f"library/CMakeLists.txt fetches fmt {fmt.group(1)}, the vendored copy is {versions()['{fmt}']}")
+    xml = re.search(r"FetchContent_Declare\(tinyxml2[^)]*GIT_TAG ([\d.]+)", cmake)
+    if xml and xml.group(1) != versions()["TinyXML-2"]:
+        errors.append(f"library/CMakeLists.txt fetches tinyxml2 {xml.group(1)}, the vendored copy is {versions()['TinyXML-2']}")
+
+    for error in errors:
+        print(error)
+    if errors:
+        sys.exit(1)
+    print(f"{NOTICES.relative_to(ROOT)}: every component listed, the versions match")
+
+
+if __name__ == "__main__":
+    main()

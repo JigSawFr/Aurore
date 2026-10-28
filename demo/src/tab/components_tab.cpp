@@ -61,7 +61,7 @@ ComponentsTab::ComponentsTab()
 int selected = 0;
 bool ComponentsTab::onPrimaryButtonClicked(brls::View* view)
 {
-    //    brls::AppletFrame* frame = new brls::AppletFrame(PokemonView::create());
+    //    brls::AppletFrame* frame = new brls::AppletFrame(GemView::create());
     //    frame->setFooterVisibility(brls::Visibility::GONE);
     //    brls::Application::pushActivity(new brls::Activity(frame));
 

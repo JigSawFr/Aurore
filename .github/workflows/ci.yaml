@@ -404,6 +404,9 @@ jobs:
           sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols xorg-dev ninja-build \
             libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri
+          # A system font for Chinese, Japanese and Korean, which the library
+          # finds with fontconfig (the case cjk_from_the_system_fonts)
+          sudo apt install -y --no-install-recommends fontconfig fonts-wqy-microhei
       - name: Compiler cache
         uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
@@ -416,6 +419,9 @@ jobs:
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON \
               -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
           cmake --build build
+      - name: Third-party notices
+        # Each vendored component and font listed, the versions they say (needs the submodules)
+        run: python3 tools/check_notices.py
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Bench
