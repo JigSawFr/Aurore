@@ -32,6 +32,12 @@ namespace brls
 void runSteamDeckCommand(const std::string& cmd);
 
 /**
+ * The steam://openurl command for this url, empty if
+ * Platform::isBrowserUrl() refuses it
+ */
+std::string steamOpenUrlCommand(const std::string& url);
+
+/**
  * return true if we are running in SteamDeck game mode
  */
 bool isSteamDeck();
