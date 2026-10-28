@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include <borealis/core/bidi.hpp>
+#include <aurore/core/bidi.hpp>
 
 #ifdef BRLS_USE_FRIBIDI
 #include <fribidi.h>

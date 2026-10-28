@@ -14,10 +14,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/activity.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/activity.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/i18n.hpp>
 
 using namespace brls::literals;
 

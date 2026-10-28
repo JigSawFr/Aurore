@@ -1,5 +1,5 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
 
 #include <yoga/Yoga.h>
 #include <algorithm>
@@ -8,11 +8,11 @@
 #include <string>
 #include <vector>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/motion.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/view/cadran_icon.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/view/cadran_icon.hpp>
 
 namespace kit = cadran::kit;
 

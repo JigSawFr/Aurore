@@ -15,8 +15,8 @@
 */
 
 #include <cmath>
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/long_press_gesture.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/long_press_gesture.hpp>
 
 namespace brls
 {

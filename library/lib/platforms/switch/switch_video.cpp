@@ -16,8 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/platforms/switch/switch_video.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/platforms/switch/switch_video.hpp>
 
 // nanovg implementation
 #include <nanovg_dk.h>

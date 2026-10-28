@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 class CaptionedImage : public brls::Box
 {

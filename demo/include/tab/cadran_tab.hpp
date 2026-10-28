@@ -4,8 +4,8 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
-#include <borealis.hpp>
-#include <borealis/cadran/view/scroll_view.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran/view/scroll_view.hpp>
 
 class CadranTab : public ScrollView
 {

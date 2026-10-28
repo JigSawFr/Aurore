@@ -1,10 +1,10 @@
 // ui — durations, days and short answers as text.
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/format_text.hpp>
+#include <aurore/cadran/ui/format_text.hpp>
 
 #include <fmt/format.h>
 
-#include <borealis/cadran/ui/tr.hpp>
+#include <aurore/cadran/ui/tr.hpp>
 
 using namespace brls::literals;
 

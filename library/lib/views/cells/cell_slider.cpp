@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "borealis/views/cells/cell_slider.hpp"
+#include "aurore/views/cells/cell_slider.hpp"
 
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/i18n.hpp>
 
 using namespace brls::literals;
 

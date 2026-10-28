@@ -17,11 +17,11 @@
 */
 
 #include <tinyxml2.h>
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/tab_frame.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/tab_frame.hpp>
 
 using namespace brls::literals;
 

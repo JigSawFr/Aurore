@@ -15,7 +15,7 @@
     limitations under the License.
 */
 
-#include <borealis/views/header.hpp>
+#include <aurore/views/header.hpp>
 
 namespace brls
 {

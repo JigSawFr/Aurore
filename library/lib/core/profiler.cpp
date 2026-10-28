@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/profiler.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/profiler.hpp>
 
 #include <cstdlib>
 

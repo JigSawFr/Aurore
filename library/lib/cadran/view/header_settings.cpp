@@ -1,19 +1,19 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/header_settings.hpp>
+#include <aurore/cadran/view/header_settings.hpp>
 
 #include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <string>
 
-#include <borealis/cadran/ui/cadran_frame.hpp>
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/live_prefs.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/text_size.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/version_badge.hpp>
+#include <aurore/cadran/ui/cadran_frame.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/live_prefs.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/text_size.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/version_badge.hpp>
 
 static constexpr float SIZE = 40;
 static constexpr float GAP  = 10;

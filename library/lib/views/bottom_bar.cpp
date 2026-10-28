@@ -18,11 +18,11 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
-#include <borealis/views/bottom_bar.hpp>
-#include <borealis/views/hint.hpp>
+#include <aurore/views/bottom_bar.hpp>
+#include <aurore/views/hint.hpp>
 
 #ifdef PS4
-#include <borealis/platforms/ps4/ps4_sysmodule.hpp>
+#include <aurore/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
 namespace brls

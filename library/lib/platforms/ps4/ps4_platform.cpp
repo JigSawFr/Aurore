@@ -21,11 +21,11 @@ limitations under the License.
 #include <orbis/SystemService.h>
 #include <orbis/UserService.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/platforms/ps4/ps4_ime.hpp>
-#include <borealis/platforms/ps4/ps4_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/platforms/ps4/ps4_ime.hpp>
+#include <aurore/platforms/ps4/ps4_platform.hpp>
 #ifdef USE_JBC
 #include <libjbc.h>
 #endif

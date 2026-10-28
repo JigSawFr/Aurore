@@ -1,20 +1,20 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/cut_text.hpp>
+#include <aurore/cadran/ui/cut_text.hpp>
 
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <set>
 #include <string>
-#include <borealis.hpp>
+#include <aurore.hpp>
 #if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
 #include <fcntl.h>
 #include <unistd.h>
 #endif
 
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
 namespace cut_text
 {

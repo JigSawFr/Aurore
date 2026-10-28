@@ -11,8 +11,8 @@
 #include <string>
 #include "check.h"
 
-#include <borealis/cadran/ui/format_text.hpp>
-#include <borealis/cadran/ui/tr.hpp>
+#include <aurore/cadran/ui/format_text.hpp>
+#include <aurore/cadran/ui/tr.hpp>
 
 #include "catalog.hpp"
 

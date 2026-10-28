@@ -1,12 +1,12 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/effects.hpp>
 
 #include <string>
 
-#include <borealis/core/application.hpp>
+#include <aurore/core/application.hpp>
 
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/text_size.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/text_size.hpp>
 
 namespace effects
 {

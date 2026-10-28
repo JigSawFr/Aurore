@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_selector.hpp"
+#include "aurore/views/cells/cell_selector.hpp"
 
-#include "borealis/views/dropdown.hpp"
+#include "aurore/views/dropdown.hpp"
 
 namespace brls
 {

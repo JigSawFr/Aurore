@@ -19,9 +19,9 @@ limitations under the License.
 #include <iostream>
 #include <string>
 #include <utility>
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/psv/psv_ime.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/psv/psv_ime.hpp>
 
 namespace brls
 {

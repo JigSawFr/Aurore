@@ -20,7 +20,7 @@
 // resources/i18n/*/themes.json. The format: docs/themes.md.
 
 #include "theme_presets.hpp"
-#include <borealis/core/time.hpp>
+#include <aurore/core/time.hpp>
 
 #include <iterator>
 

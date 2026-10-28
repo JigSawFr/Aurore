@@ -1,12 +1,12 @@
 // ui — toasts, the failures said in a dialog and screen changes. The other
 // cadran/ui/*.cpp hold the rest of ui.hpp by concern.
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
-#include <borealis/cadran/ui/cadran_modal.hpp>
-#include <borealis/cadran/ui/cadran_text.hpp>
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/cadran_modal.hpp>
+#include <aurore/cadran/ui/cadran_text.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
 
 using namespace brls::literals;
 

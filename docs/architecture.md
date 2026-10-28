@@ -21,18 +21,18 @@ flowchart TB
     core --> extern
 ```
 
-| Folder (`include/borealis/…` and `lib/…`) | What it holds | May include |
+| Folder (`include/aurore/…` and `lib/…`) | What it holds | May include |
 | --- | --- | --- |
 | `core/` | The application, the base view and box, activities, actions and gestures, the theme and the style, translations, threads, timers, animations, the logger, the inspector, hot reload, the profiler | `core/`, `views/` (the core builds some views itself: dialogs, hints, notifications), `platforms/` only to pick one (`platform.cpp`) |
 | `views/` | The views of the library: labels, images, buttons, frames, lists, cells, dialogs, widgets | `core/`, `views/` |
 | `platforms/` | One folder per platform, each implementing the core's interfaces | `core/`, `platforms/`; the GLFW and SDL keyboards also show an `EditTextDialog` |
-| `cadran/` | Cadran, the default look (GPLv3, [cadran.md](cadran.md)) | the public API only, through `<borealis.hpp>` |
+| `cadran/` | Cadran, the default look (GPLv3, [cadran.md](cadran.md)) | the public API only, through `<aurore.hpp>` |
 | `test/` | The test harness and its headless platform ([testing.md](testing.md)) | `core/`, `platforms/` |
 | `extern/` | Bundled libraries, under their own licences | — |
 
 The core calls Cadran from one file, `application.cpp`: `init()` and `createWindow()` start it (`cadran::start`, `cadran::start_window`) unless `Application::setCadran(false)` was called before, and `getReduceMotion()` asks whether its effects are reduced. Nothing else in the core or the views knows about it (the theme only knows its keys, `cadran/…`, as strings): Cadran restyles screens from the outside, through the theme keys, the XML views it registers and the hooks the core already has.
 
-`<borealis.hpp>` includes the whole public API; `<borealis/cadran.hpp>` adds Cadran's. Everything is in the `brls` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
+`<aurore.hpp>` includes the whole public API; `<aurore/cadran.hpp>` adds Cadran's. Everything is in the `brls` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
 
 ## The main loop
 

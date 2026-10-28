@@ -15,10 +15,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/scroll_gesture.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/h_scrolling_frame.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/scroll_gesture.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/h_scrolling_frame.hpp>
 
 namespace brls
 {

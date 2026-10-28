@@ -18,9 +18,9 @@
 // on every path that decodes one, before anything large is allocated; a
 // font whose glyph runs past its data is refused too (stb_truetype)
 
-#include <borealis.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <algorithm>
 #include <chrono>

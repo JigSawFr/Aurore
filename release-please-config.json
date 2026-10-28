@@ -25,7 +25,7 @@
       "release-as": "0.1.0",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
-        { "type": "generic", "path": "library/include/borealis/version.hpp" }
+        { "type": "generic", "path": "library/include/aurore/version.hpp" }
       ]
     }
   }

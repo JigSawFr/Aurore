@@ -22,10 +22,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <borealis/core/activity.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/recycling_grid.hpp>
+#include <aurore/core/activity.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/recycling_grid.hpp>
 
 namespace brls
 {

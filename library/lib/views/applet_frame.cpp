@@ -16,13 +16,13 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/applet_frame.hpp>
-#include <borealis/views/dialog.hpp>
-#include <borealis/views/hint.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/applet_frame.hpp>
+#include <aurore/views/dialog.hpp>
+#include <aurore/views/hint.hpp>
 
 using namespace brls::literals;
 

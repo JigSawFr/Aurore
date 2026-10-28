@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "borealis/views/widgets/account.hpp"
+#include "aurore/views/widgets/account.hpp"
 
 #ifdef __SWITCH__
 #include <switch.h>

@@ -18,27 +18,27 @@
 // own (docs/testing.md). The references are in tests/references/;
 // BRLS_TEST_UPDATE=1 writes them again.
 
-#include <borealis.hpp>
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/cadran_modal.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/live_prefs.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/text_size.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/cadran_icon.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/theme_decor.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/platforms/desktop/desktop_font.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/cadran_modal.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/live_prefs.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/text_size.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/cadran_icon.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/theme_decor.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/platforms/desktop/desktop_font.hpp>
 #ifdef __GLFW__
-#include <borealis/platforms/glfw/glfw_ime.hpp>
+#include <aurore/platforms/glfw/glfw_ime.hpp>
 #endif
-#include <borealis/platforms/desktop/desktop_platform.hpp>
-#include <borealis/test/harness.hpp>
-#include <borealis/views/edit_text_dialog.hpp>
+#include <aurore/platforms/desktop/desktop_platform.hpp>
+#include <aurore/test/harness.hpp>
+#include <aurore/views/edit_text_dialog.hpp>
 
 #include <algorithm>
 #include <chrono>

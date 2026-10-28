@@ -2,7 +2,7 @@
 
 Cadran is the look of [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf), now part of Aurore: navy and cool-white palettes, an icon rail for a sidebar, the app's mark and a status pill in the header, cards in place of lists, modals and action sheets, vector icons, figures in Sora, and the language, theme and text size changed while the app runs, in 15 languages.
 
-It lives in `library/include/borealis/cadran/` and `library/lib/cadran/`, its strings in `resources/i18n/<language>/cadran.json`, its emoji in `resources/img/emoji/`, its font in `resources/font/`. It is **GPLv3** (`LICENSE.GPL`): an app built with it is GPLv3.
+It lives in `library/include/aurore/cadran/` and `library/lib/cadran/`, its strings in `resources/i18n/<language>/cadran.json`, its emoji in `resources/img/emoji/`, its font in `resources/font/`. It is **GPLv3** (`LICENSE.GPL`): an app built with it is GPLv3.
 
 ## Turning it on
 
@@ -11,8 +11,8 @@ There is nothing to do: `brls::Application::init()` and `createWindow()` start i
 What the app sets **before** `init()`:
 
 ```cpp
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran.hpp>
 
 // What Cadran asks of the app (all optional), and its preferences, kept in
 // the app's own settings (a ui::Prefs).

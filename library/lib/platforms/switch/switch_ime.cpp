@@ -22,8 +22,8 @@ limitations under the License.
 #include <cstring>
 #include <iostream>
 #include <vector>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/switch/switch_ime.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/switch/switch_ime.hpp>
 
 namespace brls
 {

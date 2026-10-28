@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include <borealis/core/geometry.hpp>
+#include <aurore/core/geometry.hpp>
 
 namespace brls
 {

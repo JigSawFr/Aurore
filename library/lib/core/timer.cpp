@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include <borealis/core/timer.hpp>
+#include <aurore/core/timer.hpp>
 
 namespace brls
 {

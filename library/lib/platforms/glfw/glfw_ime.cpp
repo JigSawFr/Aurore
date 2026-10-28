@@ -22,14 +22,14 @@ limitations under the License.
 #include <cstring>
 #include <iostream>
 #include <locale>
-#include <borealis/core/box.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/platforms/desktop/steam_deck.hpp>
-#include <borealis/platforms/glfw/glfw_ime.hpp>
-#include <borealis/views/dialog.hpp>
-#include <borealis/views/edit_text_dialog.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/platforms/desktop/steam_deck.hpp>
+#include <aurore/platforms/glfw/glfw_ime.hpp>
+#include <aurore/views/dialog.hpp>
+#include <aurore/views/edit_text_dialog.hpp>
+#include <aurore/views/label.hpp>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 

@@ -16,7 +16,7 @@
 
 #include "view/gem_view.hpp"
 
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/i18n.hpp>
 
 using namespace brls::literals;
 

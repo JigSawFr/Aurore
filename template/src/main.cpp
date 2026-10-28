@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran.hpp>
 
 #include "home_tab.hpp"
 

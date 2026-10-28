@@ -14,8 +14,8 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/platforms/switch/switch_input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/platforms/switch/switch_input.hpp>
 
 namespace brls
 {

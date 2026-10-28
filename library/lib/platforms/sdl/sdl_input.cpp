@@ -16,9 +16,9 @@
 */
 
 #include <mutex>
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/sdl/sdl_input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/sdl/sdl_input.hpp>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif

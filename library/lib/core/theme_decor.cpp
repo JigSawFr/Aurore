@@ -20,9 +20,9 @@
 // frame to frame): the same time draws the same picture, whatever the
 // frame rate, which keeps a test's screenshot and redraw debugging true.
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/theme_decor.hpp>
-#include <borealis/core/theme_image.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/theme_decor.hpp>
+#include <aurore/core/theme_image.hpp>
 
 #include <algorithm>
 #include <cmath>

@@ -7,7 +7,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 - One `CMakeLists.txt` for every platform: `commonOption.cmake` and `toolchain.cmake` before `project()`, the platform picked with `-DAURORE_PLATFORM=…`. Make the program with `program_target(name sources)` rather than `add_executable`: on Android it is a shared library SDL's Java activity loads, on Windows a GUI program unless `AURORE_WIN32_TERMINAL`.
 - Add the platform's own source where it has one: `library/lib/platforms/switch/switch_wrapper.c` on the Switch (as [`template/`](../template/CMakeLists.txt) does), `library/lib/platforms/ps4/crashlog.c` on the PS4 for a backtrace when the app crashes.
 - The packaging is per platform: the `.nro` and its romfs, the `.vpk` and its LiveArea, the PS4's `.pkg`, the macOS and iOS bundles, the Android project. Copy each from the demo's `CMakeLists.txt` (and `android-project/`), with the app's name, IDs and icon.
-- Keep `main()` as it is everywhere: `init()`, `createWindow()`, a first activity, `while (mainLoop())`. Android and iOS start it through SDL: include `<SDL2/SDL_main.h>` before it there; UWP includes `<borealis/core/main.hpp>` after it. The demo's `demo/src/main.cpp` does both:
+- Keep `main()` as it is everywhere: `init()`, `createWindow()`, a first activity, `while (mainLoop())`. Android and iOS start it through SDL: include `<SDL2/SDL_main.h>` before it there; UWP includes `<aurore/core/main.hpp>` after it. The demo's `demo/src/main.cpp` does both:
 
   ```cpp
   #if defined(ANDROID) || defined(IOS)
@@ -15,7 +15,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
   #endif
   // … int main(int argc, char* argv[]) { … } …
   #ifdef __WINRT__
-  #include <borealis/core/main.hpp>
+  #include <aurore/core/main.hpp>
   #endif
   ```
 

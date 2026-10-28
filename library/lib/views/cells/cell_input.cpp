@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_input.hpp"
+#include "aurore/views/cells/cell_input.hpp"
 
-#include "borealis/views/dropdown.hpp"
+#include "aurore/views/dropdown.hpp"
 
 #include <algorithm>
 

@@ -15,10 +15,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/desktop/desktop_platform.hpp>
-#include <borealis/platforms/glfw/glfw_input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/desktop/desktop_platform.hpp>
+#include <aurore/platforms/glfw/glfw_input.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>

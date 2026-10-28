@@ -15,8 +15,8 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/views/progress_spinner.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/views/progress_spinner.hpp>
 
 namespace brls
 {

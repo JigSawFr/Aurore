@@ -1,5 +1,5 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/qr_view.hpp>
+#include <aurore/cadran/view/qr_view.hpp>
 
 #include <cmath>
 #include <qrcodegen.hpp>

@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include "borealis/views/widgets/battery.hpp"
+#include "aurore/views/widgets/battery.hpp"
 
-#include "borealis/core/thread.hpp"
+#include "aurore/core/thread.hpp"
 
 #define BATTERY_MAX_WIDTH 23.0f
 

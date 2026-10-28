@@ -15,9 +15,9 @@
 */
 
 #include <yoga/Yoga.h>
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/recycler.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/recycler.hpp>
 
 namespace brls
 {

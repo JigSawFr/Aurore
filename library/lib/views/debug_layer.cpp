@@ -16,13 +16,13 @@
 
 #include <yoga/Yoga.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/views/debug_layer.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/views/debug_layer.hpp>
+#include <aurore/views/label.hpp>
 
 #ifdef PS4
-#include <borealis/platforms/ps4/ps4_sysmodule.hpp>
+#include <aurore/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
 namespace brls

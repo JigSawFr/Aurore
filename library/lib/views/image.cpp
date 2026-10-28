@@ -22,13 +22,13 @@
 #include <climits>
 #include <cmath>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/image.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/image.hpp>
 
-#include "borealis/core/cache_helper.hpp"
-#include "borealis/core/thread.hpp"
+#include "aurore/core/cache_helper.hpp"
+#include "aurore/core/thread.hpp"
 
 #include <memory>
 

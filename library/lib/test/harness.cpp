@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include <borealis.hpp>
-#include <borealis/test/harness.hpp>
-#include <borealis/test/headless_platform.hpp>
+#include <aurore.hpp>
+#include <aurore/test/harness.hpp>
+#include <aurore/test/headless_platform.hpp>
 
 #include <algorithm>
 #include <chrono>

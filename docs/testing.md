@@ -6,11 +6,11 @@ It is built with `-DBRLS_BUILD_TESTS=ON`, on the desktop with the OpenGL 3 drive
 
 ## The harness
 
-`library/include/borealis/test/harness.hpp`, target `Aurore::test`.
+`library/include/aurore/test/harness.hpp`, target `Aurore::test`.
 
 ```cpp
-#include <borealis.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore.hpp>
+#include <aurore/test/harness.hpp>
 
 BRLS_TEST(settings_opens)
 {
@@ -64,7 +64,7 @@ The same frames are drawn on every run: the clock is simulated, the platform say
 
 ## How it draws without a display
 
-`HeadlessPlatform` (`borealis/test/headless_platform.hpp`) takes the place of GLFW or SDL (`Platform::setFactory`). Its video context draws into an offscreen framebuffer of an OpenGL 3.2 context made by EGL on Mesa's surfaceless platform: no X server, no Xvfb. Where EGL is missing (macOS, Windows), or with `BRLS_HEADLESS_GLFW=1`, the context is a hidden GLFW window's (which needs a display). On Ubuntu: `libegl-dev` to build, `libegl1` and `libgl1-mesa-dri` to run.
+`HeadlessPlatform` (`aurore/test/headless_platform.hpp`) takes the place of GLFW or SDL (`Platform::setFactory`). Its video context draws into an offscreen framebuffer of an OpenGL 3.2 context made by EGL on Mesa's surfaceless platform: no X server, no Xvfb. Where EGL is missing (macOS, Windows), or with `BRLS_HEADLESS_GLFW=1`, the context is a hidden GLFW window's (which needs a display). On Ubuntu: `libegl-dev` to build, `libegl1` and `libgl1-mesa-dri` to run.
 
 The clock is borealis' own: `getCPUTimeUsec()` returns the simulated time once `setSimulatedTimeUsec()` set one, which the harness moves one frame's time before each frame. Animations, timers, `brls::delay`, button repeats and the highlight read it; the main loop no longer sleeps to wait for a frame.
 
@@ -124,7 +124,7 @@ aurore_bench --check tests/bench_baseline.json # exit 1 on a regression
 
 `--check` fails when a count is above the baseline's by more than `--margin` (25 %, and 1). Times depend on the machine: they are checked only with `--time-margin <factor>`. `ctest` runs the check.
 
-The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too (a build with `BRLS_DEV_TOOLS`, see [hot reload](hot_reload.md#turning-it-on)), and logs averages every 120 frames. The [inspector](inspector.md)'s panel shows its figures, and it measures while the panel is open. Each `FrameProfile` has the time of each phase (`events`, `input`, `update`, `layout`, `draw`, `inspector`, `flush`, `swap`), the `total` and the `interval` since the iteration before, and counts: layouts, views laid out, nanovg's draw calls and triangles, allocations.
+The `Profiler` (`aurore/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too (a build with `BRLS_DEV_TOOLS`, see [hot reload](hot_reload.md#turning-it-on)), and logs averages every 120 frames. The [inspector](inspector.md)'s panel shows its figures, and it measures while the panel is open. Each `FrameProfile` has the time of each phase (`events`, `input`, `update`, `layout`, `draw`, `inspector`, `flush`, `swap`), the `total` and the `interval` since the iteration before, and counts: layouts, views laid out, nanovg's draw calls and triangles, allocations.
 
 ## aurore-preview
 

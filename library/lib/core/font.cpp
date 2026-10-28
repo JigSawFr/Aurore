@@ -16,9 +16,9 @@
 
 #include <unistd.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/assets.hpp>
-#include <borealis/core/font.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/assets.hpp>
+#include <aurore/core/font.hpp>
 
 #define MATERIAL_ICONS "material/MaterialIcons-Regular.ttf"
 #define MATERIAL_ICONS_PATH BRLS_ASSET(MATERIAL_ICONS)

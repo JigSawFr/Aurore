@@ -16,7 +16,7 @@ limitations under the License.
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 class TextTestTab : public brls::Box
 {

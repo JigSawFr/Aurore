@@ -28,8 +28,8 @@
 // with --time-margin (a factor over the baseline's). The baseline and the
 // check must run the same number of frames (--frames, 300 by default).
 
-#include <borealis.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <algorithm>
 #include <atomic>

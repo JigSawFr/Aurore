@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_radio.hpp"
+#include "aurore/views/cells/cell_radio.hpp"
 
 namespace brls
 {

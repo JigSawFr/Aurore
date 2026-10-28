@@ -14,10 +14,10 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_bool.hpp"
+#include "aurore/views/cells/cell_bool.hpp"
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
 
 using namespace brls::literals;
 

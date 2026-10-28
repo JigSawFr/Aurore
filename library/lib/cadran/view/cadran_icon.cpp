@@ -1,13 +1,13 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/cadran_icon.hpp>
+#include <aurore/cadran/view/cadran_icon.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <utility>
 
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/motion.hpp>
 
 namespace
 {

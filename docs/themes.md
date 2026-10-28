@@ -172,7 +172,7 @@ To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BRLS_THEME=LIGHT` f
 
 ### Pictures in memory
 
-A theme's pictures are loaded by `ThemeImages` (`borealis/core/theme_image.hpp`), the one loader for them: decoded on a thread of their own (`Threading::asyncDecode`, so a large one does not hold back the app's `brls::async` tasks), made smaller when larger than 1920×1080 (the ratio kept, an average of the pixels each one covers), the texture made on the UI thread (`brls::sync`), and freed when nothing holds it any more: the background's when the theme or the variant changes. Only the variant on screen has its picture loaded: a 1920×1080 picture is 8 MB of texture (RGBA), so at most 8 MB for the background, plus the picture being replaced while the next one loads. A JPEG that size takes a few tens of milliseconds to decode on a desktop, a few hundred on a Switch, on that thread. A picture larger than 4096×4096 pixels, or than 16384 on a side, is refused from its header without being decoded (`NVG_MAX_IMAGE_PIXELS`, `NVG_MAX_IMAGE_SIDE` in `nanovg.h`, the same for `brls::Image`): the theme reports it as a picture it cannot read.
+A theme's pictures are loaded by `ThemeImages` (`aurore/core/theme_image.hpp`), the one loader for them: decoded on a thread of their own (`Threading::asyncDecode`, so a large one does not hold back the app's `brls::async` tasks), made smaller when larger than 1920×1080 (the ratio kept, an average of the pixels each one covers), the texture made on the UI thread (`brls::sync`), and freed when nothing holds it any more: the background's when the theme or the variant changes. Only the variant on screen has its picture loaded: a 1920×1080 picture is 8 MB of texture (RGBA), so at most 8 MB for the background, plus the picture being replaced while the next one loads. A JPEG that size takes a few tens of milliseconds to decode on a desktop, a few hundred on a Switch, on that thread. A picture larger than 4096×4096 pixels, or than 16384 on a side, is refused from its header without being decoded (`NVG_MAX_IMAGE_PIXELS`, `NVG_MAX_IMAGE_SIDE` in `nanovg.h`, the same for `brls::Image`): the theme reports it as a picture it cannot read.
 
 
 <a id="logos-and-images"></a>
@@ -342,7 +342,7 @@ Which views: the core's AppletFrame header, `Sidebar`, `Dialog`, `Dropdown` and 
 
 Read like the others: at the top or per variant, inherited. They are drawn with nanovg in three depths (the far ones smaller, slower, fainter), a few fills per frame (one per depth and colour; a gradient each for the glow of embers and of the nearest flakes): no picture, no allocation once made.
 
-**Motion, the battery and the user** (`ThemeDecorations`, `borealis/core/theme_decor.hpp`):
+**Motion, the battery and the user** (`ThemeDecorations`, `aurore/core/theme_decor.hpp`):
 
 - They move only when motion is allowed: `Application::getReduceMotion()` false, so not with the app's reduced motion, nor, with Cadran, with Preferences › Visual effects at *Reduced*, nor *Automatic* in hand (the lighter effects), nor with `BRLS_STILL_FOCUS` (screenshot tests). Otherwise **nothing** of them is drawn, not even a frozen frame: the plain palette.
 - They move at 30 frames a second at most (`PARTICLE_FPS`): their places are a function of the time, taken at a 30 Hz tick. With redraw on demand, an otherwise still screen is drawn 30 times a second while they run, instead of once a second.
@@ -489,7 +489,7 @@ The seasons are the northern hemisphere's.
 ## The API
 
 ```cpp
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 // Use a file (or a preset), replacing the one in use; the screens take it at
 // their next frame. `variant`: the one it styles (or the one in use when it

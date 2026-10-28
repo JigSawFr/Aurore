@@ -22,15 +22,15 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <borealis/core/activity.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/observable.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/core/view.hpp>
-#include <borealis/views/recycler.hpp>
+#include <aurore/core/activity.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/observable.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/core/view.hpp>
+#include <aurore/views/recycler.hpp>
 
 namespace brls
 {

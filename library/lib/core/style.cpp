@@ -17,9 +17,9 @@
 */
 
 #include <stdexcept>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/style.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/style.hpp>
+#include <aurore/core/util.hpp>
 
 namespace brls
 {

@@ -14,12 +14,12 @@
 #include <memory>
 #include <optional>
 
-#include <borealis/cadran/ui/action_sheet.hpp>
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/cadran_modal.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/cadran_icon.hpp>
+#include <aurore/cadran/ui/action_sheet.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/cadran_modal.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/cadran_icon.hpp>
 
 using namespace brls::literals;
 

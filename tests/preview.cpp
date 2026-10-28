@@ -24,9 +24,9 @@
 // views of its own builds the same tool with brls::test::Harness, after
 // registering them). Resources are the demo's: "@res/..." and i18n strings.
 
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <cstdio>
 #include <cstdlib>

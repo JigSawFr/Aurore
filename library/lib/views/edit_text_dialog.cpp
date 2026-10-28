@@ -1,13 +1,13 @@
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/edit_text_dialog.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/edit_text_dialog.hpp>
 
 #ifdef __PSV__
 #define EDIT_TEXT_DIALOG_POP_ANIMATION TransitionAnimation::NONE
 #define EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT false
 #include <SDL2/SDL.h>
-#include "borealis/platforms/sdl/sdl_video.hpp"
+#include "aurore/platforms/sdl/sdl_video.hpp"
 #else
 #define EDIT_TEXT_DIALOG_POP_ANIMATION TransitionAnimation::FADE
 #define EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT true

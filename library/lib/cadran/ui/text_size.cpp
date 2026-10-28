@@ -1,16 +1,16 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/text_size.hpp>
+#include <aurore/cadran/ui/text_size.hpp>
 
 #include <yoga/Yoga.h>
 #include <cstdlib>
 #include <string>
 #include <vector>
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/cadran_digits.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/cadran_digits.hpp>
 
 #ifdef __SWITCH__
 #include <switch.h>

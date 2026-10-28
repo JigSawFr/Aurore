@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include <borealis/core/gesture.hpp>
+#include <aurore/core/gesture.hpp>
 
 namespace brls
 {

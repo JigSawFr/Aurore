@@ -17,9 +17,9 @@ limitations under the License.
 #include <psp2/ctrl.h>
 #include <psp2/touch.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/psv/psv_input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/psv/psv_input.hpp>
 
 namespace brls
 {

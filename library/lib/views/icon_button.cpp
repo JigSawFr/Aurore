@@ -14,8 +14,8 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/views/icon_button.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/views/icon_button.hpp>
 
 namespace brls
 {

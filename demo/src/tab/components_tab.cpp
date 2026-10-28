@@ -16,7 +16,7 @@
 
 #include "tab/components_tab.hpp"
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
 
 using namespace brls::literals; // for _i18n
 

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/platforms/psv/psv_video.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/platforms/psv/psv_video.hpp>
 
 #define NANOVG_GXM_IMPLEMENTATION
 #define NANOVG_GXM_UTILS_IMPLEMENTATION

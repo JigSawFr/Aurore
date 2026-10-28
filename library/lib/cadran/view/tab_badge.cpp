@@ -1,13 +1,13 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/tab_badge.hpp>
+#include <aurore/cadran/view/tab_badge.hpp>
 
 #include <string>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/motion.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/cadran_icon.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/cadran_icon.hpp>
 
 static constexpr float TAB_BADGE_SIZE     = 26;
 static constexpr const char* TAB_BADGE_ID = "tab_badge";

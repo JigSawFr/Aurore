@@ -19,10 +19,10 @@
 
 #include <cctype>
 #include <memory>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/desktop/desktop_platform.hpp>
-#include <borealis/platforms/desktop/steam_deck.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/desktop/desktop_platform.hpp>
+#include <aurore/platforms/desktop/steam_deck.hpp>
 
 #ifdef __SDL2__
 #include <SDL2/SDL_misc.h>

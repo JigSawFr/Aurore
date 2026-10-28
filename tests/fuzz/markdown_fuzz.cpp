@@ -21,8 +21,8 @@
 //
 //   ./aurore_fuzz_markdown -max_total_time=60
 
-#include <borealis/cadran/util/markdown.hpp>
-#include <borealis/cadran/util/safe_text.hpp>
+#include <aurore/cadran/util/markdown.hpp>
+#include <aurore/cadran/util/safe_text.hpp>
 
 #include <cstdint>
 #include <cstdio>

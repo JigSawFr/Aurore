@@ -1,10 +1,10 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/motion.hpp>
 
 #include <algorithm>
 #include <cmath>
 
-#include <borealis/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/effects.hpp>
 
 namespace motion
 {

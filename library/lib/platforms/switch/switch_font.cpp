@@ -17,9 +17,9 @@
 
 #include <switch.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/switch/switch_font.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/switch/switch_font.hpp>
 
 namespace brls
 {

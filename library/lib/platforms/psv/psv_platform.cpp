@@ -23,9 +23,9 @@ limitations under the License.
 #include <psp2/system_param.h>
 #include <sys/unistd.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/psv/psv_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/psv/psv_platform.hpp>
 
 namespace brls
 {

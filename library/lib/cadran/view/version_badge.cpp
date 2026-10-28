@@ -1,9 +1,9 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/version_badge.hpp>
+#include <aurore/cadran/view/version_badge.hpp>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
 #include <algorithm>
 

@@ -17,15 +17,15 @@
 // openBrowser(): which links it accepts, and that a link reaches the opener
 // as one argument, never through a shell
 
-#include <borealis/core/platform.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore/core/platform.hpp>
+#include <aurore/test/harness.hpp>
 
 #if defined(__linux__) && !defined(ANDROID)
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <borealis/platforms/desktop/desktop_platform.hpp>
-#include <borealis/platforms/desktop/steam_deck.hpp>
+#include <aurore/platforms/desktop/desktop_platform.hpp>
+#include <aurore/platforms/desktop/steam_deck.hpp>
 #endif
 
 #include <cstdlib>

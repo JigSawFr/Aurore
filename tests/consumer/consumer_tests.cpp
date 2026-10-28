@@ -1,5 +1,5 @@
 // The installed harness: Aurore::test and brls_add_tests()
-#include <borealis/test/harness.hpp>
+#include <aurore/test/harness.hpp>
 
 BRLS_TEST(consumer_links)
 {

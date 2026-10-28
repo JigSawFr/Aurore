@@ -14,14 +14,14 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/test/headless_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/test/headless_platform.hpp>
 
 #include <glad/glad.h>
 #define NANOVG_GL3 1
 #include <nanovg_gl.h>
-#include <borealis/platforms/driver/gl_read_pixels.hpp>
+#include <aurore/platforms/driver/gl_read_pixels.hpp>
 
 #include <cstdlib>
 #include <cstring>

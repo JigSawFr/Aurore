@@ -1,10 +1,10 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/footer_hints.hpp>
+#include <aurore/cadran/view/footer_hints.hpp>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/guarded.hpp>
-#include <borealis/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/guarded.hpp>
+#include <aurore/cadran/ui/motion.hpp>
 
 #include <algorithm>
 #include <cmath>

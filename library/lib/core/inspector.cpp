@@ -9,13 +9,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <typeinfo>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/frame_context.hpp>
-#include <borealis/core/input.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/profiler.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/frame_context.hpp>
+#include <aurore/core/input.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/views/label.hpp>
 
 #ifndef _MSC_VER
 #include <cxxabi.h>

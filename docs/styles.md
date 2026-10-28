@@ -59,7 +59,7 @@ The size and the place of a view are not animated: they come from the layout of 
 
 ## Data binding
 
-`brls::Observable<T>` (`borealis/core/observable.hpp`) is a value that tells its subscribers when it changes:
+`brls::Observable<T>` (`aurore/core/observable.hpp`) is a value that tells its subscribers when it changes:
 
 ```cpp
 brls::Observable<std::string> name { "Ada" };

@@ -27,18 +27,18 @@
 #include <fstream>
 #include <functional>
 #include <sstream>
-#include <borealis/core/animation.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/input.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/profiler.hpp>
-#include <borealis/core/theme_decor.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/core/view.hpp>
-#include <borealis/views/applet_frame.hpp>
+#include <aurore/core/animation.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/input.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/core/theme_decor.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/core/view.hpp>
+#include <aurore/views/applet_frame.hpp>
 
 // Avoid conflicts with macro definitions in windows.h
 #undef RGB

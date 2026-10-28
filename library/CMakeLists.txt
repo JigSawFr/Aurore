@@ -29,8 +29,8 @@ if (NOT BRLS_RESOURCES_DIR)
     endif ()
 endif ()
 
-# The version of library/include/borealis/version.hpp, which release-please updates
-file(STRINGS ${BOREALIS_PATH}/include/borealis/version.hpp AURORE_VERSION REGEX "^#define AURORE_VERSION \"")
+# The version of library/include/aurore/version.hpp, which release-please updates
+file(STRINGS ${BOREALIS_PATH}/include/aurore/version.hpp AURORE_VERSION REGEX "^#define AURORE_VERSION \"")
 string(REGEX REPLACE ".*\"([0-9.]+)\".*" "\\1" AURORE_VERSION "${AURORE_VERSION}")
 set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
 
@@ -139,8 +139,8 @@ elseif (AURORE_FETCH_DEPS)
 else()
     add_library(tinyxml2 STATIC ${BOREALIS_PATH}/lib/extern/tinyxml2/tinyxml2.cpp)
     target_include_directories(tinyxml2 SYSTEM PUBLIC
-            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/borealis/extern/tinyxml2>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/borealis/extern/tinyxml2>)
+            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/aurore/extern/tinyxml2>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aurore/extern/tinyxml2>)
     list(APPEND BRLS_PLATFORM_LIBS tinyxml2)
 endif()
 
@@ -493,7 +493,7 @@ set_source_files_properties(${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwi
 target_include_directories(aurore PUBLIC
         $<BUILD_INTERFACE:${BOREALIS_PATH}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-# The headers of other projects shipped in include/borealis/extern, before
+# The headers of other projects shipped in include/aurore/extern, before
 # the ones found on the system
 set(BRLS_EXTERN_INCLUDE extern extern/nanovg extern/qrcodegen)
 if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
@@ -501,8 +501,8 @@ if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
 endif ()
 foreach (dir ${BRLS_EXTERN_INCLUDE})
     target_include_directories(aurore SYSTEM PUBLIC
-            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/borealis/${dir}>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/borealis/${dir}>)
+            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/aurore/${dir}>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aurore/${dir}>)
 endforeach ()
 if (BOREALIS_INCLUDE)
     target_include_directories(aurore SYSTEM PUBLIC ${BOREALIS_INCLUDE})
@@ -541,7 +541,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(aurore PRIVATE -Wall)
 endif ()
 
-# Test harness: a headless platform and brls::test::Harness (include/borealis/test/,
+# Test harness: a headless platform and brls::test::Harness (include/aurore/test/,
 # docs/testing.md), for an app's tests to link: target Aurore::test
 if (BRLS_BUILD_TESTS)
     if (NOT PLATFORM_DESKTOP OR NOT BOREALIS_DRIVER STREQUAL "BOREALIS_USE_OPENGL" OR USE_GL2 OR USE_GLES2 OR USE_GLES3)

@@ -38,7 +38,7 @@ cp -r library/aurore/resources resources
 Aurore's `template/` folder (see its `README.md`) is such an app, with the `CMakeLists.txt` for the desktop and the Switch ([platforms.md](platforms.md#platforms) has the other platforms'). The program itself starts the app, pushes a first screen and runs the loop:
 
 ```cpp
-#include <borealis.hpp>
+#include <aurore.hpp>
 #include "hello_activity.hpp"
 
 int main(int argc, char* argv[])
@@ -62,7 +62,7 @@ A screen is an **activity**. Its content can come from an XML file in `resources
 ```cpp
 // hello_activity.hpp
 #pragma once
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 class HelloActivity : public brls::Activity
 {

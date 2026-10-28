@@ -19,11 +19,11 @@
 // address (docs/testing.md).
 
 #include <yoga/Yoga.h>
-#include <borealis.hpp>
-#include <borealis/test/harness.hpp>
-#include <borealis/test/headless_platform.hpp>
-#include <borealis/views/widgets/battery.hpp>
-#include <borealis/views/widgets/wireless.hpp>
+#include <aurore.hpp>
+#include <aurore/test/harness.hpp>
+#include <aurore/test/headless_platform.hpp>
+#include <aurore/views/widgets/battery.hpp>
+#include <aurore/views/widgets/wireless.hpp>
 
 #include <atomic>
 #include <cmath>

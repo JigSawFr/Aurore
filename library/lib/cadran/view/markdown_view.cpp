@@ -1,5 +1,5 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/markdown_view.hpp>
+#include <aurore/cadran/view/markdown_view.hpp>
 
 #include <sys/stat.h>
 #include <string>
@@ -8,10 +8,10 @@
 #include <romfs/romfs.hpp>
 #endif
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/util/text.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/util/text.hpp>
 
 using namespace brls::literals;
 

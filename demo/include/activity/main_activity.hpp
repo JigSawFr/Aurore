@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 class MainActivity : public brls::Activity
 {

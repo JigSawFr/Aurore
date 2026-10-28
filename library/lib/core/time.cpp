@@ -15,7 +15,7 @@
 */
 
 #include <algorithm>
-#include <borealis/core/time.hpp>
+#include <aurore/core/time.hpp>
 
 namespace brls
 {

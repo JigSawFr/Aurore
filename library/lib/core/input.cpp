@@ -14,8 +14,8 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/input.hpp>
 
 namespace brls
 {

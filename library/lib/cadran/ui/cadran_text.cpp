@@ -1,9 +1,9 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/cadran_text.hpp>
+#include <aurore/cadran/ui/cadran_text.hpp>
 
 #include <fmt/format.h>
 
-#include <borealis/cadran/ui/tr.hpp>
+#include <aurore/cadran/ui/tr.hpp>
 
 using namespace brls::literals;
 

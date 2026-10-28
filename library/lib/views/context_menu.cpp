@@ -15,14 +15,14 @@
 */
 
 #include <algorithm>
-#include <borealis/core/activity.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/touch/long_press_gesture.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/context_menu.hpp>
-#include <borealis/views/image.hpp>
-#include <borealis/views/rectangle.hpp>
+#include <aurore/core/activity.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/touch/long_press_gesture.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/context_menu.hpp>
+#include <aurore/views/image.hpp>
+#include <aurore/views/rectangle.hpp>
 
 using namespace brls::literals;
 

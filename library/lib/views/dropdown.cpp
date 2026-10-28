@@ -5,10 +5,10 @@
 //  Created by Даниил Виноградов on 14.05.2021.
 //
 
-#include "borealis/views/dropdown.hpp"
+#include "aurore/views/dropdown.hpp"
 
-#include "borealis/core/application.hpp"
-#include "borealis/views/cells/cell_radio.hpp"
+#include "aurore/core/application.hpp"
+#include "aurore/views/cells/cell_radio.hpp"
 
 namespace brls
 {

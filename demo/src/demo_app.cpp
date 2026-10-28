@@ -20,8 +20,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran.hpp>
 
 #include "activity/main_activity.hpp"
 #include "tab/cadran_tab.hpp"

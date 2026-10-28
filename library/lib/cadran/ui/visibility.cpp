@@ -1,10 +1,10 @@
 // ui — greying what cannot be written, showing / hiding views with the focus, tabs.
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
 
 #include <yoga/Yoga.h>
 #include <algorithm>

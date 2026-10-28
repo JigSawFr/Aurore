@@ -18,7 +18,7 @@
 #include <fmt/format.h>
 #include <stdio.h>
 
-#include <borealis/core/logger.hpp>
+#include <aurore/core/logger.hpp>
 
 namespace brls
 {

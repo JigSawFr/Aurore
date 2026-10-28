@@ -1,12 +1,12 @@
 // ui — the palette's colours by role, and the console's system font (see ui.hpp).
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
 
-#include <borealis/cadran/util/text.hpp>
+#include <aurore/cadran/util/text.hpp>
 
 namespace ui
 {

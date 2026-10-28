@@ -16,17 +16,17 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/assets.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/style.hpp>
-#include <borealis/core/theme.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/core/time.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/assets.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/style.hpp>
+#include <aurore/core/theme.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/core/time.hpp>
+#include <aurore/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;

@@ -13,13 +13,13 @@ OUTPUT_DIRECTORY       = build_docs
 INPUT                  = docs \
                          CHANGELOG.md \
                          template/README.md \
-                         library/include/borealis.hpp \
-                         library/include/borealis
+                         library/include/aurore.hpp \
+                         library/include/aurore
 FILE_PATTERNS          = *.hpp *.h *.md
 RECURSIVE              = YES
 # Bundled libraries and the platforms' internals are not Aurore's API
-EXCLUDE                = library/include/borealis/extern \
-                         library/include/borealis/platforms
+EXCLUDE                = library/include/aurore/extern \
+                         library/include/aurore/platforms
 USE_MDFILE_AS_MAINPAGE = docs/getting-started.md
 STRIP_FROM_PATH        = library/include
 STRIP_FROM_INC_PATH    = library/include

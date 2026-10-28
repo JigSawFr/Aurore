@@ -15,11 +15,11 @@
 */
 
 #include <cmath>
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/pan_gesture.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/cells/cell_detail.hpp>
-#include <borealis/views/slider.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/pan_gesture.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/cells/cell_detail.hpp>
+#include <aurore/views/slider.hpp>
 
 namespace brls
 {

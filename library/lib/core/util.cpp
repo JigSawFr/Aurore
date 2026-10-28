@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
-#include <borealis/core/util.hpp>
+#include <aurore/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;

@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_detail.hpp"
+#include "aurore/views/cells/cell_detail.hpp"
 
 namespace brls
 {

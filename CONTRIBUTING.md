@@ -46,7 +46,7 @@ bench.
 
 ## Licences
 
-borealis' code is Apache 2.0, Cadran (`library/lib/cadran`, `library/include/borealis/cadran`) is GPLv3: a new file
+borealis' code is Apache 2.0, Cadran (`library/lib/cadran`, `library/include/aurore/cadran`) is GPLv3: a new file
 takes the licence of the part it belongs to, with the same header as its neighbours. Third-party code goes in
 `extern/` with its licence, and in [`NOTICE`](NOTICE).
 

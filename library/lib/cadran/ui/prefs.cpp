@@ -1,6 +1,6 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
 
 #include <cctype>
 #include <cstdlib>

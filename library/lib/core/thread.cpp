@@ -15,9 +15,9 @@
 */
 
 #include <exception>
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/thread.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
 
 #ifdef BOREALIS_USE_STD_THREAD
 #include <thread>

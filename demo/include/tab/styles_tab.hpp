@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 // State styles, transitions, data binding and the focus announcer
 // (docs/styles.md), from resources/xml/tabs/styles.xml.

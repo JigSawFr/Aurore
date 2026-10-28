@@ -14,10 +14,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/platforms/sdl/sdl_video.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/platforms/sdl/sdl_video.hpp>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -47,11 +47,11 @@ extern "C"
 #endif
 #endif
 #include <nanovg_gl.h>
-#include <borealis/platforms/driver/gl_read_pixels.hpp>
+#include <aurore/platforms/driver/gl_read_pixels.hpp>
 #elif defined(BOREALIS_USE_D3D11)
 #include <nanovg_d3d11.h>
 
-#include <borealis/platforms/driver/d3d11.hpp>
+#include <aurore/platforms/driver/d3d11.hpp>
 std::unique_ptr<brls::D3D11Context> D3D11_CONTEXT;
 #endif
 

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include "tab/cadran_tab.hpp"
 
-#include <borealis/cadran.hpp>
+#include <aurore/cadran.hpp>
 
 #include <string>
 #include <vector>

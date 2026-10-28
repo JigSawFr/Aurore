@@ -17,9 +17,9 @@
 
 #include <math.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/button.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/button.hpp>
 
 namespace brls
 {

@@ -7,13 +7,13 @@
 #include <set>
 #include <sstream>
 #include <vector>
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/theme.hpp>
-#include <borealis/core/time.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/core/view.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/theme.hpp>
+#include <aurore/core/time.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/core/view.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;

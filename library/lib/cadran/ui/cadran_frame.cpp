@@ -1,23 +1,23 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/cadran_frame.hpp>
+#include <aurore/cadran/ui/cadran_frame.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/cadran_modal.hpp>
-#include <borealis/cadran/ui/cadran_palette.hpp>
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/motion.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/cadran_icon.hpp>
-#include <borealis/cadran/view/scroll_view.hpp>
-#include <borealis/cadran/view/tab_badge.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/cadran_modal.hpp>
+#include <aurore/cadran/ui/cadran_palette.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/cadran_icon.hpp>
+#include <aurore/cadran/view/scroll_view.hpp>
+#include <aurore/cadran/view/tab_badge.hpp>
 
 using namespace brls::literals;
 namespace kit = cadran::kit;

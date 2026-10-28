@@ -15,11 +15,11 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/dialog.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/dialog.hpp>
+#include <aurore/views/label.hpp>
 
 using namespace brls::literals;
 

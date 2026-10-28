@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include <borealis/core/task.hpp>
+#include <aurore/core/task.hpp>
 
 namespace brls
 {

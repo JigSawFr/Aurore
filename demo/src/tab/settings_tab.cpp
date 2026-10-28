@@ -16,9 +16,9 @@
 
 #include "tab/settings_tab.hpp"
 
-#include <borealis/cadran/ui/live_prefs.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/live_prefs.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
 using namespace brls::literals; // for _i18n
 

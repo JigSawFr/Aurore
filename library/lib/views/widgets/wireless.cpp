@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include "borealis/views/widgets/wireless.hpp"
+#include "aurore/views/widgets/wireless.hpp"
 
-#include "borealis/core/thread.hpp"
+#include "aurore/core/thread.hpp"
 
 #ifdef __SWITCH__
 extern "C"

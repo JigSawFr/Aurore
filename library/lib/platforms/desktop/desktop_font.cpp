@@ -24,9 +24,9 @@
 #include <cstring>
 #include <map>
 #include <memory>
-#include <borealis/core/application.hpp>
-#include <borealis/core/assets.hpp>
-#include <borealis/platforms/desktop/desktop_font.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/assets.hpp>
+#include <aurore/platforms/desktop/desktop_font.hpp>
 
 #if defined(__linux__) && !defined(ANDROID)
 #include <dlfcn.h>

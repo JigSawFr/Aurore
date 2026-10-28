@@ -22,10 +22,10 @@
 #include <fstream>
 #include <functional>
 #include <limits>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/util.hpp>
 
 namespace brls
 {

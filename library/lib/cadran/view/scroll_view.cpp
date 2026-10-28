@@ -1,11 +1,11 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/scroll_view.hpp>
+#include <aurore/cadran/view/scroll_view.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <functional>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
 
 ScrollView::ScrollView()
 {

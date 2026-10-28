@@ -18,12 +18,12 @@
 // BRLS_DEV_TOOLS (not a release one, by default); their functions work in
 // every build
 
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/profiler.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <cstdlib>
 

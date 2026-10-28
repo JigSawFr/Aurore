@@ -18,10 +18,10 @@
 #include <unistd.h> /* chdir */
 
 #include <unordered_map>
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/sdl/sdl_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/sdl/sdl_platform.hpp>
 
 #if defined(IOS) || defined(TVOS)
 #include <sys/utsname.h>

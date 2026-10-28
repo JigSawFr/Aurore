@@ -1,12 +1,12 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/live_prefs.hpp>
+#include <aurore/cadran/ui/live_prefs.hpp>
 
 #include <functional>
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
 namespace live_prefs
 {

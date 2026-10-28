@@ -1,8 +1,8 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/core/time.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/core/time.hpp>
 
-#include <borealis/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
 
 #include <fmt/format.h>
 #include <yoga/Yoga.h>
@@ -11,12 +11,12 @@
 #include <ctime>
 #include <tuple>
 
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/motion.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/cadran_digits.hpp>
-#include <borealis/cadran/view/qr_view.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/cadran_digits.hpp>
+#include <aurore/cadran/view/qr_view.hpp>
 
 namespace cadran::kit
 {

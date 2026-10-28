@@ -14,7 +14,7 @@
     limitations under the License.
 */
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 // Delta from touch starting point to current, when
 // touch will be recognized as pan movement

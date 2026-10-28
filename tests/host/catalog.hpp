@@ -10,7 +10,7 @@
 #include <set>
 #include <string>
 
-#include <borealis/extern/nlohmann/json.hpp>
+#include <aurore/extern/nlohmann/json.hpp>
 
 namespace catalog
 {

@@ -19,9 +19,9 @@
 // to the built-in one. Cadran's safe_text and Markdown are tested without a
 // window, in tests/host/markdown_tests.cpp.
 
-#include <borealis.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <chrono>
 #include <filesystem>

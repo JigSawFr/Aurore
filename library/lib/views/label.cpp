@@ -17,12 +17,12 @@
 
 #include <yoga/Yoga.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/bidi.hpp>
-#include <borealis/core/font.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/bidi.hpp>
+#include <aurore/core/font.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/label.hpp>
 
 namespace brls
 {

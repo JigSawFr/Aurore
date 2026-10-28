@@ -1,6 +1,6 @@
 // Built against an installed Aurore: the headers, the library and its
 // dependencies come from find_package(Aurore)
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 #include <cstdio>
 

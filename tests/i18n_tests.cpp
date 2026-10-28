@@ -19,9 +19,9 @@
 // that cannot be parsed is left out with an error in the log, the app's
 // text falling back to en-US without a word)
 
-#include <borealis/core/i18n.hpp>
-#include <borealis/extern/nlohmann/json.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/extern/nlohmann/json.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <algorithm>
 #include <filesystem>

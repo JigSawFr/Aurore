@@ -1,9 +1,9 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/focus_log.hpp>
+#include <aurore/cadran/ui/focus_log.hpp>
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-#include <borealis/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
 
 namespace focus_log
 {

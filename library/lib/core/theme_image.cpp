@@ -14,12 +14,12 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/core/util.hpp>
 #ifdef USE_LIBROMFS
 #include <romfs/romfs.hpp>
 #endif
