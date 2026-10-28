@@ -67,9 +67,9 @@ static void badge_screen_of(brls::View* focus)
     while (focus->hasParent())
         focus = focus->getParent();
     auto* frame = dynamic_cast<brls::AppletFrame*>(focus);
-    // Not on the child screen: a version means nothing to a child, and its
-    // amber reads as a warning.
-    if (frame && frame->getView("child_root"))
+    // Not on a screen of its own (a child's: a version means nothing to a
+    // child, and its amber reads as a warning).
+    if (cadran::is_standalone_screen(frame))
         return;
     // An app that says no version (ui::hooks' version) gets no badge.
     const auto& version = ui::hooks::get().version;

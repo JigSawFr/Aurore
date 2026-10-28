@@ -2,7 +2,7 @@
 // nanovg), every colour Cadran draws with: cadran::install_theme puts them
 // in borealis' themes under their keys (KEYS below), where a theme file
 // can change any of them (docs/themes.md), and a host suite checks the
-// contrast of every ink on every surface it is drawn on (tests/contrast;
+// contrast of every ink on every surface it is drawn on (tests/host;
 // Theme::checkContrast does the same at run time, with CONTRAST below).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
@@ -267,8 +267,8 @@ constexpr Key KEYS[] = {
 
 /// The pairs the palettes promise to keep readable (an ink on a surface, at
 /// least `minimum`:1; a translucent one blended over the background first):
-/// what tests/contrast checks of the palettes, and Theme::checkContrast of
-/// a theme file changing them.
+/// what the host suite checks of the palettes (tests/host/contrast_tests.cpp),
+/// and Theme::checkContrast of a theme file changing them.
 struct Contrast
 {
     const char* ink;
