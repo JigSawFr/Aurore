@@ -1061,6 +1061,35 @@ static void settlePictures(Harness& h)
     }
 }
 
+#ifndef _WIN32
+// A theme's picture is looked at again just before it is decoded: a link
+// put in its place after Theme::resolveAsset looked is refused
+BRLS_TEST(theme_pictures_are_checked_again_before_they_are_read)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_recheck_test");
+    themes.picture("outside.png", 200, 30, 30);
+    themes.picture("mine/bg.png", 30, 30, 200);
+    std::string path, error;
+    const std::string folder = (themes.dir / "mine").generic_string();
+    BRLS_CHECK(brls::Theme::resolveAsset("bg.png", folder, folder, &path, &error));
+    BRLS_CHECK(brls::Theme::recheckAsset(path));
+
+    std::filesystem::remove(themes.dir / "mine" / "bg.png");
+    std::filesystem::create_symlink(themes.dir / "outside.png", themes.dir / "mine" / "bg.png");
+    BRLS_CHECK(!brls::Theme::recheckAsset(path, &error));
+    BRLS_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
+    std::shared_ptr<brls::ThemeImage> image = brls::ThemeImages::load(path);
+    settlePictures(h);
+    BRLS_CHECK(image->state == brls::ThemeImage::State::FAILED);
+    NVGcolor mean;
+    BRLS_CHECK(!brls::ThemeImages::meanColor(path, &mean));
+
+    // A path resolveAsset did not check: as it is
+    BRLS_CHECK(brls::Theme::recheckAsset((themes.dir / "outside.png").generic_string()));
+}
+#endif
+
 static bool hasWarningWith(const brls::ThemeInfo& info, const std::string& text)
 {
     for (const std::string& warning : info.warnings)

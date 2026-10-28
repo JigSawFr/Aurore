@@ -398,6 +398,16 @@ class Theme
         std::string* path, std::string* error);
 
     /**
+     * A path resolveAsset() made, looked at again just before the file is
+     * opened (from any thread): false, with the reason in `error`, when a
+     * link now takes it out of its theme's folder (put there after
+     * resolveAsset() looked). True for a path resolveAsset() did not check
+     * (a resource, a file named by the app). A hard link cannot be told from
+     * the file itself: a theme folder is only as safe as who can write in it.
+     */
+    static bool recheckAsset(const std::string& path, std::string* error = nullptr);
+
+    /**
      * The logo, icons, preview and image slots' pictures of `variant` with
      * the file in use (none without a file, or for a variant it does not
      * style): paths, nothing loaded.

@@ -19,6 +19,7 @@
 #include <borealis/core/logger.hpp>
 #include <borealis/core/theme_image.hpp>
 #include <borealis/core/thread.hpp>
+#include <borealis/core/util.hpp>
 #ifdef USE_LIBROMFS
 #include <romfs/romfs.hpp>
 #endif
@@ -51,6 +52,7 @@ namespace
     // Where a picture's bytes are: a file on disk, or bytes in memory (romfs)
     struct Source
     {
+        std::string path; // as load() was given it
         std::string file;
         const unsigned char* data = nullptr;
         size_t size               = 0;
@@ -201,6 +203,15 @@ namespace
     // Decodes (any thread): false when it cannot
     bool decode(const Source& source, Pixels* pixels, int maxWidth, int maxHeight)
     {
+        // A theme's file is looked at again for links just before it is
+        // opened: one may have been put there since Theme::resolveAsset
+        std::string why;
+        if (!source.file.empty() && !Theme::recheckAsset(source.path, &why))
+        {
+            Logger::warning("theme: {}", escapeControlChars(why));
+            return false;
+        }
+
         // Refused from its header when too large (NVG_MAX_IMAGE_PIXELS)
         int width = 0, height = 0;
         unsigned char* data = source.data ? nvgDecodeImageMem(source.data, (int)source.size, &width, &height)
@@ -228,6 +239,7 @@ namespace
     // thread-safe); false when it is nowhere
     bool locate(const std::string& path, Source* source)
     {
+        source->path            = path;
         std::string disk        = HotReload::diskResource(path);
         const std::string& name = disk.empty() ? path : disk;
 #ifdef USE_LIBROMFS
