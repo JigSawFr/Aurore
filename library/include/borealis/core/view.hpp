@@ -435,7 +435,9 @@ class View
     /// A size or position left to the layout (`auto` in XML).
     static constexpr float AUTO = NAN;
 
-    /// A folder read before the resources for XML files ("": none).
+    /// A folder whose xml/ files replace the built-in ones of the same name
+    /// in createFromXMLResource(); one that cannot be read is logged, and the
+    /// built-in one used.
     inline static std::string CUSTOM_RESOURCES_PATH;
 
     View();
@@ -1081,6 +1083,9 @@ class View
 
     /**
      * Creates a view from the given XML element (node and attributes).
+     *
+     * Elements nest at most 64 levels deep, the files brls:View includes
+     * counted (a file including itself is an error, not a stack overflow).
      *
      * The method handleXMLElement() is executed for each child node in the XML.
      *
