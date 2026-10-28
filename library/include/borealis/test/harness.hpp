@@ -173,6 +173,9 @@ class Harness
     // Mouse, in the views' coordinates
     void mouseMove(float x, float y);
     void mouseClick(float x, float y);
+    // Pressed and let go between two frames, as a quick click or a
+    // touchpad tap
+    void mouseQuickClick(float x, float y);
     void mouseScroll(float dx, float dy);
 
     // The next keyboard (ImeManager) opened gets `text`; without it, a

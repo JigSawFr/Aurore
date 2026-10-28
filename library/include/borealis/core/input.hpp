@@ -292,6 +292,31 @@ struct RawMouseState
     bool rightButton  = false;
 };
 
+// A button read once a frame from its press and release events: a press
+// let go before the frame reads it still counts, for that one frame
+class ButtonLatch
+{
+  public:
+    void press()
+    {
+        down    = true;
+        pressed = true;
+    }
+    void release() { down = false; }
+
+    // Its state for the frame starting
+    bool frame()
+    {
+        bool state = down || pressed;
+        pressed    = false;
+        return state;
+    }
+
+  private:
+    bool down    = false;
+    bool pressed = false;
+};
+
 struct MouseState
 {
     Point position;
