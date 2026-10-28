@@ -78,7 +78,7 @@ class HelloActivity : public aurore::Activity
     }
 
   private:
-    BRLS_BIND(aurore::Button, button, "hello_button");
+    AURORE_BIND(aurore::Button, button, "hello_button");
 };
 ```
 
@@ -108,9 +108,9 @@ class HelloActivity : public aurore::Activity
 </brls:AppletFrame>
 ```
 
-Every XML tag is a view (`brls:Box`, `brls:Label`, `brls:Button`, `brls:Image`, `brls:ScrollingFrame`, `brls:TabFrame`…); its attributes are the yoga layout (`width`, `height`, `grow`, `margin`, `padding`, `gap`, `axis`, `alignItems`…) and the view's own (`text`, `fontSize`, `backgroundColor`, `cornerRadius`…). `@i18n/…` reads a translation, `@theme/…` a theme colour, `@style/…` a metric, `@res/…` a resource. `BRLS_BIND` finds a view by its `id` the first time it is used. A second screen is pushed with `aurore::Application::pushActivity(new OtherActivity())`, and B takes it off.
+Every XML tag is a view (`brls:Box`, `brls:Label`, `brls:Button`, `brls:Image`, `brls:ScrollingFrame`, `brls:TabFrame`…); its attributes are the yoga layout (`width`, `height`, `grow`, `margin`, `padding`, `gap`, `axis`, `alignItems`…) and the view's own (`text`, `fontSize`, `backgroundColor`, `cornerRadius`…). `@i18n/…` reads a translation, `@theme/…` a theme colour, `@style/…` a metric, `@res/…` a resource. `AURORE_BIND` finds a view by its `id` the first time it is used. A second screen is pushed with `aurore::Application::pushActivity(new OtherActivity())`, and B takes it off.
 
-While you work on the XML, start the app with `BRLS_HOT_RELOAD=$PWD/resources ./build/my_app`: each save builds the screen again, the focus where it was ([hot reload](hot_reload.md)).
+While you work on the XML, start the app with `AURORE_HOT_RELOAD=$PWD/resources ./build/my_app`: each save builds the screen again, the focus where it was ([hot reload](hot_reload.md)).
 
 ## 4. A view of your own (3 minutes)
 
@@ -131,8 +131,8 @@ class ScoreCard : public aurore::Box
     static aurore::View* create() { return new ScoreCard(); }
 
   private:
-    BRLS_BIND(aurore::Label, name, "name");
-    BRLS_BIND(aurore::Label, score, "score");
+    AURORE_BIND(aurore::Label, name, "name");
+    AURORE_BIND(aurore::Label, score, "score");
 };
 ```
 

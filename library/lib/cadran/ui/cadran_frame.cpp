@@ -128,7 +128,7 @@ void cadran::install_theme()
     style.addMetric("brls/notification/spacing", 10.0f);
     style.addMetric("cadran/hairline", 1.0f);
     // The boards' display face for the figures (Sora Bold, OFL).
-    if (!aurore::Application::loadFontFromFile("cadran/digits", BRLS_ASSET("font/sora_bold_latin.ttf")))
+    if (!aurore::Application::loadFontFromFile("cadran/digits", AURORE_ASSET("font/sora_bold_latin.ttf")))
     {
         aurore::Logger::warning("cadran: display font not loaded, the default one is used");
         return;

@@ -28,8 +28,8 @@ class StylesTab : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(aurore::Button, disabled, "styles/disabled");
-    BRLS_BIND(aurore::Button, toggle, "styles/toggle");
-    BRLS_BIND(aurore::Button, increment, "styles/increment");
-    BRLS_BIND(aurore::BooleanCell, reduceMotion, "styles/reduce_motion");
+    AURORE_BIND(aurore::Button, disabled, "styles/disabled");
+    AURORE_BIND(aurore::Button, toggle, "styles/toggle");
+    AURORE_BIND(aurore::Button, increment, "styles/increment");
+    AURORE_BIND(aurore::BooleanCell, reduceMotion, "styles/reduce_motion");
 };

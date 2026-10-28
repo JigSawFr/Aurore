@@ -36,11 +36,11 @@ class ViewNotFoundException : public std::exception
     std::string errorMessage;
 };
 
-#define BRLS_BIND(type, name, id) aurore::BoundView<type> name = aurore::BoundView<type>(id, this)
+#define AURORE_BIND(type, name, id) aurore::BoundView<type> name = aurore::BoundView<type>(id, this)
 
 // A BoundView represents a "child" view, bound to its "parent" view class.
 // Dereferencing operator has been overridden to directly resolve the view by ID and forward the call to the view pointer for you.
-// Allows easy access of child views inside the parent class when used with the BRLS_BIND macro.
+// Allows easy access of child views inside the parent class when used with the AURORE_BIND macro.
 // Does NOT do any type check - it assumes the type you give it is the same as the view you are trying to get.
 template <typename T>
 class BoundView

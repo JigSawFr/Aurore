@@ -40,8 +40,8 @@ versions that can be read from the sources.
 | FindDBus.cmake | - | `library/cmake/FindDBus.cmake` (build only) | BSD 2-clause | 2012 Raphael Kubo da Costa |
 
 Used from the system when there, not bundled: D-Bus (Linux), fontconfig
-(Linux, opened at run time), FreeType (`BRLS_USE_FREETYPE`), GNU FriBidi
-(`BRLS_USE_FRIBIDI`, LGPL 2.1 or later), OpenCC (`OPENCC`).
+(Linux, opened at run time), FreeType (`AURORE_USE_FREETYPE`), GNU FriBidi
+(`AURORE_USE_FRIBIDI`, LGPL 2.1 or later), OpenCC (`OPENCC`).
 
 ## Fonts and pictures
 

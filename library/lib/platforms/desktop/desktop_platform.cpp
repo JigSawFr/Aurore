@@ -541,9 +541,9 @@ static bool portalPrefersDark(DBusConnection* connection)
 
 const char* DesktopPlatform::environment(const std::string& name)
 {
-    if (const char* value = getenv(("BRLS_" + name).c_str()))
+    if (const char* value = getenv(("AURORE_" + name).c_str()))
         return value;
-    return getenv(("BOREALIS_" + name).c_str());
+    return getenv(("AURORE_" + name).c_str());
 }
 
 bool DesktopPlatform::localeFromEnvironmentVariable(std::string* locale)

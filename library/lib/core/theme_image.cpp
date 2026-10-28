@@ -258,7 +258,7 @@ namespace
             }
         }
 #endif
-        source->file = name.rfind("@res/", 0) == 0 ? std::string(BRLS_RESOURCES) + name.substr(5) : name;
+        source->file = name.rfind("@res/", 0) == 0 ? std::string(AURORE_RESOURCES) + name.substr(5) : name;
         return true;
     }
 

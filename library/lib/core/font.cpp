@@ -21,7 +21,7 @@
 #include <aurore/core/font.hpp>
 
 #define MATERIAL_ICONS "material/MaterialIcons-Regular.ttf"
-#define MATERIAL_ICONS_PATH BRLS_ASSET(MATERIAL_ICONS)
+#define MATERIAL_ICONS_PATH AURORE_ASSET(MATERIAL_ICONS)
 
 namespace aurore
 {

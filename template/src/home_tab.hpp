@@ -12,6 +12,6 @@ class HomeTab : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(aurore::Button, counter, "counter");
+    AURORE_BIND(aurore::Button, counter, "counter");
     int clicks = 0;
 };

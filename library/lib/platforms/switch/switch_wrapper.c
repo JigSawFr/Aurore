@@ -23,14 +23,14 @@
 static int nxlink_sock = -1;
 
 // BSD sessions (sockets open at once): an app that uses more than these at
-// a time blocks in lwIP. Set with -DBRLS_BSD_SESSIONS=… (as an application
-// or system application) and -DBRLS_BSD_SESSIONS_APPLET=… (as an applet,
+// a time blocks in lwIP. Set with -DAURORE_BSD_SESSIONS=… (as an application
+// or system application) and -DAURORE_BSD_SESSIONS_APPLET=… (as an applet,
 // where memory is short).
-#ifndef BRLS_BSD_SESSIONS
-#define BRLS_BSD_SESSIONS 12
+#ifndef AURORE_BSD_SESSIONS
+#define AURORE_BSD_SESSIONS 12
 #endif
-#ifndef BRLS_BSD_SESSIONS_APPLET
-#define BRLS_BSD_SESSIONS_APPLET 2
+#ifndef AURORE_BSD_SESSIONS_APPLET
+#define AURORE_BSD_SESSIONS_APPLET 2
 #endif
 
 void userAppInit()
@@ -43,13 +43,13 @@ void userAppInit()
     AppletType at        = appletGetAppletType();
     if (at == AppletType_Application || at == AppletType_SystemApplication)
     {
-        cfg.num_bsd_sessions = BRLS_BSD_SESSIONS; // libnx's default is 3
+        cfg.num_bsd_sessions = AURORE_BSD_SESSIONS; // libnx's default is 3
         cfg.sb_efficiency    = 8; // default is 4
         socketInitialize(&cfg);
     }
     else
     {
-        cfg.num_bsd_sessions = BRLS_BSD_SESSIONS_APPLET;
+        cfg.num_bsd_sessions = AURORE_BSD_SESSIONS_APPLET;
         cfg.sb_efficiency    = 1;
         socketInitialize(&cfg);
     }

@@ -124,7 +124,7 @@ CadranIcon* make_icon(const char* name, float size, const char* color_key)
 // blurred, its own ink near the icon and the next tile's in the far corner,
 // brighter while it has the focus. Gradients, not a blur: a few fills, no
 // texture. Off with the screens' background glow (lighter effects on the
-// battery, ui::prefs' glow, BRLS_CADRAN_NOGLOW).
+// battery, ui::prefs' glow, AURORE_CADRAN_NOGLOW).
 class TileGlow : public aurore::View
 {
   public:

@@ -159,9 +159,9 @@ Harness::Harness(Options options)
     : opts(std::move(options))
 {
     if (opts.referenceDir.empty())
-        opts.referenceDir = fromEnvironment("BRLS_TEST_REFERENCES", "references");
+        opts.referenceDir = fromEnvironment("AURORE_TEST_REFERENCES", "references");
     if (opts.outputDir.empty())
-        opts.outputDir = fromEnvironment("BRLS_TEST_OUTPUT", "test-output");
+        opts.outputDir = fromEnvironment("AURORE_TEST_OUTPUT", "test-output");
 
     // Not 0: some code reads a time of 0 as "never"
     this->clock = 1000000;
@@ -539,15 +539,15 @@ bool Harness::matchesReference(const std::string& name, const Rect& area, int to
     actual.savePng(outputPath);
 
     Image expected = Image::loadPng(referencePath);
-    if (expected.empty() && !flagFromEnvironment("BRLS_TEST_UPDATE") && std::getenv("CI"))
+    if (expected.empty() && !flagFromEnvironment("AURORE_TEST_UPDATE") && std::getenv("CI"))
     {
         // In CI a missing reference is a test that was never checked: a typo in its name, or a file not committed
-        Logger::error("test harness: no reference {} (run with BRLS_TEST_UPDATE=1 to write it, then commit it)",
+        Logger::error("test harness: no reference {} (run with AURORE_TEST_UPDATE=1 to write it, then commit it)",
             referencePath);
         this->diff = ImageDiff();
         return false;
     }
-    if (expected.empty() || flagFromEnvironment("BRLS_TEST_UPDATE"))
+    if (expected.empty() || flagFromEnvironment("AURORE_TEST_UPDATE"))
     {
         Logger::info("test harness: reference {} written", referencePath);
         actual.savePng(referencePath);

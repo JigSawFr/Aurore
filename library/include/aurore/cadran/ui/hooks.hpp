@@ -85,8 +85,8 @@ struct Hooks
 
     /// A flag of the app's environment, for its tests (`name`: "STILL_FOCUS",
     /// "CADRAN_NOGLOW", "FOCUS_LOG", "CUT_TEXT", "DOCKED", "BATTERY"). Unset:
-    /// the process environment's BRLS_<name> ("1", "true" or "yes"), in a
-    /// build with BRLS_DEV_TOOLS (not a release one, by default), never on
+    /// the process environment's AURORE_<name> ("1", "true" or "yes"), in a
+    /// build with AURORE_DEV_TOOLS (not a release one, by default), never on
     /// the console.
     std::function<bool(const char* name)> env_flag;
 };

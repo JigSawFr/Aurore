@@ -102,22 +102,22 @@ EditTextDialog::EditTextDialog()
                 return true; }, true);
 
     // register paste action
-    int pasteKey = BRLS_KBD_MODIFIER_CTRL;
+    int pasteKey = AURORE_KBD_MODIFIER_CTRL;
 #ifdef __APPLE__
-    pasteKey = BRLS_KBD_MODIFIER_META;
+    pasteKey = AURORE_KBD_MODIFIER_META;
 #endif
-    this->registerAction({ BRLS_KBD_KEY_V, pasteKey }, [this](...)
+    this->registerAction({ AURORE_KBD_KEY_V, pasteKey }, [this](...)
         {
             this->clipboardEvent.fire(Application::getPlatform()->pasteFromClipboard());
             return true; });
 
     // register delete action
-    this->registerAction({ BRLS_KBD_KEY_DELETE }, [this](...)
+    this->registerAction({ AURORE_KBD_KEY_DELETE }, [this](...)
         {
             // This is to ensure that the delete operation of the PSV ime will not be ignored
             this->backspaceEvent.fire();
             return true; }, true);
-    this->registerAction({ BRLS_KBD_KEY_BACKSPACE }, [this](...)
+    this->registerAction({ AURORE_KBD_KEY_BACKSPACE }, [this](...)
         {
             this->backspaceEvent.fire();
             return true; }, true);
@@ -141,7 +141,7 @@ EditTextDialog::EditTextDialog()
                     });
                 return true; });
 
-#if defined(__PSV__) and !defined(BOREALIS_USE_GXM)
+#if defined(__PSV__) and !defined(AURORE_USE_GXM)
     // After turning off the on-screen keyboard, tap on the input area to reopen
     this->addGestureRecognizer(new aurore::TapGestureRecognizer([](aurore::TapGestureStatus status, aurore::Sound*)
         {

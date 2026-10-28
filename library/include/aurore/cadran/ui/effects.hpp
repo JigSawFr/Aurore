@@ -5,7 +5,7 @@
 // all, the glow still: for whom motion tires). Lighter: the glow, the
 // ring's pulse and every other movement left out. In hand: off the dock,
 // handheld or on its stand, charging or not (the console's operation mode);
-// the desktop: BRLS_BATTERY=1 (ui::env_flag) (off by default, so the simulator
+// the desktop: AURORE_BATTERY=1 (ui::env_flag) (off by default, so the simulator
 // draws in full as the dock does).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
@@ -21,7 +21,7 @@ bool light();
 bool reduced();
 /// A decorative movement may be drawn now: neither light() nor reduced(),
 /// not the app's reduced motion (aurore::Application::setReduceMotion), and
-/// not the desktop's still frames (BRLS_STILL_FOCUS, for the screenshots
+/// not the desktop's still frames (AURORE_STILL_FOCUS, for the screenshots
 /// that compare). Every animation of the look asks this first; the core's
 /// own (transition=) ask aurore::Application::getReduceMotion(), which asks
 /// this.

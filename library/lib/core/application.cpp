@@ -111,23 +111,23 @@ bool Application::init()
     Threading::start();
 
     // Debugging aids, off unless asked for
-#ifdef BRLS_INSPECTOR
+#ifdef AURORE_INSPECTOR
     Inspector::setEnabled(true);
 #endif
-    // From the environment only in a build with BRLS_DEV_TOOLS (not a
+    // From the environment only in a build with AURORE_DEV_TOOLS (not a
     // release one, by default)
-#ifdef BRLS_DEV_TOOLS
-    if (const char* inspector = std::getenv("BRLS_INSPECTOR"))
+#ifdef AURORE_DEV_TOOLS
+    if (const char* inspector = std::getenv("AURORE_INSPECTOR"))
         Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
-    if (const char* hotReload = std::getenv("BRLS_HOT_RELOAD"))
+    if (const char* hotReload = std::getenv("AURORE_HOT_RELOAD"))
     {
         if (std::strcmp(hotReload, "0") != 0)
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
     }
 #endif
 
-#if defined(BRLS_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
-    const char* redrawDebugEnv = std::getenv("BRLS_REDRAW_DEBUG");
+#if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+    const char* redrawDebugEnv = std::getenv("AURORE_REDRAW_DEBUG");
     if (redrawDebugEnv && *redrawDebugEnv && *redrawDebugEnv != '0')
         Application::setRedrawDebug(true);
 #endif
@@ -607,23 +607,23 @@ void Application::processInput()
     oldControllerState = controllerState;
 
     // Trigger keyboard events
-    const bool ctrlPressed  = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_CONTROL);
-    const bool altPressed   = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_ALT);
-    const bool shiftPressed = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SHIFT);
-    const bool metaPressed  = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SUPER);
+    const bool ctrlPressed  = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_CONTROL);
+    const bool altPressed   = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_ALT);
+    const bool shiftPressed = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SHIFT);
+    const bool metaPressed  = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SUPER);
     for (size_t i = 0; i < watchedKeys.size(); i++)
     {
         auto& watchedKey    = watchedKeys[i];
         auto& oldWatchedKey = oldWatchedKeys[i];
 
         const AuroreKeyboardScancode scancode = watchedKey.getScancode();
-        if (scancode == BRLS_KBD_KEY_UNKNOWN)
+        if (scancode == AURORE_KBD_KEY_UNKNOWN)
         {
             continue;
         }
 
         watchedKey.pressed = inputManager->getKeyboardKeyState(scancode);
-        if (static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_SHIFT) != shiftPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_CTRL) != ctrlPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_ALT) != altPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_META) != metaPressed)
+        if (static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_SHIFT) != shiftPressed || static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_CTRL) != ctrlPressed || static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_ALT) != altPressed || static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_META) != metaPressed)
         {
             // If the key is pressed but the modifiers are not, unpressed it
             watchedKey.pressed = false;
@@ -654,7 +654,7 @@ void Application::processInput()
 
 void Application::addToWatchedKeys(const AuroreKeyCombination key)
 {
-    if (key.code == BRLS_KBD_KEY_UNKNOWN)
+    if (key.code == AURORE_KBD_KEY_UNKNOWN)
         return;
     if (watchedKeysMap.count(key) == 0 || watchedKeysMap[key] <= 0)
     {
@@ -667,7 +667,7 @@ void Application::addToWatchedKeys(const AuroreKeyCombination key)
 
 void Application::removeWatchedKeys(const AuroreKeyCombination key)
 {
-    if (key.code == BRLS_KBD_KEY_UNKNOWN)
+    if (key.code == AURORE_KBD_KEY_UNKNOWN)
         return;
     if (watchedKeysMap.count(key) == 0 || watchedKeysMap[key] <= 0)
     {
@@ -1902,7 +1902,7 @@ void Application::tryDeinitFirstResponder(View* view)
 bool Application::loadFontFromFile(std::string fontName, std::string filePath)
 {
 #ifdef USE_LIBROMFS
-    // BRLS_ASSET() paths are in the resources built into the program
+    // AURORE_ASSET() paths are in the resources built into the program
     if (filePath.rfind("@res/", 0) == 0)
     {
         try
@@ -2007,19 +2007,19 @@ void Application::setSwapInputKeys(bool swap)
 // As the web simulator's keys: X, Y, L, R and +/- as written on the
 // controller, Shift for the triggers
 std::vector<std::pair<AuroreKeyCombination, ControllerButton>> Application::keyMap = {
-    { AuroreKeyCombination(BRLS_KBD_KEY_X), BUTTON_X },
-    { AuroreKeyCombination(BRLS_KBD_KEY_Y), BUTTON_Y },
-    { AuroreKeyCombination(BRLS_KBD_KEY_L), BUTTON_LB },
-    { AuroreKeyCombination(BRLS_KBD_KEY_R), BUTTON_RB },
-    { AuroreKeyCombination(BRLS_KBD_KEY_L, BRLS_KBD_MODIFIER_SHIFT), BUTTON_LT },
-    { AuroreKeyCombination(BRLS_KBD_KEY_R, BRLS_KBD_MODIFIER_SHIFT), BUTTON_RT },
-    { AuroreKeyCombination(BRLS_KBD_KEY_P), BUTTON_START },
-    { AuroreKeyCombination(BRLS_KBD_KEY_EQUAL, BRLS_KBD_MODIFIER_SHIFT), BUTTON_START },
-    { AuroreKeyCombination(BRLS_KBD_KEY_KP_ADD), BUTTON_START },
-    { AuroreKeyCombination(BRLS_KBD_KEY_M), BUTTON_BACK },
-    { AuroreKeyCombination(BRLS_KBD_KEY_MINUS), BUTTON_BACK },
-    { AuroreKeyCombination(BRLS_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
-    { AuroreKeyCombination(BRLS_KBD_KEY_BACKSPACE), BUTTON_B },
+    { AuroreKeyCombination(AURORE_KBD_KEY_X), BUTTON_X },
+    { AuroreKeyCombination(AURORE_KBD_KEY_Y), BUTTON_Y },
+    { AuroreKeyCombination(AURORE_KBD_KEY_L), BUTTON_LB },
+    { AuroreKeyCombination(AURORE_KBD_KEY_R), BUTTON_RB },
+    { AuroreKeyCombination(AURORE_KBD_KEY_L, AURORE_KBD_MODIFIER_SHIFT), BUTTON_LT },
+    { AuroreKeyCombination(AURORE_KBD_KEY_R, AURORE_KBD_MODIFIER_SHIFT), BUTTON_RT },
+    { AuroreKeyCombination(AURORE_KBD_KEY_P), BUTTON_START },
+    { AuroreKeyCombination(AURORE_KBD_KEY_EQUAL, AURORE_KBD_MODIFIER_SHIFT), BUTTON_START },
+    { AuroreKeyCombination(AURORE_KBD_KEY_KP_ADD), BUTTON_START },
+    { AuroreKeyCombination(AURORE_KBD_KEY_M), BUTTON_BACK },
+    { AuroreKeyCombination(AURORE_KBD_KEY_MINUS), BUTTON_BACK },
+    { AuroreKeyCombination(AURORE_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
+    { AuroreKeyCombination(AURORE_KBD_KEY_BACKSPACE), BUTTON_B },
 };
 
 void Application::mapKey(AuroreKeyCombination key, ControllerButton button)
@@ -2055,14 +2055,14 @@ void Application::applyKeyMap(InputManager* inputManager, ControllerState* state
         return;
 
     int mods = 0;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SHIFT))
-        mods |= BRLS_KBD_MODIFIER_SHIFT;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_CONTROL))
-        mods |= BRLS_KBD_MODIFIER_CTRL;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_ALT))
-        mods |= BRLS_KBD_MODIFIER_ALT;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SUPER))
-        mods |= BRLS_KBD_MODIFIER_META;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SHIFT))
+        mods |= AURORE_KBD_MODIFIER_SHIFT;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_CONTROL))
+        mods |= AURORE_KBD_MODIFIER_CTRL;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_ALT))
+        mods |= AURORE_KBD_MODIFIER_ALT;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SUPER))
+        mods |= AURORE_KBD_MODIFIER_META;
 
     for (const auto& [key, button] : keyMap)
     {

@@ -26,7 +26,7 @@ class ComponentsTab : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(aurore::Label, progress, "progress");
-    BRLS_BIND(aurore::Slider, slider, "slider");
+    AURORE_BIND(aurore::Label, progress, "progress");
+    AURORE_BIND(aurore::Slider, slider, "slider");
     bool onPrimaryButtonClicked(aurore::View* view);
 };

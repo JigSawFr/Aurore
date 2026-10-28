@@ -65,7 +65,7 @@ Button::Button()
     this->registerColorXMLAttribute("textColor", [this](NVGcolor color)
         { this->setTextColor(color); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "style", const ButtonStyle*, this->setStyle,
         {
             { "default", &BUTTONSTYLE_DEFAULT },
@@ -75,7 +75,7 @@ Button::Button()
             { "borderless", &BUTTONSTYLE_BORDERLESS },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "state", ButtonState, this->setState,
         {
             { "enabled", ButtonState::ENABLED },

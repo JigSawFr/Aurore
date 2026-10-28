@@ -23,23 +23,23 @@ class SettingsTab : public aurore::Box
   public:
     SettingsTab();
 
-    BRLS_BIND(aurore::RadioCell, radio, "radio");
-    BRLS_BIND(aurore::BooleanCell, boolean, "boolean");
-    BRLS_BIND(aurore::SelectorCell, selector, "selector");
-    BRLS_BIND(aurore::InputCell, input, "input");
-    BRLS_BIND(aurore::InputNumericCell, inputNumeric, "inputNumeric");
-    BRLS_BIND(aurore::DetailCell, ipAddress, "ipAddress");
-    BRLS_BIND(aurore::DetailCell, dnsServer, "dnsServer");
-    BRLS_BIND(aurore::BooleanCell, debug, "debug");
-    BRLS_BIND(aurore::BooleanCell, screenSaver, "screenSaver");
-    BRLS_BIND(aurore::BooleanCell, bottomBar, "bottomBar");
-    BRLS_BIND(aurore::BooleanCell, alwaysOnTop, "alwaysOnTop");
-    BRLS_BIND(aurore::BooleanCell, fps, "fps");
-    BRLS_BIND(aurore::SelectorCell, swapInterval, "swapInterval");
-    BRLS_BIND(aurore::SliderCell, slider, "slider");
-    BRLS_BIND(aurore::DetailCell, notify, "notify");
-    BRLS_BIND(aurore::BooleanCell, themeDark, "themeDark");
-    BRLS_BIND(aurore::Box, themes, "themes");
+    AURORE_BIND(aurore::RadioCell, radio, "radio");
+    AURORE_BIND(aurore::BooleanCell, boolean, "boolean");
+    AURORE_BIND(aurore::SelectorCell, selector, "selector");
+    AURORE_BIND(aurore::InputCell, input, "input");
+    AURORE_BIND(aurore::InputNumericCell, inputNumeric, "inputNumeric");
+    AURORE_BIND(aurore::DetailCell, ipAddress, "ipAddress");
+    AURORE_BIND(aurore::DetailCell, dnsServer, "dnsServer");
+    AURORE_BIND(aurore::BooleanCell, debug, "debug");
+    AURORE_BIND(aurore::BooleanCell, screenSaver, "screenSaver");
+    AURORE_BIND(aurore::BooleanCell, bottomBar, "bottomBar");
+    AURORE_BIND(aurore::BooleanCell, alwaysOnTop, "alwaysOnTop");
+    AURORE_BIND(aurore::BooleanCell, fps, "fps");
+    AURORE_BIND(aurore::SelectorCell, swapInterval, "swapInterval");
+    AURORE_BIND(aurore::SliderCell, slider, "slider");
+    AURORE_BIND(aurore::DetailCell, notify, "notify");
+    AURORE_BIND(aurore::BooleanCell, themeDark, "themeDark");
+    AURORE_BIND(aurore::Box, themes, "themes");
 
     static aurore::View* create();
 

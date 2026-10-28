@@ -661,7 +661,7 @@ void Inspector::setMode(Mode newMode)
 
 void Inspector::processInput(InputManager* input, ControllerState* state)
 {
-    bool key    = input->getKeyboardKeyState(BRLS_KBD_KEY_F12);
+    bool key    = input->getKeyboardKeyState(AURORE_KBD_KEY_F12);
     bool combo  = state->buttons[BUTTON_LSB] && state->buttons[BUTTON_RSB];
     bool toggle = (key && !keyHeld) || (combo && !comboHeld);
     keyHeld     = key;

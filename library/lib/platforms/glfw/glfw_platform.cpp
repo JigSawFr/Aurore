@@ -64,7 +64,7 @@ GLFWPlatform::GLFWPlatform()
     // Misc
     glfwSetTime(0.0);
 
-    // The system's language, unless BRLS_LANG (or BOREALIS_LANG) gave one
+    // The system's language, unless AURORE_LANG (or AURORE_LANG) gave one
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO && !this->localeFromEnvironment)
     {
 #if defined(_WIN32)

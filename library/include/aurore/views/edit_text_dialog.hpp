@@ -35,9 +35,9 @@ class EditTextDialog : public Box
     Event<std::string> clipboardEvent;
     bool init = false;
 
-    BRLS_BIND(aurore::Label, header, "brls/dialog/header");
-    BRLS_BIND(aurore::Label, label, "brls/dialog/label");
-    BRLS_BIND(aurore::Label, count, "brls/dialog/count");
-    BRLS_BIND(aurore::Box, container, "brls/container");
+    AURORE_BIND(aurore::Label, header, "brls/dialog/header");
+    AURORE_BIND(aurore::Label, label, "brls/dialog/label");
+    AURORE_BIND(aurore::Label, count, "brls/dialog/count");
+    AURORE_BIND(aurore::Box, container, "brls/container");
 };
 }

@@ -29,9 +29,9 @@ class RecyclerCell
   public:
     RecyclerCell();
 
-    BRLS_BIND(aurore::Rectangle, accent, "brls/sidebar/item_accent");
-    BRLS_BIND(aurore::Label, label, "title");
-    BRLS_BIND(aurore::Image, image, "image");
+    AURORE_BIND(aurore::Rectangle, accent, "brls/sidebar/item_accent");
+    AURORE_BIND(aurore::Label, label, "title");
+    AURORE_BIND(aurore::Image, image, "image");
 
     static RecyclerCell* create();
 };
@@ -55,5 +55,5 @@ class RecyclingListTab : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(aurore::RecyclerFrame, recycler, "recycler");
+    AURORE_BIND(aurore::RecyclerFrame, recycler, "recycler");
 };

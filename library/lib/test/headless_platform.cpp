@@ -26,7 +26,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#if defined(BRLS_HEADLESS_EGL)
+#if defined(AURORE_HEADLESS_EGL)
 #define EGL_NO_X11
 #define MESA_EGL_NO_X11_HEADERS
 #include <EGL/egl.h>
@@ -67,10 +67,10 @@ HeadlessVideoContext::HeadlessVideoContext(int width, int height)
 
 bool HeadlessVideoContext::createContext()
 {
-    const char* forceGlfw = std::getenv("BRLS_HEADLESS_GLFW");
+    const char* forceGlfw = std::getenv("AURORE_HEADLESS_GLFW");
     bool useGlfw          = forceGlfw && *forceGlfw && *forceGlfw != '0';
 
-#if defined(BRLS_HEADLESS_EGL)
+#if defined(AURORE_HEADLESS_EGL)
     if (!useGlfw)
     {
         // Mesa's surfaceless platform: a context with no window system at all
@@ -218,7 +218,7 @@ HeadlessVideoContext::~HeadlessVideoContext()
         nvgDeleteGL3(this->nvgContext);
     if (this->eglContext || this->glfwWindow)
         destroyFramebuffer();
-#if defined(BRLS_HEADLESS_EGL)
+#if defined(AURORE_HEADLESS_EGL)
     if (this->eglContext)
     {
         eglMakeCurrent((EGLDisplay)this->eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -251,14 +251,14 @@ void HeadlessInputManager::updateUnifiedControllerState(ControllerState* state)
 
     // The keyboard on top of the buttons, as GLFW maps it
     bool swap   = Application::isSwapInputKeys();
-    bool enter  = keys.count(BRLS_KBD_KEY_ENTER) || keys.count(BRLS_KBD_KEY_KP_ENTER);
-    bool escape = keys.count(BRLS_KBD_KEY_ESCAPE) > 0;
+    bool enter  = keys.count(AURORE_KBD_KEY_ENTER) || keys.count(AURORE_KBD_KEY_KP_ENTER);
+    bool escape = keys.count(AURORE_KBD_KEY_ESCAPE) > 0;
     state->buttons[swap ? BUTTON_B : BUTTON_A] |= enter;
     state->buttons[swap ? BUTTON_A : BUTTON_B] |= escape;
-    state->buttons[BUTTON_UP] |= keys.count(BRLS_KBD_KEY_UP) > 0;
-    state->buttons[BUTTON_RIGHT] |= keys.count(BRLS_KBD_KEY_RIGHT) > 0;
-    state->buttons[BUTTON_DOWN] |= keys.count(BRLS_KBD_KEY_DOWN) > 0;
-    state->buttons[BUTTON_LEFT] |= keys.count(BRLS_KBD_KEY_LEFT) > 0;
+    state->buttons[BUTTON_UP] |= keys.count(AURORE_KBD_KEY_UP) > 0;
+    state->buttons[BUTTON_RIGHT] |= keys.count(AURORE_KBD_KEY_RIGHT) > 0;
+    state->buttons[BUTTON_DOWN] |= keys.count(AURORE_KBD_KEY_DOWN) > 0;
+    state->buttons[BUTTON_LEFT] |= keys.count(AURORE_KBD_KEY_LEFT) > 0;
 
     state->buttons[BUTTON_NAV_UP] |= state->buttons[BUTTON_UP] || axes[LEFT_Y] < -0.5f || axes[RIGHT_Y] < -0.5f;
     state->buttons[BUTTON_NAV_RIGHT] |= state->buttons[BUTTON_RIGHT] || axes[LEFT_X] > 0.5f || axes[RIGHT_X] > 0.5f;

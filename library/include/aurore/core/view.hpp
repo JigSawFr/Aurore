@@ -42,7 +42,7 @@
 /// Registers an "enum" XML attribute, which is just a string attribute with a map string -> enum inside
 /// When using this macro please use the same (wonky) formatting as what you see in Box.cpp or View.cpp
 /// otherwise clang-format will screw it up
-#define BRLS_REGISTER_ENUM_XML_ATTRIBUTE(name, enumType, method, ...) \
+#define AURORE_REGISTER_ENUM_XML_ATTRIBUTE(name, enumType, method, ...) \
     this->registerStringXMLAttribute(name, [this](std::string value) {                   \
         std::unordered_map<std::string, enumType> enumMap = __VA_ARGS__;                 \
         if (enumMap.count(value) > 0)                                                    \
@@ -54,7 +54,7 @@
 /// To be used in activities or derivates of Box (internally uses the getView() method)
 /// The function or method must return a boolean (true if the action was consumed, false otherwise) and take a single aurore::View*
 /// parameter (useful to know what was clicked if you use the same listener for multiple views)
-#define BRLS_REGISTER_CLICK_BY_ID(id, method) \
+#define AURORE_REGISTER_CLICK_BY_ID(id, method) \
     this->getView(id)->registerClickAction([this](aurore::View* view) { return method(view); })
 
 /// Deprecated: capture View::aliveToken() instead. Kept for older code: they
@@ -190,7 +190,7 @@ struct AppletFrameItem
 #ifdef USE_LIBROMFS
         iconPath = "@res/" + name;
 #else
-        iconPath = std::string(BRLS_RESOURCES) + name;
+        iconPath = std::string(AURORE_RESOURCES) + name;
 #endif
     }
 

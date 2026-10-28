@@ -52,20 +52,20 @@ class TransformTab : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(TransformBox, box, "box");
-    BRLS_BIND(aurore::SliderCell, transX, "transX");
-    BRLS_BIND(aurore::SliderCell, transY, "transY");
-    BRLS_BIND(aurore::SliderCell, scaleX, "scaleX");
-    BRLS_BIND(aurore::SliderCell, scaleY, "scaleY");
-    BRLS_BIND(aurore::SliderCell, skewX, "skewX");
-    BRLS_BIND(aurore::SliderCell, skewY, "skewY");
-    BRLS_BIND(aurore::SliderCell, rotate, "rotate");
-    BRLS_BIND(aurore::SliderCell, boxWidth, "width");
-    BRLS_BIND(aurore::SliderCell, boxHeight, "height");
-    BRLS_BIND(aurore::SliderCell, fontScaleX, "fontScaleX");
-    BRLS_BIND(aurore::SliderCell, fontScaleY, "fontScaleY");
-    BRLS_BIND(aurore::Button, reset, "reset");
-    BRLS_BIND(aurore::Button, play, "play");
+    AURORE_BIND(TransformBox, box, "box");
+    AURORE_BIND(aurore::SliderCell, transX, "transX");
+    AURORE_BIND(aurore::SliderCell, transY, "transY");
+    AURORE_BIND(aurore::SliderCell, scaleX, "scaleX");
+    AURORE_BIND(aurore::SliderCell, scaleY, "scaleY");
+    AURORE_BIND(aurore::SliderCell, skewX, "skewX");
+    AURORE_BIND(aurore::SliderCell, skewY, "skewY");
+    AURORE_BIND(aurore::SliderCell, rotate, "rotate");
+    AURORE_BIND(aurore::SliderCell, boxWidth, "width");
+    AURORE_BIND(aurore::SliderCell, boxHeight, "height");
+    AURORE_BIND(aurore::SliderCell, fontScaleX, "fontScaleX");
+    AURORE_BIND(aurore::SliderCell, fontScaleY, "fontScaleY");
+    AURORE_BIND(aurore::Button, reset, "reset");
+    AURORE_BIND(aurore::Button, play, "play");
 
     static void registerCell(aurore::SliderCell* cell, float init, const std::string& title, const std::function<float(float)>& cb);
 

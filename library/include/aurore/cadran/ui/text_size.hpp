@@ -15,7 +15,7 @@ namespace text_size
 constexpr float LARGE   = 1.25f;
 constexpr float LARGEST = 1.5f;
 
-/// The console on its dock (the desktop: BRLS_DOCKED=1, ui::env_flag).
+/// The console on its dock (the desktop: AURORE_DOCKED=1, ui::env_flag).
 bool docked();
 /// What the setting and the console's mode ask for now: the labels' scale,
 /// and whether it is more than 1.

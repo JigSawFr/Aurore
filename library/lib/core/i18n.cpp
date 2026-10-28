@@ -39,8 +39,8 @@ namespace fs = std::experimental::filesystem;
 #include <string>
 #include <vector>
 
-#ifndef BRLS_I18N_PREFIX
-#define BRLS_I18N_PREFIX ""
+#ifndef AURORE_I18N_PREFIX
+#define AURORE_I18N_PREFIX ""
 #endif
 
 namespace aurore
@@ -129,7 +129,7 @@ static void loadLocale(std::string locale, nlohmann::json* target)
         (*target)[name.substr(0, name.length() - 5)] = strings;
     }
 #else
-    std::string localePath = BRLS_ASSET("i18n/" + locale);
+    std::string localePath = AURORE_ASSET("i18n/" + locale);
 
     if (!fs::exists(localePath))
     {
@@ -263,7 +263,7 @@ namespace internal
 
         try
         {
-            pointer = nlohmann::json::json_pointer("/" + std::string(BRLS_I18N_PREFIX) + stringName);
+            pointer = nlohmann::json::json_pointer("/" + std::string(AURORE_I18N_PREFIX) + stringName);
         }
         catch (const std::exception& e)
         {

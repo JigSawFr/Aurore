@@ -70,6 +70,6 @@ void refresh_pill();
 /// The soft glow of the boards, an absolute full-screen view to add first in
 /// a frame: a radial gradient of `color_key` centred on (cx, cy), `radius`
 /// wide. Nothing with the lighter effects (cadran/ui/effects), without the
-/// glow (ui::prefs) or with BRLS_CADRAN_NOGLOW=1 (ui::env_flag).
+/// glow (ui::prefs) or with AURORE_CADRAN_NOGLOW=1 (ui::env_flag).
 aurore::View* make_glow(float cx, float cy, float radius, const char* color_key);
 }

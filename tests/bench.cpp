@@ -15,7 +15,7 @@
 */
 
 // aurore_bench: the main loop's cost on the demo's screens, through the
-// Profiler (BRLS_PROFILE), under the test harness: time per phase, layouts
+// Profiler (AURORE_PROFILE), under the test harness: time per phase, layouts
 // and allocations per frame, over a few scenarios.
 //
 //   aurore_bench [--frames N] [--json out.json]

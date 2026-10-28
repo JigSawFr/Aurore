@@ -7,8 +7,8 @@ A panel drawn over the app, for finding out why a view sits where it sits, which
 It is off unless asked for, and costs nothing then (one key and two buttons read per frame):
 
 - in code, at any time: `aurore::Application::setInspectorEnabled(true);`
-- in a debug build: `-DBRLS_INSPECTOR=ON` at configure time;
-- on a desktop, for one run: `BRLS_INSPECTOR=1 ./my_app` (`BRLS_INSPECTOR=0` turns it off again, even in a build that has it on), in a build with the debugging aids: not a `Release` or `MinSizeRel` one unless `-DBRLS_DEV_TOOLS=ON` ([hot reload](hot_reload.md#turning-it-on)).
+- in a debug build: `-DAURORE_INSPECTOR=ON` at configure time;
+- on a desktop, for one run: `AURORE_INSPECTOR=1 ./my_app` (`AURORE_INSPECTOR=0` turns it off again, even in a build that has it on), in a build with the debugging aids: not a `Release` or `MinSizeRel` one unless `-DAURORE_DEV_TOOLS=ON` ([hot reload](hot_reload.md#turning-it-on)).
 
 The demo turns it on.
 

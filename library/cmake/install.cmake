@@ -24,16 +24,16 @@ endif ()
 if (TARGET aurore_test)
     list(APPEND AURORE_EXPORTED aurore_test)
     set_target_properties(aurore_test PROPERTIES EXPORT_NAME test)
-    install(FILES ${BOREALIS_PATH}/cmake/AuroreTesting.cmake DESTINATION ${AURORE_CMAKE_DIR})
+    install(FILES ${AURORE_PATH}/cmake/AuroreTesting.cmake DESTINATION ${AURORE_CMAKE_DIR})
 endif ()
 
 install(TARGETS ${AURORE_EXPORTED} EXPORT AuroreTargets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY ${BOREALIS_PATH}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${AURORE_PATH}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 # yoga's headers, where its target looks for them (<prefix>/include/yoga)
-install(DIRECTORY ${BOREALIS_PATH}/lib/extern/yoga/yoga DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/yoga
+install(DIRECTORY ${AURORE_PATH}/lib/extern/yoga/yoga DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/yoga
         FILES_MATCHING PATTERN "*.h")
 install(EXPORT AuroreTargets NAMESPACE Aurore:: DESTINATION ${AURORE_CMAKE_DIR})
 
@@ -58,7 +58,7 @@ if (USE_FREETYPE)
     string(APPEND AURORE_DEPENDENCIES "find_dependency(Freetype)\n")
 endif ()
 if (USE_FRIBIDI)
-    string(APPEND AURORE_DEPENDENCIES "find_dependency(PkgConfig)\npkg_check_modules(BRLS_FRIBIDI REQUIRED QUIET IMPORTED_TARGET fribidi)\n")
+    string(APPEND AURORE_DEPENDENCIES "find_dependency(PkgConfig)\npkg_check_modules(AURORE_PC_FRIBIDI REQUIRED QUIET IMPORTED_TARGET fribidi)\n")
 endif ()
 if (AURORE_TEST_EGL)
     # libEGL alone, as the harness links it here (FindOpenGL's OpenGL::EGL also needs libOpenGL)
@@ -82,7 +82,7 @@ if (TARGET aurore_test)
     set(AURORE_TESTING "include(\"\${CMAKE_CURRENT_LIST_DIR}/AuroreTesting.cmake\")")
 endif ()
 
-configure_package_config_file(${BOREALIS_PATH}/cmake/AuroreConfig.cmake.in
+configure_package_config_file(${AURORE_PATH}/cmake/AuroreConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/AuroreConfig.cmake
         INSTALL_DESTINATION ${AURORE_CMAKE_DIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/AuroreConfig.cmake DESTINATION ${AURORE_CMAKE_DIR})

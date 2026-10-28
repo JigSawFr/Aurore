@@ -50,7 +50,7 @@ struct FrameProfile
 };
 
 // Per-frame cost of the main loop: time per phase, layouts, allocations.
-// Off by default; on with setEnabled(true) or BRLS_PROFILE=1 in the
+// Off by default; on with setEnabled(true) or AURORE_PROFILE=1 in the
 // environment (desktop), which also logs averages every 120 frames. The
 // inspector's panel shows it, and measures while it is open.
 // The bench (tests/bench.cpp) reads it frame by frame.

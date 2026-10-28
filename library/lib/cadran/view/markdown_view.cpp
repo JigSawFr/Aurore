@@ -44,7 +44,7 @@ namespace
         }
 #else
         struct stat st;
-        return stat((std::string(BRLS_RESOURCES) + path).c_str(), &st) == 0 && S_ISREG(st.st_mode);
+        return stat((std::string(AURORE_RESOURCES) + path).c_str(), &st) == 0 && S_ISREG(st.st_mode);
 #endif
     }
 

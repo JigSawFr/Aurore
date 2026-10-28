@@ -19,7 +19,7 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/core/thread.hpp>
 
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
 #include <thread>
 #else
 #include <pthread.h>
@@ -32,7 +32,7 @@
 namespace aurore
 {
 
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
 static std::thread* task_loop_thread = nullptr;
 static std::thread* decode_thread    = nullptr;
 #else
@@ -308,7 +308,7 @@ void Threading::stop()
     }
     decode_cv.notify_all();
 
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
     task_loop_thread->join();
     delete task_loop_thread;
     task_loop_thread = nullptr;
@@ -344,7 +344,7 @@ void* Threading::decode_loop(void* a)
 
 void Threading::start_task_loop()
 {
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
     task_loop_thread      = new std::thread(std_task_loop);
     task_loop_running     = true;
     decode_thread         = new std::thread([]

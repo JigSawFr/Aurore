@@ -23,9 +23,9 @@ Enter and Escape stay A and B when `Application::setSwapInputKeys(true)` swaps t
 An app changes them before or after `Application::init()`:
 
 ```cpp
-aurore::Application::mapKey(aurore::BRLS_KBD_KEY_Q, aurore::BUTTON_LB);   // Q as L as well
-aurore::Application::unmapKey(aurore::BRLS_KBD_KEY_M);                  // M types nothing
-aurore::Application::mapKey({ aurore::BRLS_KBD_KEY_F, aurore::BRLS_KBD_MODIFIER_CTRL }, aurore::BUTTON_Y);
+aurore::Application::mapKey(aurore::AURORE_KBD_KEY_Q, aurore::BUTTON_LB);   // Q as L as well
+aurore::Application::unmapKey(aurore::AURORE_KBD_KEY_M);                  // M types nothing
+aurore::Application::mapKey({ aurore::AURORE_KBD_KEY_F, aurore::AURORE_KBD_MODIFIER_CTRL }, aurore::BUTTON_Y);
 aurore::Application::clearKeyMap();                                   // Enter, Escape and the arrows only
 ```
 

@@ -17,12 +17,12 @@ if (NOT EXISTS "${AURORE_DIR}/library/CMakeLists.txt")
     message(FATAL_ERROR "Aurore not found in ${AURORE_DIR}: git submodule update --init --recursive")
 endif ()
 get_filename_component(AURORE_DIR "${AURORE_DIR}" ABSOLUTE)
-set(BOREALIS_LIBRARY ${AURORE_DIR}/library)
+set(AURORE_LIBRARY ${AURORE_DIR}/library)
 
 # Aurore's options (AURORE_PLATFORM, AURORE_WINDOW, AURORE_GRAPHICS…) and toolchain;
 # they set PLATFORM_DESKTOP, PLATFORM_SWITCH, USE_DEKO3D… for the tests below
-include(${BOREALIS_LIBRARY}/cmake/commonOption.cmake)
-include(${BOREALIS_LIBRARY}/cmake/toolchain.cmake)
+include(${AURORE_LIBRARY}/cmake/commonOption.cmake)
+include(${AURORE_LIBRARY}/cmake/toolchain.cmake)
 
 project(my_app)
 set(VERSION_MAJOR "0")
@@ -38,16 +38,16 @@ set(PROJECT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 # romfs on the Switch.
 set(MERGED_RESOURCES ${CMAKE_BINARY_DIR}/resources)
 if (PLATFORM_DESKTOP)
-    set(BRLS_RESOURCES_DIR ${CMAKE_BINARY_DIR})
+    set(AURORE_RESOURCES_ROOT ${CMAKE_BINARY_DIR})
 endif ()
 
-add_subdirectory(${BOREALIS_LIBRARY} ${CMAKE_BINARY_DIR}/aurore)
+add_subdirectory(${AURORE_LIBRARY} ${CMAKE_BINARY_DIR}/aurore)
 
 find_package(Threads REQUIRED)
 
 file(GLOB_RECURSE APP_SRC CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 if (PLATFORM_SWITCH)
-    list(APPEND APP_SRC ${BOREALIS_LIBRARY}/lib/platforms/switch/switch_wrapper.c)
+    list(APPEND APP_SRC ${AURORE_LIBRARY}/lib/platforms/switch/switch_wrapper.c)
 endif ()
 
 program_target(${PROJECT_NAME} "${APP_SRC}")

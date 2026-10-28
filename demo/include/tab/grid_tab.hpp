@@ -29,8 +29,8 @@ class PictureCell : public aurore::RecyclingGridItem
 
     static PictureCell* create();
 
-    BRLS_BIND(aurore::Image, image, "picture/image");
-    BRLS_BIND(aurore::Label, label, "picture/label");
+    AURORE_BIND(aurore::Image, image, "picture/image");
+    AURORE_BIND(aurore::Label, label, "picture/label");
 };
 
 // Items the grid shows: a page more each time its end comes into view.
@@ -59,9 +59,9 @@ class GridTab : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(aurore::HRecyclerFrame, row, "row");
-    BRLS_BIND(aurore::RecyclingGrid, grid, "grid");
-    BRLS_BIND(aurore::Header, gridHeader, "grid_header");
+    AURORE_BIND(aurore::HRecyclerFrame, row, "row");
+    AURORE_BIND(aurore::RecyclingGrid, grid, "grid");
+    AURORE_BIND(aurore::Header, gridHeader, "grid_header");
 
     PictureSource* gridSource;
     std::shared_ptr<bool> alive = std::make_shared<bool>(true);

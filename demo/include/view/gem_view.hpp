@@ -44,6 +44,6 @@ class GemView : public aurore::Box
 
   private:
     Gem gem;
-    BRLS_BIND(aurore::Image, image, "image");
-    BRLS_BIND(aurore::Label, description, "description");
+    AURORE_BIND(aurore::Image, image, "image");
+    AURORE_BIND(aurore::Label, description, "description");
 };

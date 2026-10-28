@@ -42,7 +42,7 @@ ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
 PREDEFINED             = __cplusplus
-EXPAND_AS_DEFINED      = BRLS_BIND \
+EXPAND_AS_DEFINED      = AURORE_BIND \
                          CONTENT_FROM_XML_RES \
                          CONTENT_FROM_XML_FILE \
                          CONTENT_FROM_XML_STR

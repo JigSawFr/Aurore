@@ -82,14 +82,14 @@ size_t placeholders(const std::string& text)
 
 } // namespace
 
-BRLS_TEST(every_catalog_is_valid_and_loaded)
+AURORE_TEST(every_catalog_is_valid_and_loaded)
 {
     Harness harness;
     std::map<std::string, std::string> english;
     std::string error;
     for (const auto& file : std::filesystem::directory_iterator(I18N / aurore::LOCALE_DEFAULT))
-        BRLS_CHECK(readCatalog(file.path(), &english, &error));
-    BRLS_CHECK(!english.empty());
+        AURORE_CHECK(readCatalog(file.path(), &english, &error));
+    AURORE_CHECK(!english.empty());
 
     int locales = 0;
     for (const auto& folder : std::filesystem::directory_iterator(I18N))
@@ -116,7 +116,7 @@ BRLS_TEST(every_catalog_is_valid_and_loaded)
         }
         locales++;
     }
-    BRLS_CHECK_EQ(locales, 15);
+    AURORE_CHECK_EQ(locales, 15);
     aurore::loadTranslations(aurore::LOCALE_DEFAULT);
 }
 

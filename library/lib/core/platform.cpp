@@ -34,7 +34,7 @@
 #include <aurore/platforms/ps4/ps4_platform.hpp>
 #endif
 
-#if defined(BOREALIS_USE_DEKO3D)
+#if defined(AURORE_USE_DEKO3D)
 #elif defined(__GLFW__)
 #include <aurore/platforms/glfw/glfw_platform.hpp>
 #elif defined(__SDL2__)

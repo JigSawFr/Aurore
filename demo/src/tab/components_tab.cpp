@@ -26,7 +26,7 @@ ComponentsTab::ComponentsTab()
     this->inflateFromXMLRes("xml/tabs/components.xml");
 
     // Bind the button click to a method using the macro (just for the sake of showcasing it, it's overkill in this situation)
-    BRLS_REGISTER_CLICK_BY_ID("button_primary", this->onPrimaryButtonClicked);
+    AURORE_REGISTER_CLICK_BY_ID("button_primary", this->onPrimaryButtonClicked);
 
     // Get a handle to the button and register the action directly
     aurore::Button* highlightButton = (aurore::Button*)this->getView("button_highlight");

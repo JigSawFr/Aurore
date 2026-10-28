@@ -206,7 +206,7 @@ class Button : public Box
 
     void applyStyle();
 
-    BRLS_BIND(Label, label, "brls/button/label");
+    AURORE_BIND(Label, label, "brls/button/label");
 };
 
 } // namespace aurore

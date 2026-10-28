@@ -41,8 +41,8 @@ typedef std::unordered_map<std::string, int> FontStash;
 class FontLoader
 {
   public:
-    inline static std::string USER_FONT_PATH = BRLS_ASSET("font/font.ttf");
-    inline static std::string USER_ICON_PATH = BRLS_ASSET("font/icon.ttf");
+    inline static std::string USER_FONT_PATH = AURORE_ASSET("font/font.ttf");
+    inline static std::string USER_ICON_PATH = AURORE_ASSET("font/icon.ttf");
     inline static std::string USER_EMOJI_PATH;
 
     virtual ~FontLoader() { }

@@ -148,7 +148,7 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
     dialog->setHintText(subText);
     dialog->setHeaderText(headerText);
     dialog->setCountText(std::to_string(utf8len(initialText.data())) + "/" + std::to_string(maxStringLength));
-#if defined(BOREALIS_USE_D3D11)
+#if defined(AURORE_USE_D3D11)
     float scale = Application::windowScale;
 #else
     float scale = Application::windowScale / Application::getPlatform()->getVideoContext()->getScaleFactor();

@@ -168,7 +168,7 @@ accent = #3ee8a5
 background_image = night.jpg
 ```
 
-To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BRLS_THEME=LIGHT` for the dawn), or the demo's Settings tab.
+To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`AURORE_THEME=LIGHT` for the dawn), or the demo's Settings tab.
 
 ### Pictures in memory
 
@@ -310,7 +310,7 @@ backdrop.sidebar = frost-night.png
 backdrop.dialog = frost-night.png
 ```
 
-To see it: `aurore_demo -t @res/themes/winter/theme.theme` (`BRLS_THEME=LIGHT` for the day). Its pictures are drawn by `tools/make_winter_decor.py` (a few KB each).
+To see it: `aurore_demo -t @res/themes/winter/theme.theme` (`AURORE_THEME=LIGHT` for the day). Its pictures are drawn by `tools/make_winter_decor.py` (a few KB each).
 
 ### Backdrops and strips
 
@@ -344,7 +344,7 @@ Read like the others: at the top or per variant, inherited. They are drawn with 
 
 **Motion, the battery and the user** (`ThemeDecorations`, `aurore/core/theme_decor.hpp`):
 
-- They move only when motion is allowed: `Application::getReduceMotion()` false, so not with the app's reduced motion, nor, with Cadran, with Preferences › Visual effects at *Reduced*, nor *Automatic* in hand (the lighter effects), nor with `BRLS_STILL_FOCUS` (screenshot tests). Otherwise **nothing** of them is drawn, not even a frozen frame: the plain palette.
+- They move only when motion is allowed: `Application::getReduceMotion()` false, so not with the app's reduced motion, nor, with Cadran, with Preferences › Visual effects at *Reduced*, nor *Automatic* in hand (the lighter effects), nor with `AURORE_STILL_FOCUS` (screenshot tests). Otherwise **nothing** of them is drawn, not even a frozen frame: the plain palette.
 - They move at 30 frames a second at most (`PARTICLE_FPS`): their places are a function of the time, taken at a 30 Hz tick. With redraw on demand, an otherwise still screen is drawn 30 times a second while they run, instead of once a second.
 - After 60 seconds without input (`IDLE_SECONDS`: a button, a key, a touch, the mouse) they fade out over 3 seconds and stop: no frame is asked for any more. The next input brings them back, fading in. A theme being used counts as an input.
 - They are not views: they never take the focus, an input or a touch, and the layout does not know them.
@@ -452,7 +452,7 @@ A preset is also a starting point: `inherit = builtin:ocean`, then the keys to c
 
 ### The seasons
 
-Each season has both variants and keeps the roles of every theme (the accent for what is chosen and the primary buttons, amber for warnings, red for removals), so that an app reads the same all year; the season is in the surfaces, the focus ring (it pulses between its two colours), the screens' glow, the loading bar, the charts' bars, the tiles' inks (`cadran/blue`, `violet`, `pink`) and the avatars. To see one: `aurore_demo -t builtin:halloween` (`BRLS_THEME=LIGHT` for the light variant).
+Each season has both variants and keeps the roles of every theme (the accent for what is chosen and the primary buttons, amber for warnings, red for removals), so that an app reads the same all year; the season is in the surfaces, the focus ring (it pulses between its two colours), the screens' glow, the loading bar, the charts' bars, the tiles' inks (`cadran/blue`, `violet`, `pink`) and the avatars. To see one: `aurore_demo -t builtin:halloween` (`AURORE_THEME=LIGHT` for the light variant).
 
 | Id | Dark | Light |
 | --- | --- | --- |

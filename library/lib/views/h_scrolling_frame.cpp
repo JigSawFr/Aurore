@@ -27,7 +27,7 @@ namespace aurore
 
 HScrollingFrame::HScrollingFrame()
 {
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "scrollingBehavior", ScrollingBehavior, this->setScrollingBehavior,
         {
             { "natural", ScrollingBehavior::NATURAL },

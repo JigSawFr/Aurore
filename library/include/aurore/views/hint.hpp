@@ -43,8 +43,8 @@ class Hint : public Box
   private:
     std::shared_ptr<Action> action;
 
-    BRLS_BIND(Label, icon, "icon");
-    BRLS_BIND(Label, hint, "hint");
+    AURORE_BIND(Label, icon, "icon");
+    AURORE_BIND(Label, hint, "hint");
 };
 
 class Hints : public Box

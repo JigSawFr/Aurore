@@ -19,14 +19,14 @@
 // aurore::test::Harness runs an app's screens with no window: inputs given
 // through calls, a simulated clock (frames advance without waiting, the
 // same way every run), screenshots compared with references. Built with
-// -DBRLS_BUILD_TESTS=ON (target Aurore::test); docs/testing.md has a guide.
+// -DAURORE_BUILD_TESTS=ON (target Aurore::test); docs/testing.md has a guide.
 //
 //     aurore::test::Harness h;                  // Application::init + window
 //     h.push(new MainActivity());
 //     h.settle();                             // animations done
 //     h.tap(aurore::BUTTON_DOWN);
-//     BRLS_CHECK(h.focusText() == "Settings");
-//     BRLS_CHECK(h.matchesReference("main_settings"));
+//     AURORE_CHECK(h.focusText() == "Settings");
+//     AURORE_CHECK(h.matchesReference("main_settings"));
 //
 // One Harness per process: borealis' Application is global.
 
@@ -69,7 +69,7 @@ struct Options
     // Window title (translated by the app if it wants)
     std::string title = "test";
     // Where matchesReference() reads references and writes what it got.
-    // Empty: BRLS_TEST_REFERENCES / BRLS_TEST_OUTPUT from the environment,
+    // Empty: AURORE_TEST_REFERENCES / AURORE_TEST_OUTPUT from the environment,
     // else "references" and "test-output" in the working directory.
     std::string referenceDir;
     std::string outputDir;
@@ -154,7 +154,7 @@ class Harness
     void hold(ControllerButton button, double ms);
     void setAxis(ControllerAxis axis, float value);
 
-    // Keyboard (BRLS_KBD_KEY_*, GLFW's codes): Enter is A, Escape is B and
+    // Keyboard (AURORE_KBD_KEY_*, GLFW's codes): Enter is A, Escape is B and
     // the arrows are the D-pad, as on the desktop
     void pressKey(AuroreKeyboardScancode key);
     void releaseKey(AuroreKeyboardScancode key);
@@ -198,7 +198,7 @@ class Harness
     // Text
 
     // The labels shown on the activities drawn whose text the box cuts
-    // ("…", Label::isTruncated), their whole text. As with BRLS_CUT_TEXT, a
+    // ("…", Label::isTruncated), their whole text. As with AURORE_CUT_TEXT, a
     // label only clipped away by its parent (a folded sidebar) still counts.
     std::vector<std::string> cutTexts();
     // Every label's text shown (visible views of the activities drawn)
@@ -225,7 +225,7 @@ class Harness
     // differs when a channel is off by more than `tolerance`; it matches
     // when at most `maxRatio` of the pixels differ. Writes
     // `<outputDir>/<name>.png` (and `<name>.diff.png` when it differs).
-    // A missing reference, or BRLS_TEST_UPDATE=1, writes the reference
+    // A missing reference, or AURORE_TEST_UPDATE=1, writes the reference
     // instead and matches.
     bool matchesReference(const std::string& name, int tolerance = 8, double maxRatio = 0.001);
     bool matchesReference(const std::string& name, const Rect& area, int tolerance = 8, double maxRatio = 0.001);
@@ -255,7 +255,7 @@ std::string viewText(View* view);
 
 // A small test runner, for executables of test cases (tests/main.cpp):
 //
-//     BRLS_TEST(focus_moves) { aurore::test::Harness h; ... BRLS_CHECK(...); }
+//     AURORE_TEST(focus_moves) { aurore::test::Harness h; ... AURORE_CHECK(...); }
 //     int main(int argc, char** argv) { return aurore::test::runTests(argc, argv); }
 //
 // `program` runs every case, each in a process of its own; `program name`
@@ -269,27 +269,27 @@ void reportFailure(const char* file, int line, const std::string& what);
 int runTests(int argc, char** argv);
 } // namespace aurore::test
 
-#define BRLS_TEST(name)                                                                                      \
+#define AURORE_TEST(name)                                                                                    \
     static void aurore_test_##name();                                                                        \
     static const bool aurore_test_registered_##name = aurore::test::registerTest(#name, aurore_test_##name); \
     static void aurore_test_##name()
 
-#define BRLS_CHECK(condition)                                                              \
-    do                                                                                     \
-    {                                                                                      \
-        if (!(condition))                                                                  \
-            aurore::test::reportFailure(__FILE__, __LINE__, "BRLS_CHECK(" #condition ")"); \
+#define AURORE_CHECK(condition)                                                              \
+    do                                                                                       \
+    {                                                                                        \
+        if (!(condition))                                                                    \
+            aurore::test::reportFailure(__FILE__, __LINE__, "AURORE_CHECK(" #condition ")"); \
     } while (0)
 
-#define BRLS_CHECK_EQ(actual, expected)                                                                                      \
-    do                                                                                                                       \
-    {                                                                                                                        \
-        auto aurore_actual_   = (actual);                                                                                    \
-        auto aurore_expected_ = (expected);                                                                                  \
-        if (!(aurore_actual_ == aurore_expected_))                                                                           \
-            aurore::test::reportFailure(__FILE__, __LINE__,                                                                  \
-                std::string("BRLS_CHECK_EQ(" #actual ", " #expected "): got ") + aurore::test::describeValue(aurore_actual_) \
-                    + ", expected " + aurore::test::describeValue(aurore_expected_));                                        \
+#define AURORE_CHECK_EQ(actual, expected)                                                                                      \
+    do                                                                                                                         \
+    {                                                                                                                          \
+        auto aurore_actual_   = (actual);                                                                                      \
+        auto aurore_expected_ = (expected);                                                                                    \
+        if (!(aurore_actual_ == aurore_expected_))                                                                             \
+            aurore::test::reportFailure(__FILE__, __LINE__,                                                                    \
+                std::string("AURORE_CHECK_EQ(" #actual ", " #expected "): got ") + aurore::test::describeValue(aurore_actual_) \
+                    + ", expected " + aurore::test::describeValue(aurore_expected_));                                          \
     } while (0)
 
 namespace aurore::test

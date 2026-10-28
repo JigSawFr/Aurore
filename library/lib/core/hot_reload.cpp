@@ -29,7 +29,7 @@ namespace fs = std::experimental::filesystem;
 
 #if defined(__SWITCH__) || defined(__PSV__) || defined(PS4) || defined(ANDROID) || defined(IOS) || defined(TVOS) \
     || defined(__WINRT__)
-#define BRLS_NO_HOT_RELOAD
+#define AURORE_NO_HOT_RELOAD
 #endif
 
 namespace aurore
@@ -107,7 +107,7 @@ using namespace hot_reload_detail;
 
 void HotReload::setEnabled(bool on, const std::string& resourcesDir)
 {
-#ifdef BRLS_NO_HOT_RELOAD
+#ifdef AURORE_NO_HOT_RELOAD
     if (on)
         Logger::warning("hot reload: not on this platform, its resources are not read from a folder");
     return;
@@ -168,7 +168,7 @@ void HotReload::setThemeFiles(const std::vector<std::string>& paths)
             if (disk.empty())
             {
 #ifndef USE_LIBROMFS
-                disk = std::string(BRLS_RESOURCES) + path.substr(5);
+                disk = std::string(AURORE_RESOURCES) + path.substr(5);
 #else
                 continue;
 #endif

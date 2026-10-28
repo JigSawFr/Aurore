@@ -56,7 +56,7 @@ while (aurore::Application::mainLoop())
 6. **Deletion pool**: the views given to `freeView()` (or `Application::addToFreeQueue`) during the iteration are deleted, except those a `ptrLock()` still holds, which wait for the next one.
 7. **Pacing**: a frame not drawn waits a frame's time; a frame limit (`setLimitedFPS`) keeps to its schedule. Otherwise the swap's vsync paces the loop.
 
-`Profiler` measures these phases ([inspector.md](inspector.md), `BRLS_PROFILE=1`).
+`Profiler` measures these phases ([inspector.md](inspector.md), `AURORE_PROFILE=1`).
 
 ## Views and layout
 
@@ -131,11 +131,11 @@ The usual pattern: `async` does the slow part (a file, the network, decoding), t
 
 ## Resources
 
-An app's resources (XML, pictures, translations, fonts, themes) live in its `resources/` folder, and a path to them is written `@res/…` in XML or `BRLS_ASSET("…")` in code. Where they are read from depends on the build:
+An app's resources (XML, pictures, translations, fonts, themes) live in its `resources/` folder, and a path to them is written `@res/…` in XML or `AURORE_ASSET("…")` in code. Where they are read from depends on the build:
 
 | Build | Read from |
 | --- | --- |
-| Desktop | the `resources/` folder next to the program (copied by the build), or the folder the CMake variable `BRLS_RESOURCES_DIR` names |
+| Desktop | the `resources/` folder next to the program (copied by the build), or the folder the CMake variable `AURORE_RESOURCES_ROOT` names |
 | `-DAURORE_LIBROMFS=ON` (forced on Android and iOS) | inside the program; `AURORE_RESOURCES_DIR` puts a folder in front ([environment.md](environment.md)) |
 | Switch | the `.nro`'s romfs (`romfs:/`) |
 | PS4 | `/app0/resources/` in the package |

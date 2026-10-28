@@ -1831,7 +1831,7 @@ std::string View::getFilePathXMLAttributeValue(std::string value)
 #ifdef USE_LIBROMFS
         return resPath;
 #else
-        return std::string(BRLS_RESOURCES) + resPath;
+        return std::string(AURORE_RESOURCES) + resPath;
 #endif
     }
 
@@ -2220,7 +2220,7 @@ View* View::createFromXMLResource(std::string name)
     View::currentXMLResource.clear();
     return view;
 #else
-    return View::createFromXMLFile(std::string(BRLS_RESOURCES) + "xml/" + name);
+    return View::createFromXMLFile(std::string(AURORE_RESOURCES) + "xml/" + name);
 #endif
 }
 
@@ -2450,7 +2450,7 @@ void View::registerCommonAttributes()
         { this->setShrink(value); });
 
     // Alignment
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "alignSelf", AlignSelf, this->setAlignSelf,
         {
             { "auto", AlignSelf::AUTO },
@@ -2539,7 +2539,7 @@ void View::registerCommonAttributes()
     this->registerPercentageXMLAttribute("positionLeft", [this](float value)
         { this->setPositionLeftPercentage(value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "positionType", PositionType, this->setPositionType,
         {
             { "relative", PositionType::RELATIVE },
@@ -2547,7 +2547,7 @@ void View::registerCommonAttributes()
             { "static", PositionType::STATIC },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "boxSizing", BoxSizing, this->setBoxSizing,
         {
             { "borderBox", BoxSizing::BORDER_BOX },
@@ -2592,7 +2592,7 @@ void View::registerCommonAttributes()
     this->registerFloatXMLAttribute("cornerBottomLeftRadius", [this](float value)
         { this->setCornerRadius(this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "shadowType", ShadowType, this->setShadowType,
         {
             {
@@ -2610,7 +2610,7 @@ void View::registerCommonAttributes()
         });
 
     // Misc
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "visibility", Visibility, this->setVisibility,
         {
             { "visible", Visibility::VISIBLE },
@@ -2621,7 +2621,7 @@ void View::registerCommonAttributes()
     this->registerStringXMLAttribute("id", [this](std::string value)
         { this->setId(value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "background", ViewBackground, this->setBackground,
         {
             { "sidebar", ViewBackground::SIDEBAR },

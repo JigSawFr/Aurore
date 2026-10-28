@@ -804,7 +804,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
 #endif
     std::string file = path;
     if (startsWith(file, "@res/"))
-        file = std::string(BRLS_RESOURCES) + file.substr(5);
+        file = std::string(AURORE_RESOURCES) + file.substr(5);
     return readSmallFile(file, MAX_THEME_FILE_BYTES, text);
 }
 
@@ -2180,7 +2180,7 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory, bool deco
     else
 #endif
     {
-        std::string real = startsWith(folder, "@res/") ? std::string(BRLS_RESOURCES) + folder.substr(5) : folder;
+        std::string real = startsWith(folder, "@res/") ? std::string(AURORE_RESOURCES) + folder.substr(5) : folder;
         try
         {
             if (fs::is_directory(real))

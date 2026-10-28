@@ -29,6 +29,6 @@ class CaptionedImage : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(aurore::Image, image, "image");
-    BRLS_BIND(aurore::Label, label, "label");
+    AURORE_BIND(aurore::Image, image, "image");
+    AURORE_BIND(aurore::Label, label, "label");
 };

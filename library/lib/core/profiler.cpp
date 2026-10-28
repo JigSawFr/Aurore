@@ -37,10 +37,10 @@ bool Profiler::isMeasuring()
 
 void Profiler::beginFrame()
 {
-#if defined(BRLS_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+#if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
     static bool fromEnvironment = []
     {
-        const char* value = std::getenv("BRLS_PROFILE");
+        const char* value = std::getenv("AURORE_PROFILE");
         return value && *value && *value != '0';
     }();
     if (fromEnvironment && !logging)

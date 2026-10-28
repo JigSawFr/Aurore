@@ -39,9 +39,9 @@ struct AuroreKeyCombination
 
     explicit AuroreKeyCombination(const int key)
     {
-        if (key == BRLS_KBD_KEY_UNKNOWN)
+        if (key == AURORE_KBD_KEY_UNKNOWN)
         {
-            code = BRLS_KBD_KEY_UNKNOWN;
+            code = AURORE_KBD_KEY_UNKNOWN;
             return;
         }
         code = static_cast<AuroreKeyboardScancode>(key & 0xFFFF);
@@ -50,7 +50,7 @@ struct AuroreKeyCombination
 
     AuroreKeyCombination(const AuroreKeyboardScancode code)
         : code(code)
-        , mod(BRLS_KBD_MODIFIER_NONE)
+        , mod(AURORE_KBD_MODIFIER_NONE)
     {
     }
 

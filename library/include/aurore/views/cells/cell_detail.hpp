@@ -34,8 +34,8 @@ class DetailCell : public RecyclerCell
     void setDetailText(std::string title);
     void setDetailTextColor(NVGcolor color);
 
-    BRLS_BIND(Label, title, "brls/rediocell/title");
-    BRLS_BIND(Label, detail, "brls/rediocell/detail");
+    AURORE_BIND(Label, title, "brls/rediocell/title");
+    AURORE_BIND(Label, detail, "brls/rediocell/detail");
 
     static View* create();
 

@@ -16,7 +16,7 @@
 
 // The demo under the test harness: ctest runs each case in a process of its
 // own (docs/testing.md). The references are in tests/references/;
-// BRLS_TEST_UPDATE=1 writes them again.
+// AURORE_TEST_UPDATE=1 writes them again.
 
 #include <aurore.hpp>
 #include <aurore/cadran/ui/cadran_kit.hpp>
@@ -127,16 +127,16 @@ aurore::Box* screenOf(std::initializer_list<aurore::View*> views)
 
 } // namespace
 
-BRLS_TEST(main_screen)
+AURORE_TEST(main_screen)
 {
     DemoHarness h;
-    BRLS_CHECK_EQ(h.focusText(), std::string("Cadran"));
-    BRLS_CHECK(h.hasText("Aurore Demo"));
-    BRLS_CHECK(h.hasText("Monday, January 5")); // the harness' wall clock
-    BRLS_CHECK(h.matchesReference("main_screen"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Cadran"));
+    AURORE_CHECK(h.hasText("Aurore Demo"));
+    AURORE_CHECK(h.hasText("Monday, January 5")); // the harness' wall clock
+    AURORE_CHECK(h.matchesReference("main_screen"));
 }
 
-BRLS_TEST(missing_reference_fails_in_ci)
+AURORE_TEST(missing_reference_fails_in_ci)
 {
     DemoHarness h;
     const char* ci    = std::getenv("CI");
@@ -147,72 +147,72 @@ BRLS_TEST(missing_reference_fails_in_ci)
         setenv("CI", saved.c_str(), 1);
     else
         unsetenv("CI");
-    BRLS_CHECK(!matched);
-    BRLS_CHECK(!std::filesystem::exists(h.options().referenceDir + "/no_such_reference.png"));
+    AURORE_CHECK(!matched);
+    AURORE_CHECK(!std::filesystem::exists(h.options().referenceDir + "/no_such_reference.png"));
 }
 
-BRLS_TEST(rail_focus_moves)
+AURORE_TEST(rail_focus_moves)
 {
     DemoHarness h;
     h.clearFocusLog();
     h.tap(aurore::BUTTON_DOWN, 2);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Layout and alignment"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Layout and alignment"));
     h.tap(aurore::BUTTON_UP);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Basic components"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Basic components"));
     std::vector<std::string> expected = { "Basic components", "Layout and alignment", "Basic components" };
-    BRLS_CHECK(h.focusLog() == expected);
-    BRLS_CHECK(h.focusByText("Settings"));
-    BRLS_CHECK(!h.focusByText("No such tab", aurore::BUTTON_DOWN, 3));
+    AURORE_CHECK(h.focusLog() == expected);
+    AURORE_CHECK(h.focusByText("Settings"));
+    AURORE_CHECK(!h.focusByText("No such tab", aurore::BUTTON_DOWN, 3));
 }
 
-BRLS_TEST(keyboard_moves_focus)
+AURORE_TEST(keyboard_moves_focus)
 {
     DemoHarness h;
-    h.tapKey(aurore::BRLS_KBD_KEY_DOWN);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Basic components"));
-    h.tapKey(aurore::BRLS_KBD_KEY_UP);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Cadran"));
+    h.tapKey(aurore::AURORE_KBD_KEY_DOWN);
+    AURORE_CHECK_EQ(h.focusText(), std::string("Basic components"));
+    h.tapKey(aurore::AURORE_KBD_KEY_UP);
+    AURORE_CHECK_EQ(h.focusText(), std::string("Cadran"));
 }
 
-BRLS_TEST(confirm_dialog_opens_and_closes)
+AURORE_TEST(confirm_dialog_opens_and_closes)
 {
     DemoHarness h;
     h.tap(aurore::BUTTON_RIGHT); // into the tab
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Confirm"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Confirm"));
     size_t screens = aurore::Application::getActivitiesStack().size();
 
     h.tap(aurore::BUTTON_A);
-    BRLS_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens + 1);
-    BRLS_CHECK(dynamic_cast<aurore::Dialog*>(h.top()->getContentView()) != nullptr);
-    BRLS_CHECK(h.matchesReference("confirm_dialog"));
+    AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens + 1);
+    AURORE_CHECK(dynamic_cast<aurore::Dialog*>(h.top()->getContentView()) != nullptr);
+    AURORE_CHECK(h.matchesReference("confirm_dialog"));
 
     h.tap(aurore::BUTTON_B);
-    BRLS_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Confirm"));
+    AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
+    AURORE_CHECK_EQ(h.focusText(), std::string("Confirm"));
 }
 
-BRLS_TEST(touch_opens_a_tab)
+AURORE_TEST(touch_opens_a_tab)
 {
     DemoHarness h;
-    BRLS_CHECK(h.tapView(h.findText("Layout and alignment")));
-    BRLS_CHECK(h.hasText("alignItems: center"));
-    BRLS_CHECK(aurore::Application::getInputType() == aurore::InputType::TOUCH);
-    BRLS_CHECK(h.matchesReference("layout_tab"));
+    AURORE_CHECK(h.tapView(h.findText("Layout and alignment")));
+    AURORE_CHECK(h.hasText("alignItems: center"));
+    AURORE_CHECK(aurore::Application::getInputType() == aurore::InputType::TOUCH);
+    AURORE_CHECK(h.matchesReference("layout_tab"));
 }
 
-BRLS_TEST(window_resized)
+AURORE_TEST(window_resized)
 {
     DemoHarness h;
     h.resize(1920, 1080);
     aurore::test::Image shot = h.screenshot();
-    BRLS_CHECK_EQ(shot.width, 1920);
-    BRLS_CHECK_EQ(shot.height, 1080);
-    BRLS_CHECK_EQ(aurore::Application::contentWidth, 1280.0f);
-    BRLS_CHECK(h.matchesReference("main_screen_1080p"));
+    AURORE_CHECK_EQ(shot.width, 1920);
+    AURORE_CHECK_EQ(shot.height, 1080);
+    AURORE_CHECK_EQ(aurore::Application::contentWidth, 1280.0f);
+    AURORE_CHECK(h.matchesReference("main_screen_1080p"));
 }
 
-BRLS_TEST(cut_texts_found)
+AURORE_TEST(cut_texts_found)
 {
     Harness h;
     auto* cut = new aurore::Label();
@@ -224,19 +224,19 @@ BRLS_TEST(cut_texts_found)
     h.push(new aurore::Activity(screenOf({ cut, whole })));
     h.settle();
     std::vector<std::string> expected = { "A sentence far too long for the narrow box it is given" };
-    BRLS_CHECK(h.cutTexts() == expected);
+    AURORE_CHECK(h.cutTexts() == expected);
 }
 
-BRLS_TEST(timers_follow_the_simulated_clock)
+AURORE_TEST(timers_follow_the_simulated_clock)
 {
     Harness h;
     bool fired = false;
     aurore::delay(500, [&fired]()
         { fired = true; });
     h.advance(400);
-    BRLS_CHECK(!fired);
+    AURORE_CHECK(!fired);
     h.advance(150);
-    BRLS_CHECK(fired);
+    AURORE_CHECK(fired);
 
     // An animation ends after its duration on the clock, in frames
     aurore::Animatable value;
@@ -244,12 +244,12 @@ BRLS_TEST(timers_follow_the_simulated_clock)
     value.addStep(1.0f, 300);
     value.start();
     h.advance(150);
-    BRLS_CHECK(value.getValue() > 0.0f && value.getValue() < 1.0f);
-    BRLS_CHECK(h.settle());
-    BRLS_CHECK_EQ(value.getValue(), 1.0f);
+    AURORE_CHECK(value.getValue() > 0.0f && value.getValue() < 1.0f);
+    AURORE_CHECK(h.settle());
+    AURORE_CHECK_EQ(value.getValue(), 1.0f);
 }
 
-BRLS_TEST(redraw_on_demand_skips_still_frames)
+AURORE_TEST(redraw_on_demand_skips_still_frames)
 {
     Harness h;
     auto* first  = new aurore::Button();
@@ -264,15 +264,15 @@ BRLS_TEST(redraw_on_demand_skips_still_frames)
     // Still: no frame drawn but the one a second
     uint64_t drawn = aurore::Application::getDrawnFrameCount();
     h.advance(900);
-    BRLS_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 1);
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 1);
 
     // A press: drawn
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK(aurore::Application::getDrawnFrameCount() - drawn > 2);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Second"));
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() - drawn > 2);
+    AURORE_CHECK_EQ(h.focusText(), std::string("Second"));
 }
 
-BRLS_TEST(theme_change_draws_at_once_on_demand)
+AURORE_TEST(theme_change_draws_at_once_on_demand)
 {
     Harness h;
     h.push(new aurore::Activity(screenOf({ new aurore::Button() })));
@@ -285,12 +285,12 @@ BRLS_TEST(theme_change_draws_at_once_on_demand)
     uint64_t drawn = aurore::Application::getDrawnFrameCount();
     aurore::Theme::loadFile("builtin:high-contrast-dark");
     h.step();
-    BRLS_CHECK(aurore::Application::getDrawnFrameCount() > drawn);
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() > drawn);
 
     drawn = aurore::Application::getDrawnFrameCount();
     aurore::Theme::reset();
     h.step();
-    BRLS_CHECK(aurore::Application::getDrawnFrameCount() > drawn);
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() > drawn);
 }
 
 // Noon of a date, in the harness' time zone (UTC)
@@ -304,7 +304,7 @@ static std::time_t noonOf(int year, int month, int day)
     return std::mktime(&date);
 }
 
-BRLS_TEST(seasonal_theme_picks_the_preset_of_the_date)
+AURORE_TEST(seasonal_theme_picks_the_preset_of_the_date)
 {
     Harness h;
     const struct
@@ -329,17 +329,17 @@ BRLS_TEST(seasonal_theme_picks_the_preset_of_the_date)
         { 2040, 2, 1, "winter" }, // out of the Lunar New Year's table
     };
     for (const auto& date : dates)
-        BRLS_CHECK_EQ(aurore::Theme::seasonalTheme(noonOf(date.year, date.month, date.day)),
+        AURORE_CHECK_EQ(aurore::Theme::seasonalTheme(noonOf(date.year, date.month, date.day)),
             std::string("builtin:") + date.preset);
 
     bool listed = false;
     for (const aurore::ThemeInfo& info : aurore::Theme::builtinThemes())
         if (info.path == "builtin:seasonal")
             listed = info.ok() && info.warnings.empty() && info.light && info.dark && info.name == "Seasonal";
-    BRLS_CHECK(listed);
+    AURORE_CHECK(listed);
 }
 
-BRLS_TEST(seasonal_theme_changes_at_midnight)
+AURORE_TEST(seasonal_theme_changes_at_midnight)
 {
     // 16 October 2026, 15 seconds before Halloween's first day
     aurore::test::Options options;
@@ -351,20 +351,20 @@ BRLS_TEST(seasonal_theme_changes_at_midnight)
     NVGcolor autumn;
     aurore::Theme::parseColor("#1a1310", &autumn);
     NVGcolor background = aurore::Theme::getDarkTheme()["brls/background"];
-    BRLS_CHECK(background.r == autumn.r && background.g == autumn.g && background.b == autumn.b);
+    AURORE_CHECK(background.r == autumn.r && background.g == autumn.g && background.b == autumn.b);
     aurore::test::Image before = h.screenshot();
 
     h.advance(20000);
     NVGcolor halloween;
     aurore::Theme::parseColor("#150d1f", &halloween);
     background = aurore::Theme::getDarkTheme()["brls/background"];
-    BRLS_CHECK(background.r == halloween.r && background.g == halloween.g && background.b == halloween.b);
-    BRLS_CHECK_EQ(aurore::Theme::getCurrentPath(), std::string("builtin:seasonal"));
+    AURORE_CHECK(background.r == halloween.r && background.g == halloween.g && background.b == halloween.b);
+    AURORE_CHECK_EQ(aurore::Theme::getCurrentPath(), std::string("builtin:seasonal"));
     // Drawn again: the button and its focus in the new colours
-    BRLS_CHECK(aurore::test::compareImages(h.screenshot(), before).differingPixels > 10000);
+    AURORE_CHECK(aurore::test::compareImages(h.screenshot(), before).differingPixels > 10000);
 }
 
-BRLS_TEST(every_preset_draws_the_demo_in_both_variants)
+AURORE_TEST(every_preset_draws_the_demo_in_both_variants)
 {
     DemoHarness h;
     for (const aurore::ThemeInfo& info : aurore::Theme::builtinThemes())
@@ -372,16 +372,16 @@ BRLS_TEST(every_preset_draws_the_demo_in_both_variants)
         {
             if (!info.styles(variant))
                 continue;
-            BRLS_CHECK(aurore::Theme::loadFile(info.path));
+            AURORE_CHECK(aurore::Theme::loadFile(info.path));
             aurore::Application::getPlatform()->setThemeVariant(variant);
             h.step(2);
-            BRLS_CHECK(aurore::Theme::checkContrast(variant).empty());
+            AURORE_CHECK(aurore::Theme::checkContrast(variant).empty());
         }
     aurore::Theme::reset();
     h.step(2);
 }
 
-BRLS_TEST(theme_picker_follows_a_one_variant_palette)
+AURORE_TEST(theme_picker_follows_a_one_variant_palette)
 {
     DemoHarness h;
     ui::prefs().theme      = "dark";
@@ -389,41 +389,41 @@ BRLS_TEST(theme_picker_follows_a_one_variant_palette)
     live_prefs::apply_theme();
     h.settle();
     // The palette has the light variant only: shown, and what is saved
-    BRLS_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT);
-    BRLS_CHECK_EQ(ui::prefs().theme, std::string("light"));
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT);
+    AURORE_CHECK_EQ(ui::prefs().theme, std::string("light"));
 
     // Dark asked for: the palette's counterpart, in the dark variant
     ui::pick_theme();
     h.settle();
-    BRLS_CHECK(h.focusByText("Dark"));
+    AURORE_CHECK(h.focusByText("Dark"));
     h.tap(aurore::BUTTON_A);
     h.settle();
-    BRLS_CHECK_EQ(ui::prefs().theme, std::string("dark"));
-    BRLS_CHECK_EQ(ui::prefs().theme_file, std::string("builtin:high-contrast-dark"));
-    BRLS_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
+    AURORE_CHECK_EQ(ui::prefs().theme, std::string("dark"));
+    AURORE_CHECK_EQ(ui::prefs().theme_file, std::string("builtin:high-contrast-dark"));
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
 
     // A light-only palette picked: its variant
     ui::prefs().theme_file = "";
     live_prefs::apply_theme();
     ui::pick_palette();
     h.settle();
-    BRLS_CHECK(h.focusByText("Sand"));
+    AURORE_CHECK(h.focusByText("Sand"));
     h.tap(aurore::BUTTON_A);
     h.settle();
-    BRLS_CHECK_EQ(ui::prefs().theme, std::string("light"));
-    BRLS_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT);
+    AURORE_CHECK_EQ(ui::prefs().theme, std::string("light"));
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT);
 
     // Dark again: Sand has no counterpart, back to the boards' palettes
     ui::pick_theme();
     h.settle();
-    BRLS_CHECK(h.focusByText("Dark"));
+    AURORE_CHECK(h.focusByText("Dark"));
     h.tap(aurore::BUTTON_A);
     h.settle();
-    BRLS_CHECK_EQ(ui::prefs().theme_file, std::string(""));
-    BRLS_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
+    AURORE_CHECK_EQ(ui::prefs().theme_file, std::string(""));
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
 }
 
-BRLS_TEST(theme_icon_is_read_and_inherited)
+AURORE_TEST(theme_icon_is_read_and_inherited)
 {
     Harness h;
     namespace fs       = std::filesystem;
@@ -441,20 +441,20 @@ BRLS_TEST(theme_icon_is_read_and_inherited)
     const std::string overrides = write("overrides.theme", "inherit = own.theme\nicon = tree\n");
     const std::string includes  = write("includes.theme", "@include motif.inc\naccent = #3ddc97\n");
 
-    BRLS_CHECK_EQ(aurore::Theme::inspect(own).icon, std::string("leaf"));
-    BRLS_CHECK(aurore::Theme::inspect(own).warnings.empty() && aurore::Theme::inspect(own).ok());
-    BRLS_CHECK_EQ(aurore::Theme::inspect(none).icon, std::string(""));
-    BRLS_CHECK_EQ(aurore::Theme::inspect(inherits).icon, std::string("wave"));
-    BRLS_CHECK_EQ(aurore::Theme::inspect(overrides).icon, std::string("tree"));
-    BRLS_CHECK_EQ(aurore::Theme::inspect(includes).icon, std::string("gem"));
+    AURORE_CHECK_EQ(aurore::Theme::inspect(own).icon, std::string("leaf"));
+    AURORE_CHECK(aurore::Theme::inspect(own).warnings.empty() && aurore::Theme::inspect(own).ok());
+    AURORE_CHECK_EQ(aurore::Theme::inspect(none).icon, std::string(""));
+    AURORE_CHECK_EQ(aurore::Theme::inspect(inherits).icon, std::string("wave"));
+    AURORE_CHECK_EQ(aurore::Theme::inspect(overrides).icon, std::string("tree"));
+    AURORE_CHECK_EQ(aurore::Theme::inspect(includes).icon, std::string("gem"));
     fs::remove_all(dir);
 
     // Every preset has its motif
     for (const aurore::ThemeInfo& info : aurore::Theme::builtinThemes())
-        BRLS_CHECK(!info.icon.empty());
+        AURORE_CHECK(!info.icon.empty());
 }
 
-BRLS_TEST(seasonal_palette_shows_the_motif_of_the_date)
+AURORE_TEST(seasonal_palette_shows_the_motif_of_the_date)
 {
     Harness h;
     const struct
@@ -479,7 +479,7 @@ BRLS_TEST(seasonal_palette_shows_the_motif_of_the_date)
         for (const aurore::ThemeInfo& info : aurore::Theme::builtinThemes())
             if (info.path == "builtin:seasonal")
                 icon = info.icon;
-        BRLS_CHECK_EQ(icon, std::string(date.icon));
+        AURORE_CHECK_EQ(icon, std::string(date.icon));
     }
 }
 
@@ -492,21 +492,21 @@ static void pickPalette(const char* theme, const char* reference)
     h.settle();
     ui::pick_palette();
     h.settle();
-    BRLS_CHECK(h.hasText("Ocean"));
-    BRLS_CHECK(h.matchesReference(reference));
+    AURORE_CHECK(h.hasText("Ocean"));
+    AURORE_CHECK(h.matchesReference(reference));
 }
 
-BRLS_TEST(palette_picker_shows_swatches)
+AURORE_TEST(palette_picker_shows_swatches)
 {
     pickPalette("dark", "palette_picker");
 }
 
-BRLS_TEST(palette_picker_shows_swatches_light)
+AURORE_TEST(palette_picker_shows_swatches_light)
 {
     pickPalette("light", "palette_picker_light");
 }
 
-BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
+AURORE_TEST(redraw_debug_finds_a_missing_invalidation)
 {
     Harness h;
     auto* swatch = new Swatch();
@@ -515,22 +515,22 @@ BRLS_TEST(redraw_debug_finds_a_missing_invalidation)
     aurore::Application::setRedrawDebug(true);
     h.settle();
     h.step(3);
-    BRLS_CHECK_EQ(aurore::Application::getMissedRedrawCount(), (uint64_t)0);
+    AURORE_CHECK_EQ(aurore::Application::getMissedRedrawCount(), (uint64_t)0);
 
     // Changed, and said so: drawn, nothing missed
     swatch->color = nvgRGB(40, 200, 40);
     aurore::Application::requestRedraw();
     h.step(3);
-    BRLS_CHECK_EQ(aurore::Application::getMissedRedrawCount(), (uint64_t)0);
+    AURORE_CHECK_EQ(aurore::Application::getMissedRedrawCount(), (uint64_t)0);
 
     // Changed without a word: the skipped frames differ, over the swatch
     swatch->color = nvgRGB(40, 40, 200);
     h.step(3);
-    BRLS_CHECK(aurore::Application::getMissedRedrawCount() > 0);
+    AURORE_CHECK(aurore::Application::getMissedRedrawCount() > 0);
     aurore::Rect area  = aurore::Application::getLastMissedRedrawArea();
     aurore::Rect frame = swatch->getFrame();
-    BRLS_CHECK(std::fabs(area.getMinX() - frame.getMinX()) <= 1 && std::fabs(area.getMinY() - frame.getMinY()) <= 1);
-    BRLS_CHECK(std::fabs(area.getWidth() - frame.getWidth()) <= 2 && std::fabs(area.getHeight() - frame.getHeight()) <= 2);
+    AURORE_CHECK(std::fabs(area.getMinX() - frame.getMinX()) <= 1 && std::fabs(area.getMinY() - frame.getMinY()) <= 1);
+    AURORE_CHECK(std::fabs(area.getWidth() - frame.getWidth()) <= 2 && std::fabs(area.getHeight() - frame.getHeight()) <= 2);
 }
 
 // A folder of theme files and pictures, removed afterwards
@@ -592,7 +592,7 @@ static bool hasErrorWith(const aurore::ThemeInfo& info, const std::string& text)
     return false;
 }
 
-BRLS_TEST(theme_pictures_stay_in_their_folder)
+AURORE_TEST(theme_pictures_stay_in_their_folder)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_assets_test");
@@ -608,14 +608,14 @@ BRLS_TEST(theme_pictures_stay_in_their_folder)
 
     // Folder themes are listed with the single files, named after their folder
     std::vector<aurore::ThemeInfo> listed = aurore::Theme::listThemes(root);
-    BRLS_CHECK_EQ(listed.size(), (size_t)2);
+    AURORE_CHECK_EQ(listed.size(), (size_t)2);
     for (const aurore::ThemeInfo& info : listed)
-        BRLS_CHECK(info.ok());
-    BRLS_CHECK_EQ(listed[0].id, std::string("aurora"));
-    BRLS_CHECK_EQ(listed[0].path, root + "/aurora/theme.theme");
-    BRLS_CHECK_EQ(listed[0].darkBackground.image, root + "/aurora/sky/night.png");
-    BRLS_CHECK_EQ(listed[1].id, std::string("single"));
-    BRLS_CHECK_EQ(listed[1].backgroundImage, root + "/night.png");
+        AURORE_CHECK(info.ok());
+    AURORE_CHECK_EQ(listed[0].id, std::string("aurora"));
+    AURORE_CHECK_EQ(listed[0].path, root + "/aurora/theme.theme");
+    AURORE_CHECK_EQ(listed[0].darkBackground.image, root + "/aurora/sky/night.png");
+    AURORE_CHECK_EQ(listed[1].id, std::string("single"));
+    AURORE_CHECK_EQ(listed[1].backgroundImage, root + "/night.png");
 
     // Out of the theme's folder: refused, an error, never a crash
     std::string path, error;
@@ -623,50 +623,50 @@ BRLS_TEST(theme_pictures_stay_in_their_folder)
     for (const char* name : { "../outside.png", "sky/../../outside.png", "/etc/passwd", "sdmc:/x.png", "C:/x.png",
              "@res/img/demo_icon.jpg", "sky\\night.png", "..", "." })
     {
-        BRLS_CHECK(!aurore::Theme::resolveAsset(name, folder, folder, &path, &error));
-        BRLS_CHECK(!error.empty());
+        AURORE_CHECK(!aurore::Theme::resolveAsset(name, folder, folder, &path, &error));
+        AURORE_CHECK(!error.empty());
     }
-    BRLS_CHECK(aurore::Theme::resolveAsset("./sky/x/../night.png", folder, folder, &path, &error));
-    BRLS_CHECK_EQ(path, folder + "/sky/night.png");
+    AURORE_CHECK(aurore::Theme::resolveAsset("./sky/x/../night.png", folder, folder, &path, &error));
+    AURORE_CHECK_EQ(path, folder + "/sky/night.png");
     // From an included file in a subfolder, still in the theme's folder
-    BRLS_CHECK(aurore::Theme::resolveAsset("../sky/night.png", folder + "/parts", folder, &path, &error));
-    BRLS_CHECK_EQ(path, folder + "/sky/night.png");
+    AURORE_CHECK(aurore::Theme::resolveAsset("../sky/night.png", folder + "/parts", folder, &path, &error));
+    AURORE_CHECK_EQ(path, folder + "/sky/night.png");
     // A preset's pictures are the app's resources
-    BRLS_CHECK(aurore::Theme::resolveAsset("@res/img/demo_icon.jpg", "builtin:", "builtin:", &path, &error));
-    BRLS_CHECK(!aurore::Theme::resolveAsset("night.png", "builtin:", "builtin:", &path, &error));
+    AURORE_CHECK(aurore::Theme::resolveAsset("@res/img/demo_icon.jpg", "builtin:", "builtin:", &path, &error));
+    AURORE_CHECK(!aurore::Theme::resolveAsset("night.png", "builtin:", "builtin:", &path, &error));
 
     const std::string escapes = themes.write("aurora2/theme.theme",
         "name = Escapes\nbackground_image = ../outside.png\n[light]\nbackground_image = /etc/passwd\n");
     aurore::ThemeInfo info    = aurore::Theme::inspect(escapes);
-    BRLS_CHECK(hasErrorWith(info, "goes out of the theme's folder"));
-    BRLS_CHECK(hasErrorWith(info, "an absolute path is not allowed"));
-    BRLS_CHECK(!info.darkBackground.hasImage() && !info.lightBackground.hasImage());
+    AURORE_CHECK(hasErrorWith(info, "goes out of the theme's folder"));
+    AURORE_CHECK(hasErrorWith(info, "an absolute path is not allowed"));
+    AURORE_CHECK(!info.darkBackground.hasImage() && !info.lightBackground.hasImage());
 
 #ifndef _WIN32
     // A link in the folder to a file out of it
     std::filesystem::create_symlink(themes.dir / "outside.png", themes.dir / "aurora" / "link.png");
-    BRLS_CHECK(!aurore::Theme::resolveAsset("link.png", folder, folder, &path, &error));
-    BRLS_CHECK(error.find("link") != std::string::npos);
+    AURORE_CHECK(!aurore::Theme::resolveAsset("link.png", folder, folder, &path, &error));
+    AURORE_CHECK(error.find("link") != std::string::npos);
 #endif
 
     // A picture that is not there, or not a picture
     themes.write("broken.jpg", "not a jpeg");
-    BRLS_CHECK(hasErrorWith(aurore::Theme::inspect(themes.write("missing.theme", "background_image = nowhere.png\n")),
+    AURORE_CHECK(hasErrorWith(aurore::Theme::inspect(themes.write("missing.theme", "background_image = nowhere.png\n")),
         "cannot read"));
     // A file that is not a picture: told by a check that decodes it only
     const std::string broken = themes.write("broken.theme", "background_image = broken.jpg\n");
-    BRLS_CHECK(aurore::Theme::inspect(broken).ok());
-    BRLS_CHECK(hasErrorWith(aurore::Theme::inspect(broken, true), "cannot read"));
+    AURORE_CHECK(aurore::Theme::inspect(broken).ok());
+    AURORE_CHECK(hasErrorWith(aurore::Theme::inspect(broken, true), "cannot read"));
     // Used anyway: nothing drawn, no crash
-    BRLS_CHECK(aurore::Theme::loadFile(root + "/broken.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile(root + "/broken.theme"));
     h.settle();
-    BRLS_CHECK(!aurore::Application::hasThemeBackground());
+    AURORE_CHECK(!aurore::Application::hasThemeBackground());
     aurore::Theme::reset();
 }
 
 // A file that includes itself, or many files each including the next ones
 // many times: read once each at most, quickly, with errors that say where
-BRLS_TEST(theme_include_fanout_is_bounded)
+AURORE_TEST(theme_include_fanout_is_bounded)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_fanout_test");
@@ -696,24 +696,24 @@ BRLS_TEST(theme_include_fanout_is_bounded)
     aurore::ThemeInfo wideInfo  = aurore::Theme::inspect(wide);
     aurore::ThemeInfo loopInfo  = aurore::Theme::inspect(loop);
     aurore::ThemeInfo oftenInfo = aurore::Theme::inspect(oftenPath);
-    BRLS_CHECK(aurore::Theme::loadFile(wide));
+    AURORE_CHECK(aurore::Theme::loadFile(wide));
     double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
-    BRLS_CHECK(seconds < 5.0);
+    AURORE_CHECK(seconds < 5.0);
 
-    BRLS_CHECK(hasErrorWith(fanInfo, "self.inc:2: @include self.inc includes itself (a loop)"));
-    BRLS_CHECK(fanInfo.errors.size() <= 10);
-    BRLS_CHECK(hasErrorWith(wideInfo, "part7.inc:1: @include part8.inc goes too deep"));
-    BRLS_CHECK_EQ(wideInfo.errors.size(), (size_t)101);
-    BRLS_CHECK(hasErrorWith(wideInfo, "more errors"));
-    BRLS_CHECK(hasErrorWith(oftenInfo, "line 66: @include leaf.inc: skipped, the theme reads more than 64 files"));
-    BRLS_CHECK(!hasErrorWith(oftenInfo, "line 65:"));
-    BRLS_CHECK(hasErrorWith(loopInfo, "inherit loop.theme inherits itself (a loop)"));
+    AURORE_CHECK(hasErrorWith(fanInfo, "self.inc:2: @include self.inc includes itself (a loop)"));
+    AURORE_CHECK(fanInfo.errors.size() <= 10);
+    AURORE_CHECK(hasErrorWith(wideInfo, "part7.inc:1: @include part8.inc goes too deep"));
+    AURORE_CHECK_EQ(wideInfo.errors.size(), (size_t)101);
+    AURORE_CHECK(hasErrorWith(wideInfo, "more errors"));
+    AURORE_CHECK(hasErrorWith(oftenInfo, "line 66: @include leaf.inc: skipped, the theme reads more than 64 files"));
+    AURORE_CHECK(!hasErrorWith(oftenInfo, "line 65:"));
+    AURORE_CHECK(hasErrorWith(loopInfo, "inherit loop.theme inherits itself (a loop)"));
     aurore::Theme::reset();
 }
 
 // @include, inherit and counterpart read files of the theme's folder only, as
 // its pictures; a resource theme still includes resources
-BRLS_TEST(theme_includes_stay_in_their_folder)
+AURORE_TEST(theme_includes_stay_in_their_folder)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_include_confined_test");
@@ -725,142 +725,142 @@ BRLS_TEST(theme_includes_stay_in_their_folder)
 
     const std::string absolute = themes.write("mine/abs.theme", "name = Abs\n@include /etc/passwd\n");
     aurore::ThemeInfo info     = aurore::Theme::inspect(absolute);
-    BRLS_CHECK(hasErrorWith(info, "line 2: @include /etc/passwd: an absolute path is not allowed"));
-    BRLS_CHECK(!hasErrorWith(info, "no '='")); // nothing of the file read
-    BRLS_CHECK(!hasErrorWith(info, "root:"));
+    AURORE_CHECK(hasErrorWith(info, "line 2: @include /etc/passwd: an absolute path is not allowed"));
+    AURORE_CHECK(!hasErrorWith(info, "no '='")); // nothing of the file read
+    AURORE_CHECK(!hasErrorWith(info, "root:"));
 
     info = aurore::Theme::inspect(themes.write("mine/up.theme", "name = Up\n@include ../outside.inc\n"));
-    BRLS_CHECK(hasErrorWith(info, "line 2: @include ../outside.inc: goes out of the theme's folder"));
+    AURORE_CHECK(hasErrorWith(info, "line 2: @include ../outside.inc: goes out of the theme's folder"));
 
     const std::string inherits = themes.write("mine/inherits.theme", "name = Inherits\ninherit = ../other/base.theme\n");
     info                       = aurore::Theme::inspect(inherits);
-    BRLS_CHECK(hasErrorWith(info, "inherit ../other/base.theme: goes out of the theme's folder"));
-    BRLS_CHECK(!info.darkBackground.hasImage());
-    BRLS_CHECK(aurore::Theme::loadFile(inherits));
-    BRLS_CHECK(!aurore::Theme::getBackground(aurore::ThemeVariant::DARK).hasImage());
+    AURORE_CHECK(hasErrorWith(info, "inherit ../other/base.theme: goes out of the theme's folder"));
+    AURORE_CHECK(!info.darkBackground.hasImage());
+    AURORE_CHECK(aurore::Theme::loadFile(inherits));
+    AURORE_CHECK(!aurore::Theme::getBackground(aurore::ThemeVariant::DARK).hasImage());
     aurore::Theme::reset();
 
     info = aurore::Theme::inspect(themes.write("mine/res.theme", "name = Res\n@include @res/themes/shared.inc\n"));
-    BRLS_CHECK(hasErrorWith(info, "not in the app's resources"));
+    AURORE_CHECK(hasErrorWith(info, "not in the app's resources"));
     info = aurore::Theme::inspect(themes.write("mine/pair.theme", "name = Pair\ninherit = dark\ncounterpart = /etc/hostname\n"));
-    BRLS_CHECK(hasErrorWith(info, "counterpart /etc/hostname: an absolute path is not allowed"));
-    BRLS_CHECK(info.counterpart.empty());
+    AURORE_CHECK(hasErrorWith(info, "counterpart /etc/hostname: an absolute path is not allowed"));
+    AURORE_CHECK(info.counterpart.empty());
 
     // Still fine: a sibling, a preset by name, a resource theme's includes
-    BRLS_CHECK(aurore::Theme::inspect(themes.write("mine/ok.theme", "name = Ok\ninherit = sibling.theme\n")).ok());
-    BRLS_CHECK(aurore::Theme::inspect(themes.write("mine/preset.theme", "name = P\ninherit = ocean\n")).ok());
-    BRLS_CHECK(aurore::Theme::inspect("@res/themes/rose.theme").ok());
+    AURORE_CHECK(aurore::Theme::inspect(themes.write("mine/ok.theme", "name = Ok\ninherit = sibling.theme\n")).ok());
+    AURORE_CHECK(aurore::Theme::inspect(themes.write("mine/preset.theme", "name = P\ninherit = ocean\n")).ok());
+    AURORE_CHECK(aurore::Theme::inspect("@res/themes/rose.theme").ok());
 
     // Too large, or not a file: not read
     themes.write("mine/big.inc", "# " + std::string(300 * 1024, 'x') + "\n");
     info = aurore::Theme::inspect(themes.write("mine/big.theme", "name = Big\n@include big.inc\n"));
-    BRLS_CHECK(hasErrorWith(info, "@include big.inc: cannot read"));
+    AURORE_CHECK(hasErrorWith(info, "@include big.inc: cannot read"));
     std::filesystem::create_directories(themes.dir / "mine" / "folder.inc");
     info = aurore::Theme::inspect(themes.write("mine/dir.theme", "name = Dir\n@include folder.inc\n"));
-    BRLS_CHECK(hasErrorWith(info, "@include folder.inc: cannot read"));
+    AURORE_CHECK(hasErrorWith(info, "@include folder.inc: cannot read"));
 #ifndef _WIN32
     // A pipe would block a reader for ever
-    BRLS_CHECK(::mkfifo((themes.dir / "mine" / "pipe.inc").c_str(), 0600) == 0);
+    AURORE_CHECK(::mkfifo((themes.dir / "mine" / "pipe.inc").c_str(), 0600) == 0);
     info = aurore::Theme::inspect(themes.write("mine/pipe.theme", "name = Pipe\n@include pipe.inc\n"));
-    BRLS_CHECK(hasErrorWith(info, "@include pipe.inc: cannot read"));
+    AURORE_CHECK(hasErrorWith(info, "@include pipe.inc: cannot read"));
 
     // A link out of the folder, to a file or to a folder, there or not
     std::filesystem::create_symlink(themes.dir / "outside.inc", themes.dir / "mine" / "link.inc");
     std::filesystem::create_directory_symlink(themes.dir / "other", themes.dir / "mine" / "away");
     info = aurore::Theme::inspect(themes.write("mine/link.theme", "name = Link\n@include link.inc\n"));
-    BRLS_CHECK(hasErrorWith(info, "a link out of the theme's folder"));
+    AURORE_CHECK(hasErrorWith(info, "a link out of the theme's folder"));
     std::string path, error;
     const std::string folder = root + "/mine";
-    BRLS_CHECK(!aurore::Theme::resolveAsset("away/missing.png", folder, folder, &path, &error));
-    BRLS_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
+    AURORE_CHECK(!aurore::Theme::resolveAsset("away/missing.png", folder, folder, &path, &error));
+    AURORE_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
     // A broken link: where it leads cannot be told, refused
     std::filesystem::create_symlink(themes.dir / "nowhere.png", themes.dir / "mine" / "broken.png");
-    BRLS_CHECK(!aurore::Theme::resolveAsset("broken.png", folder, folder, &path, &error));
+    AURORE_CHECK(!aurore::Theme::resolveAsset("broken.png", folder, folder, &path, &error));
     // A file not there yet, in the folder: fine (inspect says it is missing)
-    BRLS_CHECK(aurore::Theme::resolveAsset("later.png", folder, folder, &path, &error));
+    AURORE_CHECK(aurore::Theme::resolveAsset("later.png", folder, folder, &path, &error));
 #endif
 }
 
 // Colours and metrics are finite numbers in their ranges
-BRLS_TEST(theme_numbers_are_finite_and_in_range)
+AURORE_TEST(theme_numbers_are_finite_and_in_range)
 {
     Harness h;
     NVGcolor color;
     for (const char* bad : { "rgba(nan, 1, 1, 1)", "rgb(inf, 0, 0)", "rgb(1e39, 0, 0)", "rgb(256, 0, 0)", "rgb(-5, 0, 0)",
              "rgba(0, 0, 0, 1.5)", "rgba(0, 0, 0, -0.1)", "rgba(0, 0, 0, nan)", "rgb(0x1p9, 0, 0)" })
-        BRLS_CHECK(!aurore::Theme::parseColor(bad, &color));
-    BRLS_CHECK(aurore::Theme::parseColor("rgb(255, 0, 0)", &color) && color.r == 1.0f);
-    BRLS_CHECK(aurore::Theme::parseColor("rgba(0, 0, 0, 0.5)", &color) && color.a == 0.5f);
+        AURORE_CHECK(!aurore::Theme::parseColor(bad, &color));
+    AURORE_CHECK(aurore::Theme::parseColor("rgb(255, 0, 0)", &color) && color.r == 1.0f);
+    AURORE_CHECK(aurore::Theme::parseColor("rgba(0, 0, 0, 0.5)", &color) && color.a == 0.5f);
 
     ThemeFolder themes("aurore_theme_numbers_test");
     aurore::ThemeInfo info = aurore::Theme::inspect(themes.write("nan.theme",
         "name = N\naccent = rgba(nan, 1e39, -5, inf)\n[metrics]\nbrls/sidebar/width = nan\nbrls/header/height = inf\n"
         "brls/highlight/stroke_width = 1e39\nbrls/sidebar/padding_top = -20000\nbrls/sidebar/padding_left = 12\n"));
-    BRLS_CHECK(!info.ok());
-    BRLS_CHECK(hasErrorWith(info, "line 2: rgba(nan, 1e39, -5, inf) is not a colour"));
+    AURORE_CHECK(!info.ok());
+    AURORE_CHECK(hasErrorWith(info, "line 2: rgba(nan, 1e39, -5, inf) is not a colour"));
     for (const char* value : { "line 4: nan", "line 5: inf", "line 6: 1e39", "line 7: -20000" })
-        BRLS_CHECK(hasErrorWith(info, value));
-    BRLS_CHECK(!hasErrorWith(info, "line 8"));
+        AURORE_CHECK(hasErrorWith(info, value));
+    AURORE_CHECK(!hasErrorWith(info, "line 8"));
 }
 
 // Errors quote the file: never a control character to the terminal, and at
 // most 100 of them
-BRLS_TEST(theme_errors_are_escaped_and_capped)
+AURORE_TEST(theme_errors_are_escaped_and_capped)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_errors_test");
     aurore::ThemeInfo info = aurore::Theme::inspect(themes.write("ansi.theme", "name = \x1b]0;title\x07\n\x1b[2Jred\naccent = \xc2\x9b"
                                                                                "31m\n"));
-    BRLS_CHECK(hasErrorWith(info, "line 2: no '=' in \"\\x1B[2Jred\""));
-    BRLS_CHECK(hasErrorWith(info, "\\x9B31m is not a colour"));
+    AURORE_CHECK(hasErrorWith(info, "line 2: no '=' in \"\\x1B[2Jred\""));
+    AURORE_CHECK(hasErrorWith(info, "\\x9B31m is not a colour"));
     for (const std::string& error : info.errors)
         for (unsigned char c : error)
-            BRLS_CHECK(c >= 0x20 && c != 0x7F && c != 0x9B);
-    BRLS_CHECK_EQ(aurore::escapeControlChars("a\tb\x1b"
-                                             "c\xc2\x85"
-                                             "d\xc3\xa9"),
+            AURORE_CHECK(c >= 0x20 && c != 0x7F && c != 0x9B);
+    AURORE_CHECK_EQ(aurore::escapeControlChars("a\tb\x1b"
+                                               "c\xc2\x85"
+                                               "d\xc3\xa9"),
         std::string("a\\x09b\\x1Bc\\x85d\xc3\xa9"));
 
     std::string many = "name = Many\n";
     for (int i = 0; i < 500; i++)
         many += "nonsense\n";
     info = aurore::Theme::inspect(themes.write("many.theme", many));
-    BRLS_CHECK_EQ(info.errors.size(), (size_t)101);
-    BRLS_CHECK_EQ(info.errors.back(), std::string("and 400 more errors"));
+    AURORE_CHECK_EQ(info.errors.size(), (size_t)101);
+    AURORE_CHECK_EQ(info.errors.back(), std::string("and 400 more errors"));
 }
 
 // "@res/…" stays in the resources: in hot reload's folder, when a theme is
 // read and in an XML view's file paths
-BRLS_TEST(resource_names_stay_in_the_resources)
+AURORE_TEST(resource_names_stay_in_the_resources)
 {
     Harness h;
-    BRLS_CHECK(aurore::isResourceNameSafe("@res/themes/rose.theme"));
-    BRLS_CHECK(aurore::isResourceNameSafe("@res/a..b/c"));
+    AURORE_CHECK(aurore::isResourceNameSafe("@res/themes/rose.theme"));
+    AURORE_CHECK(aurore::isResourceNameSafe("@res/a..b/c"));
     for (const char* name : { "@res/../x", "@res/themes/../../x", "@res/..", "@res/a\\..\\..\\x" })
-        BRLS_CHECK(!aurore::isResourceNameSafe(name));
+        AURORE_CHECK(!aurore::isResourceNameSafe(name));
 
     ThemeFolder resources("aurore_resources_test");
     resources.write("themes/x.theme", "name = X\n");
     resources.write("secret.theme", "name = Secret\n");
     aurore::HotReload::setEnabled(true, (resources.dir / "themes").string());
-    BRLS_CHECK(!aurore::HotReload::diskResource("@res/x.theme").empty());
-    BRLS_CHECK(aurore::HotReload::diskResource("@res/../secret.theme").empty());
-    BRLS_CHECK(!aurore::Theme::loadFile("@res/../secret.theme"));
+    AURORE_CHECK(!aurore::HotReload::diskResource("@res/x.theme").empty());
+    AURORE_CHECK(aurore::HotReload::diskResource("@res/../secret.theme").empty());
+    AURORE_CHECK(!aurore::Theme::loadFile("@res/../secret.theme"));
     aurore::HotReload::setEnabled(false);
 
     // A file path attribute of an XML view
-    BRLS_CHECK(!aurore::View::getFilePathXMLAttributeValue("@res/img/demo_icon.jpg").empty());
-    BRLS_CHECK(aurore::View::getFilePathXMLAttributeValue("@res/../secret.theme").empty());
-    BRLS_CHECK(aurore::View::getFilePathXMLAttributeValue("@res/img/../../secret.theme").empty());
-    BRLS_CHECK_EQ(aurore::View::getFilePathXMLAttributeValue("/elsewhere/x.png"), std::string("/elsewhere/x.png"));
+    AURORE_CHECK(!aurore::View::getFilePathXMLAttributeValue("@res/img/demo_icon.jpg").empty());
+    AURORE_CHECK(aurore::View::getFilePathXMLAttributeValue("@res/../secret.theme").empty());
+    AURORE_CHECK(aurore::View::getFilePathXMLAttributeValue("@res/img/../../secret.theme").empty());
+    AURORE_CHECK_EQ(aurore::View::getFilePathXMLAttributeValue("/elsewhere/x.png"), std::string("/elsewhere/x.png"));
 
     // A language that is no locale's name is not a path either
     aurore::loadTranslations("../../etc");
-    BRLS_CHECK_EQ(aurore::getStr("hints/ok"), std::string("OK"));
+    AURORE_CHECK_EQ(aurore::getStr("hints/ok"), std::string("OK"));
     aurore::loadTranslations(aurore::LOCALE_DEFAULT);
 }
 
-BRLS_TEST(theme_background_keys_are_read_and_inherited)
+AURORE_TEST(theme_background_keys_are_read_and_inherited)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_background_test");
@@ -877,60 +877,60 @@ BRLS_TEST(theme_background_keys_are_read_and_inherited)
         "background_image = a.png\nbackground_fit = stretch\nbackground_dim = 2\nsurface_opacity = half\n");
 
     aurore::ThemeInfo info = aurore::Theme::inspect(base);
-    BRLS_CHECK(info.ok());
-    BRLS_CHECK(info.lightBackground.image == info.darkBackground.image && info.lightBackground.hasImage());
-    BRLS_CHECK(info.lightBackground.fit == aurore::BackgroundFit::TILE);
-    BRLS_CHECK_EQ(info.lightBackground.dim, 0.2f);
-    BRLS_CHECK_EQ(info.darkBackground.dim, 0.6f); // its own variant's line wins
-    BRLS_CHECK_EQ(info.darkBackground.surfaceOpacity, 0.5f);
+    AURORE_CHECK(info.ok());
+    AURORE_CHECK(info.lightBackground.image == info.darkBackground.image && info.lightBackground.hasImage());
+    AURORE_CHECK(info.lightBackground.fit == aurore::BackgroundFit::TILE);
+    AURORE_CHECK_EQ(info.lightBackground.dim, 0.2f);
+    AURORE_CHECK_EQ(info.darkBackground.dim, 0.6f); // its own variant's line wins
+    AURORE_CHECK_EQ(info.darkBackground.surfaceOpacity, 0.5f);
 
     info = aurore::Theme::inspect(child);
-    BRLS_CHECK(info.ok());
-    BRLS_CHECK(info.lightBackground.image.find("b.png") != std::string::npos);
-    BRLS_CHECK(info.darkBackground.image.find("a.png") != std::string::npos);
-    BRLS_CHECK(info.lightBackground.fit == aurore::BackgroundFit::CONTAIN);
-    BRLS_CHECK(info.darkBackground.fit == aurore::BackgroundFit::TILE);
-    BRLS_CHECK_EQ(info.darkBackground.dim, 0.6f);
-    BRLS_CHECK_EQ(info.lightBackground.surfaceOpacity, 0.5f);
-    BRLS_CHECK_EQ(info.darkBackground.surfaceOpacity, 0.8f);
+    AURORE_CHECK(info.ok());
+    AURORE_CHECK(info.lightBackground.image.find("b.png") != std::string::npos);
+    AURORE_CHECK(info.darkBackground.image.find("a.png") != std::string::npos);
+    AURORE_CHECK(info.lightBackground.fit == aurore::BackgroundFit::CONTAIN);
+    AURORE_CHECK(info.darkBackground.fit == aurore::BackgroundFit::TILE);
+    AURORE_CHECK_EQ(info.darkBackground.dim, 0.6f);
+    AURORE_CHECK_EQ(info.lightBackground.surfaceOpacity, 0.5f);
+    AURORE_CHECK_EQ(info.darkBackground.surfaceOpacity, 0.8f);
 
     info = aurore::Theme::inspect(none);
-    BRLS_CHECK(!info.lightBackground.hasImage() && info.darkBackground.hasImage());
-    BRLS_CHECK_EQ(info.lightBackground.surfaceOpacity, 1.0f); // nothing to show through
+    AURORE_CHECK(!info.lightBackground.hasImage() && info.darkBackground.hasImage());
+    AURORE_CHECK_EQ(info.lightBackground.surfaceOpacity, 1.0f); // nothing to show through
 
     // The defaults, and surface_opacity without a picture: no effect
     info = aurore::Theme::inspect(plain);
-    BRLS_CHECK(info.ok() && !info.darkBackground.hasImage());
-    BRLS_CHECK(info.darkBackground.fit == aurore::BackgroundFit::COVER);
-    BRLS_CHECK_EQ(info.darkBackground.dim, aurore::ThemeBackground::DEFAULT_DIM);
-    BRLS_CHECK_EQ(info.darkBackground.surfaceOpacity, 1.0f);
+    AURORE_CHECK(info.ok() && !info.darkBackground.hasImage());
+    AURORE_CHECK(info.darkBackground.fit == aurore::BackgroundFit::COVER);
+    AURORE_CHECK_EQ(info.darkBackground.dim, aurore::ThemeBackground::DEFAULT_DIM);
+    AURORE_CHECK_EQ(info.darkBackground.surfaceOpacity, 1.0f);
 
     info = aurore::Theme::inspect(wrong);
-    BRLS_CHECK_EQ(info.errors.size(), (size_t)3);
-    BRLS_CHECK(info.darkBackground.fit == aurore::BackgroundFit::COVER);
+    AURORE_CHECK_EQ(info.errors.size(), (size_t)3);
+    AURORE_CHECK(info.darkBackground.fit == aurore::BackgroundFit::COVER);
 
     // Used: the surfaces let the picture through, and are opaque again after
     NVGcolor surface = aurore::Theme::getDarkTheme()["cadran/surf"];
     NVGcolor warning = aurore::Theme::getDarkTheme()["cadran/amber_surf"];
-    BRLS_CHECK(aurore::Theme::loadFile(child));
+    AURORE_CHECK(aurore::Theme::loadFile(child));
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.settle();
-    BRLS_CHECK(aurore::Application::hasThemeBackground());
-    BRLS_CHECK(std::fabs(aurore::Theme::getDarkTheme()["cadran/surf"].a - surface.a * 0.8f) < 0.001f);
-    BRLS_CHECK(std::fabs(aurore::Theme::getDarkTheme()["brls/sidebar/background"].a - 0.8f) < 0.001f);
-    BRLS_CHECK(std::fabs(aurore::Theme::getDarkTheme()["cadran/amber_surf"].a - warning.a * 0.8f) < 0.001f);
-    BRLS_CHECK(aurore::Theme::getDarkTheme()["brls/background"].a == 1.0f);
-    BRLS_CHECK(aurore::Theme::loadFile(plain));
+    AURORE_CHECK(aurore::Application::hasThemeBackground());
+    AURORE_CHECK(std::fabs(aurore::Theme::getDarkTheme()["cadran/surf"].a - surface.a * 0.8f) < 0.001f);
+    AURORE_CHECK(std::fabs(aurore::Theme::getDarkTheme()["brls/sidebar/background"].a - 0.8f) < 0.001f);
+    AURORE_CHECK(std::fabs(aurore::Theme::getDarkTheme()["cadran/amber_surf"].a - warning.a * 0.8f) < 0.001f);
+    AURORE_CHECK(aurore::Theme::getDarkTheme()["brls/background"].a == 1.0f);
+    AURORE_CHECK(aurore::Theme::loadFile(plain));
     h.settle();
-    BRLS_CHECK(!aurore::Application::hasThemeBackground());
-    BRLS_CHECK_EQ(aurore::Theme::getDarkTheme()["cadran/surf"].a, 1.0f);
+    AURORE_CHECK(!aurore::Application::hasThemeBackground());
+    AURORE_CHECK_EQ(aurore::Theme::getDarkTheme()["cadran/surf"].a, 1.0f);
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK_EQ(aurore::Theme::getDarkTheme()["cadran/surf"].a, surface.a);
-    BRLS_CHECK_EQ(aurore::Theme::getDarkTheme()["cadran/amber_surf"].a, warning.a);
+    AURORE_CHECK_EQ(aurore::Theme::getDarkTheme()["cadran/surf"].a, surface.a);
+    AURORE_CHECK_EQ(aurore::Theme::getDarkTheme()["cadran/amber_surf"].a, warning.a);
 }
 
-BRLS_TEST(theme_text_is_checked_on_its_picture)
+AURORE_TEST(theme_text_is_checked_on_its_picture)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_contrast_test");
@@ -952,39 +952,39 @@ BRLS_TEST(theme_text_is_checked_on_its_picture)
     // A plain listing decodes nothing: no check on the picture yet
     NVGcolor mean;
     std::vector<aurore::ThemeInfo> listed = aurore::Theme::listThemes(themes.dir.generic_string());
-    BRLS_CHECK_EQ(listed.size(), (size_t)2);
+    AURORE_CHECK_EQ(listed.size(), (size_t)2);
     for (const aurore::ThemeInfo& info : listed)
-        BRLS_CHECK(info.ok() && !onPicture(info));
-    BRLS_CHECK(!aurore::ThemeImages::knownMeanColor(listed[0].backgroundImage, &mean));
+        AURORE_CHECK(info.ok() && !onPicture(info));
+    AURORE_CHECK(!aurore::ThemeImages::knownMeanColor(listed[0].backgroundImage, &mean));
 
     // An explicit check decodes them
-    BRLS_CHECK(onPicture(aurore::Theme::inspect(snow, true)));
-    BRLS_CHECK(!onPicture(aurore::Theme::inspect(night, true)));
+    AURORE_CHECK(onPicture(aurore::Theme::inspect(snow, true)));
+    AURORE_CHECK(!onPicture(aurore::Theme::inspect(night, true)));
     // ...and remembers their colour, for the next listing
-    BRLS_CHECK(onPicture(aurore::Theme::inspect(snow)));
+    AURORE_CHECK(onPicture(aurore::Theme::inspect(snow)));
 
     // A veil of the background colour makes it read again
     const std::string veiled = themes.write("veiled.theme", std::string(dark) + "background_image = snow.png\nbackground_dim = 0.9\n");
-    BRLS_CHECK(!onPicture(aurore::Theme::inspect(veiled, true)));
+    AURORE_CHECK(!onPicture(aurore::Theme::inspect(veiled, true)));
 
     // Used, the check runs once the picture is loaded (decoded off the UI
     // thread, its colour recorded then)
     ThemeFolder fresh("aurore_theme_contrast_load_test");
     fresh.picture("sky.png", 250, 250, 250);
     const std::string loaded = fresh.write("sky.theme", std::string(dark) + "background_image = sky.png\n");
-    BRLS_CHECK(!onPicture(aurore::Theme::inspect(loaded)));
-    BRLS_CHECK(aurore::Theme::loadFile(loaded));
+    AURORE_CHECK(!onPicture(aurore::Theme::inspect(loaded)));
+    AURORE_CHECK(aurore::Theme::loadFile(loaded));
     h.settle();
-    BRLS_CHECK(!aurore::Theme::checkBackgroundContrast(aurore::ThemeVariant::DARK).empty());
-    BRLS_CHECK(onPicture(aurore::Theme::inspect(loaded)));
+    AURORE_CHECK(!aurore::Theme::checkBackgroundContrast(aurore::ThemeVariant::DARK).empty());
+    AURORE_CHECK(onPicture(aurore::Theme::inspect(loaded)));
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK(aurore::Theme::loadFile(snow));
+    AURORE_CHECK(aurore::Theme::loadFile(snow));
     h.settle();
-    BRLS_CHECK(!aurore::Theme::checkBackgroundContrast(aurore::ThemeVariant::DARK).empty());
+    AURORE_CHECK(!aurore::Theme::checkBackgroundContrast(aurore::ThemeVariant::DARK).empty());
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK(aurore::Theme::checkBackgroundContrast(aurore::ThemeVariant::DARK).empty());
+    AURORE_CHECK(aurore::Theme::checkBackgroundContrast(aurore::ThemeVariant::DARK).empty());
 }
 
 // The demo's Aurora theme (a folder: resources/themes/aurora), its picture
@@ -999,41 +999,41 @@ static void auroraScreen(aurore::ThemeVariant variant, const char* reference)
     aurore::test::Image before = still();
     auto colors                = aurore::Theme::getDarkTheme().getValues()->getColors();
 
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/aurora/theme.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/aurora/theme.theme"));
     aurore::Application::getPlatform()->setThemeVariant(variant);
     h.step(); // the picture asked for: decoded, as many frames on any machine
-    BRLS_CHECK(themeImagesDecoded());
+    AURORE_CHECK(themeImagesDecoded());
     h.settle();
-    BRLS_CHECK(aurore::Application::hasThemeBackground());
-    BRLS_CHECK(aurore::Theme::checkContrast(variant).empty());
-    BRLS_CHECK(h.matchesReference(reference));
+    AURORE_CHECK(aurore::Application::hasThemeBackground());
+    AURORE_CHECK(aurore::Theme::checkContrast(variant).empty());
+    AURORE_CHECK(h.matchesReference(reference));
 
     // Back to no theme, live: the screen as it was, pixel for pixel
     aurore::Theme::reset();
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.settle();
-    BRLS_CHECK(!aurore::Application::hasThemeBackground());
+    AURORE_CHECK(!aurore::Application::hasThemeBackground());
     auto diff = aurore::test::compareImages(still(), before, 0);
-    BRLS_CHECK(diff.sameSize && diff.differingPixels == 0);
+    AURORE_CHECK(diff.sameSize && diff.differingPixels == 0);
     auto again = aurore::Theme::getDarkTheme().getValues()->getColors();
-    BRLS_CHECK_EQ(again.size(), colors.size());
+    AURORE_CHECK_EQ(again.size(), colors.size());
     for (auto& [key, color] : colors)
-        BRLS_CHECK(again.count(key) && std::memcmp(&again[key], &color, sizeof(NVGcolor)) == 0);
+        AURORE_CHECK(again.count(key) && std::memcmp(&again[key], &color, sizeof(NVGcolor)) == 0);
 }
 
-BRLS_TEST(theme_background_dark)
+AURORE_TEST(theme_background_dark)
 {
     auroraScreen(aurore::ThemeVariant::DARK, "theme_background_dark");
 }
 
-BRLS_TEST(theme_background_light)
+AURORE_TEST(theme_background_light)
 {
     auroraScreen(aurore::ThemeVariant::LIGHT, "theme_background_light");
 }
 
 // Pictures still loading when the theme changes again: dropped, never
 // drawn late, never freed twice (run under the sanitizers too)
-BRLS_TEST(theme_background_switches_back_and_forth)
+AURORE_TEST(theme_background_switches_back_and_forth)
 {
     DemoHarness h;
     const char* themes[] = { "@res/themes/aurora/theme.theme", "builtin:ocean", "@res/themes/aurora/theme.theme", "" };
@@ -1041,18 +1041,18 @@ BRLS_TEST(theme_background_switches_back_and_forth)
     {
         const char* theme = themes[round % 4];
         if (*theme)
-            BRLS_CHECK(aurore::Theme::loadFile(theme));
+            AURORE_CHECK(aurore::Theme::loadFile(theme));
         else
             aurore::Theme::reset();
         aurore::Application::getPlatform()->setThemeVariant(round % 3 ? aurore::ThemeVariant::DARK : aurore::ThemeVariant::LIGHT);
         h.step(round % 2 ? 1 : 2);
     }
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/aurora/theme.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/aurora/theme.theme"));
     h.settle();
-    BRLS_CHECK(aurore::Application::hasThemeBackground());
+    AURORE_CHECK(aurore::Application::hasThemeBackground());
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK(!aurore::Application::hasThemeBackground());
+    AURORE_CHECK(!aurore::Application::hasThemeBackground());
 }
 
 // Waits for the pictures being decoded (in real time), then for the screen
@@ -1062,7 +1062,7 @@ static void settlePictures(Harness& h)
     for (int round = 0; round < 3; round++)
     {
         h.step();
-        BRLS_CHECK(themeImagesDecoded());
+        AURORE_CHECK(themeImagesDecoded());
         h.settle();
     }
 }
@@ -1070,7 +1070,7 @@ static void settlePictures(Harness& h)
 #ifndef _WIN32
 // A theme's picture is looked at again just before it is decoded: a link
 // put in its place after Theme::resolveAsset looked is refused
-BRLS_TEST(theme_pictures_are_checked_again_before_they_are_read)
+AURORE_TEST(theme_pictures_are_checked_again_before_they_are_read)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_recheck_test");
@@ -1078,21 +1078,21 @@ BRLS_TEST(theme_pictures_are_checked_again_before_they_are_read)
     themes.picture("mine/bg.png", 30, 30, 200);
     std::string path, error;
     const std::string folder = (themes.dir / "mine").generic_string();
-    BRLS_CHECK(aurore::Theme::resolveAsset("bg.png", folder, folder, &path, &error));
-    BRLS_CHECK(aurore::Theme::recheckAsset(path));
+    AURORE_CHECK(aurore::Theme::resolveAsset("bg.png", folder, folder, &path, &error));
+    AURORE_CHECK(aurore::Theme::recheckAsset(path));
 
     std::filesystem::remove(themes.dir / "mine" / "bg.png");
     std::filesystem::create_symlink(themes.dir / "outside.png", themes.dir / "mine" / "bg.png");
-    BRLS_CHECK(!aurore::Theme::recheckAsset(path, &error));
-    BRLS_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
+    AURORE_CHECK(!aurore::Theme::recheckAsset(path, &error));
+    AURORE_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
     std::shared_ptr<aurore::ThemeImage> image = aurore::ThemeImages::load(path);
     settlePictures(h);
-    BRLS_CHECK(image->state == aurore::ThemeImage::State::FAILED);
+    AURORE_CHECK(image->state == aurore::ThemeImage::State::FAILED);
     NVGcolor mean;
-    BRLS_CHECK(!aurore::ThemeImages::meanColor(path, &mean));
+    AURORE_CHECK(!aurore::ThemeImages::meanColor(path, &mean));
 
     // A path resolveAsset did not check: as it is
-    BRLS_CHECK(aurore::Theme::recheckAsset((themes.dir / "outside.png").generic_string()));
+    AURORE_CHECK(aurore::Theme::recheckAsset((themes.dir / "outside.png").generic_string()));
 }
 #endif
 
@@ -1104,7 +1104,7 @@ static bool hasWarningWith(const aurore::ThemeInfo& info, const std::string& tex
     return false;
 }
 
-BRLS_TEST(theme_logos_and_images_are_read_inherited_and_confined)
+AURORE_TEST(theme_logos_and_images_are_read_inherited_and_confined)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_pictures_test");
@@ -1122,92 +1122,92 @@ BRLS_TEST(theme_logos_and_images_are_read_inherited_and_confined)
         "[dark]\nimage.test/cover = art.png\n");
 
     aurore::ThemeInfo info = aurore::Theme::inspect(full);
-    BRLS_CHECK(info.ok());
-    BRLS_CHECK(info.warnings.empty());
-    BRLS_CHECK_EQ(info.darkPictures.logo, root + "/logo.png");
-    BRLS_CHECK_EQ(info.lightPictures.logo, root + "/logo-day.png"); // its own variant's line wins
-    BRLS_CHECK_EQ(info.lightPictures.preview, root + "/preview.png");
-    BRLS_CHECK(info.darkPictures.icons.at("settings").tint);
-    BRLS_CHECK(!info.darkPictures.icons.at("gamepad").tint);
-    BRLS_CHECK(!info.lightPictures.icons.count("gamepad")); // none
-    BRLS_CHECK_EQ(info.lightPictures.images.at("test/art"), root + "/art.png");
-    BRLS_CHECK(info.darkPictures.images.count("test/cover") && !info.lightPictures.images.count("test/cover"));
+    AURORE_CHECK(info.ok());
+    AURORE_CHECK(info.warnings.empty());
+    AURORE_CHECK_EQ(info.darkPictures.logo, root + "/logo.png");
+    AURORE_CHECK_EQ(info.lightPictures.logo, root + "/logo-day.png"); // its own variant's line wins
+    AURORE_CHECK_EQ(info.lightPictures.preview, root + "/preview.png");
+    AURORE_CHECK(info.darkPictures.icons.at("settings").tint);
+    AURORE_CHECK(!info.darkPictures.icons.at("gamepad").tint);
+    AURORE_CHECK(!info.lightPictures.icons.count("gamepad")); // none
+    AURORE_CHECK_EQ(info.lightPictures.images.at("test/art"), root + "/art.png");
+    AURORE_CHECK(info.darkPictures.images.count("test/cover") && !info.lightPictures.images.count("test/cover"));
 
     // Inherited: the parent's pictures stay in the parent's folder, this
     // file's lines win
     const std::string child = themes.write("child.theme",
         "inherit = base/theme.theme\nicon.settings = gear.png\n[dark]\nlogo = none\n");
     info                    = aurore::Theme::inspect(child);
-    BRLS_CHECK(info.ok());
-    BRLS_CHECK(info.darkPictures.logo.empty());
-    BRLS_CHECK_EQ(info.lightPictures.logo, root + "/base/logo.png");
-    BRLS_CHECK_EQ(info.darkPictures.icons.at("info").image, root + "/base/i.png");
-    BRLS_CHECK(info.darkPictures.icons.at("info").tint);
-    BRLS_CHECK_EQ(info.lightPictures.icons.at("settings").image, root + "/gear.png"); // over the parent's [light]
-    BRLS_CHECK_EQ(info.darkPictures.images.at("test/art"), root + "/base/art.png");
+    AURORE_CHECK(info.ok());
+    AURORE_CHECK(info.darkPictures.logo.empty());
+    AURORE_CHECK_EQ(info.lightPictures.logo, root + "/base/logo.png");
+    AURORE_CHECK_EQ(info.darkPictures.icons.at("info").image, root + "/base/i.png");
+    AURORE_CHECK(info.darkPictures.icons.at("info").tint);
+    AURORE_CHECK_EQ(info.lightPictures.icons.at("settings").image, root + "/gear.png"); // over the parent's [light]
+    AURORE_CHECK_EQ(info.darkPictures.images.at("test/art"), root + "/base/art.png");
 
     // Confined, read, named: errors and warnings, never a crash
     const std::string wrong = themes.write("wrong.theme",
         "logo = ../outside.png\npreview = /etc/passwd\nicon.settings = missing.png\nicon.settings.tint = maybe\n"
         "icon.nosuchicon = gear.png\nimage.test/nosuchslot = art.png\n");
     info                    = aurore::Theme::inspect(wrong);
-    BRLS_CHECK(hasErrorWith(info, "logo ../outside.png: goes out of the theme's folder"));
-    BRLS_CHECK(hasErrorWith(info, "preview /etc/passwd: an absolute path is not allowed"));
-    BRLS_CHECK(hasErrorWith(info, "icon.settings: cannot read"));
-    BRLS_CHECK(hasErrorWith(info, "icon.settings.tint is true or false"));
-    BRLS_CHECK(hasWarningWith(info, "icon.nosuchicon: no icon has that name"));
-    BRLS_CHECK(hasWarningWith(info, "image.test/nosuchslot: the app has no such image slot (kept); its slots: "));
-    BRLS_CHECK(hasWarningWith(info, "test/art, test/cover"));
-    BRLS_CHECK(info.darkPictures.logo.empty() && info.darkPictures.preview.empty());
+    AURORE_CHECK(hasErrorWith(info, "logo ../outside.png: goes out of the theme's folder"));
+    AURORE_CHECK(hasErrorWith(info, "preview /etc/passwd: an absolute path is not allowed"));
+    AURORE_CHECK(hasErrorWith(info, "icon.settings: cannot read"));
+    AURORE_CHECK(hasErrorWith(info, "icon.settings.tint is true or false"));
+    AURORE_CHECK(hasWarningWith(info, "icon.nosuchicon: no icon has that name"));
+    AURORE_CHECK(hasWarningWith(info, "image.test/nosuchslot: the app has no such image slot (kept); its slots: "));
+    AURORE_CHECK(hasWarningWith(info, "test/art, test/cover"));
+    AURORE_CHECK(info.darkPictures.logo.empty() && info.darkPictures.preview.empty());
 
     // Used, and back: the logo is the theme's for the variant on screen
-    BRLS_CHECK(!aurore::Theme::logo());
-    BRLS_CHECK(aurore::Theme::loadFile(full));
+    AURORE_CHECK(!aurore::Theme::logo());
+    AURORE_CHECK(aurore::Theme::loadFile(full));
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.settle();
     // Loaded when asked for (by whoever draws it), off the UI thread
-    BRLS_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->state == aurore::ThemeImage::State::LOADING);
+    AURORE_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->state == aurore::ThemeImage::State::LOADING);
     settlePictures(h);
     std::shared_ptr<aurore::ThemeImage> logo = aurore::Theme::logo();
-    BRLS_CHECK(logo && logo->ready() && logo->path == root + "/logo.png");
-    BRLS_CHECK(logo->width <= aurore::ThemeImages::LOGO_SIZE && logo->height <= aurore::ThemeImages::LOGO_SIZE);
+    AURORE_CHECK(logo && logo->ready() && logo->path == root + "/logo.png");
+    AURORE_CHECK(logo->width <= aurore::ThemeImages::LOGO_SIZE && logo->height <= aurore::ThemeImages::LOGO_SIZE);
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::LIGHT);
     h.settle();
-    BRLS_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->path == root + "/logo-day.png");
+    AURORE_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->path == root + "/logo-day.png");
     bool tint = false;
-    BRLS_CHECK(aurore::Theme::icon("settings", &tint) && tint);
-    BRLS_CHECK(!aurore::Theme::icon("gamepad"));
+    AURORE_CHECK(aurore::Theme::icon("settings", &tint) && tint);
+    AURORE_CHECK(!aurore::Theme::icon("gamepad"));
     aurore::Theme::reset();
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.settle();
-    BRLS_CHECK(!aurore::Theme::logo() && !aurore::Theme::icon("settings"));
+    AURORE_CHECK(!aurore::Theme::logo() && !aurore::Theme::icon("settings"));
 }
 
-BRLS_TEST(theme_pictures_are_capped_and_freed)
+AURORE_TEST(theme_pictures_are_capped_and_freed)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_pictures_cap_test");
     themes.picture("big.png", 200, 100, 50, 1024, 512);
     themes.write("big.theme", "logo = big.png\nicon.settings = big.png\nicon.settings.tint = true\n");
-    BRLS_CHECK(aurore::Theme::loadFile((themes.dir / "big.theme").generic_string()));
+    AURORE_CHECK(aurore::Theme::loadFile((themes.dir / "big.theme").generic_string()));
     h.settle();
     std::weak_ptr<aurore::ThemeImage> logo = aurore::Theme::logo();
     std::weak_ptr<aurore::ThemeImage> icon = aurore::Theme::icon("settings");
     settlePictures(h);
-    BRLS_CHECK(logo.lock() && logo.lock()->ready());
-    BRLS_CHECK_EQ(logo.lock()->width, aurore::ThemeImages::LOGO_SIZE);
-    BRLS_CHECK_EQ(logo.lock()->height, aurore::ThemeImages::LOGO_SIZE / 2); // its ratio kept
-    BRLS_CHECK_EQ(icon.lock()->width, aurore::ThemeImages::ICON_SIZE);
-    BRLS_CHECK(icon.lock()->mask);
+    AURORE_CHECK(logo.lock() && logo.lock()->ready());
+    AURORE_CHECK_EQ(logo.lock()->width, aurore::ThemeImages::LOGO_SIZE);
+    AURORE_CHECK_EQ(logo.lock()->height, aurore::ThemeImages::LOGO_SIZE / 2); // its ratio kept
+    AURORE_CHECK_EQ(icon.lock()->width, aurore::ThemeImages::ICON_SIZE);
+    AURORE_CHECK(icon.lock()->mask);
     // Another theme: the pictures are let go of, their textures freed
-    BRLS_CHECK(aurore::Theme::loadFile("builtin:ocean"));
+    AURORE_CHECK(aurore::Theme::loadFile("builtin:ocean"));
     h.settle();
-    BRLS_CHECK(!aurore::Theme::logo());
-    BRLS_CHECK(logo.expired() && icon.expired());
+    AURORE_CHECK(!aurore::Theme::logo());
+    AURORE_CHECK(logo.expired() && icon.expired());
     aurore::Theme::reset();
 }
 
-BRLS_TEST(theme_image_slots_follow_the_theme)
+AURORE_TEST(theme_image_slots_follow_the_theme)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_slots_test");
@@ -1216,7 +1216,7 @@ BRLS_TEST(theme_image_slots_follow_the_theme)
     themes.write("broken.png", "not a png");
     aurore::Theme::addImageSlot("test/art", fallback, 256);
     aurore::Theme::addImageSlot("test/empty");
-    BRLS_CHECK(aurore::Theme::getImageSlots() == (std::vector<std::string> { "test/art", "test/empty" }));
+    AURORE_CHECK(aurore::Theme::getImageSlots() == (std::vector<std::string> { "test/art", "test/empty" }));
     const std::string art    = themes.write("art.theme", "image.test/art = art.png\nimage.test/empty = art.png\n");
     const std::string broken = themes.write("broken.theme", "image.test/art = broken.png\n");
 
@@ -1228,45 +1228,45 @@ BRLS_TEST(theme_image_slots_follow_the_theme)
     settlePictures(h);
 
     // The app's own, without a theme; nothing for a slot without one
-    BRLS_CHECK(aurore::Theme::image("test/art") && aurore::Theme::image("test/art")->path == fallback);
-    BRLS_CHECK(!aurore::Theme::image("test/empty"));
-    BRLS_CHECK(!aurore::Theme::image("test/undeclared"));
-    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
-    BRLS_CHECK_EQ(empty->getTexture(), 0);
+    AURORE_CHECK(aurore::Theme::image("test/art") && aurore::Theme::image("test/art")->path == fallback);
+    AURORE_CHECK(!aurore::Theme::image("test/empty"));
+    AURORE_CHECK(!aurore::Theme::image("test/undeclared"));
+    AURORE_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
+    AURORE_CHECK_EQ(empty->getTexture(), 0);
 
     // The theme's, live
-    BRLS_CHECK(aurore::Theme::loadFile(art));
+    AURORE_CHECK(aurore::Theme::loadFile(art));
     settlePictures(h);
-    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 64.0f);
-    BRLS_CHECK_EQ(image->getTexture(), aurore::Theme::image("test/art")->texture);
-    BRLS_CHECK(empty->getTexture() != 0);
+    AURORE_CHECK_EQ(image->getOriginalImageWidth(), 64.0f);
+    AURORE_CHECK_EQ(image->getTexture(), aurore::Theme::image("test/art")->texture);
+    AURORE_CHECK(empty->getTexture() != 0);
 
     // A picture that cannot be read: the app's
-    BRLS_CHECK(aurore::Theme::loadFile(broken));
+    AURORE_CHECK(aurore::Theme::loadFile(broken));
     settlePictures(h);
-    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
-    BRLS_CHECK_EQ(empty->getTexture(), 0);
+    AURORE_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
+    AURORE_CHECK_EQ(empty->getTexture(), 0);
 
     // Back to no theme: the app's again
-    BRLS_CHECK(aurore::Theme::loadFile(art));
+    AURORE_CHECK(aurore::Theme::loadFile(art));
     settlePictures(h);
-    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 64.0f);
+    AURORE_CHECK_EQ(image->getOriginalImageWidth(), 64.0f);
     aurore::Theme::reset();
     settlePictures(h);
-    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
-    BRLS_CHECK_EQ(empty->getTexture(), 0);
+    AURORE_CHECK_EQ(image->getOriginalImageWidth(), 48.0f);
+    AURORE_CHECK_EQ(empty->getTexture(), 0);
 
     // Set another way: it stops following the theme
     image->setImageFromFile(themes.picture("own.png", 1, 2, 3, 20, 20));
-    BRLS_CHECK(image->getThemeImage().empty());
-    BRLS_CHECK(aurore::Theme::loadFile(art));
+    AURORE_CHECK(image->getThemeImage().empty());
+    AURORE_CHECK(aurore::Theme::loadFile(art));
     settlePictures(h);
-    BRLS_CHECK_EQ(image->getOriginalImageWidth(), 20.0f);
+    AURORE_CHECK_EQ(image->getOriginalImageWidth(), 20.0f);
     aurore::Theme::reset();
 }
 
 // An icon replaced by a picture: as it is, or as a mask in the icon's colour
-BRLS_TEST(theme_icons_are_tinted_or_drawn_as_they_are)
+AURORE_TEST(theme_icons_are_tinted_or_drawn_as_they_are)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_icons_test");
@@ -1314,18 +1314,18 @@ BRLS_TEST(theme_icons_are_tinted_or_drawn_as_they_are)
         return true;
     };
 
-    BRLS_CHECK(aurore::Theme::loadFile((themes.dir / "icons.theme").generic_string()));
+    AURORE_CHECK(aurore::Theme::loadFile((themes.dir / "icons.theme").generic_string()));
     settlePictures(h);
-    BRLS_CHECK(near(middle(tinted), { 20, 40, 230 })); // the icon's colour
-    BRLS_CHECK(near(middle(plain), { 230, 20, 20 })); // the picture's
-    BRLS_CHECK(near(corner(tinted), { 20, 20, 30 })); // transparent around it
-    BRLS_CHECK(near(middle(ink), { 20, 40, 230 })); // black on nothing: all ink
+    AURORE_CHECK(near(middle(tinted), { 20, 40, 230 })); // the icon's colour
+    AURORE_CHECK(near(middle(plain), { 230, 20, 20 })); // the picture's
+    AURORE_CHECK(near(corner(tinted), { 20, 20, 30 })); // transparent around it
+    AURORE_CHECK(near(middle(ink), { 20, 40, 230 })); // black on nothing: all ink
 
     // Back: the drawings, pixel for pixel
     aurore::Theme::reset();
     h.settle();
     auto diff = aurore::test::compareImages(h.screenshot(), before, 0);
-    BRLS_CHECK(diff.sameSize && diff.differingPixels == 0);
+    AURORE_CHECK(diff.sameSize && diff.differingPixels == 0);
 }
 
 // The demo's Prism theme (resources/themes/prism): its logo in the header,
@@ -1335,21 +1335,21 @@ static void prismScreen(aurore::ThemeVariant variant, const char* reference)
 {
     DemoHarness h;
     aurore::test::Image before = h.screenshot();
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/prism/theme.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/prism/theme.theme"));
     aurore::Application::getPlatform()->setThemeVariant(variant);
     settlePictures(h);
-    BRLS_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->ready());
-    BRLS_CHECK(aurore::Theme::checkContrast(variant).empty());
-    BRLS_CHECK(h.focusByText("Settings"));
+    AURORE_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->ready());
+    AURORE_CHECK(aurore::Theme::checkContrast(variant).empty());
+    AURORE_CHECK(h.focusByText("Settings"));
     settlePictures(h);
-    BRLS_CHECK(h.matchesReference(reference));
+    AURORE_CHECK(h.matchesReference(reference));
 
     // Back to no theme, live: the screen as it was
-    BRLS_CHECK(h.focusByText("Cadran", aurore::BUTTON_UP));
+    AURORE_CHECK(h.focusByText("Cadran", aurore::BUTTON_UP));
     aurore::Theme::reset();
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.settle();
-    BRLS_CHECK(!aurore::Theme::logo());
+    AURORE_CHECK(!aurore::Theme::logo());
     // (what does not move: the glow drifts) the mark within its corners, the
     // header's right end
     for (aurore::Rect area : { aurore::Rect(26, 29, 26, 26), aurore::Rect(1000, 0, 280, 90) })
@@ -1357,35 +1357,35 @@ static void prismScreen(aurore::ThemeVariant variant, const char* reference)
         auto crop = [&area](const aurore::test::Image& image)
         { return image.crop((int)area.getMinX(), (int)area.getMinY(), (int)area.getWidth(), (int)area.getHeight()); };
         auto diff = aurore::test::compareImages(crop(h.screenshot()), crop(before), 0);
-        BRLS_CHECK(diff.sameSize && diff.differingPixels == 0);
+        AURORE_CHECK(diff.sameSize && diff.differingPixels == 0);
     }
 }
 
-BRLS_TEST(theme_logo_and_icons_dark)
+AURORE_TEST(theme_logo_and_icons_dark)
 {
     prismScreen(aurore::ThemeVariant::DARK, "theme_images_dark");
 }
 
-BRLS_TEST(theme_logo_and_icons_light)
+AURORE_TEST(theme_logo_and_icons_light)
 {
     prismScreen(aurore::ThemeVariant::LIGHT, "theme_images_light");
 }
 
 // The demo's About tab draws its image slot (demo/about/art): Prism's
-BRLS_TEST(theme_image_slot_in_the_demo)
+AURORE_TEST(theme_image_slot_in_the_demo)
 {
     DemoHarness h;
-    BRLS_CHECK(h.focusByText("About Aurore"));
+    AURORE_CHECK(h.focusByText("About Aurore"));
     settlePictures(h);
     std::shared_ptr<aurore::ThemeImage> own = aurore::Theme::image("demo/about/art");
-    BRLS_CHECK(own && own->path == "@res/img/aurore_256.png");
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/prism/theme.theme"));
+    AURORE_CHECK(own && own->path == "@res/img/aurore_256.png");
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/prism/theme.theme"));
     settlePictures(h);
-    BRLS_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/themes/prism/about.png");
-    BRLS_CHECK(h.matchesReference("theme_image_slot"));
+    AURORE_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/themes/prism/about.png");
+    AURORE_CHECK(h.matchesReference("theme_image_slot"));
     aurore::Theme::reset();
     settlePictures(h);
-    BRLS_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/img/aurore_256.png");
+    AURORE_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/img/aurore_256.png");
 }
 
 // The palette picker with Prism's preview in its row: loaded when the
@@ -1400,26 +1400,26 @@ static void pickPrism(const char* theme, const char* reference)
     // Listing decodes nothing
     for (const aurore::ThemeInfo& info : aurore::Theme::listThemes("@res/themes"))
         if (info.id == "prism")
-            BRLS_CHECK_EQ(info.darkPictures.preview, preview);
+            AURORE_CHECK_EQ(info.darkPictures.preview, preview);
     ui::pick_palette();
     // Asked for by the picker's swatch, not decoded on this thread: still loading
     aurore::ThemeImageOptions options;
     options.flags                             = NVG_IMAGE_GENERATE_MIPMAPS;
     options.maxSide                           = aurore::ThemeImages::PREVIEW_SIZE;
     std::shared_ptr<aurore::ThemeImage> image = aurore::ThemeImages::load(preview, options);
-    BRLS_CHECK(image->state == aurore::ThemeImage::State::LOADING);
-    BRLS_CHECK(h.focusByText("Prism", aurore::BUTTON_DOWN, 40));
+    AURORE_CHECK(image->state == aurore::ThemeImage::State::LOADING);
+    AURORE_CHECK(h.focusByText("Prism", aurore::BUTTON_DOWN, 40));
     settlePictures(h);
-    BRLS_CHECK(image->ready());
-    BRLS_CHECK(h.matchesReference(reference));
+    AURORE_CHECK(image->ready());
+    AURORE_CHECK(h.matchesReference(reference));
 }
 
-BRLS_TEST(palette_picker_shows_previews)
+AURORE_TEST(palette_picker_shows_previews)
 {
     pickPrism("dark", "palette_picker_preview");
 }
 
-BRLS_TEST(palette_picker_shows_previews_light)
+AURORE_TEST(palette_picker_shows_previews_light)
 {
     pickPrism("light", "palette_picker_preview_light");
 }
@@ -1427,16 +1427,16 @@ BRLS_TEST(palette_picker_shows_previews_light)
 // Logos, icons and slot pictures still loading when the theme or the
 // variant changes again: dropped, never drawn late, never freed twice (run
 // under the sanitizers too)
-BRLS_TEST(theme_pictures_switch_back_and_forth)
+AURORE_TEST(theme_pictures_switch_back_and_forth)
 {
     DemoHarness h;
-    BRLS_CHECK(h.focusByText("About Aurore"));
+    AURORE_CHECK(h.focusByText("About Aurore"));
     const char* themes[] = { "@res/themes/prism/theme.theme", "@res/themes/aurora/theme.theme", "@res/themes/prism/theme.theme", "" };
     for (int round = 0; round < 16; round++)
     {
         const char* theme = themes[round % 4];
         if (*theme)
-            BRLS_CHECK(aurore::Theme::loadFile(theme));
+            AURORE_CHECK(aurore::Theme::loadFile(theme));
         else
             aurore::Theme::reset();
         aurore::Application::getPlatform()->setThemeVariant(round % 3 ? aurore::ThemeVariant::DARK : aurore::ThemeVariant::LIGHT);
@@ -1446,22 +1446,22 @@ BRLS_TEST(theme_pictures_switch_back_and_forth)
         if (round == 12)
             h.tap(aurore::BUTTON_B);
     }
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/prism/theme.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/prism/theme.theme"));
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     settlePictures(h);
-    BRLS_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->ready());
-    BRLS_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/themes/prism/about.png");
+    AURORE_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->ready());
+    AURORE_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/themes/prism/about.png");
     aurore::Theme::reset();
     settlePictures(h);
-    BRLS_CHECK(!aurore::Theme::logo());
-    BRLS_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/img/aurore_256.png");
+    AURORE_CHECK(!aurore::Theme::logo());
+    AURORE_CHECK(aurore::Theme::image("demo/about/art")->path == "@res/img/aurore_256.png");
 }
 
 // ---------------------------------------------------------------------------
 // Decorations: backdrops, strips, particles
 // ---------------------------------------------------------------------------
 
-BRLS_TEST(theme_decor_keys_are_read_and_inherited)
+AURORE_TEST(theme_decor_keys_are_read_and_inherited)
 {
     Harness h;
     ThemeFolder themes("aurore_theme_decor_test");
@@ -1485,73 +1485,73 @@ BRLS_TEST(theme_decor_keys_are_read_and_inherited)
     const std::string plain = themes.write("plain.theme", "name = Plain\naccent = #3ddc97\n");
 
     aurore::ThemeInfo info = aurore::Theme::inspect(base);
-    BRLS_CHECK(info.ok() && info.warnings.empty());
+    AURORE_CHECK(info.ok() && info.warnings.empty());
     const aurore::ThemePicture& top = info.darkDecor.picture(aurore::ThemeArea::TOP);
-    BRLS_CHECK(top.image.find("base/garland.png") != std::string::npos);
-    BRLS_CHECK(top.fit == aurore::BackgroundFit::TILE);
-    BRLS_CHECK_EQ(top.height, 24.0f);
-    BRLS_CHECK_EQ(info.darkDecor.picture(aurore::ThemeArea::SIDEBAR).opacity, 0.5f);
-    BRLS_CHECK(!info.darkDecor.picture(aurore::ThemeArea::DIALOG).hasImage());
-    BRLS_CHECK(info.lightDecor.picture(aurore::ThemeArea::DIALOG).fit == aurore::BackgroundFit::CENTER);
-    BRLS_CHECK(info.darkDecor.particles.kind == aurore::ParticleKind::SNOW);
-    BRLS_CHECK(info.lightDecor.particles.kind == aurore::ParticleKind::PETALS); // its own variant's line
-    BRLS_CHECK_EQ(info.darkDecor.particles.density, aurore::ThemeParticles::MEDIUM);
-    BRLS_CHECK_EQ(info.darkDecor.particles.speed, 0.5f);
-    BRLS_CHECK_EQ(info.darkDecor.particles.colors.size(), (size_t)3); // its own variant's
-    BRLS_CHECK_EQ(info.lightDecor.particles.colors.size(), (size_t)2);
-    BRLS_CHECK(std::fabs(info.lightDecor.particles.colors[1].a - 0.8f) < 0.01f);
-    BRLS_CHECK(info.darkDecor.particles.layer == aurore::ParticleLayer::BACK);
+    AURORE_CHECK(top.image.find("base/garland.png") != std::string::npos);
+    AURORE_CHECK(top.fit == aurore::BackgroundFit::TILE);
+    AURORE_CHECK_EQ(top.height, 24.0f);
+    AURORE_CHECK_EQ(info.darkDecor.picture(aurore::ThemeArea::SIDEBAR).opacity, 0.5f);
+    AURORE_CHECK(!info.darkDecor.picture(aurore::ThemeArea::DIALOG).hasImage());
+    AURORE_CHECK(info.lightDecor.picture(aurore::ThemeArea::DIALOG).fit == aurore::BackgroundFit::CENTER);
+    AURORE_CHECK(info.darkDecor.particles.kind == aurore::ParticleKind::SNOW);
+    AURORE_CHECK(info.lightDecor.particles.kind == aurore::ParticleKind::PETALS); // its own variant's line
+    AURORE_CHECK_EQ(info.darkDecor.particles.density, aurore::ThemeParticles::MEDIUM);
+    AURORE_CHECK_EQ(info.darkDecor.particles.speed, 0.5f);
+    AURORE_CHECK_EQ(info.darkDecor.particles.colors.size(), (size_t)3); // its own variant's
+    AURORE_CHECK_EQ(info.lightDecor.particles.colors.size(), (size_t)2);
+    AURORE_CHECK(std::fabs(info.lightDecor.particles.colors[1].a - 0.8f) < 0.01f);
+    AURORE_CHECK(info.darkDecor.particles.layer == aurore::ParticleLayer::BACK);
 
     // Inherited, and taken away
     info = aurore::Theme::inspect(child);
-    BRLS_CHECK(info.ok());
-    BRLS_CHECK(!info.darkDecor.picture(aurore::ThemeArea::TOP).hasImage());
-    BRLS_CHECK(info.lightDecor.picture(aurore::ThemeArea::TOP).hasImage());
-    BRLS_CHECK(info.lightDecor.picture(aurore::ThemeArea::SIDEBAR).hasImage());
-    BRLS_CHECK_EQ(info.darkDecor.particles.density, aurore::ThemeParticles::HIGH);
-    BRLS_CHECK_EQ(info.lightDecor.particles.density, aurore::ThemeParticles::MEDIUM);
-    BRLS_CHECK(info.lightDecor.particles.layer == aurore::ParticleLayer::FRONT);
+    AURORE_CHECK(info.ok());
+    AURORE_CHECK(!info.darkDecor.picture(aurore::ThemeArea::TOP).hasImage());
+    AURORE_CHECK(info.lightDecor.picture(aurore::ThemeArea::TOP).hasImage());
+    AURORE_CHECK(info.lightDecor.picture(aurore::ThemeArea::SIDEBAR).hasImage());
+    AURORE_CHECK_EQ(info.darkDecor.particles.density, aurore::ThemeParticles::HIGH);
+    AURORE_CHECK_EQ(info.lightDecor.particles.density, aurore::ThemeParticles::MEDIUM);
+    AURORE_CHECK(info.lightDecor.particles.layer == aurore::ParticleLayer::FRONT);
 
     // Every wrong line an error, none of them a decoration; out of the
     // folder refused as the background's
     info = aurore::Theme::inspect(wrong);
-    BRLS_CHECK_EQ(info.errors.size(), (size_t)12);
-    BRLS_CHECK(hasErrorWith(info, "goes out of the theme's folder"));
-    BRLS_CHECK(hasErrorWith(info, "an absolute path is not allowed"));
-    BRLS_CHECK(!info.darkDecor.hasPictures() && !info.darkDecor.particles.enabled());
+    AURORE_CHECK_EQ(info.errors.size(), (size_t)12);
+    AURORE_CHECK(hasErrorWith(info, "goes out of the theme's folder"));
+    AURORE_CHECK(hasErrorWith(info, "an absolute path is not allowed"));
+    AURORE_CHECK(!info.darkDecor.hasPictures() && !info.darkDecor.particles.enabled());
 
     // None by default
     info = aurore::Theme::inspect(plain);
-    BRLS_CHECK(!info.darkDecor.hasPictures() && !info.lightDecor.hasPictures());
-    BRLS_CHECK(info.darkDecor.particles.kind == aurore::ParticleKind::NONE);
+    AURORE_CHECK(!info.darkDecor.hasPictures() && !info.lightDecor.hasPictures());
+    AURORE_CHECK(info.darkDecor.particles.kind == aurore::ParticleKind::NONE);
 
     // A picture that is not there
-    BRLS_CHECK(hasErrorWith(aurore::Theme::inspect(themes.write("base/missing.theme", "backdrop.header = nowhere.png\n")),
+    AURORE_CHECK(hasErrorWith(aurore::Theme::inspect(themes.write("base/missing.theme", "backdrop.header = nowhere.png\n")),
         "backdrop.header: cannot read"));
 
     // Used, and gone with the theme
-    BRLS_CHECK(aurore::Theme::loadFile(base));
+    AURORE_CHECK(aurore::Theme::loadFile(base));
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.step();
-    BRLS_CHECK(themeImagesDecoded());
+    AURORE_CHECK(themeImagesDecoded());
     h.settle();
-    BRLS_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP));
-    BRLS_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::SIDEBAR));
-    BRLS_CHECK(!aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::HEADER));
-    BRLS_CHECK(aurore::ThemeDecorations::particleCount() > 0);
+    AURORE_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP));
+    AURORE_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::SIDEBAR));
+    AURORE_CHECK(!aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::HEADER));
+    AURORE_CHECK(aurore::ThemeDecorations::particleCount() > 0);
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK(!aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP));
-    BRLS_CHECK_EQ(aurore::ThemeDecorations::particleCount(), 0);
+    AURORE_CHECK(!aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP));
+    AURORE_CHECK_EQ(aurore::ThemeDecorations::particleCount(), 0);
 }
 
 // A theme of particles only, over an empty screen
 static void useParticles(const std::string& preset, const std::string& kind, const std::string& more = "")
 {
-    BRLS_CHECK(aurore::Theme::load("inherit = builtin:" + preset + "\nparticles = " + kind + "\n" + more));
+    AURORE_CHECK(aurore::Theme::load("inherit = builtin:" + preset + "\nparticles = " + kind + "\n" + more));
 }
 
-BRLS_TEST(theme_particles_follow_motion_and_input)
+AURORE_TEST(theme_particles_follow_motion_and_input)
 {
     Harness h;
     // Nothing that moves of its own (a focus pulses)
@@ -1563,62 +1563,62 @@ BRLS_TEST(theme_particles_follow_motion_and_input)
     aurore::Application::setRedrawOnDemand(true);
     useParticles("winter", "snow");
     h.settle();
-    BRLS_CHECK(aurore::ThemeDecorations::particleCount() > 0);
-    BRLS_CHECK(aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(aurore::ThemeDecorations::particleCount() > 0);
+    AURORE_CHECK(aurore::ThemeDecorations::particlesRunning());
 
     // Moving: about PARTICLE_FPS frames a second, not every frame
     uint64_t drawn = aurore::Application::getDrawnFrameCount();
     h.advance(1000);
     uint64_t frames = aurore::Application::getDrawnFrameCount() - drawn;
-    BRLS_CHECK(frames >= 25 && frames <= 35);
+    AURORE_CHECK(frames >= 25 && frames <= 35);
 
     // Reduced motion: nothing drawn, no frame asked for but the one a second
     aurore::Application::setReduceMotion(true);
     h.step(3);
-    BRLS_CHECK(!aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(!aurore::ThemeDecorations::particlesRunning());
     aurore::test::Image still = h.screenshot();
     drawn                     = aurore::Application::getDrawnFrameCount();
     h.advance(900);
-    BRLS_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 1);
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 1);
     // ...and not a frozen frame of them: the screen is the one without
     aurore::Theme::load("inherit = builtin:winter\n");
     h.settle();
-    BRLS_CHECK_EQ(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
+    AURORE_CHECK_EQ(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
     useParticles("winter", "snow");
     h.settle();
-    BRLS_CHECK_EQ(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
+    AURORE_CHECK_EQ(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
 
     // Motion again: they come back
     aurore::Application::setReduceMotion(false);
     h.advance(2000);
-    BRLS_CHECK(aurore::ThemeDecorations::particlesRunning());
-    BRLS_CHECK(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels > 50);
+    AURORE_CHECK(aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels > 50);
 
     // Idle a minute: they fade out and stop asking for frames
     h.advance(aurore::ThemeDecorations::IDLE_SECONDS * 1000.0 + 4000);
-    BRLS_CHECK(!aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(!aurore::ThemeDecorations::particlesRunning());
     drawn = aurore::Application::getDrawnFrameCount();
     h.advance(2000);
-    BRLS_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 2);
-    BRLS_CHECK_EQ(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 2);
+    AURORE_CHECK_EQ(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
 
     // An input: back
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK(aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(aurore::ThemeDecorations::particlesRunning());
     drawn = aurore::Application::getDrawnFrameCount();
     h.advance(1000);
-    BRLS_CHECK(aurore::Application::getDrawnFrameCount() - drawn >= 25);
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() - drawn >= 25);
 
     // Never a view: the focus and the layout know nothing of them
-    BRLS_CHECK(dynamic_cast<aurore::Box*>(h.top()->getContentView())->getChildren().size() == 1);
+    AURORE_CHECK(dynamic_cast<aurore::Box*>(h.top()->getContentView())->getChildren().size() == 1);
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK(!aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(!aurore::ThemeDecorations::particlesRunning());
 }
 
 // Every kind, mid-flight, in both variants: drawn (and saved, for a look,
-// with BRLS_DECOR_SHOTS=<folder>)
-BRLS_TEST(theme_particles_draw_every_kind)
+// with AURORE_DECOR_SHOTS=<folder>)
+AURORE_TEST(theme_particles_draw_every_kind)
 {
     const struct
     {
@@ -1626,7 +1626,7 @@ BRLS_TEST(theme_particles_draw_every_kind)
         const char* preset;
     } kinds[]          = { { "snow", "winter" }, { "leaves", "autumn" }, { "petals", "spring" }, { "embers", "halloween" },
                  { "confetti", "new-year" }, { "sparkles", "lunar-new-year" }, { "hearts", "valentine" }, { "bubbles", "summer" } };
-    const char* folder = std::getenv("BRLS_DECOR_SHOTS");
+    const char* folder = std::getenv("AURORE_DECOR_SHOTS");
     Harness h;
     h.push(new aurore::Activity(new aurore::Box()));
     for (const auto& each : kinds)
@@ -1639,7 +1639,7 @@ BRLS_TEST(theme_particles_draw_every_kind)
             useParticles(each.preset, each.kind, "particles_density = high\n");
             h.advance(2500);
             aurore::test::Image shot = h.screenshot();
-            BRLS_CHECK(aurore::test::compareImages(shot, plain, 4).differingPixels > 200);
+            AURORE_CHECK(aurore::test::compareImages(shot, plain, 4).differingPixels > 200);
             if (folder)
                 shot.savePng(std::string(folder) + "/particles_" + each.kind
                     + (variant == aurore::ThemeVariant::DARK ? "_dark" : "_light") + ".png");
@@ -1665,24 +1665,24 @@ BRLS_TEST(theme_particles_draw_every_kind)
 
 // backdrop.header: across the whole width of a screen's header, under its
 // title; nothing elsewhere
-BRLS_TEST(theme_decor_header_backdrop)
+AURORE_TEST(theme_decor_header_backdrop)
 {
     DemoHarness h;
     aurore::Application::setReduceMotion(true);
     ThemeFolder themes("aurore_theme_header_test");
     themes.picture("red.png", 255, 0, 0);
-    BRLS_CHECK(aurore::Theme::loadFile(themes.write("red.theme", "inherit = dark\nbackdrop.header = red.png\n")));
+    AURORE_CHECK(aurore::Theme::loadFile(themes.write("red.theme", "inherit = dark\nbackdrop.header = red.png\n")));
     h.step();
-    BRLS_CHECK(themeImagesDecoded());
+    AURORE_CHECK(themeImagesDecoded());
     h.settle();
-    BRLS_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::HEADER));
+    AURORE_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::HEADER));
     aurore::test::Image shot = h.screenshot();
     for (int x : { 2, 640, 1277 })
-        BRLS_CHECK(shot.at(x, 4)[0] > 200 && shot.at(x, 4)[1] < 60);
-    BRLS_CHECK(shot.at(640, 300)[0] < 120); // the content: as it was
+        AURORE_CHECK(shot.at(x, 4)[0] > 200 && shot.at(x, 4)[1] < 60);
+    AURORE_CHECK(shot.at(640, 300)[0] < 120); // the content: as it was
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK(h.screenshot().at(640, 4)[0] < 120);
+    AURORE_CHECK(h.screenshot().at(640, 4)[0] < 120);
 }
 
 // The demo's Winter theme (a folder: resources/themes/winter): its strips
@@ -1692,24 +1692,24 @@ static void winterScreen(aurore::ThemeVariant variant, const char* reference)
 {
     DemoHarness h;
     aurore::Application::setReduceMotion(true);
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/winter/theme.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/winter/theme.theme"));
     aurore::Application::getPlatform()->setThemeVariant(variant);
     h.step();
-    BRLS_CHECK(themeImagesDecoded());
+    AURORE_CHECK(themeImagesDecoded());
     h.settle();
-    BRLS_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP));
-    BRLS_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::BOTTOM));
-    BRLS_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::SIDEBAR));
-    BRLS_CHECK(aurore::ThemeDecorations::particleCount() > 0 && !aurore::ThemeDecorations::particlesRunning());
-    BRLS_CHECK(h.matchesReference(reference));
+    AURORE_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP));
+    AURORE_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::BOTTOM));
+    AURORE_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::SIDEBAR));
+    AURORE_CHECK(aurore::ThemeDecorations::particleCount() > 0 && !aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(h.matchesReference(reference));
 }
 
-BRLS_TEST(theme_decor_dark)
+AURORE_TEST(theme_decor_dark)
 {
     winterScreen(aurore::ThemeVariant::DARK, "theme_decor_dark");
 }
 
-BRLS_TEST(theme_decor_light)
+AURORE_TEST(theme_decor_light)
 {
     winterScreen(aurore::ThemeVariant::LIGHT, "theme_decor_light");
 }
@@ -1717,7 +1717,7 @@ BRLS_TEST(theme_decor_light)
 // Decorations still loading, particles running, motion going on and off
 // while the theme changes: nothing drawn late, nothing freed twice (run
 // under the sanitizers too)
-BRLS_TEST(theme_decor_switches_back_and_forth)
+AURORE_TEST(theme_decor_switches_back_and_forth)
 {
     DemoHarness h;
     const char* themes[] = { "@res/themes/winter/theme.theme", "builtin:new-year", "@res/themes/aurora/theme.theme",
@@ -1726,7 +1726,7 @@ BRLS_TEST(theme_decor_switches_back_and_forth)
     {
         const char* theme = themes[round % 5];
         if (*theme)
-            BRLS_CHECK(aurore::Theme::loadFile(theme));
+            AURORE_CHECK(aurore::Theme::loadFile(theme));
         else
             aurore::Theme::reset();
         aurore::Application::getPlatform()->setThemeVariant(round % 3 ? aurore::ThemeVariant::DARK : aurore::ThemeVariant::LIGHT);
@@ -1734,35 +1734,35 @@ BRLS_TEST(theme_decor_switches_back_and_forth)
         h.step(round % 2 ? 1 : 3);
     }
     aurore::Application::setReduceMotion(false);
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/winter/theme.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/winter/theme.theme"));
     h.step();
-    BRLS_CHECK(themeImagesDecoded());
+    AURORE_CHECK(themeImagesDecoded());
     h.settle();
-    BRLS_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP) && aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP) && aurore::ThemeDecorations::particlesRunning());
     aurore::Theme::reset();
     h.settle();
-    BRLS_CHECK(!aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP) && !aurore::ThemeDecorations::particlesRunning());
+    AURORE_CHECK(!aurore::ThemeDecorations::hasPicture(aurore::ThemeArea::TOP) && !aurore::ThemeDecorations::particlesRunning());
 }
 
 // A translucent dialog over a theme's picture shows the picture, not the
 // screen behind it
-BRLS_TEST(theme_decor_dialog_over_a_picture)
+AURORE_TEST(theme_decor_dialog_over_a_picture)
 {
     DemoHarness h;
     aurore::Application::setReduceMotion(true);
-    BRLS_CHECK(aurore::Theme::loadFile("@res/themes/aurora/theme.theme"));
+    AURORE_CHECK(aurore::Theme::loadFile("@res/themes/aurora/theme.theme"));
     h.step();
-    BRLS_CHECK(themeImagesDecoded());
+    AURORE_CHECK(themeImagesDecoded());
     h.settle();
     h.tap(aurore::BUTTON_RIGHT);
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK_EQ(h.focusText(), std::string("Confirm"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Confirm"));
     h.tap(aurore::BUTTON_A);
     h.settle();
-    BRLS_CHECK(h.matchesReference("theme_decor_dialog"));
+    AURORE_CHECK(h.matchesReference("theme_decor_dialog"));
 }
 
-BRLS_TEST(images_compare_with_tolerance)
+AURORE_TEST(images_compare_with_tolerance)
 {
     aurore::test::Image a;
     a.width  = 4;
@@ -1772,10 +1772,10 @@ BRLS_TEST(images_compare_with_tolerance)
     b.rgba[0]             = 105; // within 8
     b.rgba[4]             = 140; // a pixel off
     auto diff             = aurore::test::compareImages(b, a, 8);
-    BRLS_CHECK(diff.sameSize);
-    BRLS_CHECK_EQ(diff.differingPixels, (size_t)1);
-    BRLS_CHECK_EQ(diff.maxDelta, 40);
-    BRLS_CHECK(!aurore::test::compareImages(b, a.crop(0, 0, 2, 2)).sameSize);
+    AURORE_CHECK(diff.sameSize);
+    AURORE_CHECK_EQ(diff.differingPixels, (size_t)1);
+    AURORE_CHECK_EQ(diff.maxDelta, 40);
+    AURORE_CHECK(!aurore::test::compareImages(b, a.crop(0, 0, 2, 2)).sameSize);
 }
 
 namespace
@@ -1808,21 +1808,21 @@ bool drawnDifferently(Harness& h, aurore::View* one, aurore::View* other)
 
 } // namespace
 
-BRLS_TEST(fonts_are_the_free_ones)
+AURORE_TEST(fonts_are_the_free_ones)
 {
     Harness h;
     // The text and the buttons from the library's resources, the Switch's
     // fonts nowhere
-    BRLS_CHECK(aurore::Application::getFont(aurore::FONT_REGULAR) != aurore::FONT_INVALID);
-    BRLS_CHECK(aurore::Application::getFont(aurore::FONT_SWITCH_ICONS) != aurore::FONT_INVALID);
-    BRLS_CHECK(!aurore::Application::loadFontFromFile("old", BRLS_ASSET("font/switch_font.ttf")));
-    BRLS_CHECK(!aurore::Application::loadFontFromFile("old", BRLS_ASSET("font/switch_icons.ttf")));
+    AURORE_CHECK(aurore::Application::getFont(aurore::FONT_REGULAR) != aurore::FONT_INVALID);
+    AURORE_CHECK(aurore::Application::getFont(aurore::FONT_SWITCH_ICONS) != aurore::FONT_INVALID);
+    AURORE_CHECK(!aurore::Application::loadFontFromFile("old", AURORE_ASSET("font/switch_font.ttf")));
+    AURORE_CHECK(!aurore::Application::loadFontFromFile("old", AURORE_ASSET("font/switch_icons.ttf")));
     // The harness reads no system font: its pictures are the same everywhere
-    BRLS_CHECK(aurore::Application::getFont(aurore::FONT_KOREAN_REGULAR) == aurore::FONT_INVALID);
-    BRLS_CHECK(aurore::Application::getFont(aurore::FONT_JAPANESE) == aurore::FONT_INVALID);
+    AURORE_CHECK(aurore::Application::getFont(aurore::FONT_KOREAN_REGULAR) == aurore::FONT_INVALID);
+    AURORE_CHECK(aurore::Application::getFont(aurore::FONT_JAPANESE) == aurore::FONT_INVALID);
 }
 
-BRLS_TEST(button_glyphs_drawn)
+AURORE_TEST(button_glyphs_drawn)
 {
     Harness h;
     // At the code points of the Switch's shared font (Hint::getKeyIcon)
@@ -1831,28 +1831,28 @@ BRLS_TEST(button_glyphs_drawn)
     auto* missing = lineOf("\u0378\u0378"); // no such character: the empty box
     h.push(new aurore::Activity(screenOf({ a, b, missing })));
     h.settle();
-    BRLS_CHECK(drawnDifferently(h, a, b));
-    BRLS_CHECK(drawnDifferently(h, a, missing));
-    BRLS_CHECK(drawnDifferently(h, b, missing));
+    AURORE_CHECK(drawnDifferently(h, a, b));
+    AURORE_CHECK(drawnDifferently(h, a, missing));
+    AURORE_CHECK(drawnDifferently(h, b, missing));
 }
 
-BRLS_TEST(asset_fonts_load_from_the_resources)
+AURORE_TEST(asset_fonts_load_from_the_resources)
 {
-    // BRLS_ASSET() is "@res/..." with the resources built in: read from them
+    // AURORE_ASSET() is "@res/..." with the resources built in: read from them
     Harness h;
-    BRLS_CHECK(aurore::Application::loadFontFromFile("test/sora", BRLS_ASSET("font/sora_bold_latin.ttf")));
-    BRLS_CHECK(aurore::Application::getFont("test/sora") != aurore::FONT_INVALID);
-    BRLS_CHECK(!aurore::Application::loadFontFromFile("test/none", BRLS_ASSET("font/none.ttf")));
+    AURORE_CHECK(aurore::Application::loadFontFromFile("test/sora", AURORE_ASSET("font/sora_bold_latin.ttf")));
+    AURORE_CHECK(aurore::Application::getFont("test/sora") != aurore::FONT_INVALID);
+    AURORE_CHECK(!aurore::Application::loadFontFromFile("test/none", AURORE_ASSET("font/none.ttf")));
 }
 
-BRLS_TEST(cadran_display_font_loaded)
+AURORE_TEST(cadran_display_font_loaded)
 {
     // Cadran's figures in Sora, with the resources built in too
     DemoHarness h;
-    BRLS_CHECK(aurore::Application::getFont("cadran/digits") != aurore::FONT_INVALID);
+    AURORE_CHECK(aurore::Application::getFont("cadran/digits") != aurore::FONT_INVALID);
 }
 
-BRLS_TEST(cjk_from_the_system_fonts)
+AURORE_TEST(cjk_from_the_system_fonts)
 {
     aurore::test::Options options;
     options.systemFonts = true;
@@ -1878,14 +1878,14 @@ BRLS_TEST(cjk_from_the_system_fonts)
             std::printf("cjk_from_the_system_fonts: no %s font on this system, not checked\n", c.language);
             continue;
         }
-        BRLS_CHECK(aurore::Application::getFont(c.font) != aurore::FONT_INVALID);
+        AURORE_CHECK(aurore::Application::getFont(c.font) != aurore::FONT_INVALID);
         auto* text    = lineOf(c.text);
         auto* missing = lineOf(c.missing);
         h.push(new aurore::Activity(screenOf({ text, missing })));
         h.settle();
         if (!drawnDifferently(h, text, missing))
             std::printf("cjk_from_the_system_fonts: %s drawn as missing glyphs (%s)\n", c.language, file.path.c_str());
-        BRLS_CHECK(drawnDifferently(h, text, missing));
+        AURORE_CHECK(drawnDifferently(h, text, missing));
     }
 }
 
@@ -1898,7 +1898,7 @@ static const std::string& announced()
     return aurore::Application::getLastAnnouncement();
 }
 
-BRLS_TEST(announcer_says_role_value_state_and_place)
+AURORE_TEST(announcer_says_role_value_state_and_place)
 {
     Harness h;
     auto* toggle = new aurore::BooleanCell();
@@ -1918,36 +1918,36 @@ BRLS_TEST(announcer_says_role_value_state_and_place)
     h.push(new aurore::Activity(screenOf({ toggle, detail, radio, slider })));
     h.settle();
 
-    BRLS_CHECK_EQ(announced(), std::string("Wi-Fi, switch, off, 1 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Wi-Fi, switch, off, 1 of 3"));
     h.tap(aurore::BUTTON_A); // flipped in place: its new state alone
-    BRLS_CHECK(toggle->isOn());
-    BRLS_CHECK_EQ(announced(), std::string("on"));
+    AURORE_CHECK(toggle->isOn());
+    AURORE_CHECK_EQ(announced(), std::string("on"));
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK_EQ(announced(), std::string("Language, English, 2 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Language, English, 2 of 3"));
     detail->setDetailText("Français"); // changed while focused, after a press
-    BRLS_CHECK_EQ(announced(), std::string("Français"));
+    AURORE_CHECK_EQ(announced(), std::string("Français"));
     h.advance(3000);
     detail->setDetailText("Deutsch"); // on its own: not read out
-    BRLS_CHECK_EQ(announced(), std::string("Français"));
+    AURORE_CHECK_EQ(announced(), std::string("Français"));
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK_EQ(announced(), std::string("Dark, selected, 3 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Dark, selected, 3 of 3"));
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK_EQ(announced(), std::string("Volume, slider, 50%"));
+    AURORE_CHECK_EQ(announced(), std::string("Volume, slider, 50%"));
     h.tap(aurore::BUTTON_RIGHT);
-    BRLS_CHECK_EQ(announced(), std::string("60%"));
+    AURORE_CHECK_EQ(announced(), std::string("60%"));
     // Gliding while held: said once, when let go
     slider->slider->setDiscreteStep(0);
     size_t before = said.size();
     h.hold(aurore::BUTTON_RIGHT, 400);
     h.step(2);
-    BRLS_CHECK_EQ(said.size(), before + 1);
-    BRLS_CHECK(announced() != "60%" && announced().back() == '%');
+    AURORE_CHECK_EQ(said.size(), before + 1);
+    AURORE_CHECK(announced() != "60%" && announced().back() == '%');
     // Each went to the announcer as it was said.
-    BRLS_CHECK(!said.empty() && said.back() == announced());
+    AURORE_CHECK(!said.empty() && said.back() == announced());
     aurore::Application::setFocusAnnouncer(nullptr);
 }
 
-BRLS_TEST(announcer_says_disabled_and_explicit_values)
+AURORE_TEST(announcer_says_disabled_and_explicit_values)
 {
     Harness h;
     auto* first  = new aurore::Button();
@@ -1961,13 +1961,13 @@ BRLS_TEST(announcer_says_disabled_and_explicit_values)
     box->setAccessibilityValue("80%");
     h.push(new aurore::Activity(screenOf({ first, second, box })));
     h.settle();
-    BRLS_CHECK_EQ(announced(), std::string("Save, button, 1 of 3"));
-    BRLS_CHECK_EQ(second->getAccessibilityDescription(), std::string("Quit, button, disabled, 2 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Save, button, 1 of 3"));
+    AURORE_CHECK_EQ(second->getAccessibilityDescription(), std::string("Quit, button, disabled, 2 of 3"));
     // No role: no place said either.
-    BRLS_CHECK_EQ(box->getAccessibilityDescription(), std::string("Battery, 80%"));
+    AURORE_CHECK_EQ(box->getAccessibilityDescription(), std::string("Battery, 80%"));
 }
 
-BRLS_TEST(focusable_box_says_the_texts_in_it)
+AURORE_TEST(focusable_box_says_the_texts_in_it)
 {
     Harness h;
     auto* tile = new aurore::Box(aurore::Axis::COLUMN);
@@ -1991,21 +1991,21 @@ BRLS_TEST(focusable_box_says_the_texts_in_it)
     silent->setHeight(40);
     h.push(new aurore::Activity(screenOf({ tile, silent })));
     h.settle();
-    BRLS_CHECK_EQ(tile->getAccessibilityDescription(), std::string("Mario Kart, 2 h 10"));
-    BRLS_CHECK_EQ(silent->getAccessibilityDescription(), std::string(""));
+    AURORE_CHECK_EQ(tile->getAccessibilityDescription(), std::string("Mario Kart, 2 h 10"));
+    AURORE_CHECK_EQ(silent->getAccessibilityDescription(), std::string(""));
 }
 
-BRLS_TEST(toast_and_dialog_are_announced)
+AURORE_TEST(toast_and_dialog_are_announced)
 {
     Harness h;
     auto* button = new aurore::Button();
     button->setText("Delete");
     h.push(new aurore::Activity(screenOf({ button })));
     h.settle();
-    BRLS_CHECK_EQ(announced(), std::string("Delete, button"));
+    AURORE_CHECK_EQ(announced(), std::string("Delete, button"));
 
     aurore::Application::notify("Profile saved");
-    BRLS_CHECK_EQ(announced(), std::string("Profile saved"));
+    AURORE_CHECK_EQ(announced(), std::string("Profile saved"));
 
     auto* dialog = new aurore::Dialog("Delete this profile?");
     dialog->addButton("Cancel", [] {});
@@ -2013,31 +2013,31 @@ BRLS_TEST(toast_and_dialog_are_announced)
     dialog->open();
     h.settle();
     const std::string opened = announced();
-    BRLS_CHECK(opened.rfind("Delete this profile?, dialog, ", 0) == 0);
-    BRLS_CHECK(opened.find(", button") != std::string::npos);
+    AURORE_CHECK(opened.rfind("Delete this profile?, dialog, ", 0) == 0);
+    AURORE_CHECK(opened.find(", button") != std::string::npos);
     // Within the dialog, only the button.
     h.tap(aurore::BUTTON_RIGHT);
-    BRLS_CHECK(announced().rfind("Delete this profile?", 0) != 0);
+    AURORE_CHECK(announced().rfind("Delete this profile?", 0) != 0);
     h.tap(aurore::BUTTON_B);
-    BRLS_CHECK_EQ(announced(), std::string("Delete, button"));
+    AURORE_CHECK_EQ(announced(), std::string("Delete, button"));
 }
 
-BRLS_TEST(dropdown_says_its_title_and_the_choice)
+AURORE_TEST(dropdown_says_its_title_and_the_choice)
 {
     Harness h;
     auto* selector = new aurore::SelectorCell();
     selector->init("Region", { "Europe", "America", "Asia" }, 1, [](int) {});
     h.push(new aurore::Activity(screenOf({ selector })));
     h.settle();
-    BRLS_CHECK_EQ(announced(), std::string("Region, America"));
+    AURORE_CHECK_EQ(announced(), std::string("Region, America"));
     h.tap(aurore::BUTTON_A);
     h.settle();
-    BRLS_CHECK_EQ(announced(), std::string("Region, list, America, selected, 2 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Region, list, America, selected, 2 of 3"));
     h.tap(aurore::BUTTON_DOWN);
-    BRLS_CHECK_EQ(announced(), std::string("Asia, 3 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Asia, 3 of 3"));
 }
 
-BRLS_TEST(announcer_speaks_the_app_language)
+AURORE_TEST(announcer_speaks_the_app_language)
 {
     Harness h;
     auto* toggle = new aurore::BooleanCell();
@@ -2049,13 +2049,13 @@ BRLS_TEST(announcer_speaks_the_app_language)
     h.settle();
 
     aurore::loadTranslations("fr");
-    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, interrupteur, activé, 1 sur 2"));
-    BRLS_CHECK_EQ(other->getAccessibilityDescription(), std::string("OK, bouton, indisponible, 2 sur 2"));
+    AURORE_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, interrupteur, activé, 1 sur 2"));
+    AURORE_CHECK_EQ(other->getAccessibilityDescription(), std::string("OK, bouton, indisponible, 2 sur 2"));
     // A language that says the count first
     aurore::loadTranslations("ja");
-    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, スイッチ, オン, 2項目中1番目"));
+    AURORE_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, スイッチ, オン, 2項目中1番目"));
     aurore::loadTranslations("en-US");
-    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, switch, on, 1 of 2"));
+    AURORE_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, switch, on, 1 of 2"));
 }
 
 namespace
@@ -2066,7 +2066,7 @@ struct CadranHarness : Demo, Harness
 };
 } // namespace
 
-BRLS_TEST(cadran_pieces_have_roles_and_labels)
+AURORE_TEST(cadran_pieces_have_roles_and_labels)
 {
     CadranHarness h;
     aurore::Box* chip = cadran::kit::chip("+15 min");
@@ -2083,10 +2083,10 @@ BRLS_TEST(cadran_pieces_have_roles_and_labels)
     h.push(new aurore::Activity(screenOf({ chip, card, toggle, line })));
     h.settle();
 
-    BRLS_CHECK_EQ(announced(), std::string("+15 min, button, 1 of 4"));
-    BRLS_CHECK_EQ(card->getAccessibilityDescription(), std::string("Today, 2 h 10, 2 of 4"));
-    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Notifications, switch, on, 3 of 4"));
-    BRLS_CHECK_EQ(line->getAccessibilityDescription(), std::string("Updates, 3 new, 4 of 4"));
+    AURORE_CHECK_EQ(announced(), std::string("+15 min, button, 1 of 4"));
+    AURORE_CHECK_EQ(card->getAccessibilityDescription(), std::string("Today, 2 h 10, 2 of 4"));
+    AURORE_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Notifications, switch, on, 3 of 4"));
+    AURORE_CHECK_EQ(line->getAccessibilityDescription(), std::string("Updates, 3 new, 4 of 4"));
 }
 
 namespace
@@ -2107,19 +2107,19 @@ aurore::AppletFrame* titledScreen(const std::string& title, const std::string& m
 }
 } // namespace
 
-BRLS_TEST(cadran_crumb_skips_screens_of_their_own)
+AURORE_TEST(cadran_crumb_skips_screens_of_their_own)
 {
     CadranHarness h;
     h.push(new aurore::Activity(titledScreen("First")));
     h.settle();
     h.push(new aurore::Activity(titledScreen("Second")));
     h.settle();
-    BRLS_CHECK(h.hasText("First  ›")); // opened from First
+    AURORE_CHECK(h.hasText("First  ›")); // opened from First
     // A screen of its own (a child's): no crumb, by the id in it…
     h.push(new aurore::Activity(titledScreen("Third", "cadran/standalone")));
     h.settle();
-    BRLS_CHECK(h.hasText("Third"));
-    BRLS_CHECK(!h.hasText("Second  ›"));
+    AURORE_CHECK(h.hasText("Third"));
+    AURORE_CHECK(!h.hasText("Second  ›"));
     // … or as the app's hook says
     ui::hooks::get().standalone_screen = [](aurore::View* frame)
     {
@@ -2128,15 +2128,15 @@ BRLS_TEST(cadran_crumb_skips_screens_of_their_own)
     };
     h.push(new aurore::Activity(titledScreen("Fourth")));
     h.settle();
-    BRLS_CHECK(h.hasText("Fourth"));
-    BRLS_CHECK(!h.hasText("Third  ›"));
+    AURORE_CHECK(h.hasText("Fourth"));
+    AURORE_CHECK(!h.hasText("Third  ›"));
     h.push(new aurore::Activity(titledScreen("Fifth")));
     h.settle();
-    BRLS_CHECK(h.hasText("Fourth  ›"));
+    AURORE_CHECK(h.hasText("Fourth  ›"));
     ui::hooks::get().standalone_screen = nullptr;
 }
 
-BRLS_TEST(cadran_picker_says_its_title_and_the_choice)
+AURORE_TEST(cadran_picker_says_its_title_and_the_choice)
 {
     CadranHarness h;
     auto* button = new aurore::Button();
@@ -2145,15 +2145,15 @@ BRLS_TEST(cadran_picker_says_its_title_and_the_choice)
     h.settle();
     ui::pick("Theme", { "System", "Light", "Dark" }, 2, [](int) {});
     h.settle();
-    BRLS_CHECK_EQ(announced(), std::string("Theme, list, Dark, selected, 3 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Theme, list, Dark, selected, 3 of 3"));
     h.tap(aurore::BUTTON_UP);
-    BRLS_CHECK_EQ(announced(), std::string("Light, 2 of 3"));
+    AURORE_CHECK_EQ(announced(), std::string("Light, 2 of 3"));
 }
 
-BRLS_TEST(every_focusable_demo_view_says_something)
+AURORE_TEST(every_focusable_demo_view_says_something)
 {
     DemoHarness h;
-    BRLS_CHECK(announced().rfind("Cadran, tab, selected, 1 of ", 0) == 0);
+    AURORE_CHECK(announced().rfind("Cadran, tab, selected, 1 of ", 0) == 0);
     // Each tab of the rail in turn (focusing its item shows it)
     std::vector<std::string> silent;
     std::vector<std::string> seen;
@@ -2168,10 +2168,10 @@ BRLS_TEST(every_focusable_demo_view_says_something)
             silent.push_back(name + ": " + view);
         h.tap(aurore::BUTTON_DOWN);
     }
-    BRLS_CHECK(seen.size() > 5);
+    AURORE_CHECK(seen.size() > 5);
     for (const std::string& name : silent)
         std::fprintf(stderr, "silent: %s\n", name.c_str());
-    BRLS_CHECK(silent.empty());
+    AURORE_CHECK(silent.empty());
 }
 
 int main(int argc, char** argv)
@@ -2179,7 +2179,7 @@ int main(int argc, char** argv)
     return aurore::test::runTests(argc, argv);
 }
 
-BRLS_TEST(switch_off_reads_as_secondary_text)
+AURORE_TEST(switch_off_reads_as_secondary_text)
 {
     Harness h;
     auto* cell = new aurore::BooleanCell();
@@ -2193,21 +2193,21 @@ BRLS_TEST(switch_off_reads_as_secondary_text)
         aurore::Theme theme = aurore::Application::getTheme();
         NVGcolor off        = cell->detail->getTextColor();
         NVGcolor want       = theme["brls/text_secondary"];
-        BRLS_CHECK(std::fabs(off.r - want.r) < 0.01f && std::fabs(off.g - want.g) < 0.01f && std::fabs(off.b - want.b) < 0.01f);
-        BRLS_CHECK(aurore::Theme::contrast(off, theme["brls/background"]) >= 4.5f);
+        AURORE_CHECK(std::fabs(off.r - want.r) < 0.01f && std::fabs(off.g - want.g) < 0.01f && std::fabs(off.b - want.b) < 0.01f);
+        AURORE_CHECK(aurore::Theme::contrast(off, theme["brls/background"]) >= 4.5f);
     }
 }
 
-BRLS_TEST(every_demo_theme_passes_the_contrast_check)
+AURORE_TEST(every_demo_theme_passes_the_contrast_check)
 {
     DemoHarness h;
     for (aurore::ThemeVariant variant : { aurore::ThemeVariant::LIGHT, aurore::ThemeVariant::DARK })
-        BRLS_CHECK(aurore::Theme::checkContrast(variant).empty());
+        AURORE_CHECK(aurore::Theme::checkContrast(variant).empty());
     for (const aurore::ThemeInfo& info : aurore::Theme::listThemes("@res/themes", true))
     {
         for (const std::string& warning : info.warnings)
             std::printf("%s: %s\n", info.path.c_str(), warning.c_str());
-        BRLS_CHECK(info.ok() && info.warnings.empty());
+        AURORE_CHECK(info.ok() && info.warnings.empty());
     }
 }
 
@@ -2228,21 +2228,21 @@ static std::string xmlError(const std::string& name, const std::string& xml)
     return "";
 }
 
-BRLS_TEST(xml_errors_say_where_and_what_was_meant)
+AURORE_TEST(xml_errors_say_where_and_what_was_meant)
 {
     Harness h;
     std::string typo = xmlError("aurore_typo.xml", "<brls:Box>\n\n    <brls:Label fontSise=\"20\"/>\n</brls:Box>\n");
-    BRLS_CHECK(typo.find("aurore_typo.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"") != std::string::npos);
-    BRLS_CHECK(typo.find("did you mean \"fontSize\"?") != std::string::npos);
+    AURORE_CHECK(typo.find("aurore_typo.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"") != std::string::npos);
+    AURORE_CHECK(typo.find("did you mean \"fontSize\"?") != std::string::npos);
 
     std::string value = xmlError("aurore_value.xml", "<brls:Box\n    axis=\"colum\"/>\n");
-    BRLS_CHECK(value.find("aurore_value.xml:1: <brls:Box>: Illegal value \"colum\" for XML attribute \"axis\"; expected column, row") != std::string::npos);
+    AURORE_CHECK(value.find("aurore_value.xml:1: <brls:Box>: Illegal value \"colum\" for XML attribute \"axis\"; expected column, row") != std::string::npos);
 
     std::string tag = xmlError("aurore_tag.xml", "<brls:Box>\n<brls:Lable/>\n</brls:Box>\n");
-    BRLS_CHECK(tag.find("aurore_tag.xml:2: <brls:Lable>: Unknown XML tag \"brls:Lable\"; did you mean \"brls:Label\"?") != std::string::npos);
+    AURORE_CHECK(tag.find("aurore_tag.xml:2: <brls:Lable>: Unknown XML tag \"brls:Lable\"; did you mean \"brls:Label\"?") != std::string::npos);
 }
 
-BRLS_TEST(reduce_motion_stops_core_animations)
+AURORE_TEST(reduce_motion_stops_core_animations)
 {
     Harness h;
     aurore::Application::setReduceMotion(true);
@@ -2251,9 +2251,9 @@ BRLS_TEST(reduce_motion_stops_core_animations)
     h.push(new aurore::Activity(screenOf({ cell })));
     h.settle();
     h.tap(aurore::BUTTON_A);
-    BRLS_CHECK(cell->isOn());
-    BRLS_CHECK(aurore::Ticking::runningTickings.empty() || std::none_of(aurore::Ticking::runningTickings.begin(), aurore::Ticking::runningTickings.end(), [](aurore::Ticking* t)
-                   { return dynamic_cast<aurore::FiniteTicking*>(t) != nullptr; }));
+    AURORE_CHECK(cell->isOn());
+    AURORE_CHECK(aurore::Ticking::runningTickings.empty() || std::none_of(aurore::Ticking::runningTickings.begin(), aurore::Ticking::runningTickings.end(), [](aurore::Ticking* t)
+                     { return dynamic_cast<aurore::FiniteTicking*>(t) != nullptr; }));
 
     // A text cut short stays still while focused
     auto* row   = new aurore::Box(aurore::Axis::ROW);
@@ -2269,36 +2269,36 @@ BRLS_TEST(reduce_motion_stops_core_animations)
     h.step(120);
     aurore::test::Image before = h.screenshot();
     h.step(120);
-    BRLS_CHECK_EQ(aurore::test::compareImages(h.screenshot(), before).differingPixels, 0);
+    AURORE_CHECK_EQ(aurore::test::compareImages(h.screenshot(), before).differingPixels, 0);
 }
 
-BRLS_TEST(rail_names_are_not_cut)
+AURORE_TEST(rail_names_are_not_cut)
 {
     DemoHarness h;
     for (const std::string& text : h.cutTexts())
-        BRLS_CHECK(text != "Basic components" && text != "Layout and alignment");
+        AURORE_CHECK(text != "Basic components" && text != "Layout and alignment");
 }
 
-BRLS_TEST(hold_to_confirm_says_it_once)
+AURORE_TEST(hold_to_confirm_says_it_once)
 {
     DemoHarness h;
     // Opened by a finger: no A key bubble
-    BRLS_CHECK(h.tapView(h.findText("Cadran")));
+    AURORE_CHECK(h.tapView(h.findText("Cadran")));
     ui::hold_confirm(cadran::dialog_body(aurore::getStr("demo/cadran/hold_text")), aurore::getStr("demo/cadran/hold"), [] {});
     h.settle();
-    BRLS_CHECK(!h.hasText("A"));
-    BRLS_CHECK(!h.hasText("Reset everything?\n\nHold the button for 2 seconds."));
-    BRLS_CHECK(h.matchesReference("hold_confirm_touch"));
+    AURORE_CHECK(!h.hasText("A"));
+    AURORE_CHECK(!h.hasText("Reset everything?\n\nHold the button for 2 seconds."));
+    AURORE_CHECK(h.matchesReference("hold_confirm_touch"));
 }
 
-BRLS_TEST(cut_text_file_written_with_cadran)
+AURORE_TEST(cut_text_file_written_with_cadran)
 {
     std::filesystem::path dir = std::filesystem::temp_directory_path() / "aurore_cut_text";
     std::filesystem::remove_all(dir);
     std::filesystem::create_directories(dir);
     std::filesystem::path previous = std::filesystem::current_path();
     std::filesystem::current_path(dir);
-    // Through the app's hook: BRLS_CUT_TEXT is read only with BRLS_DEV_TOOLS
+    // Through the app's hook: AURORE_CUT_TEXT is read only with AURORE_DEV_TOOLS
     ui::hooks::get().env_flag = [](const char* name)
     { return std::string(name) == "CUT_TEXT"; };
     {
@@ -2313,40 +2313,40 @@ BRLS_TEST(cut_text_file_written_with_cadran)
         h.step(2);
         std::ifstream file(dir / "cut_text.txt");
         std::string all((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        BRLS_CHECK(all.find("A sentence far too long for the narrow box it is given") != std::string::npos);
+        AURORE_CHECK(all.find("A sentence far too long for the narrow box it is given") != std::string::npos);
     }
     ui::hooks::get().env_flag = nullptr;
     std::filesystem::current_path(previous);
     std::filesystem::remove_all(dir);
 }
 
-BRLS_TEST(settings_tab_keeps_the_cards_margins)
+AURORE_TEST(settings_tab_keeps_the_cards_margins)
 {
     DemoHarness h;
-    BRLS_CHECK(h.focusByText("Settings"));
+    AURORE_CHECK(h.focusByText("Settings"));
     h.tap(aurore::BUTTON_RIGHT);
     h.settle();
     aurore::View* line = h.focus();
-    BRLS_CHECK(line != nullptr);
+    AURORE_CHECK(line != nullptr);
     if (line)
     {
         aurore::Rect frame = line->getFrame();
         // Within the margins of Cadran's pages, the focus ring off the window's edge
-        BRLS_CHECK(frame.getMaxX() <= 1280 - 40 + 1);
-        BRLS_CHECK(frame.getMinY() >= 84 + 28 - 1);
+        AURORE_CHECK(frame.getMaxX() <= 1280 - 40 + 1);
+        AURORE_CHECK(frame.getMinY() >= 84 + 28 - 1);
     }
-    BRLS_CHECK(h.matchesReference("settings_tab"));
+    AURORE_CHECK(h.matchesReference("settings_tab"));
 }
 
-BRLS_TEST(mouse_quick_click_is_not_lost)
+AURORE_TEST(mouse_quick_click_is_not_lost)
 {
     // Pressed and let go between two frames: a touchpad tap, a quick click
     DemoHarness h;
     aurore::View* tab = h.findText("Layout and alignment");
-    BRLS_CHECK(tab != nullptr);
+    AURORE_CHECK(tab != nullptr);
     aurore::Rect frame = tab->getFrame();
     h.mouseQuickClick(frame.getMidX(), frame.getMidY());
-    BRLS_CHECK(h.hasText("alignItems: center"));
+    AURORE_CHECK(h.hasText("alignItems: center"));
 }
 
 namespace
@@ -2374,100 +2374,100 @@ struct ButtonCounter
 
 } // namespace
 
-BRLS_TEST(keyboard_keys_press_controller_buttons)
+AURORE_TEST(keyboard_keys_press_controller_buttons)
 {
     Harness h;
     ButtonCounter c(h);
-    h.tapKey(aurore::BRLS_KBD_KEY_X);
-    h.tapKey(aurore::BRLS_KBD_KEY_Y);
-    h.tapKey(aurore::BRLS_KBD_KEY_L);
-    h.tapKey(aurore::BRLS_KBD_KEY_R);
-    h.tapKey(aurore::BRLS_KBD_KEY_P);
-    h.tapKey(aurore::BRLS_KBD_KEY_KP_ADD);
-    h.tapKey(aurore::BRLS_KBD_KEY_M);
-    h.tapKey(aurore::BRLS_KBD_KEY_MINUS);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_X], 1);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_Y], 1);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_LB], 1);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_RB], 1);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_START], 2);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_BACK], 2);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_LT], 0);
+    h.tapKey(aurore::AURORE_KBD_KEY_X);
+    h.tapKey(aurore::AURORE_KBD_KEY_Y);
+    h.tapKey(aurore::AURORE_KBD_KEY_L);
+    h.tapKey(aurore::AURORE_KBD_KEY_R);
+    h.tapKey(aurore::AURORE_KBD_KEY_P);
+    h.tapKey(aurore::AURORE_KBD_KEY_KP_ADD);
+    h.tapKey(aurore::AURORE_KBD_KEY_M);
+    h.tapKey(aurore::AURORE_KBD_KEY_MINUS);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_X], 1);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_Y], 1);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_LB], 1);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_RB], 1);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_START], 2);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_BACK], 2);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_LT], 0);
 
     // Shift for the triggers, and not the shoulder buttons then
-    h.pressKey(aurore::BRLS_KBD_KEY_LEFT_SHIFT);
-    h.tapKey(aurore::BRLS_KBD_KEY_L);
-    h.tapKey(aurore::BRLS_KBD_KEY_R);
-    h.releaseKey(aurore::BRLS_KBD_KEY_LEFT_SHIFT);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_LT], 1);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_RT], 1);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_LB], 1);
+    h.pressKey(aurore::AURORE_KBD_KEY_LEFT_SHIFT);
+    h.tapKey(aurore::AURORE_KBD_KEY_L);
+    h.tapKey(aurore::AURORE_KBD_KEY_R);
+    h.releaseKey(aurore::AURORE_KBD_KEY_LEFT_SHIFT);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_LT], 1);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_RT], 1);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_LB], 1);
 
     // Ctrl+X is a shortcut, not X
-    h.pressKey(aurore::BRLS_KBD_KEY_LEFT_CONTROL);
-    h.tapKey(aurore::BRLS_KBD_KEY_X);
-    h.releaseKey(aurore::BRLS_KBD_KEY_LEFT_CONTROL);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_X], 1);
+    h.pressKey(aurore::AURORE_KBD_KEY_LEFT_CONTROL);
+    h.tapKey(aurore::AURORE_KBD_KEY_X);
+    h.releaseKey(aurore::AURORE_KBD_KEY_LEFT_CONTROL);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_X], 1);
 }
 
-BRLS_TEST(keyboard_keys_can_be_mapped_again)
+AURORE_TEST(keyboard_keys_can_be_mapped_again)
 {
     Harness h;
     ButtonCounter c(h);
-    aurore::Application::mapKey(aurore::BRLS_KBD_KEY_Q, aurore::BUTTON_LB);
-    aurore::Application::unmapKey(aurore::BRLS_KBD_KEY_L);
-    h.tapKey(aurore::BRLS_KBD_KEY_Q);
-    h.tapKey(aurore::BRLS_KBD_KEY_L);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_LB], 1);
+    aurore::Application::mapKey(aurore::AURORE_KBD_KEY_Q, aurore::BUTTON_LB);
+    aurore::Application::unmapKey(aurore::AURORE_KBD_KEY_L);
+    h.tapKey(aurore::AURORE_KBD_KEY_Q);
+    h.tapKey(aurore::AURORE_KBD_KEY_L);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_LB], 1);
 
     // A key the app handles itself is its own
     int own = 0;
-    c.button->registerAction(aurore::AuroreKeyCombination(aurore::BRLS_KBD_KEY_X), [&own](aurore::View*)
+    c.button->registerAction(aurore::AuroreKeyCombination(aurore::AURORE_KBD_KEY_X), [&own](aurore::View*)
         {
             own++;
             return true; });
-    h.tapKey(aurore::BRLS_KBD_KEY_X);
-    BRLS_CHECK_EQ(own, 1);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_X], 0);
+    h.tapKey(aurore::AURORE_KBD_KEY_X);
+    AURORE_CHECK_EQ(own, 1);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_X], 0);
 
     aurore::Application::clearKeyMap();
-    h.tapKey(aurore::BRLS_KBD_KEY_Y);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_Y], 0);
-    BRLS_CHECK(aurore::Application::getKeyMap().empty());
+    h.tapKey(aurore::AURORE_KBD_KEY_Y);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_Y], 0);
+    AURORE_CHECK(aurore::Application::getKeyMap().empty());
 }
 
-BRLS_TEST(keyboard_keys_type_text_in_a_text_field)
+AURORE_TEST(keyboard_keys_type_text_in_a_text_field)
 {
     Harness h;
     ButtonCounter c(h);
     auto* dialog = new aurore::EditTextDialog();
     dialog->open();
     h.settle();
-    h.tapKey(aurore::BRLS_KBD_KEY_M); // not Minus: the dialog's delete
-    h.tapKey(aurore::BRLS_KBD_KEY_X);
-    BRLS_CHECK_EQ(c.pressed[aurore::BUTTON_X], 0);
-    BRLS_CHECK(dynamic_cast<aurore::EditTextDialog*>(h.top()->getContentView()) != nullptr);
+    h.tapKey(aurore::AURORE_KBD_KEY_M); // not Minus: the dialog's delete
+    h.tapKey(aurore::AURORE_KBD_KEY_X);
+    AURORE_CHECK_EQ(c.pressed[aurore::BUTTON_X], 0);
+    AURORE_CHECK(dynamic_cast<aurore::EditTextDialog*>(h.top()->getContentView()) != nullptr);
 }
 
-BRLS_TEST(horizontal_carousel_lets_left_out)
+AURORE_TEST(horizontal_carousel_lets_left_out)
 {
     DemoHarness h;
-    BRLS_CHECK(h.focusByText("Basic components"));
+    AURORE_CHECK(h.focusByText("Basic components"));
     h.tap(aurore::BUTTON_RIGHT);
     aurore::View* first = h.focus();
-    BRLS_CHECK(first != nullptr);
+    AURORE_CHECK(first != nullptr);
     bool inCarousel = false;
     for (aurore::View* v = first; v; v = v->hasParent() ? v->getParent() : nullptr)
         inCarousel |= dynamic_cast<aurore::HScrollingFrame*>(v) != nullptr;
-    BRLS_CHECK(inCarousel);
-    h.tapKey(aurore::BRLS_KBD_KEY_LEFT);
-    BRLS_CHECK(dynamic_cast<aurore::SidebarItem*>(h.focus()) != nullptr);
+    AURORE_CHECK(inCarousel);
+    h.tapKey(aurore::AURORE_KBD_KEY_LEFT);
+    AURORE_CHECK(dynamic_cast<aurore::SidebarItem*>(h.focus()) != nullptr);
 }
 
-BRLS_TEST(focus_on_a_scrolling_frame_shows_its_place)
+AURORE_TEST(focus_on_a_scrolling_frame_shows_its_place)
 {
     DemoHarness h;
-    BRLS_CHECK(h.focusByText("Layout and alignment"));
+    AURORE_CHECK(h.focusByText("Layout and alignment"));
     h.tap(aurore::BUTTON_RIGHT);
     // Down through the tab until the focus waits on the frame itself
     aurore::ScrollingFrame* frame = nullptr;
@@ -2476,48 +2476,48 @@ BRLS_TEST(focus_on_a_scrolling_frame_shows_its_place)
         h.tap(aurore::BUTTON_DOWN);
         frame = dynamic_cast<aurore::ScrollingFrame*>(h.focus());
     }
-    BRLS_CHECK(frame != nullptr);
+    AURORE_CHECK(frame != nullptr);
     if (!frame)
         return;
     aurore::Rectangle* indicator = nullptr;
     for (aurore::View* child : frame->getChildren())
         if (auto* r = dynamic_cast<aurore::Rectangle*>(child))
             indicator = r;
-    BRLS_CHECK(indicator != nullptr);
+    AURORE_CHECK(indicator != nullptr);
     if (!indicator)
         return;
-    BRLS_CHECK(indicator->getAlpha() > 0.99f);
+    AURORE_CHECK(indicator->getAlpha() > 0.99f);
     NVGcolor want = aurore::Application::getTheme()["brls/highlight/color1"];
     NVGcolor got  = indicator->getColor();
-    BRLS_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
-    BRLS_CHECK(h.matchesReference("scrolling_frame_focus"));
+    AURORE_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
+    AURORE_CHECK(h.matchesReference("scrolling_frame_focus"));
 }
 
 #ifdef __GLFW__
 // A word being composed with an input method: its focused block in [ ], and
 // block sizes that do not add up to the text read no further than blockCount
-BRLS_TEST(ime_preedit_text_stays_in_its_blocks)
+AURORE_TEST(ime_preedit_text_stays_in_its_blocks)
 {
     const unsigned int word[] = { 'a', 'b', 'c', 0x1F600 };
     const int sizes[]         = { 1, 2 };
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(3, word, 2, sizes, 1), std::string("a[bc]"));
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(3, word, 2, sizes, 0), std::string("[a]bc"));
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(4, word, 2, sizes, 5), std::string("abc\xF0\x9F\x98\x80"));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(3, word, 2, sizes, 1), std::string("a[bc]"));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(3, word, 2, sizes, 0), std::string("[a]bc"));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(4, word, 2, sizes, 5), std::string("abc\xF0\x9F\x98\x80"));
     // One block said (sizes[1] is past it): the rest is in none, and block 1
     // is never focused
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(3, word, 1, sizes, 1), std::string("abc"));
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(3, word, 1, sizes, 0), std::string("[a]bc"));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(3, word, 1, sizes, 1), std::string("abc"));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(3, word, 1, sizes, 0), std::string("[a]bc"));
     // An empty block, and nothing at all
     const int empty[] = { 0, 3 };
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(3, word, 2, empty, 1), std::string("[abc]"));
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(0, word, 2, sizes, 0), std::string(""));
-    BRLS_CHECK_EQ(aurore::glfwPreeditText(3, word, 0, sizes, 0), std::string(""));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(3, word, 2, empty, 1), std::string("[abc]"));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(0, word, 2, sizes, 0), std::string(""));
+    AURORE_CHECK_EQ(aurore::glfwPreeditText(3, word, 0, sizes, 0), std::string(""));
 }
 #endif
 
 // A pan recognizer that has seen no touch fires nothing: its last state is
 // set from the start, not whatever its memory held
-BRLS_TEST(pan_recognizer_fires_nothing_before_a_touch)
+AURORE_TEST(pan_recognizer_fires_nothing_before_a_touch)
 {
     Harness h;
     int fired = 0;
@@ -2528,7 +2528,7 @@ BRLS_TEST(pan_recognizer_fires_nothing_before_a_touch)
         aurore::PanAxis::ANY);
     aurore::Sound sound = aurore::SOUND_NONE;
     pan->recognitionLoop(aurore::TouchState(), aurore::MouseState(), nullptr, &sound);
-    BRLS_CHECK_EQ(fired, 0);
+    AURORE_CHECK_EQ(fired, 0);
     pan->~PanGestureRecognizer();
 }
 
@@ -2562,35 +2562,35 @@ class TwoTabs : public aurore::Activity
 };
 } // namespace
 
-BRLS_TEST(hot_reload_keeps_the_screen_when_a_tab_fails)
+AURORE_TEST(hot_reload_keeps_the_screen_when_a_tab_fails)
 {
     Harness h;
     s_second_tab_broken = false;
     h.push(new TwoTabs());
     h.settle();
-    BRLS_CHECK(h.focusByText("Two"));
+    AURORE_CHECK(h.focusByText("Two"));
     h.tap(aurore::BUTTON_RIGHT);
-    BRLS_CHECK_EQ(h.focusText(), std::string("second"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("second"));
     aurore::View* content = h.top()->getContentView();
     aurore::View* focused = h.focus();
 
     s_second_tab_broken = true;
-    BRLS_CHECK(!aurore::Application::rebuildActivity());
+    AURORE_CHECK(!aurore::Application::rebuildActivity());
     h.settle();
-    BRLS_CHECK(h.top()->getContentView() == content);
-    BRLS_CHECK(h.focus() == focused);
-    BRLS_CHECK(h.hasText("second"));
+    AURORE_CHECK(h.top()->getContentView() == content);
+    AURORE_CHECK(h.focus() == focused);
+    AURORE_CHECK(h.hasText("second"));
 
     s_second_tab_broken = false;
-    BRLS_CHECK(aurore::Application::rebuildActivity());
+    AURORE_CHECK(aurore::Application::rebuildActivity());
     h.settle();
-    BRLS_CHECK(h.top()->getContentView() != content);
-    BRLS_CHECK_EQ(h.focusText(), std::string("second"));
+    AURORE_CHECK(h.top()->getContentView() != content);
+    AURORE_CHECK_EQ(h.focusText(), std::string("second"));
 }
 
 // What Windows, macOS and Linux give for the language, each to one of the
 // 15 catalogues
-BRLS_TEST(system_locales_map_to_the_catalogues)
+AURORE_TEST(system_locales_map_to_the_catalogues)
 {
     Harness h;
     const std::pair<const char*, const char*> cases[] = {
@@ -2606,76 +2606,76 @@ BRLS_TEST(system_locales_map_to_the_catalogues)
         std::string got = aurore::localeFromSystem(system);
         if (got != locale)
             std::fprintf(stderr, "%s gave %s, not %s\n", system, got.c_str(), locale);
-        BRLS_CHECK_EQ(got, std::string(locale));
+        AURORE_CHECK_EQ(got, std::string(locale));
     }
 }
 
 // The header's language, theme and text size: a finger a little beside the
 // drawing still finds them
-BRLS_TEST(header_settings_take_a_wider_touch)
+AURORE_TEST(header_settings_take_a_wider_touch)
 {
     DemoHarness h;
     aurore::View* language = h.top()->getContentView()->getView("header_language");
     aurore::View* theme    = h.top()->getContentView()->getView("header_theme");
-    BRLS_CHECK(language != nullptr && theme != nullptr);
+    AURORE_CHECK(language != nullptr && theme != nullptr);
     if (!language || !theme)
         return;
     aurore::Rect frame = language->getFrame();
-    BRLS_CHECK_EQ(frame.size.height, 40.0f);
+    AURORE_CHECK_EQ(frame.size.height, 40.0f);
     size_t screens = aurore::Application::getActivitiesStack().size();
 
     // 7 px above it: the language list
     h.tapAt(frame.getMidX(), frame.getMinY() - 7);
-    BRLS_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens + 1);
+    AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens + 1);
     h.tap(aurore::BUTTON_B);
-    BRLS_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
+    AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
 
     // In the gap, nearer the theme: the theme's list, not the language's
     aurore::Rect next = theme->getFrame();
     h.tapAt(next.getMinX() - 3, next.getMidY());
-    BRLS_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens + 1);
-    BRLS_CHECK(!h.hasText("Français"));
+    AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens + 1);
+    AURORE_CHECK(!h.hasText("Français"));
     h.tap(aurore::BUTTON_B);
 
     // Farther: nothing
     h.tapAt(frame.getMidX(), frame.getMinY() - 12);
-    BRLS_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
+    AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
 }
 
-// BRLS_LANG (or the older BOREALIS_LANG) gives the language over the
+// AURORE_LANG (or the older AURORE_LANG) gives the language over the
 // system's, a locale's name as it is or a system's read
-BRLS_TEST(language_from_the_environment_wins)
+AURORE_TEST(language_from_the_environment_wins)
 {
     Harness h;
-    unsetenv("BRLS_LANG");
-    unsetenv("BOREALIS_LANG");
+    unsetenv("AURORE_LANG");
+    unsetenv("AURORE_LANG");
     std::string locale = "unchanged";
-    BRLS_CHECK(!aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
-    BRLS_CHECK_EQ(locale, std::string("unchanged"));
+    AURORE_CHECK(!aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    AURORE_CHECK_EQ(locale, std::string("unchanged"));
 
-    setenv("BOREALIS_LANG", "de_DE.UTF-8", 1);
-    BRLS_CHECK(aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
-    BRLS_CHECK_EQ(locale, std::string("de"));
+    setenv("AURORE_LANG", "de_DE.UTF-8", 1);
+    AURORE_CHECK(aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    AURORE_CHECK_EQ(locale, std::string("de"));
 
-    setenv("BRLS_LANG", "fr-CA", 1);
-    BRLS_CHECK(aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
-    BRLS_CHECK_EQ(locale, std::string("fr-CA"));
+    setenv("AURORE_LANG", "fr-CA", 1);
+    AURORE_CHECK(aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    AURORE_CHECK_EQ(locale, std::string("fr-CA"));
 
-    setenv("BRLS_LANG", "../../etc", 1);
-    BRLS_CHECK(aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
-    BRLS_CHECK_EQ(locale, std::string("en-US"));
+    setenv("AURORE_LANG", "../../etc", 1);
+    AURORE_CHECK(aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    AURORE_CHECK_EQ(locale, std::string("en-US"));
 
-    setenv("BOREALIS_THEME", "LIGHT", 1);
-    BRLS_CHECK_EQ(std::string(aurore::DesktopPlatform::environment("THEME")), std::string("LIGHT"));
-    setenv("BRLS_THEME", "DARK", 1);
-    BRLS_CHECK_EQ(std::string(aurore::DesktopPlatform::environment("THEME")), std::string("DARK"));
-    for (const char* name : { "BRLS_LANG", "BOREALIS_LANG", "BRLS_THEME", "BOREALIS_THEME" })
+    setenv("AURORE_THEME", "LIGHT", 1);
+    AURORE_CHECK_EQ(std::string(aurore::DesktopPlatform::environment("THEME")), std::string("LIGHT"));
+    setenv("AURORE_THEME", "DARK", 1);
+    AURORE_CHECK_EQ(std::string(aurore::DesktopPlatform::environment("THEME")), std::string("DARK"));
+    for (const char* name : { "AURORE_LANG", "AURORE_LANG", "AURORE_THEME", "AURORE_THEME" })
         unsetenv(name);
 }
 
 // The desktop's text field: Cadran's card with its title in it, the cursor
 // shown at the end of the text, Y to take the text out
-BRLS_TEST(text_field_is_a_card_with_a_cursor)
+AURORE_TEST(text_field_is_a_card_with_a_cursor)
 {
     DemoHarness h;
     aurore::Application::setReduceMotion(true); // the cursor still
@@ -2692,21 +2692,21 @@ BRLS_TEST(text_field_is_a_card_with_a_cursor)
 
     auto* card  = dynamic_cast<aurore::Box*>(dialog->getView("brls/dialog/applet"));
     auto* title = dialog->getView("brls/dialog/header");
-    BRLS_CHECK(card != nullptr && title != nullptr);
+    AURORE_CHECK(card != nullptr && title != nullptr);
     if (!card || !title)
         return;
-    BRLS_CHECK(title->getParent() == card);
-    BRLS_CHECK(card->getView("cadran_dialog") != nullptr);
-    BRLS_CHECK(h.matchesReference("text_field_cadran"));
+    AURORE_CHECK(title->getParent() == card);
+    AURORE_CHECK(card->getView("cadran_dialog") != nullptr);
+    AURORE_CHECK(h.matchesReference("text_field_cadran"));
 
     // The cursor is drawn: without it, the text's end differs
     aurore::test::Image with = h.screenshot();
     dialog->setCursor((int)aurore::CursorPosition::UNSET);
     h.step(2);
-    BRLS_CHECK(aurore::test::compareImages(h.screenshot(), with).differingPixels > 0);
+    AURORE_CHECK(aurore::test::compareImages(h.screenshot(), with).differingPixels > 0);
 
     h.tap(aurore::BUTTON_Y);
-    BRLS_CHECK(cleared);
+    AURORE_CHECK(cleared);
     aurore::Application::setReduceMotion(false);
 }
 
@@ -2744,7 +2744,7 @@ size_t eachDemoTab(H& h, F visit)
         seen.push_back(name);
         h.settle();
         visit(name);
-        h.tapKey(aurore::BRLS_KBD_KEY_DOWN);
+        h.tapKey(aurore::AURORE_KBD_KEY_DOWN);
     }
     return seen.size();
 }
@@ -2756,7 +2756,7 @@ std::vector<std::string> cutAtTheLargestSize(const std::string& locale)
     ui::prefs().text_size = "largest";
     text_size::apply();
     h.settle();
-    BRLS_CHECK_EQ(aurore::Application::getTextScale(), text_size::LARGEST);
+    AURORE_CHECK_EQ(aurore::Application::getTextScale(), text_size::LARGEST);
     std::vector<std::string> cut;
     for (const char* tab : { "demo/tabs/cadran", "demo/tabs/settings" })
     {
@@ -2783,7 +2783,7 @@ std::vector<std::string> cutAtTheLargestSize(const std::string& locale)
 
 // From the rail, the keyboard's arrows reach into every tab that has
 // something to focus, and Escape comes back
-BRLS_TEST(every_demo_screen_reachable_by_keyboard)
+AURORE_TEST(every_demo_screen_reachable_by_keyboard)
 {
     DemoHarness h;
     // A page to read, nothing on it to act on or to scroll
@@ -2792,43 +2792,43 @@ BRLS_TEST(every_demo_screen_reachable_by_keyboard)
     size_t tabs = eachDemoTab(h, [&](const std::string& name)
         {
         aurore::View* item = h.focus();
-        h.tapKey(aurore::BRLS_KBD_KEY_RIGHT);
+        h.tapKey(aurore::AURORE_KBD_KEY_RIGHT);
         if (h.focus() == item || dynamic_cast<aurore::SidebarItem*>(h.focus()))
         {
             if (name != still)
                 unreached.push_back(name);
             return;
         }
-        h.tapKey(aurore::BRLS_KBD_KEY_ESCAPE);
-        BRLS_CHECK(h.focus() == item); });
-    BRLS_CHECK(tabs > 5);
+        h.tapKey(aurore::AURORE_KBD_KEY_ESCAPE);
+        AURORE_CHECK(h.focus() == item); });
+    AURORE_CHECK(tabs > 5);
     for (const std::string& name : unreached)
         std::fprintf(stderr, "not reached: %s\n", name.c_str());
-    BRLS_CHECK(unreached.empty());
+    AURORE_CHECK(unreached.empty());
 }
 
-BRLS_TEST(no_cut_text_in_de_largest)
+AURORE_TEST(no_cut_text_in_de_largest)
 {
-    BRLS_CHECK(cutAtTheLargestSize("de").empty());
+    AURORE_CHECK(cutAtTheLargestSize("de").empty());
 }
 
-BRLS_TEST(no_cut_text_in_ru_largest)
+AURORE_TEST(no_cut_text_in_ru_largest)
 {
-    BRLS_CHECK(cutAtTheLargestSize("ru").empty());
+    AURORE_CHECK(cutAtTheLargestSize("ru").empty());
 }
 
-BRLS_TEST(no_cut_text_in_fr_largest)
+AURORE_TEST(no_cut_text_in_fr_largest)
 {
-    BRLS_CHECK(cutAtTheLargestSize("fr").empty());
+    AURORE_CHECK(cutAtTheLargestSize("fr").empty());
 }
 
-BRLS_TEST(no_cut_text_in_ja_largest)
+AURORE_TEST(no_cut_text_in_ja_largest)
 {
-    BRLS_CHECK(cutAtTheLargestSize("ja").empty());
+    AURORE_CHECK(cutAtTheLargestSize("ja").empty());
 }
 
 // The rows of cells grow with the text: none cut at the very large size
-BRLS_TEST(cells_grow_with_the_text)
+AURORE_TEST(cells_grow_with_the_text)
 {
     Harness h;
     auto* cell = new aurore::DetailCell();
@@ -2838,8 +2838,8 @@ BRLS_TEST(cells_grow_with_the_text)
     float normal = cell->getHeight();
     aurore::Application::setTextScale(1.5f);
     h.settle();
-    BRLS_CHECK(cell->getHeight() >= normal * 1.5f - 0.5f);
+    AURORE_CHECK(cell->getHeight() >= normal * 1.5f - 0.5f);
     aurore::Application::setTextScale(1.0f);
     h.settle();
-    BRLS_CHECK_EQ(cell->getHeight(), normal);
+    AURORE_CHECK_EQ(cell->getHeight(), normal);
 }

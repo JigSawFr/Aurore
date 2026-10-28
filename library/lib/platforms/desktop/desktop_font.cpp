@@ -36,10 +36,10 @@
 #endif
 
 // Inter and PromptFont's buttons, made by tools/make_fonts.py
-#define INTER_FONT_PATH BRLS_ASSET("font/aurore_text.ttf")
-#define INTER_ICON_PATH BRLS_ASSET("font/aurore_buttons.ttf")
+#define INTER_FONT_PATH AURORE_ASSET("font/aurore_text.ttf")
+#define INTER_ICON_PATH AURORE_ASSET("font/aurore_buttons.ttf")
 // An app's own font for Chinese, Japanese and Korean (.ttc, .ttf or .otf)
-#define APP_CJK_FONT_PATH BRLS_ASSET("font/cjk")
+#define APP_CJK_FONT_PATH AURORE_ASSET("font/cjk")
 
 namespace aurore
 {
@@ -569,7 +569,7 @@ void DesktopFontLoader::loadFonts()
     {
         nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont(FONT_EMOJI));
     }
-#ifdef BRLS_USE_FREETYPE
+#ifdef AURORE_USE_FREETYPE
     // FreeType draws colour emoji: the system's font, when the app gives none
     else if (USER_EMOJI_PATH.empty() && useSystemFonts)
     {

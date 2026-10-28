@@ -233,7 +233,7 @@ class Application
      * Off by default. getReduceMotion(), which
      * transitions read, is also true while Cadran's effects leave movement
      * out (Preferences › Visual effects "reduced", the lighter effects in
-     * hand, BRLS_STILL_FOCUS); the highlight's glide follows the app's
+     * hand, AURORE_STILL_FOCUS); the highlight's glide follows the app's
      * setting only.
      */
     static void setReduceMotion(bool reduce);
@@ -318,7 +318,7 @@ class Application
 
     /**
      * Loads a font from a given file and stores it in the font stash.
-     * A BRLS_ASSET() path ("@res/...") is read from the resources built
+     * A AURORE_ASSET() path ("@res/...") is read from the resources built
      * into the program when they are (USE_LIBROMFS).
      * Returns true if the operation succeeded.
      */
@@ -518,7 +518,7 @@ class Application
      * redraw (a missing invalidate() or requestRedraw()): it is logged as a
      * warning, with the area and the views drawn there (once per area).
      * Reads every frame back: slow, and OpenGL drivers only. Off by default;
-     * BRLS_REDRAW_DEBUG=1 in the environment turns it on (desktop).
+     * AURORE_REDRAW_DEBUG=1 in the environment turns it on (desktop).
      */
     static void setRedrawDebug(bool enabled);
     /// See setRedrawDebug().
@@ -602,7 +602,7 @@ class Application
      * both sticks pressed in together (L3 + R3) on a controller, opens it
      * over the screen with the view tree, the focus chain, the yoga box and
      * the theme values of a view, and the frame's timings. Off by default;
-     * the BRLS_INSPECTOR CMake option, or BRLS_INSPECTOR=1 in the
+     * the AURORE_INSPECTOR CMake option, or AURORE_INSPECTOR=1 in the
      * environment on a desktop, turns it on at init(). Closed, it only
      * watches for its toggle.
      */
@@ -618,7 +618,7 @@ class Application
      * be). `resourcesDir`, when given, is a resources folder (the app's
      * sources' `resources/`) the XML files are read from in place of the
      * ones built in (libromfs) or copied next to the app. Off by default;
-     * `BRLS_HOT_RELOAD=1`, or `BRLS_HOT_RELOAD=<resources folder>`, in the
+     * `AURORE_HOT_RELOAD=1`, or `AURORE_HOT_RELOAD=<resources folder>`, in the
      * environment turns it on at init(). Does nothing on the consoles.
      */
     static void setHotReload(bool enabled, const std::string& resourcesDir = "");

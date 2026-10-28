@@ -100,7 +100,7 @@ AppletFrame::AppletFrame()
 
     this->forwardXMLAttribute("iconInterpolation", this->icon, "interpolation");
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "style", HeaderStyle, this->setHeaderStyle,
         {
             { "regular", HeaderStyle::REGULAR },

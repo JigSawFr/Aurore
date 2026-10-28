@@ -642,7 +642,7 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
             return true; });
 #if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
         // The desktop build: the keyboard has no Ⓨ, so the Y key (as the main screen).
-        frame->registerAction(aurore::AuroreKeyCombination(aurore::BRLS_KBD_KEY_Y), [open_other](aurore::View*)
+        frame->registerAction(aurore::AuroreKeyCombination(aurore::AURORE_KBD_KEY_Y), [open_other](aurore::View*)
             {
             open_other();
             return true; });

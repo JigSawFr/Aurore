@@ -275,7 +275,7 @@ Label::Label()
     this->registerFloatXMLAttribute("cursor", [this](float value)
         { this->setCursor(value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "horizontalAlign", HorizontalAlign, this->setHorizontalAlign,
         {
             { "left", HorizontalAlign::LEFT },
@@ -283,7 +283,7 @@ Label::Label()
             { "right", HorizontalAlign::RIGHT },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "verticalAlign", VerticalAlign, this->setVerticalAlign,
         {
             { "baseline", VerticalAlign::BASELINE },
@@ -402,7 +402,7 @@ std::string Label::STConverter(const std::string& text)
     static bool skip = Application::getLocale() != LOCALE_ZH_HANT && Application::getLocale() != LOCALE_ZH_TW;
     if (skip || !OPENCC_ON)
         return text;
-    static opencc::SimpleConverter converter = opencc::SimpleConverter(std::string(BRLS_RESOURCES) + "opencc/s2t.json");
+    static opencc::SimpleConverter converter = opencc::SimpleConverter(std::string(AURORE_RESOURCES) + "opencc/s2t.json");
     return converter.Convert(text);
 #endif
     return text;
@@ -410,7 +410,7 @@ std::string Label::STConverter(const std::string& text)
 
 void Label::setText(const std::string& logicalText)
 {
-#ifdef BRLS_USE_FRIBIDI
+#ifdef AURORE_USE_FRIBIDI
     // Measured and drawn in display order
     const std::string text = bidiVisual(logicalText);
 #else

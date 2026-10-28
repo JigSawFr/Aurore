@@ -11,7 +11,7 @@ find_package(Aurore 0.1 REQUIRED)
 add_executable(aurore_consumer main.cpp)
 target_link_libraries(aurore_consumer PRIVATE Aurore::aurore)
 
-# The harness, installed along when the library was built with BRLS_BUILD_TESTS
+# The harness, installed along when the library was built with AURORE_BUILD_TESTS
 if (TARGET Aurore::test)
     enable_testing()
     add_executable(aurore_consumer_tests consumer_tests.cpp)

@@ -16,7 +16,7 @@
 
 #pragma once
 
-#ifdef BOREALIS_USE_DEKO3D
+#ifdef AURORE_USE_DEKO3D
 #include <aurore/platforms/switch/switch_video.hpp>
 #elif defined(__SDL2__)
 #include <aurore/platforms/sdl/sdl_video.hpp>
@@ -81,7 +81,7 @@ class SwitchPlatform : public Platform
     SwitchInputManager* inputManager;
     SwitchImeManager* imeManager;
 
-#ifdef BOREALIS_USE_DEKO3D
+#ifdef AURORE_USE_DEKO3D
     SwitchVideoContext* videoContext;
 #elif defined(__SDL2__)
     SDLVideoContext* videoContext;

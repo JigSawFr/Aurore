@@ -149,7 +149,7 @@ Image::Image()
     // (factor can be 0.0f or a larger value.)
     YGNodeSetNodeType(this->ygNode, YGNodeTypeDefault);
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "scalingType", ImageScalingType, this->setScalingType,
         {
             { "fit", ImageScalingType::FIT },
@@ -158,7 +158,7 @@ Image::Image()
             { "center", ImageScalingType::CENTER },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "imageAlign", ImageAlignment, this->setImageAlign,
         {
             { "top", ImageAlignment::TOP },
@@ -168,7 +168,7 @@ Image::Image()
             { "center", ImageAlignment::CENTER },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "interpolation", ImageInterpolation, this->setInterpolation,
         {
             { "linear", ImageInterpolation::LINEAR },
@@ -346,7 +346,7 @@ void Image::setImageFromRes(const std::string& path)
     this->setFreeTexture(false);
     TextureCache::instance().addCache("@res/" + path, tex);
 #else
-    this->setImageFromFile(std::string(BRLS_RESOURCES) + path);
+    this->setImageFromFile(std::string(AURORE_RESOURCES) + path);
 #endif
 }
 

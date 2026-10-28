@@ -33,7 +33,7 @@ presets)
     ;;
 install)
     build=${out}/install
-    cmake -S . -B "${build}" "${desktop[@]}" -DAURORE_INSTALL=ON -DBRLS_BUILD_TESTS=ON \
+    cmake -S . -B "${build}" "${desktop[@]}" -DAURORE_INSTALL=ON -DAURORE_BUILD_TESTS=ON \
         -DCMAKE_INSTALL_PREFIX="${out}/prefix"
     cmake --build "${build}" -j "${jobs}"
     rm -rf "${out}/prefix" "${out}/moved"
@@ -58,8 +58,8 @@ fonts)
     cmake --build "${out}/fonts" -j "${jobs}"
     ;;
 unity)
-    cmake -S . -B "${out}/unity" "${desktop[@]}" -DAURORE_LIBROMFS=ON -DBRLS_UNITY_BUILD=ON \
-        -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DBRLS_BUILD_TESTS=ON
+    cmake -S . -B "${out}/unity" "${desktop[@]}" -DAURORE_LIBROMFS=ON -DAURORE_UNITY_BUILD=ON \
+        -DCMAKE_UNITY_BUILD_BATCH_SIZE=0 -DAURORE_BUILD_TESTS=ON
     cmake --build "${out}/unity" -j "${jobs}"
     ;;
 template)

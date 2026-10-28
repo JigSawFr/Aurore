@@ -16,7 +16,7 @@ limitations under the License.
 
 #pragma once
 
-#ifdef BOREALIS_USE_GXM
+#ifdef AURORE_USE_GXM
 #include <aurore/platforms/desktop/desktop_platform.hpp>
 #include <aurore/platforms/psv/psv_ime.hpp>
 #include <aurore/platforms/psv/psv_input.hpp>
@@ -28,7 +28,7 @@ limitations under the License.
 namespace aurore
 {
 
-#ifdef BOREALIS_USE_GXM
+#ifdef AURORE_USE_GXM
 class PsvPlatform : public DesktopPlatform
 #else
 class PsvPlatform : public SDLPlatform
@@ -62,7 +62,7 @@ class PsvPlatform : public SDLPlatform
 
   private:
     bool suspendDisabled {};
-#ifdef BOREALIS_USE_GXM
+#ifdef AURORE_USE_GXM
     PsvInputManager* inputManager = nullptr;
     PsvImeManager* imeManager     = nullptr;
     PsvVideoContext* videoContext = nullptr;

@@ -22,7 +22,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #ifdef __PSV__
 #include <GLES2/gl2.h>
 extern "C"
@@ -48,7 +48,7 @@ extern "C"
 #endif
 #include <nanovg_gl.h>
 #include <aurore/platforms/driver/gl_read_pixels.hpp>
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
 #include <nanovg_d3d11.h>
 
 #include <aurore/platforms/driver/d3d11.hpp>
@@ -66,7 +66,7 @@ static void sdlWindowFramebufferSizeCallback(SDL_Window* window, int width, int 
         return;
 
     int fWidth, fHeight;
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     SDL_GL_GetDrawableSize(window, &fWidth, &fHeight);
     scaleFactor = fWidth * 1.0 / width;
 #if defined(ANDROID)
@@ -76,7 +76,7 @@ static void sdlWindowFramebufferSizeCallback(SDL_Window* window, int width, int 
 #else
     glViewport(0, 0, fWidth, fHeight);
 #endif
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     fWidth      = width;
     fHeight     = height;
     scaleFactor = D3D11_CONTEXT->getScaleFactor();
@@ -193,7 +193,7 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 #else
     Uint32 windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
 #endif
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #ifdef __SWITCH__
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -290,13 +290,13 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     {
         fatal("sdl: failed to create window");
     }
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     // Configure window
     SDL_GLContext context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, context);
 #endif
     SDL_AddEventWatch(sdlWindowEventWatcher, window);
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #if !defined(__PSV__) && !defined(PS4)
     // Load OpenGL routines using glad
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
@@ -321,7 +321,7 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 #else
     this->nvgContext = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_ANTIALIAS);
 #endif
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     Logger::info("sdl: USE_D3D11");
     D3D11_CONTEXT    = std::make_unique<D3D11Context>(this->window, windowWidth, windowHeight);
     this->nvgContext = nvgCreateD3D11(D3D11_CONTEXT->getDevice(), NVG_ANTIALIAS | NVG_STENCIL_STROKES);
@@ -338,12 +338,12 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     SDL_GetWindowSize(window, &width, &height);
 
     int fWidth, fHeight;
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     SDL_GL_GetDrawableSize(window, &fWidth, &fHeight);
     scaleFactor = fWidth * 1.0 / width;
     Application::setWindowSize(fWidth, fHeight);
     glViewport(0, 0, fWidth, fHeight);
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     scaleFactor = D3D11_CONTEXT->getScaleFactor();
     fWidth      = width;
     fHeight     = height;
@@ -366,16 +366,16 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 
 void SDLVideoContext::beginFrame()
 {
-#if defined(BOREALIS_USE_D3D11)
+#if defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->beginFrame();
 #endif
 }
 
 void SDLVideoContext::endFrame()
 {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     SDL_GL_SwapWindow(this->window);
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->endFrame();
 #endif
 }
@@ -383,16 +383,16 @@ void SDLVideoContext::endFrame()
 void SDLVideoContext::setSwapInterval(int interval)
 {
     VideoContext::swapInterval = interval;
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     SDL_GL_SetSwapInterval(interval);
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->setSwapInterval(interval);
 #endif
 }
 
 void SDLVideoContext::clear(NVGcolor color)
 {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glClearColor(
         color.r,
         color.g,
@@ -400,7 +400,7 @@ void SDLVideoContext::clear(NVGcolor color)
         color.a);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->clear(nvgRGBAf(
         color.r,
         color.g,
@@ -411,7 +411,7 @@ void SDLVideoContext::clear(NVGcolor color)
 
 void SDLVideoContext::resetState()
 {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glDisable(GL_CULL_FACE);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -427,7 +427,7 @@ double SDLVideoContext::getScaleFactor()
 
 bool SDLVideoContext::readPixels(std::vector<unsigned char>* rgba, int* width, int* height)
 {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     *width  = (int)Application::windowWidth;
     *height = (int)Application::windowHeight;
     return glReadPixelsTopDown(*width, *height, rgba);
@@ -442,7 +442,7 @@ SDLVideoContext::~SDLVideoContext()
     {
         if (this->nvgContext)
         {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #ifdef USE_GLES2
             nvgDeleteGLES2(this->nvgContext);
 #elif USE_GLES3
@@ -452,7 +452,7 @@ SDLVideoContext::~SDLVideoContext()
 #else
             nvgDeleteGL3(this->nvgContext);
 #endif
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
             nvgDeleteD3D11(this->nvgContext);
             D3D11_CONTEXT = nullptr;
 #endif

@@ -23,7 +23,7 @@ void start_window()
     HeaderSetting::install();
     focus_log::install();
     install_screens();
-    // BRLS_CUT_TEXT=1: the labels cut short, written once a second (an app
+    // AURORE_CUT_TEXT=1: the labels cut short, written once a second (an app
     // calling cut_text::sample() itself changes nothing)
     static bool sampling = false;
     if (!sampling)

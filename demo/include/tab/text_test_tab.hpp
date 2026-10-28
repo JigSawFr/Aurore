@@ -26,10 +26,10 @@ class TextTestTab : public aurore::Box
     static aurore::View* create();
 
   private:
-    BRLS_BIND(aurore::SliderCell, width, "width");
-    BRLS_BIND(aurore::SliderCell, height, "height");
-    BRLS_BIND(aurore::BooleanCell, singleLine, "singleLine");
-    BRLS_BIND(aurore::SelectorCell, horizontal, "horizontal");
-    BRLS_BIND(aurore::SelectorCell, vertical, "vertical");
-    BRLS_BIND(aurore::Label, label, "label");
+    AURORE_BIND(aurore::SliderCell, width, "width");
+    AURORE_BIND(aurore::SliderCell, height, "height");
+    AURORE_BIND(aurore::BooleanCell, singleLine, "singleLine");
+    AURORE_BIND(aurore::SelectorCell, horizontal, "horizontal");
+    AURORE_BIND(aurore::SelectorCell, vertical, "vertical");
+    AURORE_BIND(aurore::Label, label, "label");
 };

@@ -1,5 +1,5 @@
 // The stand-in for borealis' i18n that ui/tr.hpp asks of a host suite
-// (BRLS_CADRAN_HOST_I18N): aurore::internal::getRawStr and "…"_i18n over
+// (AURORE_CADRAN_HOST_I18N): aurore::internal::getRawStr and "…"_i18n over
 // Cadran's real catalog, resources/i18n/<lang>/cadran.json. A key the
 // catalog lacks reads as itself, as in borealis, and is noted in
 // catalog::missing. Included once, by the suite's only source file.

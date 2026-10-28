@@ -99,41 +99,41 @@ struct TaskThreadGate
 
 } // namespace
 
-BRLS_TEST(alive_token_expires_with_the_view)
+AURORE_TEST(alive_token_expires_with_the_view)
 {
     Harness harness;
     aurore::View* view        = new aurore::Box();
     std::weak_ptr<void> token = view->aliveToken();
-    BRLS_CHECK(!token.expired());
-    BRLS_CHECK(!view->aliveToken().owner_before(token) && !token.owner_before(view->aliveToken()));
+    AURORE_CHECK(!token.expired());
+    AURORE_CHECK(!view->aliveToken().owner_before(token) && !token.owner_before(view->aliveToken()));
     delete view;
-    BRLS_CHECK(token.expired());
+    AURORE_CHECK(token.expired());
 }
 
-BRLS_TEST(async_image_callback_twice_or_after_the_image_is_gone)
+AURORE_TEST(async_image_callback_twice_or_after_the_image_is_gone)
 {
     Harness harness;
     std::string png = readFile(std::string(AURORE_SOURCE_RESOURCES) + "img/sys/battery_back_dark.png");
-    BRLS_CHECK(png.size() > 100);
+    AURORE_CHECK(png.size() > 100);
 
     aurore::Image* image = new aurore::Image();
     std::function<void(const std::string&, size_t)> done;
     image->setImageAsync([&done](std::function<void(const std::string&, size_t)> cb)
         { done = cb; });
-    BRLS_CHECK(done != nullptr);
+    AURORE_CHECK(done != nullptr);
 
     // Called twice: the second sets the picture again
     done(png, png.size());
     harness.settle();
-    BRLS_CHECK(image->getTexture() != 0);
+    AURORE_CHECK(image->getTexture() != 0);
     done(png, png.size());
     harness.settle();
-    BRLS_CHECK(image->getTexture() != 0);
+    AURORE_CHECK(image->getTexture() != 0);
 
     // A length past the data is cut to it
     done(png, png.size() + 4096);
     harness.settle();
-    BRLS_CHECK(image->getTexture() != 0);
+    AURORE_CHECK(image->getTexture() != 0);
 
     // After the image is deleted: nothing (the old counter was freed by the
     // first call, and read again by the next ones)
@@ -143,7 +143,7 @@ BRLS_TEST(async_image_callback_twice_or_after_the_image_is_gone)
     harness.settle();
 }
 
-BRLS_TEST(legacy_async_macros_skip_a_deleted_view)
+AURORE_TEST(legacy_async_macros_skip_a_deleted_view)
 {
     Harness harness;
     bool keptRan = false, deletedRan = false;
@@ -154,12 +154,12 @@ BRLS_TEST(legacy_async_macros_skip_a_deleted_view)
     deleted->queue();
     delete deleted;
     harness.settle();
-    BRLS_CHECK(keptRan);
-    BRLS_CHECK(!deletedRan);
+    AURORE_CHECK(keptRan);
+    AURORE_CHECK(!deletedRan);
     delete kept;
 }
 
-BRLS_TEST(cancel_delay_ignores_an_index_not_given_yet)
+AURORE_TEST(cancel_delay_ignores_an_index_not_given_yet)
 {
     Harness harness;
     size_t first = aurore::delay(0, [] {});
@@ -170,9 +170,9 @@ BRLS_TEST(cancel_delay_ignores_an_index_not_given_yet)
     bool ran      = false;
     size_t second = aurore::delay(0, [&ran]
         { ran = true; });
-    BRLS_CHECK_EQ(second, first + 1);
+    AURORE_CHECK_EQ(second, first + 1);
     harness.step(2);
-    BRLS_CHECK(ran);
+    AURORE_CHECK(ran);
 
     // A pending one is cancelled; cancelling it again, or one run, is harmless
     bool cancelledRan = false;
@@ -182,10 +182,10 @@ BRLS_TEST(cancel_delay_ignores_an_index_not_given_yet)
     aurore::cancelDelay(third);
     aurore::cancelDelay(second);
     harness.advance(300);
-    BRLS_CHECK(!cancelledRan);
+    AURORE_CHECK(!cancelledRan);
 }
 
-BRLS_TEST(threading_stop_twice_then_start)
+AURORE_TEST(threading_stop_twice_then_start)
 {
     Harness harness;
     aurore::Threading::stop();
@@ -197,11 +197,11 @@ BRLS_TEST(threading_stop_twice_then_start)
     aurore::async([&ran]
         { ran = true; });
     harness.settle();
-    BRLS_CHECK(ran.load());
+    AURORE_CHECK(ran.load());
 }
 
 // A picture being decoded does not hold back the other tasks
-BRLS_TEST(async_tasks_run_while_a_picture_decodes)
+AURORE_TEST(async_tasks_run_while_a_picture_decodes)
 {
     Harness harness;
     std::promise<void> release;
@@ -214,19 +214,19 @@ BRLS_TEST(async_tasks_run_while_a_picture_decodes)
             decoded = true; });
     while (!decoding)
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    BRLS_CHECK(!aurore::Threading::isIdle());
+    AURORE_CHECK(!aurore::Threading::isIdle());
 
     aurore::async([&ran]
         { ran = true; });
     for (int i = 0; i < 2000 && !ran; i++)
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    BRLS_CHECK(ran.load());
-    BRLS_CHECK(!decoded.load());
+    AURORE_CHECK(ran.load());
+    AURORE_CHECK(!decoded.load());
 
     release.set_value();
     harness.settle();
-    BRLS_CHECK(decoded.load());
-    BRLS_CHECK(aurore::Threading::isIdle());
+    AURORE_CHECK(decoded.load());
+    AURORE_CHECK(aurore::Threading::isIdle());
 
     // Stopped and started again, as async()'s
     aurore::Threading::stop();
@@ -235,10 +235,10 @@ BRLS_TEST(async_tasks_run_while_a_picture_decodes)
     aurore::Threading::asyncDecode([&again]
         { again = true; });
     harness.settle();
-    BRLS_CHECK(again.load());
+    AURORE_CHECK(again.load());
 }
 
-BRLS_TEST(event_subscribed_while_another_thread_fires)
+AURORE_TEST(event_subscribed_while_another_thread_fires)
 {
     Harness harness;
     aurore::Event<int> event;
@@ -258,16 +258,16 @@ BRLS_TEST(event_subscribed_while_another_thread_fires)
     }
     stop = true;
     firing.join();
-    BRLS_CHECK(received.load() > 0);
+    AURORE_CHECK(received.load() > 0);
 
     // Copied: the subscribers, not the lock
     aurore::Event<int> copy = event;
     received                = 0;
-    BRLS_CHECK(copy.fire(2));
-    BRLS_CHECK_EQ(received.load(), 2);
+    AURORE_CHECK(copy.fire(2));
+    AURORE_CHECK_EQ(received.load(), 2);
 }
 
-BRLS_TEST(logging_from_the_task_thread)
+AURORE_TEST(logging_from_the_task_thread)
 {
     Harness harness;
     aurore::Logger::setLogLevel(aurore::LogLevel::LOG_VERBOSE);
@@ -281,10 +281,10 @@ BRLS_TEST(logging_from_the_task_thread)
         aurore::Logger::verbose("ui {}", i);
     harness.settle();
     aurore::Logger::getLogEvent()->unsubscribe(subscription);
-    BRLS_CHECK_EQ(lines.load(), 100);
+    AURORE_CHECK_EQ(lines.load(), 100);
 }
 
-BRLS_TEST(status_widgets_read_on_the_task_thread)
+AURORE_TEST(status_widgets_read_on_the_task_thread)
 {
     Harness harness;
     harness.platform()->showStatus = true;
@@ -312,15 +312,15 @@ BRLS_TEST(status_widgets_read_on_the_task_thread)
 
     // The level drawn follows the platform's, read on the task thread
     aurore::View* level = batteryBar(battery);
-    BRLS_CHECK(level != nullptr);
+    AURORE_CHECK(level != nullptr);
     if (!level)
         return;
     float full = styleWidth(level);
-    BRLS_CHECK(full > 0);
+    AURORE_CHECK(full > 0);
     harness.platform()->batteryLevel = 50;
     later();
     drawn();
-    BRLS_CHECK(std::fabs(styleWidth(level) - full / 2) < 0.5f);
+    AURORE_CHECK(std::fabs(styleWidth(level) - full / 2) < 0.5f);
 
     // Deleted while a read is under way: it lands after, harmlessly
     {
@@ -337,7 +337,7 @@ BRLS_TEST(status_widgets_read_on_the_task_thread)
     aurore::BatteryWidget* next = new aurore::BatteryWidget();
     harness.push(new aurore::Activity(next));
     drawn();
-    BRLS_CHECK(std::fabs(styleWidth(batteryBar(next)) - full / 5) < 0.5f);
+    AURORE_CHECK(std::fabs(styleWidth(batteryBar(next)) - full / 5) < 0.5f);
 }
 
 int main(int argc, char** argv)

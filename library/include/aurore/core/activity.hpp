@@ -95,7 +95,7 @@ class Activity
 
     /**
      * Counts the content views set (setContentView): what views were bound
-     * to (BRLS_BIND) is looked up again in a content made anew.
+     * to (AURORE_BIND) is looked up again in a content made anew.
      */
     unsigned getContentGeneration() const { return this->contentGeneration; }
 

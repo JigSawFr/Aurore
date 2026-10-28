@@ -23,7 +23,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 
 ## Resources
 
-- Name every resource as `@res/…` in XML and `BRLS_ASSET("…")` in code: Aurore turns it into the right place on each platform (a file next to the program, the romfs, the package, the program itself with libromfs). A path relative to the working directory works on the desktop only.
+- Name every resource as `@res/…` in XML and `AURORE_ASSET("…")` in code: Aurore turns it into the right place on each platform (a file next to the program, the romfs, the package, the program itself with libromfs). A path relative to the working directory works on the desktop only.
 - Android and iOS always build the resources in (libromfs): run `./build_libromfs_generator.sh` before the first build, and remember that a deleted file may need CMake to run again.
 - Files the app writes (its settings, a cache) are not resources: each platform has its own place for them (the SD card on the Switch, the user's folders on a desktop, the app's sandbox on a phone), and Aurore does not pick one.
 - On the Switch, the system's shared fonts replace the text and button fonts, which the demo leaves out of its romfs; elsewhere the free fonts in `resources/font/` are used, and Chinese, Japanese and Korean come from the system ([fonts.md](fonts.md)). A browser has no system font at all.

@@ -1,36 +1,36 @@
 cmake_minimum_required(VERSION 3.16...3.31)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 include(GNUInstallDirs)
-set(BOREALIS_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(BOREALIS_SOURCE)
-set(BOREALIS_SRC)
+set(AURORE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+set(AURORE_SOURCE)
+set(AURORE_SRC)
 # The usage requirements of the aurore target, filled in below. Headers of
 # other projects are system headers: their warnings are not the library's.
-set(BOREALIS_INCLUDE)
-set(BRLS_PLATFORM_LIBS)
-set(BRLS_PRIVATE_LIBS)
-set(BRLS_PUBLIC_DEFINITIONS ${BRLS_TOOLCHAIN_DEFINITIONS})
-set(BRLS_PRIVATE_DEFINITIONS)
-set(BRLS_PUBLIC_OPTIONS)
+set(AURORE_INCLUDE)
+set(AURORE_PLATFORM_LIBS)
+set(AURORE_PRIVATE_LIBS)
+set(AURORE_PUBLIC_DEFINITIONS ${AURORE_TOOLCHAIN_DEFINITIONS})
+set(AURORE_PRIVATE_DEFINITIONS)
+set(AURORE_PUBLIC_OPTIONS)
 # The vendored projects install their packages along with the library
-set(BRLS_EXTERN_EXCLUDE EXCLUDE_FROM_ALL)
+set(AURORE_EXTERN_EXCLUDE EXCLUDE_FROM_ALL)
 if (AURORE_INSTALL)
-    set(BRLS_EXTERN_EXCLUDE)
+    set(AURORE_EXTERN_EXCLUDE)
 endif ()
 # Desktop: the directory that holds "resources/" at run time (default: the
 # working directory). An app sets it before add_subdirectory(); it can be
-# given with -DBRLS_RESOURCES_DIR=... too (for an AppImage, say).
-if (NOT BRLS_RESOURCES_DIR)
+# given with -DAURORE_RESOURCES_ROOT=... too (for an AppImage, say).
+if (NOT AURORE_RESOURCES_ROOT)
     if (CUSTOM_RESOURCES_DIR)
-        message(DEPRECATION "CUSTOM_RESOURCES_DIR is deprecated: use -DBRLS_RESOURCES_DIR=${CUSTOM_RESOURCES_DIR}")
-        set(BRLS_RESOURCES_DIR "${CUSTOM_RESOURCES_DIR}")
+        message(DEPRECATION "CUSTOM_RESOURCES_DIR is deprecated: use -DAURORE_RESOURCES_ROOT=${CUSTOM_RESOURCES_DIR}")
+        set(AURORE_RESOURCES_ROOT "${CUSTOM_RESOURCES_DIR}")
     else ()
-        set(BRLS_RESOURCES_DIR ".")
+        set(AURORE_RESOURCES_ROOT ".")
     endif ()
 endif ()
 
 # The version of library/include/aurore/version.hpp, which release-please updates
-file(STRINGS ${BOREALIS_PATH}/include/aurore/version.hpp AURORE_VERSION REGEX "^#define AURORE_VERSION \"")
+file(STRINGS ${AURORE_PATH}/include/aurore/version.hpp AURORE_VERSION REGEX "^#define AURORE_VERSION \"")
 string(REGEX REPLACE ".*\"([0-9.]+)\".*" "\\1" AURORE_VERSION "${AURORE_VERSION}")
 set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
 
@@ -78,21 +78,21 @@ else()
   if (AURORE_INSTALL)
     set(FMT_INSTALL ON CACHE BOOL "" FORCE)
   endif ()
-  add_subdirectory(${BOREALIS_PATH}/lib/extern/fmt ${BRLS_EXTERN_EXCLUDE})
+  add_subdirectory(${AURORE_PATH}/lib/extern/fmt ${AURORE_EXTERN_EXCLUDE})
 endif()
 
 # tweeny
 if (USE_SYSTEM_TWEENY)
   find_package(Tweeny REQUIRED)
 else()
-  add_subdirectory(${BOREALIS_PATH}/lib/extern/tweeny ${BRLS_EXTERN_EXCLUDE})
+  add_subdirectory(${AURORE_PATH}/lib/extern/tweeny ${AURORE_EXTERN_EXCLUDE})
 endif()
 
 # yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
-add_subdirectory(${BOREALIS_PATH}/lib/extern/yoga/yoga EXCLUDE_FROM_ALL)
+add_subdirectory(${AURORE_PATH}/lib/extern/yoga/yoga EXCLUDE_FROM_ALL)
 # Its headers' installed place, relative to the prefix (yoga's own is absolute)
 set_property(TARGET yogacore PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-        $<BUILD_INTERFACE:${BOREALIS_PATH}/lib/extern/yoga>
+        $<BUILD_INTERFACE:${AURORE_PATH}/lib/extern/yoga>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/yoga>)
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(yogacore PRIVATE -fvisibility=default -Wno-error)
@@ -101,47 +101,47 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif ()
 
 # opencc
-if (BRLS_USE_OPENCC)
-    list(APPEND BRLS_PLATFORM_LIBS libopencc)
-    list(APPEND BOREALIS_INCLUDE ${BRLS_OPENCC_INCLUDE})
-    list(APPEND BRLS_PUBLIC_DEFINITIONS OPENCC)
+if (AURORE_USE_OPENCC)
+    list(APPEND AURORE_PLATFORM_LIBS libopencc)
+    list(APPEND AURORE_INCLUDE ${AURORE_OPENCC_INCLUDE})
+    list(APPEND AURORE_PUBLIC_DEFINITIONS OPENCC)
 endif ()
 
 # boost::filesystem
 if (USE_BOOST_FILESYSTEM)
     find_package(Boost 1.44 REQUIRED COMPONENTS filesystem)
     if(Boost_FOUND)
-        list(APPEND BRLS_PRIVATE_LIBS Boost::filesystem)
-        list(APPEND BRLS_PRIVATE_DEFINITIONS USE_BOOST_FILESYSTEM)
+        list(APPEND AURORE_PRIVATE_LIBS Boost::filesystem)
+        list(APPEND AURORE_PRIVATE_DEFINITIONS USE_BOOST_FILESYSTEM)
     endif()
 elseif ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1) OR
     (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32 AND NOT PLATFORM_ANDROID AND NOT PLATFORM_PS4))
-    list(APPEND BRLS_PLATFORM_LIBS stdc++fs)
+    list(APPEND AURORE_PLATFORM_LIBS stdc++fs)
 endif ()
 
 # libromfs
 if(USE_LIBROMFS)
-    add_subdirectory(${BOREALIS_PATH}/lib/extern/libromfs EXCLUDE_FROM_ALL)
-    list(APPEND BRLS_PLATFORM_LIBS ${LIBROMFS_LIBRARY})
-    list(APPEND BRLS_PUBLIC_DEFINITIONS USE_LIBROMFS)
+    add_subdirectory(${AURORE_PATH}/lib/extern/libromfs EXCLUDE_FROM_ALL)
+    list(APPEND AURORE_PLATFORM_LIBS ${LIBROMFS_LIBRARY})
+    list(APPEND AURORE_PUBLIC_DEFINITIONS USE_LIBROMFS)
 endif()
 
 # tinyxml2
 if (USE_SYSTEM_TINYXML2)
     find_package(tinyxml2 REQUIRED COMPONENTS shared)
 
-    list(APPEND BOREALIS_INCLUDE ${tinyxml2_INCLUDE_DIRS})
-    list(APPEND BRLS_PLATFORM_LIBS tinyxml2::tinyxml2)
+    list(APPEND AURORE_INCLUDE ${tinyxml2_INCLUDE_DIRS})
+    list(APPEND AURORE_PLATFORM_LIBS tinyxml2::tinyxml2)
 elseif (AURORE_FETCH_DEPS)
     set(tinyxml2_BUILD_TESTING OFF)
     FetchContent_MakeAvailable(tinyxml2)
-    list(APPEND BRLS_PLATFORM_LIBS tinyxml2::tinyxml2)
+    list(APPEND AURORE_PLATFORM_LIBS tinyxml2::tinyxml2)
 else()
-    add_library(tinyxml2 STATIC ${BOREALIS_PATH}/lib/extern/tinyxml2/tinyxml2.cpp)
+    add_library(tinyxml2 STATIC ${AURORE_PATH}/lib/extern/tinyxml2/tinyxml2.cpp)
     target_include_directories(tinyxml2 SYSTEM PUBLIC
-            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/aurore/extern/tinyxml2>
+            $<BUILD_INTERFACE:${AURORE_PATH}/include/aurore/extern/tinyxml2>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aurore/extern/tinyxml2>)
-    list(APPEND BRLS_PLATFORM_LIBS tinyxml2)
+    list(APPEND AURORE_PLATFORM_LIBS tinyxml2)
 endif()
 
 # dbus (Linux with GLFW: keeps the screen saver off). An imported target,
@@ -149,27 +149,27 @@ endif()
 if (PLATFORM_DESKTOP AND UNIX AND NOT APPLE AND NOT USE_SDL2)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
-    list(APPEND BRLS_PLATFORM_LIBS PkgConfig::DBUS)
+    list(APPEND AURORE_PLATFORM_LIBS PkgConfig::DBUS)
 endif ()
 
 if (PLATFORM_DESKTOP)
     find_package(Threads REQUIRED)
-    list(APPEND BRLS_PLATFORM_LIBS Threads::Threads)
+    list(APPEND AURORE_PLATFORM_LIBS Threads::Threads)
 
     if (USE_SDL2)
         if (USE_SYSTEM_SDL2)
             find_package(SDL2 REQUIRED)
             message(STATUS "Find SDL2: ${SDL2_INCLUDE_DIR}, ${SDL2_LIBRARIES}")
-            list(APPEND BRLS_PLATFORM_LIBS ${SDL2_LIBRARIES})
-            list(APPEND BOREALIS_INCLUDE ${SDL2_INCLUDE_DIRS})
+            list(APPEND AURORE_PLATFORM_LIBS ${SDL2_LIBRARIES})
+            list(APPEND AURORE_INCLUDE ${SDL2_INCLUDE_DIRS})
         elseif (AURORE_FETCH_DEPS)
             set(BUILD_SHARED_LIBS OFF)
             set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
             FetchContent_MakeAvailable(SDL2)
             if (sdl2_SOURCE_DIR)
-                list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
+                list(APPEND AURORE_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
             else ()
-                list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2 SDL2::SDL2main)
+                list(APPEND AURORE_PLATFORM_LIBS SDL2::SDL2 SDL2::SDL2main)
             endif ()
         else ()
             set(BUILD_SHARED_LIBS OFF)
@@ -177,11 +177,11 @@ if (PLATFORM_DESKTOP)
             if (AURORE_INSTALL)
                 set(SDL2_DISABLE_INSTALL OFF CACHE BOOL "" FORCE)
             endif ()
-            add_subdirectory(${BOREALIS_PATH}/lib/extern/SDL ${BRLS_EXTERN_EXCLUDE})
-            list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
+            add_subdirectory(${AURORE_PATH}/lib/extern/SDL ${AURORE_EXTERN_EXCLUDE})
+            list(APPEND AURORE_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
         endif ()
-        list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__)
-        list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/sdl)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__)
+        list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/sdl)
     else ()
         if (USE_SYSTEM_GLFW)
             find_package(glfw3 REQUIRED)
@@ -192,42 +192,42 @@ if (PLATFORM_DESKTOP)
             FetchContent_MakeAvailable(glfw)
         else ()
             set(GLFW_BUILD_DOCS OFF)
-            add_subdirectory(${BOREALIS_PATH}/lib/extern/glfw ${BRLS_EXTERN_EXCLUDE})
+            add_subdirectory(${AURORE_PATH}/lib/extern/glfw ${AURORE_EXTERN_EXCLUDE})
         endif ()
-        list(APPEND BRLS_PLATFORM_LIBS glfw)
-        list(APPEND BRLS_PUBLIC_DEFINITIONS __GLFW__)
-        list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/glfw)
+        list(APPEND AURORE_PLATFORM_LIBS glfw)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS __GLFW__)
+        list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/glfw)
     endif ()
-    if (BOREALIS_USE_D3D11 AND NOT WIN32)
+    if (AURORE_USE_D3D11 AND NOT WIN32)
         message(FATAL_ERROR "AURORE_GRAPHICS=D3D11 is for Windows")
     endif ()
     if (WIN32)
-        if (BOREALIS_USE_D3D11)
-            list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/driver/d3d11.cpp)
-            list(APPEND BRLS_PLATFORM_LIBS d3d11)
+        if (AURORE_USE_D3D11)
+            list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/driver/d3d11.cpp)
+            list(APPEND AURORE_PLATFORM_LIBS d3d11)
         endif ()
         if (MINGW)
-            list(APPEND BRLS_PUBLIC_DEFINITIONS WINVER=0x0605)
+            list(APPEND AURORE_PUBLIC_DEFINITIONS WINVER=0x0605)
         endif ()
-        list(APPEND BRLS_PLATFORM_LIBS wlanapi iphlpapi ws2_32)
+        list(APPEND AURORE_PLATFORM_LIBS wlanapi iphlpapi ws2_32)
     elseif (APPLE)
         # C++20 needs macOS 10.15, which has them all
-        list(APPEND BRLS_PLATFORM_LIBS "-framework CoreWLAN" "-framework CoreGraphics")
-        list(APPEND BRLS_PLATFORM_LIBS "-framework SystemConfiguration" "-framework Cocoa")
-        list(APPEND BRLS_PLATFORM_LIBS "-framework IOKit" "-framework CoreFoundation")
-        list(APPEND BRLS_PLATFORM_LIBS "-framework AppKit" "-framework Foundation" "-framework CoreServices" "-lobjc")
+        list(APPEND AURORE_PLATFORM_LIBS "-framework CoreWLAN" "-framework CoreGraphics")
+        list(APPEND AURORE_PLATFORM_LIBS "-framework SystemConfiguration" "-framework Cocoa")
+        list(APPEND AURORE_PLATFORM_LIBS "-framework IOKit" "-framework CoreFoundation")
+        list(APPEND AURORE_PLATFORM_LIBS "-framework AppKit" "-framework Foundation" "-framework CoreServices" "-lobjc")
         # The system's fonts for Chinese, Japanese and Korean (desktop_font.cpp)
-        list(APPEND BRLS_PLATFORM_LIBS "-framework CoreText")
-        list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwin.mm)
+        list(APPEND AURORE_PLATFORM_LIBS "-framework CoreText")
+        list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/desktop/desktop_darwin.mm)
     elseif (UNIX)
         # fontconfig, opened at run time when there (desktop_font.cpp)
-        list(APPEND BRLS_PLATFORM_LIBS ${CMAKE_DL_LIBS})
+        list(APPEND AURORE_PLATFORM_LIBS ${CMAKE_DL_LIBS})
     endif ()
-    list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/desktop)
-    set(BRLS_PLATFORM_RESOURCES_PATH "\"${BRLS_RESOURCES_DIR}/resources/\"")
+    list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/desktop)
+    set(AURORE_PLATFORM_RESOURCES_PATH "\"${AURORE_RESOURCES_ROOT}/resources/\"")
 elseif (PLATFORM_PSV)
-    list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/desktop)
-    list(APPEND BRLS_PLATFORM_LIBS
+    list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/desktop)
+    list(APPEND AURORE_PLATFORM_LIBS
             SceGxm_stub
             SceDisplay_stub
             SceCtrl_stub
@@ -239,7 +239,7 @@ elseif (PLATFORM_PSV)
             SceAVConfig_stub
             SceRegistryMgr_stub
             -Wl,--whole-archive -lpthread -Wl,--no-whole-archive)
-    if (BOREALIS_USE_GXM)
+    if (AURORE_USE_GXM)
         if (USE_VITA_SHARK)
                 # libshacccg.suprx, which the app ships in its module folder
                 include(FetchContent)
@@ -253,167 +253,167 @@ elseif (PLATFORM_PSV)
                 )
                 # No CMakeLists.txt in it: downloaded only
                 FetchContent_MakeAvailable(libshacccg)
-                list(APPEND BRLS_PLATFORM_LIBS
+                list(APPEND AURORE_PLATFORM_LIBS
                         vitashark
                         SceShaccCgExt
                         taihen_stub
                         SceShaccCg_stub
                 )
         endif ()
-        file(GLOB_RECURSE PSV_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/psv/*.cpp")
-        list(APPEND BOREALIS_SRC ${PSV_PLATFORM_SRC})
+        file(GLOB_RECURSE PSV_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/psv/*.cpp")
+        list(APPEND AURORE_SRC ${PSV_PLATFORM_SRC})
     else()
         if (USE_SYSTEM_SDL2)
             find_package(SDL2 REQUIRED)
         else ()
             set(BUILD_SHARED_LIBS OFF)
-            set(VIDEO_VITA_PVR ${BOREALIS_USE_GXM} CACHE BOOL "")
-            add_subdirectory(${BOREALIS_PATH}/lib/extern/SDL EXCLUDE_FROM_ALL)
+            set(VIDEO_VITA_PVR ${AURORE_USE_GXM} CACHE BOOL "")
+            add_subdirectory(${AURORE_PATH}/lib/extern/SDL EXCLUDE_FROM_ALL)
         endif ()
-        list(APPEND BRLS_PLATFORM_LIBS
+        list(APPEND AURORE_PLATFORM_LIBS
                 SDL2::SDL2-static
                 libgpu_es4_ext_stub_weak
                 libIMGEGL_stub_weak
                 libGLESv2_stub_weak)
         # Using SDL implementation instead
-        file(GLOB_RECURSE SDL_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/sdl/*.cpp")
-        list(APPEND BOREALIS_SRC ${SDL_PLATFORM_SRC})
-        list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/psv/psv_platform.cpp)
+        file(GLOB_RECURSE SDL_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/sdl/*.cpp")
+        list(APPEND AURORE_SRC ${SDL_PLATFORM_SRC})
+        list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/psv/psv_platform.cpp)
     endif ()
-    list(APPEND BRLS_PUBLIC_DEFINITIONS __PSV__ STBI_NEON)
-    set(BRLS_PLATFORM_RESOURCES_PATH "\"app0:resources/\"")
+    list(APPEND AURORE_PUBLIC_DEFINITIONS __PSV__ STBI_NEON)
+    set(AURORE_PLATFORM_RESOURCES_PATH "\"app0:resources/\"")
     set_target_properties(yogacore PROPERTIES POSITION_INDEPENDENT_CODE OFF)
 elseif(PLATFORM_PS4)
     find_package(SDL2 REQUIRED)
-    list(APPEND BOREALIS_SOURCE
-            ${BOREALIS_PATH}/lib/platforms/sdl
-            ${BOREALIS_PATH}/lib/platforms/desktop
-            ${BOREALIS_PATH}/lib/extern/nanovg/ps4)
-    file(GLOB_RECURSE PS4_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/ps4/*.cpp")
-    list(APPEND BOREALIS_SRC ${PS4_PLATFORM_SRC})
-    list(APPEND BOREALIS_INCLUDE /opt/OpenOrbis-PS4-Toolchain/include)
-    list(APPEND BRLS_PLATFORM_LIBS SDL2::SDL2-static SceNetCtl SceImeDialog SceCommonDialog)
-    list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ PS4 USE_GLES2)
+    list(APPEND AURORE_SOURCE
+            ${AURORE_PATH}/lib/platforms/sdl
+            ${AURORE_PATH}/lib/platforms/desktop
+            ${AURORE_PATH}/lib/extern/nanovg/ps4)
+    file(GLOB_RECURSE PS4_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/ps4/*.cpp")
+    list(APPEND AURORE_SRC ${PS4_PLATFORM_SRC})
+    list(APPEND AURORE_INCLUDE /opt/OpenOrbis-PS4-Toolchain/include)
+    list(APPEND AURORE_PLATFORM_LIBS SDL2::SDL2-static SceNetCtl SceImeDialog SceCommonDialog)
+    list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ PS4 USE_GLES2)
     if (LIBJBC)
-        list(APPEND BRLS_PLATFORM_LIBS jbc)
-        list(APPEND BRLS_PUBLIC_DEFINITIONS USE_JBC)
-        set(BRLS_PLATFORM_RESOURCES_PATH "\"/mnt/sandbox/${PSN_TITLE_ID}_000/app0/resources/\"")
+        list(APPEND AURORE_PLATFORM_LIBS jbc)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS USE_JBC)
+        set(AURORE_PLATFORM_RESOURCES_PATH "\"/mnt/sandbox/${PSN_TITLE_ID}_000/app0/resources/\"")
     else ()
-        set(BRLS_PLATFORM_RESOURCES_PATH "\"/app0/resources/\"")
+        set(AURORE_PLATFORM_RESOURCES_PATH "\"/app0/resources/\"")
     endif ()
 elseif(PLATFORM_ANDROID)
     find_library(SDL2 NAMES SDL2 SDL2main)
-    list(APPEND BOREALIS_SOURCE
-            ${BOREALIS_PATH}/lib/platforms/sdl
-            ${BOREALIS_PATH}/lib/platforms/desktop
-            ${BOREALIS_PATH}/lib/platforms/android)
-    list(APPEND BRLS_PLATFORM_LIBS SDL2 SDL2main)
-    list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ ANDROID)
+    list(APPEND AURORE_SOURCE
+            ${AURORE_PATH}/lib/platforms/sdl
+            ${AURORE_PATH}/lib/platforms/desktop
+            ${AURORE_PATH}/lib/platforms/android)
+    list(APPEND AURORE_PLATFORM_LIBS SDL2 SDL2main)
+    list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ ANDROID)
     # The NDK's libc++ returns std::string from path::u8string() in C++20,
     # which nlohmann json's path conversion does not build with
-    list(APPEND BRLS_PUBLIC_DEFINITIONS JSON_HAS_FILESYSTEM=0 JSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
+    list(APPEND AURORE_PUBLIC_DEFINITIONS JSON_HAS_FILESYSTEM=0 JSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
 elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     set(BUILD_SHARED_LIBS OFF)
-    add_subdirectory(${BOREALIS_PATH}/lib/extern/SDL)
+    add_subdirectory(${AURORE_PATH}/lib/extern/SDL)
     find_library(SDL2 NAMES SDL2-static SDL2main)
-    list(APPEND BOREALIS_SOURCE
-            ${BOREALIS_PATH}/lib/platforms/sdl
-            ${BOREALIS_PATH}/lib/platforms/desktop)
-    list(APPEND BRLS_PLATFORM_LIBS SDL2-static SDL2main "-framework CoreText" "-framework CoreFoundation")
-    list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/desktop/ios_darwin.mm)
+    list(APPEND AURORE_SOURCE
+            ${AURORE_PATH}/lib/platforms/sdl
+            ${AURORE_PATH}/lib/platforms/desktop)
+    list(APPEND AURORE_PLATFORM_LIBS SDL2-static SDL2main "-framework CoreText" "-framework CoreFoundation")
+    list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/desktop/ios_darwin.mm)
 
     if(PLATFORM_IOS)
-        list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ IOS)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ IOS)
     elseif(PLATFORM_TVOS)
-        list(APPEND BRLS_PUBLIC_DEFINITIONS __SDL2__ TVOS)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ TVOS)
     endif()
 elseif(PLATFORM_SWITCH)
-    file(GLOB_RECURSE SWITCH_PLATFORM_SRC CONFIGURE_DEPENDS "${BOREALIS_PATH}/lib/platforms/switch/*.cpp")
-    list(APPEND BOREALIS_SRC ${SWITCH_PLATFORM_SRC})
-    list(APPEND BRLS_PUBLIC_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>)
-    list(APPEND BRLS_PUBLIC_DEFINITIONS SWITCH __SWITCH__ STBI_NO_THREAD_LOCALS)
-    list(APPEND BRLS_PRIVATE_DEFINITIONS HAVE_LIBNX)
+    file(GLOB_RECURSE SWITCH_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/switch/*.cpp")
+    list(APPEND AURORE_SRC ${SWITCH_PLATFORM_SRC})
+    list(APPEND AURORE_PUBLIC_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>)
+    list(APPEND AURORE_PUBLIC_DEFINITIONS SWITCH __SWITCH__ STBI_NO_THREAD_LOCALS)
+    list(APPEND AURORE_PRIVATE_DEFINITIONS HAVE_LIBNX)
     find_package(PkgConfig REQUIRED)
 
-    if (BOREALIS_USE_DEKO3D)
-        list(APPEND BRLS_PLATFORM_LIBS deko3d nx m)
+    if (AURORE_USE_DEKO3D)
+        list(APPEND AURORE_PLATFORM_LIBS deko3d nx m)
     elseif (USE_SDL2)
         find_package(SDL2 REQUIRED)
-        list(REMOVE_ITEM BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/switch/switch_video.cpp)
-        list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/sdl/sdl_video.cpp)
-        list(APPEND BRLS_PLATFORM_LIBS ${SDL2_LIBRARIES} EGL glapi drm_nouveau nx m)
+        list(REMOVE_ITEM AURORE_SRC ${AURORE_PATH}/lib/platforms/switch/switch_video.cpp)
+        list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/sdl/sdl_video.cpp)
+        list(APPEND AURORE_PLATFORM_LIBS ${SDL2_LIBRARIES} EGL glapi drm_nouveau nx m)
     else ()
-        list(REMOVE_ITEM BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/switch/switch_video.cpp)
-        list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/glfw/glfw_video.cpp)
-        list(APPEND BRLS_PLATFORM_LIBS glfw3 EGL glapi drm_nouveau nx m)
+        list(REMOVE_ITEM AURORE_SRC ${AURORE_PATH}/lib/platforms/switch/switch_video.cpp)
+        list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/glfw/glfw_video.cpp)
+        list(APPEND AURORE_PLATFORM_LIBS glfw3 EGL glapi drm_nouveau nx m)
     endif ()
-    set(BRLS_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
+    set(AURORE_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
     # devkitPro's portlibs (GLFW, SDL2, EGL, curl…) last: it also has a
     # tinyxml2.h and a glad/glad.h, which must not hide the library's own
-    list(APPEND BOREALIS_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
+    list(APPEND AURORE_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
 else ()
     message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
 endif ()
 
 # aurore c/cpp source
-list(APPEND BOREALIS_SOURCE
-        ${BOREALIS_PATH}/lib/core
-        ${BOREALIS_PATH}/lib/views
-        ${BOREALIS_PATH}/lib/extern/glad
-        ${BOREALIS_PATH}/lib/extern/libretro-common/compat
-        ${BOREALIS_PATH}/lib/extern/libretro-common/encodings
-        ${BOREALIS_PATH}/lib/extern/libretro-common/features
-        ${BOREALIS_PATH}/lib/extern/qrcodegen
+list(APPEND AURORE_SOURCE
+        ${AURORE_PATH}/lib/core
+        ${AURORE_PATH}/lib/views
+        ${AURORE_PATH}/lib/extern/glad
+        ${AURORE_PATH}/lib/extern/libretro-common/compat
+        ${AURORE_PATH}/lib/extern/libretro-common/encodings
+        ${AURORE_PATH}/lib/extern/libretro-common/features
+        ${AURORE_PATH}/lib/extern/qrcodegen
         # Cadran, Aurore's look (GPLv3, LICENSE.GPL)
-        ${BOREALIS_PATH}/lib/cadran
+        ${AURORE_PATH}/lib/cadran
         )
-if (PLATFORM_PSV OR PLATFORM_PS4 OR BOREALIS_USE_D3D11)
-        list(REMOVE_ITEM BOREALIS_SOURCE ${BOREALIS_PATH}/lib/extern/glad)
+if (PLATFORM_PSV OR PLATFORM_PS4 OR AURORE_USE_D3D11)
+        list(REMOVE_ITEM AURORE_SOURCE ${AURORE_PATH}/lib/extern/glad)
 endif ()
 
 # nanovg
-list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/extern/nanovg/nanovg.c)
-if (BRLS_FONTSTASH_STREAM)
+list(APPEND AURORE_SRC ${AURORE_PATH}/lib/extern/nanovg/nanovg.c)
+if (AURORE_FONTSTASH_STREAM)
     set_source_files_properties(
-        ${BOREALIS_PATH}/lib/extern/nanovg/nanovg.c
+        ${AURORE_PATH}/lib/extern/nanovg/nanovg.c
         PROPERTIES
         COMPILE_DEFINITIONS "FONTSTASH_STREAM_IMPLEMENTATION"
     )
     message(STATUS "aurore: fontstash use stream")
 endif ()
 if (USE_FREETYPE)
-    if (BRLS_FONTSTASH_STREAM)
-        message(FATAL_ERROR "USE_FREETYPE cannot be combined with BRLS_FONTSTASH_STREAM")
+    if (AURORE_FONTSTASH_STREAM)
+        message(FATAL_ERROR "USE_FREETYPE cannot be combined with AURORE_FONTSTASH_STREAM")
     endif ()
     if (PLATFORM_SWITCH)
         # switch-freetype links bz2, png, zlib and harfbuzz: pkg-config knows them
         find_package(PkgConfig REQUIRED)
-        pkg_check_modules(BRLS_FREETYPE REQUIRED IMPORTED_TARGET freetype2)
-        list(APPEND BRLS_PLATFORM_LIBS PkgConfig::BRLS_FREETYPE)
+        pkg_check_modules(AURORE_PC_FREETYPE REQUIRED IMPORTED_TARGET freetype2)
+        list(APPEND AURORE_PLATFORM_LIBS PkgConfig::AURORE_PC_FREETYPE)
     else ()
         find_package(Freetype REQUIRED)
-        list(APPEND BRLS_PLATFORM_LIBS Freetype::Freetype)
+        list(APPEND AURORE_PLATFORM_LIBS Freetype::Freetype)
     endif ()
-    set_property(SOURCE ${BOREALIS_PATH}/lib/extern/nanovg/nanovg.c APPEND PROPERTY COMPILE_DEFINITIONS FONS_USE_FREETYPE)
-    list(APPEND BRLS_PUBLIC_DEFINITIONS BRLS_USE_FREETYPE)
+    set_property(SOURCE ${AURORE_PATH}/lib/extern/nanovg/nanovg.c APPEND PROPERTY COMPILE_DEFINITIONS FONS_USE_FREETYPE)
+    list(APPEND AURORE_PUBLIC_DEFINITIONS AURORE_USE_FREETYPE)
     message(STATUS "aurore: fontstash uses FreeType")
 endif ()
 if (USE_FRIBIDI)
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(BRLS_FRIBIDI REQUIRED IMPORTED_TARGET fribidi)
-    list(APPEND BRLS_PLATFORM_LIBS PkgConfig::BRLS_FRIBIDI)
-    list(APPEND BRLS_PUBLIC_DEFINITIONS BRLS_USE_FRIBIDI)
+    pkg_check_modules(AURORE_PC_FRIBIDI REQUIRED IMPORTED_TARGET fribidi)
+    list(APPEND AURORE_PLATFORM_LIBS PkgConfig::AURORE_PC_FRIBIDI)
+    list(APPEND AURORE_PUBLIC_DEFINITIONS AURORE_USE_FRIBIDI)
     message(STATUS "aurore: labels reorder right-to-left text with FriBidi")
 endif ()
-if (PLATFORM_SWITCH AND BOREALIS_USE_DEKO3D)
-    file(GLOB_RECURSE NANOVG_PLATFORM_SRC CONFIGURE_DEPENDS ${BOREALIS_PATH}/lib/extern/nanovg/*.cpp)
-    list(APPEND BOREALIS_SRC ${NANOVG_PLATFORM_SRC})
+if (PLATFORM_SWITCH AND AURORE_USE_DEKO3D)
+    file(GLOB_RECURSE NANOVG_PLATFORM_SRC CONFIGURE_DEPENDS ${AURORE_PATH}/lib/extern/nanovg/*.cpp)
+    list(APPEND AURORE_SRC ${NANOVG_PLATFORM_SRC})
 
     # nanovg's deko3d shaders, compiled and built into the library: an app
     # no longer copies .dksh files into its romfs (those it has still load
     # if these are missing)
     find_program(NX_UAM_EXE NAMES uam HINTS "${DEVKITPRO}/tools/bin")
-    set(DKSH_GLSL "${BOREALIS_PATH}/lib/extern/nanovg/deko3d/shaders")
+    set(DKSH_GLSL "${AURORE_PATH}/lib/extern/nanovg/deko3d/shaders")
     set(DKSH_OUT "${CMAKE_CURRENT_BINARY_DIR}/dksh")
     file(MAKE_DIRECTORY "${DKSH_OUT}")
     set(DKSH_HEADER "/* Generated by library/CMakeLists.txt from nanovg's deko3d shaders. */\n#pragma once\n#include <cstddef>\n")
@@ -438,77 +438,77 @@ if (PLATFORM_SWITCH AND BOREALIS_USE_DEKO3D)
         endif ()
     endforeach ()
     file(WRITE "${DKSH_OUT}/dk_shaders.h" "${DKSH_HEADER}")
-    set(BOREALIS_DKSH_INCLUDE "${DKSH_OUT}")
+    set(AURORE_DKSH_INCLUDE "${DKSH_OUT}")
 endif ()
 
 # Every .c and .cpp under these directories: CONFIGURE_DEPENDS has the build
 # run CMake again when one is added or removed
-foreach (lib ${BOREALIS_SOURCE})
+foreach (lib ${AURORE_SOURCE})
     file(GLOB_RECURSE TEMP_SRC CONFIGURE_DEPENDS "${lib}/*.cpp" "${lib}/*.c")
-    list(APPEND BOREALIS_SRC ${TEMP_SRC})
+    list(APPEND AURORE_SRC ${TEMP_SRC})
 endforeach (lib)
 
 # The graphics driver
-set(BOREALIS_DRIVER BOREALIS_USE_OPENGL)
-if (BOREALIS_USE_METAL)
-    set(BOREALIS_DRIVER BOREALIS_USE_METAL)
-elseif (BOREALIS_USE_D3D11)
-    set(BOREALIS_DRIVER BOREALIS_USE_D3D11)
-elseif (BOREALIS_USE_DEKO3D)
-    set(BOREALIS_DRIVER BOREALIS_USE_DEKO3D)
-elseif (BOREALIS_USE_GXM)
-    set(BOREALIS_DRIVER BOREALIS_USE_GXM)
+set(AURORE_DRIVER AURORE_USE_OPENGL)
+if (AURORE_USE_METAL)
+    set(AURORE_DRIVER AURORE_USE_METAL)
+elseif (AURORE_USE_D3D11)
+    set(AURORE_DRIVER AURORE_USE_D3D11)
+elseif (AURORE_USE_DEKO3D)
+    set(AURORE_DRIVER AURORE_USE_DEKO3D)
+elseif (AURORE_USE_GXM)
+    set(AURORE_DRIVER AURORE_USE_GXM)
     if (USE_VITA_SHARK)
-        list(APPEND BRLS_PUBLIC_DEFINITIONS USE_VITA_SHARK)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS USE_VITA_SHARK)
     endif ()
 endif ()
-list(APPEND BRLS_PUBLIC_DEFINITIONS ${BOREALIS_DRIVER})
-if (BRLS_INSPECTOR)
-    list(APPEND BRLS_PRIVATE_DEFINITIONS BRLS_INSPECTOR)
+list(APPEND AURORE_PUBLIC_DEFINITIONS ${AURORE_DRIVER})
+if (AURORE_INSPECTOR)
+    list(APPEND AURORE_PRIVATE_DEFINITIONS AURORE_INSPECTOR)
 endif ()
 # The tests read it too (tests/dev_tools_tests.cpp)
-if (BRLS_DEV_TOOLS STREQUAL "AUTO")
-    set(BRLS_DEV_TOOLS_DEFINITION "$<$<NOT:$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:BRLS_DEV_TOOLS>")
-elseif (BRLS_DEV_TOOLS)
-    set(BRLS_DEV_TOOLS_DEFINITION BRLS_DEV_TOOLS)
+if (AURORE_DEV_TOOLS STREQUAL "AUTO")
+    set(AURORE_DEV_TOOLS_DEFINITION "$<$<NOT:$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:AURORE_DEV_TOOLS>")
+elseif (AURORE_DEV_TOOLS)
+    set(AURORE_DEV_TOOLS_DEFINITION AURORE_DEV_TOOLS)
 else ()
-    set(BRLS_DEV_TOOLS_DEFINITION "")
+    set(AURORE_DEV_TOOLS_DEFINITION "")
 endif ()
-set(BRLS_DEV_TOOLS_DEFINITION "${BRLS_DEV_TOOLS_DEFINITION}" CACHE INTERNAL "")
-list(APPEND BRLS_PRIVATE_DEFINITIONS ${BRLS_DEV_TOOLS_DEFINITION})
-message(STATUS "aurore: driver ${BOREALIS_DRIVER}")
+set(AURORE_DEV_TOOLS_DEFINITION "${AURORE_DEV_TOOLS_DEFINITION}" CACHE INTERNAL "")
+list(APPEND AURORE_PRIVATE_DEFINITIONS ${AURORE_DEV_TOOLS_DEFINITION})
+message(STATUS "aurore: driver ${AURORE_DRIVER}")
 
 # The library: target aurore, Aurore::aurore for the apps
-add_library(aurore STATIC ${BOREALIS_SRC})
+add_library(aurore STATIC ${AURORE_SRC})
 add_library(Aurore::aurore ALIAS aurore)
 set_target_properties(aurore PROPERTIES
         CXX_STANDARD 20
         CXX_STANDARD_REQUIRED ON
-        UNITY_BUILD ${BRLS_UNITY_BUILD}
+        UNITY_BUILD ${AURORE_UNITY_BUILD}
         # No C++20 modules: no dependency scanning step (CMake >= 3.28)
         CXX_SCAN_FOR_MODULES OFF
 )
-set_source_files_properties(${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwin.mm PROPERTIES
+set_source_files_properties(${AURORE_PATH}/lib/platforms/desktop/desktop_darwin.mm PROPERTIES
         SKIP_UNITY_BUILD_INCLUSION ON)
 target_include_directories(aurore PUBLIC
-        $<BUILD_INTERFACE:${BOREALIS_PATH}/include>
+        $<BUILD_INTERFACE:${AURORE_PATH}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 # The headers of other projects shipped in include/aurore/extern, before
 # the ones found on the system
-set(BRLS_EXTERN_INCLUDE extern extern/nanovg extern/qrcodegen)
+set(AURORE_EXTERN_INCLUDE extern extern/nanovg extern/qrcodegen)
 if (NOT USE_SYSTEM_TINYXML2 AND NOT AURORE_FETCH_DEPS)
-    list(APPEND BRLS_EXTERN_INCLUDE extern/tinyxml2)
+    list(APPEND AURORE_EXTERN_INCLUDE extern/tinyxml2)
 endif ()
-foreach (dir ${BRLS_EXTERN_INCLUDE})
+foreach (dir ${AURORE_EXTERN_INCLUDE})
     target_include_directories(aurore SYSTEM PUBLIC
-            $<BUILD_INTERFACE:${BOREALIS_PATH}/include/aurore/${dir}>
+            $<BUILD_INTERFACE:${AURORE_PATH}/include/aurore/${dir}>
             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/aurore/${dir}>)
 endforeach ()
-if (BOREALIS_INCLUDE)
-    target_include_directories(aurore SYSTEM PUBLIC ${BOREALIS_INCLUDE})
+if (AURORE_INCLUDE)
+    target_include_directories(aurore SYSTEM PUBLIC ${AURORE_INCLUDE})
 endif ()
-if (BOREALIS_DKSH_INCLUDE)
-    target_include_directories(aurore PRIVATE ${BOREALIS_DKSH_INCLUDE})
+if (AURORE_DKSH_INCLUDE)
+    target_include_directories(aurore PRIVATE ${AURORE_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
 foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main ${LIBROMFS_LIBRARY})
@@ -523,16 +523,16 @@ endforeach ()
 # The projects that link the library build with C++20 too, so its headers can use it
 target_compile_features(aurore PUBLIC cxx_std_20)
 target_link_libraries(aurore
-        PUBLIC fmt::fmt tweeny yogacore ${BRLS_PLATFORM_LIBS}
-        PRIVATE ${BRLS_PRIVATE_LIBS})
-list(REMOVE_DUPLICATES BRLS_PUBLIC_DEFINITIONS)
+        PUBLIC fmt::fmt tweeny yogacore ${AURORE_PLATFORM_LIBS}
+        PRIVATE ${AURORE_PRIVATE_LIBS})
+list(REMOVE_DUPLICATES AURORE_PUBLIC_DEFINITIONS)
 target_compile_definitions(aurore
         PUBLIC
-        BRLS_RESOURCES=${BRLS_PLATFORM_RESOURCES_PATH}
-        ${BRLS_PUBLIC_DEFINITIONS}
+        AURORE_RESOURCES=${AURORE_PLATFORM_RESOURCES_PATH}
+        ${AURORE_PUBLIC_DEFINITIONS}
         PRIVATE
-        ${BRLS_PRIVATE_DEFINITIONS})
-target_compile_options(aurore PUBLIC ${BRLS_PUBLIC_OPTIONS})
+        ${AURORE_PRIVATE_DEFINITIONS})
+target_compile_options(aurore PUBLIC ${AURORE_PUBLIC_OPTIONS})
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # A section per function and per variable: an app linked with
     # aurore_app_link_options() (toolchain.cmake) drops the ones it does not use
@@ -543,18 +543,18 @@ endif ()
 
 # Test harness: a headless platform and aurore::test::Harness (include/aurore/test/,
 # docs/testing.md), for an app's tests to link: target Aurore::test
-if (BRLS_BUILD_TESTS)
-    if (NOT PLATFORM_DESKTOP OR NOT BOREALIS_DRIVER STREQUAL "BOREALIS_USE_OPENGL" OR USE_GL2 OR USE_GLES2 OR USE_GLES3)
-        message(FATAL_ERROR "BRLS_BUILD_TESTS needs the desktop platform with the OpenGL 3 driver (the default)")
+if (AURORE_BUILD_TESTS)
+    if (NOT PLATFORM_DESKTOP OR NOT AURORE_DRIVER STREQUAL "AURORE_USE_OPENGL" OR USE_GL2 OR USE_GLES2 OR USE_GLES3)
+        message(FATAL_ERROR "AURORE_BUILD_TESTS needs the desktop platform with the OpenGL 3 driver (the default)")
     endif ()
     add_library(aurore_test STATIC
-            ${BOREALIS_PATH}/lib/test/headless_platform.cpp
-            ${BOREALIS_PATH}/lib/test/harness.cpp)
+            ${AURORE_PATH}/lib/test/headless_platform.cpp
+            ${AURORE_PATH}/lib/test/harness.cpp)
     add_library(Aurore::test ALIAS aurore_test)
     set_target_properties(aurore_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
     target_link_libraries(aurore_test PUBLIC aurore)
     # stb_image_write, for the screenshots
-    target_include_directories(aurore_test PRIVATE ${BOREALIS_PATH}/lib/extern/glfw/deps)
+    target_include_directories(aurore_test PRIVATE ${AURORE_PATH}/lib/extern/glfw/deps)
     if (UNIX AND NOT APPLE)
         # A context without any window system (Mesa's surfaceless EGL)
         find_package(OpenGL COMPONENTS EGL)
@@ -567,15 +567,15 @@ if (BRLS_BUILD_TESTS)
             target_link_libraries(aurore_test PRIVATE
                     $<BUILD_INTERFACE:${OPENGL_egl_LIBRARY}> $<INSTALL_INTERFACE:Aurore::egl>)
             set(AURORE_TEST_EGL ON)
-            target_compile_definitions(aurore_test PRIVATE BRLS_HEADLESS_EGL)
+            target_compile_definitions(aurore_test PRIVATE AURORE_HEADLESS_EGL)
         else ()
             message(WARNING "EGL not found (libegl-dev): the test harness will need an X server (a hidden GLFW window)")
         endif ()
     endif ()
 
-    include(${BOREALIS_PATH}/cmake/AuroreTesting.cmake)
+    include(${AURORE_PATH}/cmake/AuroreTesting.cmake)
 endif ()
 
 if (AURORE_INSTALL)
-    include(${BOREALIS_PATH}/cmake/install.cmake)
+    include(${AURORE_PATH}/cmake/install.cmake)
 endif ()

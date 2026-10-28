@@ -15,7 +15,7 @@
 */
 
 // The debugging aids' environment variables are read only in a build with
-// BRLS_DEV_TOOLS (not a release one, by default); their functions work in
+// AURORE_DEV_TOOLS (not a release one, by default); their functions work in
 // every build
 
 #include <aurore/cadran/ui/prefs.hpp>
@@ -29,40 +29,40 @@
 
 using aurore::test::Harness;
 
-#ifdef BRLS_DEV_TOOLS
+#ifdef AURORE_DEV_TOOLS
 static const bool BUILT_IN = true;
 #else
 static const bool BUILT_IN = false;
 #endif
 
-BRLS_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
+AURORE_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
 {
-    setenv("BRLS_INSPECTOR", "1", 1);
-    setenv("BRLS_HOT_RELOAD", "1", 1);
-    setenv("BRLS_REDRAW_DEBUG", "1", 1);
-    setenv("BRLS_PROFILE", "1", 1);
-    setenv("BRLS_STILL_FOCUS", "1", 1);
+    setenv("AURORE_INSPECTOR", "1", 1);
+    setenv("AURORE_HOT_RELOAD", "1", 1);
+    setenv("AURORE_REDRAW_DEBUG", "1", 1);
+    setenv("AURORE_PROFILE", "1", 1);
+    setenv("AURORE_STILL_FOCUS", "1", 1);
 
     Harness harness;
     harness.step(2);
-    BRLS_CHECK_EQ(aurore::Inspector::isEnabled(), BUILT_IN);
-    BRLS_CHECK_EQ(aurore::HotReload::isEnabled(), BUILT_IN);
-    BRLS_CHECK_EQ(aurore::Application::isRedrawDebug(), BUILT_IN);
-    BRLS_CHECK_EQ(aurore::Profiler::isEnabled(), BUILT_IN);
-    BRLS_CHECK_EQ(ui::env_flag("STILL_FOCUS"), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::Inspector::isEnabled(), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::HotReload::isEnabled(), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::Application::isRedrawDebug(), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::Profiler::isEnabled(), BUILT_IN);
+    AURORE_CHECK_EQ(ui::env_flag("STILL_FOCUS"), BUILT_IN);
 }
 
-BRLS_TEST(the_debugging_aids_functions_work_in_every_build)
+AURORE_TEST(the_debugging_aids_functions_work_in_every_build)
 {
     Harness harness;
     aurore::Application::setInspectorEnabled(true);
-    BRLS_CHECK(aurore::Inspector::isEnabled());
+    AURORE_CHECK(aurore::Inspector::isEnabled());
     aurore::Application::setInspectorEnabled(false);
     aurore::Profiler::setEnabled(true);
-    BRLS_CHECK(aurore::Profiler::isEnabled());
+    AURORE_CHECK(aurore::Profiler::isEnabled());
     aurore::Profiler::setEnabled(false);
     aurore::Application::setRedrawDebug(true);
-    BRLS_CHECK(aurore::Application::isRedrawDebug());
+    AURORE_CHECK(aurore::Application::isRedrawDebug());
     aurore::Application::setRedrawDebug(false);
 }
 

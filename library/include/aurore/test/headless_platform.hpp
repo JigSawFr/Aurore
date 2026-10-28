@@ -19,7 +19,7 @@
 // The test harness' platform: no window, no display. OpenGL draws into an
 // offscreen framebuffer of a context made with EGL without any surface
 // (Mesa's surfaceless platform: no X server needed), or of a hidden GLFW
-// window where EGL is missing (macOS, Windows) or BRLS_HEADLESS_GLFW=1.
+// window where EGL is missing (macOS, Windows) or AURORE_HEADLESS_GLFW=1.
 // Inputs come from the harness only; battery, network, clipboard, browser
 // and keyboard are stand-ins, so screens look the same on every machine.
 

@@ -168,7 +168,7 @@ void SDLImeManager::openInputDialog(
     updateText();
     if (!initialText.empty())
         updateTextCursor();
-#if defined(BOREALIS_USE_D3D11)
+#if defined(AURORE_USE_D3D11)
     float scale = Application::windowScale;
 #else
     float scale = Application::windowScale / Application::getPlatform()->getVideoContext()->getScaleFactor();

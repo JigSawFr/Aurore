@@ -27,9 +27,9 @@ add_executable(aurore_parser_tests parser_tests.cpp)
 target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
 aurore_add_tests(aurore_parser_tests)
 
-# libFuzzer targets, with clang: -DBRLS_BUILD_FUZZERS=ON (docs/testing.md)
-option(BRLS_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
-if (BRLS_BUILD_FUZZERS)
+# libFuzzer targets, with clang: -DAURORE_BUILD_FUZZERS=ON (docs/testing.md)
+option(AURORE_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
+if (AURORE_BUILD_FUZZERS)
     set(FUZZ_FLAGS -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
     add_executable(aurore_fuzz_markdown fuzz/markdown_fuzz.cpp
             ${PROJECT_SOURCE_DIR}/library/lib/cadran/util/markdown.cpp
@@ -52,10 +52,10 @@ target_link_libraries(aurore_i18n_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_i18n_tests PRIVATE AURORE_SOURCE_RESOURCES="${PROJECT_SOURCE_DIR}/resources/")
 aurore_add_tests(aurore_i18n_tests)
 
-# The debugging aids' environment variables, only in a build with BRLS_DEV_TOOLS
+# The debugging aids' environment variables, only in a build with AURORE_DEV_TOOLS
 add_executable(aurore_dev_tools_tests dev_tools_tests.cpp)
 target_link_libraries(aurore_dev_tools_tests PRIVATE Aurore::test)
-target_compile_definitions(aurore_dev_tools_tests PRIVATE ${BRLS_DEV_TOOLS_DEFINITION})
+target_compile_definitions(aurore_dev_tools_tests PRIVATE ${AURORE_DEV_TOOLS_DEFINITION})
 aurore_add_tests(aurore_dev_tools_tests)
 
 # The main loop's cost on the demo (Profiler), checked against a baseline

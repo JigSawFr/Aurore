@@ -52,24 +52,24 @@ enum class LogLevel
 };
 
 #ifdef IOS
-#define BRLS_ERROR_COLOR "🔴"
-#define BRLS_WARNING_COLOR "🟠"
-#define BRLS_INFO_COLOR "🔵"
-#define BRLS_DEBUG_COLOR "🟢"
-#define BRLS_VERBOSE_COLOR "⚪️"
+#define AURORE_ERROR_COLOR "🔴"
+#define AURORE_WARNING_COLOR "🟠"
+#define AURORE_INFO_COLOR "🔵"
+#define AURORE_DEBUG_COLOR "🟢"
+#define AURORE_VERBOSE_COLOR "⚪️"
 #else
-#define BRLS_ERROR_COLOR "[0;31m"
-#define BRLS_WARNING_COLOR "[0;33m"
-#define BRLS_INFO_COLOR "[0;34m"
-#define BRLS_DEBUG_COLOR "[0;32m"
-#define BRLS_VERBOSE_COLOR "[0;37m"
+#define AURORE_ERROR_COLOR "[0;31m"
+#define AURORE_WARNING_COLOR "[0;33m"
+#define AURORE_INFO_COLOR "[0;34m"
+#define AURORE_DEBUG_COLOR "[0;32m"
+#define AURORE_VERBOSE_COLOR "[0;37m"
 #endif
 
-#define BRLS_LOG_ERROR(format, ...) aurore::Logger::error("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_WARNING(format, ...) aurore::Logger::warning("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_INFO(format, ...) aurore::Logger::info("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_DEBUG(format, ...) aurore::Logger::debug("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
-#define BRLS_LOG_VERBOSE(format, ...) aurore::Logger::verbose("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define AURORE_LOG_ERROR(format, ...) aurore::Logger::error("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define AURORE_LOG_WARNING(format, ...) aurore::Logger::warning("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define AURORE_LOG_INFO(format, ...) aurore::Logger::info("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define AURORE_LOG_DEBUG(format, ...) aurore::Logger::debug("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
+#define AURORE_LOG_VERBOSE(format, ...) aurore::Logger::verbose("{}:{} " format, __FILE__, __LINE__, ##__VA_ARGS__)
 
 class Logger
 {
@@ -151,31 +151,31 @@ class Logger
     template <typename... Args>
     inline static void error(fmt::format_string<Args...> format, Args&&... args)
     {
-        Logger::log(LogLevel::LOG_ERROR, "ERROR", BRLS_ERROR_COLOR, format, std::forward<Args>(args)...);
+        Logger::log(LogLevel::LOG_ERROR, "ERROR", AURORE_ERROR_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     inline static void warning(fmt::format_string<Args...> format, Args&&... args)
     {
-        Logger::log(LogLevel::LOG_WARNING, "WARNING", BRLS_WARNING_COLOR, format, std::forward<Args>(args)...);
+        Logger::log(LogLevel::LOG_WARNING, "WARNING", AURORE_WARNING_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     inline static void info(fmt::format_string<Args...> format, Args&&... args)
     {
-        Logger::log(LogLevel::LOG_INFO, "INFO", BRLS_INFO_COLOR, format, std::forward<Args>(args)...);
+        Logger::log(LogLevel::LOG_INFO, "INFO", AURORE_INFO_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     inline static void debug(fmt::format_string<Args...> format, Args&&... args)
     {
-        Logger::log(LogLevel::LOG_DEBUG, "DEBUG", BRLS_DEBUG_COLOR, format, std::forward<Args>(args)...);
+        Logger::log(LogLevel::LOG_DEBUG, "DEBUG", AURORE_DEBUG_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     inline static void verbose(fmt::format_string<Args...> format, Args&&... args)
     {
-        Logger::log(LogLevel::LOG_VERBOSE, "VERBOSE", BRLS_VERBOSE_COLOR, format, std::forward<Args>(args)...);
+        Logger::log(LogLevel::LOG_VERBOSE, "VERBOSE", AURORE_VERBOSE_COLOR, format, std::forward<Args>(args)...);
     }
 
     static Event<TimePoint, LogLevel, std::string>* getLogEvent()

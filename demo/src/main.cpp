@@ -29,7 +29,7 @@
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
 
-#if defined(__PSV__) && defined(BOREALIS_USE_OPENGL)
+#if defined(__PSV__) && defined(AURORE_USE_OPENGL)
 // Needed for the OpenGL driver to work
 extern "C" unsigned int sceLibcHeapSize = 2 * 1024 * 1024;
 #endif
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
         std::_Exit(status);
     }
 
-#ifdef BRLS_USE_FRIBIDI
+#ifdef AURORE_USE_FRIBIDI
     // The bundled font has neither Hebrew nor Arabic: a system font for the
     // scripts tab
     for (const char* path : { "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/TTF/DejaVuSans.ttf" })

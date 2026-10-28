@@ -58,7 +58,7 @@ std::string xmlError(const std::string& xml)
 
 } // namespace
 
-BRLS_TEST(xml_string_view_is_read_to_its_size)
+AURORE_TEST(xml_string_view_is_read_to_its_size)
 {
     Harness harness;
     // The view ends before the text after it, which is no XML: read past
@@ -66,7 +66,7 @@ BRLS_TEST(xml_string_view_is_read_to_its_size)
     std::string buffer = "<brls:Box id=\"sized\" width=\"40\"/><<<not xml";
     std::string_view xml(buffer.data(), buffer.find("<<<"));
     aurore::View* view = aurore::View::createFromXMLString(xml);
-    BRLS_CHECK(view != nullptr && view->getId() == "sized");
+    AURORE_CHECK(view != nullptr && view->getId() == "sized");
     delete view;
 
     struct Inflated : aurore::Box
@@ -76,11 +76,11 @@ BRLS_TEST(xml_string_view_is_read_to_its_size)
     Inflated* box     = new Inflated();
     std::string inner = "<brls:Box id=\"inflated\"><brls:Rectangle/></brls:Box>&&&";
     box->inflateFromXMLString(std::string_view(inner.data(), inner.size() - 3));
-    BRLS_CHECK_EQ(box->getChildren().size(), (size_t)1);
+    AURORE_CHECK_EQ(box->getChildren().size(), (size_t)1);
     delete box;
 }
 
-BRLS_TEST(xml_nesting_is_bounded)
+AURORE_TEST(xml_nesting_is_bounded)
 {
     Harness harness;
     // Deep but reasonable: read
@@ -89,7 +89,7 @@ BRLS_TEST(xml_nesting_is_bounded)
         deep += "<brls:Box>";
     for (int i = 0; i < 40; i++)
         deep += "</brls:Box>";
-    BRLS_CHECK_EQ(xmlError(deep), std::string());
+    AURORE_CHECK_EQ(xmlError(deep), std::string());
 
     // Past the bound: an error, not a stack overflow
     std::string deeper;
@@ -97,10 +97,10 @@ BRLS_TEST(xml_nesting_is_bounded)
         deeper += "<brls:Box>";
     for (int i = 0; i < 100; i++)
         deeper += "</brls:Box>";
-    BRLS_CHECK(xmlError(deeper).find("nested more than") != std::string::npos);
+    AURORE_CHECK(xmlError(deeper).find("nested more than") != std::string::npos);
 }
 
-BRLS_TEST(xml_file_including_itself_is_an_error)
+AURORE_TEST(xml_file_including_itself_is_an_error)
 {
     namespace fs  = std::filesystem;
     fs::path root = fs::temp_directory_path() / ("aurore-xml-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
@@ -121,11 +121,11 @@ BRLS_TEST(xml_file_including_itself_is_an_error)
     aurore::HotReload::setEnabled(false);
     // An error hot reload logs (the screen stays as it was), not a stack
     // overflow
-    BRLS_CHECK(error.find("nested more than") != std::string::npos);
+    AURORE_CHECK(error.find("nested more than") != std::string::npos);
     fs::remove_all(root);
 }
 
-BRLS_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
+AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
 {
     namespace fs  = std::filesystem;
     fs::path root = fs::temp_directory_path() / ("aurore-custom-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
@@ -160,38 +160,38 @@ BRLS_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
     for (aurore::View* built : { view, invalid })
     {
         aurore::Box* box = dynamic_cast<aurore::Box*>(built);
-        BRLS_CHECK(box != nullptr);
+        AURORE_CHECK(box != nullptr);
         if (box)
-            BRLS_CHECK_EQ(box->getChildren().size(), (size_t)2);
+            AURORE_CHECK_EQ(box->getChildren().size(), (size_t)2);
         delete built;
     }
     fs::remove_all(root);
 }
 
-BRLS_TEST(xml_numbers_out_of_range_are_refused)
+AURORE_TEST(xml_numbers_out_of_range_are_refused)
 {
     Harness harness;
-    BRLS_CHECK_EQ(xmlError("<brls:Box width=\"40\" height=\"25%\" marginTop=\"2.5px\"/>"), std::string());
+    AURORE_CHECK_EQ(xmlError("<brls:Box width=\"40\" height=\"25%\" marginTop=\"2.5px\"/>"), std::string());
     // Not a number, infinite, past a float: an error on the attribute (not
     // NaN in the layout, nor an out_of_range thrown from std::stof)
     for (const char* value : { "nan", "inf", "-inf", "1e99", "nanpx", "1e99px", "nan%", "1e99%" })
     {
         std::string error = xmlError(std::string("<brls:Box width=\"") + value + "\"/>");
-        BRLS_CHECK(!error.empty());
-        BRLS_CHECK(error.find("out_of_range") == std::string::npos);
-        BRLS_CHECK(error.find(value) != std::string::npos);
+        AURORE_CHECK(!error.empty());
+        AURORE_CHECK(error.find("out_of_range") == std::string::npos);
+        AURORE_CHECK(error.find(value) != std::string::npos);
     }
 }
 
-BRLS_TEST(xml_durations_out_of_range_are_refused)
+AURORE_TEST(xml_durations_out_of_range_are_refused)
 {
     Harness harness;
     aurore::Box box;
-    BRLS_CHECK(box.setTransition("backgroundColor 250ms"));
-    BRLS_CHECK(box.setTransition("backgroundColor 2s cubicOut"));
-    BRLS_CHECK(box.setTransition("backgroundColor 60s"));
+    AURORE_CHECK(box.setTransition("backgroundColor 250ms"));
+    AURORE_CHECK(box.setTransition("backgroundColor 2s cubicOut"));
+    AURORE_CHECK(box.setTransition("backgroundColor 60s"));
     for (const char* spec : { "backgroundColor 1e30s", "backgroundColor 3e9ms", "backgroundColor nans", "backgroundColor infms", "backgroundColor -1s", "backgroundColor 61s" })
-        BRLS_CHECK(!box.setTransition(spec));
+        AURORE_CHECK(!box.setTransition(spec));
 }
 
 int main(int argc, char** argv)

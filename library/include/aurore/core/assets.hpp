@@ -17,11 +17,11 @@
 
 #pragma once
 
-#ifndef BRLS_RESOURCES
-#error BRLS_RESOURCES define missing
+#ifndef AURORE_RESOURCES
+#error AURORE_RESOURCES define missing
 #endif
 #ifdef USE_LIBROMFS
-#define BRLS_ASSET(_str) "@res/" _str
+#define AURORE_ASSET(_str) "@res/" _str
 #else
-#define BRLS_ASSET(_str) BRLS_RESOURCES _str
+#define AURORE_ASSET(_str) AURORE_RESOURCES _str
 #endif

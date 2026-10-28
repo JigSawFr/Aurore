@@ -43,8 +43,8 @@ class DialogButton
 class Dialog : public Box
 {
   private:
-    BRLS_BIND(Box, container, "brls/dialog/container");
-    BRLS_BIND(AppletFrame, appletFrame, "brls/dialog/applet");
+    AURORE_BIND(Box, container, "brls/dialog/container");
+    AURORE_BIND(AppletFrame, appletFrame, "brls/dialog/applet");
 
     unsigned frameX, frameY, frameWidth, frameHeight;
 
@@ -59,12 +59,12 @@ class Dialog : public Box
     Label* textLabel          = nullptr; // the text of Dialog(text)
 
   protected:
-    BRLS_BIND(Button, button1, "brls/dialog/button1");
-    BRLS_BIND(Button, button2, "brls/dialog/button2");
-    BRLS_BIND(Button, button3, "brls/dialog/button3");
+    AURORE_BIND(Button, button1, "brls/dialog/button1");
+    AURORE_BIND(Button, button2, "brls/dialog/button2");
+    AURORE_BIND(Button, button3, "brls/dialog/button3");
 
-    BRLS_BIND(Rectangle, button2separator, "brls/dialog/button2/separator");
-    BRLS_BIND(Rectangle, button3separator, "brls/dialog/button3/separator");
+    AURORE_BIND(Rectangle, button2separator, "brls/dialog/button2/separator");
+    AURORE_BIND(Rectangle, button3separator, "brls/dialog/button3/separator");
 
     // A dialog, said with its text when the focus enters it.
     AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::DIALOG; }

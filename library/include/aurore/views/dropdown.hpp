@@ -42,11 +42,11 @@ typedef Event<int> ValueSelectedEvent;
 class Dropdown : public Box, private RecyclerDataSource
 {
   private:
-    BRLS_BIND(RecyclerFrame, recycler, "brls/dropdown/recycler");
-    BRLS_BIND(Box, header, "brls/dropdown/header");
-    BRLS_BIND(Label, title, "brls/dropdown/title_label");
-    BRLS_BIND(Box, content, "brls/dropdown/content");
-    BRLS_BIND(AppletFrame, applet, "brls/dropdown/applet");
+    AURORE_BIND(RecyclerFrame, recycler, "brls/dropdown/recycler");
+    AURORE_BIND(Box, header, "brls/dropdown/header");
+    AURORE_BIND(Label, title, "brls/dropdown/title_label");
+    AURORE_BIND(Box, content, "brls/dropdown/content");
+    AURORE_BIND(AppletFrame, applet, "brls/dropdown/applet");
     ValueSelectedEvent::Callback cb;
     ValueSelectedEvent::Callback dismissCb;
     std::vector<std::string> values;

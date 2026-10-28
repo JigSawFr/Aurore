@@ -1,5 +1,5 @@
 # aurore_add_tests(), for the tests of an app on the test harness (Aurore::test,
-# docs/testing.md). Included by the library when BRLS_BUILD_TESTS is on, and
+# docs/testing.md). Included by the library when AURORE_BUILD_TESTS is on, and
 # by the installed package along with Aurore::test.
 
 # Registers each case of a test executable (aurore::test::runTests) with
@@ -9,9 +9,9 @@
 function(aurore_add_tests target)
     cmake_parse_arguments(ARG "" "REFERENCES" "" ${ARGN})
     set(script "${CMAKE_CURRENT_BINARY_DIR}/${target}_cases.cmake")
-    set(env "BRLS_TEST_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/test-output")
+    set(env "AURORE_TEST_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/test-output")
     if (ARG_REFERENCES)
-        set(env "${env};BRLS_TEST_REFERENCES=${ARG_REFERENCES}")
+        set(env "${env};AURORE_TEST_REFERENCES=${ARG_REFERENCES}")
     endif ()
     file(GENERATE OUTPUT "${script}" CONTENT "
 execute_process(COMMAND \"$<TARGET_FILE:${target}>\" --list OUTPUT_VARIABLE cases RESULT_VARIABLE result)

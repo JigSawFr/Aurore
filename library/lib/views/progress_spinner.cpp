@@ -24,7 +24,7 @@ namespace aurore
 ProgressSpinner::ProgressSpinner(ProgressSpinnerSize size)
     : size(size)
 {
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE("size", ProgressSpinnerSize, this->setSize,
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE("size", ProgressSpinnerSize, this->setSize,
         {
             { "normal", ProgressSpinnerSize::NORMAL },
             { "large", ProgressSpinnerSize::LARGE },
