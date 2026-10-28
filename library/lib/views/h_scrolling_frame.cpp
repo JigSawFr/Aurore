@@ -461,7 +461,8 @@ void HScrollingFrame::startScrolling(bool animated, float newScroll)
     if (newScroll == this->contentOffsetX)
         return;
 
-    if (animated)
+    // Reduced motion: straight there
+    if (animated && !Application::getReduceMotion())
     {
         Style style = Application::getStyle();
         animateScrolling(newScroll, style["brls/animations/highlight"]);
@@ -610,6 +611,14 @@ View* HScrollingFrame::getParentNavigationDecision(View* from, View* newFocus, F
 
         if (from == contentView)
         {
+            // At the edge there is nothing more to scroll: the focus leaves
+            // for the views around the frame (the rail on the left)
+            float rightLimit = this->getContentWidth() - this->getScrollingAreaWidth();
+            if (direction == FocusDirection::LEFT && this->getContentOffsetX() <= 0.01f)
+                return nullptr;
+            if (direction == FocusDirection::RIGHT && this->getContentOffsetX() >= rightLimit - 0.01f)
+                return nullptr;
+
             naturalScrollingCanScroll = true;
             if (currentFocus && currentFocus->getFrame().inscribed(this->getFrame()))
                 return currentFocus;

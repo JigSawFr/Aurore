@@ -88,7 +88,7 @@ Who owns what:
 - An activity owns its content view, and frees it when it is deleted.
 - A box owns its children: `removeView(view)` deletes the view unless asked not to, and a box deletes its children with itself.
 - Deleting is deferred: `freeView()` queues a view, which is deleted at the end of the loop iteration, after the frame and the sync tasks. Code that keeps a pointer to a view across that point holds it with `ptrLock()` / `ptrUnlock()`.
-- A callback that may run after its view is gone (a task on another thread, a timer) checks it is still there: `ASYNC_RETAIN` / `ASYNC_TOKEN` / `ASYNC_RELEASE` in a view, or Cadran's `ui::Alive` tokens (`cadran/ui/guarded.hpp`).
+- A callback that may run after its view is gone (a task on another thread, a timer) checks it is still there: it captures the view's `aliveToken()` and returns if it expired (the older `ASYNC_RETAIN` / `ASYNC_TOKEN` / `ASYNC_RELEASE` wrap the same), or uses Cadran's `ui::Alive` tokens (`cadran/ui/guarded.hpp`).
 
 ## Themes and styles
 
@@ -127,7 +127,7 @@ Aurore is single-threaded: views, activities, the focus, the theme and the style
 | `brls::async(fn)` | as soon as possible | on Aurore's one worker thread, in order |
 | `brls::delay(ms, fn)` | once `ms` have gone by (`cancelDelay` stops it) | on the main thread |
 
-The usual pattern: `async` does the slow part (a file, the network, decoding), then `sync` hands the result to the views. `Threading::setSyncTaskBudget` spreads a burst of sync tasks over several frames. What is safe from any thread: `sync`, `async` and `delay` themselves, translations (`"key"_i18n`, even while the language changes), the logger, `Image::setImageFromFileAsync` and `setImageAsync` (the bytes from any thread, the image set on the main thread), `Application::crash`. Anything else on a view or the application, from another thread, is a race.
+The usual pattern: `async` does the slow part (a file, the network, decoding), then `sync` hands the result to the views. `Threading::setSyncTaskBudget` spreads a burst of sync tasks over several frames. What is safe from any thread: `sync`, `async`, `delay` and `cancelDelay` themselves, an `Event`'s subscribing and firing (its callbacks run on the thread that fires), translations (`"key"_i18n`, even while the language changes), the logger, `View::aliveToken()` (checked on the main thread), `Image::setImageFromFileAsync` and `setImageAsync` (the bytes from any thread, the image set on the main thread), `Application::crash`. Anything else on a view or the application, from another thread, is a race; `tests/async_tests.cpp` checks these paths, under ThreadSanitizer too ([testing.md](testing.md)).
 
 ## Resources
 

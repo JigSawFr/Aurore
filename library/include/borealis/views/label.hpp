@@ -121,6 +121,9 @@ class Label : public View
     void setShrinkToFit(bool shrink);
     /// See setShrinkToFit().
     bool isShrinkingToFit();
+    /// With shrinkToFit: drawn as small as `size`, under the size asked and at
+    /// any scale, before being cut (0, the default: the size asked).
+    void setShrinkToFitMin(float size);
     /// The size it is drawn at, and the same before any shrinking to fit
     /// (what the text is measured at).
     float getDrawnFontSize();
@@ -222,6 +225,7 @@ class Label : public View
     bool fontScaled    = true;
     float fontScaleMax = 1e6f;
     bool shrinkToFit   = false;
+    float shrinkMin    = 0; ///< setShrinkToFitMin
     float fitScale     = 1.0f; ///< from onLayout, when shrinkToFit
     float fittedWidth  = 0; ///< the text's width at that scale
     float textWidth(); ///< the text's width as drawn

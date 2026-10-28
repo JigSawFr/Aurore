@@ -49,6 +49,7 @@
 #include <borealis/views/cells/cell_slider.hpp>
 #include <borealis/views/debug_layer.hpp>
 #include <borealis/views/dialog.hpp>
+#include <borealis/views/edit_text_dialog.hpp>
 #include <borealis/views/h_scrolling_frame.hpp>
 #include <borealis/views/header.hpp>
 #include <borealis/views/hint.hpp>
@@ -438,6 +439,9 @@ void Application::processInput()
         for (int i = 0; i < ControllerButton::_BUTTON_MAX; i++)
             controllerState.buttons[i] = swapKeys[i];
     }
+
+    // After the swap: the keys stay as they are named
+    applyKeyMap(inputManager, &controllerState);
 
     // Its toggle, and the whole controller while it is browsing
     if (Inspector::isEnabled())
@@ -1967,6 +1971,84 @@ void Application::setSwapInputKeys(bool swap)
     getGlobalHintsUpdateEvent()->fire();
 }
 
+// As the web simulator's keys: X, Y, L, R and +/- as written on the
+// controller, Shift for the triggers
+std::vector<std::pair<BrlsKeyCombination, ControllerButton>> Application::keyMap = {
+    { BrlsKeyCombination(BRLS_KBD_KEY_X), BUTTON_X },
+    { BrlsKeyCombination(BRLS_KBD_KEY_Y), BUTTON_Y },
+    { BrlsKeyCombination(BRLS_KBD_KEY_L), BUTTON_LB },
+    { BrlsKeyCombination(BRLS_KBD_KEY_R), BUTTON_RB },
+    { BrlsKeyCombination(BRLS_KBD_KEY_L, BRLS_KBD_MODIFIER_SHIFT), BUTTON_LT },
+    { BrlsKeyCombination(BRLS_KBD_KEY_R, BRLS_KBD_MODIFIER_SHIFT), BUTTON_RT },
+    { BrlsKeyCombination(BRLS_KBD_KEY_P), BUTTON_START },
+    { BrlsKeyCombination(BRLS_KBD_KEY_EQUAL, BRLS_KBD_MODIFIER_SHIFT), BUTTON_START },
+    { BrlsKeyCombination(BRLS_KBD_KEY_KP_ADD), BUTTON_START },
+    { BrlsKeyCombination(BRLS_KBD_KEY_M), BUTTON_BACK },
+    { BrlsKeyCombination(BRLS_KBD_KEY_MINUS), BUTTON_BACK },
+    { BrlsKeyCombination(BRLS_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
+    { BrlsKeyCombination(BRLS_KBD_KEY_BACKSPACE), BUTTON_B },
+};
+
+void Application::mapKey(BrlsKeyCombination key, ControllerButton button)
+{
+    unmapKey(key);
+    keyMap.emplace_back(key, button);
+}
+
+void Application::unmapKey(BrlsKeyCombination key)
+{
+    keyMap.erase(std::remove_if(keyMap.begin(), keyMap.end(), [key](const auto& entry)
+                     { return (int)entry.first == (int)key; }),
+        keyMap.end());
+}
+
+void Application::clearKeyMap()
+{
+    keyMap.clear();
+}
+
+const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& Application::getKeyMap()
+{
+    return keyMap;
+}
+
+void Application::applyKeyMap(InputManager* inputManager, ControllerState* state)
+{
+    if (keyMap.empty())
+        return;
+
+    // Letters typed in a text field are text
+    if (!activitiesStack.empty() && dynamic_cast<EditTextDialog*>(activitiesStack.back()->getContentView()))
+        return;
+
+    int mods = 0;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SHIFT))
+        mods |= BRLS_KBD_MODIFIER_SHIFT;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_CONTROL))
+        mods |= BRLS_KBD_MODIFIER_CTRL;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_ALT))
+        mods |= BRLS_KBD_MODIFIER_ALT;
+    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SUPER))
+        mods |= BRLS_KBD_MODIFIER_META;
+
+    for (const auto& [key, button] : keyMap)
+    {
+        if (key.mod != mods)
+            continue;
+        // An app that handles the key itself keeps it
+        auto watched = watchedKeysMap.find((int)key);
+        if (watched != watchedKeysMap.end() && watched->second > 0)
+            continue;
+        if (inputManager->getKeyboardKeyState(key.code))
+            state->buttons[button] = true;
+    }
+
+    state->buttons[BUTTON_NAV_UP] |= state->buttons[BUTTON_UP];
+    state->buttons[BUTTON_NAV_RIGHT] |= state->buttons[BUTTON_RIGHT];
+    state->buttons[BUTTON_NAV_DOWN] |= state->buttons[BUTTON_DOWN];
+    state->buttons[BUTTON_NAV_LEFT] |= state->buttons[BUTTON_LEFT];
+}
+
 NVGcontext* Application::getNVGContext()
 {
     return Application::platform->getVideoContext()->getNVGContext();
@@ -2315,6 +2397,14 @@ int Application::getDefaultFont()
 bool Application::XMLViewsRegisterContains(std::string name)
 {
     return Application::xmlViewsRegister.count(name) > 0;
+}
+
+std::vector<std::string> Application::getXMLViewNames()
+{
+    std::vector<std::string> names;
+    for (const auto& entry : Application::xmlViewsRegister)
+        names.push_back(entry.first);
+    return names;
 }
 
 XMLViewCreator Application::getXMLViewCreator(std::string name)

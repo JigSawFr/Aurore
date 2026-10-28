@@ -16,6 +16,7 @@
 
 #include "borealis/views/cells/cell_bool.hpp"
 
+#include <borealis/core/application.hpp>
 #include <borealis/core/i18n.hpp>
 
 using namespace brls::literals;
@@ -62,7 +63,8 @@ void BooleanCell::setOn(bool on, bool animated)
     else
         baseDetailTextSize = detail->getFontSize();
 
-    if (!animated)
+    // Reduced motion: no bounce
+    if (!animated || Application::getReduceMotion())
     {
         updateUI();
         return;
@@ -96,7 +98,7 @@ void BooleanCell::setOn(bool on, bool animated)
 void BooleanCell::updateUI()
 {
     detail->setText(state ? "hints/on"_i18n : "hints/off"_i18n);
-    detail->setThemeColor("textColor", state ? "brls/list/listItem_value_color" : "brls/text_disabled");
+    detail->setThemeColor("textColor", state ? "brls/list/listItem_value_color" : "brls/text_secondary");
 }
 
 void BooleanCell::scaleTick()

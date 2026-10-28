@@ -132,6 +132,18 @@ void GLFWInputManager::keyboardCallback(GLFWwindow* window, int key, int scancod
     Application::setActiveEvent(true);
 }
 
+void GLFWInputManager::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    auto* self = (GLFWInputManager*)Application::getPlatform()->getInputManager();
+    if (button < 0 || button > GLFW_MOUSE_BUTTON_MIDDLE)
+        return;
+    if (action == GLFW_PRESS)
+        self->mouseLatches[button].press();
+    else if (action == GLFW_RELEASE)
+        self->mouseLatches[button].release();
+    Application::setActiveEvent(true);
+}
+
 void GLFWInputManager::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     auto* self = (GLFWInputManager*)Application::getPlatform()->getInputManager();
@@ -196,6 +208,7 @@ GLFWInputManager::GLFWInputManager(GLFWwindow* window)
     glfwSetCursorPosCallback(window, cursorCallback);
     glfwSetCursorEnterCallback(window, cursorEnterCallback);
     glfwSetKeyCallback(window, keyboardCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
     if (glfwTouchInputSupported())
     {
         glfwSetInputMode(window, GLFW_TOUCH, GLFW_TRUE);
@@ -277,16 +290,16 @@ void GLFWInputManager::updateUnifiedControllerState(ControllerState* state)
         state->buttons[BUTTON_B] |= glfwGetKey(this->window, GLFW_KEY_KP_ENTER) != 0;
         state->buttons[BUTTON_B] |= glfwGetKey(this->window, GLFW_KEY_ENTER) != 0;
         state->buttons[BUTTON_A] |= glfwGetKey(this->window, GLFW_KEY_ESCAPE) != 0;
-        state->buttons[BUTTON_A] |= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+        state->buttons[BUTTON_A] |= mouseButtons[GLFW_MOUSE_BUTTON_RIGHT];
     }
     else
     {
         state->buttons[BUTTON_A] |= glfwGetKey(this->window, GLFW_KEY_KP_ENTER) != 0;
         state->buttons[BUTTON_A] |= glfwGetKey(this->window, GLFW_KEY_ENTER) != 0;
         state->buttons[BUTTON_B] |= glfwGetKey(this->window, GLFW_KEY_ESCAPE) != 0;
-        state->buttons[BUTTON_B] |= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+        state->buttons[BUTTON_B] |= mouseButtons[GLFW_MOUSE_BUTTON_RIGHT];
     }
-    state->buttons[BUTTON_X] |= (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS);
+    state->buttons[BUTTON_X] |= mouseButtons[GLFW_MOUSE_BUTTON_MIDDLE];
 
     state->buttons[BUTTON_UP] |= glfwGetKey(this->window, GLFW_KEY_UP) != 0;
     state->buttons[BUTTON_RIGHT] |= glfwGetKey(this->window, GLFW_KEY_RIGHT) != 0;
@@ -345,9 +358,9 @@ void GLFWInputManager::updateMouseStates(RawMouseState* state)
     double x, y;
     glfwGetCursorPos(this->window, &x, &y);
 
-    state->leftButton   = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-    state->middleButton = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-    state->rightButton  = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+    state->leftButton   = mouseButtons[GLFW_MOUSE_BUTTON_LEFT];
+    state->middleButton = mouseButtons[GLFW_MOUSE_BUTTON_MIDDLE];
+    state->rightButton  = mouseButtons[GLFW_MOUSE_BUTTON_RIGHT];
 
 #if defined(BOREALIS_USE_METAL) || defined(BOREALIS_USE_D3D11)
     // 使用 metal, d3d11 的 cocoa 窗口鼠标事件不需要进行 dpi 缩放。
@@ -372,6 +385,9 @@ void GLFWInputManager::setPointerLock(bool lock)
 
 void GLFWInputManager::runloopStart()
 {
+    for (int i = 0; i < 3; i++)
+        mouseButtons[i] = mouseLatches[i].frame();
+
     pointerOffset         = pointerOffsetBuffer;
     pointerOffsetBuffer.x = 0;
     pointerOffsetBuffer.y = 0;

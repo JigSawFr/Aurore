@@ -36,7 +36,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 
 ## Input
 
-- Every platform has the controller's buttons: a pad on the consoles and desktops, the keyboard too on a desktop (the arrows, Enter for A, Escape for B), SDL's controllers on phones. Register actions on buttons (`registerAction`, `registerClickAction`) rather than on keys, and the footer shows the right hints.
+- Every platform has the controller's buttons: a pad on the consoles and desktops, the keyboard too on a desktop (the arrows, Enter for A, Escape for B, the other buttons on letters: [input.md](input.md)), SDL's controllers on phones. Register actions on buttons (`registerAction`, `registerClickAction`) rather than on keys, and the footer shows the right hints.
 - Touch is the only input on a phone without a pad, and one of two on the Switch in handheld mode and the Vita: anything reached with a button must be reachable with a tap too (a button, a cell, `addGestureRecognizer`), not through a hidden action alone. `Application::getInputType()` says which was used last; the focus highlight is not drawn after a touch.
 - The mouse works on a desktop (hover styles, the wheel in scrolling frames); there is nothing to hover on the other platforms.
 - Text input differs: the system keyboard on the consoles and phones, a dialog of Aurore's under GLFW and SDL on a desktop (`ImeManager`, through `InputCell` or `Application::getImeManager()`).

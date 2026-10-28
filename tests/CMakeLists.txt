@@ -22,6 +22,12 @@ target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_image_limits_tests)
 
+# Tasks coming back to a view from another thread, task queues, events
+add_executable(aurore_async_tests async_tests.cpp)
+target_link_libraries(aurore_async_tests PRIVATE Aurore::test)
+target_compile_definitions(aurore_async_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
+brls_add_tests(aurore_async_tests)
+
 # The main loop's cost on the demo (Profiler), checked against a baseline
 add_executable(aurore_bench bench.cpp)
 target_link_libraries(aurore_bench PRIVATE aurore_demo_views Aurore::test)
@@ -34,3 +40,9 @@ add_test(NAME aurore_preview
         COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
 set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)
+
+# docs/xml-attributes.md as the sources register the attributes
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME xml_attributes_doc COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/xml_attributes.py --check)
+endif()

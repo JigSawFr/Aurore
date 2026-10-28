@@ -227,8 +227,10 @@ class Application
 
     /**
      * Reduced motion: the movements that are only there for show are skipped
-     * (the transition= of views, the highlight's glide; Cadran's entrances,
-     * glides and breathing glow). Off by default. getReduceMotion(), which
+     * (the transition= of views, the highlight's glide, the scrolling of
+     * lists and of texts cut short, the toasts' and dropdowns' slide, the
+     * switch cells' bounce; Cadran's entrances, glides and breathing glow).
+     * Off by default. getReduceMotion(), which
      * transitions read, is also true while Cadran's effects leave movement
      * out (Preferences › Visual effects "reduced", the lighter effects in
      * hand, BRLS_STILL_FOCUS); the highlight's glide follows the app's
@@ -572,6 +574,9 @@ class Application
 
     /// Whether an XML tag is registered (registerXMLView()).
     static bool XMLViewsRegisterContains(std::string name);
+
+    /// The XML tags registered (registerXMLView).
+    static std::vector<std::string> getXMLViewNames();
     /// The function registered for an XML tag.
     static XMLViewCreator getXMLViewCreator(std::string name);
 
@@ -641,6 +646,19 @@ class Application
 
     /// Swaps A and B (and X and Y) for the app's actions, as on a Japanese console.
     static void setSwapInputKeys(bool swap);
+
+    /// The keyboard keys that press a controller button, on top of Enter (A),
+    /// Escape (B) and the arrows. By default X, Y, L, R, Shift+L (ZL),
+    /// Shift+R (ZR), P or + (Plus), M or - (Minus) and Backspace (B); keys
+    /// are named after their place on a US keyboard (docs/input.md).
+    /// A key a view registers an action for keeps that action only, and
+    /// none applies while a text is being typed.
+    /// @{
+    static void mapKey(BrlsKeyCombination key, ControllerButton button);
+    static void unmapKey(BrlsKeyCombination key);
+    static void clearKeyMap();
+    static const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& getKeyMap();
+    /// @}
 
     inline static bool isSwapInputKeys()
     {
@@ -718,6 +736,8 @@ class Application
     inline static std::vector<BrlsKeyState> watchedKeys;
     inline static std::vector<BrlsKeyState> oldWatchedKeys;
     inline static std::unordered_map<int, int> watchedKeysMap;
+    static std::vector<std::pair<BrlsKeyCombination, ControllerButton>> keyMap;
+    static void applyKeyMap(InputManager* inputManager, ControllerState* state);
     inline static ControllerState controllerState = {};
 
     inline static void processInput();

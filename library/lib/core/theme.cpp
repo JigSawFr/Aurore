@@ -65,6 +65,7 @@ static const std::initializer_list<std::pair<std::string, NVGcolor>> LIGHT_COLOR
     { "brls/background", nvgRGB(235, 235, 235) },
     { "brls/text", nvgRGB(45, 45, 45) },
     { "brls/text_disabled", nvgRGB(140, 140, 140) },
+    { "brls/text_secondary", nvgRGB(100, 100, 100) }, // 4.5:1 on the background
     { "brls/backdrop", nvgRGBA(0, 0, 0, 178) },
     { "brls/notification/background", nvgRGBA(0, 0, 0, 178) }, // as the backdrop
     { "brls/notification/text", nvgRGB(255, 255, 255) },
@@ -134,6 +135,7 @@ static const std::initializer_list<std::pair<std::string, NVGcolor>> DARK_COLORS
     { "brls/background", nvgRGB(45, 45, 45) },
     { "brls/text", nvgRGB(255, 255, 255) },
     { "brls/text_disabled", nvgRGB(80, 80, 80) },
+    { "brls/text_secondary", nvgRGB(170, 170, 170) }, // 4.5:1 on the background
     { "brls/backdrop", nvgRGBA(0, 0, 0, 178) },
     { "brls/notification/background", nvgRGBA(0, 0, 0, 178) }, // as the backdrop
     { "brls/notification/text", nvgRGB(255, 255, 255) },
@@ -365,6 +367,7 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
         out["cadran/text2"]                      = text2;
         out["cadran/text3"]                      = text3;
         out["brls/text_disabled"]                = mix(T, B, 0.55f);
+        out["brls/text_secondary"]               = text3;
         out["brls/header/subtitle"]              = text3;
         out["brls/header/rectangle"]             = text3;
         out["brls/list/listItem_value_color"]    = text2;
@@ -662,7 +665,10 @@ struct ContrastCheck
 static std::vector<ContrastCheck> contrastChecks = {
     { "brls/text", "brls/background", 4.5f },
     { "brls/text", "brls/sidebar/background", 4.5f },
+    { "brls/text_secondary", "brls/background", 4.5f },
+    { "brls/list/listItem_value_color", "brls/background", 4.5f },
     { "brls/button/primary_enabled_text", "brls/button/primary_enabled_background", 4.5f },
+    { "brls/notification/text", "brls/notification/background", 4.5f },
 };
 
 void Theme::addContrastCheck(const std::string& ink, const std::string& surface, float minimum)

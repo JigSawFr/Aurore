@@ -261,11 +261,13 @@ The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a b
 | [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, Android, iOS and in a browser |
 | [Porting an app](docs/porting.md) | What an app's code and resources should mind on each platform |
 | [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
-| [Views](docs/views.md) · [XML attributes](docs/xml-attributes.md) | Every XML tag and its class; every attribute |
+| [Views](docs/views.md) | Every XML tag, its class and its header |
 | [Themes](docs/themes.md) | Theme files and folders, presets, pictures, decorations, keys |
 | [Cadran](docs/cadran.md) | The default look and its kit |
 | [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
 | [Components](docs/components.md) | The views Aurore adds |
+| [XML attributes](docs/xml-attributes.md) | Every attribute of every view, generated from the sources |
+| [Keyboard and mouse](docs/input.md) | The keys for the controller's buttons, the mouse |
 | [Testing](docs/testing.md) | The test harness |
 | [Fonts](docs/fonts.md) | The fonts on each platform, the buttons' code points, Chinese, Japanese and Korean |
 | [Inspector](docs/inspector.md) · [Hot reload](docs/hot_reload.md) | Debugging aids |

@@ -79,7 +79,7 @@ void InputCell::updateUI()
     if (this->value.empty())
     {
         this->detail->setText(placeholder);
-        this->detail->setThemeColor("textColor", "brls/text_disabled");
+        this->detail->setThemeColor("textColor", "brls/text_secondary");
     }
     else
     {

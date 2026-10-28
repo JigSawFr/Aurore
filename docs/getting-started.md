@@ -21,7 +21,7 @@ cmake --build build
 ./build/aurore_demo
 ```
 
-The arrows move the focus, Enter is A, Escape is B, the mouse and a controller work too. `-DUSE_LIBROMFS=ON` builds the `resources/` folder into the program; without it, the folder is copied next to it. Press **F12**: that is the [inspector](inspector.md), showing the views on screen, the focus and what a frame costs. Press it twice more to close it.
+The arrows move the focus, Enter is A, Escape is B, X, Y, L and R are themselves ([the other keys](input.md)), the mouse and a controller work too. `-DUSE_LIBROMFS=ON` builds the `resources/` folder into the program; without it, the folder is copied next to it. Press **F12**: that is the [inspector](inspector.md), showing the views on screen, the focus and what a frame costs. Press it twice more to close it.
 
 The demo's code is in `demo/`, its screens in `resources/xml/`: they are the examples for what follows.
 
@@ -152,6 +152,21 @@ class ScoreCard : public brls::Box
 ```
 
 Register it before the first screen that uses it, `brls::Application::registerXMLView("ScoreCard", ScoreCard::create);`, and it can be written in any XML: `<ScoreCard id="p1" player="Ada" />`. Override `draw()` for a view that draws itself with nanovg (`demo/src/view/` has both kinds), and `onFocusGained()`, `registerAction()` or gesture recognizers to react.
+
+Slow work (a file, the network) runs on the task thread with `brls::async`, and its result comes back to the UI thread with `brls::sync`; views are only touched there. The view may be gone by then: capture its `aliveToken()` and check it first.
+
+```cpp
+brls::async([this, alive = aliveToken()] {
+    std::string text = loadScore(); // the task thread: not `this`
+    brls::sync([this, alive, text] {
+        if (alive.expired())
+            return; // the view was deleted meanwhile
+        this->score->setText(text);
+    });
+});
+```
+
+`ASYNC_RETAIN`, `ASYNC_TOKEN` and `ASYNC_RELEASE` (from borealis) still work and do the same; they are kept for older code.
 
 ## 5. A theme (2 minutes)
 

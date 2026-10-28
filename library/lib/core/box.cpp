@@ -650,6 +650,7 @@ void Box::inflateFromXMLString(std::string_view xml)
         if (!element)
             fatal("Invalid XML: no element found");
     }
+    nameXMLDocument(document.get(), View::currentXMLResource);
 
     return Box::inflateFromXMLElement(element);
 }
@@ -695,6 +696,7 @@ void Box::inflateFromXMLFile(const std::string& path)
         if (!element)
             fatal("Invalid XML: no element found");
     }
+    nameXMLDocument(document.get(), path);
 
     return Box::inflateFromXMLElement(element);
 }
@@ -702,8 +704,9 @@ void Box::inflateFromXMLFile(const std::string& path)
 void Box::inflateFromXMLElement(tinyxml2::XMLElement* element)
 {
     // Ensure element is a Box
+    ReadingXMLElement reading(element);
     if (std::string(element->Name()) != "brls:Box")
-        fatal("First XML element is " + std::string(element->Name()) + ", expected brls:Box");
+        View::fatalXML("First XML element is " + std::string(element->Name()) + ", expected brls:Box");
 
     // Apply attributes
     this->applyXMLAttributes(element);
