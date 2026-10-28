@@ -33,6 +33,9 @@
 #include <borealis/core/theme_image.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/platforms/desktop/desktop_font.hpp>
+#ifdef __GLFW__
+#include <borealis/platforms/glfw/glfw_ime.hpp>
+#endif
 #include <borealis/platforms/desktop/desktop_platform.hpp>
 #include <borealis/test/harness.hpp>
 #include <borealis/views/edit_text_dialog.hpp>
@@ -826,8 +829,8 @@ BRLS_TEST(theme_errors_are_escaped_and_capped)
     BRLS_CHECK_EQ(info.errors.back(), std::string("and 400 more errors"));
 }
 
-// "@res/…" stays in the resources: in hot reload's folder and when a theme
-// is read
+// "@res/…" stays in the resources: in hot reload's folder, when a theme is
+// read and in an XML view's file paths
 BRLS_TEST(resource_names_stay_in_the_resources)
 {
     Harness h;
@@ -844,6 +847,12 @@ BRLS_TEST(resource_names_stay_in_the_resources)
     BRLS_CHECK(brls::HotReload::diskResource("@res/../secret.theme").empty());
     BRLS_CHECK(!brls::Theme::loadFile("@res/../secret.theme"));
     brls::HotReload::setEnabled(false);
+
+    // A file path attribute of an XML view
+    BRLS_CHECK(!brls::View::getFilePathXMLAttributeValue("@res/img/demo_icon.jpg").empty());
+    BRLS_CHECK(brls::View::getFilePathXMLAttributeValue("@res/../secret.theme").empty());
+    BRLS_CHECK(brls::View::getFilePathXMLAttributeValue("@res/img/../../secret.theme").empty());
+    BRLS_CHECK_EQ(brls::View::getFilePathXMLAttributeValue("/elsewhere/x.png"), std::string("/elsewhere/x.png"));
 
     // A language that is no locale's name is not a path either
     brls::loadTranslations("../../etc");
@@ -1057,6 +1066,35 @@ static void settlePictures(Harness& h)
         h.settle();
     }
 }
+
+#ifndef _WIN32
+// A theme's picture is looked at again just before it is decoded: a link
+// put in its place after Theme::resolveAsset looked is refused
+BRLS_TEST(theme_pictures_are_checked_again_before_they_are_read)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_recheck_test");
+    themes.picture("outside.png", 200, 30, 30);
+    themes.picture("mine/bg.png", 30, 30, 200);
+    std::string path, error;
+    const std::string folder = (themes.dir / "mine").generic_string();
+    BRLS_CHECK(brls::Theme::resolveAsset("bg.png", folder, folder, &path, &error));
+    BRLS_CHECK(brls::Theme::recheckAsset(path));
+
+    std::filesystem::remove(themes.dir / "mine" / "bg.png");
+    std::filesystem::create_symlink(themes.dir / "outside.png", themes.dir / "mine" / "bg.png");
+    BRLS_CHECK(!brls::Theme::recheckAsset(path, &error));
+    BRLS_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
+    std::shared_ptr<brls::ThemeImage> image = brls::ThemeImages::load(path);
+    settlePictures(h);
+    BRLS_CHECK(image->state == brls::ThemeImage::State::FAILED);
+    NVGcolor mean;
+    BRLS_CHECK(!brls::ThemeImages::meanColor(path, &mean));
+
+    // A path resolveAsset did not check: as it is
+    BRLS_CHECK(brls::Theme::recheckAsset((themes.dir / "outside.png").generic_string()));
+}
+#endif
 
 static bool hasWarningWith(const brls::ThemeInfo& info, const std::string& text)
 {
@@ -2260,7 +2298,9 @@ BRLS_TEST(cut_text_file_written_with_cadran)
     std::filesystem::create_directories(dir);
     std::filesystem::path previous = std::filesystem::current_path();
     std::filesystem::current_path(dir);
-    setenv("BRLS_CUT_TEXT", "1", 1);
+    // Through the app's hook: BRLS_CUT_TEXT is read only with BRLS_DEV_TOOLS
+    ui::hooks::get().env_flag = [](const char* name)
+    { return std::string(name) == "CUT_TEXT"; };
     {
         DemoHarness h;
         auto* cut = new brls::Label();
@@ -2275,7 +2315,7 @@ BRLS_TEST(cut_text_file_written_with_cadran)
         std::string all((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         BRLS_CHECK(all.find("A sentence far too long for the narrow box it is given") != std::string::npos);
     }
-    unsetenv("BRLS_CUT_TEXT");
+    ui::hooks::get().env_flag = nullptr;
     std::filesystem::current_path(previous);
     std::filesystem::remove_all(dir);
 }
@@ -2451,6 +2491,45 @@ BRLS_TEST(focus_on_a_scrolling_frame_shows_its_place)
     NVGcolor got  = indicator->getColor();
     BRLS_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
     BRLS_CHECK(h.matchesReference("scrolling_frame_focus"));
+}
+
+#ifdef __GLFW__
+// A word being composed with an input method: its focused block in [ ], and
+// block sizes that do not add up to the text read no further than blockCount
+BRLS_TEST(ime_preedit_text_stays_in_its_blocks)
+{
+    const unsigned int word[] = { 'a', 'b', 'c', 0x1F600 };
+    const int sizes[]         = { 1, 2 };
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, sizes, 1), std::string("a[bc]"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, sizes, 0), std::string("[a]bc"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(4, word, 2, sizes, 5), std::string("abc\xF0\x9F\x98\x80"));
+    // One block said (sizes[1] is past it): the rest is in none, and block 1
+    // is never focused
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 1, sizes, 1), std::string("abc"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 1, sizes, 0), std::string("[a]bc"));
+    // An empty block, and nothing at all
+    const int empty[] = { 0, 3 };
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, empty, 1), std::string("[abc]"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(0, word, 2, sizes, 0), std::string(""));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 0, sizes, 0), std::string(""));
+}
+#endif
+
+// A pan recognizer that has seen no touch fires nothing: its last state is
+// set from the start, not whatever its memory held
+BRLS_TEST(pan_recognizer_fires_nothing_before_a_touch)
+{
+    Harness h;
+    int fired = 0;
+    alignas(brls::PanGestureRecognizer) unsigned char memory[sizeof(brls::PanGestureRecognizer)];
+    std::memset(memory, 0x01, sizeof(memory)); // GestureState::UNSURE in every byte
+    auto* pan         = new (memory) brls::PanGestureRecognizer([&](brls::PanGestureStatus, brls::Sound*)
+        { fired++; },
+        brls::PanAxis::ANY);
+    brls::Sound sound = brls::SOUND_NONE;
+    pan->recognitionLoop(brls::TouchState(), brls::MouseState(), nullptr, &sound);
+    BRLS_CHECK_EQ(fired, 0);
+    pan->~PanGestureRecognizer();
 }
 
 namespace

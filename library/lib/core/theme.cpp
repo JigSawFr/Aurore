@@ -49,6 +49,7 @@ namespace fs = std::experimental::filesystem;
 #include <fstream>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -837,6 +838,45 @@ static std::vector<std::string> segmentsOf(const std::string& text)
     return segments;
 }
 
+// Named: in a unity build, the other files' helpers do not meet these
+namespace theme_asset_detail
+{
+    // Why `resolved` leads out of `root` through a link, "" when it does not
+    std::string linkOutOf(const std::string& resolved, const std::string& root)
+    {
+#if !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
+        try
+        {
+            fs::path there = resolved;
+            while (!there.empty() && !fs::exists(fs::symlink_status(there)))
+                there = there.parent_path();
+            if (there.empty())
+                there = ".";
+            fs::path within = fs::canonical(there).lexically_relative(fs::canonical(root.empty() ? "." : root));
+            if (within.empty() || *within.begin() == "..")
+                return "a link out of the theme's folder";
+        }
+        catch (const std::exception& e)
+        {
+            return "cannot tell where it leads (a broken link?)";
+        }
+#endif
+        return "";
+    }
+
+    // The paths resolveAsset() checked, and their theme's folder
+    std::mutex checkedMutex;
+    std::map<std::string, std::string> checkedRoots;
+
+    void remember(const std::string& resolved, const std::string& root)
+    {
+#if !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
+        std::lock_guard<std::mutex> lock(checkedMutex);
+        checkedRoots[resolved] = root;
+#endif
+    }
+} // namespace theme_asset_detail
+
 bool Theme::resolveAsset(const std::string& raw, const std::string& directory, const std::string& root,
     std::string* path, std::string* error)
 {
@@ -899,32 +939,35 @@ bool Theme::resolveAsset(const std::string& raw, const std::string& directory, c
     // A link inside the folder to a file out of it is refused too, and a file
     // not there yet is looked at through its nearest folder that is (a link
     // to a folder out of it). Where that cannot be told, refused. (The
-    // consoles' cards have no links.)
-#if !defined(__SWITCH__) && !defined(__PSV__) && !defined(PS4)
+    // consoles' cards have no links.) Looked at again before the file is
+    // opened (recheckAsset).
     if (!trusted)
     {
-        std::string why;
-        try
-        {
-            fs::path there = resolved;
-            while (!there.empty() && !fs::exists(fs::symlink_status(there)))
-                there = there.parent_path();
-            if (there.empty())
-                there = ".";
-            fs::path within = fs::canonical(there).lexically_relative(fs::canonical(root.empty() ? "." : root));
-            if (within.empty() || *within.begin() == "..")
-                why = "a link out of the theme's folder";
-        }
-        catch (const std::exception& e)
-        {
-            why = "cannot tell where it leads (a broken link?)";
-        }
+        std::string why = theme_asset_detail::linkOutOf(resolved, root);
         if (!why.empty())
             return refuse(why);
+        theme_asset_detail::remember(resolved, root);
     }
-#endif
     *path = resolved;
     return true;
+}
+
+bool Theme::recheckAsset(const std::string& path, std::string* error)
+{
+    std::string root;
+    {
+        std::lock_guard<std::mutex> lock(theme_asset_detail::checkedMutex);
+        auto it = theme_asset_detail::checkedRoots.find(path);
+        if (it == theme_asset_detail::checkedRoots.end())
+            return true;
+        root = it->second;
+    }
+    std::string why = theme_asset_detail::linkOutOf(path, root);
+    if (why.empty())
+        return true;
+    if (error)
+        *error = path + ": " + why;
+    return false;
 }
 
 namespace

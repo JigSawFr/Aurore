@@ -121,7 +121,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A test harness: no window, simulated time, inputs by call, screenshots compared | `-DBRLS_BUILD_TESTS=ON` · [docs/testing.md](docs/testing.md) |
 | An inspector drawn over the app, on every platform | F12 or L3+R3 · [docs/inspector.md](docs/inspector.md) |
 | Hot reload of the XML and the theme on the desktop | [docs/hot_reload.md](docs/hot_reload.md) |
-| Frame profiler | `BRLS_PROFILE=1` |
+| Frame profiler | `Profiler::setEnabled(true)`, or `BRLS_PROFILE=1` outside release builds |
 
 **Layout and drawing**
 

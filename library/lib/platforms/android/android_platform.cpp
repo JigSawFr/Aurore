@@ -31,18 +31,74 @@
 namespace brls
 {
 
+// A Java exception left pending makes the next JNI call abort: logged and
+// cleared. True when there was one.
+static bool clearException(JNIEnv* env)
+{
+    if (!env->ExceptionCheck())
+        return false;
+    env->ExceptionDescribe();
+    env->ExceptionClear();
+    return true;
+}
+
+// PlatformUtils and its static method `name`; false, nothing to delete,
+// when either is not there
+static bool findUtilsMethod(JNIEnv* env, const char* name, const char* signature, jclass* utilsClass,
+    jmethodID* method)
+{
+    *utilsClass = env->FindClass("org/libsdl/app/PlatformUtils");
+    if (clearException(env) || *utilsClass == nullptr)
+        return false;
+    *method = env->GetStaticMethodID(*utilsClass, name, signature);
+    if (clearException(env) || *method == nullptr)
+    {
+        env->DeleteLocalRef(*utilsClass);
+        return false;
+    }
+    return true;
+}
+
+// `text`, UTF-8, as a Java string: NewStringUTF reads "modified UTF-8",
+// which a character outside the BMP (an emoji) is not. Null when it cannot.
+static jstring javaString(JNIEnv* env, const std::string& text)
+{
+    jstring result   = nullptr;
+    jbyteArray bytes = env->NewByteArray((jsize)text.size());
+    if (clearException(env) || bytes == nullptr)
+        return nullptr;
+    env->SetByteArrayRegion(bytes, 0, (jsize)text.size(), reinterpret_cast<const jbyte*>(text.data()));
+    jclass stringClass = env->FindClass("java/lang/String");
+    if (!clearException(env) && stringClass != nullptr)
+    {
+        jmethodID init  = env->GetMethodID(stringClass, "<init>", "([BLjava/lang/String;)V");
+        jstring charset = nullptr;
+        if (!clearException(env) && init != nullptr)
+            charset = env->NewStringUTF("UTF-8");
+        if (!clearException(env) && charset != nullptr)
+        {
+            result = (jstring)env->NewObject(stringClass, init, bytes, charset);
+            if (clearException(env))
+                result = nullptr;
+        }
+        if (charset != nullptr)
+            env->DeleteLocalRef(charset);
+        env->DeleteLocalRef(stringClass);
+    }
+    env->DeleteLocalRef(bytes);
+    return result;
+}
+
 bool static getPlatformBool(const std::string& method, bool defaultValue = false)
 {
     auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-
-    jclass utilsClass = env->FindClass("org/libsdl/app/PlatformUtils");
-    if (utilsClass == nullptr)
-        return defaultValue;
-    jmethodID jmethod = env->GetStaticMethodID(utilsClass, method.c_str(),
-        "()Z");
-    if (jmethod == nullptr)
+    jclass utilsClass;
+    jmethodID jmethod;
+    if (!findUtilsMethod(env, method.c_str(), "()Z", &utilsClass, &jmethod))
         return defaultValue;
     jboolean value = env->CallStaticBooleanMethod(utilsClass, jmethod);
+    if (clearException(env))
+        value = defaultValue;
     env->DeleteLocalRef(utilsClass);
     return value;
 }
@@ -50,14 +106,13 @@ bool static getPlatformBool(const std::string& method, bool defaultValue = false
 int static getPlatformInt(const std::string& method, int defaultValue = 100)
 {
     auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-
-    jclass utilsClass = env->FindClass("org/libsdl/app/PlatformUtils");
-    if (utilsClass == nullptr)
-        return defaultValue;
-    jmethodID jmethod = env->GetStaticMethodID(utilsClass, method.c_str(), "()I");
-    if (jmethod == nullptr)
+    jclass utilsClass;
+    jmethodID jmethod;
+    if (!findUtilsMethod(env, method.c_str(), "()I", &utilsClass, &jmethod))
         return defaultValue;
     jint value = env->CallStaticIntMethod(utilsClass, jmethod);
+    if (clearException(env))
+        value = defaultValue;
     env->DeleteLocalRef(utilsClass);
     return value;
 }
@@ -166,32 +221,26 @@ void AndroidPlatform::openBrowser(std::string url)
         return;
     }
     auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-
-    jclass utilsClass = env->FindClass("org/libsdl/app/PlatformUtils");
-    if (utilsClass == nullptr)
-    {
+    jclass utilsClass;
+    jmethodID openBrowserMethod;
+    if (!findUtilsMethod(env, "openBrowser", "(Ljava/lang/String;)V", &utilsClass, &openBrowserMethod))
         return;
-    }
-
-    jmethodID openBrowserMethod = env->GetStaticMethodID(utilsClass, "openBrowser", "(Ljava/lang/String;)V");
-    if (openBrowserMethod == nullptr)
+    jstring jurl = javaString(env, url);
+    if (jurl != nullptr)
     {
-        return;
+        env->CallStaticVoidMethod(utilsClass, openBrowserMethod, jurl);
+        clearException(env);
+        env->DeleteLocalRef(jurl);
     }
-
-    auto jurl = env->NewStringUTF(url.c_str());
-    env->CallStaticVoidMethod(utilsClass, openBrowserMethod, jurl);
-
     env->DeleteLocalRef(utilsClass);
-    env->DeleteLocalRef(jurl);
 }
 
 float AndroidPlatform::getBacklightBrightness()
 {
     auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-
-    jclass utilsClass = env->FindClass("org/libsdl/app/PlatformUtils");
-    if (utilsClass == nullptr)
+    jclass utilsClass;
+    jmethodID jmethod;
+    if (!findUtilsMethod(env, "getAppScreenBrightness", "(Landroid/app/Activity;)F", &utilsClass, &jmethod))
         return 0.0f;
     auto activity = (jobject)SDL_AndroidGetActivity();
     if (activity == nullptr)
@@ -199,11 +248,9 @@ float AndroidPlatform::getBacklightBrightness()
         env->DeleteLocalRef(utilsClass);
         return 0.0f;
     }
-    jmethodID jmethod = env->GetStaticMethodID(utilsClass, "getAppScreenBrightness",
-        "(Landroid/app/Activity;)F");
-    if (jmethod == nullptr)
-        return 0.0f;
     jfloat value = env->CallStaticFloatMethod(utilsClass, jmethod, activity);
+    if (clearException(env))
+        value = 0.0f;
     env->DeleteLocalRef(activity);
     env->DeleteLocalRef(utilsClass);
     return value;
@@ -211,17 +258,11 @@ float AndroidPlatform::getBacklightBrightness()
 
 void AndroidPlatform::setBacklightBrightness(float brightness)
 {
-    auto env          = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
-    jclass utilsClass = env->FindClass("org/libsdl/app/PlatformUtils");
-    if (utilsClass == nullptr)
-    {
+    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    jclass utilsClass;
+    jmethodID method;
+    if (!findUtilsMethod(env, "setAppScreenBrightness", "(Landroid/app/Activity;F)V", &utilsClass, &method))
         return;
-    }
-    jmethodID method = env->GetStaticMethodID(utilsClass, "setAppScreenBrightness",
-        "(Landroid/app/Activity;F)V");
-    if (method == nullptr)
-        return;
-
     auto activity = (jobject)SDL_AndroidGetActivity();
     if (activity == nullptr)
     {
@@ -229,6 +270,7 @@ void AndroidPlatform::setBacklightBrightness(float brightness)
         return;
     }
     env->CallStaticVoidMethod(utilsClass, method, activity, brightness);
+    clearException(env);
     env->DeleteLocalRef(activity);
     env->DeleteLocalRef(utilsClass);
 }

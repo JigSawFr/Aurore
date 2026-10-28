@@ -66,7 +66,7 @@ class CadranIcon : public brls::View
 /// `ink`; around it a hairline in the theme's cadran/line, so that a dark
 /// swatch still shows on a dark sheet.
 /// With a `picture` (a theme's preview), that picture instead, cover-fitted
-/// in the rounded square with the hairline: decoded on the async thread
+/// in the rounded square with the hairline: decoded on the decode thread
 /// when the swatch is made (ThemeImages), the colours shown until it is
 /// ready, or when it cannot be read; freed with the swatch.
 class CadranSwatch : public brls::View

@@ -19,9 +19,11 @@ A flag is on when it is set to anything but `0` (Cadran's: `1`, `true` or `yes`)
 | `SteamDeck` | the desktop platform, on Linux | Set by Steam on a Steam Deck: the screen's brightness through the Deck's backlight, links opened and the keyboard shown through Steam (GLFW) |
 | `systemroot` | the desktop fonts, on Windows | Where Windows' fonts are (`C:\Windows\Fonts`), for Chinese, Japanese and Korean |
 
+The debugging aids above (`BRLS_INSPECTOR`, `BRLS_HOT_RELOAD`, `BRLS_PROFILE`, `BRLS_REDRAW_DEBUG`) are read only in a build made with `BRLS_DEV_TOOLS`. It is `AUTO` by default: on, except in `Release` and `MinSizeRel` builds, where these variables do nothing. `-DBRLS_DEV_TOOLS=ON` reads them in a release build too (a simulator built in `Release`), `OFF` in none ([hot reload](hot_reload.md#turning-it-on)). Their functions (`Application::setInspectorEnabled`, `setHotReload`, `Profiler::setEnabled`, `setRedrawDebug`) work in every build.
+
 ## Cadran
 
-[Cadran](cadran.md)'s flags help tests and screenshots of an app. They are read through `ui::env_flag("NAME")`, which reads `BRLS_NAME`; an app that sets `ui::hooks::get().env_flag` answers them itself (its own variables, a test's settings). On the Switch they are all off.
+[Cadran](cadran.md)'s flags help tests and screenshots of an app. They are read through `ui::env_flag("NAME")`, which reads `BRLS_NAME` in a build with `BRLS_DEV_TOOLS` (above: not a `Release` one, by default); an app that sets `ui::hooks::get().env_flag` answers them itself in every build (its own variables, a test's settings). On the Switch they are all off.
 
 | Variable | Effect |
 | --- | --- |

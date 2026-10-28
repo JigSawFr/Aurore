@@ -1821,6 +1821,12 @@ std::string View::getFilePathXMLAttributeValue(std::string value)
 {
     if (startsWith(value, "@res/"))
     {
+        // A resource stays in the resources (as in Theme::resolveAsset)
+        if (!isResourceNameSafe(value))
+        {
+            Logger::warning("{}: \"..\" is not allowed in a resource path", escapeControlChars(value));
+            return "";
+        }
         std::string resPath = value.substr(5);
 #ifdef USE_LIBROMFS
         return resPath;
@@ -1903,10 +1909,13 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     {
         if (this->filePathAttributes.count(name) > 0)
         {
+            // "" when refused: the attribute is left unset
+            std::string path = View::getFilePathXMLAttributeValue(value);
+            if (!path.empty())
 #ifdef USE_LIBROMFS
-            this->filePathAttributes[name](value);
+                this->filePathAttributes[name](value);
 #else
-            this->filePathAttributes[name](View::getFilePathXMLAttributeValue(value));
+                this->filePathAttributes[name](path);
 #endif
             return true;
         }

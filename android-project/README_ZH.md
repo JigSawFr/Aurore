@@ -11,10 +11,12 @@
 | JDK | 17，Android Gradle Plugin 8 的要求 |
 | NDK | 22.1.7171670（`app/build.gradle` 中的 `ndkVersion`） |
 | CMake | 3.16 或更高 |
-| SDK | 基于 API 31 编译；`minSdkVersion 16`（Android 4.1），`targetSdkVersion 31` |
+| SDK | 基于 API 34 编译；`minSdkVersion 21`（Android 5.0），`targetSdkVersion 34` |
 | ABI | `armeabi-v7a`、`arm64-v8a` |
 
-NDK 决定应用能运行的最低安卓版本：r22 和 r23 支持到 API 16，r24 和 r25 到 19，r26 到 21。在 Google Play 上架的应用需要较新的目标 API：请提高 `app/build.gradle` 中的 `compileSdkVersion` 和 `targetSdkVersion`（必要时一并调整 NDK、`minSdkVersion` 和 `-DANDROID_PLATFORM`）。CI 使用上表中的版本构建 debug APK。
+NDK 决定应用能运行的最低安卓版本：r22 和 r23 支持到 API 16，r24 和 r25 到 19，r26 到 21。在 Google Play 上架的应用需要较新的目标 API：请提高 `app/build.gradle` 中的 `compileSdkVersion` 和 `targetSdkVersion`（必要时一并调整 NDK、`minSdkVersion` 和 `-DANDROID_PLATFORM`）。目标 API 高于 34 还需要更新的 Android Gradle Plugin。CI 使用上表中的版本构建 debug APK。
+
+应用数据不进入安卓的备份，也不随设备迁移：`AndroidManifest.xml` 中的 `android:allowBackup="false"`，以及适用于 Android 12 及以后版本的 `res/xml/data_extraction_rules.xml`。需要备份设置的应用可以在其中包含相应文件。
 
 ## 构建
 

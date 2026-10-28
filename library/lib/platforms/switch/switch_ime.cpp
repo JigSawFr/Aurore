@@ -18,8 +18,10 @@ limitations under the License.
 
 #include <switch.h>
 
+#include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <vector>
 #include <borealis/core/logger.hpp>
 #include <borealis/platforms/switch/switch_ime.hpp>
 
@@ -40,6 +42,15 @@ static SwkbdConfig createSwkbdBaseConfig(std::string headerText, std::string sub
     swkbdConfigSetBlurBackground(&config, true);
 
     return config;
+}
+
+// Room for what swkbd writes back: maxStringLength characters in UTF-8 (4
+// bytes at most each) and the NUL; 500, the longest swkbd edits, when no
+// length is set
+static size_t textBufferSize(int maxStringLength)
+{
+    size_t characters = maxStringLength > 0 ? (size_t)maxStringLength : 500;
+    return std::max<size_t>(0x100, characters * 4 + 1);
 }
 
 int getSwkbdKeyDisableBitmask(int borealis_key)
@@ -93,11 +104,11 @@ bool SwitchImeManager::openForText(std::function<void(std::string)> f, std::stri
     swkbdConfigSetType(&config, SwkbdType_All);
     swkbdConfigSetKeySetDisableBitmask(&config, getSwkbdKeyDisableBitmask(kbdDisableBitmask));
 
-    char buffer[0x100];
+    std::vector<char> buffer(textBufferSize(maxStringLength));
 
-    if (R_SUCCEEDED(swkbdShow(&config, buffer, 0x100)))
+    if (R_SUCCEEDED(swkbdShow(&config, buffer.data(), buffer.size())))
     {
-        f(buffer);
+        f(buffer.data());
 
         swkbdClose(&config);
         return true;
@@ -121,15 +132,15 @@ bool SwitchImeManager::openForPassword(std::function<void(std::string)> f, std::
     swkbdConfigSetStringLenMax(&config, maxStringLength);
     swkbdConfigSetKeySetDisableBitmask(&config, getSwkbdKeyDisableBitmask(kbdDisableBitmask));
 
-    char buffer[0x100];
-    bool shown = R_SUCCEEDED(swkbdShow(&config, buffer, 0x100));
+    std::vector<char> buffer(textBufferSize(maxStringLength));
+    bool shown = R_SUCCEEDED(swkbdShow(&config, buffer.data(), buffer.size()));
 
     swkbdClose(&config);
 
     if (!shown)
         return false;
 
-    f(buffer);
+    f(buffer.data());
     return true;
 }
 
@@ -145,13 +156,13 @@ bool SwitchImeManager::openForNumber(std::function<void(long)> f, std::string he
     swkbdConfigSetRightOptionalSymbolKey(&config, rightButton.c_str());
     swkbdConfigSetKeySetDisableBitmask(&config, getSwkbdKeyDisableBitmask(kbdDisableBitmask));
 
-    char buffer[0x100];
+    std::vector<char> buffer(textBufferSize(maxStringLength));
 
-    bool shown = R_SUCCEEDED(swkbdShow(&config, buffer, 0x100));
+    bool shown = R_SUCCEEDED(swkbdShow(&config, buffer.data(), buffer.size()));
 
     swkbdClose(&config);
 
-    if (!shown || strcmp(buffer, "") == 0)
+    if (!shown || strcmp(buffer.data(), "") == 0)
         return false;
 
     // The optional symbol keys can leave a text that is not a number ("-",
@@ -159,11 +170,11 @@ bool SwitchImeManager::openForNumber(std::function<void(long)> f, std::string he
     long value;
     try
     {
-        value = std::stol(buffer);
+        value = std::stol(buffer.data());
     }
     catch (const std::exception& e)
     {
-        Logger::warning("switch ime: \"{}\" is not a number: {}", buffer, e.what());
+        Logger::warning("switch ime: \"{}\" is not a number: {}", buffer.data(), e.what());
         return false;
     }
 

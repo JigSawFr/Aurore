@@ -120,7 +120,7 @@ aurore_bench --check tests/bench_baseline.json # exit 1 on a regression
 
 `--check` fails when a count is above the baseline's by more than `--margin` (25 %, and 1). Times depend on the machine: they are checked only with `--time-margin <factor>`. `ctest` runs the check.
 
-The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too, and logs averages every 120 frames. The [inspector](inspector.md)'s panel shows its figures, and it measures while the panel is open. Each `FrameProfile` has the time of each phase (`events`, `input`, `update`, `layout`, `draw`, `inspector`, `flush`, `swap`), the `total` and the `interval` since the iteration before, and counts: layouts, views laid out, nanovg's draw calls and triangles, allocations.
+The `Profiler` (`borealis/core/profiler.hpp`) is in every build and costs a test per phase while off. `Profiler::setEnabled(true)` turns it on (`getLastFrame()`, `getFrameEvent()`, `setAllocationCounter()`); `BRLS_PROFILE=1` in the environment of a desktop app does too (a build with `BRLS_DEV_TOOLS`, see [hot reload](hot_reload.md#turning-it-on)), and logs averages every 120 frames. The [inspector](inspector.md)'s panel shows its figures, and it measures while the panel is open. Each `FrameProfile` has the time of each phase (`events`, `input`, `update`, `layout`, `draw`, `inspector`, `flush`, `swap`), the `total` and the `interval` since the iteration before, and counts: layouts, views laid out, nanovg's draw calls and triangles, allocations.
 
 ## aurore-preview
 
@@ -132,7 +132,7 @@ Draws an XML layout to a PNG with the harness: `--theme dark`, `light` or a them
 
 ## Redraw on demand: finding a missing invalidation
 
-With redraw on demand (`Application::setRedrawOnDemand(true)`), a view that changes how it looks without `invalidate()` or `requestRedraw()` stays stale on screen. `Application::setRedrawDebug(true)`, or `BRLS_REDRAW_DEBUG=1` on the desktop, draws each skipped frame all the same, without presenting it, compares it with the last frame presented, and logs a difference as a warning with its area and the views drawn there:
+With redraw on demand (`Application::setRedrawOnDemand(true)`), a view that changes how it looks without `invalidate()` or `requestRedraw()` stays stale on screen. `Application::setRedrawDebug(true)`, or `BRLS_REDRAW_DEBUG=1` on the desktop (a build with `BRLS_DEV_TOOLS`), draws each skipped frame all the same, without presenting it, compares it with the last frame presented, and logs a difference as a warning with its area and the views drawn there:
 
 ```
 redraw debug: a skipped frame differs from the last one presented (412 pixels in 1104,20 96x28): no redraw asked for Label (id: clock)

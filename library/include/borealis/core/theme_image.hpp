@@ -85,7 +85,7 @@ struct ThemeImage
 
 /**
  * The one loader of theme pictures. load() hands back the image at once,
- * still loading: it is decoded on the async thread (brls::async), made
+ * still loading: it is decoded on the decode thread (Threading::asyncDecode), made
  * smaller when larger than MAX_WIDTH x MAX_HEIGHT (its ratio kept), and its
  * texture is made on the UI thread (brls::sync), which draws again. A file
  * that cannot be read is logged once and stays FAILED.
@@ -131,7 +131,7 @@ class ThemeImages
     /**
      * The average colour of the picture at `path` (opaque), for the
      * contrast checks: remembered once known (a load() computes it on the
-     * async thread); else decoded here, on the calling thread: not from the
+     * decode thread); else decoded here, on the calling thread: not from the
      * UI thread (a check, a test). False when the file cannot be read.
      */
     static bool meanColor(const std::string& path, NVGcolor* color);
@@ -148,7 +148,7 @@ class ThemeImages
     static bool exists(const std::string& path);
 
     /**
-     * How many pictures the async thread is decoding now. A test waits for
+     * How many pictures the decode thread is decoding now. A test waits for
      * none, in real time, before it counts frames: the frames drawn while a
      * picture decodes then do not depend on the machine's speed.
      */

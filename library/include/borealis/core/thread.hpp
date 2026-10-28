@@ -91,6 +91,13 @@ class Threading
      */
     static void async(std::function<void()> func);
 
+    /**
+     * As async(), on a thread of its own for decoding pictures (ThemeImages,
+     * Image::setImageFromFileAsync): a large picture does not hold back the
+     * tasks of async() (the battery, the Wi-Fi, the app's own).
+     */
+    static void asyncDecode(std::function<void()> func);
+
     static size_t delay(long milliseconds, std::function<void()> func);
 
     static void cancelDelay(size_t iter);
@@ -118,8 +125,8 @@ class Threading
     }
 
     /**
-     * True when no task is queued with sync() or async() and none is
-     * running on the async thread (delay()s are not counted). The test
+     * True when no task is queued with sync(), async() or asyncDecode()
+     * and none is running on their threads (delay()s are not counted). The test
      * harness waits for it before it calls a screen settled.
      */
     static bool isIdle();
@@ -153,6 +160,7 @@ class Threading
 
     static void* task_loop(void* a);
     static void std_task_loop();
+    static void* decode_loop(void* a);
 
     static void start_task_loop();
 };

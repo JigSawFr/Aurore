@@ -416,6 +416,16 @@ class Theme
         std::string* path, std::string* error);
 
     /**
+     * A path resolveAsset() made, looked at again just before the file is
+     * opened (from any thread): false, with the reason in `error`, when a
+     * link now takes it out of its theme's folder (put there after
+     * resolveAsset() looked). True for a path resolveAsset() did not check
+     * (a resource, a file named by the app). A hard link cannot be told from
+     * the file itself: a theme folder is only as safe as who can write in it.
+     */
+    static bool recheckAsset(const std::string& path, std::string* error = nullptr);
+
+    /**
      * The logo, icons, preview and image slots' pictures of `variant` with
      * the file in use (none without a file, or for a variant it does not
      * style): paths, nothing loaded.
@@ -447,7 +457,7 @@ class Theme
      * The picture of the image slot `key` now (UI thread): the theme's for
      * the variant in use, else the slot's fallback (also when the theme's
      * cannot be read); nullptr for neither, or a slot not declared. Loaded
-     * on the async thread (ThemeImages): it may still be LOADING, and
+     * on the decode thread (ThemeImages): it may still be LOADING, and
      * ThemeImages::getLoadedEvent() says when it is ready. Kept while the
      * theme and the variant stay; a view keeping it gets the new one on
      * Application::getThemeChangedEvent() (brls::Image::setThemeImage does).
