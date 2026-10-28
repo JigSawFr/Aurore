@@ -1,3 +1,13 @@
 # Formatting-only commits: `git config blame.ignoreRevsFile .git-blame-ignore-revs` skips them in git blame
 # style: apply clang-format 18 to the whole tree and check it in CI (#37)
 8db4ed704918a63f9bd93a302990152cd77d14ec
+# refactor(names): the headers move to include/aurore
+7e5bdd85cf364738fdf055395711d120d94254b4
+# refactor(names): the aurore namespace replaces brls
+035c080d24701bafa411e255dcb640fc27bffe75
+# refactor(names): AURORE_ replaces the BRLS_ and BOREALIS_ prefixes
+f608bc2f86a5c33d00f582133b2222722c0bf461
+# refactor(names): aurore: XML tags and aurore/ theme and style keys
+24a62e95efc04b6a478500acd83d204adb016062
+# refactor(names): Aurore in the comments and messages of the code
+4d61fc35f26bb78d1727b1fe4e4f74b4bee9d33b
