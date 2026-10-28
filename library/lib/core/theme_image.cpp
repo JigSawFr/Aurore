@@ -362,7 +362,7 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, const The
     decodingCount++;
     int maxWidth  = maxSide > 0 ? std::min(maxSide, MAX_WIDTH) : MAX_WIDTH;
     int maxHeight = maxSide > 0 ? std::min(maxSide, MAX_HEIGHT) : MAX_HEIGHT;
-    brls::async([weak, source, meanKey, maxWidth, maxHeight, mask]()
+    Threading::asyncDecode([weak, source, meanKey, maxWidth, maxHeight, mask]()
         {
             // Shared with the UI thread's task, freed by whichever ends last
             auto pixels = std::make_shared<Pixels>();

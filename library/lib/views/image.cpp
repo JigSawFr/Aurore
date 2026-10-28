@@ -445,7 +445,7 @@ void Image::setImageFromFileAsync(const std::string& path)
 
     unsigned generation = ++this->asyncGeneration;
     int flags           = this->getImageFlags();
-    brls::async([this, alive = aliveToken(), path, generation, flags]()
+    Threading::asyncDecode([this, alive = aliveToken(), path, generation, flags]()
         {
             int width = 0, height = 0;
             // Freed whatever happens to the image meanwhile

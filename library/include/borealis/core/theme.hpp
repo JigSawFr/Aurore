@@ -439,7 +439,7 @@ class Theme
      * The picture of the image slot `key` now (UI thread): the theme's for
      * the variant in use, else the slot's fallback (also when the theme's
      * cannot be read); nullptr for neither, or a slot not declared. Loaded
-     * on the async thread (ThemeImages): it may still be LOADING, and
+     * on the decode thread (ThemeImages): it may still be LOADING, and
      * ThemeImages::getLoadedEvent() says when it is ready. Kept while the
      * theme and the variant stay; a view keeping it gets the new one on
      * Application::getThemeChangedEvent() (brls::Image::setThemeImage does).

@@ -101,7 +101,7 @@ class Image : public View
     void setImageFromFile(const std::string& path);
 
     /**
-     * Sets the image from the given file path, decoded on the async thread:
+     * Sets the image from the given file path, decoded on the decode thread (Threading::asyncDecode):
      * the UI thread only uploads the pixels, so a grid of covers does not
      * stall while they load. The image stays as it was until then (a cached
      * texture is shown at once). An image set again meanwhile, or deleted,

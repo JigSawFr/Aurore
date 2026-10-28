@@ -200,6 +200,44 @@ BRLS_TEST(threading_stop_twice_then_start)
     BRLS_CHECK(ran.load());
 }
 
+// A picture being decoded does not hold back the other tasks
+BRLS_TEST(async_tasks_run_while_a_picture_decodes)
+{
+    Harness harness;
+    std::promise<void> release;
+    std::shared_future<void> released = release.get_future().share();
+    std::atomic<bool> decoding { false }, decoded { false }, ran { false };
+    brls::Threading::asyncDecode([&, released]
+        {
+            decoding = true;
+            released.wait();
+            decoded = true; });
+    while (!decoding)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(!brls::Threading::isIdle());
+
+    brls::async([&ran]
+        { ran = true; });
+    for (int i = 0; i < 2000 && !ran; i++)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(ran.load());
+    BRLS_CHECK(!decoded.load());
+
+    release.set_value();
+    harness.settle();
+    BRLS_CHECK(decoded.load());
+    BRLS_CHECK(brls::Threading::isIdle());
+
+    // Stopped and started again, as async()'s
+    brls::Threading::stop();
+    brls::Threading::start();
+    std::atomic<bool> again { false };
+    brls::Threading::asyncDecode([&again]
+        { again = true; });
+    harness.settle();
+    BRLS_CHECK(again.load());
+}
+
 BRLS_TEST(event_subscribed_while_another_thread_fires)
 {
     Harness harness;
