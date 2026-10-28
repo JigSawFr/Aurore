@@ -153,6 +153,21 @@ class ScoreCard : public brls::Box
 
 Register it before the first screen that uses it, `brls::Application::registerXMLView("ScoreCard", ScoreCard::create);`, and it can be written in any XML: `<ScoreCard id="p1" player="Ada" />`. Override `draw()` for a view that draws itself with nanovg (`demo/src/view/` has both kinds), and `onFocusGained()`, `registerAction()` or gesture recognizers to react.
 
+Slow work (a file, the network) runs on the task thread with `brls::async`, and its result comes back to the UI thread with `brls::sync`; views are only touched there. The view may be gone by then: capture its `aliveToken()` and check it first.
+
+```cpp
+brls::async([this, alive = aliveToken()] {
+    std::string text = loadScore(); // the task thread: not `this`
+    brls::sync([this, alive, text] {
+        if (alive.expired())
+            return; // the view was deleted meanwhile
+        this->score->setText(text);
+    });
+});
+```
+
+`ASYNC_RETAIN`, `ASYNC_TOKEN` and `ASYNC_RELEASE` (from borealis) still work and do the same; they are kept for older code.
+
 ## 5. A theme (2 minutes)
 
 Colours and metrics come from the theme (light or dark, following the system) and can be changed without rebuilding, from a file:

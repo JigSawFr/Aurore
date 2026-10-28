@@ -94,6 +94,17 @@ ctest --test-dir build --output-on-failure
 
 `tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
 
+`tests/async_tests.cpp` covers what crosses threads: a task coming back to a deleted view (`View::aliveToken()`, the `ASYNC_*` macros), the battery and Wi-Fi widgets read on the task thread (`HeadlessPlatform::showStatus` shows them), `delay()`/`cancelDelay()`, `Threading::stop()`/`start()`, events fired from another thread, logging from the task thread. Built with ThreadSanitizer they check the locking too:
+
+```sh
+cmake -B build-tsan -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON \
+    -DCMAKE_CXX_FLAGS=-fsanitize=thread -DCMAKE_C_FLAGS=-fsanitize=thread -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=thread
+cmake --build build-tsan --target aurore_async_tests
+TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R aurore_async_tests --output-on-failure
+```
+
+`tests/tsan.supp` leaves out what Mesa's software renderer, which draws the tests and is not built with the sanitizer, does in its own threads.
+
 ## The bench
 
 `aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, nanovg draw calls, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, flush, swap, total).

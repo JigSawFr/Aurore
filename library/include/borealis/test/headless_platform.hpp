@@ -25,6 +25,7 @@
 
 #include <borealis/platforms/desktop/desktop_platform.hpp>
 
+#include <atomic>
 #include <optional>
 #include <set>
 #include <string>
@@ -127,9 +128,9 @@ class HeadlessPlatform : public DesktopPlatform
     InputManager* getInputManager() override { return &inputManager; }
     ImeManager* getImeManager() override { return &headlessImeManager; }
 
-    bool canShowBatteryLevel() override { return false; }
-    bool canShowWirelessLevel() override { return false; }
-    int getBatteryLevel() override { return 100; }
+    bool canShowBatteryLevel() override { return showStatus; }
+    bool canShowWirelessLevel() override { return showStatus; }
+    int getBatteryLevel() override { return batteryLevel; }
     bool isBatteryCharging() override { return false; }
     bool hasWirelessConnection() override { return false; }
     int getWirelessLevel() override { return 0; }
@@ -151,6 +152,11 @@ class HeadlessPlatform : public DesktopPlatform
 
     // The links openBrowser() was asked to open
     std::vector<std::string> openedUrls;
+
+    // The battery and Wi-Fi widgets shown (the widgets made after it is set)
+    bool showStatus = false;
+    // What getBatteryLevel() says (read on the task thread)
+    std::atomic<int> batteryLevel { 100 };
 
   private:
     int width, height;
