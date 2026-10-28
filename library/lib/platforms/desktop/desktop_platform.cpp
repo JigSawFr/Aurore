@@ -539,10 +539,30 @@ static bool portalPrefersDark(DBusConnection* connection)
 }
 #endif
 
+const char* DesktopPlatform::environment(const std::string& name)
+{
+    if (const char* value = getenv(("BRLS_" + name).c_str()))
+        return value;
+    return getenv(("BOREALIS_" + name).c_str());
+}
+
+bool DesktopPlatform::localeFromEnvironmentVariable(std::string* locale)
+{
+    const char* langEnv = environment("LANG");
+    if (!langEnv)
+        return false;
+    std::string lang = langEnv;
+    bool name        = !lang.empty() && lang.size() <= 32;
+    for (char c : lang)
+        name = name && (std::isalnum((unsigned char)c) || c == '-');
+    *locale = name ? lang : localeFromSystem(lang);
+    return true;
+}
+
 DesktopPlatform::DesktopPlatform()
 {
     // Theme
-    char* themeEnv = getenv("BOREALIS_THEME");
+    const char* themeEnv = environment("THEME");
     if (themeEnv == nullptr)
     {
 #if defined(IOS) || defined(TVOS)
@@ -597,18 +617,8 @@ DesktopPlatform::DesktopPlatform()
     // Locale
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO)
     {
-        // A locale's name as it is ("zh-Hant", an app's own), else read as a
-        // system's ("fr_FR.UTF-8"): never a path
-        char* langEnv = getenv("BOREALIS_LANG");
-        this->locale  = LOCALE_DEFAULT;
-        if (langEnv)
-        {
-            std::string lang = langEnv;
-            bool name        = !lang.empty() && lang.size() <= 32;
-            for (char c : lang)
-                name = name && (std::isalnum((unsigned char)c) || c == '-');
-            this->locale = name ? lang : localeFromSystem(lang);
-        }
+        this->locale                = LOCALE_DEFAULT;
+        this->localeFromEnvironment = localeFromEnvironmentVariable(&this->locale);
     }
     else
     {

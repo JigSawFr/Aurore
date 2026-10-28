@@ -32,6 +32,7 @@
 #include <borealis/core/theme_image.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/platforms/desktop/desktop_font.hpp>
+#include <borealis/platforms/desktop/desktop_platform.hpp>
 #include <borealis/test/harness.hpp>
 #include <borealis/views/edit_text_dialog.hpp>
 
@@ -2458,4 +2459,57 @@ BRLS_TEST(hot_reload_keeps_the_screen_when_a_tab_fails)
     h.settle();
     BRLS_CHECK(h.top()->getContentView() != content);
     BRLS_CHECK_EQ(h.focusText(), std::string("second"));
+}
+
+// What Windows, macOS and Linux give for the language, each to one of the
+// 15 catalogues
+BRLS_TEST(system_locales_map_to_the_catalogues)
+{
+    Harness h;
+    const std::pair<const char*, const char*> cases[] = {
+        { "fr_CA", "fr-CA" }, { "fr_FR.UTF-8", "fr" }, { "fr-CA", "fr-CA" }, { "zh_CN", "zh-Hans" },
+        { "zh-Hans", "zh-Hans" }, { "zh-Hans-CN", "zh-Hans" }, { "zh-Hant-TW", "zh-Hant" }, { "zh_TW", "zh-Hant" },
+        { "zh_HK", "zh-Hant" }, { "zh_SG", "zh-Hans" }, { "es_MX", "es-419" }, { "es-419", "es-419" },
+        { "es_ES", "es" }, { "es", "es" }, { "en_GB", "en-GB" }, { "en-AU", "en-GB" }, { "en_US", "en-US" },
+        { "pt_BR", "pt-BR" }, { "pt-PT", "pt" }, { "de_AT@euro", "de" }, { "ja_JP", "ja" }, { "ko-KR", "ko" },
+        { "nl_BE", "nl" }, { "ru_RU.KOI8-R", "ru" }, { "it_CH", "it" }, { "C", "en-US" }, { "sv_SE", "en-US" }, { "", "en-US" }
+    };
+    for (const auto& [system, locale] : cases)
+    {
+        std::string got = brls::localeFromSystem(system);
+        if (got != locale)
+            std::fprintf(stderr, "%s gave %s, not %s\n", system, got.c_str(), locale);
+        BRLS_CHECK_EQ(got, std::string(locale));
+    }
+}
+
+// BRLS_LANG (or the older BOREALIS_LANG) gives the language over the
+// system's, a locale's name as it is or a system's read
+BRLS_TEST(language_from_the_environment_wins)
+{
+    Harness h;
+    unsetenv("BRLS_LANG");
+    unsetenv("BOREALIS_LANG");
+    std::string locale = "unchanged";
+    BRLS_CHECK(!brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("unchanged"));
+
+    setenv("BOREALIS_LANG", "de_DE.UTF-8", 1);
+    BRLS_CHECK(brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("de"));
+
+    setenv("BRLS_LANG", "fr-CA", 1);
+    BRLS_CHECK(brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("fr-CA"));
+
+    setenv("BRLS_LANG", "../../etc", 1);
+    BRLS_CHECK(brls::DesktopPlatform::localeFromEnvironmentVariable(&locale));
+    BRLS_CHECK_EQ(locale, std::string("en-US"));
+
+    setenv("BOREALIS_THEME", "LIGHT", 1);
+    BRLS_CHECK_EQ(std::string(brls::DesktopPlatform::environment("THEME")), std::string("LIGHT"));
+    setenv("BRLS_THEME", "DARK", 1);
+    BRLS_CHECK_EQ(std::string(brls::DesktopPlatform::environment("THEME")), std::string("DARK"));
+    for (const char* name : { "BRLS_LANG", "BOREALIS_LANG", "BRLS_THEME", "BOREALIS_THEME" })
+        unsetenv(name);
 }
