@@ -9,7 +9,7 @@
 #include <iterator>
 #include "check.h"
 
-#include <borealis/cadran/ui/cadran_palette.hpp>
+#include <aurore/cadran/ui/cadran_palette.hpp>
 
 using cadran::palette::Palette;
 using cadran::palette::Rgba;

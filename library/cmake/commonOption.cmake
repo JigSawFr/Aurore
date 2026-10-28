@@ -1,10 +1,13 @@
 # Aurore's build options. Include this file before project(), then
 # toolchain.cmake (README.md, "Use it in your project").
 #
-# The options are prefixed (AURORE_, and BRLS_ for the older ones), so they
-# do not clash with a parent project's own. The names borealis used
-# (PLATFORM_DESKTOP, USE_GLFW, USE_LIBROMFS…) still work for now: given on
-# the command line or set before this file, they are copied to the new
+# The options are prefixed (AURORE_), so they do not clash with a parent
+# project's own. The names borealis used still work for now:
+# legacy-names: begin
+# PLATFORM_DESKTOP, USE_GLFW, USE_LIBROMFS… and the BRLS_ ones (BRLS_BUILD_TESTS,
+# BRLS_DEV_TOOLS, BRLS_INSPECTOR, BRLS_UNITY_BUILD, BRLS_FONTSTASH_STREAM):
+# legacy-names: end
+# given on the command line or set before this file, they are copied to the new
 # options, with a deprecation warning. Either way this file then sets the
 # old names as plain variables, which the build files read: an app can
 # still test PLATFORM_SWITCH or USE_DEKO3D after including it.
@@ -65,32 +68,32 @@ option(AURORE_SIMPLE_HIGHLIGHT "Simple highlight" OFF)
 option(AURORE_FREETYPE "fontstash renders glyphs with FreeType" OFF)
 
 # Labels put right-to-left text (Hebrew, Arabic) in reading order and join
-# Arabic letters, with GNU FriBidi (LGPL-2.1+): brls::bidiVisual().
+# Arabic letters, with GNU FriBidi (LGPL-2.1+): aurore::bidiVisual().
 option(AURORE_FRIBIDI "labels reorder right-to-left text with FriBidi" OFF)
 
 # Unity build, CMAKE_UNITY_BUILD_BATCH_SIZE sets the batch size
 # https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html
-option(BRLS_UNITY_BUILD "Unity build" OFF)
+option(AURORE_UNITY_BUILD "Unity build" OFF)
 
-option(BRLS_FONTSTASH_STREAM "fontstash use stream" OFF)
+option(AURORE_FONTSTASH_STREAM "fontstash use stream" OFF)
 
 # The built-in inspector (F12, or L3 + R3) on from the start, for debug builds
 # (Application::setInspectorEnabled does it at run time)
-option(BRLS_INSPECTOR "Built-in inspector on" OFF)
+option(AURORE_INSPECTOR "Built-in inspector on" OFF)
 
-# The debugging aids read from the environment on a desktop: BRLS_INSPECTOR,
-# BRLS_HOT_RELOAD, BRLS_REDRAW_DEBUG, BRLS_PROFILE and Cadran's flags
+# The debugging aids read from the environment on a desktop: AURORE_INSPECTOR,
+# AURORE_HOT_RELOAD, AURORE_REDRAW_DEBUG, AURORE_PROFILE and Cadran's flags
 # (ui::env_flag). AUTO builds them in except in Release and MinSizeRel: a
 # distributed app does not read its screens from a folder an environment
 # variable names. Their functions (Inspector::setEnabled,
 # HotReload::setEnabled...) are in every build.
-set(BRLS_DEV_TOOLS "AUTO" CACHE STRING "Debugging aids from the environment: AUTO (not in Release and MinSizeRel), ON or OFF")
-set_property(CACHE BRLS_DEV_TOOLS PROPERTY STRINGS AUTO ON OFF)
+set(AURORE_DEV_TOOLS "AUTO" CACHE STRING "Debugging aids from the environment: AUTO (not in Release and MinSizeRel), ON or OFF")
+set_property(CACHE AURORE_DEV_TOOLS PROPERTY STRINGS AUTO ON OFF)
 
-# The test harness (headless platform, brls::test::Harness: target
+# The test harness (headless platform, aurore::test::Harness: target
 # Aurore::test), and with this project the demo's tests, bench and
 # aurore-preview. Desktop with OpenGL 3 (the default driver) only.
-option(BRLS_BUILD_TESTS "Build the test harness" OFF)
+option(AURORE_BUILD_TESTS "Build the test harness" OFF)
 
 # iOS only (if empty then not signed)
 set(IOS_CODE_SIGN_IDENTITY "" CACHE STRING "The code sign identity to use when building the IPA.")
@@ -205,6 +208,24 @@ _aurore_legacy_bool(AURORE_LIBROMFS USE_LIBROMFS)
 _aurore_legacy_bool(AURORE_SIMPLE_HIGHLIGHT SIMPLE_HIGHLIGHT)
 _aurore_legacy_bool(AURORE_FREETYPE USE_FREETYPE)
 _aurore_legacy_bool(AURORE_FRIBIDI USE_FRIBIDI)
+# legacy-names: begin
+_aurore_legacy_bool(AURORE_UNITY_BUILD BRLS_UNITY_BUILD)
+_aurore_legacy_bool(AURORE_FONTSTASH_STREAM BRLS_FONTSTASH_STREAM)
+_aurore_legacy_bool(AURORE_INSPECTOR BRLS_INSPECTOR)
+_aurore_legacy_bool(AURORE_BUILD_TESTS BRLS_BUILD_TESTS)
+set(_aurore_value "")
+if (DEFINED BRLS_DEV_TOOLS)
+    string(TOUPPER "${BRLS_DEV_TOOLS}" _aurore_value)
+    if (NOT _aurore_value STREQUAL "AUTO")
+        if (BRLS_DEV_TOOLS)
+            set(_aurore_value ON)
+        else ()
+            set(_aurore_value OFF)
+        endif ()
+    endif ()
+endif ()
+_aurore_legacy(AURORE_DEV_TOOLS "${_aurore_value}" BRLS_DEV_TOOLS)
+# legacy-names: end
 
 # The plain variables the build files read. toolchain.cmake changes some of
 # them for the platforms that impose a choice (iOS and Android: SDL2 and

@@ -11,8 +11,8 @@
 #include <vector>
 #include "check.h"
 
-#include <borealis/cadran/util/markdown.hpp>
-#include <borealis/cadran/util/safe_text.hpp>
+#include <aurore/cadran/util/markdown.hpp>
+#include <aurore/cadran/util/safe_text.hpp>
 
 using markdown::Block;
 

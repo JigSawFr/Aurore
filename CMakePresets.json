@@ -44,7 +44,7 @@
       "inherits": "desktop-glfw",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "BRLS_INSPECTOR": "ON"
+        "AURORE_INSPECTOR": "ON"
       }
     },
     {
@@ -65,7 +65,7 @@
       "description": "The test harness, the demo's tests, the bench and aurore-preview (docs/testing.md)",
       "inherits": "desktop-glfw",
       "cacheVariables": {
-        "BRLS_BUILD_TESTS": "ON"
+        "AURORE_BUILD_TESTS": "ON"
       }
     },
     {

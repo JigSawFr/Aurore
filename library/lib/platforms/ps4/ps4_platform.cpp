@@ -21,18 +21,18 @@ limitations under the License.
 #include <orbis/SystemService.h>
 #include <orbis/UserService.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/platforms/ps4/ps4_ime.hpp>
-#include <borealis/platforms/ps4/ps4_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/platforms/ps4/ps4_ime.hpp>
+#include <aurore/platforms/ps4/ps4_platform.hpp>
 #ifdef USE_JBC
 #include <libjbc.h>
 #endif
 
 extern "C" int sceSystemServiceLoadExec(const char* path, const char* args[]);
 
-namespace brls
+namespace aurore
 {
 
 int (*sceRtcGetTick)(const OrbisDateTime* inOrbisDateTime, OrbisTick* outTick);
@@ -67,13 +67,13 @@ Ps4Platform::Ps4Platform()
 
     // NetCtl
     if (sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_NETCTL) < 0 || sceNetCtlInit() < 0)
-        brls::Logger::error("sceNetCtlInit() failed");
+        aurore::Logger::error("sceNetCtlInit() failed");
 
     // Dialogs
     if (sceSysmoduleLoadModule(ORBIS_SYSMODULE_MESSAGE_DIALOG) < 0 || sceSysmoduleLoadModule(ORBIS_SYSMODULE_IME_DIALOG) < 0)
         Logger::error("Load ime dialog module failed");
     if (sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_COMMON_DIALOG) < 0 || sceCommonDialogInitialize() < 0)
-        brls::Logger::error("sceCommonDialogInitialize() failed");
+        aurore::Logger::error("sceCommonDialogInitialize() failed");
 
     // SceRtc
     int handle = LOAD_SYS_MODULE("libSceRtc.sprx");
@@ -88,7 +88,7 @@ Ps4Platform::Ps4Platform()
     GET_MODULE_SYMBOL(handle, sceShellUIUtilInitialize);
     GET_MODULE_SYMBOL(handle, sceShellUIUtilLaunchByUri);
     if (sceShellUIUtilInitialize && sceShellUIUtilInitialize() < 0)
-        brls::Logger::error("sceShellUIUtilInitialize failed");
+        aurore::Logger::error("sceShellUIUtilInitialize failed");
 
     int32_t ret = 0;
 
@@ -116,17 +116,17 @@ Ps4Platform::Ps4Platform()
             default:
                 this->locale = LOCALE_DEFAULT;
         }
-        brls::Logger::info("App locale: {}", this->locale);
+        aurore::Logger::info("App locale: {}", this->locale);
     }
 
     // timezone
     sceSystemServiceParamGetInt(ORBIS_SYSTEM_SERVICE_PARAM_ID_LANG, &sceTimezone);
-    brls::Logger::info("System timezone: {}", sceTimezone);
+    aurore::Logger::info("System timezone: {}", sceTimezone);
 
     // swap a/b/x/y
     sceSystemServiceParamGetInt(ORBIS_SYSTEM_SERVICE_PARAM_ID_ENTER_BUTTON_ASSIGN, &ret);
     if (ret == ORBIS_SYSTEM_PARAM_ENTER_BUTTON_ASSIGN_CIRCLE)
-        brls::Application::setSwapInputKeys(true);
+        aurore::Application::setSwapInputKeys(true);
 
     atexit([]()
         {
@@ -282,7 +282,7 @@ void Ps4Platform::grantRootAccess()
 {
     if (Ps4Platform::hasRootAccess())
     {
-        brls::Logger::warning("Already has root access");
+        aurore::Logger::warning("Already has root access");
         return;
     }
 
@@ -293,11 +293,11 @@ void Ps4Platform::grantRootAccess()
 
     if (Ps4Platform::hasRootAccess())
     {
-        brls::Logger::info("Root access granted");
+        aurore::Logger::info("Root access granted");
     }
     else
     {
-        brls::Logger::error("Failed to grant root access");
+        aurore::Logger::error("Failed to grant root access");
     }
 }
 
@@ -322,4 +322,4 @@ bool Ps4Platform::hasRootAccess()
 }
 #endif
 
-} // namespace brls
+} // namespace aurore

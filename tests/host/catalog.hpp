@@ -1,7 +1,7 @@
-// The stand-in for borealis' i18n that ui/tr.hpp asks of a host suite
-// (BRLS_CADRAN_HOST_I18N): brls::internal::getRawStr and "…"_i18n over
+// The stand-in for Aurore's i18n that ui/tr.hpp asks of a host suite
+// (AURORE_CADRAN_HOST_I18N): aurore::internal::getRawStr and "…"_i18n over
 // Cadran's real catalog, resources/i18n/<lang>/cadran.json. A key the
-// catalog lacks reads as itself, as in borealis, and is noted in
+// catalog lacks reads as itself, as in Aurore, and is noted in
 // catalog::missing. Included once, by the suite's only source file.
 #pragma once
 
@@ -10,7 +10,7 @@
 #include <set>
 #include <string>
 
-#include <borealis/extern/nlohmann/json.hpp>
+#include <aurore/extern/nlohmann/json.hpp>
 
 namespace catalog
 {
@@ -40,7 +40,7 @@ inline bool load(const std::string& lang)
 }
 } // namespace catalog
 
-namespace brls
+namespace aurore
 {
 namespace internal
 {
@@ -61,4 +61,4 @@ inline namespace literals
         return internal::getRawStr(std::string(str, len));
     }
 } // namespace literals
-} // namespace brls
+} // namespace aurore

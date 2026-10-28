@@ -16,7 +16,7 @@
 
 #include "tab/recycling_list_tab.hpp"
 
-using namespace brls::literals; // for _i18n
+using namespace aurore::literals; // for _i18n
 #include "view/gem_view.hpp"
 
 std::vector<Gem> gems;
@@ -33,24 +33,24 @@ RecyclerCell* RecyclerCell::create()
 
 // DATA SOURCE
 
-int DataSource::numberOfSections(brls::RecyclerFrame* recycler)
+int DataSource::numberOfSections(aurore::RecyclerFrame* recycler)
 {
     return 2;
 }
 
-int DataSource::numberOfRows(brls::RecyclerFrame* recycler, int section)
+int DataSource::numberOfRows(aurore::RecyclerFrame* recycler, int section)
 {
     return gems.size();
 }
 
-std::string DataSource::titleForHeader(brls::RecyclerFrame* recycler, int section)
+std::string DataSource::titleForHeader(aurore::RecyclerFrame* recycler, int section)
 {
     if (section == 0)
         return "";
-    return brls::getStr("demo/list/section", section + 1);
+    return aurore::getStr("demo/list/section", section + 1);
 }
 
-brls::RecyclerCell* DataSource::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
+aurore::RecyclerCell* DataSource::cellForRow(aurore::RecyclerFrame* recycler, aurore::IndexPath indexPath)
 {
     RecyclerCell* item = (RecyclerCell*)recycler->dequeueReusableCell("Cell");
     item->label->setText(gems[indexPath.row].name);
@@ -58,9 +58,9 @@ brls::RecyclerCell* DataSource::cellForRow(brls::RecyclerFrame* recycler, brls::
     return item;
 }
 
-void DataSource::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
+void DataSource::didSelectRowAt(aurore::RecyclerFrame* recycler, aurore::IndexPath indexPath)
 {
-    //    brls::Logger::info("Item Index(" + std::to_string(index.section) + ":" + std::to_string(index.row) + ") selected.");
+    //    aurore::Logger::info("Item Index(" + std::to_string(index.section) + ":" + std::to_string(index.row) + ") selected.");
     recycler->present(new GemView(gems[indexPath.row]));
 }
 
@@ -90,7 +90,7 @@ RecyclingListTab::RecyclingListTab()
     recycler->setDataSource(new DataSource());
 }
 
-brls::View* RecyclingListTab::create()
+aurore::View* RecyclingListTab::create()
 {
     // Called by the XML engine to create a new RecyclingListTab
     return new RecyclingListTab();

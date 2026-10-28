@@ -15,45 +15,45 @@
     limitations under the License.
 */
 
-#include <borealis/views/header.hpp>
+#include <aurore/views/header.hpp>
 
-namespace brls
+namespace aurore
 {
 
 const std::string headerXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
         height="auto"
         axis="row"
-        paddingTop="@style/brls/header/padding_top_bottom"
-        paddingBottom="@style/brls/header/padding_top_bottom"
+        paddingTop="@style/aurore/header/padding_top_bottom"
+        paddingBottom="@style/aurore/header/padding_top_bottom"
         lineBottom="1px"
-        lineColor="@theme/brls/header/border" >
+        lineColor="@theme/aurore/header/border" >
 
-        <brls:Rectangle
-            width="@style/brls/header/rectangle_width"
+        <aurore:Rectangle
+            width="@style/aurore/header/rectangle_width"
             height="auto"
-            color="@theme/brls/header/rectangle"
-            marginRight="@style/brls/header/rectangle_margin" />
+            color="@theme/aurore/header/rectangle"
+            marginRight="@style/aurore/header/rectangle_margin" />
 
-        <brls:Label
-            id="brls/header/title"
+        <aurore:Label
+            id="aurore/header/title"
             width="auto"
             height="auto"
-            fontSize="@style/brls/header/font_size" />
+            fontSize="@style/aurore/header/font_size" />
 
-        <brls:Padding />
+        <aurore:Padding />
 
-        <brls:Label
-            id="brls/header/subtitle"
+        <aurore:Label
+            id="aurore/header/subtitle"
             width="auto"
             height="auto"
-            fontSize="@style/brls/header/font_size"
-            textColor="@theme/brls/header/subtitle"
+            fontSize="@style/aurore/header/font_size"
+            textColor="@theme/aurore/header/subtitle"
             visibility="gone"
             horizontalAlign="right" />
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 Header::Header()
@@ -83,4 +83,4 @@ View* Header::create()
     return new Header();
 }
 
-} // namespace brls
+} // namespace aurore

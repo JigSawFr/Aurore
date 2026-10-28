@@ -23,22 +23,22 @@ limitations under the License.
 #include <psp2/system_param.h>
 #include <sys/unistd.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/psv/psv_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/psv/psv_platform.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static int powerCallback(int notifyId, int notifyCount, int powerInfo, void* common)
 {
     if ((powerInfo & SCE_POWER_CB_APP_RESUME) || (powerInfo & SCE_POWER_CB_APP_RESUMING))
     {
-        brls::Application::getWindowFocusChangedEvent()->fire(true);
+        aurore::Application::getWindowFocusChangedEvent()->fire(true);
     }
     else if ((powerInfo & SCE_POWER_CB_BUTTON_PS_PRESS) || (powerInfo & SCE_POWER_CB_APP_SUSPEND) || (powerInfo & SCE_POWER_CB_SYSTEM_SUSPEND))
     {
-        brls::Application::getWindowFocusChangedEvent()->fire(false);
+        aurore::Application::getWindowFocusChangedEvent()->fire(false);
     }
     return 0;
 }
@@ -73,7 +73,7 @@ PsvPlatform::PsvPlatform()
     int enterButton;
     sceAppUtilSystemParamGetInt(SCE_SYSTEM_PARAM_ID_ENTER_BUTTON, &enterButton);
     if (enterButton == SCE_SYSTEM_PARAM_ENTER_BUTTON_CIRCLE)
-        brls::Application::setSwapInputKeys(true);
+        aurore::Application::setSwapInputKeys(true);
 
     // Override locale
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO)
@@ -81,7 +81,7 @@ PsvPlatform::PsvPlatform()
         int systemLanguage;
         sceAppUtilSystemParamGetInt(SCE_SYSTEM_PARAM_ID_LANG, &systemLanguage);
 
-        std::unordered_map<int, std::string> psv2brls = {
+        std::unordered_map<int, std::string> psv2aurore = {
             { SCE_SYSTEM_PARAM_LANG_CHINESE_S, LOCALE_ZH_HANS },
             { SCE_SYSTEM_PARAM_LANG_CHINESE_T, LOCALE_ZH_HANT },
             { SCE_SYSTEM_PARAM_LANG_JAPANESE, LOCALE_JA },
@@ -89,15 +89,15 @@ PsvPlatform::PsvPlatform()
             { SCE_SYSTEM_PARAM_LANG_ITALIAN, LOCALE_IT }
         };
 
-        if (psv2brls.count(systemLanguage) > 0)
+        if (psv2aurore.count(systemLanguage) > 0)
         {
-            this->locale = psv2brls[systemLanguage];
+            this->locale = psv2aurore[systemLanguage];
         }
         else
         {
             this->locale = LOCALE_EN_US;
         }
-        brls::Logger::info("Set app locale: {}", this->locale);
+        aurore::Logger::info("Set app locale: {}", this->locale);
     }
 
     // trigger internal network init in newlib
@@ -106,7 +106,7 @@ PsvPlatform::PsvPlatform()
 
 PsvPlatform::~PsvPlatform()
 {
-#ifdef BOREALIS_USE_GXM
+#ifdef AURORE_USE_GXM
     delete this->audioPlayer;
     delete this->inputManager;
     delete this->imeManager;
@@ -121,7 +121,7 @@ std::string PsvPlatform::getName()
 
 void PsvPlatform::createWindow(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight, float windowXPos, float windowYPos)
 {
-#ifdef BOREALIS_USE_GXM
+#ifdef AURORE_USE_GXM
     this->videoContext = new PsvVideoContext();
     this->inputManager = new PsvInputManager();
     this->imeManager   = new PsvImeManager();
@@ -251,7 +251,7 @@ void PsvPlatform::openBrowser(std::string url)
 {
     if (!isBrowserUrl(url))
     {
-        brls::Logger::warning("open url: refused, not an http(s) link");
+        aurore::Logger::warning("open url: refused, not an http(s) link");
         return;
     }
     SceAppUtilWebBrowserParam browser_param;
@@ -262,11 +262,11 @@ void PsvPlatform::openBrowser(std::string url)
     {
         return;
     }
-    brls::Logger::error("Failed to open browser in MODAL mode, trying NORMAL mode");
+    aurore::Logger::error("Failed to open browser in MODAL mode, trying NORMAL mode");
     browser_param.launchMode = 0;
     if (sceAppUtilLaunchWebBrowser(&browser_param) != SCE_OK)
     {
-        brls::Logger::error("Failed to open browser in NORMAL mode");
+        aurore::Logger::error("Failed to open browser in NORMAL mode");
     }
 }
 
@@ -289,4 +289,4 @@ bool PsvPlatform::canSetBacklightBrightness()
     return true;
 }
 
-} // namespace brls
+} // namespace aurore

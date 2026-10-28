@@ -23,12 +23,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/android/android_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/android/android_platform.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // A Java exception left pending makes the next JNI call abort: logged and
@@ -316,4 +316,4 @@ Insets AndroidPlatform::getSafeAreaInsets()
     return insets;
 }
 
-} // namespace brls
+} // namespace aurore

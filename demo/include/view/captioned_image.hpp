@@ -16,19 +16,19 @@
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-class CaptionedImage : public brls::Box
+class CaptionedImage : public aurore::Box
 {
   public:
     CaptionedImage();
 
-    void onChildFocusGained(brls::View* directChild, brls::View* focusedView) override;
-    void onChildFocusLost(brls::View* directChild, brls::View* focusedView) override;
+    void onChildFocusGained(aurore::View* directChild, aurore::View* focusedView) override;
+    void onChildFocusLost(aurore::View* directChild, aurore::View* focusedView) override;
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(brls::Image, image, "image");
-    BRLS_BIND(brls::Label, label, "label");
+    AURORE_BIND(aurore::Image, image, "image");
+    AURORE_BIND(aurore::Label, label, "label");
 };

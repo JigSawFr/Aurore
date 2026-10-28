@@ -14,13 +14,13 @@
     limitations under the License.
 */
 
-#include "borealis/views/widgets/battery.hpp"
+#include "aurore/views/widgets/battery.hpp"
 
-#include "borealis/core/thread.hpp"
+#include "aurore/core/thread.hpp"
 
 #define BATTERY_MAX_WIDTH 23.0f
 
-namespace brls
+namespace aurore
 {
 
 BatteryWidget::BatteryWidget()
@@ -53,7 +53,7 @@ void BatteryWidget::updateState()
     Time now         = getCPUTimeUsec();
     if ((now - time) > 5000000)
     {
-        brls::Logger::verbose("isBatteryCharging: {}; batteryLevel: {}", isBatteryCharging, batteryLevel);
+        aurore::Logger::verbose("isBatteryCharging: {}; batteryLevel: {}", isBatteryCharging, batteryLevel);
 #ifdef ANDROID
         isBatteryCharging = Application::getPlatform()->isBatteryCharging();
         batteryLevel      = Application::getPlatform()->getBatteryLevel() / 100.0f;
@@ -63,11 +63,11 @@ void BatteryWidget::updateState()
         if (updating)
             return;
         updating = true;
-        brls::async([]()
+        aurore::async([]()
             {
                 bool charging = Application::getPlatform()->isBatteryCharging();
                 float level   = Application::getPlatform()->getBatteryLevel() / 100.0f;
-                brls::sync([charging, level]()
+                aurore::sync([charging, level]()
                     {
                         isBatteryCharging = charging;
                         batteryLevel      = level;
@@ -102,7 +102,7 @@ void BatteryWidget::draw(NVGcontext* vg, float x, float y, float width, float he
     if (!level)
         return;
     this->updateState();
-    level->setColor(ctx->theme[isBatteryCharging ? "brls/battery/charging" : "brls/battery/level"]);
+    level->setColor(ctx->theme[isBatteryCharging ? "aurore/battery/charging" : "aurore/battery/level"]);
 
     level->setWidth(BATTERY_MAX_WIDTH * batteryLevel);
     Box::draw(vg, x, y, width, height, style, ctx);
@@ -113,4 +113,4 @@ View* BatteryWidget::create()
     return new BatteryWidget();
 }
 
-} // namespace brls
+} // namespace aurore

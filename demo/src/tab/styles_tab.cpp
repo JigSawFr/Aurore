@@ -25,11 +25,11 @@ const char* const SWATCHES[] = { "demo/swatch/teal", "demo/swatch/orange", "demo
 // the tab may be built again (a new language or theme).
 struct StylesModel
 {
-    brls::Observable<int> counter { 0 };
-    brls::Observable<NVGcolor> swatch;
-    brls::Observable<bool> even { true };
-    brls::Observable<std::string> announced { brls::getStr("demo/styles/announced_hint") };
-    brls::DataModel model;
+    aurore::Observable<int> counter { 0 };
+    aurore::Observable<NVGcolor> swatch;
+    aurore::Observable<bool> even { true };
+    aurore::Observable<std::string> announced { aurore::getStr("demo/styles/announced_hint") };
+    aurore::DataModel model;
 
     StylesModel()
     {
@@ -39,13 +39,13 @@ struct StylesModel
         model.add("announced", announced);
 
         this->updateSwatch();
-        brls::Application::getThemeChangedEvent()->subscribe([this](brls::ThemeVariant)
+        aurore::Application::getThemeChangedEvent()->subscribe([this](aurore::ThemeVariant)
             { this->updateSwatch(); });
     }
 
     void updateSwatch()
     {
-        swatch = brls::Application::getTheme()[SWATCHES[counter.get() % 4]];
+        swatch = aurore::Application::getTheme()[SWATCHES[counter.get() % 4]];
     }
 };
 
@@ -59,27 +59,27 @@ StylesModel& stylesModel()
 StylesTab::StylesTab()
 {
     StylesModel& data = stylesModel();
-    brls::Application::registerModel("styles", &data.model);
+    aurore::Application::registerModel("styles", &data.model);
 
-    brls::Application::setFocusAnnouncer([](const std::string& description)
-        { stylesModel().announced = brls::getStr("demo/styles/announced", description); });
+    aurore::Application::setFocusAnnouncer([](const std::string& description)
+        { stylesModel().announced = aurore::getStr("demo/styles/announced", description); });
 
     this->inflateFromXMLRes("xml/tabs/styles.xml");
 
     // pressed: needs something to press.
-    brls::View* fade = this->getView("styles/fade");
-    fade->registerClickAction([](brls::View*)
+    aurore::View* fade = this->getView("styles/fade");
+    fade->registerClickAction([](aurore::View*)
         { return true; });
-    fade->addGestureRecognizer(new brls::TapGestureRecognizer(fade));
+    fade->addGestureRecognizer(new aurore::TapGestureRecognizer(fade));
 
-    this->disabled->setState(brls::ButtonState::DISABLED);
-    this->toggle->registerClickAction([this](brls::View*)
+    this->disabled->setState(aurore::ButtonState::DISABLED);
+    this->toggle->registerClickAction([this](aurore::View*)
         {
-        bool enabled = this->disabled->getState() == brls::ButtonState::ENABLED;
-        this->disabled->setState(enabled ? brls::ButtonState::DISABLED : brls::ButtonState::ENABLED);
+        bool enabled = this->disabled->getState() == aurore::ButtonState::ENABLED;
+        this->disabled->setState(enabled ? aurore::ButtonState::DISABLED : aurore::ButtonState::ENABLED);
         return true; });
 
-    this->increment->registerClickAction([](brls::View*)
+    this->increment->registerClickAction([](aurore::View*)
         {
         StylesModel& data = stylesModel();
         data.counter = data.counter.get() + 1;
@@ -87,11 +87,11 @@ StylesTab::StylesTab()
         data.even = data.counter.get() % 2 == 0;
         return true; });
 
-    this->reduceMotion->init(brls::getStr("demo/styles/reduce_motion"), brls::Application::isReduceMotionSet(), [](bool on)
-        { brls::Application::setReduceMotion(on); });
+    this->reduceMotion->init(aurore::getStr("demo/styles/reduce_motion"), aurore::Application::isReduceMotionSet(), [](bool on)
+        { aurore::Application::setReduceMotion(on); });
 }
 
-brls::View* StylesTab::create()
+aurore::View* StylesTab::create()
 {
     return new StylesTab();
 }

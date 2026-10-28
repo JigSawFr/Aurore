@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16...3.31)
 
-set(BOREALIS_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)
+set(AURORE_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)
 
 # build options
-include(${BOREALIS_LIBRARY}/cmake/commonOption.cmake)
+include(${AURORE_LIBRARY}/cmake/commonOption.cmake)
 
 # Dependencies
 option(USE_SHARED_LIB "Whether to use shared libs provided by system" OFF)
@@ -21,7 +21,7 @@ if (APPLE AND PLATFORM_DESKTOP)
 endif ()
 
 # toolchain
-include(${BOREALIS_LIBRARY}/cmake/toolchain.cmake)
+include(${AURORE_LIBRARY}/cmake/toolchain.cmake)
 
 # project info
 project(aurore_demo)
@@ -177,8 +177,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE demo demo/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore Threads::Threads)
 
 # The demo's tests, bench and aurore-preview, on the test harness
-# (-DBRLS_BUILD_TESTS=ON, then ctest)
-if (BRLS_BUILD_TESTS)
+# (-DAURORE_BUILD_TESTS=ON, then ctest)
+if (AURORE_BUILD_TESTS)
     # Their reference screenshots are drawn with the resources built in: from
     # files the desktop build picks other fonts
     if (USE_LIBROMFS)

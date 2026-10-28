@@ -7,13 +7,13 @@
 #include <set>
 #include <sstream>
 #include <vector>
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/theme.hpp>
-#include <borealis/core/time.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/core/view.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/theme.hpp>
+#include <aurore/core/time.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/core/view.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -29,10 +29,10 @@ namespace fs = std::experimental::filesystem;
 
 #if defined(__SWITCH__) || defined(__PSV__) || defined(PS4) || defined(ANDROID) || defined(IOS) || defined(TVOS) \
     || defined(__WINRT__)
-#define BRLS_NO_HOT_RELOAD
+#define AURORE_NO_HOT_RELOAD
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // Named: in a unity build, the other files' helpers do not meet these
@@ -107,7 +107,7 @@ using namespace hot_reload_detail;
 
 void HotReload::setEnabled(bool on, const std::string& resourcesDir)
 {
-#ifdef BRLS_NO_HOT_RELOAD
+#ifdef AURORE_NO_HOT_RELOAD
     if (on)
         Logger::warning("hot reload: not on this platform, its resources are not read from a folder");
     return;
@@ -168,7 +168,7 @@ void HotReload::setThemeFiles(const std::vector<std::string>& paths)
             if (disk.empty())
             {
 #ifndef USE_LIBROMFS
-                disk = std::string(BRLS_RESOURCES) + path.substr(5);
+                disk = std::string(AURORE_RESOURCES) + path.substr(5);
 #else
                 continue;
 #endif
@@ -250,4 +250,4 @@ void HotReload::poll()
         Application::rebuildActivity();
 }
 
-} // namespace brls
+} // namespace aurore

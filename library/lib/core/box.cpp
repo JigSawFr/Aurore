@@ -22,12 +22,12 @@
 #include <fstream>
 #include <functional>
 #include <limits>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/util.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static YGFlexDirection getYGFlexDirection(Axis axis)
@@ -63,14 +63,14 @@ Box::Box(Axis axis)
     // no need to invalidate if the box is empty and is not attached to any parent
 
     // Register XML attributes
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "axis", Axis, this->setAxis,
         {
             { "row", Axis::ROW },
             { "column", Axis::COLUMN },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "flexWrap", Wrap, this->setWrap,
         {
             { "wrap", Wrap::WRAP },
@@ -78,7 +78,7 @@ Box::Box(Axis axis)
             { "wrapReverse", Wrap::WRAP_REVERSE },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "direction", Direction, this->setDirection,
         {
             { "inherit", Direction::INHERIT },
@@ -86,7 +86,7 @@ Box::Box(Axis axis)
             { "rightToLeft", Direction::RIGHT_TO_LEFT },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "justifyContent", JustifyContent, this->setJustifyContent,
         {
             { "flexStart", JustifyContent::FLEX_START },
@@ -97,7 +97,7 @@ Box::Box(Axis axis)
             { "spaceEvenly", JustifyContent::SPACE_EVENLY },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "alignItems", AlignItems, this->setAlignItems,
         {
             { "auto", AlignItems::AUTO },
@@ -753,7 +753,7 @@ void Box::inflateFromXMLRes(const std::string& name)
     Box::inflateFromXMLString(romfs::get(name).string());
     View::currentXMLResource.clear();
 #else
-    return Box::inflateFromXMLFile(std::string(BRLS_RESOURCES) + name);
+    return Box::inflateFromXMLFile(std::string(AURORE_RESOURCES) + name);
 #endif
 }
 
@@ -786,8 +786,8 @@ void Box::inflateFromXMLElement(tinyxml2::XMLElement* element)
 {
     // Ensure element is a Box
     ReadingXMLElement reading(element);
-    if (std::string(element->Name()) != "brls:Box")
-        View::fatalXML("First XML element is " + std::string(element->Name()) + ", expected brls:Box");
+    if (canonicalXMLName(element->Name()) != "aurore:Box")
+        View::fatalXML("First XML element is " + std::string(element->Name()) + ", expected aurore:Box");
 
     // Apply attributes
     this->applyXMLAttributes(element);
@@ -1044,4 +1044,4 @@ Box::~Box()
     }
 }
 
-} // namespace brls
+} // namespace aurore

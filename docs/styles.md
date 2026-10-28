@@ -7,10 +7,10 @@ What a view can do beyond its own attributes: change its look while it has the f
 An attribute prefixed with a state applies while the view is in that state, and the property goes back to what it was when no state styles it any more:
 
 ```xml
-<brls:Box
+<aurore:Box
     focusable="true"
-    backgroundColor="@theme/brls/button/default_enabled_background"
-    focus:backgroundColor="@theme/brls/accent"
+    backgroundColor="@theme/aurore/button/default_enabled_background"
+    focus:backgroundColor="@theme/aurore/accent"
     pressed:scale="0.94"
     hover:borderColor="#ffffff"
     disabled:alpha="0.4" />
@@ -21,7 +21,7 @@ An attribute prefixed with a state applies while the view is in that state, and 
 | `hover:` | the mouse pointer is over the view or one of its children (desktop; the nearest view with a `hover:` style takes it) |
 | `focus:` | the view has the focus |
 | `pressed:` | A is pressed on the focused view (the length of its click animation), or a touch or click is held on it |
-| `disabled:` | the app says so (`view->setStyleState(brls::StyleState::DISABLED, true)`); a `Button` in `ButtonState::DISABLED` is |
+| `disabled:` | the app says so (`view->setStyleState(aurore::StyleState::DISABLED, true)`); a `Button` in `ButtonState::DISABLED` is |
 
 When several states style the same property, the later one in this table wins.
 
@@ -36,7 +36,7 @@ The properties are those that are drawn, never laid out (a size or a margin woul
 | `Button` | `textColor` (its label's) |
 | `Rectangle` | `color` |
 
-In code: `view->setStateStyle(brls::StyleState::FOCUS, "backgroundColor", "@theme/brls/accent")`. A view of the app adds its own properties by overriding `getStyleProperty` and `setStyleProperty` (and calling the base for the others).
+In code: `view->setStateStyle(aurore::StyleState::FOCUS, "backgroundColor", "@theme/aurore/accent")`. A view of the app adds its own properties by overriding `getStyleProperty` and `setStyleProperty` (and calling the base for the others).
 
 If the app changes a property itself while a state styles it, its value is the one the view goes back to.
 
@@ -45,49 +45,49 @@ If the app changes a property itself while a state styles it, its value is the o
 `transition` animates the changes of the properties it names instead of applying them at once, the state styles' as well as those made in code (`setBackgroundColor`, `setAlpha`, `Label::setTextColor`…):
 
 ```xml
-<brls:Box
-    focus:backgroundColor="@theme/brls/accent"
+<aurore:Box
+    focus:backgroundColor="@theme/aurore/accent"
     focus:cornerRadius="28"
     transition="backgroundColor 180ms ease-out, cornerRadius 300ms backOut" />
 ```
 
 Each entry is a property (or `all`), a duration (`150ms`, `0.2s`, at most `60s`) and an easing: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out` (cubic), or one of tweeny's by name (`quadraticOut`, `sinusoidalInOut`, `backOut`, `elasticOut`, `bounceOut`…; the default is `ease`). A change made while a transition runs starts from where it is. Colours mix channel by channel.
 
-Transitions are skipped, the change applied at once, while `brls::Application::getReduceMotion()` is true.
+Transitions are skipped, the change applied at once, while `aurore::Application::getReduceMotion()` is true.
 
 The size and the place of a view are not animated: they come from the layout of the whole screen (yoga), and moving one view frame by frame means laying the screen out again at each frame, scrolling frames and lists included. A view can still be moved without layout with `scale` and its translation.
 
 ## Data binding
 
-`brls::Observable<T>` (`borealis/core/observable.hpp`) is a value that tells its subscribers when it changes:
+`aurore::Observable<T>` (`aurore/core/observable.hpp`) is a value that tells its subscribers when it changes:
 
 ```cpp
-brls::Observable<std::string> name { "Ada" };
+aurore::Observable<std::string> name { "Ada" };
 label->bindText(name);   // the label shows "Ada"
 name = "Grace";          // then "Grace"
 
-brls::Subscription s = name.subscribe([](const std::string& value) { brls::Logger::info("{}", value); });
+aurore::Subscription s = name.subscribe([](const std::string& value) { aurore::Logger::info("{}", value); });
 ```
 
-`set()` (or `=`) calls the subscribers only when the value changes (when `T` can be compared); `notify()` calls them anyway. The subscription ends when the `Subscription` is destroyed; a view keeps those of its bindings (`View::keepSubscription`) and they end with it, so an observable never calls into a view that is gone. Set observables from the UI thread (`brls::sync` from a worker).
+`set()` (or `=`) calls the subscribers only when the value changes (when `T` can be compared); `notify()` calls them anyway. The subscription ends when the `Subscription` is destroyed; a view keeps those of its bindings (`View::keepSubscription`) and they end with it, so an observable never calls into a view that is gone. Set observables from the UI thread (`aurore::sync` from a worker).
 
-For XML, observables are gathered in a `brls::DataModel`, registered under a name on the application (every screen) or on an activity (its screen, looked up first):
+For XML, observables are gathered in a `aurore::DataModel`, registered under a name on the application (every screen) or on an activity (its screen, looked up first):
 
 ```cpp
-brls::Observable<std::string> name { "Ada" };
-brls::Observable<bool> online { true };
-brls::Observable<NVGcolor> tint { nvgRGB(46, 196, 182) };
+aurore::Observable<std::string> name { "Ada" };
+aurore::Observable<bool> online { true };
+aurore::Observable<NVGcolor> tint { nvgRGB(46, 196, 182) };
 
-brls::DataModel profile;          // outlives its registration
+aurore::DataModel profile;          // outlives its registration
 profile.add("name", name);
 profile.add("online", online);
 profile.add("tint", tint);
-brls::Application::registerModel("profile", &profile);   // or activity->registerModel(…)
+aurore::Application::registerModel("profile", &profile);   // or activity->registerModel(…)
 ```
 
 ```xml
-<brls:Label bind="text: profile.name" />
-<brls:Box bind="visible: profile.online, backgroundColor: profile.tint" />
+<aurore:Label bind="text: profile.name" />
+<aurore:Box bind="visible: profile.online, backgroundColor: profile.tint" />
 ```
 
 `bind` takes `property: model.key` pairs separated by commas:
@@ -105,11 +105,11 @@ The binding is made when the view joins an activity (the XML is read before), ag
 Every view has a role, a label, a value and a selected state, for what is said when it takes the focus:
 
 ```xml
-<brls:Box focusable="true" accessibilityRole="button" accessibilityLabel="@i18n/app/play" />
-<brls:Box focusable="true" accessibilityLabel="@i18n/app/battery" accessibilityValue="80%" />
+<aurore:Box focusable="true" accessibilityRole="button" accessibilityLabel="@i18n/app/play" />
+<aurore:Box focusable="true" accessibilityLabel="@i18n/app/battery" accessibilityValue="80%" />
 ```
 
-The roles are `none`, `button`, `label`, `header`, `image`, `cell`, `toggle`, `slider`, `text_field`, `tab`, `list` and `dialog` (`brls::AccessibilityRole`). Without them a view says what it shows:
+The roles are `none`, `button`, `label`, `header`, `image`, `cell`, `toggle`, `slider`, `text_field`, `tab`, `list` and `dialog` (`aurore::AccessibilityRole`). Without them a view says what it shows:
 
 | View | Role | Label | Value, state |
 | --- | --- | --- | --- |
@@ -125,13 +125,13 @@ The roles are `none`, `button`, `label`, `header`, `image`, `cell`, `toggle`, `s
 
 In code: `setAccessibilityRole`, `setAccessibilityLabel`, `setAccessibilityValue` and `setAccessibilitySelected` (XML `accessibilitySelected="true"`); a view of the app's overrides `getDefaultAccessibilityRole()`, `getDefaultAccessibilityLabel()`, `getDefaultAccessibilityValue()` or `getDefaultAccessibilitySelected()` to say what it shows as it changes.
 
-`brls::Application::setFocusAnnouncer` is called with the focused view's description each time the focus moves: its label, its role, its value, "selected", "disabled", then its place among its neighbours, in the app's language (`resources/i18n/<language>/a11y.json`, English when the app has none):
+`aurore::Application::setFocusAnnouncer` is called with the focused view's description each time the focus moves: its label, its role, its value, "selected", "disabled", then its place among its neighbours, in the app's language (`resources/i18n/<language>/a11y.json`, English when the app has none):
 
 - "Wi-Fi, switch, on, 2 of 5", "Language, English, 3 of 5", "Save, button, disabled";
 - the place ("2 of 5") is said for a button, a cell, a toggle, a slider, a text field or a tab: a recycler's cell its row in its section, any other one among the focusable views of its parent; nothing for a view alone;
 - entering a dialog or a list (role `list` with a label) from outside, its description comes first: "Delete this profile?, dialog, Cancel, button, 1 of 2".
 
-The same function is given what changes in place, outside of a focus move (`brls::Application::announce`):
+The same function is given what changes in place, outside of a focus move (`aurore::Application::announce`):
 
 - a value changed on the focused view by the user (a toggle flipped: "on"; a slider let go: "60%"; a cell's detail changed: its new detail; a radio cell checked: "selected"), within 2 s of a press or a touch, so that a value changing on its own (a clock) is not read out at each tick (`View::announceAccessibilityValue()`, which an app's own view calls after its value changed);
 - every toast (`Application::notify`), its text.
@@ -139,7 +139,7 @@ The same function is given what changes in place, outside of a focus move (`brls
 That is where a text-to-speech engine, a screen reader of the system or a log plugs in:
 
 ```cpp
-brls::Application::setFocusAnnouncer([](const std::string& text) {
+aurore::Application::setFocusAnnouncer([](const std::string& text) {
     my_tts::say(text); // speech-dispatcher on Linux, SAPI on Windows, AVSpeechSynthesizer on iOS…
 });
 ```
@@ -154,7 +154,7 @@ A focusable view with no label and no value (an `IconButton` without text, a pic
 
 Both are settings of the core, which Cadran's preferences feed:
 
-- `brls::Application::setReduceMotion(true)`: the movements there only for show are left out: transitions, the focus highlight's glide, and Cadran's entrances, glides and breathing glow. borealis' own views follow it too: a list scrolls straight to the focused line, a text cut short stays cut (ending with "…") instead of scrolling, a toast and a dropdown fade in where they stay, a switch cell does not bounce. `getReduceMotion()`, which transitions read, is also true while Cadran's effects leave movement out (Preferences › Visual effects "Reduced", the lighter effects in hand, `BRLS_STILL_FOCUS`); the highlight's glide follows the app's setting only.
-- `brls::Application::setTextScale(1.25f)`: every label drawn that much larger (`Label::setFontScale`), and every screen measured and laid out again at once. A view of the app that measures text of its own is told through `View::onTextScaleChanged()`. The cells (`DetailCell`, `RadioCell` and those made from them) grow with it: their height becomes a minimum height that many times larger, so the text keeps its padding. Cadran's Preferences › Text size (×1.25 or ×1.5) goes through it.
+- `aurore::Application::setReduceMotion(true)`: the movements there only for show are left out: transitions, the focus highlight's glide, and Cadran's entrances, glides and breathing glow. borealis' own views follow it too: a list scrolls straight to the focused line, a text cut short stays cut (ending with "…") instead of scrolling, a toast and a dropdown fade in where they stay, a switch cell does not bounce. `getReduceMotion()`, which transitions read, is also true while Cadran's effects leave movement out (Preferences › Visual effects "Reduced", the lighter effects in hand, `AURORE_STILL_FOCUS`); the highlight's glide follows the app's setting only.
+- `aurore::Application::setTextScale(1.25f)`: every label drawn that much larger (`Label::setFontScale`), and every screen measured and laid out again at once. A view of the app that measures text of its own is told through `View::onTextScaleChanged()`. The cells (`DetailCell`, `RadioCell` and those made from them) grow with it: their height becomes a minimum height that many times larger, so the text keeps its padding. Cadran's Preferences › Text size (×1.25 or ×1.5) goes through it.
 
-High contrast is a theme: the presets `builtin:high-contrast-dark` and `builtin:high-contrast-light` (docs/themes.md), offered by Cadran's palette picker, or any theme file (`brls::Theme::loadFile`, which warns about colours that read badly).
+High contrast is a theme: the presets `builtin:high-contrast-dark` and `builtin:high-contrast-light` (docs/themes.md), offered by Cadran's palette picker, or any theme file (`aurore::Theme::loadFile`, which warns about colours that read badly).

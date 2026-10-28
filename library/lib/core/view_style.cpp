@@ -22,17 +22,17 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <borealis/core/activity.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/observable.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/core/view.hpp>
-#include <borealis/views/recycler.hpp>
+#include <aurore/core/activity.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/observable.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/core/view.hpp>
+#include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 bool StyleValue::operator==(const StyleValue& other) const
@@ -377,7 +377,7 @@ void View::notePress(bool pressed, bool releaseLater)
 
     Animatable& release = this->extras->pressRelease;
     release.reset(0.0f);
-    release.addStep(1.0f, Application::getStyle()["brls/animations/highlight"]);
+    release.addStep(1.0f, Application::getStyle()["aurore/animations/highlight"]);
     release.setEndCallback([this](bool finished)
         {
         if (finished)
@@ -1042,9 +1042,9 @@ std::string Box::getDefaultAccessibilityLabel()
     return this->isFocusable() ? textUnder(this) : "";
 }
 
-} // namespace brls
+} // namespace aurore
 
-namespace brls
+namespace aurore
 {
 
 // ---------------------------------------------------------------------------
@@ -1159,4 +1159,4 @@ void View::onThemeChanged()
     }
 }
 
-} // namespace brls
+} // namespace aurore

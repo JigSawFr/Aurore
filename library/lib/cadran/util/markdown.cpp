@@ -1,5 +1,5 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/util/markdown.hpp>
+#include <aurore/cadran/util/markdown.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -7,10 +7,10 @@
 #include <cstdio>
 #include <cstring>
 
-#include <borealis/cadran/util/emoji.hpp>
-#include <borealis/cadran/util/safe_text.hpp>
-#include <borealis/cadran/util/text.hpp>
-#include <borealis/cadran/util/utf8.hpp>
+#include <aurore/cadran/util/emoji.hpp>
+#include <aurore/cadran/util/safe_text.hpp>
+#include <aurore/cadran/util/text.hpp>
+#include <aurore/cadran/util/utf8.hpp>
 
 namespace markdown
 {

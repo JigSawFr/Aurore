@@ -15,11 +15,11 @@
 */
 
 #include <yoga/Yoga.h>
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/recycler.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/recycler.hpp>
 
-namespace brls
+namespace aurore
 {
 
 RecyclerCell::RecyclerCell()
@@ -27,7 +27,7 @@ RecyclerCell::RecyclerCell()
     this->setLineBottom(1);
     this->showSeparator(true);
 
-    setHeight(Application::getStyle()["brls/dropdown/listItemHeight"]);
+    setHeight(Application::getStyle()["aurore/dropdown/listItemHeight"]);
 
     this->registerClickAction([this](View* view)
         {
@@ -98,7 +98,7 @@ void RecyclerCell::onTextScaleChanged()
 void RecyclerCell::showSeparator(bool show)
 {
     if (show)
-        this->setThemeColor("lineColor", "brls/sidebar/separator");
+        this->setThemeColor("lineColor", "aurore/sidebar/separator");
     else
     {
         this->setThemeColor("lineColor", "");
@@ -138,7 +138,7 @@ RecyclerHeader* RecyclerHeader::create()
 
 RecyclerCell* RecyclerDataSource::cellForHeader(RecyclerFrame* recycler, int section)
 {
-    RecyclerHeader* header = (RecyclerHeader*)recycler->dequeueReusableCell("brls::Header");
+    RecyclerHeader* header = (RecyclerHeader*)recycler->dequeueReusableCell("aurore::Header");
     std::string title      = this->titleForHeader(recycler, section);
     header->setTitle(title);
     header->setVisibility(title.empty() ? Visibility::GONE : Visibility::VISIBLE);
@@ -209,7 +209,7 @@ View* RecyclerFrame::getNextCellFocus(FocusDirection direction, View* currentVie
 
 RecyclerFrame::RecyclerFrame()
 {
-    registerCell("brls::Header", []()
+    registerCell("aurore::Header", []()
         { return RecyclerHeader::create(); });
 
     // Padding
@@ -658,4 +658,4 @@ View* RecyclerFrame::create()
     return new RecyclerFrame();
 }
 
-} // namespace brls
+} // namespace aurore

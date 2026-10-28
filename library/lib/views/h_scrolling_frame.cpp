@@ -15,19 +15,19 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/scroll_gesture.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/h_scrolling_frame.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/scroll_gesture.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/h_scrolling_frame.hpp>
 
-namespace brls
+namespace aurore
 {
 
 #define SCROLLING_INDICATOR_HEIGHT 4
 
 HScrollingFrame::HScrollingFrame()
 {
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "scrollingBehavior", ScrollingBehavior, this->setScrollingBehavior,
         {
             { "natural", ScrollingBehavior::NATURAL },
@@ -142,7 +142,7 @@ HScrollingFrame::HScrollingFrame()
         PanAxis::HORIZONTAL));
 
     // Stop scrolling on tap
-    addGestureRecognizer(new TapGestureRecognizer([this](brls::TapGestureStatus status, Sound* soundToPlay)
+    addGestureRecognizer(new TapGestureRecognizer([this](aurore::TapGestureStatus status, Sound* soundToPlay)
         {
         if (status.state == GestureState::UNSURE)
         {
@@ -169,7 +169,7 @@ HScrollingFrame::HScrollingFrame()
 void HScrollingFrame::setupScrollingIndicator()
 {
     scrollingIndicator = new Rectangle();
-    scrollingIndicator->setThemeColor("color", "brls/text");
+    scrollingIndicator->setThemeColor("color", "aurore/text");
     scrollingIndicator->setSize(Size(0, SCROLLING_INDICATOR_HEIGHT));
     scrollingIndicator->setCornerRadius(SCROLLING_INDICATOR_HEIGHT / 2);
     scrollingIndicator->detach();
@@ -465,7 +465,7 @@ void HScrollingFrame::startScrolling(bool animated, float newScroll)
     if (animated && !Application::getReduceMotion())
     {
         Style style = Application::getStyle();
-        animateScrolling(newScroll, style["brls/animations/highlight"]);
+        animateScrolling(newScroll, style["aurore/animations/highlight"]);
     }
     else
     {
@@ -693,7 +693,7 @@ enum Sound HScrollingFrame::getFocusSound()
     return Sound::SOUND_NONE;
 }
 
-#define NO_PADDING fatal("Padding is not supported by brls:HScrollingFrame, please set padding on the content view instead");
+#define NO_PADDING fatal("Padding is not supported by aurore:HScrollingFrame, please set padding on the content view instead");
 
 void HScrollingFrame::setPadding(float top, float right, float bottom, float left)
 {
@@ -729,4 +729,4 @@ HScrollingFrame::~HScrollingFrame()
     Application::getGlobalInputTypeChangeEvent()->unsubscribe(inputTypeSubscription);
 }
 
-} // namespace brls
+} // namespace aurore

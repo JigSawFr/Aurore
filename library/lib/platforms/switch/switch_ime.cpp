@@ -22,10 +22,10 @@ limitations under the License.
 #include <cstring>
 #include <iostream>
 #include <vector>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/switch/switch_ime.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/switch/switch_ime.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static SwkbdConfig createSwkbdBaseConfig(std::string headerText, std::string subText, int maxStringLength, std::string initialText)
@@ -53,42 +53,42 @@ static size_t textBufferSize(int maxStringLength)
     return std::max<size_t>(0x100, characters * 4 + 1);
 }
 
-int getSwkbdKeyDisableBitmask(int borealis_key)
+int getSwkbdKeyDisableBitmask(int aurore_key)
 {
-    // translate brls to Switch libnx values
+    // translate aurore to Switch libnx values
     int ret = 0;
-    if (borealis_key == brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE)
+    if (aurore_key == aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NONE)
         return 0;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_SPACE)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_SPACE)
         // Disable space-bar
         ret |= SwkbdKeyDisableBitmask_Space;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_AT)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_AT)
         // Disable '@'.
         ret |= SwkbdKeyDisableBitmask_At;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_PERCENT)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_PERCENT)
         // Disable '%'.
         ret |= SwkbdKeyDisableBitmask_Percent;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_FORWSLASH)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_FORWSLASH)
         // Disable '/'.
         ret |= SwkbdKeyDisableBitmask_ForwardSlash;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_BACKSLASH)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_BACKSLASH)
         // Disable '\'.
         ret |= SwkbdKeyDisableBitmask_Backslash;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NUMBERS)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_NUMBERS)
         // Disable numbers.
         ret |= SwkbdKeyDisableBitmask_Numbers;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_DOWNLOADCODE)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_DOWNLOADCODE)
         // Used for swkbdConfigMakePresetDownloadCode.
         ret |= SwkbdKeyDisableBitmask_DownloadCode;
 
-    if (borealis_key & brls::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_USERNAME)
+    if (aurore_key & aurore::KeyboardKeyDisableBitmask::KEYBOARD_DISABLE_USERNAME)
         // Used for swkbdConfigMakePresetUserName. Disables '@', '%', and '\'.
         ret |= SwkbdKeyDisableBitmask_UserName;
 

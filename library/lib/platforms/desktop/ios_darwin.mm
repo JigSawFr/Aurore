@@ -1,11 +1,11 @@
 #import <SDL2/SDL.h>
 #import <SDL2/SDL_syswm.h>
 #import <UIKit/UIKit.h>
-#import <borealis/core/logger.hpp>
-#import <borealis/core/safe_area.hpp>
-#import <borealis/platforms/desktop/desktop_platform.hpp>
+#import <aurore/core/logger.hpp>
+#import <aurore/core/safe_area.hpp>
+#import <aurore/platforms/desktop/desktop_platform.hpp>
 
-namespace brls
+namespace aurore
 {
 
 ThemeVariant ios_theme()

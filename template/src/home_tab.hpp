@@ -1,17 +1,17 @@
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 // The Home tab, from resources/xml/tabs/home.xml: a tab's views exist once
 // the tab is shown, so the code that uses them goes in a view of its own.
-class HomeTab : public brls::Box
+class HomeTab : public aurore::Box
 {
   public:
     HomeTab();
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(brls::Button, counter, "counter");
+    AURORE_BIND(aurore::Button, counter, "counter");
     int clicks = 0;
 };

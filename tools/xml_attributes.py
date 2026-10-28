@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # The XML attributes the library's views register (register*XMLAttribute,
-# BRLS_REGISTER_ENUM_XML_ATTRIBUTE), written as docs/xml-attributes.md.
+# AURORE_REGISTER_ENUM_XML_ATTRIBUTE), written as docs/xml-attributes.md.
 #
 #   python3 tools/xml_attributes.py          writes the page
 #   python3 tools/xml_attributes.py --check  1 when the page is not up to date
@@ -31,7 +31,7 @@ TEXT_VALUES = {
 }
 
 REGISTER = re.compile(r'register(Float|Percentage|Auto|String|Color|Bool|FilePath)XMLAttribute\(\s*"([^"]+)"')
-ENUM = re.compile(r'BRLS_REGISTER_ENUM_XML_ATTRIBUTE\(\s*"([^"]+)"\s*,[^{]*\{(.*?)\}\s*\)', re.S)
+ENUM = re.compile(r'AURORE_REGISTER_ENUM_XML_ATTRIBUTE\(\s*"([^"]+)"\s*,[^{]*\{(.*?)\}\s*\)', re.S)
 ENUM_VALUE = re.compile(r'\{\s*"([^"]+)"\s*,')
 FUNCTION = re.compile(r'^(?:[\w:<>*&]+\s+)?((?:\w+::)*\w+)::~?\w+\([^;]*$', re.M)
 VIEW_TAG = re.compile(r'registerXMLView\("([^"]+)",\s*(?:\w+::)*(\w+)::create\)')
@@ -93,7 +93,7 @@ def render(tags, attributes):
         if owner == "View":
             title = "Every view (`View`)"
         elif owner == "Box":
-            title = "Every box (`<brls:Box>`)"
+            title = "Every box (`<aurore:Box>`)"
         lines += ["", "## " + title, "", "| Attribute | Value |", "|---|---|"]
         for name in sorted(attributes[owner], key=str.lower):
             kinds, values = attributes[owner][name]

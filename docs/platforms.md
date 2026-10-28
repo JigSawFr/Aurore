@@ -30,7 +30,7 @@ cmake --build build
 
 `-DAURORE_WINDOW=SDL2` builds with SDL2 instead of GLFW; `-DAURORE_GRAPHICS=GL2`, `-DAURORE_GRAPHICS=GLES2` or `-DAURORE_GRAPHICS=GLES3` another OpenGL. Without `AURORE_LIBROMFS`, the `resources/` folder is copied next to the program at each build. The presets do the same in fewer words: `cmake --preset desktop-glfw` (or `desktop-sdl`), then `cmake --build --preset desktop-glfw`.
 
-The tests need EGL and Mesa as well (`libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri`), then `-DBRLS_BUILD_TESTS=ON` and `ctest --test-dir build` ([testing.md](testing.md)).
+The tests need EGL and Mesa as well (`libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri`), then `-DAURORE_BUILD_TESTS=ON` and `ctest --test-dir build` ([testing.md](testing.md)).
 
 ## macOS
 
@@ -126,10 +126,10 @@ The notch, the rounded corners and the home indicator (on tvOS, the TV's safe ar
 
 ## In a browser
 
-Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): the window stays at 1280×720 (the page scales the canvas), and `brls_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. Aurore's own CI does not build the demo for the web; [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is a complete example. In short, under `emcmake cmake`:
+Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. Aurore's own CI does not build the demo for the web; [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is a complete example. In short, under `emcmake cmake`:
 
 - set `AURORE_PLATFORM=DESKTOP`, `AURORE_WINDOW=SDL2`, `AURORE_GRAPHICS=GLES3` and `USE_SYSTEM_SDL2` before including `commonOption.cmake`, and compile with `-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions`, SDL2 coming from Emscripten's ports (a `SDL2Config.cmake` that finds nothing to link);
-- package the resources into the page's file system (`--preload-file`) and set `BRLS_RESOURCES_DIR` to where they land;
+- package the resources into the page's file system (`--preload-file`) and set `AURORE_RESOURCES_ROOT` to where they land;
 - run the loop with `emscripten_set_main_loop`, one `mainLoop()` per frame, since a browser needs its thread back between frames;
 - start the threads with the page (`-sPTHREAD_POOL_SIZE`), which then needs the cross-origin isolation headers;
 - a browser has no system font: give Chinese, Japanese and Korean a font of their own (`font/cjk.otf`, [fonts.md](fonts.md)).
@@ -140,11 +140,11 @@ Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): th
 | --- | --- |
 | `AURORE_LIBROMFS` | Builds the resources into the program (`build_libromfs_generator.sh` first when cross-compiling) |
 | `AURORE_FREETYPE`, `AURORE_FRIBIDI` | FreeType for the glyphs, FriBidi for right-to-left text ([fonts.md](fonts.md)) |
-| `BRLS_INSPECTOR` | The inspector on from the start ([inspector.md](inspector.md)) |
-| `BRLS_DEV_TOOLS` | `AUTO` (default), `ON` or `OFF`: the debugging aids read from the environment, left out of `Release` and `MinSizeRel` builds by default ([environment.md](environment.md)) |
-| `BRLS_BUILD_TESTS` | The test harness, desktop only ([testing.md](testing.md)); with the demo, its tests (they need `AURORE_LIBROMFS`) |
-| `BRLS_BUILD_FUZZERS` | With the demo's tests and clang: the libFuzzer targets of `tests/fuzz` ([testing.md](testing.md)) |
-| `BRLS_UNITY_BUILD` | A unity build (faster from scratch) |
+| `AURORE_INSPECTOR` | The inspector on from the start ([inspector.md](inspector.md)) |
+| `AURORE_DEV_TOOLS` | `AUTO` (default), `ON` or `OFF`: the debugging aids read from the environment, left out of `Release` and `MinSizeRel` builds by default ([environment.md](environment.md)) |
+| `AURORE_BUILD_TESTS` | The test harness, desktop only ([testing.md](testing.md)); with the demo, its tests (they need `AURORE_LIBROMFS`) |
+| `AURORE_BUILD_FUZZERS` | With the demo's tests and clang: the libFuzzer targets of `tests/fuzz` ([testing.md](testing.md)) |
+| `AURORE_UNITY_BUILD` | A unity build (faster from scratch) |
 | `AURORE_SIMPLE_HIGHLIGHT` | A focus highlight without its animation |
 | `AURORE_STD_THREAD`, `AURORE_BOOST_FILESYSTEM` | `std::thread` instead of pthreads; Boost's filesystem for a toolchain without `std::filesystem` |
 | `AURORE_INSTALL` | Desktop: installs the library for `find_package(Aurore)` |

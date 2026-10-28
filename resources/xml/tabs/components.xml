@@ -1,40 +1,40 @@
-<brls:Box
+<aurore:Box
     width="auto"
     height="auto">
 
-    <brls:ScrollingFrame
+    <aurore:ScrollingFrame
         width="auto"
         height="auto"
         grow="1.0" >
 
-        <brls:Box
+        <aurore:Box
             width="auto"
             height="auto"
             axis="column"
-            paddingLeft="@style/brls/tab_frame/content_padding_sides"
-            paddingRight="@style/brls/tab_frame/content_padding_sides"
-            paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
-            paddingBottom="@style/brls/tab_frame/content_padding_top_bottom">
+            paddingLeft="@style/aurore/tab_frame/content_padding_sides"
+            paddingRight="@style/aurore/tab_frame/content_padding_sides"
+            paddingTop="@style/aurore/tab_frame/content_padding_top_bottom"
+            paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom">
 
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="@i18n/demo/welcome"
                     marginBottom="10px" />
 
                 <!-- HScroll -->
-                <brls:Header
+                <aurore:Header
                     width="auto"
                     height="auto"
                     title="@i18n/demo/components_more/hscroll"
                     marginBottom="30px" />
 
-                <brls:HScrollingFrame
+                <aurore:HScrollingFrame
                     width="auto"
                     height="240"
                     grow="1.0">
 
-                    <brls:Box
+                    <aurore:Box
                         width="auto"
                         height="auto"
                         axis="row">
@@ -111,24 +111,24 @@
                             caption="@i18n/demo/components/images_original"
                             paddingRight="6" />
 
-                    </brls:Box>
+                    </aurore:Box>
 
-                </brls:HScrollingFrame>
+                </aurore:HScrollingFrame>
 
                 <!-- Buttons -->
-                <brls:Header
+                <aurore:Header
                     width="auto"
                     height="auto"
                     title="@i18n/demo/components/buttons_header"
                     marginBottom="30px" />
 
-                <brls:Box
+                <aurore:Box
                     width="100%"
                     height="auto"
                     axis="row"
                     marginBottom="30px">
 
-                    <brls:Button
+                    <aurore:Button
                         id="button_primary"
                         width="auto"
                         height="auto"
@@ -137,7 +137,7 @@
                         marginRight="30px"
                         text="@i18n/demo/components/button_primary" />
 
-                    <brls:Button
+                    <aurore:Button
                         id="button_highlight"
                         width="auto"
                         height="auto"
@@ -145,27 +145,27 @@
                         text="@i18n/demo/components/button_highlight"
                         focusDown="button_bordered" />
 
-                </brls:Box>
+                </aurore:Box>
 
-                <brls:Box
+                <aurore:Box
                     width="100%"
                     height="auto"
                     axis="row"
                     marginBottom="30px">
 
-                    <brls:Button
+                    <aurore:Button
                         width="33%"
                         height="auto"
                         marginRight="30px"
                         text="@i18n/demo/components/button_wrapping" />
 
-                    <brls:Box
+                    <aurore:Box
                         width="auto"
                         height="auto"
                         grow="1.0"
                         axis="column">
 
-                        <brls:Button
+                        <aurore:Button
                             id="button_bordered"
                             width="auto"
                             height="auto"
@@ -175,7 +175,7 @@
                             text="@i18n/demo/components/button_bordered"
                             marginBottom="30px" />
 
-                        <brls:Button
+                        <aurore:Button
                             width="auto"
                             height="auto"
                             padding="10px"
@@ -183,65 +183,65 @@
                             fontSize="16"
                             text="@i18n/demo/components/button_borderless" />
 
-                    </brls:Box>
+                    </aurore:Box>
 
-                </brls:Box>
+                </aurore:Box>
                 
                 <!-- Icon buttons and context menu -->
-                <brls:Header
+                <aurore:Header
                     width="auto"
                     height="auto"
                     title="@i18n/demo/components/icon_buttons_header"
                     subtitle="@i18n/demo/components/icon_buttons_subtitle"
                     marginBottom="30px" />
 
-                <brls:Box
+                <aurore:Box
                     width="100%"
                     height="auto"
                     axis="row"
                     alignItems="center"
                     marginBottom="30px">
 
-                    <brls:IconButton
+                    <aurore:IconButton
                         id="icon_menu"
                         glyph="&#xE5D4;"
                         accessibilityLabel="@i18n/demo/components/icon_menu"
                         marginRight="30px" />
 
-                    <brls:IconButton
+                    <aurore:IconButton
                         id="icon_play"
                         style="primary"
                         glyph="&#xE037;"
                         text="@i18n/demo/components/icon_play"
                         marginRight="30px" />
 
-                    <brls:IconButton
+                    <aurore:IconButton
                         style="bordered"
                         icon="@res/img/aurore_96.png"
                         iconSize="28"
                         text="@i18n/demo/components/icon_image"
                         marginRight="30px" />
 
-                    <brls:IconButton
+                    <aurore:IconButton
                         style="borderless"
                         glyph="&#xE8B8;"
                         accessibilityLabel="@i18n/demo/components/icon_settings" />
 
-                </brls:Box>
+                </aurore:Box>
 
                 <!-- Scroll -->
-                <brls:Header
+                <aurore:Header
                     width="auto"
                     height="auto"
                     title="@i18n/demo/components/slider_header"
                     marginBottom="15px" />
                 
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="auto"
                     axis="row">
                     
-                    <brls:Label
+                    <aurore:Label
                         id="progress"
                         width="80"
                         height="40"
@@ -250,63 +250,63 @@
                         horizontalAlign="center"
                         verticalAlign="center" />
                         
-                    <brls:Slider
+                    <aurore:Slider
                         id="slider"
                         width="auto"
                         height="40"
                         grow="1"/>
                     
-                </brls:Box>
+                </aurore:Box>
 
                 <!-- Labels -->
-                <brls:Header
+                <aurore:Header
                     width="auto"
                     height="auto"
                     title="@i18n/demo/components/labels_header"
                     marginBottom="30px" />
 
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="@i18n/demo/components/regular_label"
                     marginBottom="30px" />
 
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="auto"
                     axis="row"
                     justifyContent="spaceEvenly"
                     marginBottom="30px" >
 
-                    <brls:Label
+                    <aurore:Label
                         width="30%"
                         height="auto"
                         text="@i18n/demo/components/label_left"
                         horizontalAlign="left" />
 
-                    <brls:Label
+                    <aurore:Label
                         width="30%"
                         height="auto"
                         text="@i18n/demo/components/label_center"
                         horizontalAlign="center" />
 
-                    <brls:Label
+                    <aurore:Label
                         width="30%"
                         height="auto"
                         text="@i18n/demo/components/label_right"
                         horizontalAlign="right" />
 
-                </brls:Box>
+                </aurore:Box>
 
                 <!-- Images -->
-                <brls:Header
+                <aurore:Header
                     width="auto"
                     height="auto"
                     title="@i18n/demo/components/images_header_title"
                     subtitle="@i18n/demo/components/images_header_subtitle"
                     marginBottom="30px" />
 
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="auto"
                     axis="row"
@@ -342,9 +342,9 @@
                         caption="@i18n/demo/components/images_upscaled"
                         focusDown="image_cropped" />
 
-                </brls:Box>
+                </aurore:Box>
 
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="auto"
                     axis="row"
@@ -371,10 +371,10 @@
                         caption="@i18n/demo/components/images_cropped"
                         focusUp="image_upscaled" />
 
-                </brls:Box>
+                </aurore:Box>
 
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:ScrollingFrame>
+    </aurore:ScrollingFrame>
 
-</brls:Box>
+</aurore:Box>

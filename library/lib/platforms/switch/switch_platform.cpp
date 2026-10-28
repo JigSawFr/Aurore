@@ -16,16 +16,16 @@
 
 #include <switch.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/switch/switch_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/switch/switch_platform.hpp>
 
 #include "fmt/format.h"
 
 extern "C" u32 __nx_applet_exit_mode;
 
-namespace brls
+namespace aurore
 {
 
 static AppletHookCookie applet_hook_cookie;
@@ -35,26 +35,26 @@ static void on_applet_hook(AppletHookType hook, void* arg)
     switch (hook)
     {
         case AppletHookType_OnExitRequest:
-            brls::Logger::info("AppletHookType_OnExitRequest");
-            brls::Application::quit();
+            aurore::Logger::info("AppletHookType_OnExitRequest");
+            aurore::Application::quit();
             break;
         case AppletHookType_OnFocusState:
             switch (appletGetFocusState())
             {
                 case AppletFocusState_InFocus:
-                    brls::Logger::info("AppletFocusState_InFocus");
-                    brls::Application::getWindowFocusChangedEvent()->fire(true);
+                    aurore::Logger::info("AppletFocusState_InFocus");
+                    aurore::Application::getWindowFocusChangedEvent()->fire(true);
                     break;
                 case AppletFocusState_OutOfFocus:
                 case AppletFocusState_Background:
-                    brls::Logger::info("AppletFocusState_OutOfFocus");
-                    brls::Application::getWindowFocusChangedEvent()->fire(false);
+                    aurore::Logger::info("AppletFocusState_OutOfFocus");
+                    aurore::Application::getWindowFocusChangedEvent()->fire(false);
                     break;
                 default:
                     break;
             }
             break;
-#ifdef BOREALIS_USE_DEKO3D
+#ifdef AURORE_USE_DEKO3D
         case AppletHookType_OnOperationMode:
             ((SwitchVideoContext*)platform->getVideoContext())->appletCallback(hook);
             break;
@@ -114,7 +114,7 @@ SwitchPlatform::SwitchPlatform()
 
 void SwitchPlatform::createWindow(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight, float windowXPos, float windowYPos)
 {
-#ifdef BOREALIS_USE_DEKO3D
+#ifdef AURORE_USE_DEKO3D
     this->videoContext = new SwitchVideoContext();
 #elif defined(__SDL2__)
     this->videoContext = new SDLVideoContext(windowTitle, windowWidth, windowHeight, 0, 0);
@@ -122,7 +122,7 @@ void SwitchPlatform::createWindow(std::string windowTitle, uint32_t windowWidth,
     this->videoContext = new GLFWVideoContext(windowTitle, windowWidth, windowHeight);
 #endif
 
-    // Reinitialise controllers with settings from borealis, not by GLFW or SDL
+    // Reinitialise controllers with settings from Aurore, not by GLFW or SDL
     this->inputManager = new SwitchInputManager();
 }
 
@@ -303,7 +303,7 @@ ThemeVariant SwitchPlatform::getThemeVariant()
 void SwitchPlatform::setThemeVariant(ThemeVariant theme)
 {
     this->themeVariant = theme;
-#ifdef BOREALIS_USE_DEKO3D
+#ifdef AURORE_USE_DEKO3D
     this->videoContext->recordStaticCommands();
 #endif
 }
@@ -318,4 +318,4 @@ SwitchPlatform::~SwitchPlatform()
     delete this->imeManager;
 }
 
-} // namespace brls
+} // namespace aurore

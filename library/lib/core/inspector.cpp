@@ -9,19 +9,19 @@
 #include <cstdlib>
 #include <cstring>
 #include <typeinfo>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/frame_context.hpp>
-#include <borealis/core/input.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/profiler.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/frame_context.hpp>
+#include <aurore/core/input.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/views/label.hpp>
 
 #ifndef _MSC_VER
 #include <cxxabi.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // Named: in a unity build, the other files' helpers do not meet these
@@ -100,7 +100,7 @@ namespace inspector_detail
             result = demangled;
         std::free(demangled);
 #endif
-        for (const char* prefix : { "brls::", "(anonymous namespace)::" })
+        for (const char* prefix : { "aurore::", "(anonymous namespace)::" })
         {
             size_t at;
             while ((at = result.find(prefix)) != std::string::npos)
@@ -661,7 +661,7 @@ void Inspector::setMode(Mode newMode)
 
 void Inspector::processInput(InputManager* input, ControllerState* state)
 {
-    bool key    = input->getKeyboardKeyState(BRLS_KBD_KEY_F12);
+    bool key    = input->getKeyboardKeyState(AURORE_KBD_KEY_F12);
     bool combo  = state->buttons[BUTTON_LSB] && state->buttons[BUTTON_RSB];
     bool toggle = (key && !keyHeld) || (combo && !comboHeld);
     keyHeld     = key;
@@ -839,4 +839,4 @@ void Inspector::recordMetric(const std::string& name, float value)
     metrics.emplace_back(name, value);
 }
 
-} // namespace brls
+} // namespace aurore

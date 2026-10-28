@@ -1,7 +1,7 @@
 name: release-please
 
 # On every push to main, release-please keeps a "chore(main): release X.Y.Z"
-# pull request up to date (CHANGELOG.md, library/include/borealis/version.hpp)
+# pull request up to date (CHANGELOG.md, library/include/aurore/version.hpp)
 # from the conventional commits. Merging it creates the vX.Y.Z tag and the
 # GitHub release.
 on:

@@ -15,13 +15,13 @@
 */
 
 #include <cmath>
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/pan_gesture.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/cells/cell_detail.hpp>
-#include <borealis/views/slider.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/pan_gesture.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/cells/cell_detail.hpp>
+#include <aurore/views/slider.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // The knob, which takes the focus: it says what its slider is set to.
@@ -73,11 +73,11 @@ Slider::Slider()
     pointer->setShadowVisibility(true);
     pointer->setFocusable(true);
 
-    pointer->setThemeColor("color", "brls/slider/pointer_color");
-    pointer->setThemeColor("borderColor", "brls/slider/pointer_border_color");
+    pointer->setThemeColor("color", "aurore/slider/pointer_color");
+    pointer->setThemeColor("borderColor", "aurore/slider/pointer_border_color");
 
-    line->setThemeColor("color", "brls/slider/line_filled");
-    lineEmpty->setThemeColor("color", "brls/slider/line_empty");
+    line->setThemeColor("color", "aurore/slider/line_filled");
+    lineEmpty->setThemeColor("color", "aurore/slider/line_empty");
 
     // The D-pad moves the slider (in buttonsProcessing, or here a step at a
     // time with a discrete step) rather than the focus
@@ -341,4 +341,4 @@ View* Slider::create()
     return new Slider();
 }
 
-} // namespace brls
+} // namespace aurore

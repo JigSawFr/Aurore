@@ -1,4 +1,4 @@
-<brls:Box
+<aurore:Box
     width="auto"
     height="auto"
     axis="column"
@@ -8,25 +8,25 @@
     paddingLeft="75px"
     paddingRight="75px" >
 
-    <brls:Image
+    <aurore:Image
         id="image"
         width="auto"
         height="33%"
         image="@res/img/aurore_256.png"
         marginBottom="@style/about/description_margin"/>
 
-    <brls:Label
+    <aurore:Label
         id="description"
         width="40%"
         height="auto"
         grow="1.0"
         horizontalAlign="center" />
 
-    <brls:Button
+    <aurore:Button
         id="close_button"
         width="auto"
         height="auto"
         text="@i18n/hints/back"
         marginTop="24px"/>
 
-</brls:Box>
+</aurore:Box>

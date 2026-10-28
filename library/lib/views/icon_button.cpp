@@ -14,15 +14,15 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/views/icon_button.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/views/icon_button.hpp>
 
-namespace brls
+namespace aurore
 {
 
 IconButton::IconButton()
 {
-    this->text = (Label*)this->getView("brls/button/label");
+    this->text = (Label*)this->getView("aurore/button/label");
 
     this->registerFilePathXMLAttribute("icon", [this](const std::string& value)
         { this->setIcon(value); });
@@ -107,7 +107,7 @@ void IconButton::updateShape()
 
     if (iconOnly)
     {
-        float side = Application::getStyle()["brls/button/padding_top_bottom"];
+        float side = Application::getStyle()["aurore/button/padding_top_bottom"];
         if (this->getPaddingLeft() != side)
             this->setPadding(side, side, side, side);
         float radius = this->iconSize / 2 + side;
@@ -141,4 +141,4 @@ View* IconButton::create()
     return new IconButton();
 }
 
-} // namespace brls
+} // namespace aurore

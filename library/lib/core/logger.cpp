@@ -18,9 +18,9 @@
 #include <fmt/format.h>
 #include <stdio.h>
 
-#include <borealis/core/logger.hpp>
+#include <aurore/core/logger.hpp>
 
-namespace brls
+namespace aurore
 {
 
 void Logger::setLogLevel(LogLevel newLogLevel)
@@ -45,4 +45,4 @@ void Logger::setThreadSafeLogging(bool newThreadSafeLogging)
     Logger::threadSafeLogging = newThreadSafeLogging;
 }
 
-} // namespace brls
+} // namespace aurore

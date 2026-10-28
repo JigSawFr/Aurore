@@ -1,10 +1,10 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/util/safe_text.hpp>
+#include <aurore/cadran/util/safe_text.hpp>
 
 #include <cctype>
 #include <cstdint>
 
-#include <borealis/cadran/util/utf8.hpp>
+#include <aurore/cadran/util/utf8.hpp>
 
 namespace safe_text
 {

@@ -16,7 +16,7 @@ It is read again when the window changes size, and on Android and iOS when the w
 
 ## On a desktop, and a TV
 
-`BRLS_SAFE_AREA` shows a phone's safe area on the desktop, in a build with `BRLS_DEV_TOOLS` ([environment.md](environment.md)): `BRLS_SAFE_AREA=47,0,34,0` (an iPhone held upright: top, right, bottom, left), `BRLS_SAFE_AREA=0,48` (a notch on either side), `BRLS_SAFE_AREA=30` (every edge), in the window's unit as a CSS padding is written. In code, `Application::setSafeAreaOverride(&insets)` does the same (`nullptr` goes back to the platform's).
+`AURORE_SAFE_AREA` shows a phone's safe area on the desktop, in a build with `AURORE_DEV_TOOLS` ([environment.md](environment.md)): `AURORE_SAFE_AREA=47,0,34,0` (an iPhone held upright: top, right, bottom, left), `AURORE_SAFE_AREA=0,48` (a notch on either side), `AURORE_SAFE_AREA=30` (every edge), in the window's unit as a CSS padding is written. In code, `Application::setSafeAreaOverride(&insets)` does the same (`nullptr` goes back to the platform's).
 
 `Application::setOverscan(fraction)` keeps every edge at least that fraction of the window clear: `0.05` is a TV's title safe area (5 %), for a setting of an app on a console or a TV box plugged into a set that crops the picture. 0 by default, at most 0.25.
 
@@ -32,16 +32,16 @@ It is read again when the window changes size, and on Android and iOS when the w
 | `vertical`, `horizontal`, `all` | top and bottom, left and right, every edge |
 
 ```xml
-<brls:Box axis="column" safeArea="none" backgroundColor="@theme/brls/background">
+<aurore:Box axis="column" safeArea="none" backgroundColor="@theme/aurore/background">
     <!-- a bar at the top: its colour up to the window's edge, its text below the notch -->
-    <brls:Box height="60" boxSizing="contentBox" safeArea="top|horizontal"
-        backgroundColor="@theme/brls/accent">
-        <brls:Label text="Title"/>
-    </brls:Box>
-    <brls:ScrollingFrame grow="1" safeArea="horizontal|bottom">
+    <aurore:Box height="60" boxSizing="contentBox" safeArea="top|horizontal"
+        backgroundColor="@theme/aurore/accent">
+        <aurore:Label text="Title"/>
+    </aurore:Box>
+    <aurore:ScrollingFrame grow="1" safeArea="horizontal|bottom">
         …
-    </brls:ScrollingFrame>
-</brls:Box>
+    </aurore:ScrollingFrame>
+</aurore:Box>
 ```
 
 The rules:

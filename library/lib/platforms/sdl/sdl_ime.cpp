@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/event.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/sdl/sdl_ime.hpp>
-#include <borealis/views/edit_text_dialog.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/event.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/sdl/sdl_ime.hpp>
+#include <aurore/views/edit_text_dialog.hpp>
 
 #ifdef __PSV__
 extern "C" uint8_t* vita_ime_init_text;
@@ -31,7 +31,7 @@ extern "C" uint32_t vita_ime_type;
 __attribute__((weak)) uint32_t vita_ime_type = 0;
 #endif
 
-namespace brls
+namespace aurore
 {
 SDLImeManager::SDLImeManager(Event<SDL_Event*>* event)
     : event(event)
@@ -168,7 +168,7 @@ void SDLImeManager::openInputDialog(
     updateText();
     if (!initialText.empty())
         updateTextCursor();
-#if defined(BOREALIS_USE_D3D11)
+#if defined(AURORE_USE_D3D11)
     float scale = Application::windowScale;
 #else
     float scale = Application::windowScale / Application::getPlatform()->getVideoContext()->getScaleFactor();

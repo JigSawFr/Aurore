@@ -17,16 +17,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/notification_manager.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/notification_manager.hpp>
 
-namespace brls
+namespace aurore
 {
 
 NotificationManager::NotificationManager()
 {
-    float width = Application::getStyle().getMetric("brls/notification/width");
+    float width = Application::getStyle().getMetric("aurore/notification/width");
     this->setWidth(width);
     this->setTranslationX(Application::ORIGINAL_WINDOW_WIDTH - width);
     this->setAxis(Axis::COLUMN);
@@ -35,7 +35,7 @@ NotificationManager::NotificationManager()
 void NotificationManager::notify(const std::string& text, View* leading)
 {
     // Create the notification
-    brls::Logger::debug("Showing notification \"{}\"", text);
+    aurore::Logger::debug("Showing notification \"{}\"", text);
 
     auto* notification = new Notification(text, leading);
     this->addView(notification, 0);
@@ -43,17 +43,17 @@ void NotificationManager::notify(const std::string& text, View* leading)
     // Where the stack sits, from the style as it is now (an app may set it
     // after the manager is made),
     auto style  = Application::getStyle();
-    float width = style.getMetric("brls/notification/width");
+    float width = style.getMetric("aurore/notification/width");
     this->setWidth(width);
     // and clear of the safe area
     const Insets safe = Application::getSafeArea();
-    this->setTranslationX(Application::ORIGINAL_WINDOW_WIDTH - width - style.getMetric("brls/notification/margin_right") - safe.right);
-    this->setTranslationY(style.getMetric("brls/notification/margin_top") + safe.top);
+    this->setTranslationX(Application::ORIGINAL_WINDOW_WIDTH - width - style.getMetric("aurore/notification/margin_right") - safe.right);
+    this->setTranslationY(style.getMetric("aurore/notification/margin_top") + safe.top);
 
     // Timeout timer
-    float timeout = style.getMetric("brls/animations/notification_timeout");
-    float show    = style.getMetric("brls/animations/notification_show");
-    float slide   = style.getMetric("brls/notification/slide");
+    float timeout = style.getMetric("aurore/animations/notification_timeout");
+    float show    = style.getMetric("aurore/animations/notification_show");
+    float slide   = style.getMetric("aurore/notification/slide");
     notification->timeoutTimer.reset(slide);
     notification->timeoutTimer.addStep(0.0f, (int)show, EasingFunction::quadraticOut);
     notification->timeoutTimer.addStep(0.0f, (int)timeout, EasingFunction::linear);
@@ -91,16 +91,16 @@ NotificationManager::~NotificationManager()
 Notification::Notification(const std::string& text, View* leading)
 {
     auto style = Application::getStyle();
-    this->setThemeColor("backgroundColor", "brls/notification/background");
-    this->setCornerRadius(style.getMetric("brls/notification/corner_radius"));
-    this->setMarginBottom(style.getMetric("brls/notification/spacing"));
-    float padding = style.getMetric("brls/notification/padding");
+    this->setThemeColor("backgroundColor", "aurore/notification/background");
+    this->setCornerRadius(style.getMetric("aurore/notification/corner_radius"));
+    this->setMarginBottom(style.getMetric("aurore/notification/spacing"));
+    float padding = style.getMetric("aurore/notification/padding");
     this->setPadding(padding);
-    float width = style.getMetric("brls/notification/width");
+    float width = style.getMetric("aurore/notification/width");
     this->setWidth(width);
     this->label = new Label();
     this->label->setText(text);
-    this->label->setThemeColor("textColor", "brls/notification/text");
+    this->label->setThemeColor("textColor", "aurore/notification/text");
     if (leading)
     {
         // The text beside it, wrapping in what is left.
@@ -114,4 +114,4 @@ Notification::Notification(const std::string& text, View* leading)
 
 Notification::~Notification() = default;
 
-}; // namespace brls
+}; // namespace aurore

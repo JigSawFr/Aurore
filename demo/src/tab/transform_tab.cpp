@@ -34,22 +34,22 @@ TransformTab::TransformTab()
             skew2.stop();
 
             aniX.reset(0);
-            aniX.addStep(1.0, ANIMATION, brls::EasingFunction::exponentialOut);
-            aniX.addStep(0, ANIMATION, brls::EasingFunction::cubicIn);
-            aniX.addStep(0.5, ANIMATION, brls::EasingFunction::exponentialOut);
-            aniX.addStep(0, ANIMATION, brls::EasingFunction::cubicIn);
+            aniX.addStep(1.0, ANIMATION, aurore::EasingFunction::exponentialOut);
+            aniX.addStep(0, ANIMATION, aurore::EasingFunction::cubicIn);
+            aniX.addStep(0.5, ANIMATION, aurore::EasingFunction::exponentialOut);
+            aniX.addStep(0, ANIMATION, aurore::EasingFunction::cubicIn);
             aniX.setTickCallback([this](){transX->slider->setProgress(aniX);});
 
             aniY.reset(0);
-            aniY.addStep(1.0, ANIMATION, brls::EasingFunction::bounceOut);
-            aniY.addStep(0.0, ANIMATION, brls::EasingFunction::cubicIn);
-            aniY.addStep(1.0, ANIMATION, brls::EasingFunction::bounceOut);
-            aniY.addStep(0.0, ANIMATION, brls::EasingFunction::cubicIn);
+            aniY.addStep(1.0, ANIMATION, aurore::EasingFunction::bounceOut);
+            aniY.addStep(0.0, ANIMATION, aurore::EasingFunction::cubicIn);
+            aniY.addStep(1.0, ANIMATION, aurore::EasingFunction::bounceOut);
+            aniY.addStep(0.0, ANIMATION, aurore::EasingFunction::cubicIn);
             aniY.setTickCallback([this](){transY->slider->setProgress(aniY);});
 
             skew.reset(0);
-            skew.addStep(1, ANIMATION, brls::EasingFunction::bounceOut);
-            skew.addStep(0, ANIMATION, brls::EasingFunction::cubicIn);
+            skew.addStep(1, ANIMATION, aurore::EasingFunction::bounceOut);
+            skew.addStep(0, ANIMATION, aurore::EasingFunction::cubicIn);
             skew.setTickCallback([this](){
                     skewY->slider->setProgress(skew);
                     scaleX->slider->setProgress(1 - skew);
@@ -57,8 +57,8 @@ TransformTab::TransformTab()
 
             skew2.reset(0);
             skew2.addStep(0, ANIMATION * 2);
-            skew2.addStep(1, ANIMATION, brls::EasingFunction::bounceOut);
-            skew2.addStep(0, ANIMATION, brls::EasingFunction::cubicIn);
+            skew2.addStep(1, ANIMATION, aurore::EasingFunction::bounceOut);
+            skew2.addStep(0, ANIMATION, aurore::EasingFunction::cubicIn);
             skew2.setTickCallback([this](){
                     skewX->slider->setProgress(skew2);
                     scaleY->slider->setProgress(1 - skew2);
@@ -129,7 +129,7 @@ TransformTab::TransformTab()
         box->setFontScaleY(value); return value; });
 }
 
-void TransformTab::registerCell(brls::SliderCell* cell, float init, const std::string& title, const std::function<float(float)>& cb)
+void TransformTab::registerCell(aurore::SliderCell* cell, float init, const std::string& title, const std::function<float(float)>& cb)
 {
     cell->setDetailText(fmt::format("{:.2f}", cb(init)));
     cell->slider->setPointerSize(POINTER_SIZE);
@@ -137,12 +137,12 @@ void TransformTab::registerCell(brls::SliderCell* cell, float init, const std::s
         { cell->setDetailText(fmt::format("{:.2f}", cb(value))); });
 }
 
-brls::View* TransformTab::create()
+aurore::View* TransformTab::create()
 {
     return new TransformTab();
 }
 
-void TransformBox::draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx)
+void TransformBox::draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style, aurore::FrameContext* ctx)
 {
     float centerX = width * fabs(scale_x) / 2, centerY = height * fabs(scale_y) / 2;
     nvgSave(vg);
@@ -151,7 +151,7 @@ void TransformBox::draw(NVGcontext* vg, float x, float y, float width, float hei
     nvgSkewX(vg, skew_x);
     nvgSkewY(vg, skew_y);
     nvgScale(vg, scale_x, scale_y);
-    brls::Image::draw(vg, -centerX, -centerY, width, height, style, ctx);
+    aurore::Image::draw(vg, -centerX, -centerY, width, height, style, ctx);
     nvgTranslate(vg, -centerX, -centerY);
     nvgScale(vg, font_scale_x, font_scale_y);
     nvgText(vg, 4, 18, "demo", nullptr);
@@ -193,7 +193,7 @@ void TransformBox::setFontScaleY(float size)
     font_scale_y = size;
 }
 
-brls::View* TransformBox::create()
+aurore::View* TransformBox::create()
 {
     return new TransformBox();
 }

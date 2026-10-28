@@ -23,10 +23,10 @@
 
 Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like the Nintendo Switch's own menus out of the box, and can be restyled into anything else.
 
-It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. The code keeps borealis' names (`brls`, `borealis.hpp`), so a borealis app moves to Aurore by changing its submodule.
+It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. Its code has its own names (`aurore::`, `<aurore.hpp>`, `AURORE_`); borealis' (`brls::`, `<borealis.hpp>`, `BRLS_`) still work as deprecated aliases until 1.0, so a borealis app moves to Aurore by changing its submodule ([migrating from borealis](docs/migrating-from-borealis.md)). <!-- legacy-names: line -->
 
 > [!IMPORTANT]
-> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's default look: an app gets it without a line of code, and `brls::Application::setCadran(false)` keeps borealis' own. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
+> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's default look: an app gets it without a line of code, and `aurore::Application::setCadran(false)` keeps borealis' own. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
 
 ## ✨ Features
 
@@ -118,10 +118,10 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | --- | --- |
 | Styles per state, transitions, data binding, accessibility | [docs/styles.md](docs/styles.md) |
 | Recycling grid and row, context menu, icon button | [docs/components.md](docs/components.md) |
-| A test harness: no window, simulated time, inputs by call, screenshots compared | `-DBRLS_BUILD_TESTS=ON` · [docs/testing.md](docs/testing.md) |
+| A test harness: no window, simulated time, inputs by call, screenshots compared | `-DAURORE_BUILD_TESTS=ON` · [docs/testing.md](docs/testing.md) |
 | An inspector drawn over the app, on every platform | F12 or L3+R3 · [docs/inspector.md](docs/inspector.md) |
 | Hot reload of the XML and the theme on the desktop | [docs/hot_reload.md](docs/hot_reload.md) |
-| Frame profiler | `Profiler::setEnabled(true)`, or `BRLS_PROFILE=1` outside release builds |
+| Frame profiler | `Profiler::setEnabled(true)`, or `AURORE_PROFILE=1` outside release builds |
 
 **Layout and drawing**
 
@@ -137,7 +137,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | `imageAlign` honoured for `FIT` and `FILL` | — |
 | Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
 | A spinner's own colour | `ProgressSpinner::setColor` |
-| Toasts styled by the theme, with an optional icon | `brls/notification/background`, `…/text`, `…/corner_radius`, `…/spacing`, `…/margin_top`, `…/margin_right` · `Application::notify(text, leading)` |
+| Toasts styled by the theme, with an optional icon | `aurore/notification/background`, `…/text`, `…/corner_radius`, `…/spacing`, `…/margin_top`, `…/margin_right` · `Application::notify(text, leading)` |
 | The footer's clock in hours and minutes | — |
 
 **Text**
@@ -152,13 +152,13 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | FreeType instead of stb_truetype, hinted (an option) | `-DAURORE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
 | stb_truetype: a glyph read within its own data, a font's tables within the font (CVE-2026-18497); fonts still from trusted sources | — |
 | Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
-| Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DAURORE_FRIBIDI=ON` · `brls::bidiVisual()` |
+| Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DAURORE_FRIBIDI=ON` · `aurore::bidiVisual()` |
 
 **Languages**
 
 | Change | API |
 | --- | --- |
-| Load another language while the app runs | `brls::loadTranslations(locale)` |
+| Load another language while the app runs | `aurore::loadTranslations(locale)` |
 | Lookups safe from other threads while the language changes | — |
 | Lookups without exceptions (about 6× faster in English) | — |
 
@@ -181,7 +181,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | Change | API |
 | --- | --- |
 | SDL: the right controller closed when one is unplugged, every controller read after a reconnection | — |
-| SDL in a browser (Emscripten), with an on-screen pad | `brls_web_button()` |
+| SDL in a browser (Emscripten), with an on-screen pad | `aurore_web_button()` |
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
 | deko3d: the command memory grows instead of aborting; image descriptors reused | — |
 | Switch: the applet hook removed first at shutdown | — |
@@ -219,7 +219,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
-5. Pick a version: the submodule can follow a release tag (`vX.Y.Z`), and [`CHANGELOG.md`](CHANGELOG.md) says what each one changes. Before 1.0 a minor version may break the API. In code, `AURORE_VERSION` and `AURORE_VERSION_AT_LEAST(0, 2, 0)` come with `borealis.hpp`; an installed Aurore answers `find_package(Aurore 0.1)`.
+5. Pick a version: the submodule can follow a release tag (`vX.Y.Z`), and [`CHANGELOG.md`](CHANGELOG.md) says what each one changes. Before 1.0 a minor version may break the API. In code, `AURORE_VERSION` and `AURORE_VERSION_AT_LEAST(0, 2, 0)` come with `aurore.hpp`; an installed Aurore answers `find_package(Aurore 0.1)`.
 
 > [!TIP]
 > Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.

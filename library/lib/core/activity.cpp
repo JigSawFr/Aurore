@@ -14,14 +14,14 @@
     limitations under the License.
 */
 
-#include <borealis/core/activity.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/activity.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/i18n.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 Activity::Activity()
@@ -173,7 +173,7 @@ ActionIdentifier Activity::registerAction(const std::string& hintText, const enu
     return ACTION_NONE;
 }
 
-ActionIdentifier Activity::registerAction(const BrlsKeyCombination key, const ActionListener& actionListener, const bool allowRepeating)
+ActionIdentifier Activity::registerAction(const AuroreKeyCombination key, const ActionListener& actionListener, const bool allowRepeating)
 {
     if (this->contentView)
         return this->contentView->registerAction(key, actionListener, allowRepeating);
@@ -237,4 +237,4 @@ Activity::~Activity()
     }
 }
 
-} // namespace brls
+} // namespace aurore

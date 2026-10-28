@@ -17,9 +17,9 @@
 #include <cmath>
 #include <cstdlib>
 #include <vector>
-#include <borealis/core/safe_area.hpp>
+#include <aurore/core/safe_area.hpp>
 
-namespace brls
+namespace aurore
 {
 
 // The words of `text` between separators (`|`, commas, spaces)
@@ -113,4 +113,4 @@ bool parseSafeAreaEdges(const std::string& text, SafeAreaEdges* out)
     return true;
 }
 
-} // namespace brls
+} // namespace aurore
