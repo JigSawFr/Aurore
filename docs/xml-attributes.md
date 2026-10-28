@@ -10,6 +10,8 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 |---|---|
 | `accessibilityLabel` | text (`@i18n/…`) |
 | `accessibilityRole` | text (`@i18n/…`) |
+| `accessibilitySelected` | `true` / `false` |
+| `accessibilityValue` | text (`@i18n/…`) |
 | `alignSelf` | `auto` · `baseline` · `center` · `flexEnd` · `flexStart` · `spaceAround` · `spaceBetween` · `stretch` |
 | `alpha` | number |
 | `aspectRatio` | number |
