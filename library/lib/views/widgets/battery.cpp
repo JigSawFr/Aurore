@@ -58,12 +58,20 @@ void BatteryWidget::updateState()
         isBatteryCharging = Application::getPlatform()->isBatteryCharging();
         batteryLevel      = Application::getPlatform()->getBatteryLevel() / 100.0f;
 #else
-        ASYNC_RETAIN
-        brls::async([ASYNC_TOKEN]()
+        // Read on the task thread, applied on the UI thread, which draws
+        // them; one read at a time
+        if (updating)
+            return;
+        updating = true;
+        brls::async([]()
             {
-                ASYNC_RELEASE
-                isBatteryCharging = Application::getPlatform()->isBatteryCharging();
-                batteryLevel      = Application::getPlatform()->getBatteryLevel() / 100.0f; });
+                bool charging = Application::getPlatform()->isBatteryCharging();
+                float level   = Application::getPlatform()->getBatteryLevel() / 100.0f;
+                brls::sync([charging, level]()
+                    {
+                        isBatteryCharging = charging;
+                        batteryLevel      = level;
+                        updating          = false; }); });
 #endif
         time = now;
     }

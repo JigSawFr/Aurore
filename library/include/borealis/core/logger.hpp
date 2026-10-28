@@ -33,9 +33,11 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 
+#include <ctime>
 #include <mutex>
 #include <string>
 #include <borealis/core/event.hpp>
+#include <borealis/core/time.hpp>
 
 namespace brls
 {
@@ -102,7 +104,7 @@ class Logger
             sceRtcGetCurrentClockLocalTime(&lt);
 #else
         std::time_t tt  = std::chrono::system_clock::to_time_t(now);
-        std::tm time_tm = *std::localtime(&tt);
+        std::tm time_tm = localTime(tt);
 #endif
         std::unique_lock<std::mutex> lock;
         if (Logger::threadSafeLogging)

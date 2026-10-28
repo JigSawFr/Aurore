@@ -104,10 +104,15 @@ void WirelessWidget::updateState()
         hasWirelessConnection = Application::getPlatform()->hasWirelessConnection();
         wifiLevel             = Application::getPlatform()->getWirelessLevel();
 #else
-        ASYNC_RETAIN
-        brls::async([ASYNC_TOKEN]()
+        // Read on the task thread, applied on the UI thread, which draws
+        // them; one read at a time
+        if (updating)
+            return;
+        updating = true;
+        brls::async([]()
             {
-                ASYNC_RELEASE
+                bool ethernet = false, wireless = false;
+                int level     = 0;
 #ifdef __SWITCH__
                 // Reduce service calls
                 // and fix support for emulator (Ryujinx) as it doesn't support :
@@ -115,25 +120,24 @@ void WirelessWidget::updateState()
                 NifmInternetConnectionType type;
                 u32 wifiSignal;
                 NifmInternetConnectionStatus status;
-                Result ret            = nifmGetInternetConnectionStatus(&type, &wifiSignal, &status);
-                hasEthernetConnection = type == NifmInternetConnectionType_Ethernet;
-                hasWirelessConnection = type == NifmInternetConnectionType_WiFi;
-                if (ret != 0)
+                Result ret = nifmGetInternetConnectionStatus(&type, &wifiSignal, &status);
+                if (ret == 0)
                 {
-                    hasEthernetConnection = false;
-                    hasWirelessConnection = false;
-                    wifiLevel             = 0;
-                }
-                else
-                {
-                    wifiLevel = (int)wifiSignal;
+                    ethernet = type == NifmInternetConnectionType_Ethernet;
+                    wireless = type == NifmInternetConnectionType_WiFi;
+                    level    = (int)wifiSignal;
                 }
 #else
-                hasEthernetConnection = Application::getPlatform()->hasEthernetConnection();
-                hasWirelessConnection = Application::getPlatform()->hasWirelessConnection();
-                wifiLevel             = Application::getPlatform()->getWirelessLevel();
+                ethernet = Application::getPlatform()->hasEthernetConnection();
+                wireless = Application::getPlatform()->hasWirelessConnection();
+                level    = Application::getPlatform()->getWirelessLevel();
 #endif
-            });
+                brls::sync([ethernet, wireless, level]()
+                    {
+                        hasEthernetConnection = ethernet;
+                        hasWirelessConnection = wireless;
+                        wifiLevel             = level;
+                        updating              = false; }); });
 #endif
         time = now;
     }
