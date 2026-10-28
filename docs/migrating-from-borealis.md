@@ -36,7 +36,7 @@ Pin a release rather than following `main`: `git -C library/aurore checkout vX.Y
   ```
 
   The test harness, if the app uses it, is `Aurore::test` (`-DAURORE_BUILD_TESTS=ON`, [testing.md](testing.md)), its cases registered with `aurore_add_tests()`.
-- **The options** are prefixed: `AURORE_PLATFORM`, `AURORE_WINDOW`, `AURORE_GRAPHICS`, `AURORE_LIBROMFS`, `AURORE_BUILD_TESTS`, `AURORE_DEV_TOOLS`… ([platforms.md](platforms.md#options-for-every-platform)). The unprefixed names (`PLATFORM_*`, `USE_GLFW`, `USE_SDL2`, `USE_DEKO3D`, `USE_LIBROMFS`…) still work, with a deprecation warning, and the platform ones stay set as plain variables for the app's own tests. The `BRLS_` ones are gone: `BRLS_BUILD_TESTS`, `BRLS_DEV_TOOLS`, `BRLS_INSPECTOR`, `BRLS_UNITY_BUILD` and `BRLS_FONTSTASH_STREAM` are `AURORE_BUILD_TESTS`…, and the variable `BRLS_RESOURCES_DIR` (the folder that holds `resources/` on a desktop) is `AURORE_RESOURCES_ROOT`. The presets in `CMakePresets.json` are Aurore's own, for the demo.
+- **The options** are prefixed: `AURORE_PLATFORM`, `AURORE_WINDOW`, `AURORE_GRAPHICS`, `AURORE_LIBROMFS`, `AURORE_BUILD_TESTS`, `AURORE_DEV_TOOLS`… ([platforms.md](platforms.md#options-for-every-platform)). borealis' names are no longer read: `PLATFORM_DESKTOP=ON` is `AURORE_PLATFORM=DESKTOP`, `USE_SDL2=ON` is `AURORE_WINDOW=SDL2`, `USE_DEKO3D=ON` is `AURORE_GRAPHICS=DEKO3D`, `USE_LIBROMFS` is `AURORE_LIBROMFS`, `BRLS_BUILD_TESTS`, `BRLS_DEV_TOOLS`, `BRLS_INSPECTOR`, `BRLS_UNITY_BUILD` and `BRLS_FONTSTASH_STREAM` are `AURORE_BUILD_TESTS`…, and the variable `BRLS_RESOURCES_DIR` or `CUSTOM_RESOURCES_DIR` (the folder that holds `resources/` on a desktop) is `AURORE_RESOURCES_ROOT`. `PLATFORM_*` and `USE_*` are still set as plain variables after `commonOption.cmake`, for the app's own tests. The presets in `CMakePresets.json` are Aurore's own, for the demo.
 - **The Switch** keeps devkitPro's compiler flags now (the Cortex-A57 tuning, the TLS model): an app that put them back by hand can stop. libpulsar is no longer linked: borealis' Switch sounds had been off for years, and still are.
 
 ## 3. The resources
@@ -86,6 +86,8 @@ Every name borealis gave the library has an Aurore one, and only the Aurore one 
 | Theme colours and style metrics: `brls/text`, `@theme/brls/accent`, `@style/brls/…` | `aurore/text`, `@theme/aurore/accent`, `@style/aurore/…`, in code, XML and theme files |
 | CMake: `BRLS_BUILD_TESTS`, `BRLS_DEV_TOOLS`, `BRLS_RESOURCES_DIR`, `brls_add_tests()` | `AURORE_BUILD_TESTS`, `AURORE_DEV_TOOLS`, `AURORE_RESOURCES_ROOT`, `aurore_add_tests()` |
 | The web page's `brls_web_button()` | `aurore_web_button()` |
+| `ASYNC_RETAIN`, `ASYNC_TOKEN`, `ASYNC_RELEASE` | capture `aliveToken()` and return if it expired ([getting-started.md](getting-started.md)) |
+| `Threading::getSyncFunctions()`, `getAsyncTasks()`, `new Threading()` | `Threading::isIdle()`; the application starts the threads |
 
 Moving an app's code to the new names is a search and replace; `git grep` finds what is left:
 

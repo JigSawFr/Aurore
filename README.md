@@ -217,7 +217,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 3. Copy its `resources` folder to the root of your project.
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
-   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). borealis' names (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`…) still work, with a deprecation warning, and stay set as plain variables for the app's own tests.
+   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 

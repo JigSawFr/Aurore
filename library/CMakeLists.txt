@@ -21,12 +21,7 @@ endif ()
 # working directory). An app sets it before add_subdirectory(); it can be
 # given with -DAURORE_RESOURCES_ROOT=... too (for an AppImage, say).
 if (NOT AURORE_RESOURCES_ROOT)
-    if (CUSTOM_RESOURCES_DIR)
-        message(DEPRECATION "CUSTOM_RESOURCES_DIR is deprecated: use -DAURORE_RESOURCES_ROOT=${CUSTOM_RESOURCES_DIR}")
-        set(AURORE_RESOURCES_ROOT "${CUSTOM_RESOURCES_DIR}")
-    else ()
-        set(AURORE_RESOURCES_ROOT ".")
-    endif ()
+    set(AURORE_RESOURCES_ROOT ".")
 endif ()
 
 # The version of library/include/aurore/version.hpp, which release-please updates

@@ -12,12 +12,11 @@
 #   fonts      FreeType and FriBidi
 #   unity      the unity build, the whole library in one batch, with the tests
 #   template   template/, the app to copy
-#   unprefixed the old unprefixed option names, still read (with a deprecation warning)
 #
 # Build directories go to $VARIANT_DIR (default: build-variants).
 set -euo pipefail
 
-variant=${1:?"usage: $0 presets|install|fetch|fonts|unity|template|unprefixed"}
+variant=${1:?"usage: $0 presets|install|fetch|fonts|unity|template"}
 root=$(cd -- "$(dirname -- "$0")/.." && pwd)
 out=${VARIANT_DIR:-${root}/build-variants}
 mkdir -p "${out}"
@@ -67,19 +66,6 @@ template)
     cmake --build "${out}/template" -j "${jobs}"
     test -f "${out}/template/resources/i18n/en-US/app.json"
     test ! -e "${out}/template/resources/themes"
-    ;;
-unprefixed)
-    # What an app that has not moved to the AURORE_ options passes
-    cmake -S . -B "${out}/unprefixed" -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_SDL2=ON \
-        -DUSE_LIBROMFS=ON 2>&1 | tee "${out}/unprefixed.log"
-    for name in PLATFORM_DESKTOP USE_SDL2 USE_LIBROMFS; do
-        grep -q "${name} is deprecated" "${out}/unprefixed.log"
-    done
-    grep -q "^AURORE_PLATFORM:STRING=DESKTOP$" "${out}/unprefixed/CMakeCache.txt"
-    grep -q "^AURORE_WINDOW:STRING=SDL2$" "${out}/unprefixed/CMakeCache.txt"
-    grep -q "^AURORE_LIBROMFS:BOOL=ON$" "${out}/unprefixed/CMakeCache.txt"
-    ;;
-legacy)
     ;;
 *)
     echo "unknown variant: ${variant}" >&2
