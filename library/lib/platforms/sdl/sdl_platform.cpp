@@ -21,10 +21,17 @@
 #include <borealis/core/application.hpp>
 #include <borealis/core/i18n.hpp>
 #include <borealis/core/logger.hpp>
+#include <borealis/core/thread.hpp>
 #include <borealis/platforms/sdl/sdl_platform.hpp>
 
 #if defined(IOS) || defined(TVOS)
 #include <sys/utsname.h>
+
+namespace brls
+{
+// ios_darwin.mm
+Insets ios_safe_area(SDL_Window* window);
+}
 
 static bool isIPad()
 {
@@ -185,6 +192,18 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     }
     else if (event->type == SDL_WINDOWEVENT)
     {
+        switch (event->window.event)
+        {
+            case SDL_WINDOWEVENT_SHOWN:
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+            case SDL_WINDOWEVENT_MAXIMIZED:
+            case SDL_WINDOWEVENT_RESTORED:
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
+                this->safeAreaMayHaveChanged();
+                break;
+            default:
+                break;
+        }
         auto* manager = this->inputManager;
         if (event->window.event == SDL_WINDOWEVENT_LEAVE)
         {
@@ -196,6 +215,11 @@ bool SDLPlatform::processEvent(SDL_Event* event)
             if (manager)
                 manager->getMouseCusorEntered()->fire(true);
         }
+    }
+    else if (event->type == SDL_DISPLAYEVENT)
+    {
+        // A turn of 180 degrees: the same size, the notch on the other side
+        this->safeAreaMayHaveChanged();
     }
     else if (event->type == SDL_KEYDOWN || event->type == SDL_KEYUP)
     {
@@ -247,6 +271,28 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     brls::Application::setActiveEvent(true);
     return true;
 }
+
+void SDLPlatform::safeAreaMayHaveChanged()
+{
+#if defined(IOS) || defined(TVOS) || defined(ANDROID)
+    if (!this->videoContext)
+        return;
+    Application::updateSafeArea();
+    // The system lays the window out again after telling us
+    brls::cancelDelay(this->safeAreaCheck);
+    this->safeAreaCheck = brls::delay(300, []()
+        { Application::updateSafeArea(); });
+#endif
+}
+
+#if defined(IOS) || defined(TVOS)
+Insets SDLPlatform::getSafeAreaInsets()
+{
+    if (!this->videoContext)
+        return {};
+    return ios_safe_area(this->videoContext->getSDLWindow());
+}
+#endif
 
 bool SDLPlatform::mainLoopIteration()
 {

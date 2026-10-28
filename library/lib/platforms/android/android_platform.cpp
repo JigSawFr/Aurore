@@ -280,4 +280,40 @@ bool AndroidPlatform::canSetBacklightBrightness()
     return true;
 }
 
+// PlatformUtils.getSafeAreaInsets: the system bars, the display cutout and
+// the rounded corners over the SDL surface, in pixels (SDL's window size is
+// in pixels on Android), top, right, bottom, left
+Insets AndroidPlatform::getSafeAreaInsets()
+{
+    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    if (env == nullptr)
+        return {};
+    jclass utilsClass;
+    jmethodID method;
+    if (!findUtilsMethod(env, "getSafeAreaInsets", "(Landroid/app/Activity;)[I", &utilsClass, &method))
+        return {};
+    auto activity = (jobject)SDL_AndroidGetActivity();
+    if (activity == nullptr)
+    {
+        env->DeleteLocalRef(utilsClass);
+        return {};
+    }
+    Insets insets;
+    auto values = (jintArray)env->CallStaticObjectMethod(utilsClass, method, activity);
+    if (!clearException(env) && values != nullptr)
+    {
+        if (env->GetArrayLength(values) == 4)
+        {
+            jint edges[4] = {};
+            env->GetIntArrayRegion(values, 0, 4, edges);
+            if (!clearException(env))
+                insets = { (float)edges[0], (float)edges[1], (float)edges[2], (float)edges[3] };
+        }
+        env->DeleteLocalRef(values);
+    }
+    env->DeleteLocalRef(activity);
+    env->DeleteLocalRef(utilsClass);
+    return insets;
+}
+
 } // namespace brls

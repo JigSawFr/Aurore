@@ -1,5 +1,8 @@
+#import <SDL2/SDL.h>
+#import <SDL2/SDL_syswm.h>
 #import <UIKit/UIKit.h>
 #import <borealis/core/logger.hpp>
+#import <borealis/core/safe_area.hpp>
 #import <borealis/platforms/desktop/desktop_platform.hpp>
 
 namespace brls
@@ -29,6 +32,22 @@ uint8_t ios_battery_status()
 #else
     return 0;
 #endif
+}
+
+// The window's safe area, in points (SDL's window size is in points too):
+// the notch, the rounded corners, the home indicator; on a TV, its
+// overscan
+Insets ios_safe_area(SDL_Window* window)
+{
+    SDL_SysWMinfo info;
+    SDL_VERSION(&info.version);
+    if (window == nullptr || !SDL_GetWindowWMInfo(window, &info) || info.subsystem != SDL_SYSWM_UIKIT)
+        return {};
+    UIWindow* uiWindow = info.info.uikit.window;
+    if (uiWindow == nil)
+        return {};
+    UIEdgeInsets insets = uiWindow.safeAreaInsets;
+    return { (float)insets.top, (float)insets.right, (float)insets.bottom, (float)insets.left };
 }
 
 float ios_battery()
