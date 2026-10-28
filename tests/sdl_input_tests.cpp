@@ -18,8 +18,8 @@
 // uses SDL2): a press shorter than a frame, the wheel's fractions, and SDL's
 // event watcher running on another thread than the frame, as on Android
 
-#include <borealis/platforms/sdl/sdl_input.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore/platforms/sdl/sdl_input.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -27,8 +27,8 @@
 #include <cstdlib>
 #include <thread>
 
-using brls::ControllerState;
-using brls::SDLInputManager;
+using aurore::ControllerState;
+using aurore::SDLInputManager;
 
 namespace
 {
@@ -36,7 +36,7 @@ namespace
 // A controller SDL maps by itself, opened by the input manager
 SDL_Joystick* attachController()
 {
-    BRLS_CHECK(SDL_Init(SDL_INIT_GAMECONTROLLER) == 0);
+    AURORE_CHECK(SDL_Init(SDL_INIT_GAMECONTROLLER) == 0);
     SDL_VirtualJoystickDesc desc;
     SDL_zero(desc);
     desc.version  = SDL_VIRTUAL_JOYSTICK_DESC_VERSION;
@@ -45,18 +45,18 @@ SDL_Joystick* attachController()
     desc.nbuttons = SDL_CONTROLLER_BUTTON_MAX;
     desc.name     = "Aurore test controller";
     int index     = SDL_JoystickAttachVirtualEx(&desc);
-    BRLS_CHECK(index >= 0);
+    AURORE_CHECK(index >= 0);
     return SDL_JoystickOpen(index);
 }
 
 } // namespace
 
-BRLS_TEST(sdl_press_between_two_frames_counts_once)
+AURORE_TEST(sdl_press_between_two_frames_counts_once)
 {
     SDL_Joystick* joystick = attachController();
-    BRLS_CHECK(joystick != nullptr);
+    AURORE_CHECK(joystick != nullptr);
     SDLInputManager manager(nullptr);
-    BRLS_CHECK_EQ(manager.getControllersConnectedCount(), 1);
+    AURORE_CHECK_EQ(manager.getControllersConnectedCount(), 1);
 
     // Down and up before the frame reads the controller
     SDL_JoystickSetVirtualButton(joystick, SDL_CONTROLLER_BUTTON_A, SDL_PRESSED);
@@ -66,31 +66,31 @@ BRLS_TEST(sdl_press_between_two_frames_counts_once)
 
     ControllerState state {};
     manager.updateUnifiedControllerState(&state);
-    BRLS_CHECK(state.buttons[brls::BUTTON_A]);
+    AURORE_CHECK(state.buttons[aurore::BUTTON_A]);
     manager.updateUnifiedControllerState(&state);
-    BRLS_CHECK(!state.buttons[brls::BUTTON_A]);
+    AURORE_CHECK(!state.buttons[aurore::BUTTON_A]);
 
     // Held across frames: pressed until released
     SDL_JoystickSetVirtualButton(joystick, SDL_CONTROLLER_BUTTON_B, SDL_PRESSED);
     SDL_JoystickUpdate();
     manager.updateUnifiedControllerState(&state);
-    BRLS_CHECK(state.buttons[brls::BUTTON_B]);
+    AURORE_CHECK(state.buttons[aurore::BUTTON_B]);
     manager.updateUnifiedControllerState(&state);
-    BRLS_CHECK(state.buttons[brls::BUTTON_B]);
+    AURORE_CHECK(state.buttons[aurore::BUTTON_B]);
     SDL_JoystickSetVirtualButton(joystick, SDL_CONTROLLER_BUTTON_B, SDL_RELEASED);
     SDL_JoystickUpdate();
     manager.updateUnifiedControllerState(&state);
-    BRLS_CHECK(!state.buttons[brls::BUTTON_B]);
+    AURORE_CHECK(!state.buttons[aurore::BUTTON_B]);
 
     SDL_JoystickClose(joystick);
 }
 
-BRLS_TEST(sdl_wheel_gives_its_fractions)
+AURORE_TEST(sdl_wheel_gives_its_fractions)
 {
-    BRLS_CHECK(SDL_Init(SDL_INIT_GAMECONTROLLER) == 0);
+    AURORE_CHECK(SDL_Init(SDL_INIT_GAMECONTROLLER) == 0);
     SDLInputManager manager(nullptr);
-    brls::Point got { 0, 0 };
-    manager.getMouseScrollOffsetChanged()->subscribe([&got](brls::Point delta)
+    aurore::Point got { 0, 0 };
+    manager.getMouseScrollOffsetChanged()->subscribe([&got](aurore::Point delta)
         { got = delta; });
 
     // A touchpad's small step: no whole notch
@@ -99,17 +99,17 @@ BRLS_TEST(sdl_wheel_gives_its_fractions)
     wheel.preciseX = -0.5f;
     wheel.preciseY = 0.25f;
     manager.updateMouseWheel(wheel);
-    BRLS_CHECK(got.x == -0.5f);
-    BRLS_CHECK(got.y == 0.25f);
+    AURORE_CHECK(got.x == -0.5f);
+    AURORE_CHECK(got.y == 0.25f);
 }
 
 // SDL calls the event watcher with its joystick lock held (Android sends a
 // pad's events from its UI thread): the frame reading the controllers at the
 // same time must not wait on it while it waits on the frame
-BRLS_TEST(sdl_watcher_on_another_thread_does_not_block_the_frame)
+AURORE_TEST(sdl_watcher_on_another_thread_does_not_block_the_frame)
 {
     SDL_Joystick* joystick = attachController();
-    BRLS_CHECK(joystick != nullptr);
+    AURORE_CHECK(joystick != nullptr);
     SDLInputManager manager(nullptr);
     SDL_JoystickID jid = SDL_JoystickInstanceID(joystick);
 
@@ -155,11 +155,11 @@ BRLS_TEST(sdl_watcher_on_another_thread_does_not_block_the_frame)
 
     system.join();
     watchdog.join();
-    BRLS_CHECK_EQ(manager.getControllersConnectedCount(), 1);
+    AURORE_CHECK_EQ(manager.getControllersConnectedCount(), 1);
     SDL_JoystickClose(joystick);
 }
 
 int main(int argc, char** argv)
 {
-    return brls::test::runTests(argc, argv);
+    return aurore::test::runTests(argc, argv);
 }

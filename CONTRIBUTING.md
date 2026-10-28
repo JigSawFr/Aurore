@@ -9,7 +9,7 @@ reaches both apps, so it comes with its tests and keeps the public API working (
 ```sh
 git clone --recursive https://github.com/JigSawFr/aurore.git && cd aurore
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW \
-      -DAURORE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
+      -DAURORE_LIBROMFS=ON -DAURORE_BUILD_TESTS=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
@@ -24,7 +24,7 @@ The demo is `./build/aurore_demo`; [`docs/testing.md`](docs/testing.md) explains
 bench.
 
 - **Screenshots**: a test that draws compares with `tests/references/`. When a change alters a screen on purpose, run
-  the test with `BRLS_TEST_UPDATE=1`, look at the new pictures, and commit them with the change. In CI a missing
+  the test with `AURORE_TEST_UPDATE=1`, look at the new pictures, and commit them with the change. In CI a missing
   reference fails.
 - **Bench**: `ctest` checks the main loop's counts against `tests/bench_baseline.json`. A change that costs more on
   purpose updates it with `aurore_bench --write-baseline tests/bench_baseline.json` and says why.
@@ -46,7 +46,7 @@ bench.
 
 ## Licences
 
-borealis' code is Apache 2.0, Cadran (`library/lib/cadran`, `library/include/borealis/cadran`) is GPLv3: a new file
+borealis' code is Apache 2.0, Cadran (`library/lib/cadran`, `library/include/aurore/cadran`) is GPLv3: a new file
 takes the licence of the part it belongs to, with the same header as its neighbours. Third-party code goes in
 `extern/` with its licence, and in [`NOTICE`](NOTICE).
 

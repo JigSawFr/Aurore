@@ -1,8 +1,8 @@
-<brls:Box
+<aurore:Box
     width="auto"
     height="auto">
 
-    <brls:ScrollingFrame
+    <aurore:ScrollingFrame
         width="auto"
         height="auto"
         axis="column"
@@ -10,83 +10,83 @@
         scrollingBehavior="centered"
         grow="1.0" >
         
-        <brls:Box
+        <aurore:Box
             width="10000"
             height="auto"
             axis="column"
             alignItems="stretch"
-            paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
-            paddingRight="@style/brls/tab_frame/content_padding_sides"
-            paddingBottom="@style/brls/tab_frame/content_padding_top_bottom"
-            paddingLeft="@style/brls/tab_frame/content_padding_sides">
+            paddingTop="@style/aurore/tab_frame/content_padding_top_bottom"
+            paddingRight="@style/aurore/tab_frame/content_padding_sides"
+            paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom"
+            paddingLeft="@style/aurore/tab_frame/content_padding_sides">
             
-            <brls:RadioCell
+            <aurore:RadioCell
                 id="radio"/>
                 
-            <brls:BooleanCell
+            <aurore:BooleanCell
                 id="boolean"/>
                 
-            <brls:SelectorCell
+            <aurore:SelectorCell
                 id="selector"/>
                 
-            <brls:InputCell
+            <aurore:InputCell
                 id="input"/>
                 
-            <brls:InputNumericCell
+            <aurore:InputNumericCell
                 id="inputNumeric"/>
 
-            <brls:DetailCell
+            <aurore:DetailCell
                 title="@i18n/demo/settings/ip"
                 id="ipAddress"/>
             
-            <brls:DetailCell
+            <aurore:DetailCell
                 title="@i18n/demo/settings/dns"
                 id="dnsServer"/>
 
-            <brls:BooleanCell
+            <aurore:BooleanCell
                 id="debug"/>
 
-            <brls:BooleanCell
+            <aurore:BooleanCell
                 id="screenSaver"/>
 
-            <brls:BooleanCell
+            <aurore:BooleanCell
                 id="bottomBar"/>
 
-            <brls:BooleanCell
+            <aurore:BooleanCell
                 id="alwaysOnTop"/>
 
-            <brls:BooleanCell
+            <aurore:BooleanCell
                 id="fps"/>
 
-            <brls:SelectorCell
+            <aurore:SelectorCell
                 id="swapInterval"/>
 
-            <brls:SliderCell
+            <aurore:SliderCell
                     id="slider"/>
 
-            <brls:DetailCell
+            <aurore:DetailCell
                     title="@i18n/demo/settings/notify"
                     id="notify"/>
 
-            <brls:Header
+            <aurore:Header
                 width="auto"
                 height="auto"
                 title="@i18n/demo/settings/themes"
                 subtitle="@i18n/demo/settings/themes_subtitle"
                 marginTop="40"/>
 
-            <brls:BooleanCell
+            <aurore:BooleanCell
                 id="themeDark"/>
 
-            <brls:Box
+            <aurore:Box
                 id="themes"
                 width="auto"
                 height="auto"
                 axis="column"
                 alignItems="stretch"/>
 
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:ScrollingFrame>
+    </aurore:ScrollingFrame>
 
-</brls:Box>
+</aurore:Box>

@@ -29,52 +29,52 @@
 #include <set>
 #include <stdexcept>
 #include <string>
-#include <borealis/core/application.hpp>
-#include <borealis/core/font.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/profiler.hpp>
-#include <borealis/core/theme_decor.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/core/time.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/bottom_bar.hpp>
-#include <borealis/views/button.hpp>
-#include <borealis/views/cells/cell_bool.hpp>
-#include <borealis/views/cells/cell_input.hpp>
-#include <borealis/views/cells/cell_radio.hpp>
-#include <borealis/views/cells/cell_selector.hpp>
-#include <borealis/views/cells/cell_slider.hpp>
-#include <borealis/views/debug_layer.hpp>
-#include <borealis/views/dialog.hpp>
-#include <borealis/views/edit_text_dialog.hpp>
-#include <borealis/views/h_scrolling_frame.hpp>
-#include <borealis/views/header.hpp>
-#include <borealis/views/hint.hpp>
-#include <borealis/views/icon_button.hpp>
-#include <borealis/views/image.hpp>
-#include <borealis/views/progress_spinner.hpp>
-#include <borealis/views/rectangle.hpp>
-#include <borealis/views/recycler.hpp>
-#include <borealis/views/recycling_grid.hpp>
-#include <borealis/views/sidebar.hpp>
-#include <borealis/views/slider.hpp>
-#include <borealis/views/tab_frame.hpp>
-#include <borealis/views/widgets/account.hpp>
-#include <borealis/views/widgets/battery.hpp>
-#include <borealis/views/widgets/wireless.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/font.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/core/theme_decor.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/core/time.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/bottom_bar.hpp>
+#include <aurore/views/button.hpp>
+#include <aurore/views/cells/cell_bool.hpp>
+#include <aurore/views/cells/cell_input.hpp>
+#include <aurore/views/cells/cell_radio.hpp>
+#include <aurore/views/cells/cell_selector.hpp>
+#include <aurore/views/cells/cell_slider.hpp>
+#include <aurore/views/debug_layer.hpp>
+#include <aurore/views/dialog.hpp>
+#include <aurore/views/edit_text_dialog.hpp>
+#include <aurore/views/h_scrolling_frame.hpp>
+#include <aurore/views/header.hpp>
+#include <aurore/views/hint.hpp>
+#include <aurore/views/icon_button.hpp>
+#include <aurore/views/image.hpp>
+#include <aurore/views/progress_spinner.hpp>
+#include <aurore/views/rectangle.hpp>
+#include <aurore/views/recycler.hpp>
+#include <aurore/views/recycling_grid.hpp>
+#include <aurore/views/sidebar.hpp>
+#include <aurore/views/slider.hpp>
+#include <aurore/views/tab_frame.hpp>
+#include <aurore/views/widgets/account.hpp>
+#include <aurore/views/widgets/battery.hpp>
+#include <aurore/views/widgets/wireless.hpp>
 
 #include <chrono>
 #include <set>
 #include <thread>
-#include <borealis/cadran.hpp>
+#include <aurore/cadran.hpp>
 
 #define BUTTOM_REPEAT_TRIGGER 250000 // 250ms
 #define BUTTON_REPEAT_DELAY 100000 // 100 ms
 
-namespace brls
+namespace aurore
 {
 
 static std::thread::id mainThreadId;
@@ -111,23 +111,23 @@ bool Application::init()
     Threading::start();
 
     // Debugging aids, off unless asked for
-#ifdef BRLS_INSPECTOR
+#ifdef AURORE_INSPECTOR
     Inspector::setEnabled(true);
 #endif
-    // From the environment only in a build with BRLS_DEV_TOOLS (not a
+    // From the environment only in a build with AURORE_DEV_TOOLS (not a
     // release one, by default)
-#ifdef BRLS_DEV_TOOLS
-    if (const char* inspector = std::getenv("BRLS_INSPECTOR"))
+#ifdef AURORE_DEV_TOOLS
+    if (const char* inspector = environmentVariable("INSPECTOR"))
         Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
-    if (const char* hotReload = std::getenv("BRLS_HOT_RELOAD"))
+    if (const char* hotReload = environmentVariable("HOT_RELOAD"))
     {
         if (std::strcmp(hotReload, "0") != 0)
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
     }
 #endif
 
-#if defined(BRLS_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
-    const char* redrawDebugEnv = std::getenv("BRLS_REDRAW_DEBUG");
+#if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+    const char* redrawDebugEnv = environmentVariable("REDRAW_DEBUG");
     if (redrawDebugEnv && *redrawDebugEnv && *redrawDebugEnv != '0')
         Application::setRedrawDebug(true);
 #endif
@@ -141,7 +141,7 @@ void Application::createWindow(std::string windowTitle)
 {
     if (!Application::inited)
     {
-        fatal("Please call brls::Application::init() before calling brls::Application::createWindow().");
+        fatal("Please call aurore::Application::init() before calling aurore::Application::createWindow().");
         return;
     }
 
@@ -326,7 +326,7 @@ bool Application::internalMainLoop()
             else
             {
                 undeletedViews.push_back(view);
-                brls::Logger::verbose("Application: will delete view: {}", view->describe());
+                aurore::Logger::verbose("Application: will delete view: {}", view->describe());
             }
         }
 
@@ -607,23 +607,23 @@ void Application::processInput()
     oldControllerState = controllerState;
 
     // Trigger keyboard events
-    const bool ctrlPressed  = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_CONTROL);
-    const bool altPressed   = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_ALT);
-    const bool shiftPressed = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SHIFT);
-    const bool metaPressed  = inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SUPER);
+    const bool ctrlPressed  = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_CONTROL);
+    const bool altPressed   = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_ALT);
+    const bool shiftPressed = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SHIFT);
+    const bool metaPressed  = inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SUPER);
     for (size_t i = 0; i < watchedKeys.size(); i++)
     {
         auto& watchedKey    = watchedKeys[i];
         auto& oldWatchedKey = oldWatchedKeys[i];
 
-        const BrlsKeyboardScancode scancode = watchedKey.getScancode();
-        if (scancode == BRLS_KBD_KEY_UNKNOWN)
+        const AuroreKeyboardScancode scancode = watchedKey.getScancode();
+        if (scancode == AURORE_KBD_KEY_UNKNOWN)
         {
             continue;
         }
 
         watchedKey.pressed = inputManager->getKeyboardKeyState(scancode);
-        if (static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_SHIFT) != shiftPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_CTRL) != ctrlPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_ALT) != altPressed || static_cast<bool>(watchedKey.getModifiers() & BRLS_KBD_MODIFIER_META) != metaPressed)
+        if (static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_SHIFT) != shiftPressed || static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_CTRL) != ctrlPressed || static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_ALT) != altPressed || static_cast<bool>(watchedKey.getModifiers() & AURORE_KBD_MODIFIER_META) != metaPressed)
         {
             // If the key is pressed but the modifiers are not, unpressed it
             watchedKey.pressed = false;
@@ -652,9 +652,9 @@ void Application::processInput()
     }
 }
 
-void Application::addToWatchedKeys(const BrlsKeyCombination key)
+void Application::addToWatchedKeys(const AuroreKeyCombination key)
 {
-    if (key.code == BRLS_KBD_KEY_UNKNOWN)
+    if (key.code == AURORE_KBD_KEY_UNKNOWN)
         return;
     if (watchedKeysMap.count(key) == 0 || watchedKeysMap[key] <= 0)
     {
@@ -665,9 +665,9 @@ void Application::addToWatchedKeys(const BrlsKeyCombination key)
     watchedKeysMap[key] = watchedKeysMap[key] + 1;
 }
 
-void Application::removeWatchedKeys(const BrlsKeyCombination key)
+void Application::removeWatchedKeys(const AuroreKeyCombination key)
 {
-    if (key.code == BRLS_KBD_KEY_UNKNOWN)
+    if (key.code == AURORE_KBD_KEY_UNKNOWN)
         return;
     if (watchedKeysMap.count(key) == 0 || watchedKeysMap[key] <= 0)
     {
@@ -814,7 +814,7 @@ void Application::onControllerButtonPressed(enum ControllerButton button, bool r
     Application::getAudioPlayer()->play(SOUND_CLICK_ERROR);
 }
 
-void Application::onKeyboardPressed(BrlsKeyCombination key, bool repeating)
+void Application::onKeyboardPressed(AuroreKeyCombination key, bool repeating)
 {
     Application::handleAction(ACTION_KEYBOARD, key, repeating);
 }
@@ -996,7 +996,7 @@ void Application::frame(bool present)
 
     // Begin frame and clear
     videoContext->beginFrame();
-    videoContext->clear(Application::getTheme().getColor("brls/clear"));
+    videoContext->clear(Application::getTheme().getColor("aurore/clear"));
     float scaleFactor = videoContext->getScaleFactor();
 
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
@@ -1728,7 +1728,7 @@ bool Application::popActivity(TransitionAnimation animation, std::function<void(
         // Deleted after this frame's animations: this callback runs while
         // they update, and the activity owns some of them.
         if (free)
-            brls::sync([last]() { delete last; });
+            aurore::sync([last]() { delete last; });
 
         Application::unblockInputs(); },
         fade, last->getShowAnimationDuration(animation));
@@ -1776,7 +1776,7 @@ void Application::pushActivity(Activity* activity, TransitionAnimation animation
 
     if (!fadeIn) // No animations
     {
-        brls::Logger::debug("push activity to the stack");
+        aurore::Logger::debug("push activity to the stack");
         Application::activitiesStack.push_back(activity);
         Application::unblockInputs();
     }
@@ -1784,7 +1784,7 @@ void Application::pushActivity(Activity* activity, TransitionAnimation animation
     {
         activity->hide([]() {}, false, 0);
 
-        brls::Logger::debug("push activity to the stack");
+        aurore::Logger::debug("push activity to the stack");
         Application::activitiesStack.push_back(activity);
         float duration = activity->getShowAnimationDuration(animation);
         activity->show([]()
@@ -1824,9 +1824,9 @@ void Application::replaceActivity(Activity* activity, TransitionAnimation animat
     bool animated  = animation == TransitionAnimation::FADE || animation == TransitionAnimation::SLIDE_LEFT || animation == TransitionAnimation::SLIDE_RIGHT;
     float duration = animated ? activity->getShowAnimationDuration(animation) : 0;
     if (duration > 0)
-        brls::delay((long)duration + 1, remove);
+        aurore::delay((long)duration + 1, remove);
     else
-        brls::sync(remove);
+        aurore::sync(remove);
 }
 
 void Application::clear()
@@ -1872,7 +1872,7 @@ void Application::addToFreeQueue(View* view)
     if (std::find(deletionPool.cbegin(), deletionPool.cend(), view) != deletionPool.cend())
         return;
 
-    brls::Logger::verbose("Application::addToFreeQueue {}", view->describe());
+    aurore::Logger::verbose("Application::addToFreeQueue {}", view->describe());
 
     Application::deletionPool.push_back(view);
 }
@@ -1902,7 +1902,7 @@ void Application::tryDeinitFirstResponder(View* view)
 bool Application::loadFontFromFile(std::string fontName, std::string filePath)
 {
 #ifdef USE_LIBROMFS
-    // BRLS_ASSET() paths are in the resources built into the program
+    // AURORE_ASSET() paths are in the resources built into the program
     if (filePath.rfind("@res/", 0) == 0)
     {
         try
@@ -1970,7 +1970,7 @@ void Application::crash(std::string text)
     if (std::this_thread::get_id() == mainThreadId)
         show();
     else
-        brls::sync(show);
+        aurore::sync(show);
 }
 
 void Application::blockInputs(bool muteSounds)
@@ -2006,29 +2006,29 @@ void Application::setSwapInputKeys(bool swap)
 
 // As the web simulator's keys: X, Y, L, R and +/- as written on the
 // controller, Shift for the triggers
-std::vector<std::pair<BrlsKeyCombination, ControllerButton>> Application::keyMap = {
-    { BrlsKeyCombination(BRLS_KBD_KEY_X), BUTTON_X },
-    { BrlsKeyCombination(BRLS_KBD_KEY_Y), BUTTON_Y },
-    { BrlsKeyCombination(BRLS_KBD_KEY_L), BUTTON_LB },
-    { BrlsKeyCombination(BRLS_KBD_KEY_R), BUTTON_RB },
-    { BrlsKeyCombination(BRLS_KBD_KEY_L, BRLS_KBD_MODIFIER_SHIFT), BUTTON_LT },
-    { BrlsKeyCombination(BRLS_KBD_KEY_R, BRLS_KBD_MODIFIER_SHIFT), BUTTON_RT },
-    { BrlsKeyCombination(BRLS_KBD_KEY_P), BUTTON_START },
-    { BrlsKeyCombination(BRLS_KBD_KEY_EQUAL, BRLS_KBD_MODIFIER_SHIFT), BUTTON_START },
-    { BrlsKeyCombination(BRLS_KBD_KEY_KP_ADD), BUTTON_START },
-    { BrlsKeyCombination(BRLS_KBD_KEY_M), BUTTON_BACK },
-    { BrlsKeyCombination(BRLS_KBD_KEY_MINUS), BUTTON_BACK },
-    { BrlsKeyCombination(BRLS_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
-    { BrlsKeyCombination(BRLS_KBD_KEY_BACKSPACE), BUTTON_B },
+std::vector<std::pair<AuroreKeyCombination, ControllerButton>> Application::keyMap = {
+    { AuroreKeyCombination(AURORE_KBD_KEY_X), BUTTON_X },
+    { AuroreKeyCombination(AURORE_KBD_KEY_Y), BUTTON_Y },
+    { AuroreKeyCombination(AURORE_KBD_KEY_L), BUTTON_LB },
+    { AuroreKeyCombination(AURORE_KBD_KEY_R), BUTTON_RB },
+    { AuroreKeyCombination(AURORE_KBD_KEY_L, AURORE_KBD_MODIFIER_SHIFT), BUTTON_LT },
+    { AuroreKeyCombination(AURORE_KBD_KEY_R, AURORE_KBD_MODIFIER_SHIFT), BUTTON_RT },
+    { AuroreKeyCombination(AURORE_KBD_KEY_P), BUTTON_START },
+    { AuroreKeyCombination(AURORE_KBD_KEY_EQUAL, AURORE_KBD_MODIFIER_SHIFT), BUTTON_START },
+    { AuroreKeyCombination(AURORE_KBD_KEY_KP_ADD), BUTTON_START },
+    { AuroreKeyCombination(AURORE_KBD_KEY_M), BUTTON_BACK },
+    { AuroreKeyCombination(AURORE_KBD_KEY_MINUS), BUTTON_BACK },
+    { AuroreKeyCombination(AURORE_KBD_KEY_KP_SUBTRACT), BUTTON_BACK },
+    { AuroreKeyCombination(AURORE_KBD_KEY_BACKSPACE), BUTTON_B },
 };
 
-void Application::mapKey(BrlsKeyCombination key, ControllerButton button)
+void Application::mapKey(AuroreKeyCombination key, ControllerButton button)
 {
     unmapKey(key);
     keyMap.emplace_back(key, button);
 }
 
-void Application::unmapKey(BrlsKeyCombination key)
+void Application::unmapKey(AuroreKeyCombination key)
 {
     keyMap.erase(std::remove_if(keyMap.begin(), keyMap.end(), [key](const auto& entry)
                      { return (int)entry.first == (int)key; }),
@@ -2040,7 +2040,7 @@ void Application::clearKeyMap()
     keyMap.clear();
 }
 
-const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& Application::getKeyMap()
+const std::vector<std::pair<AuroreKeyCombination, ControllerButton>>& Application::getKeyMap()
 {
     return keyMap;
 }
@@ -2055,14 +2055,14 @@ void Application::applyKeyMap(InputManager* inputManager, ControllerState* state
         return;
 
     int mods = 0;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SHIFT))
-        mods |= BRLS_KBD_MODIFIER_SHIFT;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_CONTROL))
-        mods |= BRLS_KBD_MODIFIER_CTRL;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_ALT))
-        mods |= BRLS_KBD_MODIFIER_ALT;
-    if (inputManager->getKeyboardKeyState(BRLS_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(BRLS_KBD_KEY_RIGHT_SUPER))
-        mods |= BRLS_KBD_MODIFIER_META;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SHIFT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SHIFT))
+        mods |= AURORE_KBD_MODIFIER_SHIFT;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_CONTROL) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_CONTROL))
+        mods |= AURORE_KBD_MODIFIER_CTRL;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_ALT) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_ALT))
+        mods |= AURORE_KBD_MODIFIER_ALT;
+    if (inputManager->getKeyboardKeyState(AURORE_KBD_KEY_LEFT_SUPER) || inputManager->getKeyboardKeyState(AURORE_KBD_KEY_RIGHT_SUPER))
+        mods |= AURORE_KBD_MODIFIER_META;
 
     for (const auto& [key, button] : keyMap)
     {
@@ -2125,7 +2125,7 @@ void Application::setWindowSize(int width, int height)
     for (Activity* activity : Application::activitiesStack)
         activity->onWindowSizeChanged();
 
-    brls::Application::setActiveEvent(true);
+    aurore::Application::setActiveEvent(true);
 }
 
 void Application::onWindowResized(int width, int height)
@@ -2133,15 +2133,15 @@ void Application::onWindowResized(int width, int height)
     Application::requestRedraw();
     // Trigger event when Window size is stable
     static size_t iter = 0;
-    brls::cancelDelay(iter);
-    iter = brls::delay(100, [width, height]()
+    aurore::cancelDelay(iter);
+    iter = aurore::delay(100, [width, height]()
         {
             Application::setWindowSize(width, height);
             Application::getWindowSizeChangedEvent()->fire();
 
             Logger::info("Window size changed to {}x{}, content size: {}x{} windowScale: {}",
                 width, height, contentWidth, contentHeight, Application::windowScale);
-            brls::Logger::info("scale factor: {}",
+            aurore::Logger::info("scale factor: {}",
                 Application::getPlatform()->getVideoContext()->getScaleFactor()); });
 }
 
@@ -2154,8 +2154,8 @@ void Application::setWindowPosition(int x, int y)
 void Application::onWindowReposition(int x, int y)
 {
     static size_t iter = 0;
-    brls::cancelDelay(iter);
-    iter = brls::delay(500, [x, y]()
+    aurore::cancelDelay(iter);
+    iter = aurore::delay(500, [x, y]()
         {
             Logger::info("Window position changed to {}x{}", x, y);
             Application::setWindowPosition(x, y); });
@@ -2286,7 +2286,7 @@ void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float wi
         return;
     nvgBeginPath(vg);
     nvgRect(vg, x, y, width, height);
-    nvgFillColor(vg, Application::getTheme().getColor("brls/clear"));
+    nvgFillColor(vg, Application::getTheme().getColor("aurore/clear"));
     nvgFill(vg);
     Application::drawThemeBackgroundImage(vg, x, y, width, height);
     ThemeDecorations::drawStrips(vg, x, y, width, height);
@@ -2300,7 +2300,7 @@ void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float wi
         return Application::drawThemeBackground(vg, x, y, width, height);
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, radius);
-    nvgFillColor(vg, Application::getTheme().getColor("brls/clear"));
+    nvgFillColor(vg, Application::getTheme().getColor("aurore/clear"));
     nvgFill(vg);
     Application::drawThemeBackgroundImage(vg, x, y, width, height, radius);
     // The strips have straight edges: in the corners' square, over the image
@@ -2363,7 +2363,7 @@ void Application::drawThemeBackgroundImage(NVGcontext* vg, float areaX, float ar
 
     if (background.dim > 0.0f)
     {
-        NVGcolor veil = Application::getTheme().getColor("brls/background");
+        NVGcolor veil = Application::getTheme().getColor("aurore/background");
         veil.a *= background.dim;
         nvgBeginPath(vg);
         if (radius > 0.0f)
@@ -2429,7 +2429,7 @@ int Application::getDefaultFont()
 
 bool Application::XMLViewsRegisterContains(std::string name)
 {
-    return Application::xmlViewsRegister.count(name) > 0;
+    return Application::xmlViewsRegister.count(canonicalXMLName(name)) > 0;
 }
 
 std::vector<std::string> Application::getXMLViewNames()
@@ -2442,51 +2442,52 @@ std::vector<std::string> Application::getXMLViewNames()
 
 XMLViewCreator Application::getXMLViewCreator(std::string name)
 {
-    return Application::xmlViewsRegister[name];
+    return Application::xmlViewsRegister[canonicalXMLName(name)];
 }
 
 void Application::registerBuiltInXMLViews()
 {
-    Application::registerXMLView("brls:Box", Box::create);
-    Application::registerXMLView("brls:Rectangle", Rectangle::create);
-    Application::registerXMLView("brls:AppletFrame", AppletFrame::create);
-    Application::registerXMLView("brls:Label", Label::create);
-    Application::registerXMLView("brls:TabFrame", TabFrame::create);
-    Application::registerXMLView("brls:Sidebar", Sidebar::create);
-    Application::registerXMLView("brls:Header", Header::create);
-    Application::registerXMLView("brls:ScrollingFrame", ScrollingFrame::create);
-    Application::registerXMLView("brls:HScrollingFrame", HScrollingFrame::create);
-    Application::registerXMLView("brls:RecyclerFrame", RecyclerFrame::create);
-    Application::registerXMLView("brls:RecyclingGrid", RecyclingGrid::create);
-    Application::registerXMLView("brls:HRecyclerFrame", HRecyclerFrame::create);
-    Application::registerXMLView("brls:Image", Image::create);
-    Application::registerXMLView("brls:Padding", Padding::create);
-    Application::registerXMLView("brls:Button", Button::create);
-    Application::registerXMLView("brls:IconButton", IconButton::create);
-    Application::registerXMLView("brls:CheckBox", CheckBox::create);
-    Application::registerXMLView("brls:Hints", Hints::create);
-    Application::registerXMLView("brls:Slider", Slider::create);
-    Application::registerXMLView("brls:BottomBar", BottomBar::create);
-    Application::registerXMLView("brls:ProgressSpinner", ProgressSpinner::create);
+    Application::registerXMLView("aurore:Box", Box::create);
+    Application::registerXMLView("aurore:Rectangle", Rectangle::create);
+    Application::registerXMLView("aurore:AppletFrame", AppletFrame::create);
+    Application::registerXMLView("aurore:Label", Label::create);
+    Application::registerXMLView("aurore:TabFrame", TabFrame::create);
+    Application::registerXMLView("aurore:Sidebar", Sidebar::create);
+    Application::registerXMLView("aurore:Header", Header::create);
+    Application::registerXMLView("aurore:ScrollingFrame", ScrollingFrame::create);
+    Application::registerXMLView("aurore:HScrollingFrame", HScrollingFrame::create);
+    Application::registerXMLView("aurore:RecyclerFrame", RecyclerFrame::create);
+    Application::registerXMLView("aurore:RecyclingGrid", RecyclingGrid::create);
+    Application::registerXMLView("aurore:HRecyclerFrame", HRecyclerFrame::create);
+    Application::registerXMLView("aurore:Image", Image::create);
+    Application::registerXMLView("aurore:Padding", Padding::create);
+    Application::registerXMLView("aurore:Button", Button::create);
+    Application::registerXMLView("aurore:IconButton", IconButton::create);
+    Application::registerXMLView("aurore:CheckBox", CheckBox::create);
+    Application::registerXMLView("aurore:Hints", Hints::create);
+    Application::registerXMLView("aurore:Slider", Slider::create);
+    Application::registerXMLView("aurore:BottomBar", BottomBar::create);
+    Application::registerXMLView("aurore:ProgressSpinner", ProgressSpinner::create);
 
     // Cells
-    Application::registerXMLView("brls:DetailCell", DetailCell::create);
-    Application::registerXMLView("brls:RadioCell", RadioCell::create);
-    Application::registerXMLView("brls:BooleanCell", BooleanCell::create);
-    Application::registerXMLView("brls:SelectorCell", SelectorCell::create);
-    Application::registerXMLView("brls:InputCell", InputCell::create);
-    Application::registerXMLView("brls:InputNumericCell", InputNumericCell::create);
-    Application::registerXMLView("brls:SliderCell", SliderCell::create);
+    Application::registerXMLView("aurore:DetailCell", DetailCell::create);
+    Application::registerXMLView("aurore:RadioCell", RadioCell::create);
+    Application::registerXMLView("aurore:BooleanCell", BooleanCell::create);
+    Application::registerXMLView("aurore:SelectorCell", SelectorCell::create);
+    Application::registerXMLView("aurore:InputCell", InputCell::create);
+    Application::registerXMLView("aurore:InputNumericCell", InputNumericCell::create);
+    Application::registerXMLView("aurore:SliderCell", SliderCell::create);
 
     // Widgets
-    Application::registerXMLView("brls:Account", AccountWidget::create);
-    Application::registerXMLView("brls:Battery", BatteryWidget::create);
-    Application::registerXMLView("brls:Wireless", WirelessWidget::create);
+    Application::registerXMLView("aurore:Account", AccountWidget::create);
+    Application::registerXMLView("aurore:Battery", BatteryWidget::create);
+    Application::registerXMLView("aurore:Wireless", WirelessWidget::create);
 }
 
 void Application::registerXMLView(std::string name, XMLViewCreator creator)
 {
-    Application::xmlViewsRegister[name] = creator;
+    // borealis' prefix (deprecated) still registers (and replaces) an aurore: view
+    Application::xmlViewsRegister[canonicalXMLName(name)] = creator;
 }
 
-} // namespace brls
+} // namespace aurore

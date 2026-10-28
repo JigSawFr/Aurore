@@ -1,31 +1,31 @@
-<brls:Box
+<aurore:Box
         width="auto"
         height="auto">
 
-<brls:ScrollingFrame
+<aurore:ScrollingFrame
         width="auto"
         height="auto"
         grow="1.0">
 
-    <brls:Box
+    <aurore:Box
             width="auto"
             height="auto"
             axis="column"
-            paddingLeft="@style/brls/tab_frame/content_padding_sides"
-            paddingRight="@style/brls/tab_frame/content_padding_sides"
-            paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
-            paddingBottom="@style/brls/tab_frame/content_padding_top_bottom">
+            paddingLeft="@style/aurore/tab_frame/content_padding_sides"
+            paddingRight="@style/aurore/tab_frame/content_padding_sides"
+            paddingTop="@style/aurore/tab_frame/content_padding_top_bottom"
+            paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom">
 
-        <brls:Label
+        <aurore:Label
                 text="@i18n/demo/styles/states"
                 fontSize="24"
                 accessibilityRole="header"
                 marginBottom="10" />
 
-        <brls:Box axis="row" height="auto">
+        <aurore:Box axis="row" height="auto">
 
             <!-- focus: and pressed:, with a transition on each -->
-            <brls:Box
+            <aurore:Box
                     id="styles/fade"
                     focusable="true"
                     hideHighlightBackground="true"
@@ -35,17 +35,17 @@
                     cornerRadius="12"
                     justifyContent="center"
                     alignItems="center"
-                    backgroundColor="@theme/brls/button/default_enabled_background"
-                    focus:backgroundColor="@theme/brls/button/primary_enabled_background"
+                    backgroundColor="@theme/aurore/button/default_enabled_background"
+                    focus:backgroundColor="@theme/aurore/button/primary_enabled_background"
                     pressed:scale="0.94"
                     transition="backgroundColor 180ms ease-out, scale 120ms ease-out"
                     accessibilityRole="button"
                     accessibilityLabel="@i18n/demo/styles/fade">
-                <brls:Label text="@i18n/demo/styles/fade" />
-            </brls:Box>
+                <aurore:Label text="@i18n/demo/styles/fade" />
+            </aurore:Box>
 
             <!-- several properties at once, with an overshoot -->
-            <brls:Box
+            <aurore:Box
                     focusable="true"
                     hideHighlight="true"
                     width="230"
@@ -55,18 +55,18 @@
                     borderThickness="3"
                     justifyContent="center"
                     alignItems="center"
-                    backgroundColor="@theme/brls/button/default_enabled_background"
+                    backgroundColor="@theme/aurore/button/default_enabled_background"
                     borderColor="#00000000"
-                    focus:borderColor="@theme/brls/accent"
+                    focus:borderColor="@theme/aurore/accent"
                     focus:cornerRadius="28"
                     transition="all 300ms backOut"
                     accessibilityRole="button"
                     accessibilityLabel="@i18n/demo/styles/corners">
-                <brls:Label text="@i18n/demo/styles/corners" />
-            </brls:Box>
+                <aurore:Label text="@i18n/demo/styles/corners" />
+            </aurore:Box>
 
             <!-- hover: follows the mouse pointer (desktop) -->
-            <brls:Box
+            <aurore:Box
                     focusable="true"
                     width="230"
                     height="110"
@@ -74,17 +74,17 @@
                     cornerRadius="12"
                     justifyContent="center"
                     alignItems="center"
-                    backgroundColor="@theme/brls/button/default_enabled_background"
-                    hover:backgroundColor="@theme/brls/accent/hover"
+                    backgroundColor="@theme/aurore/button/default_enabled_background"
+                    hover:backgroundColor="@theme/aurore/accent/hover"
                     transition="backgroundColor 150ms"
                     accessibilityRole="button"
                     accessibilityLabel="@i18n/demo/styles/hover">
-                <brls:Label text="@i18n/demo/styles/hover" />
-            </brls:Box>
-        </brls:Box>
+                <aurore:Label text="@i18n/demo/styles/hover" />
+            </aurore:Box>
+        </aurore:Box>
 
-        <brls:Box axis="row" height="auto" alignItems="center">
-            <brls:Button
+        <aurore:Box axis="row" height="auto" alignItems="center">
+            <aurore:Button
                     id="styles/disabled"
                     text="@i18n/demo/styles/disabled"
                     width="300"
@@ -92,56 +92,56 @@
                     style="primary"
                     disabled:alpha="0.4"
                     transition="alpha 200ms" />
-            <brls:Button
+            <aurore:Button
                     id="styles/toggle"
                     text="@i18n/demo/styles/toggle"
                     width="300"
                     margin="10" />
-        </brls:Box>
+        </aurore:Box>
 
-        <brls:Label
+        <aurore:Label
                 text="@i18n/demo/styles/binding"
                 fontSize="24"
                 accessibilityRole="header"
                 marginTop="20"
                 marginBottom="10" />
 
-        <brls:Box axis="row" height="auto" alignItems="center">
-            <brls:Button
+        <aurore:Box axis="row" height="auto" alignItems="center">
+            <aurore:Button
                     id="styles/increment"
                     text="@i18n/demo/styles/add_one"
                     width="200"
                     margin="10" />
             <!-- text: and color: follow the model's observables -->
-            <brls:Label
+            <aurore:Label
                     bind="text: styles.counter"
                     fontSize="40"
                     width="100"
                     horizontalAlign="center"
                     margin="10" />
-            <brls:Rectangle
+            <aurore:Rectangle
                     bind="color: styles.swatch"
                     transition="color 300ms ease-in-out"
                     width="60"
                     height="60"
                     cornerRadius="30"
                     margin="10" />
-            <brls:Label
+            <aurore:Label
                     text="@i18n/demo/styles/even"
                     bind="visible: styles.even"
                     margin="10" />
-        </brls:Box>
+        </aurore:Box>
 
-        <brls:BooleanCell id="styles/reduce_motion" />
+        <aurore:BooleanCell id="styles/reduce_motion" />
 
-        <brls:Label
+        <aurore:Label
                 bind="text: styles.announced"
                 marginTop="10"
                 fontSize="18"
-                textColor="@theme/brls/header/subtitle" />
+                textColor="@theme/aurore/header/subtitle" />
 
-    </brls:Box>
+    </aurore:Box>
 
-</brls:ScrollingFrame>
+</aurore:ScrollingFrame>
 
-</brls:Box>
+</aurore:Box>

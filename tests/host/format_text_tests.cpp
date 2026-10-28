@@ -1,6 +1,6 @@
 // Host tests for cadran/ui/format_text.cpp, translated by Cadran's real
 // catalog (resources/i18n/<lang>/cadran.json) through ui/tr.hpp's stand-in
-// for borealis (catalog.hpp): minutes ("45 min", "2 h", "2 h 05"), a length
+// for Aurore (catalog.hpp): minutes ("45 min", "2 h", "2 h 05"), a length
 // in nanoseconds rounded to the minute, play time over any length ("< 1 min",
 // "52 h 30", "278 h"), the day names (in a title and inside a sentence,
 // French for the difference), yes / no, "Unavailable", and the chevron of a
@@ -11,8 +11,8 @@
 #include <string>
 #include "check.h"
 
-#include <borealis/cadran/ui/format_text.hpp>
-#include <borealis/cadran/ui/tr.hpp>
+#include <aurore/cadran/ui/format_text.hpp>
+#include <aurore/cadran/ui/tr.hpp>
 
 #include "catalog.hpp"
 

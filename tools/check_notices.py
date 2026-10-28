@@ -3,7 +3,7 @@
 # Licensed under the Apache License, Version 2.0.
 #
 # Checks resources/THIRD_PARTY_NOTICES.md against the source: each folder of
-# library/lib/extern and library/include/borealis/extern and each font has an
+# library/lib/extern and library/include/aurore/extern and each font has an
 # entry, the versions read from the vendored sources are the ones it gives
 # (and the ones library/CMakeLists.txt fetches with AURORE_FETCH_DEPS), and
 # no font is a console maker's.
@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 NOTICES = ROOT / "resources" / "THIRD_PARTY_NOTICES.md"
-EXTERN = [ROOT / "library" / "lib" / "extern", ROOT / "library" / "include" / "borealis" / "extern"]
+EXTERN = [ROOT / "library" / "lib" / "extern", ROOT / "library" / "include" / "aurore" / "extern"]
 FONTS = [ROOT / "resources" / "font", ROOT / "resources" / "material"]
 # Names that must not be in a font's file: proprietary system fonts
 FORBIDDEN = ["Nintendo", "Morisawa"]
@@ -36,7 +36,7 @@ def define(path, name):
 def versions():
     """{component as in the notices: version read from the source}"""
     lib = ROOT / "library" / "lib" / "extern"
-    inc = ROOT / "library" / "include" / "borealis" / "extern"
+    inc = ROOT / "library" / "include" / "aurore" / "extern"
     found = {}
     sdl = lib / "SDL" / "include" / "SDL_version.h"
     if sdl.exists():

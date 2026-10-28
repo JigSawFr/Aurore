@@ -7,41 +7,41 @@ its own licence. This file is in the resources, so that every program built
 with Aurore carries it; the texts of the licences are at the end.
 
 `tools/check_notices.py` checks that each folder of `library/lib/extern` and
-`library/include/borealis/extern`, and each font, has an entry here, and the
+`library/include/aurore/extern`, and each font, has an entry here, and the
 versions that can be read from the sources.
 
 ## Code
 
 | Component | Version | Path | Licence | Copyright |
 |---|---|---|---|---|
-| nanovg | fork | `library/lib/extern/nanovg`, `library/include/borealis/extern/nanovg` | zlib | 2013 Mikko Mononen |
-| fontstash | fork | `library/include/borealis/extern/nanovg/fontstash.h` | zlib | 2009-2013 Mikko Mononen |
-| nanovg's deko3d renderer | fork | `library/lib/extern/nanovg/deko3d`, `library/include/borealis/extern/nanovg/dk_renderer.hpp`, `nanovg_dk.h` | zlib | 2020 Adubbz, Mikko Mononen |
-| deko3d sample framework | - | `library/include/borealis/extern/nanovg/framework`, `library/lib/extern/nanovg/deko3d/framework` | as switchbrew's deko3d examples (fincs) | fincs |
-| nanovg's Direct3D 11 renderer | fork | `library/include/borealis/extern/nanovg/nanovg_d3d11.h` | zlib | 2009-2013 Mikko Mononen |
-| nanovg's GXM renderer (PS Vita) | - | `library/include/borealis/extern/nanovg/nanovg_gxm*.h` | zlib | 2024 xfangfang |
-| nanovg's PS4 renderer | - | `library/lib/extern/nanovg/ps4`, `library/include/borealis/extern/nanovg/nanovg_ps4.h` | zlib | 2023 xfangfang |
-| stb_image | 2.30 | `library/include/borealis/extern/nanovg/stb_image.h` | MIT or public domain | 2017 Sean Barrett |
-| stb_truetype | 1.26 (and the htcw fork) | `library/include/borealis/extern/nanovg/stb_truetype*.h` | MIT or public domain | 2017 Sean Barrett |
-| stb_dxt | 1.12 | `library/include/borealis/extern/nanovg/stb_dxt.h` | MIT or public domain | 2017 Sean Barrett |
+| nanovg | fork | `library/lib/extern/nanovg`, `library/include/aurore/extern/nanovg` | zlib | 2013 Mikko Mononen |
+| fontstash | fork | `library/include/aurore/extern/nanovg/fontstash.h` | zlib | 2009-2013 Mikko Mononen |
+| nanovg's deko3d renderer | fork | `library/lib/extern/nanovg/deko3d`, `library/include/aurore/extern/nanovg/dk_renderer.hpp`, `nanovg_dk.h` | zlib | 2020 Adubbz, Mikko Mononen |
+| deko3d sample framework | - | `library/include/aurore/extern/nanovg/framework`, `library/lib/extern/nanovg/deko3d/framework` | as switchbrew's deko3d examples (fincs) | fincs |
+| nanovg's Direct3D 11 renderer | fork | `library/include/aurore/extern/nanovg/nanovg_d3d11.h` | zlib | 2009-2013 Mikko Mononen |
+| nanovg's GXM renderer (PS Vita) | - | `library/include/aurore/extern/nanovg/nanovg_gxm*.h` | zlib | 2024 xfangfang |
+| nanovg's PS4 renderer | - | `library/lib/extern/nanovg/ps4`, `library/include/aurore/extern/nanovg/nanovg_ps4.h` | zlib | 2023 xfangfang |
+| stb_image | 2.30 | `library/include/aurore/extern/nanovg/stb_image.h` | MIT or public domain | 2017 Sean Barrett |
+| stb_truetype | 1.26 (and the htcw fork) | `library/include/aurore/extern/nanovg/stb_truetype*.h` | MIT or public domain | 2017 Sean Barrett |
+| stb_dxt | 1.12 | `library/include/aurore/extern/nanovg/stb_dxt.h` | MIT or public domain | 2017 Sean Barrett |
 | Yoga | 3.2.1 | `library/lib/extern/yoga` | MIT | Facebook, Inc. and its affiliates |
 | {fmt} | 12.2.0 | `library/lib/extern/fmt`, `library/lib/extern/nxfmtwrapper` (Aurore's build of it) | MIT | 2012 - present, Victor Zverovich and {fmt} contributors |
-| TinyXML-2 | 11.0.0 | `library/lib/extern/tinyxml2`, `library/include/borealis/extern/tinyxml2` | zlib | Lee Thomason |
-| JSON for Modern C++ | 3.12.0 | `library/include/borealis/extern/nlohmann` | MIT | 2013-2025 Niels Lohmann |
+| TinyXML-2 | 11.0.0 | `library/lib/extern/tinyxml2`, `library/include/aurore/extern/tinyxml2` | zlib | Lee Thomason |
+| JSON for Modern C++ | 3.12.0 | `library/include/aurore/extern/nlohmann` | MIT | 2013-2025 Niels Lohmann |
 | Tweeny | 3.2.1 | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
 | libromfs | - | `library/lib/extern/libromfs` | MIT | 2022 WerWolv |
 | GLFW | 3.4 (xfangfang's fork, 892256c) | `library/lib/extern/glfw` | zlib | 2002-2006 Marcus Geelnard, 2006-2019 Camilla Löwy |
 | SDL | 2.32.10 | `library/lib/extern/SDL`, `android-project/app/src/main/java/org/libsdl` | zlib | 1997-2025 Sam Lantinga |
-| libretro-common | - | `library/lib/extern/libretro-common`, `library/include/borealis/extern/libretro-common` | MIT | 2010-2020 The RetroArch team |
-| glad | 0.1.27 (generated: OpenGL 4.3 core) | `library/lib/extern/glad`, `library/include/borealis/extern/glad` | MIT (the generator); the code it writes is derived from the Khronos OpenGL registry | 2013-2018 David Herberth; The Khronos Group Inc. |
-| QR Code generator | - | `library/lib/extern/qrcodegen`, `library/include/borealis/extern/qrcodegen` | MIT | Project Nayuki |
-| Recycling grid and horizontal recycler | - | `library/include/borealis/views/recycling_grid.hpp`, `library/lib/views/recycling_grid.cpp` (adapted from Switchfin) | Apache 2.0 | 2022 xfangfang, 2023 dragonflylee and the Switchfin contributors |
+| libretro-common | - | `library/lib/extern/libretro-common`, `library/include/aurore/extern/libretro-common` | MIT | 2010-2020 The RetroArch team |
+| glad | 0.1.27 (generated: OpenGL 4.3 core) | `library/lib/extern/glad`, `library/include/aurore/extern/glad` | MIT (the generator); the code it writes is derived from the Khronos OpenGL registry | 2013-2018 David Herberth; The Khronos Group Inc. |
+| QR Code generator | - | `library/lib/extern/qrcodegen`, `library/include/aurore/extern/qrcodegen` | MIT | Project Nayuki |
+| Recycling grid and horizontal recycler | - | `library/include/aurore/views/recycling_grid.hpp`, `library/lib/views/recycling_grid.cpp` (adapted from Switchfin) | Apache 2.0 | 2022 xfangfang, 2023 dragonflylee and the Switchfin contributors |
 | ios-cmake | - | `library/cmake/ios.toolchain.cmake` (build only) | BSD 3-clause | 2014 Bogdan Cristea and LTE Engineering Software, Kitware, Inc., Insight Software Consortium |
 | FindDBus.cmake | - | `library/cmake/FindDBus.cmake` (build only) | BSD 2-clause | 2012 Raphael Kubo da Costa |
 
 Used from the system when there, not bundled: D-Bus (Linux), fontconfig
-(Linux, opened at run time), FreeType (`BRLS_USE_FREETYPE`), GNU FriBidi
-(`BRLS_USE_FRIBIDI`, LGPL 2.1 or later), OpenCC (`OPENCC`).
+(Linux, opened at run time), FreeType (`AURORE_USE_FREETYPE`), GNU FriBidi
+(`AURORE_USE_FRIBIDI`, LGPL 2.1 or later), OpenCC (`OPENCC`).
 
 ## Fonts and pictures
 

@@ -15,11 +15,11 @@
 */
 
 #include <exception>
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/thread.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
 
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
 #include <thread>
 #else
 #include <pthread.h>
@@ -29,10 +29,10 @@
 #include <orbis/libkernel.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
 static std::thread* task_loop_thread = nullptr;
 static std::thread* decode_thread    = nullptr;
 #else
@@ -76,11 +76,11 @@ static void runQueue(std::mutex& mutex, std::condition_variable& cv, std::vector
             }
             catch (std::exception& e)
             {
-                brls::Logger::error("error: {}: {}", what, e.what());
+                aurore::Logger::error("error: {}: {}", what, e.what());
             }
             catch (...)
             {
-                brls::Logger::error("error: {}: unknown exception", what);
+                aurore::Logger::error("error: {}: unknown exception", what);
             }
             std::lock_guard<std::mutex> lock(mutex);
             running--;
@@ -212,11 +212,11 @@ void Threading::performSyncTasks()
         }
         catch (std::exception& e)
         {
-            brls::Logger::error("error: performSyncTasks: {}", e.what());
+            aurore::Logger::error("error: performSyncTasks: {}", e.what());
         }
         catch (...)
         {
-            brls::Logger::error("error: performSyncTasks: unknown exception");
+            aurore::Logger::error("error: performSyncTasks: unknown exception");
         }
 
         // Over the budget: the tasks left go back first in the queue
@@ -269,11 +269,11 @@ void Threading::performSyncTasks()
             }
             catch (std::exception& e)
             {
-                brls::Logger::error("error: performSyncTasks(delay): {}", e.what());
+                aurore::Logger::error("error: performSyncTasks(delay): {}", e.what());
             }
             catch (...)
             {
-                brls::Logger::error("error: performSyncTasks(delay): unknown exception");
+                aurore::Logger::error("error: performSyncTasks(delay): unknown exception");
             }
         }
         else
@@ -308,7 +308,7 @@ void Threading::stop()
     }
     decode_cv.notify_all();
 
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
     task_loop_thread->join();
     delete task_loop_thread;
     task_loop_thread = nullptr;
@@ -344,7 +344,7 @@ void* Threading::decode_loop(void* a)
 
 void Threading::start_task_loop()
 {
-#ifdef BOREALIS_USE_STD_THREAD
+#ifdef AURORE_USE_STD_THREAD
     task_loop_thread      = new std::thread(std_task_loop);
     task_loop_running     = true;
     decode_thread         = new std::thread([]
@@ -356,4 +356,4 @@ void Threading::start_task_loop()
 #endif
 }
 
-} // namespace brls
+} // namespace aurore

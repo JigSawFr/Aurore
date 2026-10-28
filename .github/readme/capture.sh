@@ -3,7 +3,7 @@
 #   cmake -B build_pc -DAURORE_PLATFORM=DESKTOP && cmake --build build_pc
 #   xvfb-run -a -s "-screen 0 1280x720x24" .github/readme/capture.sh
 # Needs Xvfb, xdotool, ImageMagick, ffmpeg and dbus. The demo starts on its
-# Cadran tab, in the dark theme; light.png with BOREALIS_THEME=LIGHT.
+# Cadran tab, in the dark theme; light.png with AURORE_THEME=LIGHT.
 set -e
 cd "$(dirname "$0")/../.."
 OUT=.github/readme
@@ -32,17 +32,17 @@ shot picker Right Down Right Right Right Return
 shot checklist Right Down Right Right Right Right Return
 shot markdown Right Down Down Down Down Down Down Down Down
 shot components Down Right
-export BOREALIS_THEME=LIGHT
+export AURORE_THEME=LIGHT
 shot light
-unset BOREALIS_THEME
+unset AURORE_THEME
 # In French, from Language, theme and text size (the screens built again)
 shot french Right Down Down Right Right Right Right Return Return Down Down Return
 # The demo's theme folders (resources/themes): pictures, logo, decorations; particles held still
-export BRLS_STILL_FOCUS=1
+export AURORE_STILL_FOCUS=1
 APP_ARGS="-t winter" shot winter
 APP_ARGS="-t prism" shot prism
-BOREALIS_THEME=LIGHT APP_ARGS="-t aurora" shot aurora
-unset BRLS_STILL_FOCUS
+AURORE_THEME=LIGHT APP_ARGS="-t aurora" shot aurora
+unset AURORE_STILL_FOCUS
 # palettes.png is taken by hand: the header's theme button, then Palette
 
 # The tour: the Cadran tab and its dialogs, then the other tabs.

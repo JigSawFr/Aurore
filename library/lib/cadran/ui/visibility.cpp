@@ -1,24 +1,24 @@
 // ui — greying what cannot be written, showing / hiding views with the focus, tabs.
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
 
 #include <yoga/Yoga.h>
 #include <algorithm>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 namespace ui
 {
 
-void show_writable(brls::DetailCell* cell, bool writable, const char* title_key, const char* detail_key)
+void show_writable(aurore::DetailCell* cell, bool writable, const char* title_key, const char* detail_key)
 {
     const char* grey = "cadran/text_off";
     cell->title->setThemeColor("textColor", writable ? title_key : grey);
-    if (auto* sw = dynamic_cast<brls::BooleanCell*>(cell))
+    if (auto* sw = dynamic_cast<aurore::BooleanCell*>(cell))
     {
         if (writable)
             sw->setOn(sw->isOn(), false); // its own value colours back
@@ -29,15 +29,15 @@ void show_writable(brls::DetailCell* cell, bool writable, const char* title_key,
     cell->detail->setThemeColor("textColor", writable ? detail_key : grey);
 }
 
-void set_visible(brls::View* view, bool visible)
+void set_visible(aurore::View* view, bool visible)
 {
     if (!view)
         return;
     // An empty state's label (kit::empty_around): its whole card.
-    if (brls::View* card = view->getParent(); card && card->getId() == "cadran_empty_card")
+    if (aurore::View* card = view->getParent(); card && card->getId() == "cadran_empty_card")
         view = card;
     const bool had_focus = !visible && view->isFocused();
-    view->setVisibility(visible ? brls::Visibility::VISIBLE : brls::Visibility::GONE);
+    view->setVisibility(visible ? aurore::Visibility::VISIBLE : aurore::Visibility::GONE);
     if (auto* card = dynamic_cast<cadran::Card*>(view->getParent()))
         card->follow_rows();
     if (!had_focus)
@@ -46,10 +46,10 @@ void set_visible(brls::View* view, bool visible)
     // Never leave the focus on a view that just disappeared: prefer the
     // nearest focusable sibling, then the nearest one of each enclosing box in
     // turn (the line may sit in a card of its own), then the container.
-    brls::Box* parent = view->getParent();
+    aurore::Box* parent = view->getParent();
     if (!parent)
         return;
-    for (brls::View* node = view; node->getParent(); node = node->getParent())
+    for (aurore::View* node = view; node->getParent(); node = node->getParent())
     {
         const auto& children = node->getParent()->getChildren();
         const int count      = (int)children.size();
@@ -63,21 +63,21 @@ void set_visible(brls::View* view, bool visible)
             {
                 if (i < 0 || i >= count)
                     continue;
-                if (brls::View* target = children[i]->getDefaultFocus())
+                if (aurore::View* target = children[i]->getDefaultFocus())
                 {
-                    brls::Application::giveFocus(target);
+                    aurore::Application::giveFocus(target);
                     return;
                 }
             }
         }
         // Not past the scrolling frame: the rest of the screen is another list.
-        if (dynamic_cast<brls::ScrollingFrame*>(node->getParent()))
+        if (dynamic_cast<aurore::ScrollingFrame*>(node->getParent()))
             break;
     }
-    brls::Application::giveFocus(parent);
+    aurore::Application::giveFocus(parent);
 }
 
-void set_visible_all(std::initializer_list<std::pair<brls::View*, bool>> changes)
+void set_visible_all(std::initializer_list<std::pair<aurore::View*, bool>> changes)
 {
     for (const auto& c : changes)
         if (c.second)
@@ -87,21 +87,21 @@ void set_visible_all(std::initializer_list<std::pair<brls::View*, bool>> changes
             set_visible(c.first, false);
 }
 
-void set_text(brls::Label* label, const std::string& text)
+void set_text(aurore::Label* label, const std::string& text)
 {
     if (label && label->getFullText() != text)
         label->setText(text);
 }
 
-void set_detail(brls::DetailCell* cell, const std::string& text)
+void set_detail(aurore::DetailCell* cell, const std::string& text)
 {
     if (cell)
         set_text(cell->detail, text);
 }
 
-void batch_layout(brls::Box* box, const std::function<void()>& fill)
+void batch_layout(aurore::Box* box, const std::function<void()>& fill)
 {
-    // Out of its parent's Yoga node only: borealis' views, their parents and
+    // Out of its parent's Yoga node only: Aurore's views, their parents and
     // the focus stay as they are, and a change inside stops at the box.
     YGNodeRef node  = box ? box->getYGNode() : nullptr;
     YGNodeRef owner = node ? YGNodeGetOwner(node) : nullptr;
@@ -119,45 +119,45 @@ void batch_layout(brls::Box* box, const std::function<void()>& fill)
     box->invalidate();
 }
 
-void keep_focus(brls::Activity* activity, brls::View* fallback)
+void keep_focus(aurore::Activity* activity, aurore::View* fallback)
 {
     // The view to get the focus back: the end of the boxes' last focused
     // views. Box::removeView leaves a removed child there: the walk stops
     // at one no longer among its box's children (never read).
-    brls::View* last = activity->getContentView();
-    while (auto* box = dynamic_cast<brls::Box*>(last))
+    aurore::View* last = activity->getContentView();
+    while (auto* box = dynamic_cast<aurore::Box*>(last))
     {
-        brls::View* next     = box->getLastFocusedView();
+        aurore::View* next   = box->getLastFocusedView();
         const auto& children = box->getChildren();
         if (!next || std::find(children.begin(), children.end(), next) == children.end())
             break;
         last = next;
     }
     bool gone = !last || !last->isFocusable();
-    for (brls::View* v = last; v && !gone; v = v->getParent())
-        gone = v->getVisibility() != brls::Visibility::VISIBLE;
+    for (aurore::View* v = last; v && !gone; v = v->getParent())
+        gone = v->getVisibility() != aurore::Visibility::VISIBLE;
     if (gone)
-        brls::Application::giveFocus(fallback ? fallback : activity->getContentView());
+        aurore::Application::giveFocus(fallback ? fallback : activity->getContentView());
 }
 
-bool has_focus(brls::Activity* activity)
+bool has_focus(aurore::Activity* activity)
 {
-    brls::View* focus = brls::Application::getCurrentFocus();
+    aurore::View* focus = aurore::Application::getCurrentFocus();
     return focus && focus->getParentActivity() == activity;
 }
 
-bool on_top(brls::Activity* activity)
+bool on_top(aurore::Activity* activity)
 {
-    const auto& stack = brls::Application::getActivitiesStack();
+    const auto& stack = aurore::Application::getActivitiesStack();
     return !stack.empty() && stack.back() == activity;
 }
 
-brls::Activity* main_screen()
+aurore::Activity* main_screen()
 {
     const auto& is_main = hooks::get().is_main;
     if (!is_main)
         return nullptr;
-    for (brls::Activity* a : brls::Application::getActivitiesStack())
+    for (aurore::Activity* a : aurore::Application::getActivitiesStack())
         if (is_main(a))
             return a;
     return nullptr;
@@ -165,7 +165,7 @@ brls::Activity* main_screen()
 
 void open_tab(int position, const std::string& row)
 {
-    brls::Activity* main = main_screen();
+    aurore::Activity* main = main_screen();
     if (main && hooks::get().open_tab)
         hooks::get().open_tab(main, position, row);
 }
@@ -176,26 +176,26 @@ void refresh_shown_tab()
         hooks::get().refresh_shown();
 }
 
-void go_to_tab(brls::View* from, int position)
+void go_to_tab(aurore::View* from, int position)
 {
-    brls::TabFrame* frame = nullptr;
-    for (brls::View* v = from; v && !frame; v = v->getParent())
-        frame = dynamic_cast<brls::TabFrame*>(v);
+    aurore::TabFrame* frame = nullptr;
+    for (aurore::View* v = from; v && !frame; v = v->getParent())
+        frame = dynamic_cast<aurore::TabFrame*>(v);
     if (!frame)
         return;
-    brls::sync([frame, position]()
+    aurore::sync([frame, position]()
         {
         frame->focusTab(position);   // replaces the tab content
         const auto& children = frame->getChildren();
-        if (children.size() >= 2) brls::Application::giveFocus(children.back()); });
+        if (children.size() >= 2) aurore::Application::giveFocus(children.back()); });
 }
 
-void open_screen(brls::View* content, const std::string& title)
+void open_screen(aurore::View* content, const std::string& title)
 {
-    auto* frame = new brls::AppletFrame(content);
+    auto* frame = new aurore::AppletFrame(content);
     frame->setTitle(title);
-    frame->setIcon(brls::View::getFilePathXMLAttributeValue("@res/img/app_icon.jpg"));
-    brls::Application::pushActivity(new brls::Activity(frame));
+    frame->setIcon(aurore::View::getFilePathXMLAttributeValue("@res/img/app_icon.jpg"));
+    aurore::Application::pushActivity(new aurore::Activity(frame));
 }
 
 } // namespace ui

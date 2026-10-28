@@ -17,7 +17,7 @@
 
 #pragma once
 
-// What the demo sets up around borealis, shared by its main() and its tests
+// What the demo sets up around Aurore, shared by its main() and its tests
 // (tests/): Cadran's hooks, before Application::init(), and the demo's views,
 // colours and metrics, after Application::createWindow().
 namespace demo

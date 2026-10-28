@@ -24,9 +24,9 @@
 #include <cstring>
 #include <map>
 #include <memory>
-#include <borealis/core/application.hpp>
-#include <borealis/core/assets.hpp>
-#include <borealis/platforms/desktop/desktop_font.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/assets.hpp>
+#include <aurore/platforms/desktop/desktop_font.hpp>
 
 #if defined(__linux__) && !defined(ANDROID)
 #include <dlfcn.h>
@@ -36,12 +36,12 @@
 #endif
 
 // Inter and PromptFont's buttons, made by tools/make_fonts.py
-#define INTER_FONT_PATH BRLS_ASSET("font/aurore_text.ttf")
-#define INTER_ICON_PATH BRLS_ASSET("font/aurore_buttons.ttf")
+#define INTER_FONT_PATH AURORE_ASSET("font/aurore_text.ttf")
+#define INTER_ICON_PATH AURORE_ASSET("font/aurore_buttons.ttf")
 // An app's own font for Chinese, Japanese and Korean (.ttc, .ttf or .otf)
-#define APP_CJK_FONT_PATH BRLS_ASSET("font/cjk")
+#define APP_CJK_FONT_PATH AURORE_ASSET("font/cjk")
 
-namespace brls
+namespace aurore
 {
 
 namespace
@@ -474,7 +474,7 @@ bool DesktopFontLoader::loadAppCjkFont(NVGcontext* vg)
             loaded = true;
         }
         if (loaded)
-            brls::Logger::info("Using the app's font for Chinese, Japanese and Korean: {}", path);
+            aurore::Logger::info("Using the app's font for Chinese, Japanese and Korean: {}", path);
         return loaded;
     }
     return false;
@@ -499,15 +499,15 @@ void DesktopFontLoader::loadSystemCjkFonts(NVGcontext* vg)
         FontFile file = findSystemFont(cjk->language);
         if (file.path.empty())
         {
-            brls::Logger::info("No system font for {}", cjk->language);
+            aurore::Logger::info("No system font for {}", cjk->language);
             continue;
         }
         if (!loadFontFile(cjk->fontName, file))
         {
-            brls::Logger::warning("Could not load the {} font {}", cjk->language, file.path);
+            aurore::Logger::warning("Could not load the {} font {}", cjk->language, file.path);
             continue;
         }
-        brls::Logger::info("Using {} font: {} ({})", cjk->language, file.path, file.index);
+        aurore::Logger::info("Using {} font: {} ({})", cjk->language, file.path, file.index);
         // The same face for two languages: looked up once
         std::pair<std::string, int> face { file.path, file.index };
         if (std::find(added.begin(), added.end(), face) != added.end())
@@ -519,7 +519,7 @@ void DesktopFontLoader::loadSystemCjkFonts(NVGcontext* vg)
 
 void DesktopFontLoader::loadFonts()
 {
-    NVGcontext* vg = brls::Application::getNVGContext();
+    NVGcontext* vg = aurore::Application::getNVGContext();
 
     // Text font
     if (loadFont(FONT_REGULAR, USER_FONT_PATH))
@@ -532,7 +532,7 @@ void DesktopFontLoader::loadFonts()
     }
     else
     {
-        brls::Logger::info("No custom font (searched at: {}), using the internal one: {}", USER_FONT_PATH, INTER_FONT_PATH);
+        aurore::Logger::info("No custom font (searched at: {}), using the internal one: {}", USER_FONT_PATH, INTER_FONT_PATH);
         if (!loadFont(FONT_REGULAR, INTER_FONT_PATH))
         {
             Logger::warning("Failed to load internal font, text may not be displayed");
@@ -548,7 +548,7 @@ void DesktopFontLoader::loadFonts()
     }
     else
     {
-        brls::Logger::info("No custom icons (searched at: {}), using the internal ones: {}", USER_ICON_PATH, INTER_ICON_PATH);
+        aurore::Logger::info("No custom icons (searched at: {}), using the internal ones: {}", USER_ICON_PATH, INTER_ICON_PATH);
         if (loadFont(FONT_SWITCH_ICONS, INTER_ICON_PATH))
         {
             // Internal icons
@@ -569,7 +569,7 @@ void DesktopFontLoader::loadFonts()
     {
         nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont(FONT_EMOJI));
     }
-#ifdef BRLS_USE_FREETYPE
+#ifdef AURORE_USE_FREETYPE
     // FreeType draws colour emoji: the system's font, when the app gives none
     else if (USER_EMOJI_PATH.empty() && useSystemFonts)
     {
@@ -597,7 +597,7 @@ void DesktopFontLoader::loadFonts()
             if (loadFont(FONT_EMOJI, path))
             {
                 nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont(FONT_EMOJI));
-                brls::Logger::info("Using emoji font: {}", path);
+                aurore::Logger::info("Using emoji font: {}", path);
                 break;
             }
         }
@@ -615,4 +615,4 @@ void DesktopFontLoader::loadFonts()
     }
 }
 
-} // namespace brls
+} // namespace aurore

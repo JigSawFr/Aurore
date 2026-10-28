@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include <borealis.hpp>
-#include <borealis/test/harness.hpp>
-#include <borealis/test/headless_platform.hpp>
+#include <aurore.hpp>
+#include <aurore/test/harness.hpp>
+#include <aurore/test/headless_platform.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -32,7 +32,7 @@
 #define STB_IMAGE_WRITE_STATIC
 #include "stb_image_write.h"
 
-namespace brls::test
+namespace aurore::test
 {
 
 // Image
@@ -141,15 +141,16 @@ std::string viewText(View* view)
     return "";
 }
 
+// AURORE_<name>, or the deprecated name borealis gave it
 static std::string fromEnvironment(const char* name, const std::string& fallback)
 {
-    const char* value = std::getenv(name);
+    const char* value = environmentVariable(name);
     return value && *value ? std::string(value) : fallback;
 }
 
 static bool flagFromEnvironment(const char* name)
 {
-    const char* value = std::getenv(name);
+    const char* value = environmentVariable(name);
     return value && *value && *value != '0';
 }
 
@@ -159,9 +160,9 @@ Harness::Harness(Options options)
     : opts(std::move(options))
 {
     if (opts.referenceDir.empty())
-        opts.referenceDir = fromEnvironment("BRLS_TEST_REFERENCES", "references");
+        opts.referenceDir = fromEnvironment("TEST_REFERENCES", "references");
     if (opts.outputDir.empty())
-        opts.outputDir = fromEnvironment("BRLS_TEST_OUTPUT", "test-output");
+        opts.outputDir = fromEnvironment("TEST_OUTPUT", "test-output");
 
     // Not 0: some code reads a time of 0 as "never"
     this->clock = 1000000;
@@ -308,17 +309,17 @@ void Harness::setAxis(ControllerAxis axis, float value)
     headless->getHeadlessInput()->setAxis(axis, value);
 }
 
-void Harness::pressKey(BrlsKeyboardScancode key)
+void Harness::pressKey(AuroreKeyboardScancode key)
 {
     headless->getHeadlessInput()->setKey(key, true);
 }
 
-void Harness::releaseKey(BrlsKeyboardScancode key)
+void Harness::releaseKey(AuroreKeyboardScancode key)
 {
     headless->getHeadlessInput()->setKey(key, false);
 }
 
-void Harness::tapKey(BrlsKeyboardScancode key, int times)
+void Harness::tapKey(AuroreKeyboardScancode key, int times)
 {
     for (int i = 0; i < times; i++)
     {
@@ -539,15 +540,15 @@ bool Harness::matchesReference(const std::string& name, const Rect& area, int to
     actual.savePng(outputPath);
 
     Image expected = Image::loadPng(referencePath);
-    if (expected.empty() && !flagFromEnvironment("BRLS_TEST_UPDATE") && std::getenv("CI"))
+    if (expected.empty() && !flagFromEnvironment("TEST_UPDATE") && std::getenv("CI"))
     {
         // In CI a missing reference is a test that was never checked: a typo in its name, or a file not committed
-        Logger::error("test harness: no reference {} (run with BRLS_TEST_UPDATE=1 to write it, then commit it)",
+        Logger::error("test harness: no reference {} (run with AURORE_TEST_UPDATE=1 to write it, then commit it)",
             referencePath);
         this->diff = ImageDiff();
         return false;
     }
-    if (expected.empty() || flagFromEnvironment("BRLS_TEST_UPDATE"))
+    if (expected.empty() || flagFromEnvironment("TEST_UPDATE"))
     {
         Logger::info("test harness: reference {} written", referencePath);
         actual.savePng(referencePath);
@@ -621,9 +622,9 @@ int runTests(int argc, char** argv)
 
     if (argc > 1 && std::string(argv[1]) == "--list")
     {
-        // Marked: the program may log before (brls_add_tests reads them)
+        // Marked: the program may log before (aurore_add_tests reads them)
         for (auto& test : tests)
-            std::printf("brls-test: %s\n", test.name);
+            std::printf("aurore-test: %s\n", test.name);
         return 0;
     }
 
@@ -642,7 +643,7 @@ int runTests(int argc, char** argv)
         return 2;
     }
 
-    // Each case in a process of its own: borealis' Application is global
+    // Each case in a process of its own: Aurore's Application is global
     int failed = 0;
     for (auto& test : tests)
     {
@@ -655,4 +656,4 @@ int runTests(int argc, char** argv)
     return failed ? 1 : 0;
 }
 
-} // namespace brls::test
+} // namespace aurore::test

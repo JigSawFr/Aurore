@@ -15,10 +15,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/glfw/glfw_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/glfw/glfw_platform.hpp>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -27,7 +27,7 @@
 // glfw video and input code inspired from the glfw hybrid app by fincs
 // https://github.com/fincs/hybrid_app
 
-namespace brls
+namespace aurore
 {
 
 #if defined(__APPLE__)
@@ -64,7 +64,7 @@ GLFWPlatform::GLFWPlatform()
     // Misc
     glfwSetTime(0.0);
 
-    // The system's language, unless BRLS_LANG (or BOREALIS_LANG) gave one
+    // The system's language, unless AURORE_LANG gave one
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO && !this->localeFromEnvironment)
     {
 #if defined(_WIN32)
@@ -102,7 +102,7 @@ GLFWPlatform::GLFWPlatform()
             this->locale     = localeFromSystem(lang);
         }
 #endif
-        brls::Logger::info("Auto detect app locale: {}", this->locale);
+        aurore::Logger::info("Auto detect app locale: {}", this->locale);
     }
 
     // Platform impls
@@ -228,4 +228,4 @@ GLFWPlatform::~GLFWPlatform()
     delete this->videoContext;
 }
 
-} // namespace brls
+} // namespace aurore

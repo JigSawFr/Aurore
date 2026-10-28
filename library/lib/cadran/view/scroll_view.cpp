@@ -1,54 +1,54 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/scroll_view.hpp>
+#include <aurore/cadran/view/scroll_view.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <functional>
 
-#include <borealis/cadran/ui/cadran_kit.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
 
 ScrollView::ScrollView()
 {
-    // "centered" turns borealis' natural scrolling off; the scrolling itself
+    // "centered" turns Aurore's natural scrolling off; the scrolling itself
     // is ours (onChildFocusGained, step).
-    this->setScrollingBehavior(brls::ScrollingBehavior::CENTERED);
-    this->registerAction("", brls::BUTTON_NAV_DOWN, [this](brls::View*)
-        { return this->step(brls::FocusDirection::DOWN); }, true, true, brls::SOUND_NONE);
-    this->registerAction("", brls::BUTTON_NAV_UP, [this](brls::View*)
-        { return this->step(brls::FocusDirection::UP); }, true, true, brls::SOUND_NONE);
+    this->setScrollingBehavior(aurore::ScrollingBehavior::CENTERED);
+    this->registerAction("", aurore::BUTTON_NAV_DOWN, [this](aurore::View*)
+        { return this->step(aurore::FocusDirection::DOWN); }, true, true, aurore::SOUND_NONE);
+    this->registerAction("", aurore::BUTTON_NAV_UP, [this](aurore::View*)
+        { return this->step(aurore::FocusDirection::UP); }, true, true, aurore::SOUND_NONE);
 }
 
-brls::View* ScrollView::create()
+aurore::View* ScrollView::create()
 {
     return new ScrollView();
 }
 
 void ScrollView::willAppear(bool resetState)
 {
-    brls::ScrollingFrame::willAppear(resetState);
-    // Not borealis' centring: our reveal, once the first layout is known.
+    aurore::ScrollingFrame::willAppear(resetState);
+    // Not Aurore's centring: our reveal, once the first layout is known.
     this->updateScrollingOnNextFrame = false;
     if (resetState)
         this->reveal_pending = true;
 }
 
 void ScrollView::draw(NVGcontext* vg, float x, float y, float width, float height,
-    brls::Style style, brls::FrameContext* ctx)
+    aurore::Style style, aurore::FrameContext* ctx)
 {
     if (this->reveal_pending)
     {
         this->reveal_pending = false;
-        brls::View* focus    = brls::Application::getCurrentFocus();
+        aurore::View* focus  = aurore::Application::getCurrentFocus();
         if (this->owns(focus))
             this->reveal(focus, false);
     }
-    brls::ScrollingFrame::draw(vg, x, y, width, height, style, ctx);
-    cadran::kit::draw_more_below(vg, this, x, y, width, height, "brls/background");
+    aurore::ScrollingFrame::draw(vg, x, y, width, height, style, ctx);
+    cadran::kit::draw_more_below(vg, this, x, y, width, height, "aurore/background");
 }
 
 void ScrollView::reveal_focused()
 {
-    for (brls::View* v = brls::Application::getCurrentFocus(); v; v = v->hasParent() ? v->getParent() : nullptr)
+    for (aurore::View* v = aurore::Application::getCurrentFocus(); v; v = v->hasParent() ? v->getParent() : nullptr)
         if (auto* frame = dynamic_cast<ScrollView*>(v))
         {
             frame->reveal_pending = true;
@@ -56,28 +56,28 @@ void ScrollView::reveal_focused()
         }
 }
 
-brls::View* ScrollView::getDefaultFocus()
+aurore::View* ScrollView::getDefaultFocus()
 {
     if (this->parked)
         return this;
-    return brls::ScrollingFrame::getDefaultFocus();
+    return aurore::ScrollingFrame::getDefaultFocus();
 }
 
 void ScrollView::onFocusLost()
 {
-    brls::ScrollingFrame::onFocusLost();
+    aurore::ScrollingFrame::onFocusLost();
     this->parked = false;
 }
 
 // The first (or last) line that can take the focus and is on screen in full.
-brls::View* ScrollView::visible_line(bool first)
+aurore::View* ScrollView::visible_line(bool first)
 {
-    const float top                       = this->getContentOffsetY();
-    const float bottom                    = top + this->getScrollingAreaHeight();
-    brls::View* found                     = nullptr;
-    std::function<bool(brls::View*)> walk = [&](brls::View* view)
+    const float top                         = this->getContentOffsetY();
+    const float bottom                      = top + this->getScrollingAreaHeight();
+    aurore::View* found                     = nullptr;
+    std::function<bool(aurore::View*)> walk = [&](aurore::View* view)
     {
-        if (view->getVisibility() != brls::Visibility::VISIBLE)
+        if (view->getVisibility() != aurore::Visibility::VISIBLE)
             return false;
         if (view->isFocusable())
         {
@@ -89,8 +89,8 @@ brls::View* ScrollView::visible_line(bool first)
             }
             return false;
         }
-        if (auto* box = dynamic_cast<brls::Box*>(view))
-            for (brls::View* child : box->getChildren())
+        if (auto* box = dynamic_cast<aurore::Box*>(view))
+            for (aurore::View* child : box->getChildren())
                 if (walk(child))
                     return true;
         return false;
@@ -99,36 +99,36 @@ brls::View* ScrollView::visible_line(bool first)
     return found;
 }
 
-void ScrollView::onChildFocusGained(brls::View* directChild, brls::View* focusedView)
+void ScrollView::onChildFocusGained(aurore::View* directChild, aurore::View* focusedView)
 {
     // Not ScrollingFrame's: it would centre the focused line.
-    brls::Box::onChildFocusGained(directChild, focusedView);
+    aurore::Box::onChildFocusGained(directChild, focusedView);
     this->childFocused = true;
-    if (brls::Application::getInputType() == brls::InputType::GAMEPAD)
+    if (aurore::Application::getInputType() == aurore::InputType::GAMEPAD)
         this->reveal(focusedView, true);
 }
 
-brls::View* ScrollView::getNextFocus(brls::FocusDirection direction, brls::View* currentView)
+aurore::View* ScrollView::getNextFocus(aurore::FocusDirection direction, aurore::View* currentView)
 {
     // ScrollingFrame's returns the frame itself while it is not scrolled to
     // the end (natural scrolling), which would send the focus back to the top.
-    return brls::Box::getNextFocus(direction, currentView);
+    return aurore::Box::getNextFocus(direction, currentView);
 }
 
-bool ScrollView::owns(brls::View* view) const
+bool ScrollView::owns(aurore::View* view) const
 {
     if (!view || !this->contentView)
         return false;
-    for (brls::View* v = view; v; v = v->getParent())
+    for (aurore::View* v = view; v; v = v->getParent())
         if (v == this->contentView)
             return true;
     return false;
 }
 
-ScrollView::Span ScrollView::span_of(brls::View* view) const
+ScrollView::Span ScrollView::span_of(aurore::View* view) const
 {
-    float y       = 0;
-    brls::View* v = view;
+    float y         = 0;
+    aurore::View* v = view;
     for (; v && v != this->contentView; v = v->getParent())
         y += v->getLocalY();
     return { y, y + view->getHeight() };
@@ -137,14 +137,14 @@ ScrollView::Span ScrollView::span_of(brls::View* view) const
 // The view and the text around it: the lines that cannot take the focus just
 // before and after it (a section header, its notes), up to the top or the end
 // of the screen when nothing focusable comes before or after it.
-ScrollView::Span ScrollView::context_of(brls::View* view) const
+ScrollView::Span ScrollView::context_of(aurore::View* view) const
 {
     Span span = this->span_of(view);
     bool up = true, down = true;
-    brls::View* node = view;
+    aurore::View* node = view;
     while (node != this->contentView && node->getParent() && (up || down))
     {
-        brls::Box* box       = node->getParent();
+        aurore::Box* box     = node->getParent();
         const auto& siblings = box->getChildren();
         const auto at        = std::find(siblings.begin(), siblings.end(), node);
         if (at == siblings.end())
@@ -152,8 +152,8 @@ ScrollView::Span ScrollView::context_of(brls::View* view) const
         const int index = (int)(at - siblings.begin());
         for (int i = index + 1; down && i < (int)siblings.size(); i++)
         {
-            brls::View* child = siblings[i];
-            if (child->getVisibility() == brls::Visibility::GONE)
+            aurore::View* child = siblings[i];
+            if (child->getVisibility() == aurore::Visibility::GONE)
                 continue;
             if (child->getDefaultFocus())
                 down = false;
@@ -162,8 +162,8 @@ ScrollView::Span ScrollView::context_of(brls::View* view) const
         }
         for (int i = index - 1; up && i >= 0; i--)
         {
-            brls::View* child = siblings[i];
-            if (child->getVisibility() == brls::Visibility::GONE)
+            aurore::View* child = siblings[i];
+            if (child->getVisibility() == aurore::Visibility::GONE)
                 continue;
             if (child->getDefaultFocus())
                 up = false;
@@ -183,12 +183,12 @@ ScrollView::Span ScrollView::context_of(brls::View* view) const
 }
 
 // The line the focus would move to, if it is on this screen.
-brls::View* ScrollView::neighbour(brls::FocusDirection direction) const
+aurore::View* ScrollView::neighbour(aurore::FocusDirection direction) const
 {
-    brls::View* focus = brls::Application::getCurrentFocus();
+    aurore::View* focus = aurore::Application::getCurrentFocus();
     if (!this->owns(focus) || !focus->getParent())
         return nullptr;
-    brls::View* next = focus->getParent()->getNextFocus(direction, focus);
+    aurore::View* next = focus->getParent()->getNextFocus(direction, focus);
     if (next)
         next = next->getDefaultFocus();
     return this->owns(next) ? next : nullptr;
@@ -199,7 +199,7 @@ float ScrollView::bottom_limit()
     return std::max(0.0f, this->getContentHeight() - this->getScrollingAreaHeight());
 }
 
-void ScrollView::reveal(brls::View* view, bool animated)
+void ScrollView::reveal(aurore::View* view, bool animated)
 {
     const Span line    = this->span_of(view);
     const Span around  = this->context_of(view);
@@ -229,18 +229,18 @@ void ScrollView::reveal(brls::View* view, bool animated)
     this->startScrolling(animated, target);
 }
 
-// A D-pad press: false lets borealis move the focus (then reveal() scrolls),
+// A D-pad press: false lets Aurore move the focus (then reveal() scrolls),
 // true when the press only scrolled, through a text taller than the screen.
-bool ScrollView::step(brls::FocusDirection direction)
+bool ScrollView::step(aurore::FocusDirection direction)
 {
     if (!this->contentView)
         return false;
-    const bool down    = direction == brls::FocusDirection::DOWN;
-    const float height = this->getScrollingAreaHeight();
-    const float page   = std::round(height / 2);
-    const float offset = this->getContentOffsetY();
-    const float limit  = this->bottom_limit();
-    brls::View* focus  = brls::Application::getCurrentFocus();
+    const bool down     = direction == aurore::FocusDirection::DOWN;
+    const float height  = this->getScrollingAreaHeight();
+    const float page    = std::round(height / 2);
+    const float offset  = this->getContentOffsetY();
+    const float limit   = this->bottom_limit();
+    aurore::View* focus = aurore::Application::getCurrentFocus();
 
     auto scroll_to = [this, offset, limit, height, focus](float target)
     {
@@ -249,14 +249,14 @@ bool ScrollView::step(brls::FocusDirection direction)
             return false;
         this->startScrolling(true, target);
         // The focused line scrolled out of sight: the focus waits on the frame
-        // (no highlight, borealis would draw it over the header or the footer).
+        // (no highlight, Aurore would draw it over the header or the footer).
         if (focus != this)
         {
             const Span line = this->span_of(focus);
             if (line.bottom <= target || line.top >= target + height)
             {
                 this->parked = true;
-                brls::Application::giveFocus(this);
+                aurore::Application::giveFocus(this);
             }
         }
         return true;
@@ -266,9 +266,9 @@ bool ScrollView::step(brls::FocusDirection direction)
     {
         // After scrolling through a text (or by touch): the first line on
         // screen in the direction of the press, else more of the text.
-        if (brls::View* line = this->visible_line(down))
+        if (aurore::View* line = this->visible_line(down))
         {
-            brls::Application::giveFocus(line);
+            aurore::Application::giveFocus(line);
             return true;
         }
         return scroll_to(offset + (down ? page : -page));
@@ -276,8 +276,8 @@ bool ScrollView::step(brls::FocusDirection direction)
     if (!this->owns(focus))
         return false;
 
-    const Span line  = this->span_of(focus);
-    brls::View* next = this->neighbour(direction);
+    const Span line    = this->span_of(focus);
+    aurore::View* next = this->neighbour(direction);
     if (down)
     {
         // Scrolled up past the focused line (a long text above it): back to it.

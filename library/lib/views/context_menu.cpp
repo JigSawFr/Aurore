@@ -15,18 +15,18 @@
 */
 
 #include <algorithm>
-#include <borealis/core/activity.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/touch/long_press_gesture.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/context_menu.hpp>
-#include <borealis/views/image.hpp>
-#include <borealis/views/rectangle.hpp>
+#include <aurore/core/activity.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/touch/long_press_gesture.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/context_menu.hpp>
+#include <aurore/views/image.hpp>
+#include <aurore/views/rectangle.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 namespace
@@ -111,8 +111,8 @@ ContextMenu::ContextMenu(View* anchor)
     this->panel->setWidth(MENU_WIDTH);
     this->panel->setPadding(8);
     this->panel->setCornerRadius(16);
-    this->panel->setThemeColor("backgroundColor", "brls/background");
-    this->panel->setThemeColor("borderColor", "brls/sidebar/separator");
+    this->panel->setThemeColor("backgroundColor", "aurore/background");
+    this->panel->setThemeColor("borderColor", "aurore/sidebar/separator");
     this->panel->setBorderThickness(1);
     this->panel->setShadowType(ShadowType::GENERIC);
     this->panel->setShadowVisibility(true);
@@ -129,7 +129,7 @@ ContextMenu::ContextMenu(View* anchor)
 // A light dim: the screen it was opened from stays readable
 void ContextMenu::dimBackground()
 {
-    NVGcolor backdrop = Application::getTheme()["brls/backdrop"];
+    NVGcolor backdrop = Application::getTheme()["aurore/backdrop"];
     backdrop.a *= 0.4f;
     this->setBackgroundColor(backdrop);
 }
@@ -147,7 +147,7 @@ void ContextMenu::setTitle(const std::string& text)
         this->title = new Label();
         this->title->setFontSize(15);
         this->title->setSingleLine(true);
-        this->title->setThemeColor("textColor", "brls/header/subtitle");
+        this->title->setThemeColor("textColor", "aurore/header/subtitle");
         this->title->setMarginLeft(14);
         this->title->setMarginRight(14);
         this->title->setMarginTop(6);
@@ -176,7 +176,7 @@ ContextMenuItem* ContextMenu::addItem(const std::string& label, std::function<vo
 void ContextMenu::addSeparator()
 {
     auto* line = new Rectangle();
-    line->setThemeColor("color", "brls/sidebar/separator");
+    line->setThemeColor("color", "aurore/sidebar/separator");
     line->setHeight(1);
     line->setMarginTop(6);
     line->setMarginBottom(6);
@@ -274,4 +274,4 @@ void ContextMenu::attach(View* view, std::function<void(ContextMenu* menu)> fill
             show(); }));
 }
 
-} // namespace brls
+} // namespace aurore

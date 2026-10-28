@@ -22,18 +22,18 @@ limitations under the License.
 #include <cstring>
 #include <iostream>
 #include <locale>
-#include <borealis/core/box.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/platforms/desktop/steam_deck.hpp>
-#include <borealis/platforms/glfw/glfw_ime.hpp>
-#include <borealis/views/dialog.hpp>
-#include <borealis/views/edit_text_dialog.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/platforms/desktop/steam_deck.hpp>
+#include <aurore/platforms/glfw/glfw_ime.hpp>
+#include <aurore/views/dialog.hpp>
+#include <aurore/views/edit_text_dialog.hpp>
+#include <aurore/views/label.hpp>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-namespace brls
+namespace aurore
 {
 static int currentIMEStatus = GLFW_FALSE;
 
@@ -68,7 +68,7 @@ static size_t encode_utf8(char* s, unsigned int ch)
 void GLFWImeManager::ime_callback(GLFWwindow* window)
 {
     currentIMEStatus = glfwGetInputMode(window, GLFW_IME);
-    brls::Logger::info("IME switched: {}", currentIMEStatus ? "ON" : "OFF");
+    aurore::Logger::info("IME switched: {}", currentIMEStatus ? "ON" : "OFF");
 }
 
 std::string glfwPreeditText(int preeditCount, const unsigned int* preeditString, int blockCount,
@@ -133,7 +133,7 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
 #ifdef __linux__
     if (isSteamDeck())
     {
-        brls::delay(200, []()
+        aurore::delay(200, []()
             { runSteamDeckCommand("steam://open/keyboard?Mode=0\n"); });
     }
 #endif
@@ -148,7 +148,7 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
     dialog->setHintText(subText);
     dialog->setHeaderText(headerText);
     dialog->setCountText(std::to_string(utf8len(initialText.data())) + "/" + std::to_string(maxStringLength));
-#if defined(BOREALIS_USE_D3D11)
+#if defined(AURORE_USE_D3D11)
     float scale = Application::windowScale;
 #else
     float scale = Application::windowScale / Application::getPlatform()->getVideoContext()->getScaleFactor();

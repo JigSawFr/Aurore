@@ -1,14 +1,14 @@
 // ui — toasts, the failures said in a dialog and screen changes. The other
 // cadran/ui/*.cpp hold the rest of ui.hpp by concern.
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
-#include <borealis/cadran/ui/cadran_modal.hpp>
-#include <borealis/cadran/ui/cadran_text.hpp>
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/cadran_modal.hpp>
+#include <aurore/cadran/ui/cadran_text.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 namespace ui
 {
@@ -16,9 +16,9 @@ namespace ui
 void notify(const std::string& text, Toast kind)
 {
     // Logged too: the desktop smoke test checks what the user was told.
-    brls::Logger::info("toast: {}", text);
-    brls::sync([text, kind]()
-        { brls::Application::notify(text, kind == Toast::Info ? nullptr : cadran::toast_icon(kind == Toast::Done)); });
+    aurore::Logger::info("toast: {}", text);
+    aurore::sync([text, kind]()
+        { aurore::Application::notify(text, kind == Toast::Info ? nullptr : cadran::toast_icon(kind == Toast::Done)); });
 }
 
 // A refusal: the line that asked shakes its head (its focus ring, as the
@@ -27,20 +27,20 @@ static void shake_focus()
 {
     if (!effects::motion())
         return;
-    if (brls::View* focus = brls::Application::getCurrentFocus())
-        focus->shakeHighlight(brls::FocusDirection::LEFT);
+    if (aurore::View* focus = aurore::Application::getCurrentFocus())
+        focus->shakeHighlight(aurore::FocusDirection::LEFT);
 }
 
 void refuse(const std::string& text)
 {
-    brls::sync([]()
+    aurore::sync([]()
         { shake_focus(); });
     notify(text, Toast::Refused);
 }
 
 static void show_error(const std::string& text)
 {
-    brls::Logger::info("error: {}", text);
+    aurore::Logger::info("error: {}", text);
     cadran_text::Failure f;
     f.reason = text;
     show_failure(f);
@@ -48,26 +48,26 @@ static void show_error(const std::string& text)
 
 void error(const std::string& text)
 {
-    brls::sync([text]()
+    aurore::sync([text]()
         { show_error(text); });
 }
 
 void error(const std::string& what, const std::string& why)
 {
-    brls::Logger::info("error: {}: {}", what, why);
+    aurore::Logger::info("error: {}: {}", what, why);
     cadran_text::Failure f;
     f.title  = what;
     f.reason = why;
-    brls::sync([f]()
+    aurore::sync([f]()
         { show_failure(f); });
 }
 
-void replace_screen(brls::Activity* next)
+void replace_screen(aurore::Activity* next)
 {
-    const auto none = brls::TransitionAnimation::NONE;
-    if (!brls::Application::popActivity(none, [next, none]()
-            { brls::Application::pushActivity(next, none); }))
-        brls::Application::pushActivity(next, none);
+    const auto none = aurore::TransitionAnimation::NONE;
+    if (!aurore::Application::popActivity(none, [next, none]()
+            { aurore::Application::pushActivity(next, none); }))
+        aurore::Application::pushActivity(next, none);
 }
 
 bool save_prefs()

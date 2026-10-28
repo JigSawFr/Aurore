@@ -14,9 +14,9 @@
     limitations under the License.
 */
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-namespace brls
+namespace aurore
 {
 
 TapGestureRecognizer::TapGestureRecognizer(View* view, TapGestureConfig config)

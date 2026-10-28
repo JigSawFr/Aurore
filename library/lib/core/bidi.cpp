@@ -14,18 +14,18 @@
     limitations under the License.
 */
 
-#include <borealis/core/bidi.hpp>
+#include <aurore/core/bidi.hpp>
 
-#ifdef BRLS_USE_FRIBIDI
+#ifdef AURORE_USE_FRIBIDI
 #include <fribidi.h>
 
 #include <vector>
 #endif
 
-namespace brls
+namespace aurore
 {
 
-#ifdef BRLS_USE_FRIBIDI
+#ifdef AURORE_USE_FRIBIDI
 
 // A lead byte of U+0590…U+07FF (Hebrew, Arabic, Syriac, Thaana, N'Ko) or of
 // U+FB1D…U+FEFF (their presentation forms): a cheap test before fribidi.
@@ -98,4 +98,4 @@ bool bidiAvailable()
 
 #endif
 
-} // namespace brls
+} // namespace aurore

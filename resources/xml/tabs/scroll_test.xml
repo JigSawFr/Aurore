@@ -1,29 +1,29 @@
-<brls:Box
+<aurore:Box
     width="auto"
     height="auto">
 
-    <brls:ScrollingFrame
+    <aurore:ScrollingFrame
         width="auto"
         height="auto"
         grow="1.0" >
         
-        <brls:Box
+        <aurore:Box
             width="auto"
             height="auto"
             axis="column"
-            paddingLeft="@style/brls/tab_frame/content_padding_sides"
-            paddingRight="@style/brls/tab_frame/content_padding_sides"
-            paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
-            paddingBottom="@style/brls/tab_frame/content_padding_top_bottom">
+            paddingLeft="@style/aurore/tab_frame/content_padding_sides"
+            paddingRight="@style/aurore/tab_frame/content_padding_sides"
+            paddingTop="@style/aurore/tab_frame/content_padding_top_bottom"
+            paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom">
             
-            <brls:Label
+            <aurore:Label
                 width="auto"
                 height="auto"
                 text="@i18n/scroll/text"
                 marginBottom="10px" />
             
-        </brls:Box>
+        </aurore:Box>
         
-    </brls:ScrollingFrame>
+    </aurore:ScrollingFrame>
 
-</brls:Box>
+</aurore:Box>

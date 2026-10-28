@@ -13,7 +13,7 @@ makes it the commit release-please writes the changelog from. A breaking change 
 
 ## Checklist
 
-- [ ] `ctest` passes (desktop build with `-DBRLS_BUILD_TESTS=ON`)
+- [ ] `ctest` passes (desktop build with `-DAURORE_BUILD_TESTS=ON`)
 - [ ] New behaviour has a test; a fix has a test that fails without it
 - [ ] Changed screenshots in `tests/references/` were looked at and are meant
 - [ ] Files touched are formatted (`clang-format-18`)

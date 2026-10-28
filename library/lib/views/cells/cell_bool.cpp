@@ -14,14 +14,14 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_bool.hpp"
+#include "aurore/views/cells/cell_bool.hpp"
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 BooleanCell::BooleanCell()
@@ -98,7 +98,7 @@ void BooleanCell::setOn(bool on, bool animated)
 void BooleanCell::updateUI()
 {
     detail->setText(state ? "hints/on"_i18n : "hints/off"_i18n);
-    detail->setThemeColor("textColor", state ? "brls/list/listItem_value_color" : "brls/text_secondary");
+    detail->setThemeColor("textColor", state ? "aurore/list/listItem_value_color" : "aurore/text_secondary");
 }
 
 void BooleanCell::scaleTick()
@@ -116,4 +116,4 @@ View* BooleanCell::create()
     return new BooleanCell();
 }
 
-} // namespace brls
+} // namespace aurore

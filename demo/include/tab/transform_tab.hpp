@@ -16,14 +16,14 @@
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-class TransformBox : public brls::Image
+class TransformBox : public aurore::Image
 {
   public:
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx) override;
+    void draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style, aurore::FrameContext* ctx) override;
 
-    static brls::View* create();
+    static aurore::View* create();
 
     void setRotate(float deg);
 
@@ -44,30 +44,30 @@ class TransformBox : public brls::Image
     float font_scale_x { 1 }, font_scale_y { 1 };
 };
 
-class TransformTab : public brls::Box
+class TransformTab : public aurore::Box
 {
   public:
     TransformTab();
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(TransformBox, box, "box");
-    BRLS_BIND(brls::SliderCell, transX, "transX");
-    BRLS_BIND(brls::SliderCell, transY, "transY");
-    BRLS_BIND(brls::SliderCell, scaleX, "scaleX");
-    BRLS_BIND(brls::SliderCell, scaleY, "scaleY");
-    BRLS_BIND(brls::SliderCell, skewX, "skewX");
-    BRLS_BIND(brls::SliderCell, skewY, "skewY");
-    BRLS_BIND(brls::SliderCell, rotate, "rotate");
-    BRLS_BIND(brls::SliderCell, boxWidth, "width");
-    BRLS_BIND(brls::SliderCell, boxHeight, "height");
-    BRLS_BIND(brls::SliderCell, fontScaleX, "fontScaleX");
-    BRLS_BIND(brls::SliderCell, fontScaleY, "fontScaleY");
-    BRLS_BIND(brls::Button, reset, "reset");
-    BRLS_BIND(brls::Button, play, "play");
+    AURORE_BIND(TransformBox, box, "box");
+    AURORE_BIND(aurore::SliderCell, transX, "transX");
+    AURORE_BIND(aurore::SliderCell, transY, "transY");
+    AURORE_BIND(aurore::SliderCell, scaleX, "scaleX");
+    AURORE_BIND(aurore::SliderCell, scaleY, "scaleY");
+    AURORE_BIND(aurore::SliderCell, skewX, "skewX");
+    AURORE_BIND(aurore::SliderCell, skewY, "skewY");
+    AURORE_BIND(aurore::SliderCell, rotate, "rotate");
+    AURORE_BIND(aurore::SliderCell, boxWidth, "width");
+    AURORE_BIND(aurore::SliderCell, boxHeight, "height");
+    AURORE_BIND(aurore::SliderCell, fontScaleX, "fontScaleX");
+    AURORE_BIND(aurore::SliderCell, fontScaleY, "fontScaleY");
+    AURORE_BIND(aurore::Button, reset, "reset");
+    AURORE_BIND(aurore::Button, play, "play");
 
-    static void registerCell(brls::SliderCell* cell, float init, const std::string& title, const std::function<float(float)>& cb);
+    static void registerCell(aurore::SliderCell* cell, float init, const std::string& title, const std::function<float(float)>& cb);
 
-    brls::Animatable aniX, aniY, skew, skew2;
+    aurore::Animatable aniX, aniY, skew, skew2;
 };

@@ -16,20 +16,20 @@ limitations under the License.
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-class TextTestTab : public brls::Box
+class TextTestTab : public aurore::Box
 {
   public:
     TextTestTab();
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
-    BRLS_BIND(brls::SliderCell, width, "width");
-    BRLS_BIND(brls::SliderCell, height, "height");
-    BRLS_BIND(brls::BooleanCell, singleLine, "singleLine");
-    BRLS_BIND(brls::SelectorCell, horizontal, "horizontal");
-    BRLS_BIND(brls::SelectorCell, vertical, "vertical");
-    BRLS_BIND(brls::Label, label, "label");
+    AURORE_BIND(aurore::SliderCell, width, "width");
+    AURORE_BIND(aurore::SliderCell, height, "height");
+    AURORE_BIND(aurore::BooleanCell, singleLine, "singleLine");
+    AURORE_BIND(aurore::SelectorCell, horizontal, "horizontal");
+    AURORE_BIND(aurore::SelectorCell, vertical, "vertical");
+    AURORE_BIND(aurore::Label, label, "label");
 };

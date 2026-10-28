@@ -14,13 +14,14 @@
     limitations under the License.
 */
 
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/profiler.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/core/util.hpp>
 
 #include <cstdlib>
 
-namespace brls
+namespace aurore
 {
 
 static const int LOG_EVERY = 120;
@@ -37,10 +38,10 @@ bool Profiler::isMeasuring()
 
 void Profiler::beginFrame()
 {
-#if defined(BRLS_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+#if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
     static bool fromEnvironment = []
     {
-        const char* value = std::getenv("BRLS_PROFILE");
+        const char* value = environmentVariable("PROFILE");
         return value && *value && *value != '0';
     }();
     if (fromEnvironment && !logging)
@@ -162,4 +163,4 @@ void Profiler::setDrawStats(uint32_t drawCalls, uint32_t triangles)
     current.triangles = triangles;
 }
 
-} // namespace brls
+} // namespace aurore

@@ -15,10 +15,10 @@
 */
 
 #include <vector>
-#include <borealis/core/animation.hpp>
-#include <borealis/core/application.hpp>
+#include <aurore/core/animation.hpp>
+#include <aurore/core/application.hpp>
 
-namespace brls
+namespace aurore
 {
 
 Animatable::Animatable(float value)
@@ -136,4 +136,4 @@ void getHighlightAnimation(float* gradientX, float* gradientY, float* color)
         *color = (float)highlightColor;
 }
 
-} // namespace brls
+} // namespace aurore

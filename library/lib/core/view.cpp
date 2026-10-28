@@ -27,18 +27,18 @@
 #include <fstream>
 #include <functional>
 #include <sstream>
-#include <borealis/core/animation.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/box.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/input.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/profiler.hpp>
-#include <borealis/core/theme_decor.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/core/view.hpp>
-#include <borealis/views/applet_frame.hpp>
+#include <aurore/core/animation.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/input.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/core/theme_decor.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/core/view.hpp>
+#include <aurore/views/applet_frame.hpp>
 
 // Avoid conflicts with macro definitions in windows.h
 #undef RGB
@@ -46,9 +46,9 @@
 #undef RELATIVE
 #undef ABSOLUTE
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 void AppletFrameItem::setHintView(View* hintView)
@@ -83,7 +83,7 @@ View::View()
     // Default values
     Style style = Application::getStyle();
 
-    this->highlightCornerRadius = style["brls/highlight/corner_radius"];
+    this->highlightCornerRadius = style["aurore/highlight/corner_radius"];
 }
 
 static int shakeAnimation(float t, float a) // a = amplitude
@@ -277,7 +277,7 @@ void View::drawThemeUnderlay(FrameContext* ctx, const Rect& frame)
     Application::drawThemeBackground(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
     nvgBeginPath(vg);
     nvgRoundedRect(vg, frame.getMinX(), frame.getMinY(), frame.getWidth(), frame.getHeight(), this->cornerRadius);
-    nvgFillColor(vg, ctx->theme["brls/backdrop"]);
+    nvgFillColor(vg, ctx->theme["aurore/backdrop"]);
     nvgFill(vg);
 }
 
@@ -362,7 +362,7 @@ void View::playClickAnimation(bool reverse, bool animateBack, bool force)
 
     this->clickAlpha.addStep(
         reverse ? 0.0f : 1.0f,
-        style["brls/animations/highlight"],
+        style["aurore/animations/highlight"],
         reverse ? EasingFunction::quadraticOut : EasingFunction::quadraticIn);
 
     this->clickAlpha.setEndCallback([this, reverse, animateBack](bool finished)
@@ -414,7 +414,7 @@ const std::vector<std::shared_ptr<Action>>& View::getActions()
 void View::drawClickAnimation(NVGcontext* vg, FrameContext* ctx, Rect frame)
 {
     Theme theme    = ctx->theme;
-    NVGcolor color = theme["brls/click_pulse"];
+    NVGcolor color = theme["aurore/click_pulse"];
 
     color.a *= this->clickAlpha;
 
@@ -570,10 +570,10 @@ void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
     switch (this->shadowType)
     {
         case ShadowType::GENERIC:
-            shadowWidth   = style["brls/shadow/width"];
-            shadowFeather = style["brls/shadow/feather"];
-            shadowOpacity = style["brls/shadow/opacity"];
-            shadowOffset  = style["brls/shadow/offset"];
+            shadowWidth   = style["aurore/shadow/width"];
+            shadowFeather = style["aurore/shadow/feather"];
+            shadowOpacity = style["aurore/shadow/opacity"];
+            shadowOffset  = style["aurore/shadow/offset"];
             break;
         case ShadowType::CUSTOM:
             break;
@@ -587,7 +587,7 @@ void View::drawShadow(NVGcontext* vg, FrameContext* ctx, Style style, Rect frame
         frame.getMinX(), frame.getMinY() + shadowWidth,
         frame.getWidth(), frame.getHeight(),
         maxRadius * 2, shadowFeather,
-        this->shadowColor(ctx->theme["brls/shadow"], shadowOpacity * alpha), TRANSPARENT);
+        this->shadowColor(ctx->theme["aurore/shadow"], shadowOpacity * alpha), TRANSPARENT);
 
     nvgBeginPath(vg);
     nvgRect(
@@ -610,7 +610,7 @@ void View::collapse(bool animated)
 
         this->collapseState.reset();
 
-        this->collapseState.addStep(0.0f, style["brls/animations/collapse"], EasingFunction::quadraticOut);
+        this->collapseState.addStep(0.0f, style["aurore/animations/collapse"], EasingFunction::quadraticOut);
 
         this->collapseState.setTickCallback([this]
             {
@@ -638,7 +638,7 @@ void View::expand(bool animated)
 
         this->collapseState.reset();
 
-        this->collapseState.addStep(1.0f, style["brls/animations/collapse"], EasingFunction::quadraticOut);
+        this->collapseState.addStep(1.0f, style["aurore/animations/collapse"], EasingFunction::quadraticOut);
 
         this->collapseState.setTickCallback([this]
             {
@@ -687,7 +687,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
 
     float padding      = this->highlightPadding;
     float cornerRadius = this->highlightCornerRadius;
-    float strokeWidth  = style["brls/highlight/stroke_width"];
+    float strokeWidth  = style["aurore/highlight/stroke_width"];
 
     float x      = this->getX() - padding - strokeWidth / 2;
     float y      = this->getY() - padding - strokeWidth / 2;
@@ -744,7 +744,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
         Time t       = (curTime - highlightShakeStart) / 10;
         Application::requestRedraw();
 
-        if (t >= style["brls/animations/highlight_shake"])
+        if (t >= style["aurore/animations/highlight_shake"])
         {
             this->highlightShaking = false;
         }
@@ -772,7 +772,7 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
     if (background)
     {
         // Background
-        NVGcolor highlightBackgroundColor = theme["brls/highlight/background"];
+        NVGcolor highlightBackgroundColor = theme["aurore/highlight/background"];
         nvgFillColor(vg, RGBAf(highlightBackgroundColor.r, highlightBackgroundColor.g, highlightBackgroundColor.b, this->highlightAlpha));
         nvgBeginPath(vg);
         nvgRoundedRect(vg, x, y, width, height, cornerRadius);
@@ -783,19 +783,19 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
 #ifdef SIMPLE_HIGHLIGHT
         // Border
         nvgBeginPath(vg);
-        nvgStrokeColor(vg, a(theme["brls/highlight/color1"]));
-        nvgStrokeWidth(vg, style["brls/highlight/stroke_width"]);
+        nvgStrokeColor(vg, a(theme["aurore/highlight/color1"]));
+        nvgStrokeWidth(vg, style["aurore/highlight/stroke_width"]);
         nvgRoundedRect(vg, x, y, width, height, cornerRadius);
         nvgStroke(vg);
 #else
-        float shadowOffset = style["brls/highlight/shadow_offset"];
+        float shadowOffset = style["aurore/highlight/shadow_offset"];
 
         // Shadow
         NVGpaint shadowPaint = nvgBoxGradient(vg,
-            x, y + style["brls/highlight/shadow_width"],
+            x, y + style["aurore/highlight/shadow_width"],
             width, height,
-            cornerRadius * 2, style["brls/highlight/shadow_feather"],
-            this->shadowColor(theme["brls/highlight/shadow"], style["brls/highlight/shadow_opacity"] * alpha), TRANSPARENT);
+            cornerRadius * 2, style["aurore/highlight/shadow_feather"],
+            this->shadowColor(theme["aurore/highlight/shadow"], style["aurore/highlight/shadow_opacity"] * alpha), TRANSPARENT);
 
         nvgBeginPath(vg);
         nvgRect(vg, x - shadowOffset, y - shadowOffset,
@@ -811,18 +811,18 @@ void View::drawHighlight(NVGcontext* vg, Theme theme, float alpha, Style style, 
 
         // The border pulses between the two highlight colours. (Since the
         // 2.0 rewrite both terms used color1, so it never pulsed.)
-        NVGcolor highlightColor1 = theme["brls/highlight/color1"];
-        NVGcolor highlightColor2 = theme["brls/highlight/color2"];
+        NVGcolor highlightColor1 = theme["aurore/highlight/color1"];
+        NVGcolor highlightColor2 = theme["aurore/highlight/color2"];
 
         NVGcolor pulsationColor = RGBAf((color * highlightColor1.r) + (1 - color) * highlightColor2.r,
             (color * highlightColor1.g) + (1 - color) * highlightColor2.g,
             (color * highlightColor1.b) + (1 - color) * highlightColor2.b,
             alpha);
 
-        NVGcolor borderColor = theme["brls/highlight/color2"];
+        NVGcolor borderColor = theme["aurore/highlight/color2"];
         borderColor.a        = 0.5f * alpha * this->getAlpha();
 
-        float strokeWidth = style["brls/highlight/stroke_width"];
+        float strokeWidth = style["aurore/highlight/stroke_width"];
 
         NVGpaint border1Paint = nvgRadialGradient(vg,
             x + gradientX * width, y + gradientY * height,
@@ -886,8 +886,8 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect f
     {
         case ViewBackground::SIDEBAR:
         {
-            float backdropHeight  = style["brls/sidebar/border_height"];
-            NVGcolor sidebarColor = theme["brls/sidebar/background"];
+            float backdropHeight  = style["aurore/sidebar/border_height"];
+            NVGcolor sidebarColor = theme["aurore/sidebar/background"];
 
             // Solid color
             nvgBeginPath(vg);
@@ -928,7 +928,7 @@ void View::drawBackground(NVGcontext* vg, FrameContext* ctx, Style style, Rect f
         }
         case ViewBackground::BACKDROP:
         {
-            nvgFillColor(vg, a(theme["brls/backdrop"]));
+            nvgFillColor(vg, a(theme["aurore/backdrop"]));
             nvgBeginPath(vg);
             nvgRect(vg, x, y, width, height);
             nvgFill(vg);
@@ -990,10 +990,10 @@ ActionIdentifier View::registerAction(const std::string& hintText, const Control
     return registerAction<ControllerButton, GamepadAction>(hintText, button, actionListener, hidden, allowRepeating, sound);
 }
 
-ActionIdentifier View::registerAction(const BrlsKeyCombination key, const ActionListener& actionListener, const bool allowRepeating)
+ActionIdentifier View::registerAction(const AuroreKeyCombination key, const ActionListener& actionListener, const bool allowRepeating)
 {
     Application::addToWatchedKeys(key);
-    return registerAction<BrlsKeyCode, KeyboardAction>("", key, actionListener, true, allowRepeating, SOUND_NONE);
+    return registerAction<AuroreKeyCode, KeyboardAction>("", key, actionListener, true, allowRepeating, SOUND_NONE);
 }
 
 void View::unregisterAction(ActionIdentifier identifier)
@@ -1002,7 +1002,7 @@ void View::unregisterAction(ActionIdentifier identifier)
     {
         if ((*it)->getType() == ACTION_KEYBOARD)
         {
-            Application::removeWatchedKeys(BrlsKeyCombination { (*it)->getButton() });
+            Application::removeWatchedKeys(AuroreKeyCombination { (*it)->getButton() });
         }
         this->actions.erase(it);
     }
@@ -1247,7 +1247,7 @@ void View::setMaxHeightPercentage(float percentage)
 
 void View::setMarginTop(float top)
 {
-    if (top == brls::View::AUTO)
+    if (top == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeTop);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeTop, top);
@@ -1257,7 +1257,7 @@ void View::setMarginTop(float top)
 
 void View::setMarginRight(float right)
 {
-    if (right == brls::View::AUTO)
+    if (right == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeRight);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeRight, right);
@@ -1277,7 +1277,7 @@ float View::getMarginLeft()
 
 void View::setMarginBottom(float bottom)
 {
-    if (bottom == brls::View::AUTO)
+    if (bottom == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeBottom);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeBottom, bottom);
@@ -1287,7 +1287,7 @@ void View::setMarginBottom(float bottom)
 
 void View::setMarginLeft(float left)
 {
-    if (left == brls::View::AUTO)
+    if (left == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeLeft);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeLeft, left);
@@ -1297,22 +1297,22 @@ void View::setMarginLeft(float left)
 
 void View::setMargins(float top, float right, float bottom, float left)
 {
-    if (top == brls::View::AUTO)
+    if (top == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeTop);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeTop, top);
 
-    if (right == brls::View::AUTO)
+    if (right == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeRight);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeRight, right);
 
-    if (bottom == brls::View::AUTO)
+    if (bottom == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeBottom);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeBottom, bottom);
 
-    if (left == brls::View::AUTO)
+    if (left == aurore::View::AUTO)
         YGNodeStyleSetMarginAuto(this->ygNode, YGEdgeLeft);
     else
         YGNodeStyleSetMargin(this->ygNode, YGEdgeLeft, left);
@@ -1550,7 +1550,7 @@ void View::onFocusGained()
     Style style = Application::getStyle();
 
     this->highlightAlpha.reset();
-    this->highlightAlpha.addStep(1.0f, style["brls/animations/highlight"], EasingFunction::quadraticOut);
+    this->highlightAlpha.addStep(1.0f, style["aurore/animations/highlight"], EasingFunction::quadraticOut);
     this->highlightAlpha.start();
 
     this->focusEvent.fire(this);
@@ -1577,7 +1577,7 @@ void View::onFocusLost()
     Style style = Application::getStyle();
 
     this->highlightAlpha.reset();
-    this->highlightAlpha.addStep(0.0f, style["brls/animations/highlight"], EasingFunction::quadraticOut);
+    this->highlightAlpha.addStep(0.0f, style["aurore/animations/highlight"], EasingFunction::quadraticOut);
     this->highlightAlpha.start();
 
     this->focusLostEvent.fire(this);
@@ -1617,7 +1617,7 @@ void View::show(std::function<void(void)> cb, bool animate, float animationDurat
         return;
     }
 
-    brls::Logger::debug("Showing {}", this->describe());
+    aurore::Logger::debug("Showing {}", this->describe());
 
     this->hidden = false;
 
@@ -1662,7 +1662,7 @@ void View::hide(std::function<void(void)> cb, bool animated, float animationDura
         return;
     }
 
-    brls::Logger::debug("Hiding {}", this->describe());
+    aurore::Logger::debug("Hiding {}", this->describe());
 
     this->hidden = true;
     this->fadeIn = false;
@@ -1694,7 +1694,7 @@ float View::getShowAnimationDuration(TransitionAnimation animation)
     if (animation == TransitionAnimation::SLIDE_LEFT || animation == TransitionAnimation::SLIDE_RIGHT)
         fatal("Slide animation is not supported on views");
 
-    return style["brls/animations/show"];
+    return style["aurore/animations/show"];
 }
 
 bool View::isHidden()
@@ -1785,7 +1785,7 @@ View::~View()
     {
         if (action->getType() == ACTION_KEYBOARD)
         {
-            Application::removeWatchedKeys(BrlsKeyCombination { action->getButton() });
+            Application::removeWatchedKeys(AuroreKeyCombination { action->getButton() });
         }
     }
 
@@ -1831,7 +1831,7 @@ std::string View::getFilePathXMLAttributeValue(std::string value)
 #ifdef USE_LIBROMFS
         return resPath;
 #else
-        return std::string(BRLS_RESOURCES) + resPath;
+        return std::string(AURORE_RESOURCES) + resPath;
 #endif
     }
 
@@ -2220,7 +2220,7 @@ View* View::createFromXMLResource(std::string name)
     View::currentXMLResource.clear();
     return view;
 #else
-    return View::createFromXMLFile(std::string(BRLS_RESOURCES) + "xml/" + name);
+    return View::createFromXMLFile(std::string(AURORE_RESOURCES) + "xml/" + name);
 #endif
 }
 
@@ -2272,7 +2272,7 @@ View* View::createFromXMLFile(std::string path)
     return view;
 }
 
-// Elements read inside one another, brls:View files included: a file that
+// Elements read inside one another, aurore:View files included: a file that
 // includes itself would recurse until the stack runs out
 static constexpr int MAX_XML_DEPTH = 64;
 static int xmlDepth                = 0;
@@ -2284,7 +2284,7 @@ namespace
         XMLDepthGuard()
         {
             if (xmlDepth >= MAX_XML_DEPTH)
-                fatal("XML nested more than " + std::to_string(MAX_XML_DEPTH) + " levels deep (a brls:View including itself?)");
+                fatal("XML nested more than " + std::to_string(MAX_XML_DEPTH) + " levels deep (a aurore:View including itself?)");
             xmlDepth++;
         }
         ~XMLDepthGuard() { xmlDepth--; }
@@ -2298,17 +2298,17 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
     if (!element)
         return nullptr;
 
-    std::string viewName = element->Name();
+    std::string viewName = canonicalXMLName(element->Name());
     ReadingXMLElement reading(element);
 
     // Instantiate the view
     View* view = nullptr;
 
-    // Special case where element name is brls:View: create from given XML file.
+    // Special case where element name is aurore:View: create from given XML file.
     // XML attributes are explicitely not passed down to the created view.
     // To create a custom view from XML that you can reuse in other XML files,
-    // make a class inheriting brls::Box and use the inflateFromXML* methods.
-    if (viewName == "brls:View")
+    // make a class inheriting aurore::Box and use the inflateFromXML* methods.
+    if (viewName == "aurore:View")
     {
         const tinyxml2::XMLAttribute* xmlAttribute = element->FindAttribute("xml");
 
@@ -2332,7 +2332,7 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
         }
         else
         {
-            fatalXML("brls:View XML tag must have an \"xml\" attribute");
+            fatalXML("aurore:View XML tag must have an \"xml\" attribute");
         }
     }
     // Otherwise look in the register
@@ -2450,7 +2450,7 @@ void View::registerCommonAttributes()
         { this->setShrink(value); });
 
     // Alignment
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "alignSelf", AlignSelf, this->setAlignSelf,
         {
             { "auto", AlignSelf::AUTO },
@@ -2539,7 +2539,7 @@ void View::registerCommonAttributes()
     this->registerPercentageXMLAttribute("positionLeft", [this](float value)
         { this->setPositionLeftPercentage(value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "positionType", PositionType, this->setPositionType,
         {
             { "relative", PositionType::RELATIVE },
@@ -2547,7 +2547,7 @@ void View::registerCommonAttributes()
             { "static", PositionType::STATIC },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "boxSizing", BoxSizing, this->setBoxSizing,
         {
             { "borderBox", BoxSizing::BORDER_BOX },
@@ -2592,7 +2592,7 @@ void View::registerCommonAttributes()
     this->registerFloatXMLAttribute("cornerBottomLeftRadius", [this](float value)
         { this->setCornerRadius(this->cornerRadii[0], this->cornerRadii[1], this->cornerRadii[2], value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "shadowType", ShadowType, this->setShadowType,
         {
             {
@@ -2610,7 +2610,7 @@ void View::registerCommonAttributes()
         });
 
     // Misc
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "visibility", Visibility, this->setVisibility,
         {
             { "visible", Visibility::VISIBLE },
@@ -2621,7 +2621,7 @@ void View::registerCommonAttributes()
     this->registerStringXMLAttribute("id", [this](std::string value)
         { this->setId(value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "background", ViewBackground, this->setBackground,
         {
             { "sidebar", ViewBackground::SIDEBAR },
@@ -3050,4 +3050,4 @@ void View::setParentActivity(Activity* activity)
     parentActivity = activity;
 }
 
-} // namespace brls
+} // namespace aurore

@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/platforms/psv/psv_video.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/platforms/psv/psv_video.hpp>
 
 #define NANOVG_GXM_IMPLEMENTATION
 #define NANOVG_GXM_UTILS_IMPLEMENTATION
 #include <nanovg_gxm.h>
 
-namespace brls
+namespace aurore
 {
 
 PsvVideoContext::PsvVideoContext()
@@ -51,7 +51,7 @@ PsvVideoContext::PsvVideoContext()
     this->nvgContext = nvgCreateGXM(window->context, window->shader_patcher, 0);
     if (!this->nvgContext)
     {
-        brls::fatal("gxm: unable to init nanovg");
+        aurore::fatal("gxm: unable to init nanovg");
     }
 
     Application::setWindowSize(DISPLAY_WIDTH, DISPLAY_HEIGHT);

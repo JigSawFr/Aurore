@@ -1,12 +1,12 @@
 // ui — the palette's colours by role, and the console's system font (see ui.hpp).
 // Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
 
-#include <borealis/cadran/util/text.hpp>
+#include <aurore/cadran/util/text.hpp>
 
 namespace ui
 {
@@ -23,19 +23,19 @@ namespace
         PlFontData data;
         if (R_FAILED(plGetSharedFontByType(&data, type)))
             return false;
-        if (!brls::Application::loadFontFromMemory(brls::FONT_CHINESE_SIMPLIFIED, data.address, data.size, false))
+        if (!aurore::Application::loadFontFromMemory(aurore::FONT_CHINESE_SIMPLIFIED, data.address, data.size, false))
             return false;
-        const int font = brls::Application::getFont(brls::FONT_CHINESE_SIMPLIFIED);
-        NVGcontext* vg = brls::Application::getNVGContext();
-        for (const std::string& other : { brls::FONT_REGULAR, brls::FONT_CHINESE_SIMPLIFIED_EXT, brls::FONT_CHINESE_TRADITIONAL,
-                 brls::FONT_KOREAN_REGULAR, brls::FONT_SWITCH_ICONS, brls::FONT_MATERIAL_ICONS,
-                 brls::FONT_EMOJI })
+        const int font = aurore::Application::getFont(aurore::FONT_CHINESE_SIMPLIFIED);
+        NVGcontext* vg = aurore::Application::getNVGContext();
+        for (const std::string& other : { aurore::FONT_REGULAR, aurore::FONT_CHINESE_SIMPLIFIED_EXT, aurore::FONT_CHINESE_TRADITIONAL,
+                 aurore::FONT_KOREAN_REGULAR, aurore::FONT_SWITCH_ICONS, aurore::FONT_MATERIAL_ICONS,
+                 aurore::FONT_EMOJI })
         {
-            const int id = brls::Application::getFont(other);
-            if (id != brls::FONT_INVALID && id != font)
+            const int id = aurore::Application::getFont(other);
+            if (id != aurore::FONT_INVALID && id != font)
                 nvgAddFallbackFontId(vg, font, id);
         }
-        if (also != brls::FONT_INVALID)
+        if (also != aurore::FONT_INVALID)
             nvgAddFallbackFontId(vg, font, also);
         return true;
     }
@@ -52,7 +52,7 @@ void use_font_for(const std::string& locale)
     // default font is looked up for each new label.
     // Traditional Chinese takes its own font: the Simplified one draws the
     // characters both share in their mainland forms.
-    static const int chinese        = brls::Application::getFont(brls::FONT_CHINESE_SIMPLIFIED); // as loaded
+    static const int chinese        = aurore::Application::getFont(aurore::FONT_CHINESE_SIMPLIFIED); // as loaded
     static PlSharedFontType current = PlSharedFontType_ChineseSimplified; // what the name holds now
     const bool traditional          = text::starts_with(locale, "zh-Hant") || text::starts_with(locale, "zh-TW")
         || text::starts_with(locale, "zh-HK");
@@ -61,7 +61,7 @@ void use_font_for(const std::string& locale)
                                                                    : PlSharedFontType_ChineseSimplified;
     if (want == current)
         return;
-    if (register_default(want, want == PlSharedFontType_ChineseSimplified ? brls::FONT_INVALID : chinese))
+    if (register_default(want, want == PlSharedFontType_ChineseSimplified ? aurore::FONT_INVALID : chinese))
         current = want;
 #else
     (void)locale;

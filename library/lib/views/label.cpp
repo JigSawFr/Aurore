@@ -17,14 +17,14 @@
 
 #include <yoga/Yoga.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/bidi.hpp>
-#include <borealis/core/font.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/label.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/bidi.hpp>
+#include <aurore/core/font.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/label.hpp>
 
-namespace brls
+namespace aurore
 {
 
 #define ELLIPSIS "\u2026"
@@ -216,7 +216,7 @@ static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode w
 void Label::setCursor(int cursor)
 {
     this->cursor       = cursor;
-    this->cursor_blink = brls::getCPUTimeUsec();
+    this->cursor_blink = aurore::getCPUTimeUsec();
 }
 
 Label::Label()
@@ -225,12 +225,12 @@ Label::Label()
 
     // Default attributes
     this->font        = Application::getDefaultFont();
-    this->fontSize    = style["brls/label/default_font_size"];
-    this->lineHeight  = style["brls/label/default_line_height"];
+    this->fontSize    = style["aurore/label/default_font_size"];
+    this->lineHeight  = style["aurore/label/default_line_height"];
     this->fontQuality = 1.0f;
-    this->setThemeColor("textColor", "brls/text");
+    this->setThemeColor("textColor", "aurore/text");
 
-    this->setHighlightPadding(style["brls/label/highlight_padding"]);
+    this->setHighlightPadding(style["aurore/label/highlight_padding"]);
 
     // Setup the custom measure function
     YGNodeSetMeasureFunc(this->ygNode, [](YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
@@ -275,7 +275,7 @@ Label::Label()
     this->registerFloatXMLAttribute("cursor", [this](float value)
         { this->setCursor(value); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "horizontalAlign", HorizontalAlign, this->setHorizontalAlign,
         {
             { "left", HorizontalAlign::LEFT },
@@ -283,7 +283,7 @@ Label::Label()
             { "right", HorizontalAlign::RIGHT },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "verticalAlign", VerticalAlign, this->setVerticalAlign,
         {
             { "baseline", VerticalAlign::BASELINE },
@@ -402,7 +402,7 @@ std::string Label::STConverter(const std::string& text)
     static bool skip = Application::getLocale() != LOCALE_ZH_HANT && Application::getLocale() != LOCALE_ZH_TW;
     if (skip || !OPENCC_ON)
         return text;
-    static opencc::SimpleConverter converter = opencc::SimpleConverter(std::string(BRLS_RESOURCES) + "opencc/s2t.json");
+    static opencc::SimpleConverter converter = opencc::SimpleConverter(std::string(AURORE_RESOURCES) + "opencc/s2t.json");
     return converter.Convert(text);
 #endif
     return text;
@@ -410,7 +410,7 @@ std::string Label::STConverter(const std::string& text)
 
 void Label::setText(const std::string& logicalText)
 {
-#ifdef BRLS_USE_FRIBIDI
+#ifdef AURORE_USE_FRIBIDI
     // Measured and drawn in display order
     const std::string text = bidiVisual(logicalText);
 #else
@@ -600,7 +600,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     // Edit cursor: blinking, or still with the motion reduced
     if (this->cursor >= (int)CursorPosition::END)
     {
-        auto blink = ((brls::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
+        auto blink = ((aurore::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
         bool still = Application::getReduceMotion();
         // The cursor blinks between frames nothing else asks for
         if (!still)
@@ -628,7 +628,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
         nvgIntersectScissor(vg, x, y, width, scissorHeight < height ? height : scissorHeight);
 
         float baseX   = x - this->scrollingAnimation;
-        float spacing = style["brls/label/scrolling_animation_spacing"];
+        float spacing = style["aurore/label/scrolling_animation_spacing"];
 
         nvgText(vg, baseX, y + height / 2.0f, this->fullText.c_str(), nullptr);
 
@@ -687,8 +687,8 @@ void Label::onScrollTimerFinished()
     Style style = Application::getStyle();
 
     // Step 2: actual scrolling animation
-    float target   = this->textWidth() + style["brls/label/scrolling_animation_spacing"];
-    float duration = target / style["brls/animations/label_scrolling_speed"];
+    float target   = this->textWidth() + style["aurore/label/scrolling_animation_spacing"];
+    float duration = target / style["aurore/animations/label_scrolling_speed"];
 
     this->scrollingAnimation.reset();
 
@@ -717,7 +717,7 @@ void Label::startScrollTimer()
 
     this->scrollingTimer.reset();
 
-    this->scrollingTimer.setDuration(style["brls/animations/label_scrolling_timer"]);
+    this->scrollingTimer.setDuration(style["aurore/animations/label_scrolling_timer"]);
 
     this->scrollingTimer.setEndCallback([this](bool finished)
         { this->onScrollTimerFinished(); });
@@ -897,4 +897,4 @@ View* Label::create()
     return new Label();
 }
 
-} // namespace brls
+} // namespace aurore

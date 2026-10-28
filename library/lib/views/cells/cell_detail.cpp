@@ -14,40 +14,40 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_detail.hpp"
+#include "aurore/views/cells/cell_detail.hpp"
 
-namespace brls
+namespace aurore
 {
 
 const std::string detailCellXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
-        height="@style/brls/sidebar/item_height"
+        height="@style/aurore/sidebar/item_height"
         focusable="true"
         paddingTop="12.5"
         paddingBottom="12.5"
-        paddingLeft="@style/brls/listitem/descriptionIndent"
-        paddingRight="@style/brls/listitem/descriptionIndent"
+        paddingLeft="@style/aurore/listitem/descriptionIndent"
+        paddingRight="@style/aurore/listitem/descriptionIndent"
         alignItems="center">
 
-        <brls:Label
-            id="brls/rediocell/title"
+        <aurore:Label
+            id="aurore/rediocell/title"
             width="auto"
             height="auto"
             grow="1"
-            fontSize="@style/brls/sidebar/item_font_size"
-            marginRight="@style/brls/listitem/descriptionIndent" />
+            fontSize="@style/aurore/sidebar/item_font_size"
+            marginRight="@style/aurore/listitem/descriptionIndent" />
 
-        <brls:Label
-            id="brls/rediocell/detail"
+        <aurore:Label
+            id="aurore/rediocell/detail"
             horizontalAlign="right"
             maxWidth="300"
             height="auto"
             shrink="0"
-            fontSize="@style/brls/sidebar/item_font_size"
-            textColor="@theme/brls/list/listItem_value_color"/>
+            fontSize="@style/aurore/sidebar/item_font_size"
+            textColor="@theme/aurore/list/listItem_value_color"/>
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 DetailCell::DetailCell()
@@ -118,4 +118,4 @@ std::string DetailCell::getDefaultAccessibilityValue()
     return value;
 }
 
-} // namespace brls
+} // namespace aurore

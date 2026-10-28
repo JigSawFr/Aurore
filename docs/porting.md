@@ -7,7 +7,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 - One `CMakeLists.txt` for every platform: `commonOption.cmake` and `toolchain.cmake` before `project()`, the platform picked with `-DAURORE_PLATFORM=…`. Make the program with `program_target(name sources)` rather than `add_executable`: on Android it is a shared library SDL's Java activity loads, on Windows a GUI program unless `AURORE_WIN32_TERMINAL`.
 - Add the platform's own source where it has one: `library/lib/platforms/switch/switch_wrapper.c` on the Switch (as [`template/`](../template/CMakeLists.txt) does), `library/lib/platforms/ps4/crashlog.c` on the PS4 for a backtrace when the app crashes.
 - The packaging is per platform: the `.nro` and its romfs, the `.vpk` and its LiveArea, the PS4's `.pkg`, the macOS and iOS bundles, the Android project. Copy each from the demo's `CMakeLists.txt` (and `android-project/`), with the app's name, IDs and icon.
-- Keep `main()` as it is everywhere: `init()`, `createWindow()`, a first activity, `while (mainLoop())`. Android and iOS start it through SDL: include `<SDL2/SDL_main.h>` before it there; UWP includes `<borealis/core/main.hpp>` after it. The demo's `demo/src/main.cpp` does both:
+- Keep `main()` as it is everywhere: `init()`, `createWindow()`, a first activity, `while (mainLoop())`. Android and iOS start it through SDL: include `<SDL2/SDL_main.h>` before it there; UWP includes `<aurore/core/main.hpp>` after it. The demo's `demo/src/main.cpp` does both:
 
   ```cpp
   #if defined(ANDROID) || defined(IOS)
@@ -15,7 +15,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
   #endif
   // … int main(int argc, char* argv[]) { … } …
   #ifdef __WINRT__
-  #include <borealis/core/main.hpp>
+  #include <aurore/core/main.hpp>
   #endif
   ```
 
@@ -23,7 +23,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 
 ## Resources
 
-- Name every resource as `@res/…` in XML and `BRLS_ASSET("…")` in code: Aurore turns it into the right place on each platform (a file next to the program, the romfs, the package, the program itself with libromfs). A path relative to the working directory works on the desktop only.
+- Name every resource as `@res/…` in XML and `AURORE_ASSET("…")` in code: Aurore turns it into the right place on each platform (a file next to the program, the romfs, the package, the program itself with libromfs). A path relative to the working directory works on the desktop only.
 - Android and iOS always build the resources in (libromfs): run `./build_libromfs_generator.sh` before the first build, and remember that a deleted file may need CMake to run again.
 - Files the app writes (its settings, a cache) are not resources: each platform has its own place for them (the SD card on the Switch, the user's folders on a desktop, the app's sandbox on a phone), and Aurore does not pick one.
 - On the Switch, the system's shared fonts replace the text and button fonts, which the demo leaves out of its romfs; elsewhere the free fonts in `resources/font/` are used, and Chinese, Japanese and Korean come from the system ([fonts.md](fonts.md)). A browser has no system font at all.
@@ -58,7 +58,7 @@ When something is a platform's own (a Switch service, an Android intent), keep i
 
 ## Threads and speed
 
-- The UI belongs to the main thread on every platform ([architecture.md](architecture.md#threads)): slow work goes to `brls::async`, its result back with `brls::sync`. The Vita and the PS4 use pthreads; `-DAURORE_STD_THREAD=ON` uses `std::thread` where pthreads are missing.
+- The UI belongs to the main thread on every platform ([architecture.md](architecture.md#threads)): slow work goes to `aurore::async`, its result back with `aurore::sync`. The Vita and the PS4 use pthreads; `-DAURORE_STD_THREAD=ON` uses `std::thread` where pthreads are missing.
 - The consoles are slower than a desktop: long lists in a `RecyclerFrame` or `RecyclingGrid`, pictures no larger than shown (Aurore refuses those over 4096×4096), `setImageFromFileAsync` for covers. `-DAURORE_SIMPLE_HIGHLIGHT=ON` and `Application::setRedrawOnDemand(true)` save frames on a Vita or on a battery.
 - Quitting differs: the Switch's apps leave through the Home menu or `+` (`setGlobalQuit`), a desktop through its window, a phone never quits on its own.
 

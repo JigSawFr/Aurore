@@ -1,6 +1,6 @@
 // Host tests for cadran/ui/cadran_text.cpp, translated by Cadran's real
 // catalog (resources/i18n/<lang>/cadran.json) through ui/tr.hpp's stand-in
-// for borealis (catalog.hpp): a dialog's table marked and read back, a week's
+// for Aurore (catalog.hpp): a dialog's table marked and read back, a week's
 // identical lines as one (and a short table left alone), and a failure's
 // title, reason, code and report, in English and French, with or without
 // each part.
@@ -10,8 +10,8 @@
 #include <vector>
 #include "check.h"
 
-#include <borealis/cadran/ui/cadran_text.hpp>
-#include <borealis/cadran/ui/tr.hpp>
+#include <aurore/cadran/ui/cadran_text.hpp>
+#include <aurore/cadran/ui/tr.hpp>
 
 #include "catalog.hpp"
 
@@ -56,12 +56,12 @@ static void test_failure()
     cadran_text::Failure f = failure("Could not unlock the settings", "refused by the service", 0xC88E, false);
     CHECK(f.title == "Could not unlock the settings");
     CHECK(f.reason == "Refused by the service");
-    CHECK(f.code == brls::getStr("cadran/error/code", "0x0000C88E"));
+    CHECK(f.code == aurore::getStr("cadran/error/code", "0x0000C88E"));
     CHECK(f.report);
 
     // No hint known: the code alone.
     f = failure("Could not save", "", 0x1234, false);
-    CHECK(f.title == "Could not save" && f.reason.empty() && f.code == brls::getStr("cadran/error/code", "0x00001234"));
+    CHECK(f.title == "Could not save" && f.reason.empty() && f.code == aurore::getStr("cadran/error/code", "0x00001234"));
 
     // One of the app's own results: its words, no code nor report.
     f = failure("", "The SD card is full.", 0x5678, true);
@@ -77,7 +77,7 @@ static void test_french()
     REQUIRE(catalog::load("fr"));
     const cadran_text::Failure f = cadran_text::failure("Impossible de d\u00E9verrouiller", "refus\u00E9", 0xC88E, false);
     CHECK(f.title == "Impossible de d\u00E9verrouiller" && f.reason == "Refus\u00E9" && f.report);
-    CHECK(f.code == brls::getStr("cadran/error/code", "0x0000C88E"));
+    CHECK(f.code == aurore::getStr("cadran/error/code", "0x0000C88E"));
     CHECK(f.code.find("0x0000C88E") != std::string::npos);
 }
 

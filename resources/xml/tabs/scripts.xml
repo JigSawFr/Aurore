@@ -1,30 +1,30 @@
 <!-- Emoji and other scripts. Colour emoji need USE_FREETYPE and a colour
      emoji font (FontLoader::USER_EMOJI_PATH, or the system's on desktop);
      Arabic and Hebrew in reading order need USE_FRIBIDI. -->
-<brls:Box
+<aurore:Box
     width="auto"
     height="auto">
 
-    <brls:ScrollingFrame
+    <aurore:ScrollingFrame
         width="auto"
         height="auto"
         grow="1.0" >
 
-        <brls:Box
+        <aurore:Box
             width="auto"
             height="auto"
             axis="column"
-            paddingLeft="@style/brls/tab_frame/content_padding_sides"
-            paddingRight="@style/brls/tab_frame/content_padding_sides"
-            paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
-            paddingBottom="@style/brls/tab_frame/content_padding_top_bottom">
+            paddingLeft="@style/aurore/tab_frame/content_padding_sides"
+            paddingRight="@style/aurore/tab_frame/content_padding_sides"
+            paddingTop="@style/aurore/tab_frame/content_padding_top_bottom"
+            paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom">
 
-            <brls:Header
+            <aurore:Header
                 width="auto"
                 height="auto"
                 title="@i18n/demo/scripts/emoji"
                 marginBottom="20px" />
-            <brls:Box
+            <aurore:Box
                 width="auto"
                 height="auto"
                 axis="column"
@@ -34,31 +34,31 @@
                 paddingLeft="10"
                 paddingRight="10"
                 marginBottom="30px">
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     fontSize="36"
                     text="🚀 🎮 ✅ ⭐ 😀 🎉 🌍 ❤️ 👍"
                     marginBottom="20px" />
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="Inline with text: build passed ✅, release 🚀 shipped, 3 games 🎮 added."
                     marginBottom="20px" />
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     fontSize="16"
-                    textColor="@theme/brls/text_disabled"
+                    textColor="@theme/aurore/text_disabled"
                     text="Small and faded: 🍕 🐱 🌈 🔒 📦" />
-            </brls:Box>
+            </aurore:Box>
 
-            <brls:Header
+            <aurore:Header
                 width="auto"
                 height="auto"
                 title="@i18n/demo/scripts/scripts"
                 marginBottom="20px" />
-            <brls:Box
+            <aurore:Box
                 width="auto"
                 height="auto"
                 axis="column"
@@ -68,34 +68,34 @@
                 paddingLeft="10"
                 paddingRight="10"
                 marginBottom="30px">
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="Latin: Ça déménage à Zürich, ñandú, łódź"
                     marginBottom="12px" />
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="Greek and Cyrillic: Καλημέρα κόσμε · Привет, мир"
                     marginBottom="12px" />
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="CJK: 日本語のテキスト · 简体中文 · 한국어"
                     marginBottom="12px" />
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="Arabic: مرحبا بالعالم"
                     marginBottom="12px" />
-                <brls:Label
+                <aurore:Label
                     width="auto"
                     height="auto"
                     text="Hebrew: שלום עולם (1)" />
-            </brls:Box>
+            </aurore:Box>
 
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:ScrollingFrame>
+    </aurore:ScrollingFrame>
 
-</brls:Box>
+</aurore:Box>

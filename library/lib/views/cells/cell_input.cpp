@@ -14,18 +14,18 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_input.hpp"
+#include "aurore/views/cells/cell_input.hpp"
 
-#include "borealis/views/dropdown.hpp"
+#include "aurore/views/dropdown.hpp"
 
 #include <algorithm>
 
-namespace brls
+namespace aurore
 {
 
 InputCell::InputCell()
 {
-    detail->setThemeColor("textColor", "brls/list/listItem_value_color");
+    detail->setThemeColor("textColor", "aurore/list/listItem_value_color");
 
     this->registerClickAction([this](View* view)
         {
@@ -79,7 +79,7 @@ void InputCell::updateUI()
     if (this->value.empty())
     {
         this->detail->setText(placeholder);
-        this->detail->setThemeColor("textColor", "brls/text_secondary");
+        this->detail->setThemeColor("textColor", "aurore/text_secondary");
     }
     else
     {
@@ -99,7 +99,7 @@ void InputCell::updateUI()
         {
             this->detail->setText(value);
         }
-        this->detail->setThemeColor("textColor", "brls/list/listItem_value_color");
+        this->detail->setThemeColor("textColor", "aurore/list/listItem_value_color");
     }
 }
 
@@ -110,7 +110,7 @@ View* InputCell::create()
 
 InputNumericCell::InputNumericCell()
 {
-    detail->setThemeColor("textColor", "brls/list/listItem_value_color");
+    detail->setThemeColor("textColor", "aurore/list/listItem_value_color");
 
     this->registerClickAction([this](View* view)
         {
@@ -143,7 +143,7 @@ void InputNumericCell::setValue(long value)
 void InputNumericCell::updateUI()
 {
     this->detail->setText(std::to_string(value));
-    this->detail->setThemeColor("textColor", "brls/list/listItem_value_color");
+    this->detail->setThemeColor("textColor", "aurore/list/listItem_value_color");
 }
 
 View* InputNumericCell::create()
@@ -151,4 +151,4 @@ View* InputNumericCell::create()
     return new InputNumericCell();
 }
 
-} // namespace brls
+} // namespace aurore

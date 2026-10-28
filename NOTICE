@@ -12,11 +12,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Cadran (library/include/borealis/cadran.hpp, library/include/borealis/cadran,
+Cadran (library/include/aurore/cadran.hpp, library/include/aurore/cadran,
 library/lib/cadran, and the resources it reads: resources/i18n/*/cadran.json,
 resources/img/emoji, resources/font/sora_bold_latin.ttf), the inspector and
-hot reload of the core (library/include/borealis/core/inspector.hpp,
-library/lib/core/inspector.cpp, library/include/borealis/core/hot_reload.hpp,
+hot reload of the core (library/include/aurore/core/inspector.hpp,
+library/lib/core/inspector.cpp, library/include/aurore/core/hot_reload.hpp,
 library/lib/core/hot_reload.cpp) and the demo's Cadran tab
 (demo/include/tab/cadran_tab.hpp, demo/src/tab/cadran_tab.cpp) are
 Copyright 2026 JigSawFr, and Taylor for the files that say so,
@@ -25,7 +25,7 @@ licensed under the GNU General Public License, version 3 or later
 files are under the Apache License, Version 2.0, above.
 
 Also bundled, each under its own licence: the libraries in library/lib/extern
-and library/include/borealis/extern (nanovg, fontstash, stb, Yoga, {fmt},
+and library/include/aurore/extern (nanovg, fontstash, stb, Yoga, {fmt},
 TinyXML-2, JSON for Modern C++, Tweeny, libromfs, GLFW, SDL, libretro-common,
 glad, QR Code generator), the fonts Inter, PromptFont (as Aurore Text and
 Aurore Buttons) and Sora (resources/font, SIL Open Font License 1.1), Material
@@ -35,7 +35,7 @@ resources/THIRD_PARTY_NOTICES.md lists them with their versions, copyrights
 and licences, and is part of the resources of every program built with
 Aurore.
 
-The recycled grid and horizontal recycler (library/include/borealis/views/
+The recycled grid and horizontal recycler (library/include/aurore/views/
 recycling_grid.hpp, library/lib/views/recycling_grid.cpp) are adapted from
 Switchfin's recycling_grid and h_recycling (https://github.com/dragonflylee/
 switchfin), Copyright 2022 xfangfang, Copyright 2023 dragonflylee and the

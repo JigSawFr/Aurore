@@ -53,6 +53,6 @@ cmake --build build-switch --target my_app.nro
 
 ## Where to go next
 
-- A new screen: an XML file in `resources/xml/`, an `Activity` with `CONTENT_FROM_XML_RES`, `brls::Application::pushActivity()`.
-- A view of your own: a `brls::Box` subclass, `brls::Application::registerXMLView("MyView", MyView::create)` before the XML that uses it.
+- A new screen: an XML file in `resources/xml/`, an `Activity` with `CONTENT_FROM_XML_RES`, `aurore::Application::pushActivity()`.
+- A view of your own: a `aurore::Box` subclass, `aurore::Application::registerXMLView("MyView", MyView::create)` before the XML that uses it.
 - Aurore's demo (`demo/` in Aurore) shows every view; [docs/cadran.md](../docs/cadran.md) what Cadran asks of an app and gives it; [docs/components.md](../docs/components.md) the grid, the context menu and the icon button.

@@ -18,75 +18,75 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
-#include <borealis/views/bottom_bar.hpp>
-#include <borealis/views/hint.hpp>
+#include <aurore/views/bottom_bar.hpp>
+#include <aurore/views/hint.hpp>
 
 #ifdef PS4
-#include <borealis/platforms/ps4/ps4_sysmodule.hpp>
+#include <aurore/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 const std::string bottomBarXML = R"xml(
 
-<brls:Box
+<aurore:Box
     width="auto"
-    height="@style/brls/applet_frame/footer_height"
+    height="@style/aurore/applet_frame/footer_height"
     axis="column">
-    <brls:Box
+    <aurore:Box
         width="auto"
-        height="@style/brls/applet_frame/footer_height"
-        marginLeft="@style/brls/hints/footer_margin_sides"
-        marginRight="@style/brls/hints/footer_margin_sides"
-        paddingLeft="@style/brls/hints/footer_padding_sides"
-        paddingRight="@style/brls/hints/footer_padding_sides"
-        lineColor="@theme/brls/applet_frame/separator"
+        height="@style/aurore/applet_frame/footer_height"
+        marginLeft="@style/aurore/hints/footer_margin_sides"
+        marginRight="@style/aurore/hints/footer_margin_sides"
+        paddingLeft="@style/aurore/hints/footer_padding_sides"
+        paddingRight="@style/aurore/hints/footer_padding_sides"
+        lineColor="@theme/aurore/applet_frame/separator"
         lineTop="1px"
         alignItems="stretch">
-        <brls:Box
+        <aurore:Box
             width="auto"
-            height="@style/brls/applet_frame/footer_height"
+            height="@style/aurore/applet_frame/footer_height"
             axis="row"
             grow="1"
             direction="rightToLeft"
             justifyContent="spaceBetween"
-            paddingTop="@style/brls/hints/footer_padding_top_bottom"
-            paddingBottom="@style/brls/hints/footer_padding_top_bottom" >
+            paddingTop="@style/aurore/hints/footer_padding_top_bottom"
+            paddingBottom="@style/aurore/hints/footer_padding_top_bottom" >
 
-            <brls:Hints
+            <aurore:Hints
                 width="auto"
                 height="auto"/>
 
-            <brls:Box
+            <aurore:Box
                 width="auto"
                 height="auto"
                 axis="row"
                 alignItems="center"
                 direction="leftToRight" >
 
-                <brls:Battery
-                    id="brls/battery"
+                <aurore:Battery
+                    id="aurore/battery"
                     marginRight="21"
                     marginBottom="5"/>
 
-                <brls:Wireless
-                    id="brls/wireless"
+                <aurore:Wireless
+                    id="aurore/wireless"
                     marginRight="21"
                     marginBottom="5"/>
 
-                <brls:Label
-                    id="brls/hints/time"
+                <aurore:Label
+                    id="aurore/hints/time"
                     width="auto"
                     height="auto"
                     verticalAlign="center"
                     fontSize="21.5" />
 
-            </brls:Box>
+            </aurore:Box>
 
-        </brls:Box>
-    </brls:Box>
-</brls:Box>
+        </aurore:Box>
+    </aurore:Box>
+</aurore:Box>
 )xml";
 
 BottomBar::BottomBar()
@@ -141,4 +141,4 @@ View* BottomBar::create()
     return new BottomBar();
 }
 
-} // namespace brls
+} // namespace aurore

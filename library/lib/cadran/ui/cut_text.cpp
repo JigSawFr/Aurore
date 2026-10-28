@@ -1,20 +1,20 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/cut_text.hpp>
+#include <aurore/cadran/ui/cut_text.hpp>
 
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <set>
 #include <string>
-#include <borealis.hpp>
+#include <aurore.hpp>
 #if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
 #include <fcntl.h>
 #include <unistd.h>
 #endif
 
-#include <borealis/cadran/ui/hooks.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/ui.hpp>
+#include <aurore/cadran/ui/hooks.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/ui.hpp>
 
 namespace cut_text
 {
@@ -26,11 +26,11 @@ namespace
     std::set<std::string> s_seen;
 
     // The labels shown under `view` that are cut; a hidden box hides its own.
-    void walk(brls::View* view, const std::string& screen, FILE* out)
+    void walk(aurore::View* view, const std::string& screen, FILE* out)
     {
-        if (!view || view->getVisibility() != brls::Visibility::VISIBLE)
+        if (!view || view->getVisibility() != aurore::Visibility::VISIBLE)
             return;
-        if (auto* label = dynamic_cast<brls::Label*>(view))
+        if (auto* label = dynamic_cast<aurore::Label*>(view))
         {
             if (label->getWidth() > 0 && label->isTruncated())
             {
@@ -43,8 +43,8 @@ namespace
             }
             return;
         }
-        if (auto* box = dynamic_cast<brls::Box*>(view))
-            for (brls::View* child : box->getChildren())
+        if (auto* box = dynamic_cast<aurore::Box*>(view))
+            for (aurore::View* child : box->getChildren())
                 walk(child, screen, out);
     }
 } // namespace
@@ -76,14 +76,14 @@ void sample()
     if (now - last < std::chrono::seconds(1))
         return;
     last              = now;
-    const auto& stack = brls::Application::getActivitiesStack();
+    const auto& stack = aurore::Application::getActivitiesStack();
     if (stack.empty())
         return;
     // A dialog or a picker keeps the name of the screen it opened over, with
     // what it is after it ("dashboard › dialog").
-    brls::View* top    = stack.back()->getContentView();
+    aurore::View* top  = stack.back()->getContentView();
     std::string screen = ui::hooks::get().shown_screen ? ui::hooks::get().shown_screen() : std::string();
-    if (dynamic_cast<brls::Dialog*>(top))
+    if (dynamic_cast<aurore::Dialog*>(top))
         screen += " › dialog";
     else if (ui::is_sheet(top))
         screen += " › picker";

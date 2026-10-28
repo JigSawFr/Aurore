@@ -1,5 +1,5 @@
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/driver/d3d11.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/driver/d3d11.hpp>
 #define NANOVG_D3D11_IMPLEMENTATION
 #include <nanovg_d3d11.h>
 #include <versionhelpers.h>
@@ -17,7 +17,7 @@
 #include <winrt/Windows.Graphics.Display.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 static const int SwapChainBufferCount    = 2;

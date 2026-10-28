@@ -44,7 +44,7 @@ def submodule_commit(path):
 
 def vendored():
     fmt = define(LIBRARY / "lib/extern/fmt/include/fmt/base.h", "FMT_VERSION")
-    xml = LIBRARY / "include/borealis/extern/tinyxml2/tinyxml2.h"
+    xml = LIBRARY / "include/aurore/extern/tinyxml2/tinyxml2.h"
     sdl = LIBRARY / "lib/extern/SDL/include/SDL_version.h"
     return {
         "fmt": f"{fmt // 10000}.{fmt // 100 % 100}.{fmt % 100}",

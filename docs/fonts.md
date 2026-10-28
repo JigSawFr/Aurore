@@ -22,7 +22,7 @@ The buttons come before the other fallbacks: their code points are in the privat
 
 ### The buttons
 
-`aurore_buttons.ttf` has the glyphs at the code points of the Switch's shared font, so that a string written for the console, `brls::Hint::getKeyIcon()` or `" OK"`, draws the same button everywhere:
+`aurore_buttons.ttf` has the glyphs at the code points of the Switch's shared font, so that a string written for the console, `aurore::Hint::getKeyIcon()` or `" OK"`, draws the same button everywhere:
 
 | Code point | Button | Code point | Button |
 |---|---|---|---|

@@ -16,16 +16,16 @@
 */
 
 #include <mutex>
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/sdl/sdl_input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/sdl/sdl_input.hpp>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #endif
 
 #include <algorithm>
 
-namespace brls
+namespace aurore
 {
 
 #define SDL_GAMEPAD_BUTTON_NONE SIZE_MAX
@@ -40,268 +40,268 @@ static float normalizeSdlAxis(Sint16 axis)
 
 /// HidKeyboardScancode
 /// Uses the same key codes as GLFW
-static const BrlsKeyboardScancode sdlToBrlsKeyboardScancode(SDL_Scancode scancode)
+static const AuroreKeyboardScancode sdlToAuroreKeyboardScancode(SDL_Scancode scancode)
 {
     if (scancode == SDL_SCANCODE_UNKNOWN)
-        return BRLS_KBD_KEY_UNKNOWN;
+        return AURORE_KBD_KEY_UNKNOWN;
 
     // 1 - 9
     if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_9)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_1 + scancode - SDL_SCANCODE_1);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_1 + scancode - SDL_SCANCODE_1);
 
     // KP1 - KP9
     if (scancode >= SDL_SCANCODE_KP_1 && scancode <= SDL_SCANCODE_KP_9)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_KP_1 + scancode - SDL_SCANCODE_KP_1);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_KP_1 + scancode - SDL_SCANCODE_KP_1);
 
     // A - Z
     if (scancode >= SDL_SCANCODE_A && scancode <= SDL_SCANCODE_Z)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_A + scancode - SDL_SCANCODE_A);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_A + scancode - SDL_SCANCODE_A);
 
     // F1 - F12
     if (scancode >= SDL_SCANCODE_F1 && scancode <= SDL_SCANCODE_F12)
-        return (BrlsKeyboardScancode)(BRLS_KBD_KEY_F1 + scancode - SDL_SCANCODE_F1);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_F1 + scancode - SDL_SCANCODE_F1);
 
     switch (scancode)
     {
         case SDL_SCANCODE_UNKNOWN:
-            return BRLS_KBD_KEY_UNKNOWN;
+            return AURORE_KBD_KEY_UNKNOWN;
 
             /* Printable keys */
         case SDL_SCANCODE_SPACE:
-            return BRLS_KBD_KEY_SPACE;
+            return AURORE_KBD_KEY_SPACE;
         case SDL_SCANCODE_APOSTROPHE:
-            return BRLS_KBD_KEY_APOSTROPHE;
+            return AURORE_KBD_KEY_APOSTROPHE;
         case SDL_SCANCODE_COMMA:
-            return BRLS_KBD_KEY_COMMA;
+            return AURORE_KBD_KEY_COMMA;
         case SDL_SCANCODE_MINUS:
-            return BRLS_KBD_KEY_MINUS;
+            return AURORE_KBD_KEY_MINUS;
         case SDL_SCANCODE_PERIOD:
-            return BRLS_KBD_KEY_PERIOD;
+            return AURORE_KBD_KEY_PERIOD;
         case SDL_SCANCODE_SLASH:
-            return BRLS_KBD_KEY_SLASH;
+            return AURORE_KBD_KEY_SLASH;
         case SDL_SCANCODE_0:
-            return BRLS_KBD_KEY_0;
+            return AURORE_KBD_KEY_0;
         case SDL_SCANCODE_SEMICOLON:
-            return BRLS_KBD_KEY_SEMICOLON;
+            return AURORE_KBD_KEY_SEMICOLON;
         case SDL_SCANCODE_EQUALS:
-            return BRLS_KBD_KEY_EQUAL;
+            return AURORE_KBD_KEY_EQUAL;
         case SDL_SCANCODE_LEFTBRACKET:
-            return BRLS_KBD_KEY_LEFT_BRACKET;
+            return AURORE_KBD_KEY_LEFT_BRACKET;
         case SDL_SCANCODE_BACKSLASH:
-            return BRLS_KBD_KEY_BACKSLASH;
+            return AURORE_KBD_KEY_BACKSLASH;
         case SDL_SCANCODE_RIGHTBRACKET:
-            return BRLS_KBD_KEY_RIGHT_BRACKET;
+            return AURORE_KBD_KEY_RIGHT_BRACKET;
         case SDL_SCANCODE_GRAVE:
-            return BRLS_KBD_KEY_GRAVE_ACCENT;
+            return AURORE_KBD_KEY_GRAVE_ACCENT;
         case SDL_SCANCODE_INTERNATIONAL1:
-            return BRLS_KBD_KEY_WORLD_1;
+            return AURORE_KBD_KEY_WORLD_1;
 
             /* Function keys */
         case SDL_SCANCODE_ESCAPE:
-            return BRLS_KBD_KEY_ESCAPE;
+            return AURORE_KBD_KEY_ESCAPE;
         case SDL_SCANCODE_RETURN:
-            return BRLS_KBD_KEY_ENTER;
+            return AURORE_KBD_KEY_ENTER;
         case SDL_SCANCODE_TAB:
-            return BRLS_KBD_KEY_TAB;
+            return AURORE_KBD_KEY_TAB;
         case SDL_SCANCODE_BACKSPACE:
-            return BRLS_KBD_KEY_BACKSPACE;
+            return AURORE_KBD_KEY_BACKSPACE;
         case SDL_SCANCODE_INSERT:
-            return BRLS_KBD_KEY_INSERT;
+            return AURORE_KBD_KEY_INSERT;
         case SDL_SCANCODE_DELETE:
-            return BRLS_KBD_KEY_DELETE;
+            return AURORE_KBD_KEY_DELETE;
         case SDL_SCANCODE_RIGHT:
-            return BRLS_KBD_KEY_RIGHT;
+            return AURORE_KBD_KEY_RIGHT;
         case SDL_SCANCODE_LEFT:
-            return BRLS_KBD_KEY_LEFT;
+            return AURORE_KBD_KEY_LEFT;
         case SDL_SCANCODE_DOWN:
-            return BRLS_KBD_KEY_DOWN;
+            return AURORE_KBD_KEY_DOWN;
         case SDL_SCANCODE_UP:
-            return BRLS_KBD_KEY_UP;
+            return AURORE_KBD_KEY_UP;
         case SDL_SCANCODE_PAGEUP:
-            return BRLS_KBD_KEY_PAGE_UP;
+            return AURORE_KBD_KEY_PAGE_UP;
         case SDL_SCANCODE_PAGEDOWN:
-            return BRLS_KBD_KEY_PAGE_DOWN;
+            return AURORE_KBD_KEY_PAGE_DOWN;
         case SDL_SCANCODE_HOME:
-            return BRLS_KBD_KEY_HOME;
+            return AURORE_KBD_KEY_HOME;
         case SDL_SCANCODE_END:
-            return BRLS_KBD_KEY_END;
+            return AURORE_KBD_KEY_END;
         case SDL_SCANCODE_CAPSLOCK:
-            return BRLS_KBD_KEY_CAPS_LOCK;
+            return AURORE_KBD_KEY_CAPS_LOCK;
         case SDL_SCANCODE_SCROLLLOCK:
-            return BRLS_KBD_KEY_SCROLL_LOCK;
+            return AURORE_KBD_KEY_SCROLL_LOCK;
         case SDL_SCANCODE_NUMLOCKCLEAR:
-            return BRLS_KBD_KEY_NUM_LOCK;
+            return AURORE_KBD_KEY_NUM_LOCK;
         case SDL_SCANCODE_PRINTSCREEN:
-            return BRLS_KBD_KEY_PRINT_SCREEN;
+            return AURORE_KBD_KEY_PRINT_SCREEN;
         case SDL_SCANCODE_PAUSE:
-            return BRLS_KBD_KEY_PAUSE;
+            return AURORE_KBD_KEY_PAUSE;
         case SDL_SCANCODE_KP_0:
-            return BRLS_KBD_KEY_KP_0;
+            return AURORE_KBD_KEY_KP_0;
         case SDL_SCANCODE_KP_DECIMAL:
-            return BRLS_KBD_KEY_KP_DECIMAL;
+            return AURORE_KBD_KEY_KP_DECIMAL;
         case SDL_SCANCODE_KP_DIVIDE:
-            return BRLS_KBD_KEY_KP_DIVIDE;
+            return AURORE_KBD_KEY_KP_DIVIDE;
         case SDL_SCANCODE_KP_MULTIPLY:
-            return BRLS_KBD_KEY_KP_MULTIPLY;
+            return AURORE_KBD_KEY_KP_MULTIPLY;
         case SDL_SCANCODE_KP_MINUS:
-            return BRLS_KBD_KEY_KP_SUBTRACT;
+            return AURORE_KBD_KEY_KP_SUBTRACT;
         case SDL_SCANCODE_KP_PLUS:
-            return BRLS_KBD_KEY_KP_ADD;
+            return AURORE_KBD_KEY_KP_ADD;
         case SDL_SCANCODE_KP_ENTER:
-            return BRLS_KBD_KEY_KP_ENTER;
+            return AURORE_KBD_KEY_KP_ENTER;
         case SDL_SCANCODE_KP_EQUALS:
-            return BRLS_KBD_KEY_KP_EQUAL;
+            return AURORE_KBD_KEY_KP_EQUAL;
         case SDL_SCANCODE_LSHIFT:
-            return BRLS_KBD_KEY_LEFT_SHIFT;
+            return AURORE_KBD_KEY_LEFT_SHIFT;
         case SDL_SCANCODE_LCTRL:
-            return BRLS_KBD_KEY_LEFT_CONTROL;
+            return AURORE_KBD_KEY_LEFT_CONTROL;
         case SDL_SCANCODE_LALT:
-            return BRLS_KBD_KEY_LEFT_ALT;
+            return AURORE_KBD_KEY_LEFT_ALT;
         case SDL_SCANCODE_LGUI:
-            return BRLS_KBD_KEY_LEFT_SUPER;
+            return AURORE_KBD_KEY_LEFT_SUPER;
         case SDL_SCANCODE_RSHIFT:
-            return BRLS_KBD_KEY_RIGHT_SHIFT;
+            return AURORE_KBD_KEY_RIGHT_SHIFT;
         case SDL_SCANCODE_RCTRL:
-            return BRLS_KBD_KEY_RIGHT_CONTROL;
+            return AURORE_KBD_KEY_RIGHT_CONTROL;
         case SDL_SCANCODE_RALT:
-            return BRLS_KBD_KEY_RIGHT_ALT;
+            return AURORE_KBD_KEY_RIGHT_ALT;
         case SDL_SCANCODE_RGUI:
-            return BRLS_KBD_KEY_RIGHT_SUPER;
+            return AURORE_KBD_KEY_RIGHT_SUPER;
         case SDL_SCANCODE_MENU:
-            return BRLS_KBD_KEY_MENU;
+            return AURORE_KBD_KEY_MENU;
         default:
-            return BRLS_KBD_KEY_UNKNOWN;
+            return AURORE_KBD_KEY_UNKNOWN;
     }
 }
 
-static const SDL_Scancode brlsToSdlKeyboardScancode(BrlsKeyboardScancode scancode)
+static const SDL_Scancode auroreToSdlKeyboardScancode(AuroreKeyboardScancode scancode)
 {
-    if (scancode == BRLS_KBD_KEY_UNKNOWN)
+    if (scancode == AURORE_KBD_KEY_UNKNOWN)
         return SDL_SCANCODE_UNKNOWN;
 
     // 1 - 9
-    if (scancode >= BRLS_KBD_KEY_1 && scancode <= BRLS_KBD_KEY_9)
-        return (SDL_Scancode)(SDL_SCANCODE_1 + scancode - BRLS_KBD_KEY_1);
+    if (scancode >= AURORE_KBD_KEY_1 && scancode <= AURORE_KBD_KEY_9)
+        return (SDL_Scancode)(SDL_SCANCODE_1 + scancode - AURORE_KBD_KEY_1);
 
     // KP1 - KP9
-    if (scancode >= BRLS_KBD_KEY_KP_1 && scancode <= BRLS_KBD_KEY_KP_9)
-        return (SDL_Scancode)(SDL_SCANCODE_KP_1 + scancode - BRLS_KBD_KEY_KP_1);
+    if (scancode >= AURORE_KBD_KEY_KP_1 && scancode <= AURORE_KBD_KEY_KP_9)
+        return (SDL_Scancode)(SDL_SCANCODE_KP_1 + scancode - AURORE_KBD_KEY_KP_1);
 
     // A - Z
-    if (scancode >= BRLS_KBD_KEY_A && scancode <= BRLS_KBD_KEY_Z)
-        return (SDL_Scancode)(SDL_SCANCODE_A + scancode - BRLS_KBD_KEY_A);
+    if (scancode >= AURORE_KBD_KEY_A && scancode <= AURORE_KBD_KEY_Z)
+        return (SDL_Scancode)(SDL_SCANCODE_A + scancode - AURORE_KBD_KEY_A);
 
     // F1 - F12
-    if (scancode >= BRLS_KBD_KEY_F1 && scancode <= BRLS_KBD_KEY_F12)
-        return (SDL_Scancode)(SDL_SCANCODE_F1 + scancode - BRLS_KBD_KEY_F1);
+    if (scancode >= AURORE_KBD_KEY_F1 && scancode <= AURORE_KBD_KEY_F12)
+        return (SDL_Scancode)(SDL_SCANCODE_F1 + scancode - AURORE_KBD_KEY_F1);
 
     switch (scancode)
     {
-        case BRLS_KBD_KEY_UNKNOWN:
+        case AURORE_KBD_KEY_UNKNOWN:
             return SDL_SCANCODE_UNKNOWN;
 
             /* Printable keys */
-        case BRLS_KBD_KEY_SPACE:
+        case AURORE_KBD_KEY_SPACE:
             return SDL_SCANCODE_SPACE;
-        case BRLS_KBD_KEY_APOSTROPHE:
+        case AURORE_KBD_KEY_APOSTROPHE:
             return SDL_SCANCODE_APOSTROPHE;
-        case BRLS_KBD_KEY_COMMA:
+        case AURORE_KBD_KEY_COMMA:
             return SDL_SCANCODE_COMMA;
-        case BRLS_KBD_KEY_MINUS:
+        case AURORE_KBD_KEY_MINUS:
             return SDL_SCANCODE_MINUS;
-        case BRLS_KBD_KEY_PERIOD:
+        case AURORE_KBD_KEY_PERIOD:
             return SDL_SCANCODE_PERIOD;
-        case BRLS_KBD_KEY_SLASH:
+        case AURORE_KBD_KEY_SLASH:
             return SDL_SCANCODE_SLASH;
-        case BRLS_KBD_KEY_0:
+        case AURORE_KBD_KEY_0:
             return SDL_SCANCODE_0;
-        case BRLS_KBD_KEY_SEMICOLON:
+        case AURORE_KBD_KEY_SEMICOLON:
             return SDL_SCANCODE_SEMICOLON;
-        case BRLS_KBD_KEY_EQUAL:
+        case AURORE_KBD_KEY_EQUAL:
             return SDL_SCANCODE_EQUALS;
-        case BRLS_KBD_KEY_LEFT_BRACKET:
+        case AURORE_KBD_KEY_LEFT_BRACKET:
             return SDL_SCANCODE_LEFTBRACKET;
-        case BRLS_KBD_KEY_BACKSLASH:
+        case AURORE_KBD_KEY_BACKSLASH:
             return SDL_SCANCODE_BACKSLASH;
-        case BRLS_KBD_KEY_RIGHT_BRACKET:
+        case AURORE_KBD_KEY_RIGHT_BRACKET:
             return SDL_SCANCODE_RIGHTBRACKET;
-        case BRLS_KBD_KEY_GRAVE_ACCENT:
+        case AURORE_KBD_KEY_GRAVE_ACCENT:
             return SDL_SCANCODE_GRAVE;
-        case BRLS_KBD_KEY_WORLD_1:
+        case AURORE_KBD_KEY_WORLD_1:
             return SDL_SCANCODE_INTERNATIONAL1;
 
             /* Function keys */
-        case BRLS_KBD_KEY_ESCAPE:
+        case AURORE_KBD_KEY_ESCAPE:
             return SDL_SCANCODE_ESCAPE;
-        case BRLS_KBD_KEY_ENTER:
+        case AURORE_KBD_KEY_ENTER:
             return SDL_SCANCODE_RETURN;
-        case BRLS_KBD_KEY_TAB:
+        case AURORE_KBD_KEY_TAB:
             return SDL_SCANCODE_TAB;
-        case BRLS_KBD_KEY_BACKSPACE:
+        case AURORE_KBD_KEY_BACKSPACE:
             return SDL_SCANCODE_BACKSPACE;
-        case BRLS_KBD_KEY_INSERT:
+        case AURORE_KBD_KEY_INSERT:
             return SDL_SCANCODE_INSERT;
-        case BRLS_KBD_KEY_DELETE:
+        case AURORE_KBD_KEY_DELETE:
             return SDL_SCANCODE_DELETE;
-        case BRLS_KBD_KEY_RIGHT:
+        case AURORE_KBD_KEY_RIGHT:
             return SDL_SCANCODE_RIGHT;
-        case BRLS_KBD_KEY_LEFT:
+        case AURORE_KBD_KEY_LEFT:
             return SDL_SCANCODE_LEFT;
-        case BRLS_KBD_KEY_DOWN:
+        case AURORE_KBD_KEY_DOWN:
             return SDL_SCANCODE_DOWN;
-        case BRLS_KBD_KEY_UP:
+        case AURORE_KBD_KEY_UP:
             return SDL_SCANCODE_UP;
-        case BRLS_KBD_KEY_PAGE_UP:
+        case AURORE_KBD_KEY_PAGE_UP:
             return SDL_SCANCODE_PAGEUP;
-        case BRLS_KBD_KEY_PAGE_DOWN:
+        case AURORE_KBD_KEY_PAGE_DOWN:
             return SDL_SCANCODE_PAGEDOWN;
-        case BRLS_KBD_KEY_HOME:
+        case AURORE_KBD_KEY_HOME:
             return SDL_SCANCODE_HOME;
-        case BRLS_KBD_KEY_END:
+        case AURORE_KBD_KEY_END:
             return SDL_SCANCODE_END;
-        case BRLS_KBD_KEY_CAPS_LOCK:
+        case AURORE_KBD_KEY_CAPS_LOCK:
             return SDL_SCANCODE_CAPSLOCK;
-        case BRLS_KBD_KEY_SCROLL_LOCK:
+        case AURORE_KBD_KEY_SCROLL_LOCK:
             return SDL_SCANCODE_SCROLLLOCK;
-        case BRLS_KBD_KEY_NUM_LOCK:
+        case AURORE_KBD_KEY_NUM_LOCK:
             return SDL_SCANCODE_NUMLOCKCLEAR;
-        case BRLS_KBD_KEY_PRINT_SCREEN:
+        case AURORE_KBD_KEY_PRINT_SCREEN:
             return SDL_SCANCODE_PRINTSCREEN;
-        case BRLS_KBD_KEY_PAUSE:
+        case AURORE_KBD_KEY_PAUSE:
             return SDL_SCANCODE_PAUSE;
-        case BRLS_KBD_KEY_KP_0:
+        case AURORE_KBD_KEY_KP_0:
             return SDL_SCANCODE_KP_0;
-        case BRLS_KBD_KEY_KP_DECIMAL:
+        case AURORE_KBD_KEY_KP_DECIMAL:
             return SDL_SCANCODE_KP_DECIMAL;
-        case BRLS_KBD_KEY_KP_DIVIDE:
+        case AURORE_KBD_KEY_KP_DIVIDE:
             return SDL_SCANCODE_KP_DIVIDE;
-        case BRLS_KBD_KEY_KP_MULTIPLY:
+        case AURORE_KBD_KEY_KP_MULTIPLY:
             return SDL_SCANCODE_KP_MULTIPLY;
-        case BRLS_KBD_KEY_KP_SUBTRACT:
+        case AURORE_KBD_KEY_KP_SUBTRACT:
             return SDL_SCANCODE_KP_MINUS;
-        case BRLS_KBD_KEY_KP_ADD:
+        case AURORE_KBD_KEY_KP_ADD:
             return SDL_SCANCODE_KP_PLUS;
-        case BRLS_KBD_KEY_KP_ENTER:
+        case AURORE_KBD_KEY_KP_ENTER:
             return SDL_SCANCODE_KP_ENTER;
-        case BRLS_KBD_KEY_KP_EQUAL:
+        case AURORE_KBD_KEY_KP_EQUAL:
             return SDL_SCANCODE_KP_EQUALS;
-        case BRLS_KBD_KEY_LEFT_SHIFT:
+        case AURORE_KBD_KEY_LEFT_SHIFT:
             return SDL_SCANCODE_LSHIFT;
-        case BRLS_KBD_KEY_LEFT_CONTROL:
+        case AURORE_KBD_KEY_LEFT_CONTROL:
             return SDL_SCANCODE_LCTRL;
-        case BRLS_KBD_KEY_LEFT_ALT:
+        case AURORE_KBD_KEY_LEFT_ALT:
             return SDL_SCANCODE_LALT;
-        case BRLS_KBD_KEY_LEFT_SUPER:
+        case AURORE_KBD_KEY_LEFT_SUPER:
             return SDL_SCANCODE_LGUI;
-        case BRLS_KBD_KEY_RIGHT_SHIFT:
+        case AURORE_KBD_KEY_RIGHT_SHIFT:
             return SDL_SCANCODE_RSHIFT;
-        case BRLS_KBD_KEY_RIGHT_CONTROL:
+        case AURORE_KBD_KEY_RIGHT_CONTROL:
             return SDL_SCANCODE_RCTRL;
-        case BRLS_KBD_KEY_RIGHT_ALT:
+        case AURORE_KBD_KEY_RIGHT_ALT:
             return SDL_SCANCODE_RALT;
-        case BRLS_KBD_KEY_RIGHT_SUPER:
+        case AURORE_KBD_KEY_RIGHT_SUPER:
             return SDL_SCANCODE_RGUI;
-        case BRLS_KBD_KEY_MENU:
+        case AURORE_KBD_KEY_MENU:
             return SDL_SCANCODE_MENU;
         default:
             return SDL_SCANCODE_UNKNOWN;
@@ -336,7 +336,7 @@ static std::unordered_map<SDL_Scancode, int> keyboardKeys {};
 static bool webButtonsHeld[_BUTTON_MAX] {};
 static bool webButtonsPressed[_BUTTON_MAX] {};
 
-extern "C" EMSCRIPTEN_KEEPALIVE void brls_web_button(int button, int down)
+extern "C" EMSCRIPTEN_KEEPALIVE void aurore_web_button(int button, int down)
 {
     if (button < 0 || button >= _BUTTON_MAX)
         return;
@@ -344,6 +344,14 @@ extern "C" EMSCRIPTEN_KEEPALIVE void brls_web_button(int button, int down)
     if (down)
         webButtonsPressed[button] = true;
 }
+
+// legacy-names: begin
+// borealis' name for it, for a page not changed yet (deprecated)
+extern "C" EMSCRIPTEN_KEEPALIVE void brls_web_button(int button, int down)
+{
+    aurore_web_button(button, down);
+}
+// legacy-names: end
 #endif
 
 static const size_t SDL_AXIS_MAPPING[SDL_GAMEPAD_AXIS_MAX] = {
@@ -492,7 +500,7 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
 #endif
     if (SDL_Init(flags) < 0)
     {
-        brls::fatal("Couldn't initialize joystick: " + std::string(SDL_GetError()));
+        aurore::fatal("Couldn't initialize joystick: " + std::string(SDL_GetError()));
     }
 
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
@@ -502,7 +510,7 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
 #endif
 
     int controllersCount = SDL_NumJoysticks();
-    brls::Logger::info("joystick num: {}", controllersCount);
+    aurore::Logger::info("joystick num: {}", controllersCount);
 
     {
         ControllersLock lock;
@@ -647,9 +655,9 @@ void SDLInputManager::updateControllerState(ControllerState* state, int controll
 
     for (size_t i = 0; i < SDL_GAMEPAD_BUTTON_MAX; i++)
     {
-        // Translate SDL gamepad to borealis controller
-        size_t brlsButton          = SDL_BUTTONS_MAPPING[i];
-        state->buttons[brlsButton] = SDL_GameControllerGetButton(c, (SDL_GameControllerButton)i) || (pressed >> i & 1);
+        // Translate SDL gamepad to Aurore controller
+        size_t auroreButton          = SDL_BUTTONS_MAPPING[i];
+        state->buttons[auroreButton] = SDL_GameControllerGetButton(c, (SDL_GameControllerButton)i) || (pressed >> i & 1);
     }
 
     state->buttons[BUTTON_LT] = SDL_GameControllerGetAxis(c, SDL_CONTROLLER_AXIS_TRIGGERLEFT) > 3276.7f;
@@ -666,9 +674,9 @@ void SDLInputManager::updateControllerState(ControllerState* state, int controll
     }
 }
 
-bool SDLInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
+bool SDLInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
-    return getKeyboardKeys(brlsToSdlKeyboardScancode(key));
+    return getKeyboardKeys(auroreToSdlKeyboardScancode(key));
 }
 
 void SDLInputManager::updateTouchStates(std::vector<RawTouchState>* states)
@@ -704,12 +712,12 @@ void SDLInputManager::updateMouseStates(RawMouseState* state)
     state->middleButton = getMouseButtonState(SDL_BUTTON_MIDDLE);
     state->rightButton  = getMouseButtonState(SDL_BUTTON_RIGHT);
 
-#ifdef BOREALIS_USE_D3D11
+#ifdef AURORE_USE_D3D11
     // d3d11 scaleFactor 不计算在点击事件里
     state->position.x = x / Application::windowScale;
     state->position.y = y / Application::windowScale;
 #else
-    double scaleFactor = brls::Application::getPlatform()->getVideoContext()->getScaleFactor();
+    double scaleFactor = aurore::Application::getPlatform()->getVideoContext()->getScaleFactor();
     state->position.x  = x * scaleFactor / Application::windowScale;
     state->position.y  = y * scaleFactor / Application::windowScale;
 #endif
@@ -727,7 +735,7 @@ void SDLInputManager::setPointerLock(bool lock)
 
     if (SDL_SetRelativeMouseMode(lock ? SDL_TRUE : SDL_FALSE) < 0)
     {
-        brls::Logger::warning("sdl: failed to set relative mouse mode: {}", SDL_GetError());
+        aurore::Logger::warning("sdl: failed to set relative mouse mode: {}", SDL_GetError());
     }
 
     SDL_ShowCursor(lock ? SDL_FALSE : SDL_TRUE);
@@ -797,12 +805,12 @@ void SDLInputManager::updateKeyboardState(SDL_KeyboardEvent event)
 {
     auto* self = (SDLInputManager*)Application::getPlatform()->getInputManager();
     KeyState state {};
-    state.key     = sdlToBrlsKeyboardScancode(event.keysym.scancode);
+    state.key     = sdlToAuroreKeyboardScancode(event.keysym.scancode);
     state.pressed = event.type == SDL_KEYDOWN;
-    state.mods |= event.keysym.mod & KMOD_SHIFT ? BRLS_KBD_MODIFIER_SHIFT : 0;
-    state.mods |= event.keysym.mod & KMOD_CTRL ? BRLS_KBD_MODIFIER_CTRL : 0;
-    state.mods |= event.keysym.mod & KMOD_ALT ? BRLS_KBD_MODIFIER_ALT : 0;
-    state.mods |= event.keysym.mod & KMOD_GUI ? BRLS_KBD_MODIFIER_META : 0;
+    state.mods |= event.keysym.mod & KMOD_SHIFT ? AURORE_KBD_MODIFIER_SHIFT : 0;
+    state.mods |= event.keysym.mod & KMOD_CTRL ? AURORE_KBD_MODIFIER_CTRL : 0;
+    state.mods |= event.keysym.mod & KMOD_ALT ? AURORE_KBD_MODIFIER_ALT : 0;
+    state.mods |= event.keysym.mod & KMOD_GUI ? AURORE_KBD_MODIFIER_META : 0;
 
     self->getKeyboardKeyStateChanged()->fire(state);
     Application::setActiveEvent(true);

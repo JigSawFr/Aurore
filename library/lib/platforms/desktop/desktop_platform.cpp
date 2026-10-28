@@ -19,10 +19,11 @@
 
 #include <cctype>
 #include <memory>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/desktop/desktop_platform.hpp>
-#include <borealis/platforms/desktop/steam_deck.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/platforms/desktop/desktop_platform.hpp>
+#include <aurore/platforms/desktop/steam_deck.hpp>
 
 #ifdef __SDL2__
 #include <SDL2/SDL_misc.h>
@@ -76,7 +77,7 @@ extern char** environ;
 #endif
 #endif
 
-namespace brls
+namespace aurore
 {
 #ifdef __WINRT__
 
@@ -511,7 +512,7 @@ static bool portalPrefersDark(DBusConnection* connection)
     dbus_message_unref(msg);
     if (!reply)
     {
-        brls::Logger::debug("dbus: no colour scheme from the desktop portal: {}", error.message ? error.message : "?");
+        aurore::Logger::debug("dbus: no colour scheme from the desktop portal: {}", error.message ? error.message : "?");
         dbus_error_free(&error);
         return false;
     }
@@ -541,9 +542,7 @@ static bool portalPrefersDark(DBusConnection* connection)
 
 const char* DesktopPlatform::environment(const std::string& name)
 {
-    if (const char* value = getenv(("BRLS_" + name).c_str()))
-        return value;
-    return getenv(("BOREALIS_" + name).c_str());
+    return environmentVariable(name);
 }
 
 bool DesktopPlatform::localeFromEnvironmentVariable(std::string* locale)
@@ -578,7 +577,7 @@ DesktopPlatform::DesktopPlatform()
             if (CFEqual(propertyList, CFSTR("Dark")))
             {
                 this->themeVariant = ThemeVariant::DARK;
-                brls::Logger::info("Set app theme: Dark");
+                aurore::Logger::info("Set app theme: Dark");
             }
             CFRelease(propertyList);
         }
@@ -587,7 +586,7 @@ DesktopPlatform::DesktopPlatform()
         if (((5 * clr.G) + (2 * clr.R) + clr.B) > (8 * 128))
         {
             this->themeVariant = ThemeVariant::DARK;
-            brls::Logger::info("Set app theme: Dark");
+            aurore::Logger::info("Set app theme: Dark");
         }
 #elif defined(_WIN32)
         HMODULE hUxtheme = LoadLibraryExW(L"uxtheme.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -597,7 +596,7 @@ DesktopPlatform::DesktopPlatform()
             if (fnSystemUseDarkMode != nullptr && fnSystemUseDarkMode())
             {
                 this->themeVariant = ThemeVariant::DARK;
-                brls::Logger::info("Set app theme: Dark");
+                aurore::Logger::info("Set app theme: Dark");
             }
             FreeLibrary(hUxtheme);
         }
@@ -605,7 +604,7 @@ DesktopPlatform::DesktopPlatform()
         if (portalPrefersDark(dbus_conn.get()))
         {
             this->themeVariant = ThemeVariant::DARK;
-            brls::Logger::info("Set app theme: Dark");
+            aurore::Logger::info("Set app theme: Dark");
         }
 #endif
     }
@@ -623,7 +622,7 @@ DesktopPlatform::DesktopPlatform()
     else
     {
         this->locale = Platform::APP_LOCALE_DEFAULT;
-        brls::Logger::info("Set app locale: {}", this->locale);
+        aurore::Logger::info("Set app locale: {}", this->locale);
     }
 
 #if defined(__WINRT__)
@@ -1084,10 +1083,10 @@ void DesktopPlatform::openBrowser(std::string url)
 {
     if (!isBrowserUrl(url))
     {
-        brls::Logger::warning("open url: refused, not an http(s) link");
+        aurore::Logger::warning("open url: refused, not an http(s) link");
         return;
     }
-    brls::Logger::debug("open url: {}", url);
+    aurore::Logger::debug("open url: {}", url);
 #if __SDL2__
     SDL_OpenURL(url.c_str());
 #elif defined(__APPLE__) || defined(__linux__)
@@ -1138,7 +1137,7 @@ int DesktopPlatform::spawnProcess(const std::vector<std::string>& args)
     int err   = posix_spawnp(&pid, argv[0], nullptr, nullptr, argv.data(), env);
     if (err != 0)
     {
-        brls::Logger::warning("Cannot start {}: {}", args[0], strerror(err));
+        aurore::Logger::warning("Cannot start {}: {}", args[0], strerror(err));
         return -1;
     }
     return pid;
@@ -1187,4 +1186,4 @@ DesktopPlatform::~DesktopPlatform()
     delete this->imeManager;
 }
 
-} // namespace brls
+} // namespace aurore

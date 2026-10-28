@@ -18,9 +18,9 @@
 // on every path that decodes one, before anything large is allocated; a
 // font whose glyph runs past its data is refused too (stb_truetype)
 
-#include <borealis.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -39,7 +39,7 @@
 
 #include "stb_truetype.h"
 
-using brls::test::Harness;
+using aurore::test::Harness;
 
 namespace
 {
@@ -172,7 +172,7 @@ struct TempDir
     // A picture of one colour, opaque
     std::string picture(const std::string& name, unsigned char r, unsigned char g, unsigned char b, int width, int height)
     {
-        brls::test::Image image;
+        aurore::test::Image image;
         image.width  = width;
         image.height = height;
         image.rgba.reserve((size_t)width * height * 4);
@@ -188,7 +188,7 @@ void settlePictures(Harness& h)
     for (int round = 0; round < 3; round++)
     {
         h.step();
-        while (brls::ThemeImages::decoding() > 0)
+        while (aurore::ThemeImages::decoding() > 0)
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         h.settle();
     }
@@ -196,7 +196,7 @@ void settlePictures(Harness& h)
 
 } // namespace
 
-BRLS_TEST(bomb_is_refused_from_its_header)
+AURORE_TEST(bomb_is_refused_from_its_header)
 {
     // 8192 x 8192: 256 MB of pixels, from 1.7 MB
     std::vector<unsigned char> bomb = zeroPng(8192, 8192);
@@ -206,20 +206,20 @@ BRLS_TEST(bomb_is_refused_from_its_header)
     auto start       = std::chrono::steady_clock::now();
 
     int w = 0, h = 0;
-    BRLS_CHECK(nvgDecodeImageMem(bomb.data(), (int)bomb.size(), &w, &h) == nullptr);
-    BRLS_CHECK_EQ(w, 8192); // read from the header
-    BRLS_CHECK(nvgDecodeImage(path.c_str(), &w, &h) == nullptr);
+    AURORE_CHECK(nvgDecodeImageMem(bomb.data(), (int)bomb.size(), &w, &h) == nullptr);
+    AURORE_CHECK_EQ(w, 8192); // read from the header
+    AURORE_CHECK(nvgDecodeImage(path.c_str(), &w, &h) == nullptr);
     NVGcolor mean;
-    BRLS_CHECK(!brls::ThemeImages::meanColor(path, &mean));
+    AURORE_CHECK(!aurore::ThemeImages::meanColor(path, &mean));
 
     double elapsed = millisecondsSince(start);
     long grown     = peakMegabytes() - before;
-    BRLS_CHECK(elapsed < 200);
-    BRLS_CHECK(grown < 50);
-    brls::Logger::info("bomb refused in {:.1f} ms, peak memory +{} MB", elapsed, grown);
+    AURORE_CHECK(elapsed < 200);
+    AURORE_CHECK(grown < 50);
+    aurore::Logger::info("bomb refused in {:.1f} ms, peak memory +{} MB", elapsed, grown);
 }
 
-BRLS_TEST(bomb_is_refused_by_the_views_and_theme_pictures)
+AURORE_TEST(bomb_is_refused_by_the_views_and_theme_pictures)
 {
     Harness harness;
     std::vector<unsigned char> bomb = zeroPng(8192, 8192);
@@ -227,69 +227,69 @@ BRLS_TEST(bomb_is_refused_by_the_views_and_theme_pictures)
     std::string path = temp.write("bomb.png", bomb);
     long before      = peakMegabytes();
 
-    auto* image = new brls::Image();
-    harness.push(new brls::Activity(image));
+    auto* image = new aurore::Image();
+    harness.push(new aurore::Activity(image));
     image->setImageFromMem(bomb.data(), (int)bomb.size());
-    BRLS_CHECK_EQ(image->getTexture(), 0);
+    AURORE_CHECK_EQ(image->getTexture(), 0);
     image->setImageFromFile(path);
-    BRLS_CHECK_EQ(image->getTexture(), 0);
+    AURORE_CHECK_EQ(image->getTexture(), 0);
     image->setImageFromFileAsync(path);
     harness.settle();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     harness.settle();
-    BRLS_CHECK_EQ(image->getTexture(), 0);
+    AURORE_CHECK_EQ(image->getTexture(), 0);
 
-    std::shared_ptr<brls::ThemeImage> picture = brls::ThemeImages::load(path);
+    std::shared_ptr<aurore::ThemeImage> picture = aurore::ThemeImages::load(path);
     settlePictures(harness);
-    BRLS_CHECK(picture->state == brls::ThemeImage::State::FAILED);
-    BRLS_CHECK(peakMegabytes() - before < 50);
+    AURORE_CHECK(picture->state == aurore::ThemeImage::State::FAILED);
+    AURORE_CHECK(peakMegabytes() - before < 50);
 }
 
-BRLS_TEST(pictures_up_to_the_limit_still_load)
+AURORE_TEST(pictures_up_to_the_limit_still_load)
 {
     Harness harness;
     TempDir temp("aurore_image_limits_ok");
     std::string jpeg = std::string(AURORE_SOURCE_RESOURCES) + "img/demo_icon.jpg";
     int w = 0, h = 0;
     unsigned char* pixels = nvgDecodeImage(jpeg.c_str(), &w, &h);
-    BRLS_CHECK(pixels != nullptr && w > 0 && h > 0);
+    AURORE_CHECK(pixels != nullptr && w > 0 && h > 0);
     nvgFreeImageData(pixels);
 
     // A transparent picture of exactly NVG_MAX_IMAGE_PIXELS
     std::vector<unsigned char> largest = zeroPng(NVG_MAX_IMAGE_SIDE, NVG_MAX_IMAGE_PIXELS / NVG_MAX_IMAGE_SIDE);
     pixels                             = nvgDecodeImageMem(largest.data(), (int)largest.size(), &w, &h);
-    BRLS_CHECK(pixels != nullptr);
-    BRLS_CHECK_EQ(w * h, NVG_MAX_IMAGE_PIXELS);
+    AURORE_CHECK(pixels != nullptr);
+    AURORE_CHECK_EQ(w * h, NVG_MAX_IMAGE_PIXELS);
     nvgFreeImageData(pixels);
     std::vector<unsigned char> wider = zeroPng(NVG_MAX_IMAGE_SIDE + 1, 1);
-    BRLS_CHECK(nvgDecodeImageMem(wider.data(), (int)wider.size(), &w, &h) == nullptr);
+    AURORE_CHECK(nvgDecodeImageMem(wider.data(), (int)wider.size(), &w, &h) == nullptr);
 
-    auto* image = new brls::Image();
-    harness.push(new brls::Activity(image));
+    auto* image = new aurore::Image();
+    harness.push(new aurore::Activity(image));
     image->setImageFromFile(jpeg);
-    BRLS_CHECK(image->getTexture() != 0);
+    AURORE_CHECK(image->getTexture() != 0);
 
     std::string png = temp.picture("red.png", 220, 20, 20, 300, 200);
     NVGcolor mean;
-    BRLS_CHECK(brls::ThemeImages::meanColor(png, &mean));
-    BRLS_CHECK(mean.r > 0.8f && mean.g < 0.15f);
+    AURORE_CHECK(aurore::ThemeImages::meanColor(png, &mean));
+    AURORE_CHECK(mean.r > 0.8f && mean.g < 0.15f);
 }
 
-BRLS_TEST(downscale_keeps_the_colour_over_wide_spans)
+AURORE_TEST(downscale_keeps_the_colour_over_wide_spans)
 {
     // A wide picture down to a few pixels: each output pixel averages
     // thousands of source pixels (sums kept in 64 bits)
     Harness harness;
     TempDir temp("aurore_image_limits_downscale");
     std::string path = temp.picture("wide.png", 255, 255, 255, NVG_MAX_IMAGE_SIDE, 8);
-    brls::ThemeImageOptions options;
-    options.maxSide                           = 4;
-    std::shared_ptr<brls::ThemeImage> picture = brls::ThemeImages::load(path, options);
+    aurore::ThemeImageOptions options;
+    options.maxSide                             = 4;
+    std::shared_ptr<aurore::ThemeImage> picture = aurore::ThemeImages::load(path, options);
     settlePictures(harness);
-    BRLS_CHECK(picture->ready());
-    BRLS_CHECK_EQ(picture->width, 4);
-    BRLS_CHECK_EQ(picture->height, 1);
-    BRLS_CHECK(picture->mean.r > 0.99f && picture->mean.g > 0.99f && picture->mean.b > 0.99f);
+    AURORE_CHECK(picture->ready());
+    AURORE_CHECK_EQ(picture->width, 4);
+    AURORE_CHECK_EQ(picture->height, 1);
+    AURORE_CHECK(picture->mean.r > 0.99f && picture->mean.g > 0.99f && picture->mean.b > 0.99f);
 }
 
 namespace
@@ -335,7 +335,7 @@ std::vector<unsigned char> readFile(const std::string& path)
 } // namespace
 
 // Draws "A" in two fonts, side by side, white on black
-class TwoGlyphs : public brls::View
+class TwoGlyphs : public aurore::View
 {
   public:
     TwoGlyphs(int left, int right)
@@ -346,7 +346,7 @@ class TwoGlyphs : public brls::View
         setHeight(200);
     }
 
-    void draw(NVGcontext* vg, float x, float y, float width, float height, brls::Style style, brls::FrameContext* ctx) override
+    void draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style, aurore::FrameContext* ctx) override
     {
         nvgBeginPath(vg);
         nvgRect(vg, x, y, width, height);
@@ -365,16 +365,16 @@ class TwoGlyphs : public brls::View
     int left, right;
 };
 
-BRLS_TEST(glyph_running_past_its_data_is_refused)
+AURORE_TEST(glyph_running_past_its_data_is_refused)
 {
     // Kept after the harness: fontstash holds on to the fonts it loaded
     std::vector<unsigned char> good = readFile(std::string(AURORE_SOURCE_RESOURCES) + "font/sora_bold_latin.ttf");
     std::vector<unsigned char> bad  = good;
-    BRLS_CHECK(good.size() > 1000);
+    AURORE_CHECK(good.size() > 1000);
     stbtt_fontinfo info;
-    BRLS_CHECK(stbtt_InitFont(&info, bad.data(), 0));
+    AURORE_CHECK(stbtt_InitFont(&info, bad.data(), 0));
     int glyph = stbtt_FindGlyphIndex(&info, 'A');
-    BRLS_CHECK(glyph > 0);
+    AURORE_CHECK(glyph > 0);
 
     // 'A' cut after its header, which still says one contour of 4 points:
     // the points that follow, past its data, would make a square over its box
@@ -399,39 +399,39 @@ BRLS_TEST(glyph_running_past_its_data_is_refused)
         writeBe(bad, (past += 2) - 2, 2, (uint16_t)dy);
 
     Harness harness;
-    NVGcontext* vg = brls::Application::getNVGContext();
+    NVGcontext* vg = aurore::Application::getNVGContext();
     int goodFont   = nvgCreateFontMem(vg, "limits-glyph-good", good.data(), (int)good.size(), 0);
     int badFont    = nvgCreateFontMem(vg, "limits-glyph-bad", bad.data(), (int)bad.size(), 0);
-    BRLS_CHECK(goodFont >= 0 && badFont >= 0);
-    harness.push(new brls::Activity(new TwoGlyphs(badFont, goodFont)));
+    AURORE_CHECK(goodFont >= 0 && badFont >= 0);
+    harness.push(new aurore::Activity(new TwoGlyphs(badFont, goodFont)));
     harness.settle();
 
     // Lit pixels under each "A": the cut glyph draws nothing
-    brls::test::Image shot = harness.screenshot();
-    int lit[2]             = { 0, 0 };
+    aurore::test::Image shot = harness.screenshot();
+    int lit[2]               = { 0, 0 };
     for (int y = 0; y < std::min(shot.height, 200); y++)
         for (int x = 0; x < std::min(shot.width, 400); x++)
             if (shot.rgba[((size_t)y * shot.width + x) * 4] > 128)
                 lit[x < 200 ? 0 : 1]++;
-    BRLS_CHECK(lit[1] > 500);
-    BRLS_CHECK_EQ(lit[0], 0);
+    AURORE_CHECK(lit[1] > 500);
+    AURORE_CHECK_EQ(lit[0], 0);
 }
 
-BRLS_TEST(font_tables_past_the_data_are_refused)
+AURORE_TEST(font_tables_past_the_data_are_refused)
 {
     // Kept after the harness: fontstash holds on to the fonts it loaded
     std::vector<unsigned char> font = readFile(std::string(AURORE_SOURCE_RESOURCES) + "font/sora_bold_latin.ttf");
     std::vector<unsigned char> good = font, longer = font, past = font;
     Harness harness;
-    NVGcontext* vg = brls::Application::getNVGContext();
-    BRLS_CHECK(nvgCreateFontMem(vg, "limits-good", good.data(), (int)good.size(), 0) >= 0);
+    NVGcontext* vg = aurore::Application::getNVGContext();
+    AURORE_CHECK(nvgCreateFontMem(vg, "limits-good", good.data(), (int)good.size(), 0) >= 0);
 
     // The glyf table said longer than the file
     int count = (int)readBe(longer, 4, 2);
     for (int i = 0; i < count; i++)
         if (std::memcmp(longer.data() + 12 + 16 * i, "glyf", 4) == 0)
             writeBe(longer, 12 + 16 * i + 12, 4, (uint32_t)longer.size());
-    BRLS_CHECK(nvgCreateFontMem(vg, "limits-longer", longer.data(), (int)longer.size(), 0) < 0);
+    AURORE_CHECK(nvgCreateFontMem(vg, "limits-longer", longer.data(), (int)longer.size(), 0) < 0);
 
     // A glyph (loca) past the end of the glyf table
     uint32_t glyfLength = 0;
@@ -442,13 +442,13 @@ BRLS_TEST(font_tables_past_the_data_are_refused)
         writeBe(past, loca + 2, 2, (glyfLength + 64) / 2);
     else
         writeBe(past, loca + 4, 4, glyfLength + 64);
-    BRLS_CHECK(nvgCreateFontMem(vg, "limits-past", past.data(), (int)past.size(), 0) < 0);
+    AURORE_CHECK(nvgCreateFontMem(vg, "limits-past", past.data(), (int)past.size(), 0) < 0);
 
     // Too short to hold a header
-    BRLS_CHECK(nvgCreateFontMem(vg, "limits-short", font.data(), 8, 0) < 0);
+    AURORE_CHECK(nvgCreateFontMem(vg, "limits-short", font.data(), 8, 0) < 0);
 }
 
 int main(int argc, char** argv)
 {
-    return brls::test::runTests(argc, argv);
+    return aurore::test::runTests(argc, argv);
 }

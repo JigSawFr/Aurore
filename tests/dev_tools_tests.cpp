@@ -15,58 +15,58 @@
 */
 
 // The debugging aids' environment variables are read only in a build with
-// BRLS_DEV_TOOLS (not a release one, by default); their functions work in
+// AURORE_DEV_TOOLS (not a release one, by default); their functions work in
 // every build
 
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/profiler.hpp>
-#include <borealis/test/harness.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/profiler.hpp>
+#include <aurore/test/harness.hpp>
 
 #include <cstdlib>
 
-using brls::test::Harness;
+using aurore::test::Harness;
 
-#ifdef BRLS_DEV_TOOLS
+#ifdef AURORE_DEV_TOOLS
 static const bool BUILT_IN = true;
 #else
 static const bool BUILT_IN = false;
 #endif
 
-BRLS_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
+AURORE_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
 {
-    setenv("BRLS_INSPECTOR", "1", 1);
-    setenv("BRLS_HOT_RELOAD", "1", 1);
-    setenv("BRLS_REDRAW_DEBUG", "1", 1);
-    setenv("BRLS_PROFILE", "1", 1);
-    setenv("BRLS_STILL_FOCUS", "1", 1);
+    setenv("AURORE_INSPECTOR", "1", 1);
+    setenv("AURORE_HOT_RELOAD", "1", 1);
+    setenv("AURORE_REDRAW_DEBUG", "1", 1);
+    setenv("AURORE_PROFILE", "1", 1);
+    setenv("AURORE_STILL_FOCUS", "1", 1);
 
     Harness harness;
     harness.step(2);
-    BRLS_CHECK_EQ(brls::Inspector::isEnabled(), BUILT_IN);
-    BRLS_CHECK_EQ(brls::HotReload::isEnabled(), BUILT_IN);
-    BRLS_CHECK_EQ(brls::Application::isRedrawDebug(), BUILT_IN);
-    BRLS_CHECK_EQ(brls::Profiler::isEnabled(), BUILT_IN);
-    BRLS_CHECK_EQ(ui::env_flag("STILL_FOCUS"), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::Inspector::isEnabled(), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::HotReload::isEnabled(), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::Application::isRedrawDebug(), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::Profiler::isEnabled(), BUILT_IN);
+    AURORE_CHECK_EQ(ui::env_flag("STILL_FOCUS"), BUILT_IN);
 }
 
-BRLS_TEST(the_debugging_aids_functions_work_in_every_build)
+AURORE_TEST(the_debugging_aids_functions_work_in_every_build)
 {
     Harness harness;
-    brls::Application::setInspectorEnabled(true);
-    BRLS_CHECK(brls::Inspector::isEnabled());
-    brls::Application::setInspectorEnabled(false);
-    brls::Profiler::setEnabled(true);
-    BRLS_CHECK(brls::Profiler::isEnabled());
-    brls::Profiler::setEnabled(false);
-    brls::Application::setRedrawDebug(true);
-    BRLS_CHECK(brls::Application::isRedrawDebug());
-    brls::Application::setRedrawDebug(false);
+    aurore::Application::setInspectorEnabled(true);
+    AURORE_CHECK(aurore::Inspector::isEnabled());
+    aurore::Application::setInspectorEnabled(false);
+    aurore::Profiler::setEnabled(true);
+    AURORE_CHECK(aurore::Profiler::isEnabled());
+    aurore::Profiler::setEnabled(false);
+    aurore::Application::setRedrawDebug(true);
+    AURORE_CHECK(aurore::Application::isRedrawDebug());
+    aurore::Application::setRedrawDebug(false);
 }
 
 int main(int argc, char** argv)
 {
-    return brls::test::runTests(argc, argv);
+    return aurore::test::runTests(argc, argv);
 }
