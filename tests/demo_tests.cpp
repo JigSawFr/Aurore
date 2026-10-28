@@ -823,8 +823,8 @@ BRLS_TEST(theme_errors_are_escaped_and_capped)
     BRLS_CHECK_EQ(info.errors.back(), std::string("and 400 more errors"));
 }
 
-// "@res/…" stays in the resources: in hot reload's folder and when a theme
-// is read
+// "@res/…" stays in the resources: in hot reload's folder, when a theme is
+// read and in an XML view's file paths
 BRLS_TEST(resource_names_stay_in_the_resources)
 {
     Harness h;
@@ -841,6 +841,12 @@ BRLS_TEST(resource_names_stay_in_the_resources)
     BRLS_CHECK(brls::HotReload::diskResource("@res/../secret.theme").empty());
     BRLS_CHECK(!brls::Theme::loadFile("@res/../secret.theme"));
     brls::HotReload::setEnabled(false);
+
+    // A file path attribute of an XML view
+    BRLS_CHECK(!brls::View::getFilePathXMLAttributeValue("@res/img/demo_icon.jpg").empty());
+    BRLS_CHECK(brls::View::getFilePathXMLAttributeValue("@res/../secret.theme").empty());
+    BRLS_CHECK(brls::View::getFilePathXMLAttributeValue("@res/img/../../secret.theme").empty());
+    BRLS_CHECK_EQ(brls::View::getFilePathXMLAttributeValue("/elsewhere/x.png"), std::string("/elsewhere/x.png"));
 
     // A language that is no locale's name is not a path either
     brls::loadTranslations("../../etc");

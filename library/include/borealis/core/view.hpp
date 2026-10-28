@@ -1651,7 +1651,7 @@ class View
     /**
      * Resolves the value of the given XML attribute file path.
      * Returns the full path of the resource if it starts with "@res/", returns the
-     * path as it is otherwise.
+     * path as it is otherwise. A resource path with ".." is refused: "".
      */
     static std::string getFilePathXMLAttributeValue(std::string value);
 
