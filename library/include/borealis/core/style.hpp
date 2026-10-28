@@ -25,41 +25,53 @@
 namespace brls
 {
 
+/// The metrics (sizes, margins, durations) by name, "brls/sidebar/width"…: the ones
+/// the code adds, and over them a theme file's `[metrics]`.
 class StyleValues
 {
   public:
+    /// The base metrics.
     StyleValues(std::initializer_list<std::pair<std::string, float>> list);
 
-    // A metric of the base: what it is without a theme file.
+    /// A metric of the base: what it is without a theme file.
     void addMetric(const std::string&, float value);
+    /// A metric; an unknown name is logged as an error and gives 0.
     float getMetric(const std::string& name);
+    /// Whether the metric exists.
     bool hasMetric(const std::string& name) const;
 
-    // The theme file's metrics, over the base (empty: the base alone).
+    /// The theme file's metrics, over the base (empty: the base alone).
     void setOverlay(const std::unordered_map<std::string, float>& overlay);
 
   private:
     std::unordered_map<std::string, float> base;
     std::unordered_map<std::string, float> overlay;
-    std::unordered_map<std::string, float> values; // base, then overlay
+    std::unordered_map<std::string, float> values; ///< base, then overlay
 };
 
-// Simple wrapper around StyleValues for the array operator
+/// Simple wrapper around StyleValues for the array operator
 class Style
 {
   public:
+    /// A handle on `values` (not owned).
     Style(StyleValues* values);
+    /// The metric `name` (getMetric()).
     float operator[](const std::string& name);
 
+    /// Adds or changes a metric of the base.
     void addMetric(const std::string& name, float value);
+    /// A metric; an unknown name is logged as an error and gives 0.
     float getMetric(const std::string& name);
+    /// Whether the metric exists.
     bool hasMetric(const std::string& name);
+    /// The metrics behind the handle.
     StyleValues* getValues() { return this->values; }
 
   private:
     StyleValues* values;
 };
 
+/// The app's metrics: what XML reads with `@style/…`.
 Style getStyle();
 
 } // namespace brls

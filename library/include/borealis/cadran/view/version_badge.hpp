@@ -8,17 +8,19 @@
 
 #include <borealis.hpp>
 
+/// The running version by every screen's title: grey for a release, amber with
+/// the commit for any other build.
 class VersionBadge : public brls::Box
 {
   public:
     VersionBadge();
 
-    // Puts a badge by the title of every screen, when it first takes the
-    // focus. Called once, at start-up, before the first screen opens.
+    /// Puts a badge by the title of every screen, when it first takes the
+    /// focus. Called once, at start-up, before the first screen opens.
     static void install();
 
-    // The row at the right of `frame`'s header (the bell, the language and the
-    // theme go in it), made the first time it is asked for; null for a frame
-    // without the applet frame's header.
+    /// The row at the right of `frame`'s header (the bell, the language and the
+    /// theme go in it), made the first time it is asked for; null for a frame
+    /// without the applet frame's header.
     static brls::Box* header_tools(brls::AppletFrame* frame);
 };

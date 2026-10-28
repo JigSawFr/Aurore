@@ -13,9 +13,9 @@
 namespace utf8
 {
 
-// The code point of the well-formed UTF-8 sequence at `s[i]` and its length;
-// 0 when there is none there (a stray continuation byte, an overlong form, a
-// surrogate, beyond U+10FFFF, cut short).
+/// The code point of the well-formed UTF-8 sequence at `s[i]` and its length;
+/// 0 when there is none there (a stray continuation byte, an overlong form, a
+/// surrogate, beyond U+10FFFF, cut short).
 inline size_t decode(const std::string& s, size_t i, uint32_t* cp)
 {
     const unsigned char c = (unsigned char)s[i];
@@ -49,8 +49,8 @@ inline size_t decode(const std::string& s, size_t i, uint32_t* cp)
     return n;
 }
 
-// decode(), with a byte that starts no well-formed character read as U+FFFD,
-// length 1: what an export writes in its place.
+/// decode(), with a byte that starts no well-formed character read as U+FFFD,
+/// length 1: what an export writes in its place.
 inline size_t decode_replacing(const std::string& s, size_t i, uint32_t* cp)
 {
     const size_t n = decode(s, i, cp);
@@ -60,9 +60,9 @@ inline size_t decode_replacing(const std::string& s, size_t i, uint32_t* cp)
     return 1;
 }
 
-// The sequence at `s[i]` read without checking it: the length its first
-// byte announces (1 for a byte that starts none, which is its own code
-// point) and the bits that are there. Never 0. For text known to be valid.
+/// The sequence at `s[i]` read without checking it: the length its first
+/// byte announces (1 for a byte that starts none, which is its own code
+/// point) and the bits that are there. Never 0. For text known to be valid.
 inline size_t decode_loose(const std::string& s, size_t i, uint32_t* cp)
 {
     const unsigned char c = (unsigned char)s[i];
@@ -78,9 +78,9 @@ inline size_t decode_loose(const std::string& s, size_t i, uint32_t* cp)
     return n;
 }
 
-// Where to cut `s` to at most `n` bytes without splitting a character: `n`,
-// moved back over the continuation bytes (10xxxxxx) found there. `n` itself
-// at the end of `s` or past it.
+/// Where to cut `s` to at most `n` bytes without splitting a character: `n`,
+/// moved back over the continuation bytes (10xxxxxx) found there. `n` itself
+/// at the end of `s` or past it.
 inline size_t boundary_before(const std::string& s, size_t n)
 {
     while (n > 0 && n < s.size() && ((unsigned char)s[n] & 0xC0) == 0x80)
@@ -88,7 +88,7 @@ inline size_t boundary_before(const std::string& s, size_t n)
     return n;
 }
 
-// `cp` (at most U+10FFFF) as UTF-8 at the end of `out`.
+/// `cp` (at most U+10FFFF) as UTF-8 at the end of `out`.
 inline void append(std::string& out, uint32_t cp)
 {
     if (cp < 0x80)

@@ -12,18 +12,18 @@
 
 namespace effects
 {
-// The console is off its dock.
+/// The console is off its dock.
 bool in_hand();
-// What the setting and the power ask for now: the lighter effects (no glow,
-// nothing moving).
+/// What the setting and the power ask for now: the lighter effects (no glow,
+/// nothing moving).
 bool light();
-// The setting is "reduced": nothing moves for show (the glow stays).
+/// The setting is "reduced": nothing moves for show (the glow stays).
 bool reduced();
-// A decorative movement may be drawn now: neither light() nor reduced(),
-// not the app's reduced motion (brls::Application::setReduceMotion), and
-// not the desktop's still frames (BRLS_STILL_FOCUS, for the screenshots
-// that compare). Every animation of the look asks this first; the core's
-// own (transition=) ask brls::Application::getReduceMotion(), which asks
-// this.
+/// A decorative movement may be drawn now: neither light() nor reduced(),
+/// not the app's reduced motion (brls::Application::setReduceMotion), and
+/// not the desktop's still frames (BRLS_STILL_FOCUS, for the screenshots
+/// that compare). Every animation of the look asks this first; the core's
+/// own (transition=) ask brls::Application::getReduceMotion(), which asks
+/// this.
 bool motion();
 } // namespace effects

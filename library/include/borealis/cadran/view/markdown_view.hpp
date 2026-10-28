@@ -15,6 +15,8 @@
 namespace markdown_view
 {
 
+/// Adds `blocks` (markdown::parse) to `box` as labels: headings, lists, code,
+/// quotes and alerts, rules, tables. Nothing is opened or run.
 void fill(brls::Box* box, const std::vector<markdown::Block>& blocks);
 
 } // namespace markdown_view
