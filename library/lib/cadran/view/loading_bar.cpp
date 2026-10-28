@@ -1,5 +1,5 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/loading_bar.hpp>
+#include <aurore/cadran/view/loading_bar.hpp>
 
 #include <algorithm>
 
@@ -25,7 +25,7 @@ void LoadingBar::setProgress(float value)
     this->moveTo(value, EASE_US, false);
 }
 
-void LoadingBar::fillOver(float value, brls::Time duration_us)
+void LoadingBar::fillOver(float value, aurore::Time duration_us)
 {
     this->moveTo(value, (float)duration_us, true);
 }
@@ -34,21 +34,21 @@ void LoadingBar::reset()
 {
     this->from = this->to = 0.0f;
     this->duration        = 1.0f;
-    this->since           = brls::getCPUTimeUsec();
+    this->since           = aurore::getCPUTimeUsec();
 }
 
 void LoadingBar::moveTo(float value, float duration_us, bool at_steady_pace)
 {
     // From where the fill is drawn now, not from the last value asked.
-    const brls::Time now = brls::getCPUTimeUsec();
-    this->from           = this->drawn(now);
-    this->to             = std::clamp(value, 0.0f, 1.0f);
-    this->since          = now;
-    this->duration       = std::max(duration_us, 1.0f);
-    this->steady         = at_steady_pace;
+    const aurore::Time now = aurore::getCPUTimeUsec();
+    this->from             = this->drawn(now);
+    this->to               = std::clamp(value, 0.0f, 1.0f);
+    this->since            = now;
+    this->duration         = std::max(duration_us, 1.0f);
+    this->steady           = at_steady_pace;
 }
 
-float LoadingBar::drawn(brls::Time now) const
+float LoadingBar::drawn(aurore::Time now) const
 {
     if (!this->since)
         return this->to;
@@ -57,32 +57,32 @@ float LoadingBar::drawn(brls::Time now) const
 }
 
 void LoadingBar::draw(NVGcontext* vg, float x, float y, float width, float height,
-    brls::Style style, brls::FrameContext* ctx)
+    aurore::Style style, aurore::FrameContext* ctx)
 {
     (void)style;
-    const float radius = height / 2.0f;
-    brls::Theme& theme = ctx->theme;
+    const float radius   = height / 2.0f;
+    aurore::Theme& theme = ctx->theme;
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, radius);
     nvgFillColor(vg, this->a(theme[this->brand ? "cadran/brand/track" : "cadran/well"]));
     nvgFill(vg);
 
-    const brls::Time now = brls::getCPUTimeUsec();
-    const float value    = this->drawn(now);
+    const aurore::Time now = aurore::getCPUTimeUsec();
+    const float value      = this->drawn(now);
     // Still moving: the next frames are drawn too (redraw on demand)
-    if (this->since && now - this->since < (brls::Time)this->duration)
-        brls::Application::requestRedraw();
+    if (this->since && now - this->since < (aurore::Time)this->duration)
+        aurore::Application::requestRedraw();
     if (value <= 0.0f)
         return;
     const float w = std::max(height, width * value);
     // Teal, lighter toward its end: the end that moves.
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, w, height, radius);
-    nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x + w, y, this->a(theme[this->brand ? "cadran/brand/fill" : "cadran/teal_fill"]), this->a(theme[this->brand ? "cadran/brand/glow" : "brls/highlight/color2"])));
+    nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x + w, y, this->a(theme[this->brand ? "cadran/brand/fill" : "cadran/teal_fill"]), this->a(theme[this->brand ? "cadran/brand/glow" : "aurore/highlight/color2"])));
     nvgFill(vg);
 }
 
-brls::View* LoadingBar::create()
+aurore::View* LoadingBar::create()
 {
     return new LoadingBar();
 }

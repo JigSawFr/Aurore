@@ -1,23 +1,23 @@
-<brls:AppletFrame>
-    <brls:TabFrame title="@i18n/app/title">
+<aurore:AppletFrame>
+    <aurore:TabFrame title="@i18n/app/title">
 
-        <brls:Tab label="@i18n/app/tabs/home">
+        <aurore:Tab label="@i18n/app/tabs/home">
             <HomeTab />
-        </brls:Tab>
+        </aurore:Tab>
 
-        <brls:Tab label="@i18n/app/tabs/about">
-            <brls:Box
+        <aurore:Tab label="@i18n/app/tabs/about">
+            <aurore:Box
                 axis="column"
                 alignItems="center"
                 justifyContent="center"
                 grow="1">
 
-                <brls:Label
+                <aurore:Label
                     text="@i18n/app/about/text"
                     horizontalAlign="center" />
 
-            </brls:Box>
-        </brls:Tab>
+            </aurore:Box>
+        </aurore:Tab>
 
-    </brls:TabFrame>
-</brls:AppletFrame>
+    </aurore:TabFrame>
+</aurore:AppletFrame>

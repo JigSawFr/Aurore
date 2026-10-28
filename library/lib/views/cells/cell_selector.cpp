@@ -14,16 +14,16 @@
     limitations under the License.
 */
 
-#include "borealis/views/cells/cell_selector.hpp"
+#include "aurore/views/cells/cell_selector.hpp"
 
-#include "borealis/views/dropdown.hpp"
+#include "aurore/views/dropdown.hpp"
 
-namespace brls
+namespace aurore
 {
 
 SelectorCell::SelectorCell()
 {
-    detail->setThemeColor("textColor", "brls/list/listItem_value_color");
+    detail->setThemeColor("textColor", "aurore/list/listItem_value_color");
 
     this->registerClickAction([this](View* view)
         {
@@ -64,4 +64,4 @@ View* SelectorCell::create()
     return new SelectorCell();
 }
 
-} // namespace brls
+} // namespace aurore

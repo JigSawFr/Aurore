@@ -16,32 +16,32 @@
 
 #include <algorithm>
 #include <cctype>
-#include <borealis/core/platform.hpp>
+#include <aurore/core/platform.hpp>
 
 #ifdef __SWITCH__
-#include <borealis/platforms/switch/switch_platform.hpp>
+#include <aurore/platforms/switch/switch_platform.hpp>
 #endif
 
 #ifdef ANDROID
-#include <borealis/platforms/android/android_platform.hpp>
+#include <aurore/platforms/android/android_platform.hpp>
 #endif
 
 #ifdef __PSV__
-#include <borealis/platforms/psv/psv_platform.hpp>
+#include <aurore/platforms/psv/psv_platform.hpp>
 #endif
 
 #ifdef PS4
-#include <borealis/platforms/ps4/ps4_platform.hpp>
+#include <aurore/platforms/ps4/ps4_platform.hpp>
 #endif
 
-#if defined(BOREALIS_USE_DEKO3D)
+#if defined(AURORE_USE_DEKO3D)
 #elif defined(__GLFW__)
-#include <borealis/platforms/glfw/glfw_platform.hpp>
+#include <aurore/platforms/glfw/glfw_platform.hpp>
 #elif defined(__SDL2__)
-#include <borealis/platforms/sdl/sdl_platform.hpp>
+#include <aurore/platforms/sdl/sdl_platform.hpp>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 Platform* Platform::createPlatform()
@@ -84,4 +84,4 @@ bool Platform::isBrowserUrl(const std::string& url)
     return true;
 }
 
-} // namespace brls
+} // namespace aurore

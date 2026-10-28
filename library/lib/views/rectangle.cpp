@@ -15,10 +15,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/logger.hpp>
-#include <borealis/views/rectangle.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/views/rectangle.hpp>
 
-namespace brls
+namespace aurore
 {
 
 Rectangle::Rectangle(NVGcolor color)
@@ -90,4 +90,4 @@ View* Rectangle::create()
     return new Rectangle();
 }
 
-} // namespace brls
+} // namespace aurore

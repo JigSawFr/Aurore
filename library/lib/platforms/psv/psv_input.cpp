@@ -17,11 +17,11 @@ limitations under the License.
 #include <psp2/ctrl.h>
 #include <psp2/touch.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/psv/psv_input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/psv/psv_input.hpp>
 
-namespace brls
+namespace aurore
 {
 
 PsvInputManager::PsvInputManager()
@@ -103,7 +103,7 @@ void PsvInputManager::updateControllerState(ControllerState* state, int controll
     state->buttons[BUTTON_NAV_LEFT]  = pad.lx < 0x20 || pad.rx < 0x20 || state->buttons[BUTTON_LEFT];
 }
 
-bool PsvInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
+bool PsvInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
     return false;
 }

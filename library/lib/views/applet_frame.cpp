@@ -16,69 +16,69 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/applet_frame.hpp>
-#include <borealis/views/dialog.hpp>
-#include <borealis/views/hint.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/applet_frame.hpp>
+#include <aurore/views/dialog.hpp>
+#include <aurore/views/hint.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 const std::string appletFrameXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
         height="auto"
         axis="column"
         justifyContent="spaceBetween">
 
         <!-- Header -->
-        <brls:Box
-            id="brls/applet_frame/header"
+        <aurore:Box
+            id="aurore/applet_frame/header"
             width="auto"
-            height="@style/brls/applet_frame/header_height"
+            height="@style/aurore/applet_frame/header_height"
             axis="row"
             justifyContent="spaceBetween"
-            paddingLeft="@style/brls/applet_frame/header_padding_sides"
-            paddingRight="@style/brls/applet_frame/header_padding_sides"
-            marginLeft="@style/brls/applet_frame/padding_sides"
-            marginRight="@style/brls/applet_frame/padding_sides"
-            lineColor="@theme/brls/applet_frame/separator"
+            paddingLeft="@style/aurore/applet_frame/header_padding_sides"
+            paddingRight="@style/aurore/applet_frame/header_padding_sides"
+            marginLeft="@style/aurore/applet_frame/padding_sides"
+            marginRight="@style/aurore/applet_frame/padding_sides"
+            lineColor="@theme/aurore/applet_frame/separator"
             lineBottom="1px">
 
-            <brls:Box
+            <aurore:Box
                 width="auto"
                 height="auto"
                 axis="row"
-                paddingTop="@style/brls/applet_frame/header_padding_top_bottom"
-                paddingBottom="@style/brls/applet_frame/header_padding_top_bottom">
-                <brls:Image
-                    id="brls/applet_frame/title_icon"
+                paddingTop="@style/aurore/applet_frame/header_padding_top_bottom"
+                paddingBottom="@style/aurore/applet_frame/header_padding_top_bottom">
+                <aurore:Image
+                    id="aurore/applet_frame/title_icon"
                     width="auto"
                     height="auto"
-                    marginRight="@style/brls/applet_frame/header_image_title_spacing"
+                    marginRight="@style/aurore/applet_frame/header_image_title_spacing"
                     visibility="gone" />
 
-                <brls:Label
-                    id="brls/applet_frame/title_label"
+                <aurore:Label
+                    id="aurore/applet_frame/title_label"
                     width="auto"
                     height="auto"
-                    marginTop="@style/brls/applet_frame/header_title_top_offset"
-                    fontSize="@style/brls/applet_frame/header_title_font_size" />
-            </brls:Box>
+                    marginTop="@style/aurore/applet_frame/header_title_top_offset"
+                    fontSize="@style/aurore/applet_frame/header_title_font_size" />
+            </aurore:Box>
 
-            <brls:Box
-                id="brls/applet_frame/hint_box"
+            <aurore:Box
+                id="aurore/applet_frame/hint_box"
                 width="auto"
                 height="auto"
-                marginTop="@style/brls/applet_frame/header_title_top_offset"
+                marginTop="@style/aurore/applet_frame/header_title_top_offset"
                 axis="row"/>
 
-        </brls:Box>
+        </aurore:Box>
 
         <!-- Content will be injected here with grow="1.0" -->
 
@@ -87,10 +87,10 @@ const std::string appletFrameXML = R"xml(
             Direction inverted so that the bottom left text can be
             set to visibility="gone" without affecting the hint
         -->
-        <brls:BottomBar
-            id="brls/applet_frame/footer"/>
+        <aurore:BottomBar
+            id="aurore/applet_frame/footer"/>
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 AppletFrame::AppletFrame()
@@ -100,7 +100,7 @@ AppletFrame::AppletFrame()
 
     this->forwardXMLAttribute("iconInterpolation", this->icon, "interpolation");
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "style", HeaderStyle, this->setHeaderStyle,
         {
             { "regular", HeaderStyle::REGULAR },
@@ -179,7 +179,7 @@ void AppletFrame::popContentView(std::function<void(void)> cb)
         if (!Application::popActivity(TransitionAnimation::FADE, cb))
         {
 #ifndef IOS // Do not close the app in iOS
-            auto dialog = new brls::Dialog("hints/exit_hint"_i18n);
+            auto dialog = new aurore::Dialog("hints/exit_hint"_i18n);
             dialog->addButton("hints/cancel"_i18n, []() {});
             dialog->addButton("hints/ok"_i18n, []()
                 { Application::quit(); });
@@ -235,7 +235,7 @@ void AppletFrame::setContentView(View* view)
 void AppletFrame::handleXMLElement(tinyxml2::XMLElement* element)
 {
     if (this->contentView)
-        fatal("brls:AppletFrame can only have one child XML element");
+        fatal("aurore:AppletFrame can only have one child XML element");
 
     View* view = View::createFromXMLElement(element);
     contentViewStack.push_back(view);
@@ -261,12 +261,12 @@ void AppletFrame::setHeaderStyle(HeaderStyle style)
     switch (style)
     {
         case HeaderStyle::REGULAR:
-            header->setHeight(appStyle["brls/applet_frame/header_height"]);
-            title->setFontSize(appStyle["brls/applet_frame/header_title_font_size"]);
+            header->setHeight(appStyle["aurore/applet_frame/header_height"]);
+            title->setFontSize(appStyle["aurore/applet_frame/header_title_font_size"]);
             break;
         case HeaderStyle::POPUP:
-            //            header->setHeight(appStyle["brls/applet_frame/dropdown_header_height"]);
-            //            title->setFontSize(appStyle["brls/applet_frame/dropdown_header_title_font_size"]);
+            //            header->setHeight(appStyle["aurore/applet_frame/dropdown_header_height"]);
+            //            title->setFontSize(appStyle["aurore/applet_frame/dropdown_header_title_font_size"]);
             break;
         default:
             break;
@@ -278,4 +278,4 @@ View* AppletFrame::create()
     return new AppletFrame();
 }
 
-} // namespace brls
+} // namespace aurore

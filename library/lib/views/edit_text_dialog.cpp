@@ -1,24 +1,24 @@
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/edit_text_dialog.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/edit_text_dialog.hpp>
 
 #ifdef __PSV__
 #define EDIT_TEXT_DIALOG_POP_ANIMATION TransitionAnimation::NONE
 #define EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT false
 #include <SDL2/SDL.h>
-#include "borealis/platforms/sdl/sdl_video.hpp"
+#include "aurore/platforms/sdl/sdl_video.hpp"
 #else
 #define EDIT_TEXT_DIALOG_POP_ANIMATION TransitionAnimation::FADE
 #define EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT true
 #endif
 
-namespace brls
+namespace aurore
 {
 
 const std::string editTextDialogXML = R"xml(
-    <brls:Box
-        id="brls/container"
+    <aurore:Box
+        id="aurore/container"
         width="auto"
         height="auto"
         axis="column"
@@ -26,10 +26,10 @@ const std::string editTextDialogXML = R"xml(
         alignItems="center"
         focusable="true"
         hideHighlight="true"
-        backgroundColor="@theme/brls/backdrop">
+        backgroundColor="@theme/aurore/backdrop">
 
-        <brls:Label
-            id="brls/dialog/header"
+        <aurore:Label
+            id="aurore/dialog/header"
             fontSize="24")xml"
 #ifdef __PSV__
                                       R"xml(marginTop="30")xml"
@@ -39,16 +39,16 @@ const std::string editTextDialogXML = R"xml(
                                       R"xml(marginBottom="30"
             textColor="#FFFFFF"/>
 
-        <brls:Box
-            id="brls/dialog/applet"
+        <aurore:Box
+            id="aurore/dialog/applet"
             width="720"
             cornerRadius="4"
             alignItems="flexEnd"
             axis="column"
-            backgroundColor="@theme/brls/background">
+            backgroundColor="@theme/aurore/background">
 
-            <brls:Label
-                id="brls/dialog/label"
+            <aurore:Label
+                id="aurore/dialog/label"
                 grow="1"
                 width="680"
                 cursor="-1"
@@ -57,16 +57,16 @@ const std::string editTextDialogXML = R"xml(
                 autoAnimate="false"
                 verticalAlign="top"/>
 
-            <brls:Label
-                id="brls/dialog/count"
+            <aurore:Label
+                id="aurore/dialog/count"
                 width="680"
                 horizontalAlign="right"
                 fontSize="18"
-                textColor="@theme/brls/text_secondary"
+                textColor="@theme/aurore/text_secondary"
                 marginRight="30"
                 marginBottom="10"/>
 
-            <brls:Hints
+            <aurore:Hints
                 allowAButtonTouch="true"
                 forceShown="true"
                 addBaseAction="false"
@@ -74,15 +74,15 @@ const std::string editTextDialogXML = R"xml(
                 marginRight="10"
                 width="auto"
                 height="auto"/>
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:Box>
+    </aurore:Box>
     )xml";
 
 EditTextDialog::EditTextDialog()
 {
     this->inflateFromXMLString(editTextDialogXML);
-    if (View* panel = this->getView("brls/dialog/applet"))
+    if (View* panel = this->getView("aurore/dialog/applet"))
         panel->setThemeArea(ThemeArea::DIALOG);
 
     // submit text
@@ -102,22 +102,22 @@ EditTextDialog::EditTextDialog()
                 return true; }, true);
 
     // register paste action
-    int pasteKey = BRLS_KBD_MODIFIER_CTRL;
+    int pasteKey = AURORE_KBD_MODIFIER_CTRL;
 #ifdef __APPLE__
-    pasteKey = BRLS_KBD_MODIFIER_META;
+    pasteKey = AURORE_KBD_MODIFIER_META;
 #endif
-    this->registerAction({ BRLS_KBD_KEY_V, pasteKey }, [this](...)
+    this->registerAction({ AURORE_KBD_KEY_V, pasteKey }, [this](...)
         {
             this->clipboardEvent.fire(Application::getPlatform()->pasteFromClipboard());
             return true; });
 
     // register delete action
-    this->registerAction({ BRLS_KBD_KEY_DELETE }, [this](...)
+    this->registerAction({ AURORE_KBD_KEY_DELETE }, [this](...)
         {
             // This is to ensure that the delete operation of the PSV ime will not be ignored
             this->backspaceEvent.fire();
             return true; }, true);
-    this->registerAction({ BRLS_KBD_KEY_BACKSPACE }, [this](...)
+    this->registerAction({ AURORE_KBD_KEY_BACKSPACE }, [this](...)
         {
             this->backspaceEvent.fire();
             return true; }, true);
@@ -141,11 +141,11 @@ EditTextDialog::EditTextDialog()
                     });
                 return true; });
 
-#if defined(__PSV__) and !defined(BOREALIS_USE_GXM)
+#if defined(__PSV__) and !defined(AURORE_USE_GXM)
     // After turning off the on-screen keyboard, tap on the input area to reopen
-    this->addGestureRecognizer(new brls::TapGestureRecognizer([](brls::TapGestureStatus status, brls::Sound*)
+    this->addGestureRecognizer(new aurore::TapGestureRecognizer([](aurore::TapGestureStatus status, aurore::Sound*)
         {
-            if (status.state == brls::GestureState::END) {
+            if (status.state == aurore::GestureState::END) {
                 auto* videoContext = (SDLVideoContext*)Application::getPlatform()->getVideoContext();
                 if (!SDL_IsScreenKeyboardShown(videoContext->getSDLWindow()))
                 {
@@ -244,13 +244,13 @@ void EditTextDialog::updateUI()
 {
     if (content.empty())
     {
-        label->setThemeColor("textColor", "brls/text_secondary");
+        label->setThemeColor("textColor", "aurore/text_secondary");
         label->setText(hint);
         label->setCursor((int)CursorPosition::START);
     }
     else
     {
-        label->setThemeColor("textColor", "brls/text");
+        label->setThemeColor("textColor", "aurore/text");
         label->setText(content);
     }
 }

@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "borealis/views/cells/cell_slider.hpp"
+#include "aurore/views/cells/cell_slider.hpp"
 
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/i18n.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-namespace brls
+namespace aurore
 {
 
 SliderCell::SliderCell()
@@ -60,4 +60,4 @@ View* SliderCell::create()
     return new SliderCell();
 }
 
-} // namespace brls
+} // namespace aurore

@@ -14,12 +14,12 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/core/thread.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/core/thread.hpp>
+#include <aurore/core/util.hpp>
 #ifdef USE_LIBROMFS
 #include <romfs/romfs.hpp>
 #endif
@@ -35,7 +35,7 @@
 #include <tuple>
 #include <vector>
 
-namespace brls
+namespace aurore
 {
 
 namespace
@@ -258,7 +258,7 @@ namespace
             }
         }
 #endif
-        source->file = name.rfind("@res/", 0) == 0 ? std::string(BRLS_RESOURCES) + name.substr(5) : name;
+        source->file = name.rfind("@res/", 0) == 0 ? std::string(AURORE_RESOURCES) + name.substr(5) : name;
         return true;
     }
 
@@ -373,7 +373,7 @@ std::shared_ptr<ThemeImage> ThemeImages::load(const std::string& path, const The
             if (ok && mask)
                 makeMask(pixels.get());
             decodingCount--;
-            brls::sync([weak, pixels, ok]()
+            aurore::sync([weak, pixels, ok]()
                 {
                     std::shared_ptr<ThemeImage> image = weak.lock();
                     if (!image)
@@ -490,4 +490,4 @@ bool ThemeImages::meanColor(const std::string& path, NVGcolor* color)
     return true;
 }
 
-} // namespace brls
+} // namespace aurore

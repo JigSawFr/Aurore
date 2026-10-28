@@ -16,17 +16,17 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/assets.hpp>
-#include <borealis/core/hot_reload.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/inspector.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/style.hpp>
-#include <borealis/core/theme.hpp>
-#include <borealis/core/theme_image.hpp>
-#include <borealis/core/time.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/assets.hpp>
+#include <aurore/core/hot_reload.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/inspector.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/style.hpp>
+#include <aurore/core/theme.hpp>
+#include <aurore/core/theme_image.hpp>
+#include <aurore/core/time.hpp>
+#include <aurore/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -57,146 +57,146 @@ namespace fs = std::experimental::filesystem;
 
 #include "theme_presets.hpp"
 
-namespace brls
+namespace aurore
 {
 
 static const std::initializer_list<std::pair<std::string, NVGcolor>> LIGHT_COLORS = {
     // Generic values
-    { "brls/clear", nvgRGB(235, 235, 235) },
-    { "brls/background", nvgRGB(235, 235, 235) },
-    { "brls/text", nvgRGB(45, 45, 45) },
-    { "brls/text_disabled", nvgRGB(140, 140, 140) },
-    { "brls/text_secondary", nvgRGB(100, 100, 100) }, // 4.5:1 on the background
-    { "brls/backdrop", nvgRGBA(0, 0, 0, 178) },
-    { "brls/notification/background", nvgRGBA(0, 0, 0, 178) }, // as the backdrop
-    { "brls/notification/text", nvgRGB(255, 255, 255) },
-    { "brls/click_pulse", nvgRGBA(13, 182, 213, 38) }, // same as highlight color1 with different opacity
-    { "brls/accent", nvgRGB(49, 79, 235) },
+    { "aurore/clear", nvgRGB(235, 235, 235) },
+    { "aurore/background", nvgRGB(235, 235, 235) },
+    { "aurore/text", nvgRGB(45, 45, 45) },
+    { "aurore/text_disabled", nvgRGB(140, 140, 140) },
+    { "aurore/text_secondary", nvgRGB(100, 100, 100) }, // 4.5:1 on the background
+    { "aurore/backdrop", nvgRGBA(0, 0, 0, 178) },
+    { "aurore/notification/background", nvgRGBA(0, 0, 0, 178) }, // as the backdrop
+    { "aurore/notification/text", nvgRGB(255, 255, 255) },
+    { "aurore/click_pulse", nvgRGBA(13, 182, 213, 38) }, // same as highlight color1 with different opacity
+    { "aurore/accent", nvgRGB(49, 79, 235) },
 
     // Highlight
-    { "brls/highlight/background", nvgRGB(252, 255, 248) },
-    { "brls/highlight/color1", nvgRGB(13, 182, 213) },
-    { "brls/highlight/color2", nvgRGB(80, 239, 217) },
+    { "aurore/highlight/background", nvgRGB(252, 255, 248) },
+    { "aurore/highlight/color1", nvgRGB(13, 182, 213) },
+    { "aurore/highlight/color2", nvgRGB(80, 239, 217) },
 
     // AppletFrame
-    { "brls/applet_frame/separator", nvgRGB(45, 45, 45) },
+    { "aurore/applet_frame/separator", nvgRGB(45, 45, 45) },
 
     // Sidebar
-    { "brls/sidebar/background", nvgRGB(240, 240, 240) },
-    { "brls/sidebar/active_item", nvgRGB(49, 79, 235) },
-    { "brls/sidebar/separator", nvgRGB(208, 208, 208) },
+    { "aurore/sidebar/background", nvgRGB(240, 240, 240) },
+    { "aurore/sidebar/active_item", nvgRGB(49, 79, 235) },
+    { "aurore/sidebar/separator", nvgRGB(208, 208, 208) },
 
     // Header
-    { "brls/header/border", nvgRGB(207, 207, 207) },
-    { "brls/header/rectangle", nvgRGB(127, 127, 127) },
-    { "brls/header/subtitle", nvgRGB(140, 140, 140) },
+    { "aurore/header/border", nvgRGB(207, 207, 207) },
+    { "aurore/header/rectangle", nvgRGB(127, 127, 127) },
+    { "aurore/header/subtitle", nvgRGB(140, 140, 140) },
 
     // Button
-    { "brls/button/primary_enabled_background", nvgRGB(50, 79, 241) },
-    { "brls/button/primary_disabled_background", nvgRGB(201, 201, 209) },
-    { "brls/button/primary_enabled_text", nvgRGB(255, 255, 255) },
-    { "brls/button/primary_disabled_text", nvgRGB(220, 220, 228) },
+    { "aurore/button/primary_enabled_background", nvgRGB(50, 79, 241) },
+    { "aurore/button/primary_disabled_background", nvgRGB(201, 201, 209) },
+    { "aurore/button/primary_enabled_text", nvgRGB(255, 255, 255) },
+    { "aurore/button/primary_disabled_text", nvgRGB(220, 220, 228) },
 
-    { "brls/button/default_enabled_background", nvgRGB(255, 255, 255) },
-    { "brls/button/default_disabled_background", nvgRGB(255, 255, 255) },
-    { "brls/button/default_enabled_text", nvgRGB(45, 45, 45) },
-    { "brls/button/default_disabled_text", nvgRGB(45, 45, 45) },
+    { "aurore/button/default_enabled_background", nvgRGB(255, 255, 255) },
+    { "aurore/button/default_disabled_background", nvgRGB(255, 255, 255) },
+    { "aurore/button/default_enabled_text", nvgRGB(45, 45, 45) },
+    { "aurore/button/default_disabled_text", nvgRGB(45, 45, 45) },
 
-    { "brls/button/highlight_enabled_text", nvgRGB(49, 79, 235) },
-    { "brls/button/highlight_disabled_text", nvgRGB(49, 79, 235) },
+    { "aurore/button/highlight_enabled_text", nvgRGB(49, 79, 235) },
+    { "aurore/button/highlight_disabled_text", nvgRGB(49, 79, 235) },
 
-    { "brls/button/enabled_border_color", nvgRGB(45, 45, 45) },
-    { "brls/button/disabled_border_color", nvgRGB(45, 45, 45) },
+    { "aurore/button/enabled_border_color", nvgRGB(45, 45, 45) },
+    { "aurore/button/disabled_border_color", nvgRGB(45, 45, 45) },
 
     // List
-    { "brls/list/listItem_value_color", nvgRGB(43, 81, 226) },
+    { "aurore/list/listItem_value_color", nvgRGB(43, 81, 226) },
 
     // Slider
-    { "brls/slider/pointer_color", nvgRGB(255, 255, 255) },
-    { "brls/slider/pointer_border_color", nvgRGB(200, 200, 200) },
-    { "brls/slider/line_filled", nvgRGB(50, 79, 241) },
-    { "brls/slider/line_empty", nvgRGB(140, 140, 140) },
+    { "aurore/slider/pointer_color", nvgRGB(255, 255, 255) },
+    { "aurore/slider/pointer_border_color", nvgRGB(200, 200, 200) },
+    { "aurore/slider/line_filled", nvgRGB(50, 79, 241) },
+    { "aurore/slider/line_empty", nvgRGB(140, 140, 140) },
 
     // Spinner
-    { "brls/spinner/bar_color", nvgRGBA(131, 131, 131, 80) },
+    { "aurore/spinner/bar_color", nvgRGBA(131, 131, 131, 80) },
 
     // Shadows: a view's (shadowType), the focus highlight's; their opacity
-    // is the style's (brls/shadow/opacity, brls/highlight/shadow_opacity)
-    { "brls/shadow", nvgRGB(0, 0, 0) },
-    { "brls/highlight/shadow", nvgRGB(0, 0, 0) },
+    // is the style's (aurore/shadow/opacity, aurore/highlight/shadow_opacity)
+    { "aurore/shadow", nvgRGB(0, 0, 0) },
+    { "aurore/highlight/shadow", nvgRGB(0, 0, 0) },
 
     // Battery widget
-    { "brls/battery/level", nvgRGB(0, 0, 0) },
-    { "brls/battery/charging", nvgRGB(140, 251, 79) },
+    { "aurore/battery/level", nvgRGB(0, 0, 0) },
+    { "aurore/battery/charging", nvgRGB(140, 251, 79) },
 };
 
 static const std::initializer_list<std::pair<std::string, NVGcolor>> DARK_COLORS = {
     // Generic values
-    { "brls/clear", nvgRGB(45, 45, 45) },
-    { "brls/background", nvgRGB(45, 45, 45) },
-    { "brls/text", nvgRGB(255, 255, 255) },
-    { "brls/text_disabled", nvgRGB(80, 80, 80) },
-    { "brls/text_secondary", nvgRGB(170, 170, 170) }, // 4.5:1 on the background
-    { "brls/backdrop", nvgRGBA(0, 0, 0, 178) },
-    { "brls/notification/background", nvgRGBA(0, 0, 0, 178) }, // as the backdrop
-    { "brls/notification/text", nvgRGB(255, 255, 255) },
-    { "brls/click_pulse", nvgRGBA(25, 138, 198, 38) }, // same as highlight color1 with different opacity
-    { "brls/accent", nvgRGB(0, 255, 204) },
+    { "aurore/clear", nvgRGB(45, 45, 45) },
+    { "aurore/background", nvgRGB(45, 45, 45) },
+    { "aurore/text", nvgRGB(255, 255, 255) },
+    { "aurore/text_disabled", nvgRGB(80, 80, 80) },
+    { "aurore/text_secondary", nvgRGB(170, 170, 170) }, // 4.5:1 on the background
+    { "aurore/backdrop", nvgRGBA(0, 0, 0, 178) },
+    { "aurore/notification/background", nvgRGBA(0, 0, 0, 178) }, // as the backdrop
+    { "aurore/notification/text", nvgRGB(255, 255, 255) },
+    { "aurore/click_pulse", nvgRGBA(25, 138, 198, 38) }, // same as highlight color1 with different opacity
+    { "aurore/accent", nvgRGB(0, 255, 204) },
 
     // Highlight
-    { "brls/highlight/background", nvgRGB(31, 34, 39) },
-    { "brls/highlight/color1", nvgRGB(25, 138, 198) },
-    { "brls/highlight/color2", nvgRGB(137, 241, 242) },
+    { "aurore/highlight/background", nvgRGB(31, 34, 39) },
+    { "aurore/highlight/color1", nvgRGB(25, 138, 198) },
+    { "aurore/highlight/color2", nvgRGB(137, 241, 242) },
 
     // AppletFrame
-    { "brls/applet_frame/separator", nvgRGB(255, 255, 255) },
+    { "aurore/applet_frame/separator", nvgRGB(255, 255, 255) },
 
     // Sidebar
-    { "brls/sidebar/background", nvgRGB(50, 50, 50) },
-    { "brls/sidebar/active_item", nvgRGB(0, 255, 204) },
-    { "brls/sidebar/separator", nvgRGB(81, 81, 81) },
+    { "aurore/sidebar/background", nvgRGB(50, 50, 50) },
+    { "aurore/sidebar/active_item", nvgRGB(0, 255, 204) },
+    { "aurore/sidebar/separator", nvgRGB(81, 81, 81) },
 
     // Header
-    { "brls/header/border", nvgRGB(78, 78, 78) },
-    { "brls/header/rectangle", nvgRGB(160, 160, 160) },
-    { "brls/header/subtitle", nvgRGB(163, 163, 163) },
+    { "aurore/header/border", nvgRGB(78, 78, 78) },
+    { "aurore/header/rectangle", nvgRGB(160, 160, 160) },
+    { "aurore/header/subtitle", nvgRGB(163, 163, 163) },
 
     // Button
-    { "brls/button/primary_enabled_background", nvgRGB(1, 255, 201) },
-    { "brls/button/primary_disabled_background", nvgRGB(83, 87, 86) },
-    { "brls/button/primary_enabled_text", nvgRGB(52, 41, 55) },
-    { "brls/button/primary_disabled_text", nvgRGB(71, 75, 74) },
+    { "aurore/button/primary_enabled_background", nvgRGB(1, 255, 201) },
+    { "aurore/button/primary_disabled_background", nvgRGB(83, 87, 86) },
+    { "aurore/button/primary_enabled_text", nvgRGB(52, 41, 55) },
+    { "aurore/button/primary_disabled_text", nvgRGB(71, 75, 74) },
 
-    { "brls/button/default_enabled_background", nvgRGB(80, 80, 80) },
-    { "brls/button/default_disabled_background", nvgRGB(80, 80, 80) },
-    { "brls/button/default_enabled_text", nvgRGB(255, 255, 255) },
-    { "brls/button/default_disabled_text", nvgRGB(255, 255, 255) },
+    { "aurore/button/default_enabled_background", nvgRGB(80, 80, 80) },
+    { "aurore/button/default_disabled_background", nvgRGB(80, 80, 80) },
+    { "aurore/button/default_enabled_text", nvgRGB(255, 255, 255) },
+    { "aurore/button/default_disabled_text", nvgRGB(255, 255, 255) },
 
-    { "brls/button/highlight_enabled_text", nvgRGB(7, 247, 198) },
-    { "brls/button/highlight_disabled_text", nvgRGB(7, 247, 198) },
+    { "aurore/button/highlight_enabled_text", nvgRGB(7, 247, 198) },
+    { "aurore/button/highlight_disabled_text", nvgRGB(7, 247, 198) },
 
-    { "brls/button/enabled_border_color", nvgRGB(255, 255, 255) },
-    { "brls/button/disabled_border_color", nvgRGB(255, 255, 255) },
+    { "aurore/button/enabled_border_color", nvgRGB(255, 255, 255) },
+    { "aurore/button/disabled_border_color", nvgRGB(255, 255, 255) },
 
     // List
-    { "brls/list/listItem_value_color", nvgRGB(88, 195, 169) },
+    { "aurore/list/listItem_value_color", nvgRGB(88, 195, 169) },
 
     // Slider
-    { "brls/slider/pointer_color", nvgRGB(80, 80, 80) },
-    { "brls/slider/pointer_border_color", nvgRGB(120, 120, 120) },
-    { "brls/slider/line_filled", nvgRGB(1, 255, 201) },
-    { "brls/slider/line_empty", nvgRGB(140, 140, 140) },
+    { "aurore/slider/pointer_color", nvgRGB(80, 80, 80) },
+    { "aurore/slider/pointer_border_color", nvgRGB(120, 120, 120) },
+    { "aurore/slider/line_filled", nvgRGB(1, 255, 201) },
+    { "aurore/slider/line_empty", nvgRGB(140, 140, 140) },
 
     // Spinner
-    { "brls/spinner/bar_color", nvgRGBA(192, 192, 192, 80) },
+    { "aurore/spinner/bar_color", nvgRGBA(192, 192, 192, 80) },
 
     // Shadows
-    { "brls/shadow", nvgRGB(0, 0, 0) },
-    { "brls/highlight/shadow", nvgRGB(0, 0, 0) },
+    { "aurore/shadow", nvgRGB(0, 0, 0) },
+    { "aurore/highlight/shadow", nvgRGB(0, 0, 0) },
 
     // Battery widget
-    { "brls/battery/level", nvgRGB(255, 255, 255) },
-    { "brls/battery/charging", nvgRGB(140, 251, 79) },
+    { "aurore/battery/level", nvgRGB(255, 255, 255) },
+    { "aurore/battery/charging", nvgRGB(140, 251, 79) },
 };
 
 static uint64_t generation = 1;
@@ -295,11 +295,11 @@ static NVGcolor lookup(const ColorMap& colors, const char* key, NVGcolor fallbac
 // on it
 static void addAccentShades(ColorMap& out, NVGcolor accent, NVGcolor background, NVGcolor text)
 {
-    bool dark                   = isDark(background);
-    out["brls/accent/hover"]    = dark ? mix(accent, nvgRGB(255, 255, 255), 0.15f) : mix(accent, nvgRGB(0, 0, 0), 0.10f);
-    out["brls/accent/pressed"]  = mix(accent, nvgRGB(0, 0, 0), 0.20f);
-    out["brls/accent/disabled"] = mix(accent, background, 0.6f);
-    out["brls/accent/ink"]      = onColor(accent, text, background);
+    bool dark                     = isDark(background);
+    out["aurore/accent/hover"]    = dark ? mix(accent, nvgRGB(255, 255, 255), 0.15f) : mix(accent, nvgRGB(0, 0, 0), 0.10f);
+    out["aurore/accent/pressed"]  = mix(accent, nvgRGB(0, 0, 0), 0.20f);
+    out["aurore/accent/disabled"] = mix(accent, background, 0.6f);
+    out["aurore/accent/ink"]      = onColor(accent, text, background);
 }
 
 static ThemeValues makeValues(std::initializer_list<std::pair<std::string, NVGcolor>> list)
@@ -307,7 +307,7 @@ static ThemeValues makeValues(std::initializer_list<std::pair<std::string, NVGco
     ThemeValues values(list);
     ColorMap shades;
     const ColorMap& base = values.getBaseColors();
-    addAccentShades(shades, base.at("brls/accent"), base.at("brls/background"), base.at("brls/text"));
+    addAccentShades(shades, base.at("aurore/accent"), base.at("aurore/background"), base.at("aurore/text"));
     for (auto& [name, color] : shades)
         values.addColor(name, color);
     return values;
@@ -331,10 +331,10 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
     ColorMap out;
     auto has = [&seeds](const char* seed)
     { return seeds.count(seed) > 0; };
-    NVGcolor B  = has("background") ? seeds.at("background") : lookup(base, "brls/background", nvgRGB(45, 45, 45));
-    NVGcolor T  = has("text") ? seeds.at("text") : lookup(base, "brls/text", nvgRGB(255, 255, 255));
+    NVGcolor B  = has("background") ? seeds.at("background") : lookup(base, "aurore/background", nvgRGB(45, 45, 45));
+    NVGcolor T  = has("text") ? seeds.at("text") : lookup(base, "aurore/text", nvgRGB(255, 255, 255));
     NVGcolor S  = has("surface") ? seeds.at("surface")
-                                 : lookup(base, "cadran/surf", lookup(base, "brls/highlight/background", B));
+                                 : lookup(base, "cadran/surf", lookup(base, "aurore/highlight/background", B));
     NVGcolor S2 = has("surface") || has("text") ? mix(S, T, 0.05f) : lookup(base, "cadran/surf2", S);
     bool dark   = isDark(B);
     auto alpha  = [dark](NVGcolor c, int onDark, int onLight)
@@ -344,82 +344,82 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
 
     if (has("background"))
     {
-        out["brls/background"]         = B;
-        out["brls/clear"]              = B;
-        out["brls/sidebar/background"] = B;
+        out["aurore/background"]         = B;
+        out["aurore/clear"]              = B;
+        out["aurore/sidebar/background"] = B;
     }
 
     if (has("surface"))
     {
-        out["brls/highlight/background"]               = S;
-        out["cadran/surf"]                             = S;
-        out["cadran/surf2"]                            = S2;
-        out["brls/button/default_enabled_background"]  = S2;
-        out["brls/button/default_disabled_background"] = S2;
+        out["aurore/highlight/background"]               = S;
+        out["cadran/surf"]                               = S;
+        out["cadran/surf2"]                              = S2;
+        out["aurore/button/default_enabled_background"]  = S2;
+        out["aurore/button/default_disabled_background"] = S2;
     }
 
     if (has("text") || has("background"))
     {
-        NVGcolor text2                           = inkOn(mix(T, B, 0.30f), 4.5f);
-        NVGcolor text3                           = inkOn(mix(T, B, 0.45f), 4.5f);
-        NVGcolor line                            = alpha(T, 36, 26);
-        out["brls/text"]                         = T;
-        out["cadran/text"]                       = T;
-        out["cadran/text2"]                      = text2;
-        out["cadran/text3"]                      = text3;
-        out["brls/text_disabled"]                = mix(T, B, 0.55f);
-        out["brls/text_secondary"]               = text3;
-        out["brls/header/subtitle"]              = text3;
-        out["brls/header/rectangle"]             = text3;
-        out["brls/list/listItem_value_color"]    = text2;
-        out["brls/sidebar/separator"]            = line;
-        out["brls/applet_frame/separator"]       = line;
-        out["brls/header/border"]                = line;
-        out["cadran/line"]                       = line;
-        out["cadran/track"]                      = alpha(T, 23, 26);
-        out["cadran/border"]                     = withAlpha(T, 60);
-        out["cadran/well"]                       = alpha(T, 46, 34);
-        out["brls/button/default_enabled_text"]  = T;
-        out["brls/button/default_disabled_text"] = T;
-        out["brls/button/enabled_border_color"]  = withAlpha(T, 60);
-        out["brls/button/disabled_border_color"] = withAlpha(T, 60);
-        out["brls/slider/line_empty"]            = text3;
-        out["brls/spinner/bar_color"]            = withAlpha(T, 80);
-        out["cadran/key_bg"]                     = T;
-        out["cadran/key_fg"]                     = B;
+        NVGcolor text2                             = inkOn(mix(T, B, 0.30f), 4.5f);
+        NVGcolor text3                             = inkOn(mix(T, B, 0.45f), 4.5f);
+        NVGcolor line                              = alpha(T, 36, 26);
+        out["aurore/text"]                         = T;
+        out["cadran/text"]                         = T;
+        out["cadran/text2"]                        = text2;
+        out["cadran/text3"]                        = text3;
+        out["aurore/text_disabled"]                = mix(T, B, 0.55f);
+        out["aurore/text_secondary"]               = text3;
+        out["aurore/header/subtitle"]              = text3;
+        out["aurore/header/rectangle"]             = text3;
+        out["aurore/list/listItem_value_color"]    = text2;
+        out["aurore/sidebar/separator"]            = line;
+        out["aurore/applet_frame/separator"]       = line;
+        out["aurore/header/border"]                = line;
+        out["cadran/line"]                         = line;
+        out["cadran/track"]                        = alpha(T, 23, 26);
+        out["cadran/border"]                       = withAlpha(T, 60);
+        out["cadran/well"]                         = alpha(T, 46, 34);
+        out["aurore/button/default_enabled_text"]  = T;
+        out["aurore/button/default_disabled_text"] = T;
+        out["aurore/button/enabled_border_color"]  = withAlpha(T, 60);
+        out["aurore/button/disabled_border_color"] = withAlpha(T, 60);
+        out["aurore/slider/line_empty"]            = text3;
+        out["aurore/spinner/bar_color"]            = withAlpha(T, 80);
+        out["cadran/key_bg"]                       = T;
+        out["cadran/key_fg"]                       = B;
     }
 
     if (has("accent") || has("background") || has("surface"))
     {
-        NVGcolor A                                     = has("accent") ? seeds.at("accent") : lookup(base, "brls/accent", T);
-        NVGcolor fill                                  = has("accent") ? A : lookup(base, "cadran/teal_fill", A);
-        NVGcolor railActive                            = withAlpha(fill, 36);
-        NVGcolor accentInk                             = ink(fill, { B, S, S2, railActive }, B, 4.5f);
-        NVGcolor ring                                  = ink(fill, { B }, B, 3.0f);
-        NVGcolor glow                                  = ink(dark ? mix(fill, nvgRGB(255, 255, 255), 0.5f) : mix(fill, B, 0.25f), { B }, B, 3.0f);
-        NVGcolor onFill                                = onColor(fill, T, B);
-        out["brls/accent"]                             = accentInk;
-        out["brls/sidebar/active_item"]                = accentInk;
-        out["brls/button/highlight_enabled_text"]      = accentInk;
-        out["brls/button/highlight_disabled_text"]     = accentInk;
-        out["brls/highlight/color1"]                   = ring;
-        out["brls/highlight/color2"]                   = glow;
-        out["brls/click_pulse"]                        = withAlpha(fill, 38);
-        out["brls/button/primary_enabled_background"]  = fill;
-        out["brls/button/primary_enabled_text"]        = onFill;
-        out["brls/button/primary_disabled_background"] = mix(fill, B, 0.6f);
-        out["brls/button/primary_disabled_text"]       = mix(onFill, mix(fill, B, 0.6f), 0.5f);
-        out["brls/slider/line_filled"]                 = fill;
-        out["cadran/teal"]                             = accentInk;
-        out["cadran/teal_fill"]                        = fill;
-        out["cadran/teal_soft"]                        = withAlpha(fill, 26);
-        out["cadran/glow"]                             = alpha(fill, 31, 41);
-        out["cadran/glow_strong"]                      = alpha(fill, 51, 56);
-        out["cadran/pill_ok"]                          = dark ? withAlpha(fill, 41) : over(withAlpha(fill, 46), S);
-        out["cadran/pill_ok_ink"]                      = ink(accentInk, { B, S, out["cadran/pill_ok"] }, B, 4.5f);
-        out["cadran/rail_active"]                      = railActive;
-        out["cadran/hl1"]                              = ring;
-        out["cadran/hl2"]                              = glow;
+        NVGcolor A                                       = has("accent") ? seeds.at("accent") : lookup(base, "aurore/accent", T);
+        NVGcolor fill                                    = has("accent") ? A : lookup(base, "cadran/teal_fill", A);
+        NVGcolor railActive                              = withAlpha(fill, 36);
+        NVGcolor accentInk                               = ink(fill, { B, S, S2, railActive }, B, 4.5f);
+        NVGcolor ring                                    = ink(fill, { B }, B, 3.0f);
+        NVGcolor glow                                    = ink(dark ? mix(fill, nvgRGB(255, 255, 255), 0.5f) : mix(fill, B, 0.25f), { B }, B, 3.0f);
+        NVGcolor onFill                                  = onColor(fill, T, B);
+        out["aurore/accent"]                             = accentInk;
+        out["aurore/sidebar/active_item"]                = accentInk;
+        out["aurore/button/highlight_enabled_text"]      = accentInk;
+        out["aurore/button/highlight_disabled_text"]     = accentInk;
+        out["aurore/highlight/color1"]                   = ring;
+        out["aurore/highlight/color2"]                   = glow;
+        out["aurore/click_pulse"]                        = withAlpha(fill, 38);
+        out["aurore/button/primary_enabled_background"]  = fill;
+        out["aurore/button/primary_enabled_text"]        = onFill;
+        out["aurore/button/primary_disabled_background"] = mix(fill, B, 0.6f);
+        out["aurore/button/primary_disabled_text"]       = mix(onFill, mix(fill, B, 0.6f), 0.5f);
+        out["aurore/slider/line_filled"]                 = fill;
+        out["cadran/teal"]                               = accentInk;
+        out["cadran/teal_fill"]                          = fill;
+        out["cadran/teal_soft"]                          = withAlpha(fill, 26);
+        out["cadran/glow"]                               = alpha(fill, 31, 41);
+        out["cadran/glow_strong"]                        = alpha(fill, 51, 56);
+        out["cadran/pill_ok"]                            = dark ? withAlpha(fill, 41) : over(withAlpha(fill, 46), S);
+        out["cadran/pill_ok_ink"]                        = ink(accentInk, { B, S, out["cadran/pill_ok"] }, B, 4.5f);
+        out["cadran/rail_active"]                        = railActive;
+        out["cadran/hl1"]                                = ring;
+        out["cadran/hl2"]                                = glow;
         addAccentShades(out, fill, B, T);
     }
 
@@ -446,7 +446,7 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
     // removal's): the ink that reads best on all of them
     if (has("accent") || has("danger") || has("text") || has("background"))
     {
-        NVGcolor fills[] = { has("accent") ? seeds.at("accent") : lookup(base, "cadran/teal_fill", lookup(base, "brls/button/primary_enabled_background", B)),
+        NVGcolor fills[] = { has("accent") ? seeds.at("accent") : lookup(base, "cadran/teal_fill", lookup(base, "aurore/button/primary_enabled_background", B)),
             has("danger") ? seeds.at("danger") : lookup(base, "cadran/coral_fill", B) };
         // The fills the file gives first: the others can be adjusted
         bool given[]    = { has("accent"), has("danger") };
@@ -472,7 +472,7 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
         if (bestRatio < 4.5f)
         {
             const char* seeded[]  = { "accent", "danger" };
-            const char* keys[][2] = { { "cadran/teal_fill", "brls/button/primary_enabled_background" }, { "cadran/coral_fill", nullptr } };
+            const char* keys[][2] = { { "cadran/teal_fill", "aurore/button/primary_enabled_background" }, { "cadran/coral_fill", nullptr } };
             NVGcolor away         = luminance(best) > 0.5f ? nvgRGB(0, 0, 0) : nvgRGB(255, 255, 255);
             for (int i = 0; i < 2; i++)
             {
@@ -504,9 +504,10 @@ ThemeValues::ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>>
     this->values = this->base;
 }
 
-void ThemeValues::addColor(const std::string& name, NVGcolor color)
+void ThemeValues::addColor(const std::string& key, NVGcolor color)
 {
-    auto it = this->base.find(name);
+    const std::string name = canonicalKey(key);
+    auto it                = this->base.find(name);
     if (it != this->base.end() && sameRgba(it->second, color))
         return;
     this->base[name] = color;
@@ -521,16 +522,18 @@ void ThemeValues::addColor(const std::string& name, NVGcolor color)
 NVGcolor ThemeValues::getColor(const std::string& name)
 {
     auto it = this->values.find(name);
+    if (it == this->values.end() && isLegacyKey(name))
+        it = this->values.find(canonicalKey(name));
     if (it == this->values.end())
         fatal("Unknown theme value \"" + name + "\" in size: " + std::to_string(this->values.size()));
     if (Inspector::recording)
-        Inspector::recordColor(name, it->second);
+        Inspector::recordColor(it->first, it->second);
     return it->second;
 }
 
 bool ThemeValues::hasColor(const std::string& name) const
 {
-    return this->values.count(name) > 0;
+    return this->values.count(name) > 0 || (isLegacyKey(name) && this->values.count(canonicalKey(name)) > 0);
 }
 
 void ThemeValues::setOverlay(const std::unordered_map<std::string, NVGcolor>& overlay)
@@ -538,7 +541,7 @@ void ThemeValues::setOverlay(const std::unordered_map<std::string, NVGcolor>& ov
     this->overlay = overlay;
     this->values  = this->base;
     for (auto& [name, color] : overlay)
-        this->values[name] = color;
+        this->values[canonicalKey(name)] = color;
     generation++;
 }
 
@@ -664,12 +667,12 @@ struct ContrastCheck
 
 // The pairs most of the core's text is drawn with
 static std::vector<ContrastCheck> contrastChecks = {
-    { "brls/text", "brls/background", 4.5f },
-    { "brls/text", "brls/sidebar/background", 4.5f },
-    { "brls/text_secondary", "brls/background", 4.5f },
-    { "brls/list/listItem_value_color", "brls/background", 4.5f },
-    { "brls/button/primary_enabled_text", "brls/button/primary_enabled_background", 4.5f },
-    { "brls/notification/text", "brls/notification/background", 4.5f },
+    { "aurore/text", "aurore/background", 4.5f },
+    { "aurore/text", "aurore/sidebar/background", 4.5f },
+    { "aurore/text_secondary", "aurore/background", 4.5f },
+    { "aurore/list/listItem_value_color", "aurore/background", 4.5f },
+    { "aurore/button/primary_enabled_text", "aurore/button/primary_enabled_background", 4.5f },
+    { "aurore/notification/text", "aurore/notification/background", 4.5f },
 };
 
 void Theme::addContrastCheck(const std::string& ink, const std::string& surface, float minimum)
@@ -685,10 +688,10 @@ void Theme::addContrastCheck(const std::string& ink, const std::string& surface,
 
 // The surfaces a background image shows through (surface_opacity)
 static std::vector<std::string> surfaceKeys = {
-    "brls/sidebar/background",
-    "brls/highlight/background",
-    "brls/button/default_enabled_background",
-    "brls/button/default_disabled_background",
+    "aurore/sidebar/background",
+    "aurore/highlight/background",
+    "aurore/button/default_enabled_background",
+    "aurore/button/default_disabled_background",
 };
 
 void Theme::addSurfaceKey(const std::string& key)
@@ -704,7 +707,7 @@ static std::vector<std::string> checkColors(const ColorMap& colors, const NVGcol
     bool backdropOnly = false)
 {
     std::vector<std::string> warnings;
-    auto background = colors.find("brls/background");
+    auto background = colors.find("aurore/background");
     if (background == colors.end())
         return warnings;
     NVGcolor under = backdrop ? *backdrop : over(background->second, nvgRGB(0, 0, 0));
@@ -715,7 +718,7 @@ static std::vector<std::string> checkColors(const ColorMap& colors, const NVGcol
         if (ink == colors.end() || surface == colors.end())
             continue;
         // Text on the screens' background sits on the image
-        bool onScreen = backdrop && (check.surface == "brls/background" || check.surface == "brls/clear");
+        bool onScreen = backdrop && (check.surface == "aurore/background" || check.surface == "aurore/clear");
         if (backdropOnly && !onScreen && !(backdrop && surface->second.a < 1.0f))
             continue;
         NVGcolor drawnSurface = onScreen ? under : over(surface->second, under);
@@ -732,10 +735,10 @@ static std::vector<std::string> checkColors(const ColorMap& colors, const NVGcol
 }
 
 // The screens' background as drawn over `background`'s image: its average
-// colour under the veil of brls/background
+// colour under the veil of aurore/background
 static NVGcolor backdropOf(const ColorMap& colors, const ThemeBackground& background, NVGcolor mean)
 {
-    NVGcolor veil = lookup(colors, "brls/background", nvgRGB(0, 0, 0));
+    NVGcolor veil = lookup(colors, "aurore/background", nvgRGB(0, 0, 0));
     veil.a *= background.dim;
     return over(veil, mean);
 }
@@ -804,7 +807,7 @@ static bool readThemeRaw(const std::string& name, std::string* text)
 #endif
     std::string file = path;
     if (startsWith(file, "@res/"))
-        file = std::string(BRLS_RESOURCES) + file.substr(5);
+        file = std::string(AURORE_RESOURCES) + file.substr(5);
     return readSmallFile(file, MAX_THEME_FILE_BYTES, text);
 }
 
@@ -1521,7 +1524,8 @@ static void parseThemeText(const std::string& text, const std::string& directory
             report(out, where(number) + ": no '=' in \"" + (line.size() > 40 ? line.substr(0, 40) + "..." : line) + "\"");
             continue;
         }
-        std::string key   = trim(line.substr(0, equals));
+        // borealis' keys (deprecated) are read as Aurore's
+        std::string key   = canonicalKey(trim(line.substr(0, equals)));
         std::string value = trim(line.substr(equals + 1));
 
         if (section == "metrics")
@@ -2026,11 +2030,11 @@ static ThemeInfo::Preview previewOf(const ColorMap& base, const ColorMap& overla
         return nvgRGB(0, 0, 0);
     };
     ThemeInfo::Preview preview;
-    preview.background = color("brls/background", "brls/clear");
-    preview.surface    = color("cadran/surf", "brls/highlight/background");
-    preview.text       = color("brls/text", "brls/text");
-    preview.accent     = color("brls/sidebar/active_item", "brls/accent");
-    preview.highlight  = color("brls/highlight/color1", "brls/highlight/color1");
+    preview.background = color("aurore/background", "aurore/clear");
+    preview.surface    = color("cadran/surf", "aurore/highlight/background");
+    preview.text       = color("aurore/text", "aurore/text");
+    preview.accent     = color("aurore/sidebar/active_item", "aurore/accent");
+    preview.highlight  = color("aurore/highlight/color1", "aurore/highlight/color1");
     return preview;
 }
 
@@ -2180,7 +2184,7 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory, bool deco
     else
 #endif
     {
-        std::string real = startsWith(folder, "@res/") ? std::string(BRLS_RESOURCES) + folder.substr(5) : folder;
+        std::string real = startsWith(folder, "@res/") ? std::string(AURORE_RESOURCES) + folder.substr(5) : folder;
         try
         {
             if (fs::is_directory(real))
@@ -2320,4 +2324,4 @@ std::vector<ThemeInfo> Theme::builtinThemes()
     return themes;
 }
 
-} // namespace brls
+} // namespace aurore

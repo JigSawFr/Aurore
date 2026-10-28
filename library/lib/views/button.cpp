@@ -17,36 +17,36 @@
 
 #include <math.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/touch/tap_gesture.hpp>
-#include <borealis/views/button.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/touch/tap_gesture.hpp>
+#include <aurore/views/button.hpp>
 
-namespace brls
+namespace aurore
 {
 
 const std::string buttonXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
         height="auto"
         axis="row"
         focusable="true"
         justifyContent="center"
         alignItems="center"
-        paddingTop="@style/brls/button/padding_top_bottom"
-        paddingRight="@style/brls/button/padding_sides"
-        paddingBottom="@style/brls/button/padding_top_bottom"
-        paddingLeft="@style/brls/button/padding_sides"
-        cornerRadius="@style/brls/button/corner_radius"
-        highlightCornerRadius="@style/brls/button/corner_radius">
+        paddingTop="@style/aurore/button/padding_top_bottom"
+        paddingRight="@style/aurore/button/padding_sides"
+        paddingBottom="@style/aurore/button/padding_top_bottom"
+        paddingLeft="@style/aurore/button/padding_sides"
+        cornerRadius="@style/aurore/button/corner_radius"
+        highlightCornerRadius="@style/aurore/button/corner_radius">
 
-    <brls:Label
-        id="brls/button/label"
+    <aurore:Label
+        id="aurore/button/label"
         width="auto"
         height="auto"
-        fontSize="@style/brls/button/text_size"
+        fontSize="@style/aurore/button/text_size"
         horizontalAlign="center" />
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 Button::Button()
@@ -65,7 +65,7 @@ Button::Button()
     this->registerColorXMLAttribute("textColor", [this](NVGcolor color)
         { this->setTextColor(color); });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "style", const ButtonStyle*, this->setStyle,
         {
             { "default", &BUTTONSTYLE_DEFAULT },
@@ -75,7 +75,7 @@ Button::Button()
             { "borderless", &BUTTONSTYLE_BORDERLESS },
         });
 
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE(
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
         "state", ButtonState, this->setState,
         {
             { "enabled", ButtonState::ENABLED },
@@ -232,4 +232,4 @@ View* Button::create()
     return new Button();
 }
 
-} // namespace brls
+} // namespace aurore

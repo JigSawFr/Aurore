@@ -14,12 +14,12 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/glfw/glfw_video.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/glfw/glfw_video.hpp>
 
 // nanovg implementation
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #include <glad/glad.h>
 #ifdef USE_GL2
 #define NANOVG_GL2_IMPLEMENTATION
@@ -31,15 +31,15 @@
 #define NANOVG_GL3_IMPLEMENTATION
 #endif /* USE_GL2 */
 #include <nanovg_gl.h>
-#include <borealis/platforms/driver/gl_read_pixels.hpp>
-#elif defined(BOREALIS_USE_METAL)
+#include <aurore/platforms/driver/gl_read_pixels.hpp>
+#elif defined(AURORE_USE_METAL)
 static void* METAL_CONTEXT = nullptr;
-#include <borealis/platforms/glfw/driver/metal.hpp>
-#elif defined(BOREALIS_USE_D3D11)
+#include <aurore/platforms/glfw/driver/metal.hpp>
+#elif defined(AURORE_USE_D3D11)
 #include <nanovg_d3d11.h>
 
-#include <borealis/platforms/driver/d3d11.hpp>
-std::unique_ptr<brls::D3D11Context> D3D11_CONTEXT;
+#include <aurore/platforms/driver/d3d11.hpp>
+std::unique_ptr<aurore::D3D11Context> D3D11_CONTEXT;
 #endif
 
 #if defined(__linux__) || defined(_WIN32)
@@ -56,7 +56,7 @@ std::unique_ptr<brls::D3D11Context> D3D11_CONTEXT;
 #include <windows.h>
 #endif
 
-namespace brls
+namespace aurore
 {
 
 static double scaleFactor = 1.0;
@@ -130,12 +130,12 @@ static void glfwWindowFramebufferSizeCallback(GLFWwindow* window, int width, int
 {
     if (!width || !height)
         return;
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glViewport(0, 0, width, height);
     int wWidth, wHeight;
     glfwGetWindowSize(window, &wWidth, &wHeight);
     scaleFactor = width * 1.0 / wWidth;
-#elif defined(BOREALIS_USE_METAL)
+#elif defined(AURORE_USE_METAL)
     if (METAL_CONTEXT == nullptr)
     {
         return;
@@ -147,7 +147,7 @@ static void glfwWindowFramebufferSizeCallback(GLFWwindow* window, int width, int
     // cocoa 画布大小和窗口一致
     width  = wWidth;
     height = wHeight;
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     if (D3D11_CONTEXT == nullptr)
     {
         return;
@@ -185,7 +185,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     }
 
     // Create window
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #if defined(USE_GLES2)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
@@ -298,7 +298,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     {
     }
 #else
-    const char* icon_path = BRLS_ASSET("icon/icon.png");
+    const char* icon_path = AURORE_ASSET("icon/icon.png");
     if (access(icon_path, F_OK) != -1)
     {
         images[0].pixels = nvgDecodeImage(icon_path, &images[0].width, &images[0].height);
@@ -350,7 +350,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     glfwSetFramebufferSizeCallback(window, glfwWindowFramebufferSizeCallback);
     glfwSetWindowPosCallback(window, glfwWindowPositionCallback);
 
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glfwMakeContextCurrent(window);
     // Load OpenGL routines using glad
     gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -362,7 +362,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     Logger::info("glfw: GLFW Version: {}.{}.{}", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
 
     // Initialize nanovg
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #ifdef USE_GLES2
     this->nvgContext = nvgCreateGLES2(0);
 #elif defined(USE_GLES3)
@@ -372,13 +372,13 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
 #else
     this->nvgContext = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_ANTIALIAS);
 #endif
-#elif defined(BOREALIS_USE_METAL)
+#elif defined(AURORE_USE_METAL)
     Logger::info("glfw: USE_METAL");
     void* ctx        = CreateMetalContext(window);
     METAL_CONTEXT    = ctx;
     this->nvgContext = nvgCreateMTL(GetMetalLayer(ctx), NVG_STENCIL_STROKES | NVG_ANTIALIAS);
     scaleFactor      = GetMetalScaleFactor(ctx);
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     Logger::info("glfw: USE_D3D11");
     D3D11_CONTEXT    = std::make_unique<D3D11Context>(this->window, windowWidth, windowHeight);
     this->nvgContext = nvgCreateD3D11(D3D11_CONTEXT->getDevice(), NVG_ANTIALIAS | NVG_STENCIL_STROKES);
@@ -406,9 +406,9 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     glfwGetWindowPos(window, &xPos, &yPos);
     Application::setWindowPosition(xPos, yPos);
 
-#if defined(BOREALIS_USE_D3D11)
+#if defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->onFramebufferSize(width, height);
-#elif defined(BOREALIS_USE_METAL)
+#elif defined(AURORE_USE_METAL)
 #else
     scaleFactor = width * 1.0 / wWidth;
     glViewport(0, 0, width, height);
@@ -425,7 +425,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
 #ifdef __SWITCH__
     this->monitor    = glfwGetPrimaryMonitor();
     const char* name = glfwGetMonitorName(monitor);
-    brls::Logger::info("glfw: Monitor: {}", name);
+    aurore::Logger::info("glfw: Monitor: {}", name);
 #endif
 }
 
@@ -441,16 +441,16 @@ void GLFWVideoContext::beginFrame()
 
         glfwSetWindowSize(window, r->width, r->height);
     }
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->beginFrame();
 #endif
 }
 
 void GLFWVideoContext::endFrame()
 {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glfwSwapBuffers(this->window);
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->endFrame();
 #endif
 }
@@ -458,7 +458,7 @@ void GLFWVideoContext::endFrame()
 void GLFWVideoContext::setSwapInterval(int interval)
 {
     VideoContext::swapInterval = interval;
-#ifdef BOREALIS_USE_D3D11
+#ifdef AURORE_USE_D3D11
     D3D11_CONTEXT->setSwapInterval(interval);
 #else
     glfwSwapInterval(interval);
@@ -468,7 +468,7 @@ void GLFWVideoContext::setSwapInterval(int interval)
 void GLFWVideoContext::clear(NVGcolor color)
 {
 
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glClearColor(
         color.r,
         color.g,
@@ -476,9 +476,9 @@ void GLFWVideoContext::clear(NVGcolor color)
         color.a);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-#elif defined(BOREALIS_USE_METAL)
+#elif defined(AURORE_USE_METAL)
     nvgClearWithColor(nvgContext, nvgRGBAf(color.r, color.g, color.b, color.a));
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->clear(nvgRGBAf(
         color.r,
         color.g,
@@ -489,7 +489,7 @@ void GLFWVideoContext::clear(NVGcolor color)
 
 void GLFWVideoContext::resetState()
 {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glDisable(GL_CULL_FACE);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -505,7 +505,7 @@ double GLFWVideoContext::getScaleFactor()
 
 bool GLFWVideoContext::readPixels(std::vector<unsigned char>* rgba, int* width, int* height)
 {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     *width  = (int)Application::windowWidth;
     *height = (int)Application::windowHeight;
     return glReadPixelsTopDown(*width, *height, rgba);
@@ -520,7 +520,7 @@ GLFWVideoContext::~GLFWVideoContext()
     {
         if (this->nvgContext)
         {
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
 #ifdef USE_GLES2
             nvgDeleteGLES2(this->nvgContext);
 #elif defined(USE_GLES3)
@@ -530,10 +530,10 @@ GLFWVideoContext::~GLFWVideoContext()
 #else
             nvgDeleteGL3(this->nvgContext);
 #endif
-#elif defined(BOREALIS_USE_METAL)
+#elif defined(AURORE_USE_METAL)
             nvgDeleteMTL(this->nvgContext);
             METAL_CONTEXT = nullptr;
-#elif defined(BOREALIS_USE_D3D11)
+#elif defined(AURORE_USE_D3D11)
             nvgDeleteD3D11(this->nvgContext);
             D3D11_CONTEXT = nullptr;
 #endif
@@ -572,7 +572,7 @@ void GLFWVideoContext::fullScreen(bool fs)
 {
     VideoContext::FULLSCREEN = fs;
 
-    brls::Logger::info("Set fullscreen: {}", fs);
+    aurore::Logger::info("Set fullscreen: {}", fs);
     if (fs)
     {
         GLFWmonitor* monitor    = getCurrentMonitor(this->window);
@@ -615,7 +615,7 @@ void GLFWVideoContext::fullScreen(bool fs)
             glfwSetWindowMonitor(this->window, nullptr, (int)posX, (int)posY, (int)sizeW, (int)sizeH, mode->refreshRate);
         }
     }
-#ifdef BOREALIS_USE_OPENGL
+#ifdef AURORE_USE_OPENGL
     glfwSwapInterval(VideoContext::swapInterval);
 #endif
 }
@@ -625,4 +625,4 @@ GLFWwindow* GLFWVideoContext::getGLFWWindow()
     return this->window;
 }
 
-} // namespace brls
+} // namespace aurore

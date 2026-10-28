@@ -1,0 +1,104 @@
+/*
+    Copyright 2019-2021 natinusala
+    Copyright 2021 XITRIX
+    Copyright 2019 p-sam
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
+#pragma once
+
+#include <aurore/core/bind.hpp>
+#include <aurore/core/box.hpp>
+#include <aurore/core/event.hpp>
+#include <aurore/views/bottom_bar.hpp>
+#include <aurore/views/image.hpp>
+#include <aurore/views/label.hpp>
+
+namespace aurore
+{
+
+enum class HeaderStyle
+{
+    REGULAR,
+    POPUP
+};
+
+// A Horizon settings-like frame, with header and footer (no sidebar)
+class AppletFrame : public Box
+{
+  public:
+    AppletFrame();
+    AppletFrame(View* contentView);
+
+    ~AppletFrame()
+    {
+        aurore::Logger::debug("delete AppletFrame {}", this->describe());
+    }
+
+    void handleXMLElement(tinyxml2::XMLElement* element) override;
+
+    void pushContentView(View* view);
+    void popContentView(std::function<void(void)> cb = [] {});
+    void popToRootContentView(std::function<void(void)> cb = [] {});
+
+    void setTitle(std::string title);
+    void setIcon(std::string path);
+
+    void setHeaderVisibility(Visibility visibility);
+    void setFooterVisibility(Visibility visibility);
+
+    void setHeaderStyle(HeaderStyle style);
+    void updateAppletFrameItem();
+
+    View* getContentView()
+    {
+        return contentView;
+    }
+
+    Box* getHeader()
+    {
+        return header;
+    }
+
+    Box* getFooter()
+    {
+        return footer;
+    }
+
+    static View* create();
+
+    inline static bool HIDE_BOTTOM_BAR = false;
+
+  private:
+    AURORE_BIND(Box, header, "aurore/applet_frame/header");
+    AURORE_BIND(BottomBar, footer, "aurore/applet_frame/footer");
+    AURORE_BIND(Label, title, "aurore/applet_frame/title_label");
+    AURORE_BIND(Image, icon, "aurore/applet_frame/title_icon");
+    AURORE_BIND(Box, hintBox, "aurore/applet_frame/hint_box");
+
+    HeaderStyle style = HeaderStyle::REGULAR;
+
+  protected:
+    std::vector<View*> contentViewStack;
+    View* contentView = nullptr;
+
+    /**
+     * Sets the content view for that AppletFrame.
+     * Will be placed between header and footer and expanded with grow factor
+     * and width / height to AUTO.
+     */
+    void setContentView(View* view);
+};
+
+} // namespace aurore

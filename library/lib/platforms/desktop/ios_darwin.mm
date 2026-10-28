@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
-#import <borealis/core/logger.hpp>
-#import <borealis/platforms/desktop/desktop_platform.hpp>
+#import <aurore/core/logger.hpp>
+#import <aurore/platforms/desktop/desktop_platform.hpp>
 
-namespace brls
+namespace aurore
 {
 
 ThemeVariant ios_theme()

@@ -3,15 +3,15 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran.hpp>
 
 #include "home_tab.hpp"
 
-using namespace brls::literals; // "key"_i18n
+using namespace aurore::literals; // "key"_i18n
 
 // The main screen, from resources/xml/activity/main.xml
-class MainActivity : public brls::Activity
+class MainActivity : public aurore::Activity
 {
   public:
     CONTENT_FROM_XML_RES("activity/main.xml");
@@ -23,21 +23,21 @@ int main(int argc, char* argv[])
     ui::hooks::get().rail_icons = []()
     { return std::vector<std::string> { "home", "info" }; };
 
-    if (!brls::Application::init())
+    if (!aurore::Application::init())
     {
-        brls::Logger::error("Unable to init the application");
+        aurore::Logger::error("Unable to init the application");
         return EXIT_FAILURE;
     }
 
-    brls::Application::createWindow("app/title"_i18n);
-    brls::Application::setGlobalQuit(true); // + quits, on every screen
+    aurore::Application::createWindow("app/title"_i18n);
+    aurore::Application::setGlobalQuit(true); // + quits, on every screen
 
     // The app's own views, before the XML that uses them
-    brls::Application::registerXMLView("HomeTab", HomeTab::create);
+    aurore::Application::registerXMLView("HomeTab", HomeTab::create);
 
-    brls::Application::pushActivity(new MainActivity());
+    aurore::Application::pushActivity(new MainActivity());
 
-    while (brls::Application::mainLoop())
+    while (aurore::Application::mainLoop())
         ;
 
     return EXIT_SUCCESS;

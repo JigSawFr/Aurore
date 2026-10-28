@@ -1,6 +1,6 @@
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
-#include <borealis/platforms/glfw/driver/metal.hpp>
+#include <aurore/platforms/glfw/driver/metal.hpp>
 
 struct context_mtl
 {

@@ -1,0 +1,303 @@
+/*
+    Copyright 2021 XITRIX
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
+#pragma once
+
+#include <functional>
+#include <map>
+#include <vector>
+#include <aurore/core/application.hpp>
+#include <aurore/core/bind.hpp>
+#include <aurore/views/header.hpp>
+#include <aurore/views/label.hpp>
+#include <aurore/views/rectangle.hpp>
+#include <aurore/views/scrolling_frame.hpp>
+
+namespace aurore
+{
+
+/// A cell's place in a RecyclerFrame: its section and row (`item`: the row, or the
+/// item's index for a grid).
+struct IndexPath
+{
+    size_t section;
+    int row;
+    size_t item;
+
+    IndexPath()
+        : IndexPath(0, 0, 0)
+    {
+    }
+
+    IndexPath(size_t section, size_t row, size_t item)
+    {
+        this->section = section;
+        this->row     = row;
+        this->item    = item;
+    }
+
+    IndexPath(size_t section, size_t row)
+        : IndexPath(section, row, row)
+    {
+    }
+
+    bool operator==(const IndexPath& other)
+    {
+        return section == other.section && row == other.row && item == other.item;
+    }
+};
+
+/// A cell of a RecyclerFrame, reused as the list scrolls: subclass it, fill it in
+/// RecyclerDataSource::cellForRow().
+class RecyclerCell : public Box
+{
+  public:
+    /// An empty cell.
+    RecyclerCell();
+    ~RecyclerCell();
+
+    /**
+     * Cell's position inside recycler frame
+     */
+    IndexPath getIndexPath() const { return indexPath; }
+
+    /**
+     * DO NOT USE! FOR INTERNAL USAGE ONLY!
+     */
+    void setIndexPath(IndexPath value);
+
+    /**
+     * A string used to identify a cell that is reusable.
+     */
+    std::string reuseIdentifier;
+
+    /**
+     * Prepares a reusable cell for reuse by the recycler frame's data source.
+     */
+    virtual void prepareForReuse() { }
+
+    /// Makes an empty cell (registerCell's default).
+    static RecyclerCell* create();
+
+    void onFocusGained() override;
+    void onFocusLost() override;
+    void onTextScaleChanged() override;
+
+  protected:
+    /// The height set grows with the text (Application::setTextScale), as a
+    /// minimum height: a larger text keeps the cell's padding. DetailCell and
+    /// RadioCell (and the cells made from them) do it.
+    void growWithText();
+
+  private:
+    void showSeparator(bool show);
+    bool growsWithText = false;
+    bool grown         = false;
+    IndexPath indexPath;
+    Event<InputType>::Subscription subscription;
+};
+
+/// A section's header in a RecyclerFrame: a title and a subtitle.
+class RecyclerHeader
+    : public RecyclerCell
+{
+  public:
+    RecyclerHeader();
+
+    /// The header's title.
+    void setTitle(std::string text);
+    /// The header's subtitle, on the right.
+    void setSubtitle(std::string text);
+
+    /// Makes an empty header.
+    static RecyclerHeader* create();
+
+  private:
+    Header* header;
+};
+
+class RecyclerFrame;
+/// What a RecyclerFrame shows: the app subclasses it and gives it with
+/// RecyclerFrame::setDataSource().
+class RecyclerDataSource
+{
+  public:
+    /**
+     * Asks the data source to return the number of sections in the recycler frame.
+     */
+    virtual int numberOfSections(RecyclerFrame* recycler) { return 1; }
+
+    /**
+     * Tells the data source to return the number of rows in a recycler frame.
+     */
+    virtual int numberOfRows(RecyclerFrame* recycler, int section) { return 0; }
+
+    /**
+     * Asks the data source for a cell to insert in a particular location of the recycler frame.
+     */
+    virtual RecyclerCell* cellForRow(RecyclerFrame* recycler, IndexPath index) { return nullptr; }
+
+    /**
+     * Asks the data source for a cell to display in the header of the specified section of the recycler frame.
+     */
+    virtual RecyclerCell* cellForHeader(RecyclerFrame* recycler, int section);
+
+    /**
+     * Asks the data source for the height to use for a row in a specified location.
+     * Return -1 to use autoscaling.
+     */
+    virtual float heightForRow(RecyclerFrame* recycler, IndexPath index) { return -1; }
+
+    /**
+     * Asks the data source for the height to use for the header of a particular section.
+     * Return -1 to use autoscaling.
+     */
+    virtual float heightForHeader(RecyclerFrame* recycler, int section);
+
+    /**
+     * Asks the data source for the title of the header of the specified section of the recycler frame.
+     */
+    virtual std::string titleForHeader(RecyclerFrame* recycler, int section) { return ""; }
+
+    /**
+     * Tells the data source a row is selected.
+     */
+    virtual void didSelectRowAt(RecyclerFrame* recycler, IndexPath index) { }
+
+    virtual ~RecyclerDataSource() = default;
+};
+
+/// The box a RecyclerFrame lays its cells in, which asks it where the focus goes.
+class RecyclerContentBox : public Box
+{
+  public:
+    RecyclerContentBox(RecyclerFrame* recycler);
+    View* getNextFocus(FocusDirection direction, View* currentView) override;
+
+  private:
+    RecyclerFrame* recycler;
+};
+
+/// A list that makes only the cells on screen, and reuses them as it
+/// scrolls: a long list at the cost of a short one. Its rows come from a
+/// RecyclerDataSource; its cells are registered by a reuse identifier
+/// (registerCell) and taken back with dequeueReusableCell().
+class RecyclerFrame : public ScrollingFrame
+{
+  public:
+    /// An empty list; give it a data source and register its cells.
+    RecyclerFrame();
+    ~RecyclerFrame();
+
+    /// The cell the focus goes to from `currentView` (cells off screen included).
+    View* getNextCellFocus(FocusDirection direction, View* currentView);
+    void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
+    void onLayout() override;
+    void onThemeChanged() override;
+    void setPadding(float padding) override;
+    void setPadding(float top, float right, float bottom, float left) override;
+    void setPaddingTop(float top) override;
+    void setPaddingRight(float right) override;
+    void setPaddingBottom(float bottom) override;
+    void setPaddingLeft(float left) override;
+
+    /**
+     * Set an object that acts as the data source of the recycler frame.
+     *
+     * deleteDataSource: set to false if source object deletion should NOT be
+     * handled by the RecyclerFrame.
+     */
+    void setDataSource(RecyclerDataSource* source, bool deleteDataSource = true);
+
+    /**
+     * Get an object that acts as the data source of the recycler frame.
+     */
+    RecyclerDataSource* getDataSource() const;
+
+    /**
+     * Reloads the rows of the recycler frame.
+     */
+    void reloadData();
+
+    /**
+     * Registers a class for use in creating new recycler cells.
+     */
+    void registerCell(std::string identifier, std::function<RecyclerCell*(void)> allocation);
+
+    /**
+     * Returns a reusable recycler-frame cell object for the specified reuse identifier
+     */
+    RecyclerCell* dequeueReusableCell(std::string identifier);
+
+    /**
+     * Selects a row in the recycler frame identified by index path.
+     */
+    void selectRowAt(IndexPath indexPath, bool animated);
+
+    /**
+     * Used for initial recycler's frame calculation if rows autoscaling selected.
+     * To provide more accurate height implement RecyclerDataSource::heightForRow().
+     */
+    float estimatedRowHeight = 44;
+
+    /// The cell that takes the focus first.
+    IndexPath getDefaultCellFocus()
+    {
+        return this->defaultCellFocus;
+    }
+
+    /// See getDefaultCellFocus().
+    void setDefaultCellFocus(IndexPath indexPath)
+    {
+        this->defaultCellFocus = indexPath;
+    }
+
+    /// Makes a list for XML (`<aurore:RecyclerFrame>`).
+    static View* create();
+
+  private:
+    RecyclerDataSource* dataSource = nullptr;
+    bool deleteDataSource          = false;
+    bool layouted                  = false;
+
+    uint32_t visibleMin, visibleMax;
+
+    IndexPath defaultCellFocus;
+
+    float paddingTop    = 0;
+    float paddingRight  = 0;
+    float paddingBottom = 0;
+    float paddingLeft   = 0;
+
+    Box* contentBox;
+    Rect renderedFrame;
+    std::vector<Size> cacheFramesData;
+    std::vector<IndexPath> cacheIndexPathData;
+    std::map<std::string, std::vector<RecyclerCell*>*> queueMap;
+    std::map<std::string, std::function<RecyclerCell*(void)>> allocationMap;
+
+    bool checkWidth();
+    float oldWidth = 0;
+
+    void cacheCellFrames();
+    void cellsRecyclingLoop();
+    void queueReusableCell(RecyclerCell* cell);
+
+    void addCellAt(size_t index, size_t downSide);
+    void removeCell(View* view);
+};
+
+} // namespace aurore

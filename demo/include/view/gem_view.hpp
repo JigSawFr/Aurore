@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
 class Gem
 {
@@ -31,7 +31,7 @@ class Gem
     }
 };
 
-class GemView : public brls::Box
+class GemView : public aurore::Box
 {
   public:
     GemView(Gem gem);
@@ -40,10 +40,10 @@ class GemView : public brls::Box
     {
     }
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
     Gem gem;
-    BRLS_BIND(brls::Image, image, "image");
-    BRLS_BIND(brls::Label, description, "description");
+    AURORE_BIND(aurore::Image, image, "image");
+    AURORE_BIND(aurore::Label, description, "description");
 };

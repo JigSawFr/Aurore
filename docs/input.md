@@ -23,13 +23,13 @@ Enter and Escape stay A and B when `Application::setSwapInputKeys(true)` swaps t
 An app changes them before or after `Application::init()`:
 
 ```cpp
-brls::Application::mapKey(brls::BRLS_KBD_KEY_Q, brls::BUTTON_LB);   // Q as L as well
-brls::Application::unmapKey(brls::BRLS_KBD_KEY_M);                  // M types nothing
-brls::Application::mapKey({ brls::BRLS_KBD_KEY_F, brls::BRLS_KBD_MODIFIER_CTRL }, brls::BUTTON_Y);
-brls::Application::clearKeyMap();                                   // Enter, Escape and the arrows only
+aurore::Application::mapKey(aurore::AURORE_KBD_KEY_Q, aurore::BUTTON_LB);   // Q as L as well
+aurore::Application::unmapKey(aurore::AURORE_KBD_KEY_M);                  // M types nothing
+aurore::Application::mapKey({ aurore::AURORE_KBD_KEY_F, aurore::AURORE_KBD_MODIFIER_CTRL }, aurore::BUTTON_Y);
+aurore::Application::clearKeyMap();                                   // Enter, Escape and the arrows only
 ```
 
-A key a view registers an action for (`registerAction(BrlsKeyCombination(...), ...)`) keeps that action only: an app that already gave X its own meaning on the desktop is not pressed twice.
+A key a view registers an action for (`registerAction(AuroreKeyCombination(...), ...)`) keeps that action only: an app that already gave X its own meaning on the desktop is not pressed twice.
 
 ## The mouse
 
@@ -39,4 +39,4 @@ A left click is a touch; the right button is B, the middle one X. The buttons ar
 
 The focus waiting on a scrolling list itself, between two lines out of sight or through a long text, has no highlight: the list's scroll bar then shows it, wider and in the focus colour, until the focus moves to a line again.
 
-A horizontal list (`brls:HScrollingFrame`) scrolled to its start lets Left out to the views around it, the rail first; to its end, Right.
+A horizontal list (`aurore:HScrollingFrame`) scrolled to its start lets Left out to the views around it, the rail first; to its end, Right.

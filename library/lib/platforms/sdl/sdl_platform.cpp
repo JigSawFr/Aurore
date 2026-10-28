@@ -18,10 +18,10 @@
 #include <unistd.h> /* chdir */
 
 #include <unordered_map>
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/sdl/sdl_platform.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/sdl/sdl_platform.hpp>
 
 #if defined(IOS) || defined(TVOS)
 #include <sys/utsname.h>
@@ -34,7 +34,7 @@ static bool isIPad()
 }
 #endif
 
-namespace brls
+namespace aurore
 {
 
 SDLPlatform::SDLPlatform()
@@ -73,13 +73,13 @@ SDLPlatform::SDLPlatform()
     // Platform impls
     this->audioPlayer = new NullAudioPlayer();
 
-    // The system's language, unless BRLS_LANG (or BOREALIS_LANG) gave one
+    // The system's language, unless AURORE_LANG gave one
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO && !this->localeFromEnvironment)
     {
         SDL_Locale* locales = SDL_GetPreferredLocales();
         if (locales != nullptr && locales->language != nullptr)
         {
-            // Every locale of borealis (a browser in French gave English:
+            // Every locale of Aurore (a browser in French gave English:
             // only five were known)
             std::string lang = std::string { locales->language };
             if (locales->country)
@@ -87,7 +87,7 @@ SDLPlatform::SDLPlatform()
                 lang += "_" + std::string { locales->country };
             }
             this->locale = localeFromSystem(lang);
-            brls::Logger::info("Set app locale: {}", this->locale);
+            aurore::Logger::info("Set app locale: {}", this->locale);
             SDL_free(locales);
         }
     }
@@ -224,18 +224,18 @@ bool SDLPlatform::processEvent(SDL_Event* event)
 #if defined(IOS) || defined(ANDROID)
     else if (event->type == SDL_APP_WILLENTERBACKGROUND)
     {
-        brls::Application::getWindowFocusChangedEvent()->fire(false);
+        aurore::Application::getWindowFocusChangedEvent()->fire(false);
     }
     else if (event->type == SDL_APP_WILLENTERFOREGROUND)
     {
-        brls::Application::getWindowFocusChangedEvent()->fire(true);
+        aurore::Application::getWindowFocusChangedEvent()->fire(true);
     }
     else if (event->type == SDL_APP_TERMINATING)
     {
         // OS 正要杀我们（Android swipe-to-recents / iOS 强杀）。在这个窗口期主动走
         // 清理路径，让 MPVCore::clean() + mpv_terminate_destroy 有机会释放
         // MediaCodec / Surface 等底层资源，避免 Tegra 驱动层 slot 泄漏。
-        brls::Application::quit();
+        aurore::Application::quit();
         return false;
     }
 #endif
@@ -244,7 +244,7 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         // 其它没有处理的事件
         this->otherEvent.fire(event);
     }
-    brls::Application::setActiveEvent(true);
+    aurore::Application::setActiveEvent(true);
     return true;
 }
 
@@ -262,7 +262,7 @@ bool SDLPlatform::mainLoopIteration()
     }
     if (!hasEvent && !Application::hasActiveEvent())
     {
-        if (SDL_WaitEventTimeout(&event, (int)(brls::Application::getDeactivatedFrameTime() * 1000))
+        if (SDL_WaitEventTimeout(&event, (int)(aurore::Application::getDeactivatedFrameTime() * 1000))
             && !processEvent(&event))
         {
             return false;
@@ -299,4 +299,4 @@ SDLPlatform::~SDLPlatform()
     delete this->videoContext;
 }
 
-} // namespace brls
+} // namespace aurore

@@ -17,31 +17,31 @@
 */
 
 #include <tinyxml2.h>
-#include <borealis/core/application.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/core/util.hpp>
-#include <borealis/views/tab_frame.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/util.hpp>
+#include <aurore/views/tab_frame.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
 const std::string tabFrameContentXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
         height="auto"
         axis="row">
 
-        <brls:Sidebar
-            id="brls/tab_frame/sidebar"
-            width="@style/brls/tab_frame/sidebar_width"
+        <aurore:Sidebar
+            id="aurore/tab_frame/sidebar"
+            width="@style/aurore/tab_frame/sidebar_width"
             height="auto" />
 
         <!-- Content will be injected here with grow="1.0" -->
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
-namespace brls
+namespace aurore
 {
 
 TabFrame::TabFrame()
@@ -52,7 +52,7 @@ TabFrame::TabFrame()
 void TabFrame::addTab(std::string label, TabViewCreator creator)
 {
     int index = this->tabCount++;
-    this->sidebar->addItem(label, [this, creator, index](brls::View* view)
+    this->sidebar->addItem(label, [this, creator, index](aurore::View* view)
         {
         // Only trigger when the sidebar item gains focus
         if (!view->isFocused())
@@ -148,9 +148,9 @@ void TabFrame::addSeparator()
 
 void TabFrame::handleXMLElement(tinyxml2::XMLElement* element)
 {
-    std::string name = element->Name();
+    std::string name = canonicalXMLName(element->Name());
 
-    if (name == "brls:Tab")
+    if (name == "aurore:Tab")
     {
         const tinyxml2::XMLAttribute* labelAttribute = element->FindAttribute("label");
 
@@ -167,7 +167,7 @@ void TabFrame::handleXMLElement(tinyxml2::XMLElement* element)
                 { return View::createFromXMLElement(viewElement); });
 
             if (viewElement->NextSiblingElement())
-                fatal("\"brls:Tab\" can only contain one child element");
+                fatal("\"aurore:Tab\" can only contain one child element");
         }
         else
         {
@@ -175,13 +175,13 @@ void TabFrame::handleXMLElement(tinyxml2::XMLElement* element)
                 { return nullptr; });
         }
     }
-    else if (name == "brls:Separator")
+    else if (name == "aurore:Separator")
     {
         this->addSeparator();
     }
     else
     {
-        fatal("Unknown child element \"" + name + "\" for \"brls:Tab\"");
+        fatal("Unknown child element \"" + name + "\" for \"aurore:Tab\"");
     }
 }
 
@@ -190,4 +190,4 @@ View* TabFrame::create()
     return new TabFrame();
 }
 
-} // namespace brls
+} // namespace aurore

@@ -16,36 +16,36 @@
 
 #pragma once
 
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-class SettingsTab : public brls::Box
+class SettingsTab : public aurore::Box
 {
   public:
     SettingsTab();
 
-    BRLS_BIND(brls::RadioCell, radio, "radio");
-    BRLS_BIND(brls::BooleanCell, boolean, "boolean");
-    BRLS_BIND(brls::SelectorCell, selector, "selector");
-    BRLS_BIND(brls::InputCell, input, "input");
-    BRLS_BIND(brls::InputNumericCell, inputNumeric, "inputNumeric");
-    BRLS_BIND(brls::DetailCell, ipAddress, "ipAddress");
-    BRLS_BIND(brls::DetailCell, dnsServer, "dnsServer");
-    BRLS_BIND(brls::BooleanCell, debug, "debug");
-    BRLS_BIND(brls::BooleanCell, screenSaver, "screenSaver");
-    BRLS_BIND(brls::BooleanCell, bottomBar, "bottomBar");
-    BRLS_BIND(brls::BooleanCell, alwaysOnTop, "alwaysOnTop");
-    BRLS_BIND(brls::BooleanCell, fps, "fps");
-    BRLS_BIND(brls::SelectorCell, swapInterval, "swapInterval");
-    BRLS_BIND(brls::SliderCell, slider, "slider");
-    BRLS_BIND(brls::DetailCell, notify, "notify");
-    BRLS_BIND(brls::BooleanCell, themeDark, "themeDark");
-    BRLS_BIND(brls::Box, themes, "themes");
+    AURORE_BIND(aurore::RadioCell, radio, "radio");
+    AURORE_BIND(aurore::BooleanCell, boolean, "boolean");
+    AURORE_BIND(aurore::SelectorCell, selector, "selector");
+    AURORE_BIND(aurore::InputCell, input, "input");
+    AURORE_BIND(aurore::InputNumericCell, inputNumeric, "inputNumeric");
+    AURORE_BIND(aurore::DetailCell, ipAddress, "ipAddress");
+    AURORE_BIND(aurore::DetailCell, dnsServer, "dnsServer");
+    AURORE_BIND(aurore::BooleanCell, debug, "debug");
+    AURORE_BIND(aurore::BooleanCell, screenSaver, "screenSaver");
+    AURORE_BIND(aurore::BooleanCell, bottomBar, "bottomBar");
+    AURORE_BIND(aurore::BooleanCell, alwaysOnTop, "alwaysOnTop");
+    AURORE_BIND(aurore::BooleanCell, fps, "fps");
+    AURORE_BIND(aurore::SelectorCell, swapInterval, "swapInterval");
+    AURORE_BIND(aurore::SliderCell, slider, "slider");
+    AURORE_BIND(aurore::DetailCell, notify, "notify");
+    AURORE_BIND(aurore::BooleanCell, themeDark, "themeDark");
+    AURORE_BIND(aurore::Box, themes, "themes");
 
-    static brls::View* create();
+    static aurore::View* create();
 
   private:
     // A line per theme file (Theme::builtinThemes, Theme::listThemes): its
     // name, a few of its colours, what is wrong with it; A uses it.
     void listThemes();
-    std::vector<std::pair<brls::DetailCell*, std::string>> themeCells;
+    std::vector<std::pair<aurore::DetailCell*, std::string>> themeCells;
 };

@@ -20,11 +20,11 @@
 // resources/i18n/*/themes.json. The format: docs/themes.md.
 
 #include "theme_presets.hpp"
-#include <borealis/core/time.hpp>
+#include <aurore/core/time.hpp>
 
 #include <iterator>
 
-namespace brls
+namespace aurore
 {
 
 const std::vector<BuiltinTheme>& builtinThemeTexts()
@@ -50,23 +50,23 @@ danger = #ff6b6b
 cadran/surf2 = #141414
 cadran/text2 = #ffffff
 cadran/text3 = #e6e6e6
-brls/text_disabled = #a6a6a6
-brls/header/subtitle = #e6e6e6
-brls/list/listItem_value_color = #ffffff
+aurore/text_disabled = #a6a6a6
+aurore/header/subtitle = #e6e6e6
+aurore/list/listItem_value_color = #ffffff
 cadran/line = rgba(255, 255, 255, 0.55)
-brls/sidebar/separator = rgba(255, 255, 255, 0.55)
-brls/applet_frame/separator = rgba(255, 255, 255, 0.55)
-brls/header/border = rgba(255, 255, 255, 0.55)
+aurore/sidebar/separator = rgba(255, 255, 255, 0.55)
+aurore/applet_frame/separator = rgba(255, 255, 255, 0.55)
+aurore/header/border = rgba(255, 255, 255, 0.55)
 cadran/border = #ffffff
-brls/button/enabled_border_color = #ffffff
-brls/highlight/color1 = #ffd60a
-brls/highlight/color2 = #ffd60a
+aurore/button/enabled_border_color = #ffffff
+aurore/highlight/color1 = #ffd60a
+aurore/highlight/color2 = #ffd60a
 cadran/hl1 = #ffd60a
 cadran/hl2 = #ffd60a
-brls/backdrop = rgba(0, 0, 0, 0.9)
+aurore/backdrop = rgba(0, 0, 0, 0.9)
 
 [metrics]
-brls/highlight/stroke_width = 6
+aurore/highlight/stroke_width = 6
 )theme" },
 
         { "high-contrast-light", R"theme(
@@ -89,22 +89,22 @@ danger = #b00020
 cadran/surf2 = #f0f0f0
 cadran/text2 = #000000
 cadran/text3 = #1f1f1f
-brls/text_disabled = #5c5c5c
-brls/header/subtitle = #1f1f1f
-brls/list/listItem_value_color = #000000
+aurore/text_disabled = #5c5c5c
+aurore/header/subtitle = #1f1f1f
+aurore/list/listItem_value_color = #000000
 cadran/line = rgba(0, 0, 0, 0.6)
-brls/sidebar/separator = rgba(0, 0, 0, 0.6)
-brls/applet_frame/separator = rgba(0, 0, 0, 0.6)
-brls/header/border = rgba(0, 0, 0, 0.6)
+aurore/sidebar/separator = rgba(0, 0, 0, 0.6)
+aurore/applet_frame/separator = rgba(0, 0, 0, 0.6)
+aurore/header/border = rgba(0, 0, 0, 0.6)
 cadran/border = #000000
-brls/button/enabled_border_color = #000000
-brls/highlight/color1 = #0039b3
-brls/highlight/color2 = #0039b3
+aurore/button/enabled_border_color = #000000
+aurore/highlight/color1 = #0039b3
+aurore/highlight/color2 = #0039b3
 cadran/hl1 = #0039b3
 cadran/hl2 = #0039b3
 
 [metrics]
-brls/highlight/stroke_width = 6
+aurore/highlight/stroke_width = 6
 )theme" },
 
         { "ocean", R"theme(
@@ -179,8 +179,8 @@ danger = #b42335
 cadran/blue = #1f5c9c
 cadran/violet = #5747b8
 cadran/pink = #a63d70
-brls/highlight/color1 = #2a6496
-brls/highlight/color2 = #6a8fb5
+aurore/highlight/color1 = #2a6496
+aurore/highlight/color2 = #6a8fb5
 cadran/hl1 = #2a6496
 cadran/hl2 = #6a8fb5
 cadran/bar = #8594a2
@@ -198,8 +198,8 @@ danger = #ff7a85
 cadran/blue = #7fd4ff
 cadran/violet = #b9b0ff
 cadran/pink = #f4a6c8
-brls/highlight/color1 = #9cc9ff
-brls/highlight/color2 = #f2f8ff
+aurore/highlight/color1 = #9cc9ff
+aurore/highlight/color2 = #f2f8ff
 cadran/hl1 = #9cc9ff
 cadran/hl2 = #f2f8ff
 cadran/bar = #636e7e
@@ -209,7 +209,7 @@ cadran/glow_strong = rgba(156, 201, 255, 0.18)
 cadran/brand/track = #1f2b3b
 cadran/brand/fill = #9cc9ff
 cadran/brand/glow = #f2f8ff
-brls/backdrop = rgba(6, 10, 16, 0.88)
+aurore/backdrop = rgba(6, 10, 16, 0.88)
 
 [colors]
 cadran/avatar0 = #9cc9ff
@@ -236,8 +236,8 @@ danger = #9d1d5a
 cadran/blue = #4a5bc4
 cadran/violet = #8a3fa8
 cadran/pink = #b8285e
-brls/highlight/color1 = #c1121f
-brls/highlight/color2 = #d0577f
+aurore/highlight/color1 = #c1121f
+aurore/highlight/color2 = #d0577f
 cadran/hl1 = #c1121f
 cadran/hl2 = #d0577f
 cadran/bar = #ac8591
@@ -255,8 +255,8 @@ danger = #ff8a5c
 cadran/blue = #b9a6ff
 cadran/violet = #e0a6ff
 cadran/pink = #ff9ec0
-brls/highlight/color1 = #ff5c8a
-brls/highlight/color2 = #ffc2d4
+aurore/highlight/color1 = #ff5c8a
+aurore/highlight/color2 = #ffc2d4
 cadran/hl1 = #ff5c8a
 cadran/hl2 = #ffc2d4
 cadran/bar = #835e6e
@@ -266,7 +266,7 @@ cadran/glow_strong = rgba(255, 92, 138, 0.22)
 cadran/brand/track = #3a1424
 cadran/brand/fill = #ff5c8a
 cadran/brand/glow = #ffc2d4
-brls/backdrop = rgba(16, 4, 10, 0.88)
+aurore/backdrop = rgba(16, 4, 10, 0.88)
 
 [colors]
 cadran/avatar0 = #ff7aa2
@@ -293,8 +293,8 @@ danger = #8f1d4a
 cadran/blue = #0f7a5a
 cadran/violet = #6b3fa0
 cadran/pink = #b3245a
-brls/highlight/color1 = #b5121b
-brls/highlight/color2 = #a87908
+aurore/highlight/color1 = #b5121b
+aurore/highlight/color2 = #a87908
 cadran/hl1 = #b5121b
 cadran/hl2 = #a87908
 cadran/bar = #ab877e
@@ -314,8 +314,8 @@ danger = #ff7a6e
 cadran/blue = #5fd3a8
 cadran/violet = #d6a6ff
 cadran/pink = #ff8c9e
-brls/highlight/color1 = #f6c445
-brls/highlight/color2 = #ff6b5b
+aurore/highlight/color1 = #f6c445
+aurore/highlight/color2 = #ff6b5b
 cadran/hl1 = #f6c445
 cadran/hl2 = #ff6b5b
 cadran/bar = #845f58
@@ -325,7 +325,7 @@ cadran/glow_strong = rgba(246, 196, 69, 0.20)
 cadran/brand/track = #3a1414
 cadran/brand/fill = #e23a3a
 cadran/brand/glow = #f6c445
-brls/backdrop = rgba(14, 3, 4, 0.88)
+aurore/backdrop = rgba(14, 3, 4, 0.88)
 
 [colors]
 cadran/avatar0 = #ff6b5b
@@ -352,8 +352,8 @@ danger = #c0262d
 cadran/blue = #3c7a37
 cadran/violet = #7a4fb0
 cadran/pink = #b8487a
-brls/highlight/color1 = #b8487a
-brls/highlight/color2 = #4f8a45
+aurore/highlight/color1 = #b8487a
+aurore/highlight/color2 = #4f8a45
 cadran/hl1 = #b8487a
 cadran/hl2 = #4f8a45
 cadran/bar = #a98996
@@ -371,8 +371,8 @@ danger = #ff7f50
 cadran/blue = #9ed98a
 cadran/violet = #c7a6ff
 cadran/pink = #ffb3d1
-brls/highlight/color1 = #ff9cc4
-brls/highlight/color2 = #ffe3ee
+aurore/highlight/color1 = #ff9cc4
+aurore/highlight/color2 = #ffe3ee
 cadran/hl1 = #ff9cc4
 cadran/hl2 = #ffe3ee
 cadran/bar = #7a667b
@@ -382,7 +382,7 @@ cadran/glow_strong = rgba(255, 156, 196, 0.18)
 cadran/brand/track = #33223a
 cadran/brand/fill = #ff9cc4
 cadran/brand/glow = #ffe3ee
-brls/backdrop = rgba(12, 7, 14, 0.88)
+aurore/backdrop = rgba(12, 7, 14, 0.88)
 
 [colors]
 cadran/avatar0 = #f7a8c4
@@ -408,8 +408,8 @@ danger = #c2362b
 cadran/blue = #1b62b8
 cadran/violet = #6c4bc4
 cadran/pink = #b83c6a
-brls/highlight/color1 = #c4500f
-brls/highlight/color2 = #00798c
+aurore/highlight/color1 = #c4500f
+aurore/highlight/color2 = #00798c
 cadran/hl1 = #c4500f
 cadran/hl2 = #00798c
 cadran/bar = #7a979e
@@ -427,8 +427,8 @@ danger = #ff6b81
 cadran/blue = #48d6cf
 cadran/violet = #b49cff
 cadran/pink = #ff9ec0
-brls/highlight/color1 = #ff8f5a
-brls/highlight/color2 = #ffd166
+aurore/highlight/color1 = #ff8f5a
+aurore/highlight/color2 = #ffd166
 cadran/hl1 = #ff8f5a
 cadran/hl2 = #ffd166
 cadran/bar = #657b7b
@@ -438,7 +438,7 @@ cadran/glow_strong = rgba(255, 209, 102, 0.18)
 cadran/brand/track = #18363b
 cadran/brand/fill = #ff8f5a
 cadran/brand/glow = #ffd166
-brls/backdrop = rgba(4, 14, 16, 0.88)
+aurore/backdrop = rgba(4, 14, 16, 0.88)
 
 [colors]
 cadran/avatar0 = #ffb347
@@ -465,8 +465,8 @@ danger = #b0203a
 cadran/blue = #2e6f6a
 cadran/violet = #7a4a8f
 cadran/pink = #a8405a
-brls/highlight/color1 = #a83f12
-brls/highlight/color2 = #6b7a1a
+aurore/highlight/color1 = #a83f12
+aurore/highlight/color2 = #6b7a1a
 cadran/hl1 = #a83f12
 cadran/hl2 = #6b7a1a
 cadran/bar = #9e8d7d
@@ -484,8 +484,8 @@ danger = #ff6b6b
 cadran/blue = #6fb7b0
 cadran/violet = #c39bd3
 cadran/pink = #f08a8a
-brls/highlight/color1 = #e8743b
-brls/highlight/color2 = #f2b84b
+aurore/highlight/color1 = #e8743b
+aurore/highlight/color2 = #f2b84b
 cadran/hl1 = #e8743b
 cadran/hl2 = #f2b84b
 cadran/bar = #76685e
@@ -495,7 +495,7 @@ cadran/glow_strong = rgba(242, 184, 75, 0.16)
 cadran/brand/track = #33251c
 cadran/brand/fill = #e8743b
 cadran/brand/glow = #f2b84b
-brls/backdrop = rgba(10, 7, 5, 0.88)
+aurore/backdrop = rgba(10, 7, 5, 0.88)
 
 [colors]
 cadran/avatar0 = #e8743b
@@ -522,8 +522,8 @@ danger = #b3261e
 cadran/blue = #2f7a1f
 cadran/violet = #6a3fb5
 cadran/pink = #a8306a
-brls/highlight/color1 = #6a3fb5
-brls/highlight/color2 = #c2520a
+aurore/highlight/color1 = #6a3fb5
+aurore/highlight/color2 = #c2520a
 cadran/hl1 = #6a3fb5
 cadran/hl2 = #c2520a
 cadran/bar = #9689a4
@@ -541,11 +541,11 @@ danger = #ff5d73
 cadran/blue = #9ee37d
 cadran/violet = #b794ff
 cadran/pink = #ff9ecb
-brls/highlight/color1 = #ff8a1f
-brls/highlight/color2 = #ffd166
+aurore/highlight/color1 = #ff8a1f
+aurore/highlight/color2 = #ffd166
 cadran/hl1 = #ff8a1f
 cadran/hl2 = #ffd166
-brls/highlight/shadow = #ff8a1f
+aurore/highlight/shadow = #ff8a1f
 cadran/bar = #73637c
 cadran/bar_today = #957aae
 cadran/glow = rgba(140, 82, 255, 0.16)
@@ -553,7 +553,7 @@ cadran/glow_strong = rgba(255, 138, 31, 0.18)
 cadran/brand/track = #2c1d40
 cadran/brand/fill = #ff8a1f
 cadran/brand/glow = #ffd166
-brls/backdrop = rgba(8, 4, 14, 0.9)
+aurore/backdrop = rgba(8, 4, 14, 0.9)
 
 [colors]
 cadran/avatar0 = #ff8a1f
@@ -580,8 +580,8 @@ danger = #c2410c
 cadran/blue = #1f5f8b
 cadran/violet = #5b3fa8
 cadran/pink = #b0244a
-brls/highlight/color1 = #1d6b45
-brls/highlight/color2 = #a6780f
+aurore/highlight/color1 = #1d6b45
+aurore/highlight/color2 = #a6780f
 cadran/hl1 = #1d6b45
 cadran/hl2 = #a6780f
 cadran/bar = #83978c
@@ -599,11 +599,11 @@ danger = #ff6b7a
 cadran/blue = #9fd8ff
 cadran/violet = #c9b0ff
 cadran/pink = #ff8da1
-brls/highlight/color1 = #e8c15a
-brls/highlight/color2 = #ff7b8e
+aurore/highlight/color1 = #e8c15a
+aurore/highlight/color2 = #ff7b8e
 cadran/hl1 = #e8c15a
 cadran/hl2 = #ff7b8e
-brls/highlight/shadow = #e8c15a
+aurore/highlight/shadow = #e8c15a
 cadran/bar = #5f786e
 cadran/bar_today = #6c9882
 cadran/glow = rgba(232, 193, 90, 0.12)
@@ -611,7 +611,7 @@ cadran/glow_strong = rgba(224, 56, 79, 0.20)
 cadran/brand/track = #1d3a2d
 cadran/brand/fill = #e0384f
 cadran/brand/glow = #e8c15a
-brls/backdrop = rgba(4, 12, 8, 0.9)
+aurore/backdrop = rgba(4, 12, 8, 0.9)
 
 [colors]
 cadran/avatar0 = #e0384f
@@ -638,8 +638,8 @@ danger = #e5484d
 cadran/blue = #2a4fa8
 cadran/violet = #5b3fa8
 cadran/pink = #a63d70
-brls/highlight/color1 = #8a6a0a
-brls/highlight/color2 = #2a3a8f
+aurore/highlight/color1 = #8a6a0a
+aurore/highlight/color2 = #2a3a8f
 cadran/hl1 = #8a6a0a
 cadran/hl2 = #2a3a8f
 cadran/bar = #94918d
@@ -657,11 +657,11 @@ danger = #ff6b7a
 cadran/blue = #8ab4ff
 cadran/violet = #c3a6ff
 cadran/pink = #ff9ec7
-brls/highlight/color1 = #e9c46a
-brls/highlight/color2 = #eef1f8
+aurore/highlight/color1 = #e9c46a
+aurore/highlight/color2 = #eef1f8
 cadran/hl1 = #e9c46a
 cadran/hl2 = #eef1f8
-brls/highlight/shadow = #e9c46a
+aurore/highlight/shadow = #e9c46a
 cadran/bar = #636776
 cadran/bar_today = #7d839b
 cadran/glow = rgba(233, 196, 106, 0.10)
@@ -669,7 +669,7 @@ cadran/glow_strong = rgba(192, 199, 214, 0.16)
 cadran/brand/track = #1c2136
 cadran/brand/fill = #e9c46a
 cadran/brand/glow = #eef1f8
-brls/backdrop = rgba(3, 4, 10, 0.9)
+aurore/backdrop = rgba(3, 4, 10, 0.9)
 
 [colors]
 cadran/avatar0 = #e9c46a
@@ -774,4 +774,4 @@ std::string builtinThemeText(const BuiltinTheme& theme, std::time_t now)
         + seasonalThemeId(now) + "\n";
 }
 
-} // namespace brls
+} // namespace aurore

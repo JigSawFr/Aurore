@@ -14,10 +14,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/platforms/switch/switch_input.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/platforms/switch/switch_input.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static const uint64_t HidNpadButton_None = ((uint64_t)1 << (63));
@@ -211,20 +211,20 @@ void SwitchInputManager::updateUnifiedControllerState(ControllerState* state)
         }
     }
 
-    state->buttons[BUTTON_NAV_UP] |= getKeyboardKeyState(BRLS_KBD_KEY_UP);
-    state->buttons[BUTTON_NAV_RIGHT] |= getKeyboardKeyState(BRLS_KBD_KEY_RIGHT);
-    state->buttons[BUTTON_NAV_DOWN] |= getKeyboardKeyState(BRLS_KBD_KEY_DOWN);
-    state->buttons[BUTTON_NAV_LEFT] |= getKeyboardKeyState(BRLS_KBD_KEY_LEFT);
+    state->buttons[BUTTON_NAV_UP] |= getKeyboardKeyState(AURORE_KBD_KEY_UP);
+    state->buttons[BUTTON_NAV_RIGHT] |= getKeyboardKeyState(AURORE_KBD_KEY_RIGHT);
+    state->buttons[BUTTON_NAV_DOWN] |= getKeyboardKeyState(AURORE_KBD_KEY_DOWN);
+    state->buttons[BUTTON_NAV_LEFT] |= getKeyboardKeyState(AURORE_KBD_KEY_LEFT);
 
     if (Application::isSwapInputKeys())
     {
-        state->buttons[BUTTON_B] |= getKeyboardKeyState(BRLS_KBD_KEY_ENTER);
-        state->buttons[BUTTON_A] |= getKeyboardKeyState(BRLS_KBD_KEY_ESCAPE);
+        state->buttons[BUTTON_B] |= getKeyboardKeyState(AURORE_KBD_KEY_ENTER);
+        state->buttons[BUTTON_A] |= getKeyboardKeyState(AURORE_KBD_KEY_ESCAPE);
     }
     else
     {
-        state->buttons[BUTTON_A] |= getKeyboardKeyState(BRLS_KBD_KEY_ENTER);
-        state->buttons[BUTTON_B] |= getKeyboardKeyState(BRLS_KBD_KEY_ESCAPE);
+        state->buttons[BUTTON_A] |= getKeyboardKeyState(AURORE_KBD_KEY_ENTER);
+        state->buttons[BUTTON_B] |= getKeyboardKeyState(AURORE_KBD_KEY_ESCAPE);
     }
 }
 
@@ -298,9 +298,9 @@ void SwitchInputManager::updateControllerStateInner(ControllerState* state, PadS
     state->axes[RIGHT_Z] = 0; // SWITCH NOT SUPPORT ZR AXIS
 }
 
-bool SwitchInputManager::getKeyboardKeyState(BrlsKeyboardScancode key)
+bool SwitchInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
-    return m_hid_keyboard_state[m_brls_hid_map[key]];
+    return m_hid_keyboard_state[m_aurore_hid_map[key]];
 }
 
 void SwitchInputManager::updateTouchStates(std::vector<RawTouchState>* states)
@@ -428,24 +428,24 @@ void SwitchInputManager::handleKeyboard()
             auto is_pressed = (state.keys[i / 64] & (1ul << (i % 64))) != 0;
             if (m_hid_keyboard_state[i] != is_pressed)
             {
-                m_hid_keyboard_state[i]            = is_pressed;
-                const BrlsKeyboardScancode brlsKey = m_hid_brls_map[i];
+                m_hid_keyboard_state[i]                = is_pressed;
+                const AuroreKeyboardScancode auroreKey = m_hid_aurore_map[i];
 
                 KeyState keyState {};
-                keyState.key     = brlsKey;
+                keyState.key     = auroreKey;
                 keyState.pressed = is_pressed;
 
                 if (state.modifiers & HidKeyboardModifier_LeftAlt)
-                    keyState.mods |= BRLS_KBD_MODIFIER_ALT;
+                    keyState.mods |= AURORE_KBD_MODIFIER_ALT;
 
                 if (state.modifiers & HidKeyboardModifier_Control)
-                    keyState.mods |= BRLS_KBD_MODIFIER_CTRL;
+                    keyState.mods |= AURORE_KBD_MODIFIER_CTRL;
 
                 if (state.modifiers & HidKeyboardModifier_Shift)
-                    keyState.mods |= BRLS_KBD_MODIFIER_SHIFT;
+                    keyState.mods |= AURORE_KBD_MODIFIER_SHIFT;
 
                 if (state.modifiers & HidKeyboardModifier_Gui)
-                    keyState.mods |= BRLS_KBD_MODIFIER_META;
+                    keyState.mods |= AURORE_KBD_MODIFIER_META;
 
                 getKeyboardKeyStateChanged()->fire(keyState);
             }
@@ -527,7 +527,7 @@ void SwitchInputManager::initCursor(NVGcontext* vg)
         auto image          = romfs::get("img/sys/cursor.png");
         this->cursorTexture = nvgCreateImageMem(vg, NVG_IMAGE_NEAREST, (unsigned char*)image.data(), image.size());
 #else
-        this->cursorTexture = nvgCreateImage(vg, BRLS_ASSET("img/sys/cursor.png"), NVG_IMAGE_NEAREST);
+        this->cursorTexture = nvgCreateImage(vg, AURORE_ASSET("img/sys/cursor.png"), NVG_IMAGE_NEAREST);
 #endif
 
         int width, height;
@@ -541,146 +541,146 @@ void SwitchInputManager::initCursor(NVGcontext* vg)
     }
 }
 
-static BrlsKeyboardScancode hidKey2BrlsKey(int key)
+static AuroreKeyboardScancode hidKey2AuroreKey(int key)
 {
     if (KBD_A <= key && key <= KBD_Z)
     {
-        return (BrlsKeyboardScancode)(key - KBD_A + BRLS_KBD_KEY_A);
+        return (AuroreKeyboardScancode)(key - KBD_A + AURORE_KBD_KEY_A);
     }
     if (KBD_1 <= key && key <= KBD_9)
     {
-        return (BrlsKeyboardScancode)(key - KBD_1 + BRLS_KBD_KEY_1);
+        return (AuroreKeyboardScancode)(key - KBD_1 + AURORE_KBD_KEY_1);
     }
     if (KBD_F1 <= key && key <= KBD_F12)
     {
-        return (BrlsKeyboardScancode)(key - KBD_F1 + BRLS_KBD_KEY_F1);
+        return (AuroreKeyboardScancode)(key - KBD_F1 + AURORE_KBD_KEY_F1);
     }
     if (KBD_KP1 <= key && key <= KBD_KP9)
     {
-        return (BrlsKeyboardScancode)(key - KBD_KP1 + BRLS_KBD_KEY_KP_1);
+        return (AuroreKeyboardScancode)(key - KBD_KP1 + AURORE_KBD_KEY_KP_1);
     }
 
     switch (key)
     {
         case KBD_0:
-            return BRLS_KBD_KEY_0;
+            return AURORE_KBD_KEY_0;
         case KBD_SPACE:
-            return BRLS_KBD_KEY_SPACE;
+            return AURORE_KBD_KEY_SPACE;
         case KBD_APOSTROPHE:
-            return BRLS_KBD_KEY_APOSTROPHE;
+            return AURORE_KBD_KEY_APOSTROPHE;
         case KBD_COMMA:
-            return BRLS_KBD_KEY_COMMA;
+            return AURORE_KBD_KEY_COMMA;
         case KBD_MINUS:
-            return BRLS_KBD_KEY_MINUS;
+            return AURORE_KBD_KEY_MINUS;
         case KBD_DOT:
-            return BRLS_KBD_KEY_PERIOD;
+            return AURORE_KBD_KEY_PERIOD;
         case KBD_SLASH:
-            return BRLS_KBD_KEY_SLASH;
+            return AURORE_KBD_KEY_SLASH;
         case KBD_SEMICOLON:
-            return BRLS_KBD_KEY_SEMICOLON;
+            return AURORE_KBD_KEY_SEMICOLON;
         case KBD_EQUAL:
-            return BRLS_KBD_KEY_EQUAL;
+            return AURORE_KBD_KEY_EQUAL;
         case KBD_LEFTBRACE:
-            return BRLS_KBD_KEY_LEFT_BRACKET;
+            return AURORE_KBD_KEY_LEFT_BRACKET;
         case KBD_RIGHTBRACE:
-            return BRLS_KBD_KEY_RIGHT_BRACKET;
+            return AURORE_KBD_KEY_RIGHT_BRACKET;
         case KBD_BACKSLASH:
-            return BRLS_KBD_KEY_BACKSLASH;
+            return AURORE_KBD_KEY_BACKSLASH;
         case KBD_GRAVE:
-            return BRLS_KBD_KEY_GRAVE_ACCENT;
+            return AURORE_KBD_KEY_GRAVE_ACCENT;
         case KBD_ESC:
-            return BRLS_KBD_KEY_ESCAPE;
+            return AURORE_KBD_KEY_ESCAPE;
         case KBD_ENTER:
-            return BRLS_KBD_KEY_ENTER;
+            return AURORE_KBD_KEY_ENTER;
         case KBD_TAB:
-            return BRLS_KBD_KEY_TAB;
+            return AURORE_KBD_KEY_TAB;
         case KBD_BACKSPACE:
-            return BRLS_KBD_KEY_BACKSPACE;
+            return AURORE_KBD_KEY_BACKSPACE;
         case KBD_CAPSLOCK:
-            return BRLS_KBD_KEY_CAPS_LOCK;
+            return AURORE_KBD_KEY_CAPS_LOCK;
         case KBD_LEFTSHIFT:
-            return BRLS_KBD_KEY_LEFT_SHIFT;
+            return AURORE_KBD_KEY_LEFT_SHIFT;
         case KBD_LEFTCTRL:
-            return BRLS_KBD_KEY_LEFT_CONTROL;
+            return AURORE_KBD_KEY_LEFT_CONTROL;
         case KBD_LEFTALT:
-            return BRLS_KBD_KEY_LEFT_ALT;
+            return AURORE_KBD_KEY_LEFT_ALT;
         case KBD_LEFTMETA:
-            return BRLS_KBD_KEY_LEFT_SUPER;
+            return AURORE_KBD_KEY_LEFT_SUPER;
         case KBD_RIGHTSHIFT:
-            return BRLS_KBD_KEY_RIGHT_SHIFT;
+            return AURORE_KBD_KEY_RIGHT_SHIFT;
         case KBD_RIGHTCTRL:
-            return BRLS_KBD_KEY_RIGHT_CONTROL;
+            return AURORE_KBD_KEY_RIGHT_CONTROL;
         case KBD_RIGHTALT:
-            return BRLS_KBD_KEY_RIGHT_ALT;
+            return AURORE_KBD_KEY_RIGHT_ALT;
         case KBD_RIGHTMETA:
-            return BRLS_KBD_KEY_RIGHT_SUPER;
+            return AURORE_KBD_KEY_RIGHT_SUPER;
         case KBD_LEFT:
-            return BRLS_KBD_KEY_LEFT;
+            return AURORE_KBD_KEY_LEFT;
         case KBD_RIGHT:
-            return BRLS_KBD_KEY_RIGHT;
+            return AURORE_KBD_KEY_RIGHT;
         case KBD_UP:
-            return BRLS_KBD_KEY_UP;
+            return AURORE_KBD_KEY_UP;
         case KBD_DOWN:
-            return BRLS_KBD_KEY_DOWN;
+            return AURORE_KBD_KEY_DOWN;
 
         case KBD_SYSRQ:
-            return BRLS_KBD_KEY_PRINT_SCREEN;
+            return AURORE_KBD_KEY_PRINT_SCREEN;
         case KBD_SCROLLLOCK:
-            return BRLS_KBD_KEY_SCROLL_LOCK;
+            return AURORE_KBD_KEY_SCROLL_LOCK;
         case KBD_PAUSE:
-            return BRLS_KBD_KEY_PAUSE;
+            return AURORE_KBD_KEY_PAUSE;
         case KBD_INSERT:
-            return BRLS_KBD_KEY_INSERT;
+            return AURORE_KBD_KEY_INSERT;
         case KBD_HOME:
-            return BRLS_KBD_KEY_HOME;
+            return AURORE_KBD_KEY_HOME;
         case KBD_PAGEUP:
-            return BRLS_KBD_KEY_PAGE_UP;
+            return AURORE_KBD_KEY_PAGE_UP;
         case KBD_DELETE:
-            return BRLS_KBD_KEY_DELETE;
+            return AURORE_KBD_KEY_DELETE;
         case KBD_END:
-            return BRLS_KBD_KEY_END;
+            return AURORE_KBD_KEY_END;
         case KBD_PAGEDOWN:
-            return BRLS_KBD_KEY_PAGE_DOWN;
+            return AURORE_KBD_KEY_PAGE_DOWN;
 
         case KBD_NUMLOCK:
-            return BRLS_KBD_KEY_NUM_LOCK;
+            return AURORE_KBD_KEY_NUM_LOCK;
         case KBD_KPSLASH:
-            return BRLS_KBD_KEY_KP_DIVIDE;
+            return AURORE_KBD_KEY_KP_DIVIDE;
         case KBD_KPASTERISK:
-            return BRLS_KBD_KEY_KP_MULTIPLY;
+            return AURORE_KBD_KEY_KP_MULTIPLY;
         case KBD_KPMINUS:
-            return BRLS_KBD_KEY_KP_SUBTRACT;
+            return AURORE_KBD_KEY_KP_SUBTRACT;
         case KBD_KPPLUS:
-            return BRLS_KBD_KEY_KP_ADD;
+            return AURORE_KBD_KEY_KP_ADD;
         case KBD_KPENTER:
-            return BRLS_KBD_KEY_KP_ENTER;
+            return AURORE_KBD_KEY_KP_ENTER;
         case KBD_KPDOT:
-            return BRLS_KBD_KEY_KP_DECIMAL;
+            return AURORE_KBD_KEY_KP_DECIMAL;
         case KBD_KP0:
-            return BRLS_KBD_KEY_KP_0;
+            return AURORE_KBD_KEY_KP_0;
 
         case KBD_102ND:
-            return BRLS_KBD_KEY_WORLD_1;
+            return AURORE_KBD_KEY_WORLD_1;
 
         // case KBD_HASHTILDE: return GLFW_HASHTILDE;
         default:
-            return BRLS_KBD_KEY_UNKNOWN;
+            return AURORE_KBD_KEY_UNKNOWN;
     }
 }
 
 void SwitchInputManager::hidInitializeKeyboardMap()
 {
-    m_hid_brls_map[KBD_NONE]             = BRLS_KBD_KEY_UNKNOWN;
-    m_brls_hid_map[BRLS_KBD_KEY_UNKNOWN] = KBD_NONE;
+    m_hid_aurore_map[KBD_NONE]               = AURORE_KBD_KEY_UNKNOWN;
+    m_aurore_hid_map[AURORE_KBD_KEY_UNKNOWN] = KBD_NONE;
 
     for (int i = 0; i < 256; ++i)
     {
-        const auto brlsKey = hidKey2BrlsKey(i);
-        if (brlsKey == BRLS_KBD_KEY_UNKNOWN)
+        const auto auroreKey = hidKey2AuroreKey(i);
+        if (auroreKey == AURORE_KBD_KEY_UNKNOWN)
             continue;
-        m_hid_brls_map[i]       = brlsKey;
-        m_brls_hid_map[brlsKey] = i;
+        m_hid_aurore_map[i]         = auroreKey;
+        m_aurore_hid_map[auroreKey] = i;
     }
 }
 
-} // namespace brls
+} // namespace aurore

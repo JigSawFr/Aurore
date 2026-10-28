@@ -1,43 +1,43 @@
-<brls:Box
+<aurore:Box
         width="auto"
         height="auto">
 
-    <brls:ScrollingFrame
+    <aurore:ScrollingFrame
             width="auto"
             height="auto"
             marginRight="460"
             grow="1.0">
 
-        <brls:Box
+        <aurore:Box
                 width="auto"
                 height="auto"
-                paddingLeft="@style/brls/tab_frame/content_padding_sides"
-                paddingRight="@style/brls/tab_frame/content_padding_sides"
-                paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
-                paddingBottom="@style/brls/tab_frame/content_padding_top_bottom">
+                paddingLeft="@style/aurore/tab_frame/content_padding_sides"
+                paddingRight="@style/aurore/tab_frame/content_padding_sides"
+                paddingTop="@style/aurore/tab_frame/content_padding_top_bottom"
+                paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom">
 
-            <brls:Box
+            <aurore:Box
                     grow="1"
                     axis="column">
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="width"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="height"/>
-                <brls:SelectorCell
+                <aurore:SelectorCell
                         id="horizontal"/>
-                <brls:SelectorCell
+                <aurore:SelectorCell
                         id="vertical"/>
-                <brls:BooleanCell
+                <aurore:BooleanCell
                         id="singleLine"/>
-            </brls:Box>
+            </aurore:Box>
 
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:ScrollingFrame>
+    </aurore:ScrollingFrame>
 
-    <brls:Box
+    <aurore:Box
             height="404"
             width="404"
             paddingBottom="2"
@@ -47,16 +47,16 @@
             positionType="absolute"
             borderThickness="2"
             cornerRadius="4"
-            borderColor="@theme/brls/header/border"
+            borderColor="@theme/aurore/header/border"
             positionTop="64"
             axis="column"
             positionRight="30">
-        <brls:Label
+        <aurore:Label
                 id="label"
                 height="auto"
                 width="auto"
                 wireframe="true"
                 text="text 123456 qwe"/>
-    </brls:Box>
+    </aurore:Box>
 
-</brls:Box>
+</aurore:Box>

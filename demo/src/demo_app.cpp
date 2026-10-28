@@ -20,8 +20,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
-#include <borealis.hpp>
-#include <borealis/cadran.hpp>
+#include <aurore.hpp>
+#include <aurore/cadran.hpp>
 
 #include "activity/main_activity.hpp"
 #include "tab/cadran_tab.hpp"
@@ -47,9 +47,7 @@ int shownTab = 0;
 void installCadranHooks()
 {
     static ui::Prefs prefs; // not saved: the demo starts in the defaults
-    const char* theme = std::getenv("BRLS_THEME");
-    if (!theme)
-        theme = std::getenv("BOREALIS_THEME");
+    const char* theme = aurore::environmentVariable("THEME");
     if (theme && !std::strcmp(theme, "LIGHT"))
         prefs.theme = "light";
     ui::use_prefs(prefs);
@@ -70,15 +68,15 @@ void installCadranHooks()
     h.push_main = [](int position, const std::string&)
     {
         auto* main = new MainActivity();
-        brls::Application::pushActivity(main, brls::TransitionAnimation::NONE);
-        brls::sync([main, position]()
+        aurore::Application::pushActivity(main, aurore::TransitionAnimation::NONE);
+        aurore::sync([main, position]()
             {
-            if (auto* tabs = dynamic_cast<brls::TabFrame*>(main->getView("main_tabs")))
+            if (auto* tabs = dynamic_cast<aurore::TabFrame*>(main->getView("main_tabs")))
                 tabs->focusTab(position); });
     };
-    brls::Application::getGlobalFocusChangeEvent()->subscribe([](brls::View* view)
+    aurore::Application::getGlobalFocusChangeEvent()->subscribe([](aurore::View* view)
         {
-        auto* item = dynamic_cast<brls::SidebarItem*>(view);
+        auto* item = dynamic_cast<aurore::SidebarItem*>(view);
         if (!item || !item->getParent())
             return;
         const auto& items = item->getParent()->getChildren();
@@ -95,41 +93,41 @@ void installHooks()
 {
     installCadranHooks();
     // A picture of the demo's a theme may replace (image.demo/about/art):
-    // the About tab's, drawn by a brls::Image that follows the theme
-    brls::Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512);
+    // the About tab's, drawn by a aurore::Image that follows the theme
+    aurore::Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512);
 }
 
 void registerViews()
 {
     // Custom views (including tabs, which are views)
-    brls::Application::registerXMLView("CaptionedImage", CaptionedImage::create);
-    brls::Application::registerXMLView("CadranTab", CadranTab::create);
-    brls::Application::registerXMLView("RecyclingListTab", RecyclingListTab::create);
-    brls::Application::registerXMLView("ComponentsTab", ComponentsTab::create);
-    brls::Application::registerXMLView("GridTab", GridTab::create);
-    brls::Application::registerXMLView("TransformTab", TransformTab::create);
-    brls::Application::registerXMLView("TransformBox", TransformBox::create);
-    brls::Application::registerXMLView("GemView", GemView::create);
-    brls::Application::registerXMLView("SettingsTab", SettingsTab::create);
-    brls::Application::registerXMLView("TextTestTab", TextTestTab::create);
-    brls::Application::registerXMLView("StylesTab", StylesTab::create);
+    aurore::Application::registerXMLView("CaptionedImage", CaptionedImage::create);
+    aurore::Application::registerXMLView("CadranTab", CadranTab::create);
+    aurore::Application::registerXMLView("RecyclingListTab", RecyclingListTab::create);
+    aurore::Application::registerXMLView("ComponentsTab", ComponentsTab::create);
+    aurore::Application::registerXMLView("GridTab", GridTab::create);
+    aurore::Application::registerXMLView("TransformTab", TransformTab::create);
+    aurore::Application::registerXMLView("TransformBox", TransformBox::create);
+    aurore::Application::registerXMLView("GemView", GemView::create);
+    aurore::Application::registerXMLView("SettingsTab", SettingsTab::create);
+    aurore::Application::registerXMLView("TextTestTab", TextTestTab::create);
+    aurore::Application::registerXMLView("StylesTab", StylesTab::create);
 
     // Add custom values to the theme
-    brls::Theme::getLightTheme().addColor("captioned_image/caption", nvgRGB(2, 176, 183));
-    brls::Theme::getDarkTheme().addColor("captioned_image/caption", nvgRGB(51, 186, 227));
+    aurore::Theme::getLightTheme().addColor("captioned_image/caption", nvgRGB(2, 176, 183));
+    aurore::Theme::getDarkTheme().addColor("captioned_image/caption", nvgRGB(51, 186, 227));
     const std::pair<const char*, NVGcolor> swatches[] = { { "demo/swatch/teal", nvgRGB(46, 196, 182) },
         { "demo/swatch/orange", nvgRGB(255, 159, 28) }, { "demo/swatch/red", nvgRGB(231, 29, 54) },
         { "demo/swatch/blue", nvgRGB(58, 123, 213) } };
     for (const auto& [key, color] : swatches)
     {
-        brls::Theme::getLightTheme().addColor(key, color);
-        brls::Theme::getDarkTheme().addColor(key, color);
+        aurore::Theme::getLightTheme().addColor(key, color);
+        aurore::Theme::getDarkTheme().addColor(key, color);
     }
 
     // Add custom values to the style
-    brls::getStyle().addMetric("about/padding_top_bottom", 50);
-    brls::getStyle().addMetric("about/padding_sides", 75);
-    brls::getStyle().addMetric("about/description_margin", 50);
+    aurore::getStyle().addMetric("about/padding_top_bottom", 50);
+    aurore::getStyle().addMetric("about/padding_sides", 75);
+    aurore::getStyle().addMetric("about/description_margin", 50);
 }
 
 } // namespace demo

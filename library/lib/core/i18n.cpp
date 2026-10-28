@@ -14,10 +14,10 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/assets.hpp>
-#include <borealis/core/i18n.hpp>
-#include <borealis/core/util.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/assets.hpp>
+#include <aurore/core/i18n.hpp>
+#include <aurore/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -39,11 +39,17 @@ namespace fs = std::experimental::filesystem;
 #include <string>
 #include <vector>
 
-#ifndef BRLS_I18N_PREFIX
-#define BRLS_I18N_PREFIX ""
+// legacy-names: begin
+// borealis' name, still read (deprecated)
+#if !defined(AURORE_I18N_PREFIX) && defined(BRLS_I18N_PREFIX)
+#define AURORE_I18N_PREFIX BRLS_I18N_PREFIX
+#endif
+// legacy-names: end
+#ifndef AURORE_I18N_PREFIX
+#define AURORE_I18N_PREFIX ""
 #endif
 
-namespace brls
+namespace aurore
 {
 
 // The strings of the default locale and of the current one, never changed
@@ -129,7 +135,7 @@ static void loadLocale(std::string locale, nlohmann::json* target)
         (*target)[name.substr(0, name.length() - 5)] = strings;
     }
 #else
-    std::string localePath = BRLS_ASSET("i18n/" + locale);
+    std::string localePath = AURORE_ASSET("i18n/" + locale);
 
     if (!fs::exists(localePath))
     {
@@ -263,7 +269,7 @@ namespace internal
 
         try
         {
-            pointer = nlohmann::json::json_pointer("/" + std::string(BRLS_I18N_PREFIX) + stringName);
+            pointer = nlohmann::json::json_pointer("/" + std::string(AURORE_I18N_PREFIX) + stringName);
         }
         catch (const std::exception& e)
         {
@@ -313,4 +319,4 @@ inline namespace literals
 
 } // namespace literals
 
-} // namespace brls
+} // namespace aurore

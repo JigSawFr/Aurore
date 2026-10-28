@@ -15,11 +15,11 @@ limitations under the License.
 */
 #ifdef __linux__
 
-#include <borealis/core/logger.hpp>
-#include <borealis/core/platform.hpp>
-#include <borealis/platforms/desktop/steam_deck.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/core/platform.hpp>
+#include <aurore/platforms/desktop/steam_deck.hpp>
 
-namespace brls
+namespace aurore
 {
 
 #define STEAM_CLIENT_PIPE_PATH "/home/deck/.steam/steam.pipe"

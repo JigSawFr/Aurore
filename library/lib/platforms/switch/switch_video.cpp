@@ -16,8 +16,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/platforms/switch/switch_video.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/platforms/switch/switch_video.hpp>
 
 // nanovg implementation
 #include <nanovg_dk.h>
@@ -32,7 +32,7 @@ limitations under the License.
 #define CODE_POOL_SIZE 128 * 1024
 #define DATA_POOL_SIZE 1 * 1024 * 1024
 
-namespace brls
+namespace aurore
 {
 
 static constexpr const unsigned STATIC_CMD_SIZE = 0x1000;
@@ -142,7 +142,7 @@ void SwitchVideoContext::recordStaticCommands()
 
     // Clear the color and depth buffers
     Theme theme              = Application::getTheme();
-    NVGcolor backgroundColor = theme["brls/background"];
+    NVGcolor backgroundColor = theme["aurore/background"];
     this->cmdbuf.clearColor(0, DkColorMask_RGBA, backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
 
     this->cmdbuf.clearDepthStencil(true, 1.0f, 0xFF, 0);
@@ -203,7 +203,7 @@ void SwitchVideoContext::resetState()
 
 void SwitchVideoContext::resetFramebuffer()
 {
-    brls::Logger::error("resetFramebuffer");
+    aurore::Logger::error("resetFramebuffer");
     this->destroyFramebufferResources();
     this->updateWindowSize();
     this->createFramebufferResources();
@@ -331,4 +331,4 @@ void SwitchVideoContext::queueFlush()
     dkQueueFlush(this->queue);
 }
 
-} // namespace brls
+} // namespace aurore

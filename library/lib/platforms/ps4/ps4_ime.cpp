@@ -15,11 +15,11 @@ limitations under the License.
 */
 #include <orbis/UserService.h>
 #include <orbis/_types/ime_dialog.h>
-#include <borealis/extern/libretro-common/retro_timers.h>
+#include <aurore/extern/libretro-common/retro_timers.h>
 
-#include <borealis/core/application.hpp>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/ps4/ps4_ime.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/ps4/ps4_ime.hpp>
 
 extern "C"
 {
@@ -29,7 +29,7 @@ extern "C"
     int sceImeDialogTerm();
 }
 
-namespace brls
+namespace aurore
 {
 
 #define SCE_IME_DIALOG_MAX_TITLE_LENGTH (128)
@@ -148,7 +148,7 @@ int32_t ShowImeDialog(std::function<void(std::string)> f)
 
         if (status == ORBIS_DIALOG_STATUS_NONE)
         {
-            brls::Logger::info("ORBIS_DIALOG_STATUS_NONE");
+            aurore::Logger::info("ORBIS_DIALOG_STATUS_NONE");
             break;
         }
 
@@ -158,11 +158,11 @@ int32_t ShowImeDialog(std::function<void(std::string)> f)
 
         if (result.endstatus == ORBIS_DIALOG_CANCEL)
         {
-            brls::Logger::info("ORBIS_DIALOG_CANCEL");
+            aurore::Logger::info("ORBIS_DIALOG_CANCEL");
         }
         else if (result.endstatus == ORBIS_DIALOG_ABORD)
         {
-            brls::Logger::info("ORBIS_DIALOG_ABORD");
+            aurore::Logger::info("ORBIS_DIALOG_ABORD");
         }
         else if (result.endstatus == ORBIS_DIALOG_OK)
         {

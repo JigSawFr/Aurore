@@ -1,36 +1,36 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include "tab/cadran_tab.hpp"
 
-#include <borealis/cadran.hpp>
+#include <aurore/cadran.hpp>
 
 #include <string>
 #include <vector>
 
-using namespace brls::literals; // for _i18n
+using namespace aurore::literals; // for _i18n
 
 namespace kit = cadran::kit;
 
 namespace
 {
 // A section: its kicker, then a card holding `content`.
-brls::Box* section(brls::Box* column, const char* icon, const std::string& title)
+aurore::Box* section(aurore::Box* column, const char* icon, const std::string& title)
 {
-    brls::Box* head = kit::kicker(icon, title);
+    aurore::Box* head = kit::kicker(icon, title);
     head->setMarginTop(column->getChildren().empty() ? 0 : 28);
     head->setMarginBottom(12);
     column->addView(head);
-    brls::Box* card = kit::card(false, false);
-    card->setAxis(brls::Axis::COLUMN);
+    aurore::Box* card = kit::card(false, false);
+    card->setAxis(aurore::Axis::COLUMN);
     card->setPadding(20, 22, 20, 22);
     column->addView(card);
     return card;
 }
 
 // A row of the cards above: their figure, its caption, a pill.
-brls::Box* figure(const std::string& value, const std::string& caption, const std::string& state, const char* dot)
+aurore::Box* figure(const std::string& value, const std::string& caption, const std::string& state, const char* dot)
 {
-    brls::Box* card = kit::top_card(true);
-    card->setAxis(brls::Axis::COLUMN);
+    aurore::Box* card = kit::top_card(true);
+    card->setAxis(aurore::Axis::COLUMN);
     card->setPadding(18, 20, 18, 20);
     auto* digits = new CadranDigits();
     digits->setText(value);
@@ -38,23 +38,23 @@ brls::Box* figure(const std::string& value, const std::string& caption, const st
     digits->setTextColor(kit::color("cadran/text"));
     digits->setHeight(54);
     card->addView(digits);
-    brls::Label* label = kit::label(caption, kit::TEXT_NOTE, "cadran/text2");
+    aurore::Label* label = kit::label(caption, kit::TEXT_NOTE, "cadran/text2");
     label->setMarginBottom(12);
     card->addView(label);
-    brls::Box* pill = kit::pill(state, dot);
-    pill->setAlignSelf(brls::AlignSelf::FLEX_START);
+    aurore::Box* pill = kit::pill(state, dot);
+    pill->setAlignSelf(aurore::AlignSelf::FLEX_START);
     card->addView(pill);
     return card;
 }
 
 // A button of the dialogs' card: its text, what it opens.
-brls::Button* action(const std::string& text, std::function<void()> run, cadran::Emphasis emphasis)
+aurore::Button* action(const std::string& text, std::function<void()> run, cadran::Emphasis emphasis)
 {
-    auto* button = new brls::Button();
+    auto* button = new aurore::Button();
     button->setText(text);
     button->setMarginRight(12);
     button->setMarginBottom(12);
-    button->registerClickAction([run](brls::View*)
+    button->registerClickAction([run](aurore::View*)
         {
         run();
         return true; });
@@ -85,15 +85,15 @@ const char* const MARKDOWN = "## Markdown\n"
 
 CadranTab::CadranTab()
 {
-    auto* column = new brls::Box(brls::Axis::COLUMN);
+    auto* column = new aurore::Box(aurore::Axis::COLUMN);
     column->setPadding(28, 40, 40, 40);
     this->setContentView(column);
 
     // The figures, as a dashboard's top cards.
-    brls::Box* head = kit::kicker("today", "demo/cadran/figures"_i18n);
+    aurore::Box* head = kit::kicker("today", "demo/cadran/figures"_i18n);
     head->setMarginBottom(12);
     column->addView(head);
-    auto* figures = new brls::Box(brls::Axis::ROW);
+    auto* figures = new aurore::Box(aurore::Axis::ROW);
     figures->addView(figure("2:45", "demo/cadran/played"_i18n, "demo/cadran/on_track"_i18n, "cadran/teal"));
     figures->addView(figure("12", "demo/cadran/games"_i18n, "demo/cadran/updates"_i18n, "cadran/amber"));
     figures->addView(figure("98%", "demo/cadran/storage"_i18n, "demo/cadran/almost_full"_i18n, "cadran/coral"));
@@ -102,11 +102,11 @@ CadranTab::CadranTab()
     column->addView(figures);
 
     // Chips and a bar.
-    brls::Box* chips = section(column, "timer", "demo/cadran/chips"_i18n);
-    auto* row        = new brls::Box(brls::Axis::ROW);
+    aurore::Box* chips = section(column, "timer", "demo/cadran/chips"_i18n);
+    auto* row          = new aurore::Box(aurore::Axis::ROW);
     for (const char* text : { "15 min", "30 min", "1 h", "2 h" })
     {
-        brls::Box* chip = kit::chip(text);
+        aurore::Box* chip = kit::chip(text);
         chip->setMarginRight(12);
         row->addView(chip);
     }
@@ -117,8 +117,8 @@ CadranTab::CadranTab()
     chips->addView(bar);
 
     // Dialogs, sheets and toasts.
-    brls::Box* dialogs = section(column, "sparkle", "demo/cadran/dialogs"_i18n);
-    auto* buttons      = new brls::Box(brls::Axis::ROW);
+    aurore::Box* dialogs = section(column, "sparkle", "demo/cadran/dialogs"_i18n);
+    auto* buttons        = new aurore::Box(aurore::Axis::ROW);
     kit::wrap(buttons);
     const auto E = cadran::Emphasis::NONE;
     buttons->addView(action("demo/cadran/confirm"_i18n, []
@@ -142,13 +142,13 @@ CadranTab::CadranTab()
                  [](int i) { chosen = i; }, true, {}, { "timer", "timer", "timer", "timer" }); }, E));
     buttons->addView(action("demo/cadran/checklist"_i18n, []
         {
-        brls::Box* body = ui::checklist_body("demo/cadran/checklist"_i18n,
+        aurore::Box* body = ui::checklist_body("demo/cadran/checklist"_i18n,
                                              { { ui::Check::Ok, "demo/cadran/check_ok"_i18n },
                                                { ui::Check::Warn, "demo/cadran/check_warn"_i18n },
                                                { ui::Check::Bad, "demo/cadran/check_bad"_i18n },
                                                { ui::Check::Info, "demo/cadran/check_info"_i18n } },
                                              "demo/cadran/check_note"_i18n);
-        brls::Dialog* dialog = ui::box_dialog(body);
+        aurore::Dialog* dialog = ui::box_dialog(body);
         dialog->addButton("hints/ok"_i18n, [] {});
         dialog->open(); }, E));
     buttons->addView(action("demo/cadran/hold"_i18n, []
@@ -168,8 +168,8 @@ CadranTab::CadranTab()
     dialogs->addView(buttons);
 
     // The icons.
-    brls::Box* icons = section(column, "eye", "demo/cadran/icons"_i18n);
-    auto* grid       = new brls::Box(brls::Axis::ROW);
+    aurore::Box* icons = section(column, "eye", "demo/cadran/icons"_i18n);
+    auto* grid         = new aurore::Box(aurore::Axis::ROW);
     kit::wrap(grid);
     for (const char* name : ICONS)
     {
@@ -180,11 +180,11 @@ CadranTab::CadranTab()
     icons->addView(grid);
 
     // Markdown.
-    brls::Box* text = section(column, "file", "demo/cadran/markdown"_i18n);
+    aurore::Box* text = section(column, "file", "demo/cadran/markdown"_i18n);
     markdown_view::fill(text, markdown::parse(MARKDOWN));
 }
 
-brls::View* CadranTab::create()
+aurore::View* CadranTab::create()
 {
     return new CadranTab();
 }

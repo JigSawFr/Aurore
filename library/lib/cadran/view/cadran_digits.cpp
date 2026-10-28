@@ -1,11 +1,11 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/view/cadran_digits.hpp>
+#include <aurore/cadran/view/cadran_digits.hpp>
 
 #include <algorithm>
 #include <cmath>
 
-#include <borealis/cadran/ui/effects.hpp>
-#include <borealis/cadran/ui/motion.hpp>
+#include <aurore/cadran/ui/effects.hpp>
+#include <aurore/cadran/ui/motion.hpp>
 
 namespace
 {
@@ -14,10 +14,10 @@ constexpr float ROLL_US = 240000.0f; // a digit's roll, in µs
 
 CadranDigits::CadranDigits()
 {
-    this->setThemeColor("textColor", "brls/text");
-    this->font = brls::Application::getFont("cadran/digits");
-    if (this->font == brls::FONT_INVALID)
-        this->font = brls::Application::getDefaultFont();
+    this->setThemeColor("textColor", "aurore/text");
+    this->font = aurore::Application::getFont("cadran/digits");
+    if (this->font == aurore::FONT_INVALID)
+        this->font = aurore::Application::getDefaultFont();
     this->setFocusable(false);
     this->registerStringXMLAttribute("text", [this](std::string value)
         { this->setText(value); });
@@ -58,23 +58,23 @@ void CadranDigits::setFontSize(float value)
 
 void CadranDigits::setTextColor(NVGcolor value)
 {
-    if (!this->transitionStyle("textColor", brls::StyleValue::of(value)))
+    if (!this->transitionStyle("textColor", aurore::StyleValue::of(value)))
         this->color = value;
 }
 
-bool CadranDigits::getStyleProperty(const std::string& name, brls::StyleValue* value)
+bool CadranDigits::getStyleProperty(const std::string& name, aurore::StyleValue* value)
 {
     if (name != "textColor")
-        return brls::View::getStyleProperty(name, value);
-    *value = brls::StyleValue::of(this->color);
+        return aurore::View::getStyleProperty(name, value);
+    *value = aurore::StyleValue::of(this->color);
     return true;
 }
 
-bool CadranDigits::setStyleProperty(const std::string& name, const brls::StyleValue& value)
+bool CadranDigits::setStyleProperty(const std::string& name, const aurore::StyleValue& value)
 {
     if (name != "textColor")
-        return brls::View::setStyleProperty(name, value);
-    if (value.type != brls::StyleValue::Type::COLOR)
+        return aurore::View::setStyleProperty(name, value);
+    if (value.type != aurore::StyleValue::Type::COLOR)
         return false;
     this->setTextColor(value.color);
     return true;
@@ -138,9 +138,9 @@ float CadranDigits::advance(NVGcontext* vg, float size) const
 
 void CadranDigits::measure()
 {
-    NVGcontext* vg = brls::Application::getNVGContext();
+    NVGcontext* vg = aurore::Application::getNVGContext();
     nvgFontFaceId(vg, this->font);
-    const float size = this->fontSize * (this->followsTextSize ? brls::Label::getFontScale() : 1.0f);
+    const float size = this->fontSize * (this->followsTextSize ? aurore::Label::getFontScale() : 1.0f);
     float width      = this->advance(vg, size);
     this->drawSize   = size;
     if (this->fitWidth > 0.0f && width > this->fitWidth)
@@ -184,7 +184,7 @@ void CadranDigits::write(NVGcontext* vg, const std::string& what, float size, fl
 }
 
 void CadranDigits::draw(NVGcontext* vg, float x, float y, float width, float height,
-    brls::Style style, brls::FrameContext* ctx)
+    aurore::Style style, aurore::FrameContext* ctx)
 {
     (void)style;
     (void)ctx;
@@ -222,4 +222,4 @@ void CadranDigits::draw(NVGcontext* vg, float x, float y, float width, float hei
     nvgRestore(vg);
 }
 
-brls::View* CadranDigits::create() { return new CadranDigits(); }
+aurore::View* CadranDigits::create() { return new CadranDigits(); }

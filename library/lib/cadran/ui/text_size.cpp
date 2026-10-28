@@ -1,16 +1,16 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
-#include <borealis/cadran/ui/text_size.hpp>
+#include <aurore/cadran/ui/text_size.hpp>
 
 #include <yoga/Yoga.h>
 #include <cstdlib>
 #include <string>
 #include <vector>
-#include <borealis.hpp>
+#include <aurore.hpp>
 
-#include <borealis/cadran/ui/cadran_list.hpp>
-#include <borealis/cadran/ui/prefs.hpp>
-#include <borealis/cadran/ui/ui.hpp>
-#include <borealis/cadran/view/cadran_digits.hpp>
+#include <aurore/cadran/ui/cadran_list.hpp>
+#include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/cadran/ui/ui.hpp>
+#include <aurore/cadran/view/cadran_digits.hpp>
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -49,7 +49,7 @@ namespace
     void on_applet_hook(AppletHookType hook, void*)
     {
         if (hook == AppletHookType_OnOperationMode)
-            brls::sync([]()
+            aurore::sync([]()
                 { apply(); });
     }
 #endif
@@ -58,10 +58,10 @@ namespace
 void apply()
 {
     const float wanted = scale();
-    if (wanted == brls::Application::getTextScale())
+    if (wanted == aurore::Application::getTextScale())
         return;
     // Every label of every screen measured and laid out again (the core's).
-    brls::Application::setTextScale(wanted);
+    aurore::Application::setTextScale(wanted);
     // The tab on screen, for what it lays out by the size (Today's room).
     ui::refresh_shown_tab();
 }

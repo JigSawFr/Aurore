@@ -41,13 +41,13 @@ CaptionedImage::CaptionedImage()
     this->registerStringXMLAttribute("caption", [this](std::string value)
         {
         this->label->setText(value);
-        this->image->setAccessibilityRole(brls::AccessibilityRole::IMAGE);
+        this->image->setAccessibilityRole(aurore::AccessibilityRole::IMAGE);
         this->image->setAccessibilityLabel(value); });
 
-    this->addGestureRecognizer(new brls::TapGestureRecognizer(this, brls::TapGestureConfig(false, brls::SOUND_NONE, brls::SOUND_NONE, brls::SOUND_NONE)));
+    this->addGestureRecognizer(new aurore::TapGestureRecognizer(this, aurore::TapGestureConfig(false, aurore::SOUND_NONE, aurore::SOUND_NONE, aurore::SOUND_NONE)));
 }
 
-void CaptionedImage::onChildFocusGained(brls::View* directChild, brls::View* focusedView)
+void CaptionedImage::onChildFocusGained(aurore::View* directChild, aurore::View* focusedView)
 {
     // Called when a child of ours gets focused, in that case it's the Image
 
@@ -56,7 +56,7 @@ void CaptionedImage::onChildFocusGained(brls::View* directChild, brls::View* foc
     this->label->show([] {});
 }
 
-void CaptionedImage::onChildFocusLost(brls::View* directChild, brls::View* focusedView)
+void CaptionedImage::onChildFocusLost(aurore::View* directChild, aurore::View* focusedView)
 {
     // Called when a child of ours losts focused, in that case it's the Image
 
@@ -65,7 +65,7 @@ void CaptionedImage::onChildFocusLost(brls::View* directChild, brls::View* focus
     this->label->hide([] {});
 }
 
-brls::View* CaptionedImage::create()
+aurore::View* CaptionedImage::create()
 {
     // Called by the XML engine to create a new CaptionedImage
     return new CaptionedImage();

@@ -16,11 +16,11 @@
 
 #include "view/gem_view.hpp"
 
-#include <borealis/core/i18n.hpp>
+#include <aurore/core/i18n.hpp>
 
-using namespace brls::literals;
+using namespace aurore::literals;
 
-bool dismissView(brls::View* view, GemView* gem)
+bool dismissView(aurore::View* view, GemView* gem)
 {
     return true;
 }
@@ -37,19 +37,19 @@ GemView::GemView(Gem gem)
         return true;
     };
 
-    brls::Label* label = new brls::Label();
-    label->setText(brls::Hint::getKeyIcon(brls::ControllerButton::BUTTON_RB) + " Закрыть");
+    aurore::Label* label = new aurore::Label();
+    label->setText(aurore::Hint::getKeyIcon(aurore::ControllerButton::BUTTON_RB) + " Закрыть");
     label->setFontSize(24);
     label->setMargins(0, 12, 0, 12);
 
-    brls::Box* holder = new brls::Box();
+    aurore::Box* holder = new aurore::Box();
     holder->addView(label);
     holder->setFocusable(true);
-    holder->addGestureRecognizer(new brls::TapGestureRecognizer(holder));
+    holder->addGestureRecognizer(new aurore::TapGestureRecognizer(holder));
 
     holder->registerClickAction(dismissAction);
-    holder->registerAction("demo/close"_i18n, brls::ControllerButton::BUTTON_RB, dismissAction, true);
-    registerAction("demo/close"_i18n, brls::ControllerButton::BUTTON_RB, dismissAction, true);
+    holder->registerAction("demo/close"_i18n, aurore::ControllerButton::BUTTON_RB, dismissAction, true);
+    registerAction("demo/close"_i18n, aurore::ControllerButton::BUTTON_RB, dismissAction, true);
 
     getAppletFrameItem()->title = gem.name;
     getAppletFrameItem()->setIconFromRes("img/gallery/" + gem.id + ".png");
@@ -58,13 +58,13 @@ GemView::GemView(Gem gem)
 
     description->setText(gem.name + ", one of the gems of the list.\nA picture, a text and a button, presented over the tab.");
 
-    this->getView("close_button")->registerAction("hints/ok"_i18n, brls::BUTTON_A, [this](brls::View* view)
+    this->getView("close_button")->registerAction("hints/ok"_i18n, aurore::BUTTON_A, [this](aurore::View* view)
         {
             this->dismiss();
-            return true; }, false, false, brls::SOUND_BACK);
+            return true; }, false, false, aurore::SOUND_BACK);
 }
 
-brls::View* GemView::create()
+aurore::View* GemView::create()
 {
     // Called by the XML engine to create a new ComponentsTab
     return new GemView();

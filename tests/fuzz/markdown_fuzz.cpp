@@ -14,15 +14,15 @@
     limitations under the License.
 */
 
-// libFuzzer target (-DBRLS_BUILD_FUZZERS=ON, clang): Cadran's Markdown and
+// libFuzzer target (-DAURORE_BUILD_FUZZERS=ON, clang): Cadran's Markdown and
 // safe_text on any bytes, as GitHub sends them. Beyond the sanitizers: the
 // bounds markdown.hpp promises, every string valid UTF-8, and clean() within
 // its size and stable when run again.
 //
 //   ./aurore_fuzz_markdown -max_total_time=60
 
-#include <borealis/cadran/util/markdown.hpp>
-#include <borealis/cadran/util/safe_text.hpp>
+#include <aurore/cadran/util/markdown.hpp>
+#include <aurore/cadran/util/safe_text.hpp>
 
 #include <cstdint>
 #include <cstdio>

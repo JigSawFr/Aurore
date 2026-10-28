@@ -18,10 +18,10 @@ limitations under the License.
 
 #include <cstring>
 #include <iostream>
-#include <borealis/core/logger.hpp>
-#include <borealis/platforms/desktop/desktop_ime.hpp>
+#include <aurore/core/logger.hpp>
+#include <aurore/platforms/desktop/desktop_ime.hpp>
 
-namespace brls
+namespace aurore
 {
 
 static std::string terminalInput(std::string text)

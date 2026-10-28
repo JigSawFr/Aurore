@@ -13,13 +13,13 @@ OUTPUT_DIRECTORY       = build_docs
 INPUT                  = docs \
                          CHANGELOG.md \
                          template/README.md \
-                         library/include/borealis.hpp \
-                         library/include/borealis
+                         library/include/aurore.hpp \
+                         library/include/aurore
 FILE_PATTERNS          = *.hpp *.h *.md
 RECURSIVE              = YES
 # Bundled libraries and the platforms' internals are not Aurore's API
-EXCLUDE                = library/include/borealis/extern \
-                         library/include/borealis/platforms
+EXCLUDE                = library/include/aurore/extern \
+                         library/include/aurore/platforms
 USE_MDFILE_AS_MAINPAGE = docs/getting-started.md
 STRIP_FROM_PATH        = library/include
 STRIP_FROM_INC_PATH    = library/include
@@ -42,7 +42,7 @@ ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
 PREDEFINED             = __cplusplus
-EXPAND_AS_DEFINED      = BRLS_BIND \
+EXPAND_AS_DEFINED      = AURORE_BIND \
                          CONTENT_FROM_XML_RES \
                          CONTENT_FROM_XML_FILE \
                          CONTENT_FROM_XML_STR

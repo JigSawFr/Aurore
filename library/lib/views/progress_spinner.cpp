@@ -15,16 +15,16 @@
     limitations under the License.
 */
 
-#include <borealis/core/application.hpp>
-#include <borealis/views/progress_spinner.hpp>
+#include <aurore/core/application.hpp>
+#include <aurore/views/progress_spinner.hpp>
 
-namespace brls
+namespace aurore
 {
 
 ProgressSpinner::ProgressSpinner(ProgressSpinnerSize size)
     : size(size)
 {
-    BRLS_REGISTER_ENUM_XML_ATTRIBUTE("size", ProgressSpinnerSize, this->setSize,
+    AURORE_REGISTER_ENUM_XML_ATTRIBUTE("size", ProgressSpinnerSize, this->setSize,
         {
             { "normal", ProgressSpinnerSize::NORMAL },
             { "large", ProgressSpinnerSize::LARGE },
@@ -45,7 +45,7 @@ void ProgressSpinner::restartAnimation()
         if (done)
             this->restartAnimation(); });
     float animationLength = size == NORMAL ? 8.0f : 12.0f;
-    this->animationValue.addStep(animationLength, style["brls/spinner/animation_duration"], EasingFunction::linear);
+    this->animationValue.addStep(animationLength, style["aurore/spinner/animation_duration"], EasingFunction::linear);
     this->animationValue.start();
 }
 
@@ -63,7 +63,7 @@ void ProgressSpinner::animate(bool animate)
 
 void ProgressSpinner::draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx)
 {
-    NVGcolor baseColor = this->customBarColor ? this->barColor : Application::getTheme()["brls/spinner/bar_color"];
+    NVGcolor baseColor = this->customBarColor ? this->barColor : Application::getTheme()["aurore/spinner/bar_color"];
     NVGcolor barColor  = baseColor;
 
     // Each bar of the spinner
@@ -77,10 +77,10 @@ void ProgressSpinner::draw(NVGcontext* vg, float x, float y, float width, float 
                 nvgTranslate(vg, x + width / 2, y + height / 2);
                 nvgRotate(vg, nvgDegToRad(i * 45)); // Internal angle of octagon
                 nvgBeginPath(vg);
-                nvgMoveTo(vg, height * style["brls/spinner/center_gap_multiplier"], 0);
-                nvgLineTo(vg, height / 2 - height * style["brls/spinner/center_gap_multiplier"], 0);
+                nvgMoveTo(vg, height * style["aurore/spinner/center_gap_multiplier"], 0);
+                nvgLineTo(vg, height / 2 - height * style["aurore/spinner/center_gap_multiplier"], 0);
                 nvgStrokeColor(vg, barColor);
-                nvgStrokeWidth(vg, height * style["brls/spinner/bar_width_multiplier"]);
+                nvgStrokeWidth(vg, height * style["aurore/spinner/bar_width_multiplier"]);
                 nvgLineCap(vg, NVG_SQUARE);
                 nvgStroke(vg);
                 nvgRestore(vg);
@@ -94,10 +94,10 @@ void ProgressSpinner::draw(NVGcontext* vg, float x, float y, float width, float 
                 nvgTranslate(vg, x + width / 2, y + height / 2);
                 nvgRotate(vg, nvgDegToRad(i * 30)); // Internal angle of octagon
                 nvgBeginPath(vg);
-                nvgMoveTo(vg, height * style["brls/spinner/center_gap_multiplier_large"], 0);
-                nvgLineTo(vg, height / 2 - height * style["brls/spinner/center_gap_multiplier_large"], 0);
+                nvgMoveTo(vg, height * style["aurore/spinner/center_gap_multiplier_large"], 0);
+                nvgLineTo(vg, height / 2 - height * style["aurore/spinner/center_gap_multiplier_large"], 0);
                 nvgStrokeColor(vg, barColor);
-                nvgStrokeWidth(vg, height * style["brls/spinner/bar_width_multiplier_large"]);
+                nvgStrokeWidth(vg, height * style["aurore/spinner/bar_width_multiplier_large"]);
                 nvgLineCap(vg, NVG_SQUARE);
                 nvgStroke(vg);
                 nvgRestore(vg);
@@ -126,7 +126,7 @@ bool ProgressSpinner::getStyleProperty(const std::string& name, StyleValue* valu
 {
     if (name != "barColor")
         return View::getStyleProperty(name, value);
-    *value = StyleValue::of(this->customBarColor ? this->barColor : Application::getTheme()["brls/spinner/bar_color"]);
+    *value = StyleValue::of(this->customBarColor ? this->barColor : Application::getTheme()["aurore/spinner/bar_color"]);
     return true;
 }
 
@@ -140,9 +140,9 @@ bool ProgressSpinner::setStyleProperty(const std::string& name, const StyleValue
     return true;
 }
 
-brls::View* ProgressSpinner::create()
+aurore::View* ProgressSpinner::create()
 {
     return new ProgressSpinner();
 }
 
-} // namespace brls
+} // namespace aurore
