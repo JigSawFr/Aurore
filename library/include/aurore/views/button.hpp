@@ -55,15 +55,15 @@ inline const ButtonStyle BUTTONSTYLE_PRIMARY = {
     .shadowType              = ShadowType::GENERIC,
     .hideHighlightBackground = true,
 
-    .highlightPadding = "brls/button/primary_highlight_padding",
+    .highlightPadding = "aurore/button/primary_highlight_padding",
     .borderThickness  = "",
 
-    .enabledBackgroundColor = "brls/button/primary_enabled_background",
-    .enabledLabelColor      = "brls/button/primary_enabled_text",
+    .enabledBackgroundColor = "aurore/button/primary_enabled_background",
+    .enabledLabelColor      = "aurore/button/primary_enabled_text",
     .enabledBorderColor     = "",
 
-    .disabledBackgroundColor = "brls/button/primary_disabled_background",
-    .disabledLabelColor      = "brls/button/primary_disabled_text",
+    .disabledBackgroundColor = "aurore/button/primary_disabled_background",
+    .disabledLabelColor      = "aurore/button/primary_disabled_text",
     .disabledBorderColor     = "",
 };
 
@@ -75,12 +75,12 @@ inline const ButtonStyle BUTTONSTYLE_HIGHLIGHT = {
     .highlightPadding = "",
     .borderThickness  = "",
 
-    .enabledBackgroundColor = "brls/button/default_enabled_background",
-    .enabledLabelColor      = "brls/button/highlight_enabled_text",
+    .enabledBackgroundColor = "aurore/button/default_enabled_background",
+    .enabledLabelColor      = "aurore/button/highlight_enabled_text",
     .enabledBorderColor     = "",
 
-    .disabledBackgroundColor = "brls/button/default_disabled_background",
-    .disabledLabelColor      = "brls/button/highlight_disabled_text",
+    .disabledBackgroundColor = "aurore/button/default_disabled_background",
+    .disabledLabelColor      = "aurore/button/highlight_disabled_text",
     .disabledBorderColor     = "",
 };
 
@@ -92,12 +92,12 @@ inline const ButtonStyle BUTTONSTYLE_DEFAULT = {
     .highlightPadding = "",
     .borderThickness  = "",
 
-    .enabledBackgroundColor = "brls/button/default_enabled_background",
-    .enabledLabelColor      = "brls/button/default_enabled_text",
+    .enabledBackgroundColor = "aurore/button/default_enabled_background",
+    .enabledLabelColor      = "aurore/button/default_enabled_text",
     .enabledBorderColor     = "",
 
-    .disabledBackgroundColor = "brls/button/default_disabled_background",
-    .disabledLabelColor      = "brls/button/default_disabled_text",
+    .disabledBackgroundColor = "aurore/button/default_disabled_background",
+    .disabledLabelColor      = "aurore/button/default_disabled_text",
     .disabledBorderColor     = "",
 };
 
@@ -107,15 +107,15 @@ inline const ButtonStyle BUTTONSTYLE_BORDERED = {
     .hideHighlightBackground = false,
 
     .highlightPadding = "",
-    .borderThickness  = "brls/button/border_thickness",
+    .borderThickness  = "aurore/button/border_thickness",
 
     .enabledBackgroundColor = "",
-    .enabledLabelColor      = "brls/button/default_enabled_text",
-    .enabledBorderColor     = "brls/button/enabled_border_color",
+    .enabledLabelColor      = "aurore/button/default_enabled_text",
+    .enabledBorderColor     = "aurore/button/enabled_border_color",
 
     .disabledBackgroundColor = "",
-    .disabledLabelColor      = "brls/button/default_disabled_text",
-    .disabledBorderColor     = "brls/button/disabled_border_color",
+    .disabledLabelColor      = "aurore/button/default_disabled_text",
+    .disabledBorderColor     = "aurore/button/disabled_border_color",
 };
 
 // only text
@@ -127,11 +127,11 @@ inline const ButtonStyle BUTTONSTYLE_BORDERLESS = {
     .borderThickness  = "",
 
     .enabledBackgroundColor = "",
-    .enabledLabelColor      = "brls/button/default_enabled_text",
+    .enabledLabelColor      = "aurore/button/default_enabled_text",
     .enabledBorderColor     = "",
 
     .disabledBackgroundColor = "",
-    .disabledLabelColor      = "brls/button/default_disabled_text",
+    .disabledLabelColor      = "aurore/button/default_disabled_text",
     .disabledBorderColor     = "",
 };
 
@@ -206,7 +206,7 @@ class Button : public Box
 
     void applyStyle();
 
-    AURORE_BIND(Label, label, "brls/button/label");
+    AURORE_BIND(Label, label, "aurore/button/label");
 };
 
 } // namespace aurore

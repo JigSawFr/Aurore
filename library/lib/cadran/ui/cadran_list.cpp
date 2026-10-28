@@ -694,7 +694,7 @@ void cadran::List::section(aurore::Header* header)
     if (!header->getChildren().empty())
         header->getChildren()[0]->setVisibility(aurore::Visibility::GONE); // the bar
     // A kicker: read from across the room (its capitals: sync()).
-    for (const char* part : { "brls/header/title", "brls/header/subtitle" })
+    for (const char* part : { "aurore/header/title", "aurore/header/subtitle" })
         kit::set_kicker(dynamic_cast<aurore::Label*>(header->getView(part)));
 }
 
@@ -811,7 +811,7 @@ void cadran::List::sync()
 {
     for (aurore::Header* header : this->headers)
     {
-        auto* text = dynamic_cast<aurore::Label*>(header->getView("brls/header/title"));
+        auto* text = dynamic_cast<aurore::Label*>(header->getView("aurore/header/title"));
         if (!text)
             continue;
         const std::string title    = text->getFullText();
@@ -820,7 +820,7 @@ void cadran::List::sync()
             text->setText(capitals);
     }
     aurore::Theme theme    = aurore::Application::getTheme();
-    const NVGcolor neutral = theme["brls/list/listItem_value_color"];
+    const NVGcolor neutral = theme["aurore/list/listItem_value_color"];
     for (aurore::DetailCell* cell : this->readings)
     {
         // A reading that also opens something: the tile is the way in, no "›".

@@ -39,7 +39,7 @@ enum class ThemeVariant
     DARK
 };
 
-/// One variant's colours by key ("brls/text", "cadran/teal"…): the ones the
+/// One variant's colours by key ("aurore/text", "cadran/teal"…): the ones the
 /// code adds (the base), and over them the ones of the theme file in use.
 class ThemeValues
 {
@@ -71,7 +71,7 @@ class ThemeValues
 enum class BackgroundFit
 {
     COVER, ///< scaled to cover it, centred, cut at the edges (the default)
-    CONTAIN, ///< scaled to fit in it whole, centred, brls/clear around it
+    CONTAIN, ///< scaled to fit in it whole, centred, aurore/clear around it
     TILE, ///< repeated from the top left, one pixel per unit of the layout
     CENTER, ///< as is, one pixel per unit of the layout, centred
 };
@@ -84,7 +84,7 @@ struct ThemeBackground
     /// background_image: its path (Theme::resolveAsset), "" without one
     std::string image;
     BackgroundFit fit = BackgroundFit::COVER;
-    /// background_dim: how much of brls/background veils the image (0 to 1)
+    /// background_dim: how much of aurore/background veils the image (0 to 1)
     float dim = DEFAULT_DIM;
     /// surface_opacity: the surfaces' opacity over the image (0 to 1), see
     /// Theme::addSurfaceKey; 1 without an image
@@ -290,7 +290,7 @@ struct ThemeInfo
  * restyles all of them.
  *
  * A view keeps a key rather than a colour with View::setThemeColor (XML:
- * textColor="@theme/brls/text"), and draws with its new value when the
+ * textColor="@theme/aurore/text"), and draws with its new value when the
  * theme changes, at once: Application::getThemeChangedEvent() says so to
  * what keeps colours of its own.
  */
@@ -326,10 +326,10 @@ class Theme
      *     accent = #3fa7ff        # the palette: accent, background, surface,
      *                             # text, warning, danger; the rest derived
      *     [colors]                # any key, for the variants it styles
-     *     brls/sidebar/background = #0d1b2a
+     *     aurore/sidebar/background = #0d1b2a
      *     [light] / [dark]        # the same, for one variant only
      *     [metrics]
-     *     brls/highlight/stroke_width = 4
+     *     aurore/highlight/stroke_width = 4
      *
      * `path` is a file, a resource ("@res/themes/x.theme") or a preset
      * ("builtin:high-contrast-dark", builtinThemes()). A line it cannot read
@@ -383,7 +383,7 @@ class Theme
     /**
      * The picture the file in use puts behind every screen in the variant
      * in use (background_image = file.png, next to the theme file), ""
-     * without one: drawn over brls/clear, under the screens.
+     * without one: drawn over aurore/clear, under the screens.
      */
     static std::string getBackgroundImage();
 
@@ -481,8 +481,8 @@ class Theme
     /**
      * A key of a surface (a card, a panel) drawn over the screens'
      * background: with a background image and surface_opacity under 1, its
-     * opacity is multiplied by it. The core's: brls/sidebar/background,
-     * brls/highlight/background, the default buttons' backgrounds; Cadran
+     * opacity is multiplied by it. The core's: aurore/sidebar/background,
+     * aurore/highlight/background, the default buttons' backgrounds; Cadran
      * adds cadran/surf and cadran/surf2.
      */
     static void addSurfaceKey(const std::string& key);
@@ -525,14 +525,14 @@ class Theme
     /**
      * A pair checkContrast() looks at: `ink` drawn on `surface` (keys), at
      * least `minimum`:1. A translucent colour is first blended over
-     * brls/background. The core adds its own; Cadran its palette's.
+     * aurore/background. The core adds its own; Cadran its palette's.
      */
     static void addContrastCheck(const std::string& ink, const std::string& surface, float minimum = 4.5f);
 
     /**
-     * The pairs of `variant` under their minimum, as "brls/text on
-     * brls/background: 3.1:1, under 4.5:1". With a background image whose
-     * colour is known (ThemeImages), text on brls/background is checked on
+     * The pairs of `variant` under their minimum, as "aurore/text on
+     * aurore/background: 3.1:1, under 4.5:1". With a background image whose
+     * colour is known (ThemeImages), text on aurore/background is checked on
      * the image's average colour under its veil, and translucent surfaces
      * over it.
      */

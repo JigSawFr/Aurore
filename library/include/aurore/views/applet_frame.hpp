@@ -81,11 +81,11 @@ class AppletFrame : public Box
     inline static bool HIDE_BOTTOM_BAR = false;
 
   private:
-    AURORE_BIND(Box, header, "brls/applet_frame/header");
-    AURORE_BIND(BottomBar, footer, "brls/applet_frame/footer");
-    AURORE_BIND(Label, title, "brls/applet_frame/title_label");
-    AURORE_BIND(Image, icon, "brls/applet_frame/title_icon");
-    AURORE_BIND(Box, hintBox, "brls/applet_frame/hint_box");
+    AURORE_BIND(Box, header, "aurore/applet_frame/header");
+    AURORE_BIND(BottomBar, footer, "aurore/applet_frame/footer");
+    AURORE_BIND(Label, title, "aurore/applet_frame/title_label");
+    AURORE_BIND(Image, icon, "aurore/applet_frame/title_icon");
+    AURORE_BIND(Box, hintBox, "aurore/applet_frame/hint_box");
 
     HeaderStyle style = HeaderStyle::REGULAR;
 

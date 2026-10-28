@@ -350,14 +350,14 @@ AURORE_TEST(seasonal_theme_changes_at_midnight)
     h.settle();
     NVGcolor autumn;
     aurore::Theme::parseColor("#1a1310", &autumn);
-    NVGcolor background = aurore::Theme::getDarkTheme()["brls/background"];
+    NVGcolor background = aurore::Theme::getDarkTheme()["aurore/background"];
     AURORE_CHECK(background.r == autumn.r && background.g == autumn.g && background.b == autumn.b);
     aurore::test::Image before = h.screenshot();
 
     h.advance(20000);
     NVGcolor halloween;
     aurore::Theme::parseColor("#150d1f", &halloween);
-    background = aurore::Theme::getDarkTheme()["brls/background"];
+    background = aurore::Theme::getDarkTheme()["aurore/background"];
     AURORE_CHECK(background.r == halloween.r && background.g == halloween.g && background.b == halloween.b);
     AURORE_CHECK_EQ(aurore::Theme::getCurrentPath(), std::string("builtin:seasonal"));
     // Drawn again: the button and its focus in the new colours
@@ -794,8 +794,8 @@ AURORE_TEST(theme_numbers_are_finite_and_in_range)
 
     ThemeFolder themes("aurore_theme_numbers_test");
     aurore::ThemeInfo info = aurore::Theme::inspect(themes.write("nan.theme",
-        "name = N\naccent = rgba(nan, 1e39, -5, inf)\n[metrics]\nbrls/sidebar/width = nan\nbrls/header/height = inf\n"
-        "brls/highlight/stroke_width = 1e39\nbrls/sidebar/padding_top = -20000\nbrls/sidebar/padding_left = 12\n"));
+        "name = N\naccent = rgba(nan, 1e39, -5, inf)\n[metrics]\naurore/sidebar/width = nan\naurore/header/height = inf\n"
+        "aurore/highlight/stroke_width = 1e39\naurore/sidebar/padding_top = -20000\naurore/sidebar/padding_left = 12\n"));
     AURORE_CHECK(!info.ok());
     AURORE_CHECK(hasErrorWith(info, "line 2: rgba(nan, 1e39, -5, inf) is not a colour"));
     for (const char* value : { "line 4: nan", "line 5: inf", "line 6: 1e39", "line 7: -20000" })
@@ -917,9 +917,9 @@ AURORE_TEST(theme_background_keys_are_read_and_inherited)
     h.settle();
     AURORE_CHECK(aurore::Application::hasThemeBackground());
     AURORE_CHECK(std::fabs(aurore::Theme::getDarkTheme()["cadran/surf"].a - surface.a * 0.8f) < 0.001f);
-    AURORE_CHECK(std::fabs(aurore::Theme::getDarkTheme()["brls/sidebar/background"].a - 0.8f) < 0.001f);
+    AURORE_CHECK(std::fabs(aurore::Theme::getDarkTheme()["aurore/sidebar/background"].a - 0.8f) < 0.001f);
     AURORE_CHECK(std::fabs(aurore::Theme::getDarkTheme()["cadran/amber_surf"].a - warning.a * 0.8f) < 0.001f);
-    AURORE_CHECK(aurore::Theme::getDarkTheme()["brls/background"].a == 1.0f);
+    AURORE_CHECK(aurore::Theme::getDarkTheme()["aurore/background"].a == 1.0f);
     AURORE_CHECK(aurore::Theme::loadFile(plain));
     h.settle();
     AURORE_CHECK(!aurore::Application::hasThemeBackground());
@@ -945,7 +945,7 @@ AURORE_TEST(theme_text_is_checked_on_its_picture)
     auto onPicture = [](const aurore::ThemeInfo& info)
     {
         for (const std::string& warning : info.warnings)
-            if (warning.find("brls/text on brls/background over the background image") != std::string::npos)
+            if (warning.find("aurore/text on aurore/background over the background image") != std::string::npos)
                 return true;
         return false;
     };
@@ -1472,7 +1472,7 @@ AURORE_TEST(theme_decor_keys_are_read_and_inherited)
         "name = Base\ninherit = dark\ndecor.top = garland.png\ndecor.top_fit = tile\ndecor.top_height = 24\nbackdrop.sidebar = frost.png\n"
         "backdrop.sidebar_opacity = 0.5\nparticles = snow\nparticles_density = medium\nparticles_speed = 0.5\n"
         "particles_color = #ffffff, rgba(200, 220, 255, 0.8) # a comment\n"
-        "[colors]\nbrls/backdrop = rgba(0, 0, 0, 0.8) # a comment\n[dark]\nparticles_color = #ffffff, #ddeeff, #c0d0e0\n"
+        "[colors]\naurore/backdrop = rgba(0, 0, 0, 0.8) # a comment\n[dark]\nparticles_color = #ffffff, #ddeeff, #c0d0e0\n"
         "[light]\nparticles = petals\nbackdrop.dialog = frost.png\nbackdrop.dialog_fit = center\n");
     themes.picture("base/garland.png", 200, 30, 40, 128, 16);
     themes.picture("base/frost.png", 220, 230, 240);
@@ -2123,7 +2123,7 @@ AURORE_TEST(cadran_crumb_skips_screens_of_their_own)
     // … or as the app's hook says
     ui::hooks::get().standalone_screen = [](aurore::View* frame)
     {
-        auto* title = dynamic_cast<aurore::Label*>(frame->getView("brls/applet_frame/title_label"));
+        auto* title = dynamic_cast<aurore::Label*>(frame->getView("aurore/applet_frame/title_label"));
         return title && title->getFullText() == "Fourth";
     };
     h.push(new aurore::Activity(titledScreen("Fourth")));
@@ -2192,9 +2192,9 @@ AURORE_TEST(switch_off_reads_as_secondary_text)
         h.step(2);
         aurore::Theme theme = aurore::Application::getTheme();
         NVGcolor off        = cell->detail->getTextColor();
-        NVGcolor want       = theme["brls/text_secondary"];
+        NVGcolor want       = theme["aurore/text_secondary"];
         AURORE_CHECK(std::fabs(off.r - want.r) < 0.01f && std::fabs(off.g - want.g) < 0.01f && std::fabs(off.b - want.b) < 0.01f);
-        AURORE_CHECK(aurore::Theme::contrast(off, theme["brls/background"]) >= 4.5f);
+        AURORE_CHECK(aurore::Theme::contrast(off, theme["aurore/background"]) >= 4.5f);
     }
 }
 
@@ -2231,15 +2231,15 @@ static std::string xmlError(const std::string& name, const std::string& xml)
 AURORE_TEST(xml_errors_say_where_and_what_was_meant)
 {
     Harness h;
-    std::string typo = xmlError("aurore_typo.xml", "<brls:Box>\n\n    <brls:Label fontSise=\"20\"/>\n</brls:Box>\n");
-    AURORE_CHECK(typo.find("aurore_typo.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"") != std::string::npos);
+    std::string typo = xmlError("aurore_typo.xml", "<aurore:Box>\n\n    <aurore:Label fontSise=\"20\"/>\n</aurore:Box>\n");
+    AURORE_CHECK(typo.find("aurore_typo.xml:3: <aurore:Label>: Unknown XML attribute \"fontSise\"") != std::string::npos);
     AURORE_CHECK(typo.find("did you mean \"fontSize\"?") != std::string::npos);
 
-    std::string value = xmlError("aurore_value.xml", "<brls:Box\n    axis=\"colum\"/>\n");
-    AURORE_CHECK(value.find("aurore_value.xml:1: <brls:Box>: Illegal value \"colum\" for XML attribute \"axis\"; expected column, row") != std::string::npos);
+    std::string value = xmlError("aurore_value.xml", "<aurore:Box\n    axis=\"colum\"/>\n");
+    AURORE_CHECK(value.find("aurore_value.xml:1: <aurore:Box>: Illegal value \"colum\" for XML attribute \"axis\"; expected column, row") != std::string::npos);
 
-    std::string tag = xmlError("aurore_tag.xml", "<brls:Box>\n<brls:Lable/>\n</brls:Box>\n");
-    AURORE_CHECK(tag.find("aurore_tag.xml:2: <brls:Lable>: Unknown XML tag \"brls:Lable\"; did you mean \"brls:Label\"?") != std::string::npos);
+    std::string tag = xmlError("aurore_tag.xml", "<aurore:Box>\n<aurore:Lable/>\n</aurore:Box>\n");
+    AURORE_CHECK(tag.find("aurore_tag.xml:2: <aurore:Lable>: Unknown XML tag \"aurore:Lable\"; did you mean \"aurore:Label\"?") != std::string::npos);
 }
 
 AURORE_TEST(reduce_motion_stops_core_animations)
@@ -2487,7 +2487,7 @@ AURORE_TEST(focus_on_a_scrolling_frame_shows_its_place)
     if (!indicator)
         return;
     AURORE_CHECK(indicator->getAlpha() > 0.99f);
-    NVGcolor want = aurore::Application::getTheme()["brls/highlight/color1"];
+    NVGcolor want = aurore::Application::getTheme()["aurore/highlight/color1"];
     NVGcolor got  = indicator->getColor();
     AURORE_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
     AURORE_CHECK(h.matchesReference("scrolling_frame_focus"));
@@ -2555,7 +2555,7 @@ class TwoTabs : public aurore::Activity
         frame->addTab("Two", []
             {
             if (s_second_tab_broken)
-                throw std::logic_error("two.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"");
+                throw std::logic_error("two.xml:3: <aurore:Label>: Unknown XML attribute \"fontSise\"");
             return tabWith("second"); });
         return frame;
     }
@@ -2690,8 +2690,8 @@ AURORE_TEST(text_field_is_a_card_with_a_cursor)
     dialog->open();
     h.settle();
 
-    auto* card  = dynamic_cast<aurore::Box*>(dialog->getView("brls/dialog/applet"));
-    auto* title = dialog->getView("brls/dialog/header");
+    auto* card  = dynamic_cast<aurore::Box*>(dialog->getView("aurore/dialog/applet"));
+    auto* title = dialog->getView("aurore/dialog/header");
     AURORE_CHECK(card != nullptr && title != nullptr);
     if (!card || !title)
         return;

@@ -39,4 +39,4 @@ A left click is a touch; the right button is B, the middle one X. The buttons ar
 
 The focus waiting on a scrolling list itself, between two lines out of sight or through a long text, has no highlight: the list's scroll bar then shows it, wider and in the focus colour, until the focus moves to a line again.
 
-A horizontal list (`brls:HScrollingFrame`) scrolled to its start lets Left out to the views around it, the rail first; to its end, Right.
+A horizontal list (`aurore:HScrollingFrame`) scrolled to its start lets Left out to the views around it, the rail first; to its end, Right.

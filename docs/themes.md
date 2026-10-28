@@ -1,6 +1,6 @@
 # Themes
 
-Every colour Aurore draws with, the core views' and Cadran's, is a **theme key** (`brls/text`, `cadran/teal`…) with a value for the light variant and one for the dark variant. A **theme file** changes any of them, and the look changes at once: no restart, no screen built again. Aurore ships presets, an app lists the user's own files in a folder, and a theme can be three lines long:
+Every colour Aurore draws with, the core views' and Cadran's, is a **theme key** (`aurore/text`, `cadran/teal`…) with a value for the light variant and one for the dark variant. A **theme file** changes any of them, and the look changes at once: no restart, no screen built again. Aurore ships presets, an app lists the user's own files in a folder, and a theme can be three lines long:
 
 ```ini
 name = Mint
@@ -49,7 +49,7 @@ surface_opacity = 1
 @include shared.inc
 
 [colors]            # any key, for every variant the file styles
-brls/sidebar/background = #0d1b2a
+aurore/sidebar/background = #0d1b2a
 
 [light]             # for the light variant only (palette, keys, background)
 accent = #1f5fc4
@@ -59,7 +59,7 @@ background_image = day.jpg
 cadran/glow = rgba(63, 167, 255, 0.15)
 
 [metrics]           # style metrics (Application::getStyle)
-brls/highlight/stroke_width = 6
+aurore/highlight/stroke_width = 6
 ```
 
 - **Colours**: `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(r, g, b)`, `rgba(r, g, b, a)` (r, g and b from 0 to 255, a from 0 to 1; a value out of its range, `nan` or `inf` is not a colour).
@@ -72,7 +72,7 @@ brls/highlight/stroke_width = 6
 - **`inherit`** with a file or a preset takes everything from it first (its colours, metrics, variants, background), then this file's lines over them; for the background, a line of this file for every variant also beats the inherited file's `[light]`/`[dark]` one. `@include other.inc` reads another file's lines at that place (its `name` and `inherit` are ignored). Both look next to the including file first, then in the presets (`ocean`, or `builtin:ocean` for the preset only). The file they name, and a `counterpart`, is confined to the theme's folder as its pictures are ([below](#theme-folders-and-pictures)): no absolute path, no `..` out of the folder, no link out of it, `@res/` for a resource theme only; a refused one is an error (`line 3: @include /etc/passwd: an absolute path is not allowed: a theme's files are in its folder`), its file is not read. Limits, each an error with its file and line: a file that includes or inherits itself, directly or not (`parts/sky.inc:2: @include sky.inc includes itself (a loop)`), more than 8 levels, more than 64 files read for one theme (with what it includes and inherits); a file larger than 256 KB, or that is not a regular file (a folder, a pipe, a device), cannot be read.
 - **Later lines win**; palette values are derived first, then `[colors]`, then `[light]`/`[dark]`, so an explicit key always beats the derived one.
 - **Errors never stop the file**: a line that cannot be read (a bad colour, an unknown section, a missing include) is skipped and reported, with its file and line number. An unknown key is kept (an app's own keys are fine) and reported as a warning, in case it is a typo. The first 100 errors are kept, then `and N more errors`; an error quoting a long line is cut at 200 bytes, and a control character of the file is written `\x1B` in errors, warnings and the log.
-- **Contrast**: after a file is read, the pairs the core and Cadran promise to keep readable are checked (`Theme::checkContrast`): `brls/text on brls/background reads badly: 3.1:1, under 4.5:1`. Text needs 4.5:1 (the inks, a cell's value, secondary text, the toasts), shapes that carry meaning 3:1: the focus ring on the screen and on a card, a tile's icon, a chart's bars (`cadran/bar`, `cadran/bar_today`) (WCAG 1.4.3, 1.4.11). A theme that sets `cadran/text3` over a picture sets `brls/text_secondary` with it. Warnings are logged, and listed in `ThemeInfo::warnings`.
+- **Contrast**: after a file is read, the pairs the core and Cadran promise to keep readable are checked (`Theme::checkContrast`): `aurore/text on aurore/background reads badly: 3.1:1, under 4.5:1`. Text needs 4.5:1 (the inks, a cell's value, secondary text, the toasts), shapes that carry meaning 3:1: the focus ring on the screen and on a card, a tile's icon, a chart's bars (`cadran/bar`, `cadran/bar_today`) (WCAG 1.4.3, 1.4.11). A theme that sets `cadran/text3` over a picture sets `aurore/text_secondary` with it. Warnings are logged, and listed in `ThemeInfo::warnings`.
 
 ### The palette
 
@@ -80,16 +80,16 @@ The palette keys (`accent`, `background`, `surface`, `text`, `warning`, `danger`
 
 | Palette key | Keys it sets |
 | --- | --- |
-| `background` | `brls/background`, `brls/clear`, `brls/sidebar/background` |
-| `surface` | `cadran/surf`, `cadran/surf2` (5 % toward the text), `brls/highlight/background`, `brls/button/default_*_background` |
-| `text` (and `background`) | `brls/text`, `cadran/text`, `cadran/text2` and `text3` (30 % and 45 % toward the background, at 4.5:1), `brls/text_disabled`, `brls/text_secondary` (as `text3`), `brls/header/subtitle`, `brls/header/rectangle`, `brls/list/listItem_value_color`, every separator and line (`brls/sidebar/separator`, `brls/header/border`, `brls/applet_frame/separator`, `cadran/line`, `cadran/track`, `cadran/border`, `cadran/well`), button text and borders, `brls/slider/line_empty`, `brls/spinner/bar_color`, `cadran/key_bg`, `cadran/key_fg` |
-| `accent` | `brls/accent` and the inks of the active and chosen things (`brls/sidebar/active_item`, `brls/button/highlight_*_text`, `cadran/teal`, `cadran/pill_ok_ink`), the fills (`brls/button/primary_*`, `brls/slider/line_filled`, `cadran/teal_fill`, `cadran/teal_soft`, `cadran/pill_ok`, `cadran/rail_active`), the focus ring (`brls/highlight/color1` at 3:1, `color2` lighter, `cadran/hl1`, `cadran/hl2`), `brls/click_pulse`, `cadran/glow`, `cadran/glow_strong`, and the state shades below |
+| `background` | `aurore/background`, `aurore/clear`, `aurore/sidebar/background` |
+| `surface` | `cadran/surf`, `cadran/surf2` (5 % toward the text), `aurore/highlight/background`, `aurore/button/default_*_background` |
+| `text` (and `background`) | `aurore/text`, `cadran/text`, `cadran/text2` and `text3` (30 % and 45 % toward the background, at 4.5:1), `aurore/text_disabled`, `aurore/text_secondary` (as `text3`), `aurore/header/subtitle`, `aurore/header/rectangle`, `aurore/list/listItem_value_color`, every separator and line (`aurore/sidebar/separator`, `aurore/header/border`, `aurore/applet_frame/separator`, `cadran/line`, `cadran/track`, `cadran/border`, `cadran/well`), button text and borders, `aurore/slider/line_empty`, `aurore/spinner/bar_color`, `cadran/key_bg`, `cadran/key_fg` |
+| `accent` | `aurore/accent` and the inks of the active and chosen things (`aurore/sidebar/active_item`, `aurore/button/highlight_*_text`, `cadran/teal`, `cadran/pill_ok_ink`), the fills (`aurore/button/primary_*`, `aurore/slider/line_filled`, `cadran/teal_fill`, `cadran/teal_soft`, `cadran/pill_ok`, `cadran/rail_active`), the focus ring (`aurore/highlight/color1` at 3:1, `color2` lighter, `cadran/hl1`, `cadran/hl2`), `aurore/click_pulse`, `cadran/glow`, `cadran/glow_strong`, and the state shades below |
 | `warning` | `cadran/amber`, `cadran/amber_fill`, `cadran/amber_surf`, `cadran/amber_line` |
 | `danger` | `cadran/coral`, `cadran/coral_fill`, `cadran/coral_line`, `cadran/coral_soft` |
 
 The label on the fills (`cadran/navy`: a confirmation's, a primary button's) is the one of the text, the background, black or white that reads best on the accent and danger fills; a fill the file does not give is darkened or lightened until it reads at 4.5:1.
 
-**State shades**: `brls/accent/hover`, `brls/accent/pressed`, `brls/accent/disabled` and `brls/accent/ink` (the text on the accent) exist in every theme, derived from `brls/accent` (from `accent` in a file), for an app's state styles: `pressed:backgroundColor="@theme/brls/accent/pressed"` (docs/styles.md).
+**State shades**: `aurore/accent/hover`, `aurore/accent/pressed`, `aurore/accent/disabled` and `aurore/accent/ink` (the text on the accent) exist in every theme, derived from `aurore/accent` (from `accent` in a file), for an app's state styles: `pressed:backgroundColor="@theme/aurore/accent/pressed"` (docs/styles.md).
 
 <a id="theme-folders-and-pictures"></a>
 ## Theme folders and pictures
@@ -115,22 +115,22 @@ themes/                      # the folder an app lists (Theme::listThemes)
 | Key | Values | Default | What |
 | --- | --- | --- | --- |
 | `background_image` | a file in the theme's folder, or `none` | none | A picture behind every screen: PNG or JPEG (not WebP). `none` takes away an inherited one |
-| `background_fit` | `cover`, `contain`, `tile`, `center` | `cover` | `cover` fills the window, centred, cut at the edges; `contain` shows it whole, centred, `brls/clear` around it; `tile` repeats it from the top left; `center` puts it in the middle as is. `tile` and `center` draw one pixel of the picture per unit of the 1280×720 layout |
-| `background_dim` | 0 to 1 | 0.35 | A veil of `brls/background` over the picture, so that the text drawn on it reads: 0 shows it as is, 1 hides it |
-| `surface_opacity` | 0 to 1 | 1 | The opacity of the surfaces over the picture: cards and chips (`cadran/surf`, `cadran/surf2`, and the tinted ones: `cadran/amber_surf`, `cadran/teal_soft`, `cadran/coral_soft`, `cadran/pill_ok`), the sidebar (`brls/sidebar/background`), the focus's fill (`brls/highlight/background`), the default buttons. 1 keeps them opaque; without a picture it does nothing |
+| `background_fit` | `cover`, `contain`, `tile`, `center` | `cover` | `cover` fills the window, centred, cut at the edges; `contain` shows it whole, centred, `aurore/clear` around it; `tile` repeats it from the top left; `center` puts it in the middle as is. `tile` and `center` draw one pixel of the picture per unit of the 1280×720 layout |
+| `background_dim` | 0 to 1 | 0.35 | A veil of `aurore/background` over the picture, so that the text drawn on it reads: 0 shows it as is, 1 hides it |
+| `surface_opacity` | 0 to 1 | 1 | The opacity of the surfaces over the picture: cards and chips (`cadran/surf`, `cadran/surf2`, and the tinted ones: `cadran/amber_surf`, `cadran/teal_soft`, `cadran/coral_soft`, `cadran/pill_ok`), the sidebar (`aurore/sidebar/background`), the focus's fill (`aurore/highlight/background`), the default buttons. 1 keeps them opaque; without a picture it does nothing |
 
 Each key is read at the top (every variant the file styles) or in `[light]`/`[dark]` (one variant), as the colours: a theme can have a night picture and a day one, or a picture in one variant only. A variant the file does not style has no picture.
 
 What shows and what does not:
 
-- The screens have no fill of their own: their background is the window's, `brls/clear`, then the picture, then its veil. The main screen, a tab frame's content, applet frames and Cadran's screens show it as they are.
+- The screens have no fill of their own: their background is the window's, `aurore/clear`, then the picture, then its veil. The main screen, a tab frame's content, applet frames and Cadran's screens show it as they are.
 - The surfaces keep their colours, at `surface_opacity`. Cadran's rail, when it opens over the tab in a translucent colour, draws the picture again under itself (`Application::drawThemeBackground`), so that the tab does not show through it.
-- Dialogs keep their own surfaces, over `brls/backdrop`: the core's panel is `brls/background`, opaque; Cadran's dialogs, sheets and pickers are drawn in `cadran/surf`/`surf2`, at `surface_opacity`. Under 1, such a panel draws the picture again under itself, dimmed by `brls/backdrop` as around it (`View::setThemeArea(ThemeArea::DIALOG)`), so it shows the picture faintly, not the screen behind it.
-- `brls/background` stays opaque: views use it to cut a shape out of what is under them (a badge's ring, the fade at the bottom of a list).
+- Dialogs keep their own surfaces, over `aurore/backdrop`: the core's panel is `aurore/background`, opaque; Cadran's dialogs, sheets and pickers are drawn in `cadran/surf`/`surf2`, at `surface_opacity`. Under 1, such a panel draws the picture again under itself, dimmed by `aurore/backdrop` as around it (`View::setThemeArea(ThemeArea::DIALOG)`), so it shows the picture faintly, not the screen behind it.
+- `aurore/background` stays opaque: views use it to cut a shape out of what is under them (a badge's ring, the fade at the bottom of a list).
 
 Why 0.35: over a picture as it comes (a photo, a gradient with bright parts), text keyed to the theme's own background colour needs that colour back under it; 0.35 keeps two thirds of the picture's colour, enough to see it, and pulls its brightest and darkest parts toward the background, which in most pictures brings the text's contrast back over its minimum. A busy or bright picture wants more (0.5 to 0.7); a dark, quiet one under a dark theme reads at 0.
 
-**Contrast**: the picture's average colour is worked out once, where it is decoded, then the veil over it: that is what the text on the screens is checked on (`brls/text on brls/background over the background image reads badly: 3.2:1, under 4.5:1`), and the translucent surfaces over it. The palette derives its inks to read on `background`; over a picture darker or lighter than that, give the keys the check names (the demo's Aurora does, in `[light]`). The average does not see a bright spot in a dark picture: look at the screens too.
+**Contrast**: the picture's average colour is worked out once, where it is decoded, then the veil over it: that is what the text on the screens is checked on (`aurore/text on aurore/background over the background image reads badly: 3.2:1, under 4.5:1`), and the translucent surfaces over it. The palette derives its inks to read on `background`; over a picture darker or lighter than that, give the keys the check names (the demo's Aurora does, in `[light]`). The average does not see a bright spot in a dark picture: look at the screens too.
 
 When the check runs: a picture is decoded off the UI thread when a theme is used (its colour recorded then, the check logged once it is loaded, `Theme::checkBackgroundContrast`), or by an explicit check on the thread that asks (`inspect(path, true)`, `listThemes(folder, true)`, `aurore_demo --check-themes`, which a picker must not call from the UI thread). A plain `listThemes()`, the one a picker calls, decodes nothing and reads colours only: its `ThemeInfo::warnings` have the picture's check only for a picture whose colour is already known (loaded, or checked, in this run).
 
@@ -157,8 +157,8 @@ accent = #15604f
 background_image = day.jpg
 background_dim = 0.5
 cadran/text3 = #56606e
-brls/header/subtitle = #56606e
-brls/highlight/color2 = #2a8f7a
+aurore/header/subtitle = #56606e
+aurore/highlight/color2 = #2a8f7a
 
 [dark]
 background = #0a1426
@@ -219,7 +219,7 @@ and the app shows whichever is in use, live:
 
 ```xml
 <!-- Follows the theme: the theme's picture, else the app's -->
-<brls:Image themeImage="playshelf/cover/placeholder" scalingType="fit"/>
+<aurore:Image themeImage="playshelf/cover/placeholder" scalingType="fit"/>
 ```
 
 ```cpp
@@ -386,24 +386,24 @@ Without a theme file, each variant has the core's defaults, then Cadran's palett
 
 | Key | What |
 | --- | --- |
-| `brls/clear` | The window's colour, under everything |
-| `brls/background` | Screens, dialogs and pickers |
-| `brls/text`, `brls/text_disabled` | Labels, and what cannot be used now |
-| `brls/text_secondary` | Secondary text at 4.5:1: a switch cell's Off, a placeholder, a counter (Cadran: `cadran/text3`) |
-| `brls/accent`, `brls/accent/hover`, `…/pressed`, `…/disabled`, `…/ink` | The accent (a dialog's buttons) and its state shades |
-| `brls/backdrop` | Behind a dialog or a picker |
-| `brls/notification/background`, `brls/notification/text` | Toasts |
-| `brls/click_pulse` | A press's flash |
-| `brls/highlight/background`, `brls/highlight/color1`, `brls/highlight/color2`, `brls/highlight/shadow` | The focus: its fill, its ring pulsing between the two colours, its shadow |
-| `brls/shadow` | A view's shadow (`shadowType`) |
-| `brls/applet_frame/separator` | The header's and footer's lines |
-| `brls/sidebar/background`, `brls/sidebar/active_item`, `brls/sidebar/separator` | The sidebar |
-| `brls/header/border`, `brls/header/rectangle`, `brls/header/subtitle` | A list's header |
-| `brls/button/{primary,default}_{enabled,disabled}_{background,text}`, `brls/button/highlight_{enabled,disabled}_text`, `brls/button/{enabled,disabled}_border_color` | Buttons, by style and state |
-| `brls/list/listItem_value_color` | A cell's value |
-| `brls/slider/pointer_color`, `…/pointer_border_color`, `…/line_filled`, `…/line_empty` | Sliders |
-| `brls/spinner/bar_color` | The progress spinner |
-| `brls/battery/level`, `brls/battery/charging` | The battery widget |
+| `aurore/clear` | The window's colour, under everything |
+| `aurore/background` | Screens, dialogs and pickers |
+| `aurore/text`, `aurore/text_disabled` | Labels, and what cannot be used now |
+| `aurore/text_secondary` | Secondary text at 4.5:1: a switch cell's Off, a placeholder, a counter (Cadran: `cadran/text3`) |
+| `aurore/accent`, `aurore/accent/hover`, `…/pressed`, `…/disabled`, `…/ink` | The accent (a dialog's buttons) and its state shades |
+| `aurore/backdrop` | Behind a dialog or a picker |
+| `aurore/notification/background`, `aurore/notification/text` | Toasts |
+| `aurore/click_pulse` | A press's flash |
+| `aurore/highlight/background`, `aurore/highlight/color1`, `aurore/highlight/color2`, `aurore/highlight/shadow` | The focus: its fill, its ring pulsing between the two colours, its shadow |
+| `aurore/shadow` | A view's shadow (`shadowType`) |
+| `aurore/applet_frame/separator` | The header's and footer's lines |
+| `aurore/sidebar/background`, `aurore/sidebar/active_item`, `aurore/sidebar/separator` | The sidebar |
+| `aurore/header/border`, `aurore/header/rectangle`, `aurore/header/subtitle` | A list's header |
+| `aurore/button/{primary,default}_{enabled,disabled}_{background,text}`, `aurore/button/highlight_{enabled,disabled}_text`, `aurore/button/{enabled,disabled}_border_color` | Buttons, by style and state |
+| `aurore/list/listItem_value_color` | A cell's value |
+| `aurore/slider/pointer_color`, `…/pointer_border_color`, `…/line_filled`, `…/line_empty` | Sliders |
+| `aurore/spinner/bar_color` | The progress spinner |
+| `aurore/battery/level`, `aurore/battery/charging` | The battery widget |
 
 **Cadran** (`cadran/ui/cadran_palette.hpp`; it also sets the core keys above to its palettes):
 
@@ -432,7 +432,7 @@ Without a theme file, each variant has the core's defaults, then Cadran's palett
 
 Not colour keys, on purpose: the app's logo (`CadranIcon` "mark", the app's own drawing through `ui::hooks`' `mark`; a theme replaces it with a picture, `logo`, below), the debug layer and the layout wireframe (`-v`), and a `Rectangle`'s default colour before the app sets one.
 
-**Metrics** (`[metrics]`): numbers from -10000 to 10000 (`nan`, `inf` and larger ones are errors), any of `library/lib/core/style.cpp` and Cadran's (`cadran/radius/*`, `brls/tab_frame/sidebar_width`…). The focus highlight's look is there: `brls/highlight/stroke_width`, `corner_radius`, `shadow_width`, `shadow_offset`, `shadow_feather`, `shadow_opacity`. Metrics read when drawing (the highlight's) change at once; the ones read when a view is made (paddings, sizes) apply to the views made afterwards.
+**Metrics** (`[metrics]`): numbers from -10000 to 10000 (`nan`, `inf` and larger ones are errors), any of `library/lib/core/style.cpp` and Cadran's (`cadran/radius/*`, `aurore/tab_frame/sidebar_width`…). The focus highlight's look is there: `aurore/highlight/stroke_width`, `corner_radius`, `shadow_width`, `shadow_offset`, `shadow_feather`, `shadow_opacity`. Metrics read when drawing (the highlight's) change at once; the ones read when a view is made (paddings, sizes) apply to the views made afterwards.
 
 ## Presets
 
@@ -510,7 +510,7 @@ aurore::Theme::getCurrentPath();              // the file in use, "" without one
 aurore::Theme::styles(aurore::ThemeVariant::LIGHT);   // whether it styles that variant
 aurore::Theme::inspect(path);                 // one file, read without using it
 aurore::Theme::checkContrast(variant);        // the pairs under their minimum
-aurore::Theme::addContrastCheck("myapp/ink", "brls/background", 4.5f);
+aurore::Theme::addContrastCheck("myapp/ink", "aurore/background", 4.5f);
 ```
 
 `ThemeInfo` has `path`, `id` (a theme folder's name for its `theme.theme`), `name`, `author`, `version`, `description`, `icon` (its `icon`, "" without one), `light`/`dark` (the variants it styles, `styles(variant)`), `counterpart` (its path, as `loadFile` takes it), `lightPreview`/`darkPreview` (`background`, `surface`, `text`, `accent`, `highlight`), `lightBackground`/`darkBackground` (`ThemeBackground`: `image`, `fit`, `dim`, `surfaceOpacity`; `background(variant)`), `lightPictures`/`darkPictures` (`ThemePictures`: `logo`, `preview`, `icons`, `images`; `pictures(variant)`), `backgroundImage` (the dark variant's picture, else the light one's), `errors`, `warnings`, `ok()` and `variant()`. `listThemes` takes a folder or a resource folder (`@res/themes`), and lists its `*.theme` files and theme folders, cheaply (no picture decoded unless asked, above); a file's `@include`s are best named `*.inc`, so that they are not listed.
@@ -545,7 +545,7 @@ aurore::Application::drawThemeBackground(vg, x, y, width, height); // under a tr
 
 A view drawn from a theme key follows every change. What the core and Cadran draw does; an app's own views do the same in one of three ways:
 
-- **XML**: `textColor="@theme/brls/text"`, `backgroundColor="@theme/cadran/surf"` (any colour property of the view: docs/styles.md).
+- **XML**: `textColor="@theme/aurore/text"`, `backgroundColor="@theme/cadran/surf"` (any colour property of the view: docs/styles.md).
 - **Code**: `label->setThemeColor("textColor", "cadran/text2")`, `box->setThemeColor("backgroundColor", "cadran/surf")`, instead of `setTextColor(theme["cadran/text2"])`, which keeps the colour of the moment. A colour set afterwards by value (`setTextColor(…)`) replaces the key; `setThemeColor(property, "")` forgets it.
 - **Drawing**: in `draw()`, `ctx->theme["cadran/teal"]` is always the theme in use.
 

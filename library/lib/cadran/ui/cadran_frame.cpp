@@ -39,7 +39,7 @@ constexpr float HINTS_SCALE = 1.15f;
 constexpr float RAIL_ITEM_PAD = 12.0f;
 constexpr float RAIL_ICON     = 22.0f;
 constexpr float MARK_SIZE     = 38.0f;
-// The rail open (brls/tab_frame/sidebar_width) and on its icons: the items'
+// The rail open (aurore/tab_frame/sidebar_width) and on its icons: the items'
 // column inset 16 px on both sides, the icons centred under the header's mark.
 constexpr float RAIL_OPEN      = 232.0f;
 constexpr float RAIL_SHUT      = 16.0f + RAIL_ITEM_PAD * 2 + RAIL_ICON + 16.0f;
@@ -66,7 +66,7 @@ void cadran::install_theme()
         // The still focus of an app's screenshot tests (STILL_FOCUS): the glow in
         // the stroke's own colour, so a screenshot does not depend on when.
         if (ui::env_flag("STILL_FOCUS"))
-            t->addColor("brls/highlight/color2", c(p->hl1));
+            t->addColor("aurore/highlight/color2", c(p->hl1));
 #endif
     }
     for (const pal::Contrast& pair : pal::CONTRAST)
@@ -102,30 +102,30 @@ void cadran::install_theme()
     style.addMetric("cadran/radius/modal", kit::RADIUS_MODAL);
     // The gap between a filled button and the focus ring around it
     style.addMetric("cadran/ring_gap", 4.0f);
-    style.addMetric("brls/applet_frame/header_height", 84.0f);
+    style.addMetric("aurore/applet_frame/header_height", 84.0f);
     // 232 px, not the boards' 196: the console's font is wider than the
     // boards' (Nunito Sans), and the longest names must stay whole
     // (PlayGuard's "Tiempo de juego", "Einschränkungen" and their badges).
-    style.addMetric("brls/tab_frame/sidebar_width", RAIL_OPEN);
-    // A tab's own content (@style/brls/tab_frame/content_padding_*): the
+    style.addMetric("aurore/tab_frame/sidebar_width", RAIL_OPEN);
+    // A tab's own content (@style/aurore/tab_frame/content_padding_*): the
     // margins of Cadran's pages, the cards' edges
-    style.addMetric("brls/tab_frame/content_padding_sides", 40.0f);
-    style.addMetric("brls/tab_frame/content_padding_top_bottom", 28.0f);
-    style.addMetric("brls/sidebar/padding_top", 6.0f);
-    style.addMetric("brls/sidebar/padding_right", 8.0f);
-    style.addMetric("brls/sidebar/padding_bottom", 10.0f);
-    style.addMetric("brls/sidebar/padding_left", 16.0f);
-    style.addMetric("brls/sidebar/item_height", 52.0f);
+    style.addMetric("aurore/tab_frame/content_padding_sides", 40.0f);
+    style.addMetric("aurore/tab_frame/content_padding_top_bottom", 28.0f);
+    style.addMetric("aurore/sidebar/padding_top", 6.0f);
+    style.addMetric("aurore/sidebar/padding_right", 8.0f);
+    style.addMetric("aurore/sidebar/padding_bottom", 10.0f);
+    style.addMetric("aurore/sidebar/padding_left", 16.0f);
+    style.addMetric("aurore/sidebar/item_height", 52.0f);
     // The pickers' rows inside their card (cadran_modal), the toasts as
     // cards under the header, and the pills' hairline.
-    style.addMetric("brls/dropdown/listPadding", 14.0f);
-    style.addMetric("brls/dropdown/listPaddingSides", 20.0f);
-    style.addMetric("brls/notification/width", 400.0f);
-    style.addMetric("brls/notification/padding", 18.0f);
-    style.addMetric("brls/notification/corner_radius", 16.0f);
-    style.addMetric("brls/notification/margin_top", 96.0f);
-    style.addMetric("brls/notification/margin_right", 32.0f);
-    style.addMetric("brls/notification/spacing", 10.0f);
+    style.addMetric("aurore/dropdown/listPadding", 14.0f);
+    style.addMetric("aurore/dropdown/listPaddingSides", 20.0f);
+    style.addMetric("aurore/notification/width", 400.0f);
+    style.addMetric("aurore/notification/padding", 18.0f);
+    style.addMetric("aurore/notification/corner_radius", 16.0f);
+    style.addMetric("aurore/notification/margin_top", 96.0f);
+    style.addMetric("aurore/notification/margin_right", 32.0f);
+    style.addMetric("aurore/notification/spacing", 10.0f);
     style.addMetric("cadran/hairline", 1.0f);
     // The boards' display face for the figures (Sora Bold, OFL).
     if (!aurore::Application::loadFontFromFile("cadran/digits", AURORE_ASSET("font/sora_bold_latin.ttf")))
@@ -405,7 +405,7 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
 {
     if (!frame || frame->getView("cadran_mark"))
         return;
-    aurore::View* app_icon = frame->getView("brls/applet_frame/title_icon");
+    aurore::View* app_icon = frame->getView("aurore/applet_frame/title_icon");
     aurore::Box* left      = app_icon ? app_icon->getParent() : nullptr;
     if (app_icon)
         app_icon->setVisibility(aurore::Visibility::GONE);
@@ -420,14 +420,14 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
         {
             // The main screen: the mark centred over the rail's icons.
             aurore::Style style = aurore::getStyle();
-            const float icons   = style["brls/sidebar/padding_left"] + RAIL_ITEM_PAD + RAIL_ICON / 2;
-            const float start   = style["brls/applet_frame/padding_sides"] + style["brls/applet_frame/header_padding_sides"];
+            const float icons   = style["aurore/sidebar/padding_left"] + RAIL_ITEM_PAD + RAIL_ICON / 2;
+            const float start   = style["aurore/applet_frame/padding_sides"] + style["aurore/applet_frame/header_padding_sides"];
             mark->setMarginLeft(icons - MARK_SIZE / 2 - start);
             mark->setCulled(false); // left of its box, which borealis would take for off-screen
         }
         left->addView(mark, 0);
     }
-    if (auto* title = dynamic_cast<aurore::Label*>(frame->getView("brls/applet_frame/title_label")))
+    if (auto* title = dynamic_cast<aurore::Label*>(frame->getView("aurore/applet_frame/title_label")))
     {
         chrome(title, 24, TITLE_SCALE);
         title->setMarginTop(0);
@@ -516,14 +516,14 @@ std::string crumb_of(aurore::AppletFrame* frame)
         const std::string tab = h.main_screen ? h.main_screen() : ""; // "tab/console"
         return h.tab_title && !tab.empty() ? h.tab_title(tab) : "";
     }
-    auto* title = dynamic_cast<aurore::Label*>(below->getView("brls/applet_frame/title_label"));
+    auto* title = dynamic_cast<aurore::Label*>(below->getView("aurore/applet_frame/title_label"));
     return title ? title->getFullText() : "";
 }
 
 // Before a screen's title, small: where it was opened from ("Console ›").
 void add_crumb(aurore::AppletFrame* frame)
 {
-    auto* title = dynamic_cast<aurore::Label*>(frame->getView("brls/applet_frame/title_label"));
+    auto* title = dynamic_cast<aurore::Label*>(frame->getView("aurore/applet_frame/title_label"));
     auto* row   = title ? dynamic_cast<aurore::Box*>(title->getParent()) : nullptr;
     // Not on a screen of its own, which is not a step of the one below.
     const std::string crumb = row && !cadran::is_standalone_screen(frame) ? crumb_of(frame) : "";
@@ -561,12 +561,12 @@ void skin_screen_of(aurore::View* focus)
     auto* frame = dynamic_cast<aurore::AppletFrame*>(focus);
     if (!frame || frame->getView("cadran_mark"))
         return;
-    if (!frame->getView("brls/applet_frame/header"))
+    if (!frame->getView("aurore/applet_frame/header"))
         return;
     if (cadran::is_main_frame(frame))
     {
         // The TabFrame itself: the rail (RailFold) takes its sidebar out of it.
-        aurore::View* sidebar = frame->getView("brls/tab_frame/sidebar");
+        aurore::View* sidebar = frame->getView("aurore/tab_frame/sidebar");
         aurore::View* tabs    = sidebar && sidebar->hasParent() ? sidebar->getParent() : frame->getView("main_tabs");
         cadran::style_frame(frame, tabs);
         return;
@@ -680,7 +680,7 @@ class RailFold : public aurore::Box
         this->column->setPaddingRight(icons ? 16 : 8);
         for (aurore::SidebarItem* item : this->items)
         {
-            if (auto* label = item->getView("brls/sidebar/item_label"))
+            if (auto* label = item->getView("aurore/sidebar/item_label"))
             {
                 label->setVisibility(icons ? aurore::Visibility::GONE : aurore::Visibility::VISIBLE);
                 label->setAlpha(1.0f);
@@ -750,11 +750,11 @@ class RailFold : public aurore::Box
         nvgIntersectScissor(vg, x, y, out, height);
         // Over a theme's picture, a translucent rail would show the tab under
         // it: the picture first, as behind the screens
-        if (aurore::Application::hasThemeBackground() && ctx->theme["brls/sidebar/background"].a < 1.0f)
+        if (aurore::Application::hasThemeBackground() && ctx->theme["aurore/sidebar/background"].a < 1.0f)
             aurore::Application::drawThemeBackground(vg, x, y, out, height);
         aurore::Box::draw(vg, x, y, width, height, style, ctx);
         // The separators, from their left end to as far as the rail is out.
-        const NVGcolor line = aurore::Application::getTheme()["brls/sidebar/separator"];
+        const NVGcolor line = aurore::Application::getTheme()["aurore/sidebar/separator"];
         for (aurore::View* v : this->separators)
         {
             const aurore::Rect at = v->getFrame();
@@ -845,7 +845,7 @@ class RailFold : public aurore::Box
         {
             if (this->mode == RailMode::AUTO)
             {
-                if (auto* label = item->getView("brls/sidebar/item_label"))
+                if (auto* label = item->getView("aurore/sidebar/item_label"))
                     label->setAlpha(t * t);
                 item->setHideHighlight(moving || t < 1.0f);
             }
@@ -921,7 +921,7 @@ void cadran::apply_rail()
 
 void cadran::style_rail(aurore::View* tab_frame)
 {
-    auto* sidebar              = tab_frame ? dynamic_cast<aurore::Sidebar*>(tab_frame->getView("brls/tab_frame/sidebar")) : nullptr;
+    auto* sidebar              = tab_frame ? dynamic_cast<aurore::Sidebar*>(tab_frame->getView("aurore/tab_frame/sidebar")) : nullptr;
     aurore::SidebarItem* first = sidebar ? sidebar->getItem(0) : nullptr;
     aurore::Box* list          = first ? first->getParent() : nullptr;
     if (!list)
@@ -955,14 +955,14 @@ void cadran::style_rail(aurore::View* tab_frame)
         item->setAlignItems(aurore::AlignItems::CENTER);
         // The library shows its accent again on each change of tab: without
         // a size or a colour, that moves nothing (the pill says it instead).
-        if (auto* accent = dynamic_cast<aurore::Rectangle*>(item->getView("brls/sidebar/item_accent")))
+        if (auto* accent = dynamic_cast<aurore::Rectangle*>(item->getView("aurore/sidebar/item_accent")))
         {
             accent->setWidth(0);
             accent->setMargins(0, 0, 0, 0);
             accent->setThemeColor("color", "cadran/none");
             accent->setVisibility(aurore::Visibility::GONE);
         }
-        if (auto* label = dynamic_cast<aurore::Label*>(item->getView("brls/sidebar/item_label")))
+        if (auto* label = dynamic_cast<aurore::Label*>(item->getView("aurore/sidebar/item_label")))
         {
             chrome(label, 17, RAIL_SCALE);
             label->setMarginTop(0);
@@ -1014,7 +1014,7 @@ void cadran::style_rail(aurore::View* tab_frame)
 
 bool cadran::is_main_frame(aurore::View* frame)
 {
-    return frame && (frame->getView("main_tabs") || frame->getView("brls/tab_frame/sidebar"));
+    return frame && (frame->getView("main_tabs") || frame->getView("aurore/tab_frame/sidebar"));
 }
 
 bool cadran::is_standalone_screen(aurore::View* frame)

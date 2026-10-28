@@ -163,7 +163,7 @@ class Label : public View
     /// The text as laid out does not fit: it is drawn cut, with an ellipsis.
     bool isTruncated();
 
-    /// Makes a label for XML (`<brls:Label>`).
+    /// Makes a label for XML (`<aurore:Label>`).
     static View* create();
 
     /// Set by the measure function: the width the text needs on one line.

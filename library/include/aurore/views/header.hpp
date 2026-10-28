@@ -37,8 +37,8 @@ class Header : public Box
     static View* create();
 
   private:
-    AURORE_BIND(Label, title, "brls/header/title");
-    AURORE_BIND(Label, subtitle, "brls/header/subtitle");
+    AURORE_BIND(Label, title, "aurore/header/title");
+    AURORE_BIND(Label, subtitle, "aurore/header/subtitle");
 };
 
 } // namespace aurore

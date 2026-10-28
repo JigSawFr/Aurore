@@ -142,7 +142,7 @@ void SwitchVideoContext::recordStaticCommands()
 
     // Clear the color and depth buffers
     Theme theme              = Application::getTheme();
-    NVGcolor backgroundColor = theme["brls/background"];
+    NVGcolor backgroundColor = theme["aurore/background"];
     this->cmdbuf.clearColor(0, DkColorMask_RGBA, backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
 
     this->cmdbuf.clearDepthStencil(true, 1.0f, 0xFF, 0);

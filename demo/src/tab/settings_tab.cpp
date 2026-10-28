@@ -170,7 +170,7 @@ void SettingsTab::listThemes()
                 swatch->setCornerRadius(11);
                 swatch->setMarginLeft(6);
                 swatch->setBorderThickness(1);
-                swatch->setThemeColor("borderColor", "brls/header/border");
+                swatch->setThemeColor("borderColor", "aurore/header/border");
                 swatches->addView(swatch);
             }
             cell->addView(swatches, (int)cell->getChildren().size() - 1);

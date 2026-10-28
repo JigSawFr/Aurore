@@ -397,9 +397,9 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
     }
 
     // borealis' order: button3 alone above, button1 and button2 in a row.
-    aurore::Button* b1   = button(dialog, "brls/dialog/button1");
-    aurore::Button* b2   = button(dialog, "brls/dialog/button2");
-    aurore::Button* b3   = button(dialog, "brls/dialog/button3");
+    aurore::Button* b1   = button(dialog, "aurore/dialog/button1");
+    aurore::Button* b2   = button(dialog, "aurore/dialog/button2");
+    aurore::Button* b3   = button(dialog, "aurore/dialog/button3");
     aurore::Button* last = b3 ? b3 : b2 ? b2
                                         : b1;
     const std::string ok = "hints/ok"_i18n;
@@ -418,8 +418,8 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
         // A says what the focused button does ("A Cancel"), not borealis' "OK".
         b->updateActionHint(aurore::BUTTON_A, b->getText());
     }
-    hide(dialog, "brls/dialog/button2/separator");
-    hide(dialog, "brls/dialog/button3/separator");
+    hide(dialog, "aurore/dialog/button2/separator");
+    hide(dialog, "aurore/dialog/button3/separator");
     if (b2)
         b2->setMarginLeft(12);
     if (b3)
@@ -437,7 +437,7 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
 
 void cadran::style_edit_text_dialog(aurore::EditTextDialog* dialog)
 {
-    auto* card = dialog ? dynamic_cast<aurore::Box*>(dialog->getView("brls/dialog/applet")) : nullptr;
+    auto* card = dialog ? dynamic_cast<aurore::Box*>(dialog->getView("aurore/dialog/applet")) : nullptr;
     if (!card || dialog->getView("cadran_dialog"))
         return;
     card->setCornerRadius(kit::RADIUS_MODAL);
@@ -449,7 +449,7 @@ void cadran::style_edit_text_dialog(aurore::EditTextDialog* dialog)
     mark->setVisibility(aurore::Visibility::GONE);
     card->addView(mark);
     // The title in the card, over the text, where it stood above the card
-    auto* title = dynamic_cast<aurore::Label*>(dialog->getView("brls/dialog/header"));
+    auto* title = dynamic_cast<aurore::Label*>(dialog->getView("aurore/dialog/header"));
     auto* above = title && title->hasParent() ? dynamic_cast<aurore::Box*>(title->getParent()) : nullptr;
     if (above && above != card)
     {
@@ -659,7 +659,7 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     dialog->setCancelable(true);
     style_dialog(dialog, Emphasis::PRIMARY);
     // A time is set, then confirmed: A right after the arrows is OK.
-    if (aurore::View* ok = dialog->getView("brls/dialog/button2"))
+    if (aurore::View* ok = dialog->getView("aurore/dialog/button2"))
         dialog->setLastFocusedView(ok);
     dialog->open();
 }

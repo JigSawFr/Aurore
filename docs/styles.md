@@ -7,10 +7,10 @@ What a view can do beyond its own attributes: change its look while it has the f
 An attribute prefixed with a state applies while the view is in that state, and the property goes back to what it was when no state styles it any more:
 
 ```xml
-<brls:Box
+<aurore:Box
     focusable="true"
-    backgroundColor="@theme/brls/button/default_enabled_background"
-    focus:backgroundColor="@theme/brls/accent"
+    backgroundColor="@theme/aurore/button/default_enabled_background"
+    focus:backgroundColor="@theme/aurore/accent"
     pressed:scale="0.94"
     hover:borderColor="#ffffff"
     disabled:alpha="0.4" />
@@ -36,7 +36,7 @@ The properties are those that are drawn, never laid out (a size or a margin woul
 | `Button` | `textColor` (its label's) |
 | `Rectangle` | `color` |
 
-In code: `view->setStateStyle(aurore::StyleState::FOCUS, "backgroundColor", "@theme/brls/accent")`. A view of the app adds its own properties by overriding `getStyleProperty` and `setStyleProperty` (and calling the base for the others).
+In code: `view->setStateStyle(aurore::StyleState::FOCUS, "backgroundColor", "@theme/aurore/accent")`. A view of the app adds its own properties by overriding `getStyleProperty` and `setStyleProperty` (and calling the base for the others).
 
 If the app changes a property itself while a state styles it, its value is the one the view goes back to.
 
@@ -45,8 +45,8 @@ If the app changes a property itself while a state styles it, its value is the o
 `transition` animates the changes of the properties it names instead of applying them at once, the state styles' as well as those made in code (`setBackgroundColor`, `setAlpha`, `Label::setTextColor`…):
 
 ```xml
-<brls:Box
-    focus:backgroundColor="@theme/brls/accent"
+<aurore:Box
+    focus:backgroundColor="@theme/aurore/accent"
     focus:cornerRadius="28"
     transition="backgroundColor 180ms ease-out, cornerRadius 300ms backOut" />
 ```
@@ -86,8 +86,8 @@ aurore::Application::registerModel("profile", &profile);   // or activity->regis
 ```
 
 ```xml
-<brls:Label bind="text: profile.name" />
-<brls:Box bind="visible: profile.online, backgroundColor: profile.tint" />
+<aurore:Label bind="text: profile.name" />
+<aurore:Box bind="visible: profile.online, backgroundColor: profile.tint" />
 ```
 
 `bind` takes `property: model.key` pairs separated by commas:
@@ -105,8 +105,8 @@ The binding is made when the view joins an activity (the XML is read before), ag
 Every view has a role, a label, a value and a selected state, for what is said when it takes the focus:
 
 ```xml
-<brls:Box focusable="true" accessibilityRole="button" accessibilityLabel="@i18n/app/play" />
-<brls:Box focusable="true" accessibilityLabel="@i18n/app/battery" accessibilityValue="80%" />
+<aurore:Box focusable="true" accessibilityRole="button" accessibilityLabel="@i18n/app/play" />
+<aurore:Box focusable="true" accessibilityLabel="@i18n/app/battery" accessibilityValue="80%" />
 ```
 
 The roles are `none`, `button`, `label`, `header`, `image`, `cell`, `toggle`, `slider`, `text_field`, `tab`, `list` and `dialog` (`aurore::AccessibilityRole`). Without them a view says what it shows:

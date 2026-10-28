@@ -16,7 +16,7 @@ constexpr float POP_US = 380000.0f;
 
 CadranIcon::CadranIcon()
 {
-    this->setThemeColor("color", "brls/text");
+    this->setThemeColor("color", "aurore/text");
     this->setWidth(22);
     this->setHeight(22);
     this->setFocusable(false);

@@ -63,7 +63,7 @@ AURORE_TEST(xml_string_view_is_read_to_its_size)
     Harness harness;
     // The view ends before the text after it, which is no XML: read past
     // its size (as a C string), it made the parse fail
-    std::string buffer = "<brls:Box id=\"sized\" width=\"40\"/><<<not xml";
+    std::string buffer = "<aurore:Box id=\"sized\" width=\"40\"/><<<not xml";
     std::string_view xml(buffer.data(), buffer.find("<<<"));
     aurore::View* view = aurore::View::createFromXMLString(xml);
     AURORE_CHECK(view != nullptr && view->getId() == "sized");
@@ -74,7 +74,7 @@ AURORE_TEST(xml_string_view_is_read_to_its_size)
         using aurore::Box::inflateFromXMLString;
     };
     Inflated* box     = new Inflated();
-    std::string inner = "<brls:Box id=\"inflated\"><brls:Rectangle/></brls:Box>&&&";
+    std::string inner = "<aurore:Box id=\"inflated\"><aurore:Rectangle/></aurore:Box>&&&";
     box->inflateFromXMLString(std::string_view(inner.data(), inner.size() - 3));
     AURORE_CHECK_EQ(box->getChildren().size(), (size_t)1);
     delete box;
@@ -86,17 +86,17 @@ AURORE_TEST(xml_nesting_is_bounded)
     // Deep but reasonable: read
     std::string deep;
     for (int i = 0; i < 40; i++)
-        deep += "<brls:Box>";
+        deep += "<aurore:Box>";
     for (int i = 0; i < 40; i++)
-        deep += "</brls:Box>";
+        deep += "</aurore:Box>";
     AURORE_CHECK_EQ(xmlError(deep), std::string());
 
     // Past the bound: an error, not a stack overflow
     std::string deeper;
     for (int i = 0; i < 100; i++)
-        deeper += "<brls:Box>";
+        deeper += "<aurore:Box>";
     for (int i = 0; i < 100; i++)
-        deeper += "</brls:Box>";
+        deeper += "</aurore:Box>";
     AURORE_CHECK(xmlError(deeper).find("nested more than") != std::string::npos);
 }
 
@@ -105,7 +105,7 @@ AURORE_TEST(xml_file_including_itself_is_an_error)
     namespace fs  = std::filesystem;
     fs::path root = fs::temp_directory_path() / ("aurore-xml-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
     // Hot reload reads @res/ from this folder: its cell.xml includes itself
-    writeFile(root / "xml/cells/cell.xml", "<brls:Box><brls:View xml=\"@res/xml/cells/cell.xml\"/></brls:Box>");
+    writeFile(root / "xml/cells/cell.xml", "<aurore:Box><aurore:View xml=\"@res/xml/cells/cell.xml\"/></aurore:Box>");
 
     Harness harness;
     aurore::HotReload::setEnabled(true, root.string() + "/");
@@ -129,7 +129,7 @@ AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
 {
     namespace fs  = std::filesystem;
     fs::path root = fs::temp_directory_path() / ("aurore-custom-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
-    writeFile(root / "xml/cells/cell.xml", "<brls:Box><brls:Unknown/></brls:Box>");
+    writeFile(root / "xml/cells/cell.xml", "<aurore:Box><aurore:Unknown/></aurore:Box>");
 
     Harness harness;
     std::string before                  = aurore::View::CUSTOM_RESOURCES_PATH;
@@ -146,7 +146,7 @@ AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
     aurore::View* invalid = nullptr;
     try
     {
-        writeFile(root / "xml/cells/cell.xml", "<brls:Box><unclosed></brls:Box>");
+        writeFile(root / "xml/cells/cell.xml", "<aurore:Box><unclosed></aurore:Box>");
         aurore::View::forgetXMLCache((root / "xml/cells/cell.xml").string());
         invalid = aurore::View::createFromXMLResource("cells/cell.xml");
     }
@@ -171,12 +171,12 @@ AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
 AURORE_TEST(xml_numbers_out_of_range_are_refused)
 {
     Harness harness;
-    AURORE_CHECK_EQ(xmlError("<brls:Box width=\"40\" height=\"25%\" marginTop=\"2.5px\"/>"), std::string());
+    AURORE_CHECK_EQ(xmlError("<aurore:Box width=\"40\" height=\"25%\" marginTop=\"2.5px\"/>"), std::string());
     // Not a number, infinite, past a float: an error on the attribute (not
     // NaN in the layout, nor an out_of_range thrown from std::stof)
     for (const char* value : { "nan", "inf", "-inf", "1e99", "nanpx", "1e99px", "nan%", "1e99%" })
     {
-        std::string error = xmlError(std::string("<brls:Box width=\"") + value + "\"/>");
+        std::string error = xmlError(std::string("<aurore:Box width=\"") + value + "\"/>");
         AURORE_CHECK(!error.empty());
         AURORE_CHECK(error.find("out_of_range") == std::string::npos);
         AURORE_CHECK(error.find(value) != std::string::npos);

@@ -102,7 +102,7 @@ void BatteryWidget::draw(NVGcontext* vg, float x, float y, float width, float he
     if (!level)
         return;
     this->updateState();
-    level->setColor(ctx->theme[isBatteryCharging ? "brls/battery/charging" : "brls/battery/level"]);
+    level->setColor(ctx->theme[isBatteryCharging ? "aurore/battery/charging" : "aurore/battery/level"]);
 
     level->setWidth(BATTERY_MAX_WIDTH * batteryLevel);
     Box::draw(vg, x, y, width, height, style, ctx);

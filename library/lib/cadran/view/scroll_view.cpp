@@ -43,7 +43,7 @@ void ScrollView::draw(NVGcontext* vg, float x, float y, float width, float heigh
             this->reveal(focus, false);
     }
     aurore::ScrollingFrame::draw(vg, x, y, width, height, style, ctx);
-    cadran::kit::draw_more_below(vg, this, x, y, width, height, "brls/background");
+    cadran::kit::draw_more_below(vg, this, x, y, width, height, "aurore/background");
 }
 
 void ScrollView::reveal_focused()

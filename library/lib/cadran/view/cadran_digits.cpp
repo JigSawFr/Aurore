@@ -14,7 +14,7 @@ constexpr float ROLL_US = 240000.0f; // a digit's roll, in µs
 
 CadranDigits::CadranDigits()
 {
-    this->setThemeColor("textColor", "brls/text");
+    this->setThemeColor("textColor", "aurore/text");
     this->font = aurore::Application::getFont("cadran/digits");
     if (this->font == aurore::FONT_INVALID)
         this->font = aurore::Application::getDefaultFont();

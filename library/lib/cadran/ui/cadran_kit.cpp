@@ -173,7 +173,7 @@ void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, aur
             nvgClosePath(vg);
             nvgFillColor(vg, this->a(color));
             nvgFill(vg);
-            const NVGcolor cut = this->a(ctx->theme["brls/background"]);
+            const NVGcolor cut = this->a(ctx->theme["aurore/background"]);
             nvgBeginPath(vg);
             nvgRoundedRect(vg, cx - 0.8f, y + 4.2f, 1.6f, 3.8f, 0.8f);
             nvgCircle(vg, cx, y + height - 2.6f, 0.95f);
@@ -399,7 +399,7 @@ void wrap(aurore::View* row)
 
 void fit_button(aurore::Button* button)
 {
-    auto* label = button ? dynamic_cast<aurore::Label*>(button->getView("brls/button/label")) : nullptr;
+    auto* label = button ? dynamic_cast<aurore::Label*>(button->getView("aurore/button/label")) : nullptr;
     if (!label)
         return;
     label->setSingleLine(true);

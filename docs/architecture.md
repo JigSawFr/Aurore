@@ -92,7 +92,7 @@ Who owns what:
 
 ## Themes and styles
 
-Colours come from the **theme**, by key (`brls/text`, `brls/highlight/color1`, `cadran/teal`…): two sets of values, light and dark (`Theme::getLightTheme()`, `getDarkTheme()`), the variant in use given by the platform (the system's mode, or `Platform::setThemeVariant`). Each set is the colours the code adds (the core's, Cadran's, the app's) with those of a theme file over them (`Theme::loadFile`, [themes.md](themes.md)). A view keeps a key rather than a colour (`View::setThemeColor`, `@theme/…` in XML), so a new theme is drawn from the next frame on without rebuilding anything; `Application::getThemeChangedEvent()` tells what keeps colours of its own.
+Colours come from the **theme**, by key (`aurore/text`, `aurore/highlight/color1`, `cadran/teal`…): two sets of values, light and dark (`Theme::getLightTheme()`, `getDarkTheme()`), the variant in use given by the platform (the system's mode, or `Platform::setThemeVariant`). Each set is the colours the code adds (the core's, Cadran's, the app's) with those of a theme file over them (`Theme::loadFile`, [themes.md](themes.md)). A view keeps a key rather than a colour (`View::setThemeColor`, `@theme/…` in XML), so a new theme is drawn from the next frame on without rebuilding anything; `Application::getThemeChangedEvent()` tells what keeps colours of its own.
 
 Sizes, margins and durations come from the **style** (`aurore::getStyle()`, `@style/…` in XML), by key too, with a theme file's `[metrics]` over them. A view's look in each state (focused, pressed, disabled, hovered), transitions and data bindings are its **view style** ([styles.md](styles.md)).
 
@@ -100,7 +100,7 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 
 ## Cadran
 
-[Cadran](cadran.md) is the default look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `brls:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `aurore::View`s.
+[Cadran](cadran.md) is the default look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `aurore:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `aurore::View`s.
 
 ## Platforms and drivers
 

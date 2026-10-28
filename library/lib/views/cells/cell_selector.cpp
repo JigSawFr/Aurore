@@ -23,7 +23,7 @@ namespace aurore
 
 SelectorCell::SelectorCell()
 {
-    detail->setThemeColor("textColor", "brls/list/listItem_value_color");
+    detail->setThemeColor("textColor", "aurore/list/listItem_value_color");
 
     this->registerClickAction([this](View* view)
         {

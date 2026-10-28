@@ -26,131 +26,131 @@ namespace aurore
 
 static StyleValues styleValues = {
     // Animations
-    { "brls/animations/show", 200.0f },
-    { "brls/animations/show_slide", 125.0f },
+    { "aurore/animations/show", 200.0f },
+    { "aurore/animations/show_slide", 125.0f },
 
-    { "brls/animations/highlight", 200.0f },
-    { "brls/animations/highlight_shake", 15.0f },
+    { "aurore/animations/highlight", 200.0f },
+    { "aurore/animations/highlight_shake", 15.0f },
 
-    { "brls/animations/label_scrolling_timer", 1500.0f },
-    { "brls/animations/label_scrolling_speed", 0.05f },
-    { "brls/animations/notification_timeout", 4000.0f },
-    { "brls/animations/notification_show", 300.0f },
+    { "aurore/animations/label_scrolling_timer", 1500.0f },
+    { "aurore/animations/label_scrolling_speed", 0.05f },
+    { "aurore/animations/notification_timeout", 4000.0f },
+    { "aurore/animations/notification_show", 300.0f },
 
     // Notification
-    { "brls/notification/width", 280.0f },
-    { "brls/notification/padding", 16.0f },
-    { "brls/notification/slide", 40.0f },
-    { "brls/notification/corner_radius", 0.0f },
-    { "brls/notification/margin_top", 0.0f },
-    { "brls/notification/margin_right", 0.0f },
-    { "brls/notification/spacing", 0.0f },
+    { "aurore/notification/width", 280.0f },
+    { "aurore/notification/padding", 16.0f },
+    { "aurore/notification/slide", 40.0f },
+    { "aurore/notification/corner_radius", 0.0f },
+    { "aurore/notification/margin_top", 0.0f },
+    { "aurore/notification/margin_right", 0.0f },
+    { "aurore/notification/spacing", 0.0f },
 
     // Highlight
-    { "brls/highlight/stroke_width", 5.0f },
-    { "brls/highlight/corner_radius", 6.0f },
-    { "brls/highlight/shadow_width", 2.0f },
-    { "brls/highlight/shadow_offset", 10.0f },
-    { "brls/highlight/shadow_feather", 10.0f },
-    { "brls/highlight/shadow_opacity", 128.0f },
+    { "aurore/highlight/stroke_width", 5.0f },
+    { "aurore/highlight/corner_radius", 6.0f },
+    { "aurore/highlight/shadow_width", 2.0f },
+    { "aurore/highlight/shadow_offset", 10.0f },
+    { "aurore/highlight/shadow_feather", 10.0f },
+    { "aurore/highlight/shadow_opacity", 128.0f },
 
     // AppletFrame
-    { "brls/applet_frame/padding_sides", 30.0f },
+    { "aurore/applet_frame/padding_sides", 30.0f },
 
-    { "brls/applet_frame/header_height", 88.0f },
-    { "brls/applet_frame/header_padding_top_bottom", 15.0f },
-    { "brls/applet_frame/header_padding_sides", 35.0f },
-    { "brls/applet_frame/header_image_title_spacing", 18.0f },
-    { "brls/applet_frame/header_title_font_size", 28.0f },
-    { "brls/applet_frame/header_title_top_offset", 7.0f },
+    { "aurore/applet_frame/header_height", 88.0f },
+    { "aurore/applet_frame/header_padding_top_bottom", 15.0f },
+    { "aurore/applet_frame/header_padding_sides", 35.0f },
+    { "aurore/applet_frame/header_image_title_spacing", 18.0f },
+    { "aurore/applet_frame/header_title_font_size", 28.0f },
+    { "aurore/applet_frame/header_title_top_offset", 7.0f },
 
-    { "brls/applet_frame/footer_height", 73.0f },
-    { "brls/applet_frame/footer_padding_top_bottom", 20.0f },
-    { "brls/applet_frame/footer_padding_sides", 25.0f },
+    { "aurore/applet_frame/footer_height", 73.0f },
+    { "aurore/applet_frame/footer_padding_top_bottom", 20.0f },
+    { "aurore/applet_frame/footer_padding_sides", 25.0f },
 
     // TabFrame
-    { "brls/tab_frame/sidebar_width", 410.0f },
-    { "brls/tab_frame/content_padding_top_bottom", 42.0f }, // a tab's content, for the apps' XML (Cadran's margins with it)
-    { "brls/tab_frame/content_padding_sides", 60.0f }, // a tab's content, for the apps' XML
+    { "aurore/tab_frame/sidebar_width", 410.0f },
+    { "aurore/tab_frame/content_padding_top_bottom", 42.0f }, // a tab's content, for the apps' XML (Cadran's margins with it)
+    { "aurore/tab_frame/content_padding_sides", 60.0f }, // a tab's content, for the apps' XML
 
     // Sidebar
-    { "brls/sidebar/border_height", 16.0f },
-    { "brls/sidebar/padding_top", 32.0f },
-    { "brls/sidebar/padding_bottom", 47.0f },
-    { "brls/sidebar/padding_left", 80.0f },
-    { "brls/sidebar/padding_right", 40.0f },
-    { "brls/sidebar/item_height", 70.0f },
-    { "brls/sidebar/item_accent_margin_top_bottom", 9.0f },
-    { "brls/sidebar/item_accent_margin_sides", 8.0f },
-    { "brls/sidebar/item_accent_rect_width", 4.0f },
-    { "brls/sidebar/item_font_size", 22.0f },
-    { "brls/sidebar/separator_height", 30.0f },
+    { "aurore/sidebar/border_height", 16.0f },
+    { "aurore/sidebar/padding_top", 32.0f },
+    { "aurore/sidebar/padding_bottom", 47.0f },
+    { "aurore/sidebar/padding_left", 80.0f },
+    { "aurore/sidebar/padding_right", 40.0f },
+    { "aurore/sidebar/item_height", 70.0f },
+    { "aurore/sidebar/item_accent_margin_top_bottom", 9.0f },
+    { "aurore/sidebar/item_accent_margin_sides", 8.0f },
+    { "aurore/sidebar/item_accent_rect_width", 4.0f },
+    { "aurore/sidebar/item_font_size", 22.0f },
+    { "aurore/sidebar/separator_height", 30.0f },
 
     // Tab Details
-    { "brls/tab_details/padding_top", 32.0f },
-    { "brls/tab_details/padding_bottom", 47.0f },
-    { "brls/tab_details/padding_left", 60.0f },
-    { "brls/tab_details/padding_right", 80.0f },
+    { "aurore/tab_details/padding_top", 32.0f },
+    { "aurore/tab_details/padding_bottom", 47.0f },
+    { "aurore/tab_details/padding_left", 60.0f },
+    { "aurore/tab_details/padding_right", 80.0f },
 
     // Label
-    { "brls/label/default_font_size", 20.0f },
-    { "brls/label/default_line_height", 1.65f },
-    { "brls/label/scrolling_animation_spacing", 50.0f },
-    { "brls/label/highlight_padding", 2.0f },
+    { "aurore/label/default_font_size", 20.0f },
+    { "aurore/label/default_line_height", 1.65f },
+    { "aurore/label/scrolling_animation_spacing", 50.0f },
+    { "aurore/label/highlight_padding", 2.0f },
 
     // Header
-    { "brls/header/padding_top_bottom", 11.0f },
-    { "brls/header/padding_right", 11.0f },
-    { "brls/header/rectangle_width", 5.0f },
-    { "brls/header/rectangle_height", 33.0f },
-    { "brls/header/rectangle_margin", 10.0f },
-    { "brls/header/font_size", 18.0f },
+    { "aurore/header/padding_top_bottom", 11.0f },
+    { "aurore/header/padding_right", 11.0f },
+    { "aurore/header/rectangle_width", 5.0f },
+    { "aurore/header/rectangle_height", 33.0f },
+    { "aurore/header/rectangle_margin", 10.0f },
+    { "aurore/header/font_size", 18.0f },
 
     // Button
-    { "brls/button/padding_top_bottom", 15.0f },
-    { "brls/button/padding_sides", 25.0f },
-    { "brls/button/corner_radius", 5.0f },
-    { "brls/button/text_size", 18.0f },
-    { "brls/button/primary_highlight_padding", 2.0f },
-    { "brls/button/border_thickness", 2.0f },
+    { "aurore/button/padding_top_bottom", 15.0f },
+    { "aurore/button/padding_sides", 25.0f },
+    { "aurore/button/corner_radius", 5.0f },
+    { "aurore/button/text_size", 18.0f },
+    { "aurore/button/primary_highlight_padding", 2.0f },
+    { "aurore/button/border_thickness", 2.0f },
 
     // Generic shadow
-    { "brls/shadow/width", 2.0f },
-    { "brls/shadow/feather", 10.0f },
-    { "brls/shadow/opacity", 63.75f },
-    { "brls/shadow/offset", 10.0f },
+    { "aurore/shadow/width", 2.0f },
+    { "aurore/shadow/feather", 10.0f },
+    { "aurore/shadow/opacity", 63.75f },
+    { "aurore/shadow/offset", 10.0f },
 
     // Dropdown
-    { "brls/dropdown/listPadding", 40.0f },
-    { "brls/dropdown/listPaddingSides", 232.0f },
-    { "brls/dropdown/listItemHeight", 60.0f },
-    { "brls/dropdown/listItemTextSize", 20.0f },
+    { "aurore/dropdown/listPadding", 40.0f },
+    { "aurore/dropdown/listPaddingSides", 232.0f },
+    { "aurore/dropdown/listItemHeight", 60.0f },
+    { "aurore/dropdown/listItemTextSize", 20.0f },
 
-    { "brls/dropdown/header_height", 70.0f },
-    { "brls/dropdown/header_title_font_size", 24.0f },
+    { "aurore/dropdown/header_height", 70.0f },
+    { "aurore/dropdown/header_title_font_size", 24.0f },
 
     // ListItem
-    { "brls/listitem/descriptionIndent", 16.0f },
-    { "brls/listitem/indent", 40.0f },
-    { "brls/listitem/selectRadius", 15.0f },
+    { "aurore/listitem/descriptionIndent", 16.0f },
+    { "aurore/listitem/indent", 40.0f },
+    { "aurore/listitem/selectRadius", 15.0f },
 
     // Hints
-    { "brls/hints/footer_margin_sides", 30.0f },
-    { "brls/hints/footer_padding_sides", 25.0f },
-    { "brls/hints/footer_padding_top_bottom", 8.0f },
+    { "aurore/hints/footer_margin_sides", 30.0f },
+    { "aurore/hints/footer_padding_sides", 25.0f },
+    { "aurore/hints/footer_padding_top_bottom", 8.0f },
 
     // Spinner
-    { "brls/spinner/center_gap_multiplier_large", 0.207f },
-    { "brls/spinner/bar_width_multiplier_large", 0.034f },
-    { "brls/spinner/center_gap_multiplier", 0.2f },
-    { "brls/spinner/bar_width_multiplier", 0.06f },
-    { "brls/spinner/animation_duration", 1000 },
+    { "aurore/spinner/center_gap_multiplier_large", 0.207f },
+    { "aurore/spinner/bar_width_multiplier_large", 0.034f },
+    { "aurore/spinner/center_gap_multiplier", 0.2f },
+    { "aurore/spinner/bar_width_multiplier", 0.06f },
+    { "aurore/spinner/animation_duration", 1000 },
 
     // Dialog
-    { "brls/dialog/paddingTopBottom", 65 },
-    { "brls/dialog/paddingLeftRight", 115 },
+    { "aurore/dialog/paddingTopBottom", 65 },
+    { "aurore/dialog/paddingLeftRight", 115 },
 
-    { "brls/dialog/fontSize", 24 },
+    { "aurore/dialog/fontSize", 24 },
 };
 
 static Style style(&styleValues);

@@ -137,7 +137,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | `imageAlign` honoured for `FIT` and `FILL` | — |
 | Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
 | A spinner's own colour | `ProgressSpinner::setColor` |
-| Toasts styled by the theme, with an optional icon | `brls/notification/background`, `…/text`, `…/corner_radius`, `…/spacing`, `…/margin_top`, `…/margin_right` · `Application::notify(text, leading)` |
+| Toasts styled by the theme, with an optional icon | `aurore/notification/background`, `…/text`, `…/corner_radius`, `…/spacing`, `…/margin_top`, `…/margin_right` · `Application::notify(text, leading)` |
 | The footer's clock in hours and minutes | — |
 
 **Text**

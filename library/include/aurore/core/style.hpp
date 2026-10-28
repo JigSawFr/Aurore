@@ -25,7 +25,7 @@
 namespace aurore
 {
 
-/// The metrics (sizes, margins, durations) by name, "brls/sidebar/width"…: the ones
+/// The metrics (sizes, margins, durations) by name, "aurore/sidebar/width"…: the ones
 /// the code adds, and over them a theme file's `[metrics]`.
 class StyleValues
 {

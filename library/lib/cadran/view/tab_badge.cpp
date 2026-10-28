@@ -92,7 +92,7 @@ void TabBadge::draw(NVGcontext* vg, float x, float y, float width, float height,
     nvgFontFaceId(vg, aurore::Application::getDefaultFont());
     nvgFontSize(vg, r * 1.3f);
     nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-    nvgFillColor(vg, aurore::Application::getTheme()["brls/background"]);
+    nvgFillColor(vg, aurore::Application::getTheme()["aurore/background"]);
     nvgText(vg, cx, cy + r * 0.06f, n.c_str(), nullptr);
     nvgRestore(vg);
 }

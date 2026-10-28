@@ -70,8 +70,8 @@ class SidebarItem : public Box
     bool getDefaultAccessibilitySelected() override { return this->active; }
 
   private:
-    AURORE_BIND(Rectangle, accent, "brls/sidebar/item_accent");
-    AURORE_BIND(Label, label, "brls/sidebar/item_label");
+    AURORE_BIND(Rectangle, accent, "aurore/sidebar/item_accent");
+    AURORE_BIND(Label, label, "aurore/sidebar/item_label");
 
     GenericEvent activeEvent;
 

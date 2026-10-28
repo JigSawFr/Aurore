@@ -27,33 +27,33 @@ namespace aurore
 {
 
 const std::string sidebarItemXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
-        height="@style/brls/sidebar/item_height"
+        height="@style/aurore/sidebar/item_height"
         focusable="true" >
 
-        <brls:Rectangle
-            id="brls/sidebar/item_accent"
-            width="@style/brls/sidebar/item_accent_rect_width"
+        <aurore:Rectangle
+            id="aurore/sidebar/item_accent"
+            width="@style/aurore/sidebar/item_accent_rect_width"
             height="auto"
             visibility="invisible"
-            color="@theme/brls/sidebar/active_item"
-            marginTop="@style/brls/sidebar/item_accent_margin_top_bottom"
-            marginBottom="@style/brls/sidebar/item_accent_margin_top_bottom"
-            marginLeft="@style/brls/sidebar/item_accent_margin_sides"
-            marginRight="@style/brls/sidebar/item_accent_margin_sides" />
+            color="@theme/aurore/sidebar/active_item"
+            marginTop="@style/aurore/sidebar/item_accent_margin_top_bottom"
+            marginBottom="@style/aurore/sidebar/item_accent_margin_top_bottom"
+            marginLeft="@style/aurore/sidebar/item_accent_margin_sides"
+            marginRight="@style/aurore/sidebar/item_accent_margin_sides" />
 
-        <brls:Label
-            id="brls/sidebar/item_label"
+        <aurore:Label
+            id="aurore/sidebar/item_label"
             width="auto"
             height="auto"
             grow="1.0"
-            fontSize="@style/brls/sidebar/item_font_size"
-            marginTop="@style/brls/sidebar/item_accent_margin_top_bottom"
-            marginBottom="@style/brls/sidebar/item_accent_margin_top_bottom"
-            marginRight="@style/brls/sidebar/item_accent_margin_sides" />
+            fontSize="@style/aurore/sidebar/item_font_size"
+            marginTop="@style/aurore/sidebar/item_accent_margin_top_bottom"
+            marginBottom="@style/aurore/sidebar/item_accent_margin_top_bottom"
+            marginRight="@style/aurore/sidebar/item_accent_margin_sides" />
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 SidebarItem::SidebarItem()
@@ -108,12 +108,12 @@ void SidebarItem::setActive(bool active)
         this->activeEvent.fire(this);
 
         this->accent->setVisibility(Visibility::VISIBLE);
-        this->label->setThemeColor("textColor", "brls/sidebar/active_item");
+        this->label->setThemeColor("textColor", "aurore/sidebar/active_item");
     }
     else
     {
         this->accent->setVisibility(Visibility::INVISIBLE);
-        this->label->setThemeColor("textColor", "brls/text");
+        this->label->setThemeColor("textColor", "aurore/text");
     }
 
     this->active = active;
@@ -162,10 +162,10 @@ Sidebar::Sidebar()
     this->contentBox = new Box(Axis::COLUMN);
 
     this->contentBox->setPadding(
-        style["brls/sidebar/padding_top"],
-        style["brls/sidebar/padding_right"],
-        style["brls/sidebar/padding_bottom"],
-        style["brls/sidebar/padding_left"]);
+        style["aurore/sidebar/padding_top"],
+        style["aurore/sidebar/padding_right"],
+        style["aurore/sidebar/padding_bottom"],
+        style["aurore/sidebar/padding_left"]);
 
     this->setContentView(this->contentBox);
     this->setScrollingIndicatorVisible(false);
@@ -231,7 +231,7 @@ SidebarSeparator::SidebarSeparator()
 {
     Style style = Application::getStyle();
 
-    this->setHeight(style["brls/sidebar/separator_height"]);
+    this->setHeight(style["aurore/sidebar/separator_height"]);
 }
 
 void SidebarSeparator::draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx)
@@ -239,7 +239,7 @@ void SidebarSeparator::draw(NVGcontext* vg, float x, float y, float width, float
     float midY = y + height / 2;
 
     nvgBeginPath(vg);
-    nvgFillColor(vg, a(ctx->theme["brls/sidebar/separator"]));
+    nvgFillColor(vg, a(ctx->theme["aurore/sidebar/separator"]));
     nvgRect(vg, x, midY, width, 1);
     nvgFill(vg);
 }

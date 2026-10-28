@@ -996,7 +996,7 @@ void Application::frame(bool present)
 
     // Begin frame and clear
     videoContext->beginFrame();
-    videoContext->clear(Application::getTheme().getColor("brls/clear"));
+    videoContext->clear(Application::getTheme().getColor("aurore/clear"));
     float scaleFactor = videoContext->getScaleFactor();
 
     nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
@@ -2286,7 +2286,7 @@ void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float wi
         return;
     nvgBeginPath(vg);
     nvgRect(vg, x, y, width, height);
-    nvgFillColor(vg, Application::getTheme().getColor("brls/clear"));
+    nvgFillColor(vg, Application::getTheme().getColor("aurore/clear"));
     nvgFill(vg);
     Application::drawThemeBackgroundImage(vg, x, y, width, height);
     ThemeDecorations::drawStrips(vg, x, y, width, height);
@@ -2300,7 +2300,7 @@ void Application::drawThemeBackground(NVGcontext* vg, float x, float y, float wi
         return Application::drawThemeBackground(vg, x, y, width, height);
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, width, height, radius);
-    nvgFillColor(vg, Application::getTheme().getColor("brls/clear"));
+    nvgFillColor(vg, Application::getTheme().getColor("aurore/clear"));
     nvgFill(vg);
     Application::drawThemeBackgroundImage(vg, x, y, width, height, radius);
     // The strips have straight edges: in the corners' square, over the image
@@ -2363,7 +2363,7 @@ void Application::drawThemeBackgroundImage(NVGcontext* vg, float areaX, float ar
 
     if (background.dim > 0.0f)
     {
-        NVGcolor veil = Application::getTheme().getColor("brls/background");
+        NVGcolor veil = Application::getTheme().getColor("aurore/background");
         veil.a *= background.dim;
         nvgBeginPath(vg);
         if (radius > 0.0f)
@@ -2447,41 +2447,41 @@ XMLViewCreator Application::getXMLViewCreator(std::string name)
 
 void Application::registerBuiltInXMLViews()
 {
-    Application::registerXMLView("brls:Box", Box::create);
-    Application::registerXMLView("brls:Rectangle", Rectangle::create);
-    Application::registerXMLView("brls:AppletFrame", AppletFrame::create);
-    Application::registerXMLView("brls:Label", Label::create);
-    Application::registerXMLView("brls:TabFrame", TabFrame::create);
-    Application::registerXMLView("brls:Sidebar", Sidebar::create);
-    Application::registerXMLView("brls:Header", Header::create);
-    Application::registerXMLView("brls:ScrollingFrame", ScrollingFrame::create);
-    Application::registerXMLView("brls:HScrollingFrame", HScrollingFrame::create);
-    Application::registerXMLView("brls:RecyclerFrame", RecyclerFrame::create);
-    Application::registerXMLView("brls:RecyclingGrid", RecyclingGrid::create);
-    Application::registerXMLView("brls:HRecyclerFrame", HRecyclerFrame::create);
-    Application::registerXMLView("brls:Image", Image::create);
-    Application::registerXMLView("brls:Padding", Padding::create);
-    Application::registerXMLView("brls:Button", Button::create);
-    Application::registerXMLView("brls:IconButton", IconButton::create);
-    Application::registerXMLView("brls:CheckBox", CheckBox::create);
-    Application::registerXMLView("brls:Hints", Hints::create);
-    Application::registerXMLView("brls:Slider", Slider::create);
-    Application::registerXMLView("brls:BottomBar", BottomBar::create);
-    Application::registerXMLView("brls:ProgressSpinner", ProgressSpinner::create);
+    Application::registerXMLView("aurore:Box", Box::create);
+    Application::registerXMLView("aurore:Rectangle", Rectangle::create);
+    Application::registerXMLView("aurore:AppletFrame", AppletFrame::create);
+    Application::registerXMLView("aurore:Label", Label::create);
+    Application::registerXMLView("aurore:TabFrame", TabFrame::create);
+    Application::registerXMLView("aurore:Sidebar", Sidebar::create);
+    Application::registerXMLView("aurore:Header", Header::create);
+    Application::registerXMLView("aurore:ScrollingFrame", ScrollingFrame::create);
+    Application::registerXMLView("aurore:HScrollingFrame", HScrollingFrame::create);
+    Application::registerXMLView("aurore:RecyclerFrame", RecyclerFrame::create);
+    Application::registerXMLView("aurore:RecyclingGrid", RecyclingGrid::create);
+    Application::registerXMLView("aurore:HRecyclerFrame", HRecyclerFrame::create);
+    Application::registerXMLView("aurore:Image", Image::create);
+    Application::registerXMLView("aurore:Padding", Padding::create);
+    Application::registerXMLView("aurore:Button", Button::create);
+    Application::registerXMLView("aurore:IconButton", IconButton::create);
+    Application::registerXMLView("aurore:CheckBox", CheckBox::create);
+    Application::registerXMLView("aurore:Hints", Hints::create);
+    Application::registerXMLView("aurore:Slider", Slider::create);
+    Application::registerXMLView("aurore:BottomBar", BottomBar::create);
+    Application::registerXMLView("aurore:ProgressSpinner", ProgressSpinner::create);
 
     // Cells
-    Application::registerXMLView("brls:DetailCell", DetailCell::create);
-    Application::registerXMLView("brls:RadioCell", RadioCell::create);
-    Application::registerXMLView("brls:BooleanCell", BooleanCell::create);
-    Application::registerXMLView("brls:SelectorCell", SelectorCell::create);
-    Application::registerXMLView("brls:InputCell", InputCell::create);
-    Application::registerXMLView("brls:InputNumericCell", InputNumericCell::create);
-    Application::registerXMLView("brls:SliderCell", SliderCell::create);
+    Application::registerXMLView("aurore:DetailCell", DetailCell::create);
+    Application::registerXMLView("aurore:RadioCell", RadioCell::create);
+    Application::registerXMLView("aurore:BooleanCell", BooleanCell::create);
+    Application::registerXMLView("aurore:SelectorCell", SelectorCell::create);
+    Application::registerXMLView("aurore:InputCell", InputCell::create);
+    Application::registerXMLView("aurore:InputNumericCell", InputNumericCell::create);
+    Application::registerXMLView("aurore:SliderCell", SliderCell::create);
 
     // Widgets
-    Application::registerXMLView("brls:Account", AccountWidget::create);
-    Application::registerXMLView("brls:Battery", BatteryWidget::create);
-    Application::registerXMLView("brls:Wireless", WirelessWidget::create);
+    Application::registerXMLView("aurore:Account", AccountWidget::create);
+    Application::registerXMLView("aurore:Battery", BatteryWidget::create);
+    Application::registerXMLView("aurore:Wireless", WirelessWidget::create);
 }
 
 void Application::registerXMLView(std::string name, XMLViewCreator creator)

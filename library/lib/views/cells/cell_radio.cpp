@@ -20,54 +20,54 @@ namespace aurore
 {
 
 const std::string radioCellXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
-        height="@style/brls/sidebar/item_height"
+        height="@style/aurore/sidebar/item_height"
         focusable="true"
         paddingTop="12.5"
         paddingBottom="12.5"
         alignItems="center">
 
-        <brls:Label
-            id="brls/rediocell/title"
+        <aurore:Label
+            id="aurore/rediocell/title"
             width="auto"
             height="auto"
             grow="1"
-            fontSize="@style/brls/sidebar/item_font_size"
-            marginLeft="@style/brls/listitem/descriptionIndent"
-            marginRight="@style/brls/listitem/descriptionIndent" />
+            fontSize="@style/aurore/sidebar/item_font_size"
+            marginLeft="@style/aurore/listitem/descriptionIndent"
+            marginRight="@style/aurore/listitem/descriptionIndent" />
 
-        <brls:CheckBox
-            id="brls/rediocell/checkbox"
+        <aurore:CheckBox
+            id="aurore/rediocell/checkbox"
             visibility="gone"
-            marginRight="@style/brls/listitem/descriptionIndent"/>
+            marginRight="@style/aurore/listitem/descriptionIndent"/>
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 CheckBox::CheckBox()
 {
-    float size = Application::getStyle()["brls/listitem/selectRadius"] * 2;
+    float size = Application::getStyle()["aurore/listitem/selectRadius"] * 2;
     setWidth(size);
     setHeight(size);
 }
 
 void CheckBox::draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx)
 {
-    float radius  = style["brls/listitem/selectRadius"];
+    float radius  = style["aurore/listitem/selectRadius"];
     float centerX = x + width / 2;
     float centerY = y + height / 2;
 
     int thickness = roundf(radius * 0.10f);
 
     // Background
-    nvgFillColor(vg, a(ctx->theme["brls/list/listItem_value_color"]));
+    nvgFillColor(vg, a(ctx->theme["aurore/list/listItem_value_color"]));
     nvgBeginPath(vg);
     nvgCircle(vg, centerX, centerY, radius);
     nvgFill(vg);
 
     // Check mark
-    nvgFillColor(vg, a(ctx->theme["brls/background"]));
+    nvgFillColor(vg, a(ctx->theme["aurore/background"]));
 
     // Long stroke
     nvgSave(vg);
@@ -112,7 +112,7 @@ void RadioCell::setSelected(bool selected)
     if (changed && selected)
         this->announceAccessibilityValue();
     this->checkbox->setVisibility(selected ? Visibility::VISIBLE : Visibility::GONE);
-    this->title->setThemeColor("textColor", selected ? "brls/list/listItem_value_color" : "brls/text");
+    this->title->setThemeColor("textColor", selected ? "aurore/list/listItem_value_color" : "aurore/text");
 }
 
 bool RadioCell::getSelected()

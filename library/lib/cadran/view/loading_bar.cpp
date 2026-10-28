@@ -78,7 +78,7 @@ void LoadingBar::draw(NVGcontext* vg, float x, float y, float width, float heigh
     // Teal, lighter toward its end: the end that moves.
     nvgBeginPath(vg);
     nvgRoundedRect(vg, x, y, w, height, radius);
-    nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x + w, y, this->a(theme[this->brand ? "cadran/brand/fill" : "cadran/teal_fill"]), this->a(theme[this->brand ? "cadran/brand/glow" : "brls/highlight/color2"])));
+    nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x + w, y, this->a(theme[this->brand ? "cadran/brand/fill" : "cadran/teal_fill"]), this->a(theme[this->brand ? "cadran/brand/glow" : "aurore/highlight/color2"])));
     nvgFill(vg);
 }
 

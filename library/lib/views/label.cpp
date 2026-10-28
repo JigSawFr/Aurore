@@ -225,12 +225,12 @@ Label::Label()
 
     // Default attributes
     this->font        = Application::getDefaultFont();
-    this->fontSize    = style["brls/label/default_font_size"];
-    this->lineHeight  = style["brls/label/default_line_height"];
+    this->fontSize    = style["aurore/label/default_font_size"];
+    this->lineHeight  = style["aurore/label/default_line_height"];
     this->fontQuality = 1.0f;
-    this->setThemeColor("textColor", "brls/text");
+    this->setThemeColor("textColor", "aurore/text");
 
-    this->setHighlightPadding(style["brls/label/highlight_padding"]);
+    this->setHighlightPadding(style["aurore/label/highlight_padding"]);
 
     // Setup the custom measure function
     YGNodeSetMeasureFunc(this->ygNode, [](YGNodeConstRef node, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
@@ -628,7 +628,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
         nvgIntersectScissor(vg, x, y, width, scissorHeight < height ? height : scissorHeight);
 
         float baseX   = x - this->scrollingAnimation;
-        float spacing = style["brls/label/scrolling_animation_spacing"];
+        float spacing = style["aurore/label/scrolling_animation_spacing"];
 
         nvgText(vg, baseX, y + height / 2.0f, this->fullText.c_str(), nullptr);
 
@@ -687,8 +687,8 @@ void Label::onScrollTimerFinished()
     Style style = Application::getStyle();
 
     // Step 2: actual scrolling animation
-    float target   = this->textWidth() + style["brls/label/scrolling_animation_spacing"];
-    float duration = target / style["brls/animations/label_scrolling_speed"];
+    float target   = this->textWidth() + style["aurore/label/scrolling_animation_spacing"];
+    float duration = target / style["aurore/animations/label_scrolling_speed"];
 
     this->scrollingAnimation.reset();
 
@@ -717,7 +717,7 @@ void Label::startScrollTimer()
 
     this->scrollingTimer.reset();
 
-    this->scrollingTimer.setDuration(style["brls/animations/label_scrolling_timer"]);
+    this->scrollingTimer.setDuration(style["aurore/animations/label_scrolling_timer"]);
 
     this->scrollingTimer.setEndCallback([this](bool finished)
         { this->onScrollTimerFinished(); });

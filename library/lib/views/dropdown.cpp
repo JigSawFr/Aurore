@@ -14,58 +14,58 @@ namespace aurore
 {
 
 const std::string dropdownFrameXML = R"xml(
-<brls:Box
+<aurore:Box
     width="1280"
     height="auto"
     axis="column">
 
-    <brls:AppletFrame
-        id="brls/dropdown/applet"
+    <aurore:AppletFrame
+        id="aurore/dropdown/applet"
         width="auto"
         height="auto"
         grow="1"
         headerHidden="true"
         footerHidden="true"
-        backgroundColor="@theme/brls/backdrop">
+        backgroundColor="@theme/aurore/backdrop">
 
-        <brls:Box
+        <aurore:Box
             width="auto"
             height="auto"
             grow="1"
             axis="column"
             justifyContent="flexEnd">
 
-            <brls:Box
-                id="brls/dropdown/content"
+            <aurore:Box
+                id="aurore/dropdown/content"
                 width="auto"
                 height="330"
                 axis="column"
-                backgroundColor="@theme/brls/background">
+                backgroundColor="@theme/aurore/background">
 
-                <brls:Box
-                    id="brls/dropdown/header"
+                <aurore:Box
+                    id="aurore/dropdown/header"
                     width="auto"
-                    height="@style/brls/dropdown/header_height"
+                    height="@style/aurore/dropdown/header_height"
                     axis="row"
-                    paddingTop="@style/brls/applet_frame/header_padding_top_bottom"
-                    paddingBottom="@style/brls/applet_frame/header_padding_top_bottom"
-                    paddingLeft="@style/brls/applet_frame/header_padding_sides"
-                    paddingRight="@style/brls/applet_frame/header_padding_sides"
-                    marginLeft="@style/brls/applet_frame/padding_sides"
-                    marginRight="@style/brls/applet_frame/padding_sides"
-                    lineColor="@theme/brls/applet_frame/separator"
+                    paddingTop="@style/aurore/applet_frame/header_padding_top_bottom"
+                    paddingBottom="@style/aurore/applet_frame/header_padding_top_bottom"
+                    paddingLeft="@style/aurore/applet_frame/header_padding_sides"
+                    paddingRight="@style/aurore/applet_frame/header_padding_sides"
+                    marginLeft="@style/aurore/applet_frame/padding_sides"
+                    marginRight="@style/aurore/applet_frame/padding_sides"
+                    lineColor="@theme/aurore/applet_frame/separator"
                     lineBottom="1px">
 
-                    <brls:Label
-                        id="brls/dropdown/title_label"
+                    <aurore:Label
+                        id="aurore/dropdown/title_label"
                         width="auto"
                         height="auto"
-                        marginTop="@style/brls/applet_frame/header_title_top_offset"
-                        fontSize="@style/brls/dropdown/header_title_font_size" />
+                        marginTop="@style/aurore/applet_frame/header_title_top_offset"
+                        fontSize="@style/aurore/dropdown/header_title_font_size" />
 
-                </brls:Box>
+                </aurore:Box>
             
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="auto"
                     axis="row"
@@ -73,25 +73,25 @@ const std::string dropdownFrameXML = R"xml(
                     justifyContent="center"
                     alignItems="stretch">
                     
-                    <brls:RecyclerFrame
-                        id="brls/dropdown/recycler"
+                    <aurore:RecyclerFrame
+                        id="aurore/dropdown/recycler"
                         width="100%"
                         height="auto"
-                        paddingTop="@style/brls/dropdown/listPadding"
-                        paddingRight="@style/brls/dropdown/listPaddingSides"
-                        paddingBottom="@style/brls/dropdown/listPadding"
-                        paddingLeft="@style/brls/dropdown/listPaddingSides"/>
+                        paddingTop="@style/aurore/dropdown/listPadding"
+                        paddingRight="@style/aurore/dropdown/listPaddingSides"
+                        paddingBottom="@style/aurore/dropdown/listPadding"
+                        paddingLeft="@style/aurore/dropdown/listPaddingSides"/>
 
-                </brls:Box>
+                </aurore:Box>
 
-            </brls:Box>
+            </aurore:Box>
 
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:AppletFrame>
-    <brls:BottomBar
-        backgroundColor="@theme/brls/background"/>
-</brls:Box>
+    </aurore:AppletFrame>
+    <aurore:BottomBar
+        backgroundColor="@theme/aurore/background"/>
+</aurore:Box>
 )xml";
 
 float min(float a, float b)
@@ -111,22 +111,22 @@ Dropdown::Dropdown(std::string title, std::vector<std::string> values, ValueSele
     content->setThemeArea(ThemeArea::DIALOG);
     this->title->setText(title);
 
-    recycler->estimatedRowHeight = Application::getStyle()["brls/dropdown/listItemHeight"];
+    recycler->estimatedRowHeight = Application::getStyle()["aurore/dropdown/listItemHeight"];
     recycler->registerCell("Cell", []()
         {
         RadioCell* cell = new RadioCell();
-        cell->setHeight(Application::getStyle()["brls/dropdown/listItemHeight"]);
-        cell->title->setFontSize(Application::getStyle()["brls/dropdown/listItemTextSize"]);
+        cell->setHeight(Application::getStyle()["aurore/dropdown/listItemHeight"]);
+        cell->title->setFontSize(Application::getStyle()["aurore/dropdown/listItemTextSize"]);
         return cell; });
     recycler->setDefaultCellFocus(IndexPath(0, selected));
     recycler->setDataSource(this, false);
 
     Style style = Application::getStyle();
 
-    float height = numberOfRows(recycler, 0) * style["brls/dropdown/listItemHeight"]
+    float height = numberOfRows(recycler, 0) * style["aurore/dropdown/listItemHeight"]
         + header->getHeight()
-        + style["brls/dropdown/listPadding"] // top
-        + style["brls/dropdown/listPadding"] // bottom
+        + style["aurore/dropdown/listPadding"] // top
+        + style["aurore/dropdown/listPadding"] // bottom
         ;
 
     content->setHeight(min(height, Application::contentHeight * 0.73f));

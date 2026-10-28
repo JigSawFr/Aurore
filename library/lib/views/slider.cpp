@@ -73,11 +73,11 @@ Slider::Slider()
     pointer->setShadowVisibility(true);
     pointer->setFocusable(true);
 
-    pointer->setThemeColor("color", "brls/slider/pointer_color");
-    pointer->setThemeColor("borderColor", "brls/slider/pointer_border_color");
+    pointer->setThemeColor("color", "aurore/slider/pointer_color");
+    pointer->setThemeColor("borderColor", "aurore/slider/pointer_border_color");
 
-    line->setThemeColor("color", "brls/slider/line_filled");
-    lineEmpty->setThemeColor("color", "brls/slider/line_empty");
+    line->setThemeColor("color", "aurore/slider/line_filled");
+    lineEmpty->setThemeColor("color", "aurore/slider/line_empty");
 
     // The D-pad moves the slider (in buttonsProcessing, or here a step at a
     // time with a discrete step) rather than the focus

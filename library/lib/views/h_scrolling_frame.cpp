@@ -169,7 +169,7 @@ HScrollingFrame::HScrollingFrame()
 void HScrollingFrame::setupScrollingIndicator()
 {
     scrollingIndicator = new Rectangle();
-    scrollingIndicator->setThemeColor("color", "brls/text");
+    scrollingIndicator->setThemeColor("color", "aurore/text");
     scrollingIndicator->setSize(Size(0, SCROLLING_INDICATOR_HEIGHT));
     scrollingIndicator->setCornerRadius(SCROLLING_INDICATOR_HEIGHT / 2);
     scrollingIndicator->detach();
@@ -465,7 +465,7 @@ void HScrollingFrame::startScrolling(bool animated, float newScroll)
     if (animated && !Application::getReduceMotion())
     {
         Style style = Application::getStyle();
-        animateScrolling(newScroll, style["brls/animations/highlight"]);
+        animateScrolling(newScroll, style["aurore/animations/highlight"]);
     }
     else
     {
@@ -693,7 +693,7 @@ enum Sound HScrollingFrame::getFocusSound()
     return Sound::SOUND_NONE;
 }
 
-#define NO_PADDING fatal("Padding is not supported by brls:HScrollingFrame, please set padding on the content view instead");
+#define NO_PADDING fatal("Padding is not supported by aurore:HScrollingFrame, please set padding on the content view instead");
 
 void HScrollingFrame::setPadding(float top, float right, float bottom, float left)
 {

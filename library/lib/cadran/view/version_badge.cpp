@@ -22,7 +22,7 @@ VersionBadge::VersionBadge()
     // centred like the title's box, the tag and the commit sat 4 px below
     // the middle of its capitals (the larger font has more room under them),
     // and a centred box moves by half its margin.
-    this->setMarginTop(aurore::getStyle()["brls/applet_frame/header_title_top_offset"] - 8);
+    this->setMarginTop(aurore::getStyle()["aurore/applet_frame/header_title_top_offset"] - 8);
 
     // The app's (ui::hooks): its version, its commit, a release or not.
     const auto& h             = ui::hooks::get();
@@ -41,7 +41,7 @@ VersionBadge::VersionBadge()
     number->setFontSize(18);
     number->setFontScaled(false); // a tag: the same size with the larger text
     number->setSingleLine(true);
-    number->setThemeColor("textColor", "brls/background");
+    number->setThemeColor("textColor", "aurore/background");
     tag->addView(number);
     this->addView(tag);
     if (release || commit.empty())
@@ -75,7 +75,7 @@ static void badge_screen_of(aurore::View* focus)
     const auto& version = ui::hooks::get().version;
     if (!version || version().empty())
         return;
-    auto* label = frame ? frame->getView("brls/applet_frame/title_label") : nullptr;
+    auto* label = frame ? frame->getView("aurore/applet_frame/title_label") : nullptr;
     auto* row   = label ? dynamic_cast<aurore::Box*>(label->getParent()) : nullptr;
     if (!row || row->getView(BADGE_ID))
         return;
@@ -86,7 +86,7 @@ static void badge_screen_of(aurore::View* focus)
 
 aurore::Box* VersionBadge::header_tools(aurore::AppletFrame* frame)
 {
-    auto* header = frame ? dynamic_cast<aurore::Box*>(frame->getView("brls/applet_frame/header")) : nullptr;
+    auto* header = frame ? dynamic_cast<aurore::Box*>(frame->getView("aurore/applet_frame/header")) : nullptr;
     if (!header)
         return nullptr;
     if (auto* tools = dynamic_cast<aurore::Box*>(header->getView(TOOLS_ID)))

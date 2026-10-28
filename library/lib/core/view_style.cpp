@@ -377,7 +377,7 @@ void View::notePress(bool pressed, bool releaseLater)
 
     Animatable& release = this->extras->pressRelease;
     release.reset(0.0f);
-    release.addStep(1.0f, Application::getStyle()["brls/animations/highlight"]);
+    release.addStep(1.0f, Application::getStyle()["aurore/animations/highlight"]);
     release.setEndCallback([this](bool finished)
         {
         if (finished)

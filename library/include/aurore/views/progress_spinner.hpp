@@ -40,7 +40,7 @@ class ProgressSpinner : public View
 
     /**
      * Sets the color of the spinner's bars, in place of the theme's
-     * brls/spinner/bar_color (its alpha is the faintest bar's).
+     * aurore/spinner/bar_color (its alpha is the faintest bar's).
      */
     void setColor(NVGcolor color);
 

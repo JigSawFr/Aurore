@@ -79,7 +79,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `width` | `auto`, number, percentage (`50%`) |
 | `wireframe` | `true` / `false` |
 
-## Every box (`<brls:Box>`)
+## Every box (`<aurore:Box>`)
 
 | Attribute | Value |
 |---|---|
@@ -121,7 +121,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 |---|---|
 | `label` | text (`@i18n/…`) |
 
-## `<brls:AppletFrame>`
+## `<aurore:AppletFrame>`
 
 | Attribute | Value |
 |---|---|
@@ -129,7 +129,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `headerHidden` | `true` / `false` |
 | `style` | `popup` · `regular` |
 
-## `<brls:Button>`
+## `<aurore:Button>`
 
 | Attribute | Value |
 |---|---|
@@ -137,13 +137,13 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `style` | `bordered` · `borderless` · `default` · `highlight` · `primary` |
 | `textColor` | colour (`#rrggbb`, `@theme/…`) |
 
-## `<brls:DetailCell>`
+## `<aurore:DetailCell>`
 
 | Attribute | Value |
 |---|---|
 | `title` | text (`@i18n/…`) |
 
-## `<brls:HRecyclerFrame>`
+## `<aurore:HRecyclerFrame>`
 
 | Attribute | Value |
 |---|---|
@@ -152,20 +152,20 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `preFetchLine` | number |
 | `spanCount` | number |
 
-## `<brls:HScrollingFrame>`
+## `<aurore:HScrollingFrame>`
 
 | Attribute | Value |
 |---|---|
 | `scrollingBehavior` | `centered` · `natural` |
 
-## `<brls:Header>`
+## `<aurore:Header>`
 
 | Attribute | Value |
 |---|---|
 | `subtitle` | text (`@i18n/…`) |
 | `title` | text (`@i18n/…`) |
 
-## `<brls:Hints>`
+## `<aurore:Hints>`
 
 | Attribute | Value |
 |---|---|
@@ -173,7 +173,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `allowAButtonTouch` | `true` / `false` |
 | `forceShown` | `true` / `false` |
 
-## `<brls:IconButton>`
+## `<aurore:IconButton>`
 
 | Attribute | Value |
 |---|---|
@@ -181,7 +181,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `icon` | file (`@res/…`) |
 | `iconSize` | number |
 
-## `<brls:Image>`
+## `<aurore:Image>`
 
 | Attribute | Value |
 |---|---|
@@ -191,13 +191,13 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `scalingType` | `center` · `fill` · `fit` · `stretch` |
 | `themeImage` | text (`@i18n/…`) |
 
-## `<brls:InputCell>`
+## `<aurore:InputCell>`
 
 | Attribute | Value |
 |---|---|
 | `secure` | `true` / `false` |
 
-## `<brls:Label>`
+## `<aurore:Label>`
 
 | Attribute | Value |
 |---|---|
@@ -214,26 +214,26 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `textColor` | colour (`#rrggbb`, `@theme/…`) |
 | `verticalAlign` | `baseline` · `bottom` · `center` · `top` |
 
-## `<brls:ProgressSpinner>`
+## `<aurore:ProgressSpinner>`
 
 | Attribute | Value |
 |---|---|
 | `barColor` | colour (`#rrggbb`, `@theme/…`) |
 | `size` | `large` · `normal` |
 
-## `<brls:RadioCell>`
+## `<aurore:RadioCell>`
 
 | Attribute | Value |
 |---|---|
 | `title` | text (`@i18n/…`) |
 
-## `<brls:Rectangle>`
+## `<aurore:Rectangle>`
 
 | Attribute | Value |
 |---|---|
 | `color` | colour (`#rrggbb`, `@theme/…`) |
 
-## `<brls:RecyclerFrame>`
+## `<aurore:RecyclerFrame>`
 
 | Attribute | Value |
 |---|---|
@@ -243,7 +243,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `paddingRight` | number |
 | `paddingTop` | number |
 
-## `<brls:RecyclingGrid>`
+## `<aurore:RecyclingGrid>`
 
 | Attribute | Value |
 |---|---|
@@ -253,7 +253,7 @@ A misspelt attribute or a value outside the list stops the app with the file, th
 | `preFetchLine` | number |
 | `spanCount` | number |
 
-## `<brls:ScrollingFrame>`
+## `<aurore:ScrollingFrame>`
 
 | Attribute | Value |
 |---|---|

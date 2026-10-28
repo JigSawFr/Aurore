@@ -29,7 +29,7 @@ namespace aurore
 {
 
 const std::string hintXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
         height="auto"
         axis="row"
@@ -38,20 +38,20 @@ const std::string hintXML = R"xml(
         paddingLeft="16"
         paddingRight="16"
         cornerRadius="6">
-            <brls:Label
+            <aurore:Label
                 id="icon"
                 width="auto"
                 height="auto"
                 fontSize="25.5"/>
 
-            <brls:Label
+            <aurore:Label
                 id="hint"
                 width="auto"
                 height="auto"
                 fontSize="21.5"
                 marginLeft="8"/>
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 static bool hintsSteady         = false;
@@ -112,8 +112,8 @@ Hint::Hint(std::shared_ptr<Action> action, bool allowAButtonTouch)
 
     if (!action->isAvailable() || blocked)
     {
-        icon->setThemeColor("textColor", "brls/text_disabled");
-        hint->setThemeColor("textColor", "brls/text_disabled");
+        icon->setThemeColor("textColor", "aurore/text_disabled");
+        hint->setThemeColor("textColor", "aurore/text_disabled");
     }
 }
 

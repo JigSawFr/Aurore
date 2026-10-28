@@ -1,5 +1,5 @@
 // ScrollView — the scrolling frame of every Cadran screen (<ScrollView> in
-// the XML, with brls:ScrollingFrame's attributes).
+// the XML, with aurore:ScrollingFrame's attributes).
 //
 // borealis' default ("natural") scrolling moves a frame's worth of pixels per
 // D-pad press once the next line is partly off screen, so a short press barely

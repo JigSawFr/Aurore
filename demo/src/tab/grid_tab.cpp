@@ -34,7 +34,7 @@ constexpr size_t PAGE      = 24;
 constexpr size_t MAX_ITEMS = 240;
 
 const std::string pictureCellXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
         height="auto"
         axis="column"
@@ -42,16 +42,16 @@ const std::string pictureCellXML = R"xml(
         padding="10"
         cornerRadius="12"
         highlightCornerRadius="12"
-        backgroundColor="@theme/brls/highlight/background">
+        backgroundColor="@theme/aurore/highlight/background">
 
-        <brls:Image
+        <aurore:Image
             id="picture/image"
             width="auto"
             height="auto"
             grow="1.0"
             scalingType="fit" />
 
-        <brls:Label
+        <aurore:Label
             id="picture/label"
             width="auto"
             height="auto"
@@ -60,7 +60,7 @@ const std::string pictureCellXML = R"xml(
             singleLine="true"
             horizontalAlign="center" />
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 // The row: always the same 40 thumbnails

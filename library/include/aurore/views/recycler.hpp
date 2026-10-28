@@ -265,7 +265,7 @@ class RecyclerFrame : public ScrollingFrame
         this->defaultCellFocus = indexPath;
     }
 
-    /// Makes a list for XML (`<brls:RecyclerFrame>`).
+    /// Makes a list for XML (`<aurore:RecyclerFrame>`).
     static View* create();
 
   private:

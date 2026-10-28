@@ -88,7 +88,7 @@ def render(tags, attributes):
         if owner == "View":
             title = "Every view (`View`)"
         elif owner == "Box":
-            title = "Every box (`<brls:Box>`)"
+            title = "Every box (`<aurore:Box>`)"
         lines += ["", "## " + title, "", "| Attribute | Value |", "|---|---|"]
         for name in sorted(attributes[owner], key=str.lower):
             kinds, values = attributes[owner][name]

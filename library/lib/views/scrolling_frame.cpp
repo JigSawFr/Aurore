@@ -174,7 +174,7 @@ ScrollingFrame::ScrollingFrame()
 void ScrollingFrame::setupScrollingIndicator()
 {
     scrollingIndicator = new Rectangle();
-    scrollingIndicator->setThemeColor("color", "brls/text");
+    scrollingIndicator->setThemeColor("color", "aurore/text");
     scrollingIndicator->setSize(Size(SCROLLING_INDICATOR_WIDTH, 0));
     scrollingIndicator->setCornerRadius(SCROLLING_INDICATOR_WIDTH / 2);
     scrollingIndicator->detach();
@@ -201,7 +201,7 @@ void ScrollingFrame::updateScrollingIndicatior()
     if (showsFocus != indicatorShowsFocus)
     {
         indicatorShowsFocus = showsFocus;
-        scrollingIndicator->setThemeColor("color", showsFocus ? "brls/highlight/color1" : "brls/text");
+        scrollingIndicator->setThemeColor("color", showsFocus ? "aurore/highlight/color1" : "aurore/text");
         scrollingIndicator->setWidth(showsFocus ? SCROLLING_INDICATOR_WIDTH * 2 : SCROLLING_INDICATOR_WIDTH);
         scrollingIndicator->setCornerRadius(showsFocus ? SCROLLING_INDICATOR_WIDTH : SCROLLING_INDICATOR_WIDTH / 2);
         Application::requestRedraw();
@@ -500,7 +500,7 @@ void ScrollingFrame::startScrolling(bool animated, float newScroll)
     if (animated && !Application::getReduceMotion())
     {
         Style style = Application::getStyle();
-        animateScrolling(newScroll, style["brls/animations/highlight"]);
+        animateScrolling(newScroll, style["aurore/animations/highlight"]);
     }
     else
     {
@@ -729,7 +729,7 @@ enum Sound ScrollingFrame::getFocusSound()
     return Sound::SOUND_NONE;
 }
 
-#define NO_PADDING fatal("Padding is not supported by brls:ScrollingFrame, please set padding on the content view instead");
+#define NO_PADDING fatal("Padding is not supported by aurore:ScrollingFrame, please set padding on the content view instead");
 
 void ScrollingFrame::setPadding(float top, float right, float bottom, float left)
 {

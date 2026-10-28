@@ -17,8 +17,8 @@ namespace aurore
 {
 
 const std::string editTextDialogXML = R"xml(
-    <brls:Box
-        id="brls/container"
+    <aurore:Box
+        id="aurore/container"
         width="auto"
         height="auto"
         axis="column"
@@ -26,10 +26,10 @@ const std::string editTextDialogXML = R"xml(
         alignItems="center"
         focusable="true"
         hideHighlight="true"
-        backgroundColor="@theme/brls/backdrop">
+        backgroundColor="@theme/aurore/backdrop">
 
-        <brls:Label
-            id="brls/dialog/header"
+        <aurore:Label
+            id="aurore/dialog/header"
             fontSize="24")xml"
 #ifdef __PSV__
                                       R"xml(marginTop="30")xml"
@@ -39,16 +39,16 @@ const std::string editTextDialogXML = R"xml(
                                       R"xml(marginBottom="30"
             textColor="#FFFFFF"/>
 
-        <brls:Box
-            id="brls/dialog/applet"
+        <aurore:Box
+            id="aurore/dialog/applet"
             width="720"
             cornerRadius="4"
             alignItems="flexEnd"
             axis="column"
-            backgroundColor="@theme/brls/background">
+            backgroundColor="@theme/aurore/background">
 
-            <brls:Label
-                id="brls/dialog/label"
+            <aurore:Label
+                id="aurore/dialog/label"
                 grow="1"
                 width="680"
                 cursor="-1"
@@ -57,16 +57,16 @@ const std::string editTextDialogXML = R"xml(
                 autoAnimate="false"
                 verticalAlign="top"/>
 
-            <brls:Label
-                id="brls/dialog/count"
+            <aurore:Label
+                id="aurore/dialog/count"
                 width="680"
                 horizontalAlign="right"
                 fontSize="18"
-                textColor="@theme/brls/text_secondary"
+                textColor="@theme/aurore/text_secondary"
                 marginRight="30"
                 marginBottom="10"/>
 
-            <brls:Hints
+            <aurore:Hints
                 allowAButtonTouch="true"
                 forceShown="true"
                 addBaseAction="false"
@@ -74,15 +74,15 @@ const std::string editTextDialogXML = R"xml(
                 marginRight="10"
                 width="auto"
                 height="auto"/>
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:Box>
+    </aurore:Box>
     )xml";
 
 EditTextDialog::EditTextDialog()
 {
     this->inflateFromXMLString(editTextDialogXML);
-    if (View* panel = this->getView("brls/dialog/applet"))
+    if (View* panel = this->getView("aurore/dialog/applet"))
         panel->setThemeArea(ThemeArea::DIALOG);
 
     // submit text
@@ -244,13 +244,13 @@ void EditTextDialog::updateUI()
 {
     if (content.empty())
     {
-        label->setThemeColor("textColor", "brls/text_secondary");
+        label->setThemeColor("textColor", "aurore/text_secondary");
         label->setText(hint);
         label->setCursor((int)CursorPosition::START);
     }
     else
     {
-        label->setThemeColor("textColor", "brls/text");
+        label->setThemeColor("textColor", "aurore/text");
         label->setText(content);
     }
 }

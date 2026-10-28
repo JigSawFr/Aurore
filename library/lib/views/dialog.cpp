@@ -29,45 +29,45 @@ namespace aurore
 {
 
 const std::string dialogXML = R"xml(
-    <brls:Box
+    <aurore:Box
         width="auto"
         height="auto"
         axis="column"
         justifyContent="center"
         alignItems="center"
-        backgroundColor="@theme/brls/backdrop">
+        backgroundColor="@theme/aurore/backdrop">
 
-        <brls:AppletFrame
-            id="brls/dialog/applet"
+        <aurore:AppletFrame
+            id="aurore/dialog/applet"
             width="720"
             height="auto"
             headerHidden="true"
             footerHidden="true"
             cornerRadius="4"
-            backgroundColor="@theme/brls/background">
+            backgroundColor="@theme/aurore/background">
 
-            <brls:Box
+            <aurore:Box
                 width="auto"
                 height="auto"
                 grow="1"
                 axis="column">
 
-                <brls:Box
-                    id="brls/dialog/container"
+                <aurore:Box
+                    id="aurore/dialog/container"
                     width="auto"
                     height="auto"
                     grow="1"
                     axis="column"/>
 
-                <brls:Rectangle
-                    id="brls/dialog/button3/separator"
+                <aurore:Rectangle
+                    id="aurore/dialog/button3/separator"
                     width="auto"
                     height="2"
-                    color="@theme/brls/sidebar/separator"
+                    color="@theme/aurore/sidebar/separator"
                     visibility="gone" />
 
-                <brls:Button
-                    id="brls/dialog/button3"
+                <aurore:Button
+                    id="aurore/dialog/button3"
                     width="auto"
                     height="72"
                     axis="column"
@@ -75,24 +75,24 @@ const std::string dialogXML = R"xml(
                     justifyContent="center"
                     alignItems="center"
                     highlightCornerRadius="6"
-                    fontSize="@style/brls/dialog/fontSize"
+                    fontSize="@style/aurore/dialog/fontSize"
                     style="borderless"
-                    textColor="@theme/brls/accent"
+                    textColor="@theme/aurore/accent"
                     text="Continue"
                     visibility="gone"/>
 
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="72"
                     axis="row"
                     justifyContent="spaceEvenly"
                     alignItems="stretch"
                     lineTop="2px"
-                    lineColor="@theme/brls/sidebar/separator"
+                    lineColor="@theme/aurore/sidebar/separator"
                     visibility="gone">
 
-                    <brls:Button
-                        id="brls/dialog/button1"
+                    <aurore:Button
+                        id="aurore/dialog/button1"
                         width="0"
                         height="auto"
                         grow="1"
@@ -102,19 +102,19 @@ const std::string dialogXML = R"xml(
                         highlightCornerRadius="6"
                         text="Continue"
                         style="borderless"
-                        fontSize="@style/brls/dialog/fontSize"
-                        textColor="@theme/brls/accent"
+                        fontSize="@style/aurore/dialog/fontSize"
+                        textColor="@theme/aurore/accent"
                         visibility="gone"/>
 
-                    <brls:Rectangle
-                        id="brls/dialog/button2/separator"
+                    <aurore:Rectangle
+                        id="aurore/dialog/button2/separator"
                         width="2"
                         height="auto"
-                        color="@theme/brls/sidebar/separator"
+                        color="@theme/aurore/sidebar/separator"
                         visibility="gone" />
 
-                    <brls:Button
-                        id="brls/dialog/button2"
+                    <aurore:Button
+                        id="aurore/dialog/button2"
                         width="0"
                         height="auto"
                         grow="1"
@@ -124,17 +124,17 @@ const std::string dialogXML = R"xml(
                         highlightCornerRadius="6"
                         text="Continue"
                         style="borderless"
-                        fontSize="@style/brls/dialog/fontSize"
-                        textColor="@theme/brls/accent"
+                        fontSize="@style/aurore/dialog/fontSize"
+                        textColor="@theme/aurore/accent"
                         visibility="gone"/>
 
-                </brls:Box>
+                </aurore:Box>
             
-            </brls:Box>
+            </aurore:Box>
 
-        </brls:AppletFrame>
+        </aurore:AppletFrame>
 
-    </brls:Box>
+    </aurore:Box>
 )xml";
 
 Dialog::Dialog(Box* contentView)
@@ -169,7 +169,7 @@ Dialog::Dialog(std::string text)
     Label* label    = new Label();
     this->textLabel = label;
     label->setText(text);
-    label->setFontSize(style["brls/dialog/fontSize"]);
+    label->setFontSize(style["aurore/dialog/fontSize"]);
     label->setHorizontalAlign(HorizontalAlign::CENTER);
     label->setSingleLine(false);
 
@@ -177,7 +177,7 @@ Dialog::Dialog(std::string text)
     box->addView(label);
     box->setAlignItems(AlignItems::CENTER);
     box->setJustifyContent(JustifyContent::CENTER);
-    box->setPadding(style["brls/dialog/paddingTopBottom"], style["brls/dialog/paddingLeftRight"], style["brls/dialog/paddingTopBottom"], style["brls/dialog/paddingLeftRight"]);
+    box->setPadding(style["aurore/dialog/paddingTopBottom"], style["aurore/dialog/paddingLeftRight"], style["aurore/dialog/paddingTopBottom"], style["aurore/dialog/paddingLeftRight"]);
 
     this->inflateFromXMLString(dialogXML);
     appletFrame->setThemeArea(ThemeArea::DIALOG);

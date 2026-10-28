@@ -84,8 +84,8 @@ class HelloActivity : public aurore::Activity
 
 ```xml
 <!-- resources/xml/activity/hello.xml -->
-<brls:AppletFrame>
-    <brls:Box
+<aurore:AppletFrame>
+    <aurore:Box
         title="Hello"
         width="auto"
         height="auto"
@@ -94,21 +94,21 @@ class HelloActivity : public aurore::Activity
         justifyContent="center"
         gap="20">
 
-        <brls:Label
+        <aurore:Label
             text="Aurore lays this out with flexbox"
             fontSize="24" />
 
-        <brls:Button
+        <aurore:Button
             id="hello_button"
             style="primary"
             width="300"
             text="Say hello" />
 
-    </brls:Box>
-</brls:AppletFrame>
+    </aurore:Box>
+</aurore:AppletFrame>
 ```
 
-Every XML tag is a view (`brls:Box`, `brls:Label`, `brls:Button`, `brls:Image`, `brls:ScrollingFrame`, `brls:TabFrame`…); its attributes are the yoga layout (`width`, `height`, `grow`, `margin`, `padding`, `gap`, `axis`, `alignItems`…) and the view's own (`text`, `fontSize`, `backgroundColor`, `cornerRadius`…). `@i18n/…` reads a translation, `@theme/…` a theme colour, `@style/…` a metric, `@res/…` a resource. `AURORE_BIND` finds a view by its `id` the first time it is used. A second screen is pushed with `aurore::Application::pushActivity(new OtherActivity())`, and B takes it off.
+Every XML tag is a view (`aurore:Box`, `aurore:Label`, `aurore:Button`, `aurore:Image`, `aurore:ScrollingFrame`, `aurore:TabFrame`…); its attributes are the yoga layout (`width`, `height`, `grow`, `margin`, `padding`, `gap`, `axis`, `alignItems`…) and the view's own (`text`, `fontSize`, `backgroundColor`, `cornerRadius`…). `@i18n/…` reads a translation, `@theme/…` a theme colour, `@style/…` a metric, `@res/…` a resource. `AURORE_BIND` finds a view by its `id` the first time it is used. A second screen is pushed with `aurore::Application::pushActivity(new OtherActivity())`, and B takes it off.
 
 While you work on the XML, start the app with `AURORE_HOT_RELOAD=$PWD/resources ./build/my_app`: each save builds the screen again, the focus where it was ([hot reload](hot_reload.md)).
 
@@ -138,17 +138,17 @@ class ScoreCard : public aurore::Box
 
 ```xml
 <!-- resources/xml/views/score_card.xml -->
-<brls:Box
+<aurore:Box
     width="260"
     height="auto"
     axis="column"
     padding="16"
     cornerRadius="12"
-    backgroundColor="@theme/brls/highlight/background"
+    backgroundColor="@theme/aurore/highlight/background"
     focusable="true">
-    <brls:Label id="name" fontSize="18" />
-    <brls:Label id="score" fontSize="40" text="0" />
-</brls:Box>
+    <aurore:Label id="name" fontSize="18" />
+    <aurore:Label id="score" fontSize="40" text="0" />
+</aurore:Box>
 ```
 
 Register it before the first screen that uses it, `aurore::Application::registerXMLView("ScoreCard", ScoreCard::create);`, and it can be written in any XML: `<ScoreCard id="p1" player="Ada" />`. Override `draw()` for a view that draws itself with nanovg (`demo/src/view/` has both kinds), and `onFocusGained()`, `registerAction()` or gesture recognizers to react.
@@ -176,11 +176,11 @@ Colours and metrics come from the theme (light or dark, following the system) an
 # my_theme.ini
 inherit = dark
 [colors]
-brls/accent = #ff7a59
-brls/background = #14161c
-brls/highlight/color1 = rgb(255, 122, 89)
+aurore/accent = #ff7a59
+aurore/background = #14161c
+aurore/highlight/color1 = rgb(255, 122, 89)
 [metrics]
-brls/sidebar/width = 320
+aurore/sidebar/width = 320
 ```
 
 ```cpp

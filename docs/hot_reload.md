@@ -18,7 +18,7 @@ Each file watched is looked at about three times a second, and read again only w
 ### Where the XML files are read from
 
 - **A build that reads its resources from disk** (without `AURORE_LIBROMFS`) reads them from the `resources/` folder copied next to the app when it was built. Edit the files there, or better, give hot reload the sources' own folder (`AURORE_HOT_RELOAD=/path/to/my_app/resources`): the XML files are then read from it.
-- **A build with its resources built in** (`AURORE_LIBROMFS`, the default on the consoles and phones) has no files to watch: give hot reload the sources' resources folder, and the XML files found there are read from it in place of the ones built in (`@res/…` in `brls:View`, `createFromXMLResource()`, `inflateFromXMLRes()`). The images, fonts and translations still come from the built-in ones.
+- **A build with its resources built in** (`AURORE_LIBROMFS`, the default on the consoles and phones) has no files to watch: give hot reload the sources' resources folder, and the XML files found there are read from it in place of the ones built in (`@res/…` in `aurore:View`, `createFromXMLResource()`, `inflateFromXMLRes()`). The images, fonts and translations still come from the built-in ones.
 - A path given to `createFromXMLFile()` or `inflateFromXMLFile()` is watched as it is.
 
 It does nothing on the Switch, the PS4, the PS Vita, Android and iOS: their resources are not read from a folder of the developer's machine.
@@ -34,7 +34,7 @@ The files are looked at about three times a second; a file seen changed is acted
 
 ## Limits
 
-- An XML file with a mistake (a tag not closed, an unknown attribute, a `brls:View` that includes the file it is in: elements nest at most 64 levels deep) is logged and shown in a notification (`file:line: message`), and the screen stays as it was, the focus where it was, until the next save. This holds for the files of the tabs shown too: the new content is kept only once it has made them.
+- An XML file with a mistake (a tag not closed, an unknown attribute, a `aurore:View` that includes the file it is in: elements nest at most 64 levels deep) is logged and shown in a notification (`file:line: message`), and the screen stays as it was, the focus where it was, until the next save. This holds for the files of the tabs shown too: the new content is kept only once it has made them.
 - An activity given its view in its constructor (`new Activity(view)`) cannot be made again; one with `CONTENT_FROM_XML_RES` or its own `createContentView()` can.
 - What the activity set up outside its content view stays as it was: a subscription made in `onContentAvailable()` is made a second time, unless the activity takes it back in its destructor or before. Views bound with `AURORE_BIND` in the activity are looked up again in the new content.
 - A view's state not in its XML (a scroll position, a text typed) starts again.

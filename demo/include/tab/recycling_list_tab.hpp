@@ -29,7 +29,7 @@ class RecyclerCell
   public:
     RecyclerCell();
 
-    AURORE_BIND(aurore::Rectangle, accent, "brls/sidebar/item_accent");
+    AURORE_BIND(aurore::Rectangle, accent, "aurore/sidebar/item_accent");
     AURORE_BIND(aurore::Label, label, "title");
     AURORE_BIND(aurore::Image, image, "image");
 

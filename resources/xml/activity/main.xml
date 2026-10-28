@@ -1,79 +1,79 @@
-<brls:AppletFrame
+<aurore:AppletFrame
     iconInterpolation="linear"
     footerHidden="false">
-    <brls:TabFrame
+    <aurore:TabFrame
         id="main_tabs"
         title="@i18n/demo/title"
         icon="@res/img/aurore_96.png">
 
         <!-- Built in code: Cadran, Aurore's look -->
-        <brls:Tab label="@i18n/demo/tabs/cadran" >
+        <aurore:Tab label="@i18n/demo/tabs/cadran" >
             <CadranTab />
-        </brls:Tab>
+        </aurore:Tab>
 
         <!-- Dynamic tab - required to get references to the views in the code -->
-        <brls:Tab label="@i18n/demo/tabs/components" >
+        <aurore:Tab label="@i18n/demo/tabs/components" >
             <ComponentsTab />
-        </brls:Tab>
+        </aurore:Tab>
 
         <!-- Static tab linking to another XML -->
-        <brls:Tab label="@i18n/demo/tabs/layout" >
-            <brls:View xml="@res/xml/tabs/layout.xml" />
-        </brls:Tab>
+        <aurore:Tab label="@i18n/demo/tabs/layout" >
+            <aurore:View xml="@res/xml/tabs/layout.xml" />
+        </aurore:Tab>
 
-        <brls:Tab label="@i18n/demo/tabs/transform" >
+        <aurore:Tab label="@i18n/demo/tabs/transform" >
             <TransformTab />
-        </brls:Tab>
+        </aurore:Tab>
 
-        <brls:Tab label="@i18n/demo/tabs/text" >
+        <aurore:Tab label="@i18n/demo/tabs/text" >
             <TextTestTab />
-        </brls:Tab>
+        </aurore:Tab>
 
-        <brls:Tab label="@i18n/demo/tabs/styles" >
+        <aurore:Tab label="@i18n/demo/tabs/styles" >
             <StylesTab />
-        </brls:Tab>
+        </aurore:Tab>
 
-        <brls:Tab label="@i18n/demo/tabs/scripts" >
-            <brls:View xml="@res/xml/tabs/scripts.xml" />
-        </brls:Tab>
+        <aurore:Tab label="@i18n/demo/tabs/scripts" >
+            <aurore:View xml="@res/xml/tabs/scripts.xml" />
+        </aurore:Tab>
 
-        <brls:Separator />
+        <aurore:Separator />
 
-        <brls:Tab label="@i18n/demo/tabs/scroll" >
-            <brls:View xml="@res/xml/tabs/scroll_test.xml" />
-        </brls:Tab>
+        <aurore:Tab label="@i18n/demo/tabs/scroll" >
+            <aurore:View xml="@res/xml/tabs/scroll_test.xml" />
+        </aurore:Tab>
 
-        <brls:Tab label="@i18n/demo/tabs/list">
+        <aurore:Tab label="@i18n/demo/tabs/list">
             <RecyclingListTab />
-        </brls:Tab>
+        </aurore:Tab>
 
-        <brls:Tab label="@i18n/demo/tabs/grid">
+        <aurore:Tab label="@i18n/demo/tabs/grid">
             <GridTab />
-        </brls:Tab>
+        </aurore:Tab>
 
-        <brls:Separator />
+        <aurore:Separator />
 
-        <brls:Tab label="@i18n/demo/tabs/settings">
+        <aurore:Tab label="@i18n/demo/tabs/settings">
             <SettingsTab />
-        </brls:Tab>
+        </aurore:Tab>
 
-<!--        <brls:Separator />-->
+<!--        <aurore:Separator />-->
 
-<!--        <brls:Tab label="@i18n/demo/tabs/popups" />-->
-<!--        <brls:Tab label="@i18n/demo/tabs/hos_layout" />-->
+<!--        <aurore:Tab label="@i18n/demo/tabs/popups" />-->
+<!--        <aurore:Tab label="@i18n/demo/tabs/hos_layout" />-->
 
-<!--        <brls:Separator />-->
+<!--        <aurore:Separator />-->
 
-<!--        <brls:Tab label="@i18n/demo/tabs/misc_layouts" />-->
-<!--        <brls:Tab label="@i18n/demo/tabs/misc_components" />-->
-<!--        <brls:Tab label="@i18n/demo/tabs/misc_tools" />-->
+<!--        <aurore:Tab label="@i18n/demo/tabs/misc_layouts" />-->
+<!--        <aurore:Tab label="@i18n/demo/tabs/misc_components" />-->
+<!--        <aurore:Tab label="@i18n/demo/tabs/misc_tools" />-->
 
-        <brls:Separator />
+        <aurore:Separator />
 
         <!-- Static tab with inline XML -->
-        <brls:Tab label="@i18n/demo/tabs/about" >
+        <aurore:Tab label="@i18n/demo/tabs/about" >
 
-            <brls:Box
+            <aurore:Box
                 width="auto"
                 height="auto"
                 axis="column"
@@ -82,19 +82,19 @@
                 paddingLeft="@style/about/padding_sides"
                 paddingRight="@style/about/padding_sides" >
 
-                <brls:Image
+                <aurore:Image
                     width="auto"
                     height="33%"
                     themeImage="demo/about/art"
                     marginBottom="@style/about/description_margin"/>
 
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="auto"
                     axis="row"
                     marginBottom="@style/about/description_margin">
 
-                    <brls:Label
+                    <aurore:Label
                         width="40%"
                         height="auto"
                         text="@i18n/demo/about/title"
@@ -102,15 +102,15 @@
                         horizontalAlign="right"
                         verticalAlign="top" />
 
-                    <brls:Label
+                    <aurore:Label
                         width="auto"
                         height="auto"
                         text="@i18n/demo/about/description"
                         marginLeft="@style/about/description_margin" />
 
-                </brls:Box>
+                </aurore:Box>
 
-                <brls:Box
+                <aurore:Box
                     width="auto"
                     height="auto"
                     axis="column"
@@ -118,26 +118,26 @@
                     justifyContent="spaceEvenly"
                     grow="1.0" >
 
-                    <brls:Label
+                    <aurore:Label
                         width="auto"
                         height="auto"
                         text="@i18n/demo/about/github" />
 
-                    <brls:Label
+                    <aurore:Label
                         width="auto"
                         height="auto"
                         text="@i18n/demo/about/licence" />
 
-                    <brls:Label
+                    <aurore:Label
                         width="auto"
                         height="auto"
                         text="@i18n/demo/about/logo_credit" />
 
-                </brls:Box>
+                </aurore:Box>
 
-            </brls:Box>
+            </aurore:Box>
 
-        </brls:Tab>
+        </aurore:Tab>
 
-    </brls:TabFrame>
-</brls:AppletFrame>
+    </aurore:TabFrame>
+</aurore:AppletFrame>

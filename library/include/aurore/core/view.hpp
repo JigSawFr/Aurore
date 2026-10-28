@@ -985,7 +985,7 @@ class View
      * .sidebar, .dialog) is drawn over the view's background, under its
      * content, in its corners. A DIALOG in a translucent colour over a
      * theme's background image has that image drawn under it first, dimmed
-     * by brls/backdrop, so that it does not show the screen behind it. A
+     * by aurore/backdrop, so that it does not show the screen behind it. A
      * HEADER is drawn across the whole width of its parent (an AppletFrame),
      * when that parent is a screen's (not in a dialog). NONE by default; the
      * core's header, sidebar, dialogs and dropdowns are set.
@@ -1084,7 +1084,7 @@ class View
     /**
      * Creates a view from the given XML element (node and attributes).
      *
-     * Elements nest at most 64 levels deep, the files brls:View includes
+     * Elements nest at most 64 levels deep, the files aurore:View includes
      * counted (a file including itself is an error, not a stack overflow).
      *
      * The method handleXMLElement() is executed for each child node in the XML.
@@ -1805,7 +1805,7 @@ class View
      * While `state` is on, the style property `property` takes `value`
      * (as XML writes it: "#rrggbb", "rgba(…)", "@theme/…", "4", "@style/…"),
      * and goes back to what it was when no state styles it any more.
-     * XML: focus:backgroundColor="@theme/brls/accent", pressed:scale="0.96",
+     * XML: focus:backgroundColor="@theme/aurore/accent", pressed:scale="0.96",
      * disabled:alpha="0.4", hover:borderColor="#ffffff". A "@theme/" value is
      * read when the state comes on, so it follows the theme. Returns false
      * for a property the view does not have.
@@ -1940,7 +1940,7 @@ class View
 
     /**
      * Draws the style property `property` (backgroundColor, textColor…, see
-     * getStyleProperty) in the theme colour `key` ("brls/text"), now and
+     * getStyleProperty) in the theme colour `key` ("aurore/text"), now and
      * again each time the theme changes (a theme file, the light or dark
      * variant). XML does it for every "@theme/…" colour. A colour the app
      * sets on the property afterwards (setTextColor…) replaces the key.

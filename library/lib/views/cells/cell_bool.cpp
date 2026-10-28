@@ -98,7 +98,7 @@ void BooleanCell::setOn(bool on, bool animated)
 void BooleanCell::updateUI()
 {
     detail->setText(state ? "hints/on"_i18n : "hints/off"_i18n);
-    detail->setThemeColor("textColor", state ? "brls/list/listItem_value_color" : "brls/text_secondary");
+    detail->setThemeColor("textColor", state ? "aurore/list/listItem_value_color" : "aurore/text_secondary");
 }
 
 void BooleanCell::scaleTick()

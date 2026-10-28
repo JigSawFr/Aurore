@@ -247,9 +247,9 @@ namespace
     {
         auto key = [&theme](const char* name, NVGcolor fallback)
         { return theme.hasColor(name) ? theme.getColor(name) : fallback; };
-        NVGcolor background = key("brls/background", nvgRGB(45, 45, 45));
-        NVGcolor text       = key("brls/text", nvgRGB(255, 255, 255));
-        NVGcolor accent     = key("brls/accent", text);
+        NVGcolor background = key("aurore/background", nvgRGB(45, 45, 45));
+        NVGcolor text       = key("aurore/text", nvgRGB(255, 255, 255));
+        NVGcolor accent     = key("aurore/accent", text);
         NVGcolor white      = nvgRGB(255, 255, 255);
         bool dark           = 0.2126f * background.r + 0.7152f * background.g + 0.0722f * background.b < 0.45f;
         *isDark             = dark;

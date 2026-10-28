@@ -8,10 +8,10 @@ Views of Aurore beyond borealis' own. The demo shows them: the **Grid** tab (a g
 
 ```xml
 <!-- As many 170 px columns as fit, rows 200 px tall -->
-<brls:RecyclingGrid id="grid" grow="1" columnWidth="170" itemHeight="200" itemSpace="16" padding="6" />
+<aurore:RecyclingGrid id="grid" grow="1" columnWidth="170" itemHeight="200" itemSpace="16" padding="6" />
 
 <!-- One row of items 120 px wide -->
-<brls:HRecyclerFrame id="row" height="150" itemWidth="120" itemSpace="16" />
+<aurore:HRecyclerFrame id="row" height="150" itemWidth="120" itemSpace="16" />
 ```
 
 | Attribute | View | Meaning |
@@ -86,9 +86,9 @@ The long press is a gesture recognizer of its own, `aurore::LongPressGestureReco
 `aurore::IconButton` is a `Button` with an icon before its text, or an icon alone in a round button when it has no text. Every `Button` attribute and style applies.
 
 ```xml
-<brls:IconButton glyph="&#xE5D4;" />                                     <!-- round, a glyph -->
-<brls:IconButton style="primary" glyph="&#xE037;" text="Play" />
-<brls:IconButton style="bordered" icon="@res/img/logo.png" iconSize="28" text="Aurore" />
+<aurore:IconButton glyph="&#xE5D4;" />                                     <!-- round, a glyph -->
+<aurore:IconButton style="primary" glyph="&#xE037;" text="Play" />
+<aurore:IconButton style="bordered" icon="@res/img/logo.png" iconSize="28" text="Aurore" />
 ```
 
 | Attribute | Meaning |

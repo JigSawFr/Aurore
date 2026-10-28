@@ -105,7 +105,7 @@ class ScrollingFrame : public Box
         showScrollingIndicator = visible;
     }
 
-    /// Makes a frame for XML (`<brls:ScrollingFrame>`, one child: its content).
+    /// Makes a frame for XML (`<aurore:ScrollingFrame>`, one child: its content).
     static View* create();
 
   protected:

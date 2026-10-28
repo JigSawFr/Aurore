@@ -179,7 +179,7 @@ class Image : public View
     float getOriginalImageWidth();
     float getOriginalImageHeight();
 
-    /// Makes an image for XML (`<brls:Image>`).
+    /// Makes an image for XML (`<aurore:Image>`).
     static View* create();
 
   protected:

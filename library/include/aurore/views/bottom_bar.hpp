@@ -35,10 +35,10 @@ class BottomBar : public Box
   private:
     void updateText();
     std::string bottomText;
-    AURORE_BIND(Box, hints, "brls/hints");
-    AURORE_BIND(Label, time, "brls/hints/time");
-    AURORE_BIND(View, battery, "brls/battery");
-    AURORE_BIND(View, wireless, "brls/wireless");
+    AURORE_BIND(Box, hints, "aurore/hints");
+    AURORE_BIND(Label, time, "aurore/hints/time");
+    AURORE_BIND(View, battery, "aurore/battery");
+    AURORE_BIND(View, wireless, "aurore/wireless");
 };
 
 } // namespace aurore

@@ -117,7 +117,7 @@ namespace
             // Said when the focus enters it: its title, then its row.
             this->setAccessibilityRole(aurore::AccessibilityRole::LIST);
             this->setAccessibilityLabel(subtitle.empty() ? title : title + ", " + subtitle);
-            this->setThemeColor("backgroundColor", "brls/backdrop");
+            this->setThemeColor("backgroundColor", "aurore/backdrop");
             this->setAlignItems(aurore::AlignItems::STRETCH);
             this->addView(sheet_outside(0, true));
 

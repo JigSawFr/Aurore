@@ -59,7 +59,7 @@ void FooterHints::fit()
     for (aurore::View* v : row->getChildren())
         if (v != this)
             status = v;
-    auto* clock = status ? dynamic_cast<aurore::Label*>(status->getView("brls/hints/time")) : nullptr;
+    auto* clock = status ? dynamic_cast<aurore::Label*>(status->getView("aurore/hints/time")) : nullptr;
     if (!clock)
         return;
     // A new screen's clock is set when it is first drawn: until then it has
@@ -153,7 +153,7 @@ void FooterHints::install()
     if (done)
         return;
     done = true;
-    aurore::Application::registerXMLView("brls:Hints", FooterHints::create);
+    aurore::Application::registerXMLView("aurore:Hints", FooterHints::create);
 }
 
 aurore::View* FooterHints::create()

@@ -1,78 +1,78 @@
-<brls:Box
+<aurore:Box
         width="auto"
         height="auto">
 
-    <brls:ScrollingFrame
+    <aurore:ScrollingFrame
             width="auto"
             height="auto"
             marginRight="460"
             grow="1.0">
 
-        <brls:Box
+        <aurore:Box
                 width="auto"
                 height="auto"
-                paddingLeft="@style/brls/tab_frame/content_padding_sides"
-                paddingRight="@style/brls/tab_frame/content_padding_sides"
-                paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
-                paddingBottom="@style/brls/tab_frame/content_padding_top_bottom">
+                paddingLeft="@style/aurore/tab_frame/content_padding_sides"
+                paddingRight="@style/aurore/tab_frame/content_padding_sides"
+                paddingTop="@style/aurore/tab_frame/content_padding_top_bottom"
+                paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom">
 
-            <brls:Box
+            <aurore:Box
                     grow="1"
                     axis="column">
-                <brls:Box>
-                    <brls:Button
+                <aurore:Box>
+                    <aurore:Button
                             id="play"
                             text="@i18n/demo/transform/play"
                             grow="1"
                             margin="10"
                             style="primary"/>
 
-                    <brls:Button
+                    <aurore:Button
                             id="reset"
                             grow="1"
                             margin="10"
                             text="@i18n/demo/transform/reset"/>
-                </brls:Box>
-                <brls:SliderCell
+                </aurore:Box>
+                <aurore:SliderCell
                         grow="1"
                         id="transX"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="transY"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="scaleX"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="scaleY"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="skewX"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="skewY"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="rotate"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="width"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="height"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="fontScaleX"/>
-                <brls:SliderCell
+                <aurore:SliderCell
                         grow="1"
                         id="fontScaleY"/>
-            </brls:Box>
+            </aurore:Box>
 
-        </brls:Box>
+        </aurore:Box>
 
-    </brls:ScrollingFrame>
+    </aurore:ScrollingFrame>
 
-    <brls:Box
+    <aurore:Box
             height="404"
             width="404"
             paddingBottom="2"
@@ -82,7 +82,7 @@
             positionType="absolute"
             borderThickness="2"
             cornerRadius="4"
-            borderColor="@theme/brls/header/border"
+            borderColor="@theme/aurore/header/border"
             positionTop="64"
             positionRight="30">
         <TransformBox
@@ -93,6 +93,6 @@
                 clipsToBounds="false"
                 scalingType="stretch"
                 image="@res/img/tiles.png"/>
-    </brls:Box>
+    </aurore:Box>
 
-</brls:Box>
+</aurore:Box>

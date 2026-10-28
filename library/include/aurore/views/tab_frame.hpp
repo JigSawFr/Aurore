@@ -54,7 +54,7 @@ class TabFrame : public Box
     static View* create();
 
   private:
-    AURORE_BIND(Sidebar, sidebar, "brls/tab_frame/sidebar");
+    AURORE_BIND(Sidebar, sidebar, "aurore/tab_frame/sidebar");
 
     View* activeTab = nullptr;
     bool keepTabs   = false;

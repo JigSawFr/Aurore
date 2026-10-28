@@ -194,7 +194,7 @@ void show_failure(const cadran_text::Failure& f)
     cadran::style_dialog(dialog, cadran::Emphasis::FAILURE);
     // A closes it, as before: the report is a choice, not the default.
     if (report)
-        if (aurore::View* ok = dialog->getView("brls/dialog/button2"))
+        if (aurore::View* ok = dialog->getView("aurore/dialog/button2"))
             dialog->setLastFocusedView(ok);
     dialog->open();
 }
@@ -440,7 +440,7 @@ void hold_confirm(aurore::Box* body, const std::string& hold_label, std::functio
     held->full = [dialog, on_yes]()
     { dialog->close([on_yes]()
           { if (on_yes) on_yes(); }); };
-    if (auto* yes = dynamic_cast<aurore::Box*>(dialog->getView("brls/dialog/button2")))
+    if (auto* yes = dynamic_cast<aurore::Box*>(dialog->getView("aurore/dialog/button2")))
     {
         yes->addView(new HoldFill(held));
         yes->registerAction(hold_label, aurore::BUTTON_A, [held](aurore::View*)
@@ -606,8 +606,8 @@ namespace
             return nvgRGB(0, 0, 0);
         };
         // The keys of ThemeInfo's previews (core/theme.cpp)
-        return { color("brls/background", "brls/clear"), color("cadran/surf", "brls/highlight/background"),
-            color("brls/sidebar/active_item", "brls/accent"), "palette" };
+        return { color("aurore/background", "aurore/clear"), color("cadran/surf", "aurore/highlight/background"),
+            color("aurore/sidebar/active_item", "aurore/accent"), "palette" };
     }
 } // namespace
 
