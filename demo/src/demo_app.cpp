@@ -33,7 +33,7 @@
 #include "tab/text_test_tab.hpp"
 #include "tab/transform_tab.hpp"
 #include "view/captioned_image.hpp"
-#include "view/pokemon_view.hpp"
+#include "view/gem_view.hpp"
 
 namespace
 {
@@ -107,7 +107,7 @@ void registerViews()
     brls::Application::registerXMLView("GridTab", GridTab::create);
     brls::Application::registerXMLView("TransformTab", TransformTab::create);
     brls::Application::registerXMLView("TransformBox", TransformBox::create);
-    brls::Application::registerXMLView("PokemonView", PokemonView::create);
+    brls::Application::registerXMLView("GemView", GemView::create);
     brls::Application::registerXMLView("SettingsTab", SettingsTab::create);
     brls::Application::registerXMLView("TextTestTab", TextTestTab::create);
     brls::Application::registerXMLView("StylesTab", StylesTab::create);

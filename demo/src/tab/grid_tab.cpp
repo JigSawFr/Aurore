@@ -22,9 +22,8 @@ using namespace brls::literals; // for _i18n
 
 namespace
 {
-const std::array<const char*, 9> names = { "Bulbasaur", "Charmander", "Squirtle", "Metapod", "Kakuna",
-    "Pidgeotto", "Spearow", "Arbok", "Sandshrew" };
-const std::array<const char*, 9> ids   = { "001", "004", "007", "011", "014", "017", "021", "024", "027" };
+const std::array<const char*, 9> names = { "Amber", "Coral", "Jade", "Lapis", "Onyx", "Opal", "Pearl", "Ruby", "Topaz" };
+const std::array<const char*, 9> ids   = { "amber", "coral", "jade", "lapis", "onyx", "opal", "pearl", "ruby", "topaz" };
 
 constexpr size_t PAGE      = 24;
 constexpr size_t MAX_ITEMS = 240;
@@ -68,7 +67,7 @@ class RowSource : public brls::RecyclingGridDataSource
     brls::RecyclingGridItem* cellForRow(brls::RecyclingView* recycler, size_t index) override
     {
         auto* cell = (PictureCell*)recycler->dequeueReusableCell("Picture");
-        cell->image->setImageFromRes(std::string("img/pokemon/thumbnails/") + ids[index % ids.size()] + ".png");
+        cell->image->setImageFromRes(std::string("img/gallery/thumbnails/") + ids[index % ids.size()] + ".png");
         cell->label->setText("#" + std::to_string(index + 1));
         return cell;
     }
@@ -111,7 +110,7 @@ PictureCell* PictureCell::create()
 brls::RecyclingGridItem* PictureSource::cellForRow(brls::RecyclingView* recycler, size_t index)
 {
     auto* cell = (PictureCell*)recycler->dequeueReusableCell("Picture");
-    cell->image->setImageFromRes(std::string("img/pokemon/") + ids[index % ids.size()] + ".png");
+    cell->image->setImageFromRes(std::string("img/gallery/") + ids[index % ids.size()] + ".png");
     cell->label->setText(std::to_string(index + 1) + ". " + names[index % names.size()]);
     return cell;
 }

@@ -234,17 +234,25 @@ void SwitchPlatform::forceEnableGamePlayRecording()
 
 void SwitchPlatform::openBrowser(std::string url)
 {
+    if (!isBrowserUrl(url))
+    {
+        Logger::warning("open url: refused, not an http(s) link");
+        return;
+    }
     WebCommonConfig config;
 
     Result rc = webPageCreate(&config, url.c_str());
     if (R_SUCCEEDED(rc))
     {
-        rc = webConfigSetWhitelist(&config, "^http*");
+        // The pages the applet may go on to: http and https only
+        rc = webConfigSetWhitelist(&config, "^https?://");
         if (R_SUCCEEDED(rc))
         {
             rc = webConfigShow(&config, NULL);
         }
     }
+    if (R_FAILED(rc))
+        Logger::error("open url: web applet failed: 0x{:X}", rc);
 }
 
 std::string SwitchPlatform::getName()

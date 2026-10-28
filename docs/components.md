@@ -63,7 +63,7 @@ They come from Switchfin's `recycling_grid` and `h_recycling` (Apache-2.0, see `
 
 ```cpp
 auto* menu = new brls::ContextMenu(anchor);       // the view it opens next to
-menu->setTitle("Bulbasaur");
+menu->setTitle("Amber");
 menu->addItem("Open", [] { /* … */ }, "\uE89E");  // a Material Icons glyph
 menu->addItem("Rename", [] { /* … */ }, "@res/img/rename.png");
 menu->addSeparator();

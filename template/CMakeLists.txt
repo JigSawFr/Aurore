@@ -59,7 +59,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore ${CMAKE_THREAD_LIBS
 set(ASSEMBLE_RESOURCES
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${AURORE_DIR}/resources ${MERGED_RESOURCES}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}/xml ${MERGED_RESOURCES}/img/pokemon
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}/xml ${MERGED_RESOURCES}/img/gallery
     COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/img/tiles.png ${MERGED_RESOURCES}/img/demo_icon.jpg
             ${MERGED_RESOURCES}/i18n/en-US/demo.json ${MERGED_RESOURCES}/i18n/en-US/scroll.json
             ${MERGED_RESOURCES}/i18n/fr/demo.json ${MERGED_RESOURCES}/i18n/zh-Hans/demo.json
@@ -68,7 +68,7 @@ set(ASSEMBLE_RESOURCES
 
 if (PLATFORM_SWITCH)
     list(APPEND ASSEMBLE_RESOURCES
-        COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/font/switch_font.ttf ${MERGED_RESOURCES}/font/switch_icons.ttf)
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/font/aurore_text.ttf ${MERGED_RESOURCES}/font/aurore_buttons.ttf)
     if (USE_DEKO3D)
         # deko3d's shaders, compiled at configure time
         gen_dksh(${CMAKE_BINARY_DIR}/shaders)
