@@ -20,6 +20,7 @@
 // resources/i18n/*/themes.json. The format: docs/themes.md.
 
 #include "theme_presets.hpp"
+#include <borealis/core/time.hpp>
 
 #include <iterator>
 
@@ -754,11 +755,10 @@ namespace
 
 const char* seasonalThemeId(std::time_t now)
 {
-    const std::tm* date = std::localtime(&now);
-    if (date)
-        for (const Season& season : SEASONS)
-            if (inSeason(season, date->tm_year + 1900, date->tm_mon + 1, date->tm_mday))
-                return season.id;
+    const std::tm date = localTime(now);
+    for (const Season& season : SEASONS)
+        if (inSeason(season, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday))
+            return season.id;
     return "winter";
 }
 

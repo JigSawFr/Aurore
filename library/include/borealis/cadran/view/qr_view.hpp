@@ -11,6 +11,7 @@
 #include <vector>
 #include <borealis.hpp>
 
+/// A QR code of a text, dark on white with its quiet zone whatever the theme.
 class QrView : public brls::View
 {
   public:
@@ -21,7 +22,7 @@ class QrView : public brls::View
         brls::Style style, brls::FrameContext* ctx) override;
 
   private:
-    int size = 0; // modules per side (0: the text could not be encoded)
-    std::vector<bool> modules; // row by row, true = dark
-    int image = 0; // the texture, made at the first draw (0: none yet)
+    int size = 0; ///< modules per side (0: the text could not be encoded)
+    std::vector<bool> modules; ///< row by row, true = dark
+    int image = 0; ///< the texture, made at the first draw (0: none yet)
 };

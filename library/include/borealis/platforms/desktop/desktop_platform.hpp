@@ -39,18 +39,14 @@ class DesktopPlatform : public Platform
     DesktopPlatform();
     ~DesktopPlatform() override;
 
-    /**
-     * The environment variable BRLS_<name>, else BOREALIS_<name> (the older
-     * name): nullptr when neither is set.
-     */
+    /// The environment variable `BRLS_` + `name`, else `BOREALIS_` + `name`
+    /// (the older name): nullptr when neither is set.
     static const char* environment(const std::string& name);
 
-    /**
-     * The locale BRLS_LANG (or BOREALIS_LANG) asks for: a locale's name as
-     * it is ("zh-Hant", an app's own), else read as a system's
-     * ("fr_FR.UTF-8" gives "fr"), never a path. False when neither is set:
-     * the system's language is used.
-     */
+    /// The locale BRLS_LANG (or BOREALIS_LANG) asks for: a locale's name as
+    /// it is ("zh-Hant", an app's own), else read as a system's
+    /// ("fr_FR.UTF-8" gives "fr"), never a path. False when neither is set:
+    /// the system's language is used.
     static bool localeFromEnvironmentVariable(std::string* locale);
 
     std::string getName() override;
@@ -103,7 +99,7 @@ class DesktopPlatform : public Platform
     ThemeVariant themeVariant     = ThemeVariant::LIGHT;
     DesktopImeManager* imeManager = nullptr;
     std::string locale;
-    // BRLS_LANG (or BOREALIS_LANG) gave the locale: the system's is not looked for
+    /// BRLS_LANG (or BOREALIS_LANG) gave the locale: the system's is not looked for
     bool localeFromEnvironment = false;
     bool screenDimmingDisabled = false;
 #ifdef __linux__

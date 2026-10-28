@@ -22,7 +22,7 @@ class EditTextDialog : public Box
     Event<>* getBackspaceEvent();
     Event<>* getCancelEvent();
     Event<>* getSubmitEvent();
-    // Y: the whole text taken out (to type another in place of the one given)
+    /// Y: the whole text taken out (to type another in place of the one given)
     Event<>* getClearEvent();
     Event<std::string>* getClipboardEvent();
     void updateUI();

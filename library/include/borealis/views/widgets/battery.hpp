@@ -44,6 +44,7 @@ class BatteryWidget : public Box
     void updateState();
     inline static bool isBatteryCharging = false;
     inline static float batteryLevel     = 1;
+    inline static bool updating          = false; // a read is under way
 };
 
 } // namespace brls

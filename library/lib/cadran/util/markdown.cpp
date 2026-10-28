@@ -468,9 +468,12 @@ namespace
         {
             if (t[0] != '>')
                 return false;
-            std::string inside = text::trim_blank(t.substr(1));
-            while (!inside.empty() && inside[0] == '>')
-                inside = text::trim_blank(inside.substr(1)); // nested: flattened
+            // Nested: flattened. The marks are skipped, not copied off one
+            // by one (a line of '>' would take quadratic time).
+            size_t at = 1;
+            while (at < t.size() && (t[at] == '>' || t[at] == ' ' || t[at] == '\t'))
+                at++;
+            std::string inside    = text::trim_blank(t.substr(at));
             const std::string tag = text::lower_ascii(inside);
             for (const char* alert : { "note", "tip", "important", "warning", "caution" })
                 if (tag == std::string("[!") + alert + "]")
@@ -620,7 +623,7 @@ namespace
 
 std::vector<Block> parse(const std::string& source)
 {
-    const std::string md = drop_raw_elements(safe_text::clean(source, source.size(), true));
+    const std::string md = drop_raw_elements(safe_text::clean(source, MAX_SOURCE, true));
     Parser p;
     // safe_text::clean() left no \r for lines() to drop.
     p.lines = text::lines(md);

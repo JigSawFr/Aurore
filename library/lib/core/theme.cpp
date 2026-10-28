@@ -2131,6 +2131,7 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory, bool deco
         }
         catch (const std::exception& e)
         {
+            Logger::warning("theme: cannot list {}: {}", directory, e.what());
         }
     }
     else

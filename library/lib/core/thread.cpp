@@ -92,13 +92,17 @@ size_t Threading::delay(long milliseconds, std::function<void()> func)
     operation.func  = std::move(func);
     operation.index = ++m_delay_index;
     m_delay_tasks.push_back(operation);
+    m_delay_pending.insert(operation.index);
     return m_delay_index;
 }
 
 void Threading::cancelDelay(size_t iter)
 {
     std::lock_guard<std::mutex> guard(m_delay_mutex);
-    m_delay_cancel_set.insert(iter);
+    // An index run already, cancelled already or not given yet is ignored:
+    // kept, it would stay in the set (or cancel a later delay)
+    if (m_delay_pending.erase(iter))
+        m_delay_cancel_set.insert(iter);
 }
 
 bool Threading::isIdle()
@@ -180,6 +184,14 @@ void Threading::performSyncTasks()
 
         if (duration >= d.delayMilliseconds)
         {
+            // Cancelled since the check above, or run now
+            m_delay_mutex.lock();
+            bool cancelled = m_delay_cancel_set.erase(d.index) > 0;
+            m_delay_pending.erase(d.index);
+            m_delay_mutex.unlock();
+            if (cancelled)
+                continue;
+
             Application::requestRedraw();
             try
             {
@@ -193,11 +205,6 @@ void Threading::performSyncTasks()
             {
                 brls::Logger::error("error: performSyncTasks(delay): unknown exception");
             }
-
-            m_delay_mutex.lock();
-            if (m_delay_cancel_set.count(d.index))
-                m_delay_cancel_set.erase(d.index);
-            m_delay_mutex.unlock();
         }
         else
         {
@@ -210,12 +217,16 @@ void Threading::performSyncTasks()
 
 void Threading::start()
 {
+    if (task_loop_running)
+        return;
     task_loop_active = true;
     start_task_loop();
 }
 
 void Threading::stop()
 {
+    if (!task_loop_running)
+        return;
     {
         std::lock_guard<std::mutex> guard(m_async_mutex);
         task_loop_active = false;
@@ -229,6 +240,7 @@ void Threading::stop()
 #else
     pthread_join(task_loop_thread, NULL);
 #endif
+    task_loop_running = false;
 }
 void Threading::std_task_loop()
 {
@@ -277,9 +289,10 @@ void* Threading::task_loop(void* a)
 void Threading::start_task_loop()
 {
 #ifdef BOREALIS_USE_STD_THREAD
-    task_loop_thread = new std::thread(std_task_loop);
+    task_loop_thread  = new std::thread(std_task_loop);
+    task_loop_running = true;
 #else
-    pthread_create(&task_loop_thread, NULL, task_loop, NULL);
+    task_loop_running = pthread_create(&task_loop_thread, NULL, task_loop, NULL) == 0;
 #endif
 }
 

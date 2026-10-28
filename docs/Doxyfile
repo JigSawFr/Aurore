@@ -35,6 +35,8 @@ WARN_IF_INCOMPLETE_DOC = NO
 QUIET                  = YES
 # A comment doxygen cannot read fails the build (the CI's docs job)
 WARN_AS_ERROR          = FAIL_ON_WARNINGS
+# A comment over a group of members (/// @{ … /// @}) documents each of them
+DISTRIBUTE_GROUP_DOC   = YES
 
 # The macros that declare members, expanded so the members show
 ENABLE_PREPROCESSING   = YES

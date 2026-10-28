@@ -48,27 +48,30 @@
 namespace brls
 {
 
-// Input types for entire app
+/// Input types for entire app
 enum class InputType
 {
-    GAMEPAD, // Gamepad or keyboard
-    TOUCH, // Touch screen
+    GAMEPAD, ///< Gamepad or keyboard
+    TOUCH, ///< Touch screen
 };
 
 class DebugLayer;
 class EditTextDialog;
 struct ThemeImage;
 
+/// Makes a new view for an XML tag (Application::registerXMLView).
 typedef std::function<View*(void)> XMLViewCreator;
 
+/// The app: its window, its stack of activities, the focus, the inputs and the main loop.
+/// Every member is static: there is one app per process, run from the main thread.
 class Application
 {
   public:
     friend class EditTextDialog;
 
-    static inline uint32_t ORIGINAL_WINDOW_WIDTH  = 1280;
-    static inline uint32_t ORIGINAL_WINDOW_HEIGHT = 720;
-    inline static std::string appId               = "";
+    static inline uint32_t ORIGINAL_WINDOW_WIDTH  = 1280; ///< The design width, in layout units
+    static inline uint32_t ORIGINAL_WINDOW_HEIGHT = 720; ///< The design height
+    inline static std::string appId               = ""; ///< See setAppId().
 
     /**
      * Inits the borealis application.
@@ -84,6 +87,7 @@ class Application
      * Must be called before createWindow().
      */
     static void setAppId(std::string appId) { Application::appId = std::move(appId); }
+    /// The application ID given to setAppId(), "" by default.
     static const std::string& getAppId() { return Application::appId; }
 
     /**
@@ -92,6 +96,7 @@ class Application
      * look instead.
      */
     static void setCadran(bool on) { Application::cadran = on; }
+    /// Whether the app is drawn in Cadran's look (see setCadran()).
     static bool isCadran() { return Application::cadran; }
 
     /**
@@ -106,7 +111,9 @@ class Application
      */
     static bool mainLoop();
 
+    /// The platform the app runs on (window, inputs, video, audio, fonts), made by init().
     static Platform* getPlatform();
+    /// The platform's sound player.
     static AudioPlayer* getAudioPlayer();
 
     /**
@@ -115,11 +122,15 @@ class Application
      */
     static YGConfig* getYogaConfig();
 
+    /// The nanovg context every view draws with.
     static NVGcontext* getNVGContext();
+    /// The size of the UI in layout units: ORIGINAL_WINDOW_WIDTH wide, as high as the window's ratio gives.
     inline static float contentWidth, contentHeight;
 
+    /// The window's size in pixels.
     inline static unsigned windowWidth, windowHeight;
 
+    /// The window's position on the screen (desktop).
     inline static int windowXPos, windowYPos;
 
     /**
@@ -144,6 +155,7 @@ class Application
      */
     static void setWindowPosition(int xPos, int yPos);
 
+    /// A copy of the stack of activities, the first pushed first.
     static std::vector<Activity*> getActivitiesStack();
 
     /**
@@ -226,7 +238,7 @@ class Application
      */
     static void setReduceMotion(bool reduce);
     static bool getReduceMotion();
-    // The app's own setting alone, without Cadran's.
+    /// The app's own setting alone, without Cadran's.
     static bool isReduceMotionSet() { return Application::reduceMotion; }
 
     /**
@@ -259,12 +271,15 @@ class Application
      */
     static View* getHoveredView() { return Application::hoveredView; }
 
+    /// The metrics in use (brls::getStyle()).
     inline static Style getStyle()
     {
         return brls::getStyle();
     }
 
+    /// The colours of the variant in use (light or dark), with the theme file's over them.
     static Theme getTheme();
+    /// The variant in use, as the platform reports it.
     static ThemeVariant getThemeVariant();
 
     /**
@@ -298,6 +313,7 @@ class Application
      */
     static void drawThemeBackground(NVGcontext* vg, float x, float y, float width, float height, float radius);
 
+    /// The platform's text input (the keyboard shown for an EditTextDialog).
     static ImeManager* getImeManager();
 
     /**
@@ -331,12 +347,18 @@ class Application
      */
     static bool addFontFallback(const std::string& font, const std::string& fallback);
 
+    /// The font a new Label draws with: the regular font (the Chinese one on the Switch).
     static int getDefaultFont();
 
+    /// Shows a toast with `text`, and `leading` (an icon) before it when given; the
+    /// focus announcer says the text.
     static void notify(const std::string& text, View* leading = nullptr);
 
+    /// Handles a controller button as the main loop does: the focused view's actions first,
+    /// then the focus moves. For the platforms and the test harness.
     static void onControllerButtonPressed(enum ControllerButton button, bool repeating);
 
+    /// Handles a key as the main loop does (the actions registered on keys).
     static void onKeyboardPressed(BrlsKeyCombination key, bool repeating);
 
     /**
@@ -349,7 +371,9 @@ class Application
      */
     static void crash(std::string text);
 
+    /// Asks the main loop to stop: the next mainLoop() returns false, after the exit events.
     static void quit();
+    /// Deletes every activity on the stack and clears the focus.
     static void clear();
 
     /**
@@ -363,15 +387,19 @@ class Application
      */
     static void unblockInputs();
 
+    /// Whether blockInputs() is in force.
     static bool isInputBlocks();
 
+    /// The controller's buttons and sticks as read this frame.
     static const ControllerState& getControllerState();
 
+    /// A text the app keeps for its footers (the library does not draw it).
     static void setCommonFooter(std::string footer);
     static std::string* getCommonFooter();
 
+    /// Pixels per layout unit (windowWidth / ORIGINAL_WINDOW_WIDTH, capped by setMaximumUIScale()).
     inline static float windowScale;
-    inline static float maximumUIScale = 0.0f;
+    inline static float maximumUIScale = 0.0f; ///< See setMaximumUIScale().
 
     /**
      * Caps how large the UI is allowed to grow relative to the design size.
@@ -385,8 +413,10 @@ class Application
      */
     static void setGlobalQuit(bool enabled);
 
+    /// Whether getFPS() is counted (60 when off).
     static void setFPSStatus(bool enabled);
     static bool getFPSStatus();
+    /// The frames per second over the last second.
     static size_t getFPS();
 
     /**
@@ -438,12 +468,19 @@ class Application
      * default is false;
      */
     static void setAutomaticDeactivation(bool value);
+    /// See setAutomaticDeactivation().
     static bool getAutomaticDeactivation();
+    /// Whether the app is active: an input lately, an animation under way, or no automatic
+    /// deactivation. Always true on the Switch.
     static bool hasActiveEvent();
+    /// Marks the app active now (and asks for a redraw), or no longer.
     static void setActiveEvent(bool value);
+    /// After this long without an input, the app is drawn at the deactivated FPS.
     static void setDeactivatedTime(int millisecond);
+    /// The frame rate once deactivated (5 by default).
     static void setDeactivatedFPS(int value);
     static int getDeactivatedFPS();
+    /// A frame's time once deactivated, in seconds.
     static double getDeactivatedFrameTime();
 
     /**
@@ -460,6 +497,7 @@ class Application
      * default is false: every frame is drawn.
      */
     static void setRedrawOnDemand(bool enabled);
+    /// See setRedrawOnDemand().
     static bool isRedrawOnDemand();
 
     /**
@@ -483,6 +521,7 @@ class Application
      * BRLS_REDRAW_DEBUG=1 in the environment turns it on (desktop).
      */
     static void setRedrawDebug(bool enabled);
+    /// See setRedrawDebug().
     static bool isRedrawDebug();
 
     /**
@@ -493,20 +532,33 @@ class Application
     static uint64_t getMissedRedrawCount();
     static Rect getLastMissedRedrawArea();
 
+    /// Fired with the new focus each time the focus moves.
     static GenericEvent* getGlobalFocusChangeEvent();
+    /// Fired when the footer's hints must be read again (the focus moved, keys swapped).
     static VoidEvent* getGlobalHintsUpdateEvent();
+    /// Fired when the input type changes (a touch after the buttons, or the reverse).
     static Event<InputType>* getGlobalInputTypeChangeEvent();
+    /// Fired once per main loop iteration, after the frame and the sync tasks.
     static VoidEvent* getRunLoopEvent();
+    /// Fired after each frame presented.
     static VoidEvent* getPostFrameEvent();
+    /// Fired when the app starts to exit, before the activities are deleted.
     static VoidEvent* getExitEvent();
+    /// Fired once the activities and the views left are deleted.
     static VoidEvent* getExitDoneEvent();
+    /// Fired when the window's size changed.
     static VoidEvent* getWindowSizeChangedEvent();
+    /// Fired at the end of createWindow().
     static VoidEvent* getWindowCreationDoneEvent();
+    /// Fired when the window is closed or quit() was asked, before the exit.
     static VoidEvent* getWindowShouldCloseEvent();
+    /// Fired with true or false when the window gains or loses the system's focus.
     static Event<bool>* getWindowFocusChangedEvent();
 
+    /// The view that has the focus, or nullptr.
     static View* getCurrentFocus();
 
+    /// The window's title, as given to createWindow().
     static std::string getTitle();
 
     /**
@@ -520,10 +572,12 @@ class Application
      */
     static void registerXMLView(std::string name, XMLViewCreator creator);
 
+    /// Whether an XML tag is registered (registerXMLView()).
     static bool XMLViewsRegisterContains(std::string name);
 
-    // The XML tags registered (registerXMLView)
+    /// The XML tags registered (registerXMLView).
     static std::vector<std::string> getXMLViewNames();
+    /// The function registered for an XML tag.
     static XMLViewCreator getXMLViewCreator(std::string name);
 
     /**
@@ -531,6 +585,8 @@ class Application
      */
     static std::string getLocale();
 
+    /// Deletes `view` at the end of the current main loop iteration (once no ptrLock()
+    /// holds it). View::freeView() calls it.
     static void addToFreeQueue(View* view);
 
     /**
@@ -551,6 +607,7 @@ class Application
      * watches for its toggle.
      */
     static void setInspectorEnabled(bool enabled);
+    /// See setInspectorEnabled().
     static bool isInspectorEnabled();
 
     /**
@@ -565,18 +622,18 @@ class Application
      * environment turns it on at init(). Does nothing on the consoles.
      */
     static void setHotReload(bool enabled, const std::string& resourcesDir = "");
+    /// See setHotReload().
     static bool isHotReload();
 
-    /**
-     * Builds the content of the activity on top again from its
-     * createContentView(), as hot reload does. False when it cannot (an
-     * activity given its view in its constructor) or the new content
-     * throws while being made (its XML, onContentAvailable(), or a tab
-     * shown, made when it takes the focus): the old one then stays, with
-     * the focus, and the error is shown in a notification.
-     */
+    /// Builds the content of the activity on top again from its
+    /// createContentView(), as hot reload does. False when it cannot (an
+    /// activity given its view in its constructor) or the new content
+    /// throws while being made (its XML, onContentAvailable(), or a tab
+    /// shown, made when it takes the focus): the old one then stays, with
+    /// the focus, and the error is shown in a notification.
     static bool rebuildActivity();
 
+    /// Draws the debug layer (DebugLayer) over the app.
     inline static void enableDebuggingView(bool enable)
     {
         debuggingViewEnabled = enable;
@@ -587,24 +644,28 @@ class Application
         return debuggingViewEnabled;
     }
 
+    /// Swaps A and B (and X and Y) for the app's actions, as on a Japanese console.
     static void setSwapInputKeys(bool swap);
 
-    // The keyboard keys that press a controller button, on top of Enter (A),
-    // Escape (B) and the arrows. By default X, Y, L, R, Shift+L (ZL),
-    // Shift+R (ZR), P or + (Plus), M or - (Minus) and Backspace (B); keys
-    // are named after their place on a US keyboard (docs/input.md).
-    // A key a view registers an action for keeps that action only, and
-    // none applies while a text is being typed.
+    /// The keyboard keys that press a controller button, on top of Enter (A),
+    /// Escape (B) and the arrows. By default X, Y, L, R, Shift+L (ZL),
+    /// Shift+R (ZR), P or + (Plus), M or - (Minus) and Backspace (B); keys
+    /// are named after their place on a US keyboard (docs/input.md).
+    /// A key a view registers an action for keeps that action only, and
+    /// none applies while a text is being typed.
+    /// @{
     static void mapKey(BrlsKeyCombination key, ControllerButton button);
     static void unmapKey(BrlsKeyCombination key);
     static void clearKeyMap();
     static const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& getKeyMap();
+    /// @}
 
     inline static bool isSwapInputKeys()
     {
         return swapInputKeys;
     }
 
+    /// Draws the mouse pointer with nanovg (for platforms with no system pointer).
     inline static void setDrawCoursor(bool draw)
     {
         drawCoursor = draw;
@@ -615,21 +676,25 @@ class Application
         return drawCoursor;
     }
 
+    /// See setHintsLiteMode().
     inline static bool isHintsLiteMode()
     {
         return hintsLiteMode;
     }
 
-    // Set hints lite mode, which will only show hints for A button and B button
+    /// Set hints lite mode, which will only show hints for A button and B button
     inline void static setHintsLiteMode(const bool value)
     {
         hintsLiteMode = value;
     }
 
+    /// Stops the touch gestures `view` is tracking, before it is removed.
     static void tryDeinitFirstResponder(View* view);
 
+    /// Reads `key` each frame from now on (counted: one removeWatchedKeys() per add).
     static void addToWatchedKeys(const BrlsKeyCombination key);
 
+    /// See addToWatchedKeys().
     static void removeWatchedKeys(const BrlsKeyCombination key);
 
   private:
@@ -664,7 +729,7 @@ class Application
     inline static MouseState currentMouseState;
     inline static NotificationManager* notificationManager;
 
-    // Return true if input type was changed
+    /// Return true if input type was changed
     static bool setInputType(InputType type);
 
     inline static InputType inputType = InputType::GAMEPAD;
@@ -680,7 +745,7 @@ class Application
 
     inline static void updateFPS();
 
-    inline static unsigned blockInputsTokens = 0; // any value > 0 means inputs are blocked
+    inline static unsigned blockInputsTokens = 0; ///< any value > 0 means inputs are blocked
     inline static bool muteSounds            = false;
 
     inline static std::string commonFooter;
@@ -699,7 +764,7 @@ class Application
     inline static Time lastInputTime       = 0;
     inline static bool highlightIdleFade   = false;
     inline static bool redrawOnDemand      = false;
-    inline static int redrawFrames         = 2; // frames still to draw
+    inline static int redrawFrames         = 2; ///< frames still to draw
     inline static Time lastDrawTime        = 0;
     inline static uint64_t drawnFrames     = 0;
     inline static bool redrawDebug         = false;
@@ -707,8 +772,8 @@ class Application
     static Rect missedRedrawArea;
     inline static std::vector<unsigned char> presentedPixels;
     inline static int presentedWidth = 0, presentedHeight = 0;
-    inline static int deactivatedFPS  = 5; // FPS 5
-    inline static int deactivatedTime = 5000000; // 5s
+    inline static int deactivatedFPS  = 5; ///< FPS 5
+    inline static int deactivatedTime = 5000000; ///< 5s
 
     inline static View* repetitionOldFocus = nullptr;
 
@@ -725,13 +790,13 @@ class Application
     inline static Event<bool> windowFocusChangedEvent;
     inline static Event<ThemeVariant> themeChangedEvent;
 
-    // The theme the screens were last told about
+    /// The theme the screens were last told about
     inline static uint64_t themeGeneration  = 0;
     inline static ThemeVariant themeVariant = ThemeVariant::DARK;
     static void checkThemeChanged();
 
-    // The theme file's background in the variant in use: the image drawn,
-    // and the one replacing it once loaded (the one drawn stays meanwhile)
+    /// The theme file's background in the variant in use: the image drawn,
+    /// and the one replacing it once loaded (the one drawn stays meanwhile)
     inline static ThemeBackground themeBackgroundSpec;
     inline static std::shared_ptr<ThemeImage> themeBackground;
     inline static std::shared_ptr<ThemeImage> themeBackgroundLoading;
@@ -743,7 +808,7 @@ class Application
 
     static void navigate(FocusDirection direction, bool repeating);
 
-    // present: false draws the frame without presenting it (redraw debug)
+    /// present: false draws the frame without presenting it (redraw debug)
     static void frame(bool present = true);
     static void checkSkippedFrame();
     static void exit();

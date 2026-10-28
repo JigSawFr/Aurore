@@ -26,29 +26,29 @@
 namespace brls
 {
 
-// This dictates what to do with the image if there is not
-// enough room for the view to grow and display the whole image,
-// or if the view is bigger than the image
+/// This dictates what to do with the image if there is not
+/// enough room for the view to grow and display the whole image,
+/// or if the view is bigger than the image
 enum class ImageScalingType
 {
-    // The image is scaled to fit the view boundaries, aspect ratio is conserved
+    /// The image is scaled to fit the view boundaries, aspect ratio is conserved
     FIT,
-    // The image is scaled to fill the view boundaries, aspect ratio is conserved
+    /// The image is scaled to fill the view boundaries, aspect ratio is conserved
     FILL,
-    // The image is stretched to fit the view boundaries (aspect ratio is not conserved). The original image dimensions are entirely ignored in the layout process.
+    /// The image is stretched to fit the view boundaries (aspect ratio is not conserved). The original image dimensions are entirely ignored in the layout process.
     STRETCH,
-    // The image is either cropped (not enough space) or untouched (too much space)
+    /// The image is either cropped (not enough space) or untouched (too much space)
     CENTER,
 };
 
-// This dictates what interpolation to use when down / up scaling the image
+/// This dictates what interpolation to use when down / up scaling the image
 enum class ImageInterpolation
 {
     LINEAR,
     NEAREST
 };
 
-// Alignment of the image inside the view for FIT and CROP scaling types
+/// Alignment of the image inside the view for FIT and CROP scaling types
 enum class ImageAlignment
 {
     TOP,
@@ -58,14 +58,15 @@ enum class ImageAlignment
     CENTER,
 };
 
-// An image. The view will try to grow as much
-// as possible to fit the image. The scaling type dictates
-// what to do with the image if there is not enough or too much space
-// for the view compared to the image inside.
-// Supported formats are: JPG, PNG, TGA, BMP and GIF (not animated).
+/// An image. The view will try to grow as much
+/// as possible to fit the image. The scaling type dictates
+/// what to do with the image if there is not enough or too much space
+/// for the view compared to the image inside.
+/// Supported formats are: JPG, PNG, TGA, BMP and GIF (not animated).
 class Image : public View
 {
   public:
+    /// An empty image (FIT, centred, linear interpolation).
     Image();
     ~Image();
 
@@ -133,12 +134,18 @@ class Image : public View
      * stops following it.
      */
     void setThemeImage(const std::string& key);
+    /// The image slot followed (setThemeImage()), "" for none.
     const std::string& getThemeImage() const { return this->themeImageKey; }
 
+    /// Shows the nanovg image `texture` (what every setImage* ends with).
     virtual void innerSetImage(int texture);
 
+    /// `cb` gets a function to call, from any thread, with the encoded image's bytes:
+    /// the image is set from them on the main thread (nothing if the view is gone
+    /// or `length` is 0).
     void setImageAsync(std::function<void(std::function<void(const std::string&, size_t length)>)> cb);
 
+    /// Shows nothing (the texture freed when the image owns it).
     void clear();
 
     /**
@@ -148,6 +155,7 @@ class Image : public View
      */
     void setScalingType(ImageScalingType scalingType);
 
+    /// See setScalingType().
     ImageScalingType getScalingType();
 
     /**
@@ -165,10 +173,13 @@ class Image : public View
     void setFreeTexture(bool value);
     bool getFreeTexture();
 
+    /// The nanovg image shown, 0 for none.
     int getTexture();
+    /// The size of the picture shown, in pixels.
     float getOriginalImageWidth();
     float getOriginalImageHeight();
 
+    /// Makes an image for XML (`<brls:Image>`).
     static View* create();
 
   protected:
@@ -194,21 +205,21 @@ class Image : public View
 
     bool freeTexture = true;
 
-    // Bumped each time the image is set: an async load set before is stale
+    /// Bumped each time the image is set: an async load set before is stale
     unsigned asyncGeneration = 0;
 
-    // Deletes the texture if owned, or hands it back to TextureCache
+    /// Deletes the texture if owned, or hands it back to TextureCache
     void releaseTexture();
 
   private:
-    // setThemeImage: the slot followed, the picture shown, the one loading
+    /// setThemeImage: the slot followed, the picture shown, the one loading
     std::string themeImageKey;
     std::shared_ptr<ThemeImage> themeImage;
     std::shared_ptr<ThemeImage> themeImagePending;
     bool settingThemeImage = false;
     bool followingTheme    = false;
-    // Gone with the view: an event firing from a copy of its callbacks
-    // does not call a view deleted meanwhile
+    /// Gone with the view: an event firing from a copy of its callbacks
+    /// does not call a view deleted meanwhile
     std::shared_ptr<char> themeToken;
     Event<ThemeVariant>::Subscription themeChanged;
     Event<const ThemeImage*>::Subscription themeImageLoaded;

@@ -1803,8 +1803,7 @@ View::~View()
 
     YGNodeFree(this->ygNode);
 
-    if (deletionToken)
-        *deletionToken = true;
+    alive.reset();
 }
 
 std::string View::getStringXMLAttributeValue(std::string value)
@@ -1861,6 +1860,20 @@ static bool splitStateAttribute(const std::string& name, StyleState* state, std:
     *state    = it->second;
     *property = name.substr(colon + 1);
     return true;
+}
+
+// std::stof(), a value past a float's range read as not a number (which
+// the callers refuse) instead of an exception they do not expect
+static float readXMLFloat(const std::string& text)
+{
+    try
+    {
+        return std::stof(text);
+    }
+    catch (const std::out_of_range&)
+    {
+        return NAN;
+    }
 }
 
 bool View::applyXMLAttribute(std::string name, std::string value)
@@ -1934,7 +1947,9 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         std::string newFloat = value.substr(0, value.length() - 2);
         try
         {
-            float floatValue = std::stof(newFloat);
+            float floatValue = readXMLFloat(newFloat);
+            if (!std::isfinite(floatValue))
+                return false;
             if (this->floatAttributes.count(name) > 0)
             {
                 this->floatAttributes[name](floatValue);
@@ -1958,9 +1973,9 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         std::string newFloat = value.substr(0, value.length() - 1);
         try
         {
-            float floatValue = std::stof(newFloat);
+            float floatValue = readXMLFloat(newFloat);
 
-            if (floatValue < -100 || floatValue > 100)
+            if (!std::isfinite(floatValue) || floatValue < -100 || floatValue > 100)
                 return false;
 
             if (this->percentageAttributes.count(name) > 0)
@@ -2037,7 +2052,9 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     // Valid float -> float, otherwise unknown attribute
     try
     {
-        float newValue = std::stof(value);
+        float newValue = readXMLFloat(value);
+        if (!std::isfinite(newValue))
+            return false;
         if (this->floatAttributes.count(name) > 0)
         {
             this->floatAttributes[name](newValue);
@@ -2160,6 +2177,21 @@ bool View::isXMLAttributeValid(std::string attributeName)
     return this->knownAttributes.count(attributeName) > 0;
 }
 
+// A custom resource (a folder the app's users may change): an error in it is
+// logged, and the built-in resource is used instead
+static View* createFromCustomXMLFile(const std::string& path)
+{
+    try
+    {
+        return View::createFromXMLFile(path);
+    }
+    catch (const std::exception& e)
+    {
+        Logger::error("{}; the built-in resource is used instead", e.what());
+        return nullptr;
+    }
+}
+
 View* View::createFromXMLResource(std::string name)
 {
     std::string disk = HotReload::diskResource("@res/xml/" + name);
@@ -2169,7 +2201,8 @@ View* View::createFromXMLResource(std::string name)
     // Check if custom xml file exists
     if (!View::CUSTOM_RESOURCES_PATH.empty() && std::ifstream { View::CUSTOM_RESOURCES_PATH + "xml/" + name }.good())
     {
-        return View::createFromXMLFile(View::CUSTOM_RESOURCES_PATH + "xml/" + name);
+        if (View* view = createFromCustomXMLFile(View::CUSTOM_RESOURCES_PATH + "xml/" + name))
+            return view;
     }
 
 #ifdef USE_LIBROMFS
@@ -2189,7 +2222,8 @@ View* View::createFromXMLString(std::string_view xml)
 
     if (!element)
     {
-        tinyxml2::XMLError error = document->Parse(xml.data());
+        // A string_view need not end with a NUL: its size bounds the parse
+        tinyxml2::XMLError error = document->Parse(xml.data(), xml.size());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
             fatal("Invalid XML when creating View from XML: " + View::describeXMLError(document.get()));
@@ -2229,8 +2263,29 @@ View* View::createFromXMLFile(std::string path)
     return view;
 }
 
+// Elements read inside one another, brls:View files included: a file that
+// includes itself would recurse until the stack runs out
+static constexpr int MAX_XML_DEPTH = 64;
+static int xmlDepth                = 0;
+
+namespace
+{
+    struct XMLDepthGuard
+    {
+        XMLDepthGuard()
+        {
+            if (xmlDepth >= MAX_XML_DEPTH)
+                fatal("XML nested more than " + std::to_string(MAX_XML_DEPTH) + " levels deep (a brls:View including itself?)");
+            xmlDepth++;
+        }
+        ~XMLDepthGuard() { xmlDepth--; }
+    };
+} // namespace
+
 View* View::createFromXMLElement(tinyxml2::XMLElement* element)
 {
+    XMLDepthGuard depth;
+
     if (!element)
         return nullptr;
 
@@ -2951,6 +3006,13 @@ void View::ptrLock()
 void View::ptrUnlock()
 {
     ptrLockCounter--;
+}
+
+std::weak_ptr<void> View::aliveToken()
+{
+    if (!alive)
+        alive = std::make_shared<char>(0);
+    return alive;
 }
 
 bool View::isPtrLocked()

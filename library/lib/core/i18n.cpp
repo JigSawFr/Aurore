@@ -279,18 +279,23 @@ namespace internal
 
         // First look for translated string in current locale, then in the
         // default locale. The current one is empty when it is the default
-        // locale: skipped, not looked up (a lookup that misses throws, and
-        // operator[] added a null to it each time).
+        // locale: skipped. A string missing, or not a string, is looked for
+        // in the next one (contains() rather than at(), which throws).
         for (const nlohmann::json* locale : { &table->currentLocale, &table->defaultLocale })
         {
             if (locale->is_null() || locale->empty())
                 continue;
             try
             {
-                return locale->at(pointer).get<std::string>();
+                if (!locale->contains(pointer))
+                    continue;
+                const nlohmann::json& value = locale->at(pointer);
+                if (value.is_string())
+                    return value.get<std::string>();
             }
-            catch (...)
+            catch (const std::exception& e)
             {
+                Logger::debug("i18n: \"{}\": {}", stringName, e.what());
             }
         }
 

@@ -11,58 +11,59 @@
 
 namespace cadran::palette
 {
+/// A colour, 0 to 255 per channel.
 struct Rgba
 {
     uint8_t r, g, b, a;
 };
 
-// Dark: the boards' navy. Light: the style board's cool white, the inks
-// darkened to 4.5:1 on every surface they are drawn on, the rail's active
-// pill included (teal #0A705F, amber #8A5200, coral #B71C1C); the quiet
-// text too, on both (text3 4.5:1 on the second surface). The focus ring
-// in the dark teal, its glow no lighter than the fill teal: 3:1 or more
-// on the background at any point of its pulse (WCAG 1.4.11). The dark
-// theme's hairline at 14 % white: the cards stay apart on a TV that
-// crushes its blacks.
+/// Dark: the boards' navy. Light: the style board's cool white, the inks
+/// darkened to 4.5:1 on every surface they are drawn on, the rail's active
+/// pill included (teal `#0A705F`, amber `#8A5200`, coral `#B71C1C`); the quiet
+/// text too, on both (text3 4.5:1 on the second surface). The focus ring
+/// in the dark teal, its glow no lighter than the fill teal: 3:1 or more
+/// on the background at any point of its pulse (WCAG 1.4.11). The dark
+/// theme's hairline at 14 % white: the cards stay apart on a TV that
+/// crushes its blacks.
 struct Palette
 {
     Rgba bg, text, text2, text3, surf, surf2, line, teal, teal_fill, teal_soft, amber, amber_fill, coral, coral_fill,
         coral_line, track, glow, glow_strong, amber_surf, amber_line, pill_ok, pill_ok_ink, rail_active, key_bg,
         key_fg, hl1, hl2, border;
-    Rgba blue, violet; // a release note's alerts, a build's tags
-    // A removal's soft fill (the header's pill in danger).
+    Rgba blue, violet; ///< a release note's alerts, a build's tags
+    /// A removal's soft fill (the header's pill in danger).
     Rgba coral_soft;
-    // The empty part of a progress bar, behind a game's missing cover.
+    /// The empty part of a progress bar, behind a game's missing cover.
     Rgba well;
-    // The action tiles' fourth ink (cadran::List::tiles()), after teal, blue
-    // and violet: the third avatar's pink, darker on white.
+    /// The action tiles' fourth ink (cadran::List::tiles()), after teal, blue
+    /// and violet: the third avatar's pink, darker on white.
     Rgba pink;
-    // The accounts' avatars, in turn: fills under a navy initial, alike on
-    // both themes.
+    /// The accounts' avatars, in turn: fills under a navy initial, alike on
+    /// both themes.
     Rgba avatar0, avatar1, avatar2, avatar3;
-    // A switch's knob, white on either track, and its edge while off.
+    /// A switch's knob, white on either track, and its edge while off.
     Rgba knob, knob_line;
-    // A chart's bars, today's lighter.
+    /// A chart's bars, today's lighter.
     Rgba bar, bar_today;
-    // Behind a dialog or a picker: the navy, dimmed enough that the screen
-    // under it does not read through around a dialog's text and QR codes. A
-    // toast: a card of the second surface on the dark theme, navy on the
-    // light one, and its text.
+    /// Behind a dialog or a picker: the navy, dimmed enough that the screen
+    /// under it does not read through around a dialog's text and QR codes. A
+    /// toast: a card of the second surface on the dark theme, navy on the
+    /// light one, and its text.
     Rgba backdrop, toast, toast_text;
-    // The label on a teal or coral fill (a confirmation's, a primary
-    // button's): the navy.
+    /// The label on a teal or coral fill (a confirmation's, a primary
+    /// button's): the navy.
     Rgba on_fill;
-    // A held button filling up (ui::hold_confirm), over its own colour.
+    /// A held button filling up (ui::hold_confirm), over its own colour.
     Rgba hold_fill;
-    // The rail's shadow over the tab while it is out (its darkest).
+    /// The rail's shadow over the tab while it is out (its darkest).
     Rgba rail_shadow;
-    // A press's flash: the fill teal, faint.
+    /// A press's flash: the fill teal, faint.
     Rgba click_pulse;
-    // What the app cannot do now (a read-only mode, ui::show_writable): the
-    // text, faded.
+    /// What the app cannot do now (a read-only mode, ui::show_writable): the
+    /// text, faded.
     Rgba text_off;
-    // The loading screen's bar (LoadingBar::setBrand), alike in both themes:
-    // its track, its fill and the fill's lighter end.
+    /// The loading screen's bar (LoadingBar::setBrand), alike in both themes:
+    /// its track, its fill and the fill's lighter end.
     Rgba brand_track, brand_fill, brand_glow;
 };
 
@@ -178,8 +179,8 @@ constexpr Palette LIGHT = {
     { 0x9A, 0xF0, 0xDC, 255 } // brand_glow
 };
 
-// Each colour's theme keys: the Cadran one ("cadran/…"), and the core's it
-// also sets so that borealis' own views take the boards' look.
+/// Each colour's theme keys: the Cadran one ("cadran/…"), and the core's it
+/// also sets so that borealis' own views take the boards' look.
 struct Key
 {
     const char* name;
@@ -264,10 +265,10 @@ constexpr Key KEYS[] = {
     { "cadran/brand/glow", &Palette::brand_glow },
 };
 
-// The pairs the palettes promise to keep readable (an ink on a surface, at
-// least `minimum`:1; a translucent one blended over the background first):
-// what tests/contrast checks of the palettes, and Theme::checkContrast of
-// a theme file changing them.
+/// The pairs the palettes promise to keep readable (an ink on a surface, at
+/// least `minimum`:1; a translucent one blended over the background first):
+/// what tests/contrast checks of the palettes, and Theme::checkContrast of
+/// a theme file changing them.
 struct Contrast
 {
     const char* ink;
