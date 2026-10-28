@@ -69,7 +69,7 @@ if (AURORE_FETCH_DEPS)
             FIND_PACKAGE_ARGS NAMES glfw3)
     FetchContent_Declare(SDL2
             GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-            GIT_TAG release-2.28.5
+            GIT_TAG release-2.32.10
             GIT_SHALLOW TRUE
             FIND_PACKAGE_ARGS)
 endif ()

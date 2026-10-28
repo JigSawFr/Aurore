@@ -14,7 +14,9 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 | iOS, tvOS | `IOS`, `TVOS` | SDL2 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
 | Browser | Emscripten (`emcmake`) | SDL2 | OpenGL ES 3 (WebGL 2) | packaged with the page |
 
-Every build needs CMake 3.16 or later and a C++20 compiler. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
+Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 built from the submodule) and a C++20 compiler. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
+
+SDL2 is the submodule `library/lib/extern/SDL` (2.32.10) on the desktop, Android, iOS and tvOS, and on the Vita without `USE_SYSTEM_SDL2`. Elsewhere it is the toolchain's: devkitPro's `switch-sdl2` on the Switch, PacBrew's SDL 2.0.18 on the PS4, Emscripten's port in a browser, and the SDL in the Docker image of the Vita's OpenGL ES build (2.28.5 with `psv/scripts/sdl2/ime.patch` in the image the CI pins; `psv/scripts` now makes one with 2.32.10 and the same patch). Aurore's SDL code builds with all of them.
 
 ## Linux
 

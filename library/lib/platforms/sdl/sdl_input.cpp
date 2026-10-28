@@ -364,14 +364,35 @@ static const size_t SDL_AXIS_MAPPING[SDL_GAMEPAD_AXIS_MAX] = {
 };
 
 std::vector<std::pair<SDL_JoystickID, SDL_GameController*>> controllers;
+// Buttons of each controller pressed since its last read, so that a press
+// and release between two frames still counts once, as a key does
+static std::unordered_map<SDL_JoystickID, uint32_t> controllerButtonsPressed;
 // The event watcher can run on another thread than the one reading the
-// controllers (hot-plug on some platforms)
+// controllers, keys and mouse buttons (Android sends them from its UI thread)
 static std::recursive_mutex controllersMutex;
+
+// SDL calls the event watcher with its joystick lock held (Android's pad
+// events): code that calls SDL with controllersMutex held takes that lock
+// first, so that the two threads never wait on each other
+struct ControllersLock
+{
+    ControllersLock()
+    {
+        SDL_LockJoysticks();
+        controllersMutex.lock();
+    }
+    ~ControllersLock()
+    {
+        controllersMutex.unlock();
+        SDL_UnlockJoysticks();
+    }
+};
 
 static int mouseButtons[3] = { 0 };
 
 static inline int getMouseButtonState(int buttonIndex)
 {
+    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
     if (mouseButtons[buttonIndex - 1] == SDL_STICKY)
     {
         mouseButtons[buttonIndex - 1] = SDL_RELEASED;
@@ -385,6 +406,7 @@ static inline int getMouseButtonState(int buttonIndex)
 
 static inline int getKeyboardKeys(SDL_Scancode code)
 {
+    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
     if (keyboardKeys.find(code) == keyboardKeys.end())
         return SDL_RELEASED;
     // Using SDL_STICKY to ensure that no input is lost
@@ -404,7 +426,7 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
 {
     if (event->type == SDL_CONTROLLERDEVICEADDED)
     {
-        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+        ControllersLock lock;
         SDL_GameController* controller = SDL_GameControllerOpen(event->cdevice.which);
         if (controller)
         {
@@ -429,7 +451,7 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
         // For SDL_CONTROLLERDEVICEREMOVED, event->cdevice.which is already the instance ID
         SDL_JoystickID jid = event->cdevice.which;
         Logger::info("Controller disconnected: {}", jid);
-        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+        ControllersLock lock;
         auto it = std::find_if(controllers.begin(), controllers.end(), [jid](auto x)
             { return x.first == jid; });
         if (it != controllers.end())
@@ -437,19 +459,31 @@ static int sdlEventWatcher(void* data, SDL_Event* event)
             SDL_GameControllerClose(it->second);
             controllers.erase(it);
         }
+        controllerButtonsPressed.erase(jid);
+    }
+    else if (event->type == SDL_CONTROLLERBUTTONDOWN)
+    {
+        if (event->cbutton.button < SDL_GAMEPAD_BUTTON_MAX)
+        {
+            std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+            controllerButtonsPressed[event->cbutton.which] |= 1u << event->cbutton.button;
+        }
     }
     else if (event->type == SDL_MOUSEBUTTONDOWN)
     {
+        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
         if (event->button.button <= 3)
             mouseButtons[event->button.button - 1] = SDL_PRESSED;
     }
     else if (event->type == SDL_MOUSEBUTTONUP)
     {
+        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
         if (event->button.button <= 3)
             mouseButtons[event->button.button - 1] = SDL_STICKY;
     }
     else if (event->type == SDL_KEYDOWN || event->type == SDL_KEYUP)
     {
+        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
         keyboardKeys[event->key.keysym.scancode] = event->type == SDL_KEYDOWN ? SDL_PRESSED : SDL_STICKY;
     }
     Application::setActiveEvent(true);
@@ -479,7 +513,7 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
     aurore::Logger::info("joystick num: {}", controllersCount);
 
     {
-        std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+        ControllersLock lock;
         for (int i = 0; i < controllersCount; i++)
         {
             SDL_JoystickID jid = SDL_JoystickGetDeviceInstanceID(i);
@@ -521,17 +555,18 @@ SDLInputManager::~SDLInputManager()
 {
     SDL_DelEventWatch(sdlEventWatcher, this->window);
 
-    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+    ControllersLock lock;
     for (auto i : controllers)
     {
         SDL_GameControllerClose(i.second);
     }
     controllers.clear();
+    controllerButtonsPressed.clear();
 }
 
 short SDLInputManager::getControllersConnectedCount()
 {
-    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+    ControllersLock lock;
     return controllers.size();
 }
 
@@ -543,7 +578,7 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
     for (float& axe : state->axes)
         axe = 0;
 
-    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+    ControllersLock lock;
     // updateControllerState takes a position in the list, not an instance ID
     for (size_t index = 0; index < controllers.size(); index++)
     {
@@ -604,17 +639,25 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
 
 void SDLInputManager::updateControllerState(ControllerState* state, int controller)
 {
-    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+    ControllersLock lock;
     if ((int)controllers.size() <= controller)
         return;
 
     SDL_GameController* c = controllers[controller].second;
 
+    uint32_t pressed = 0;
+    auto latched     = controllerButtonsPressed.find(controllers[controller].first);
+    if (latched != controllerButtonsPressed.end())
+    {
+        pressed         = latched->second;
+        latched->second = 0;
+    }
+
     for (size_t i = 0; i < SDL_GAMEPAD_BUTTON_MAX; i++)
     {
         // Translate SDL gamepad to Aurore controller
         size_t auroreButton          = SDL_BUTTONS_MAPPING[i];
-        state->buttons[auroreButton] = (bool)SDL_GameControllerGetButton(c, (SDL_GameControllerButton)i);
+        state->buttons[auroreButton] = SDL_GameControllerGetButton(c, (SDL_GameControllerButton)i) || (pressed >> i & 1);
     }
 
     state->buttons[BUTTON_LT] = SDL_GameControllerGetAxis(c, SDL_CONTROLLER_AXIS_TRIGGERLEFT) > 3276.7f;
@@ -707,7 +750,7 @@ void SDLInputManager::runloopStart()
 
 void SDLInputManager::sendRumble(unsigned short controller, unsigned short lowFreqMotor, unsigned short highFreqMotor)
 {
-    std::lock_guard<std::recursive_mutex> lock(controllersMutex);
+    ControllersLock lock;
     if (controllers.size() <= controller)
         return;
     SDL_GameController* c = controllers[controller].second;
@@ -733,7 +776,9 @@ void SDLInputManager::updateMouseWheel(SDL_MouseWheelEvent event)
     this->scrollOffset.y += event.preciseY * 10;
 #endif
 
-    this->getMouseScrollOffsetChanged()->fire(Point(event.x, event.y));
+    // The precise deltas, as GLFW gives: the whole ones stay at 0 for a
+    // touchpad's small steps
+    this->getMouseScrollOffsetChanged()->fire(Point(event.preciseX, event.preciseY));
 }
 
 void SDLInputManager::updateControllerSensorsUpdate(SDL_ControllerSensorEvent event)
