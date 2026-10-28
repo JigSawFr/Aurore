@@ -265,6 +265,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 | [Cadran](docs/cadran.md) | The default look and its kit |
 | [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
 | [Components](docs/components.md) | The views Aurore adds |
+| [XML attributes](docs/xml-attributes.md) | Every attribute of every view, generated from the sources |
 | [Keyboard and mouse](docs/input.md) | The keys for the controller's buttons, the mouse |
 | [Testing](docs/testing.md) | The test harness |
 | [Fonts](docs/fonts.md) | The fonts on each platform, the buttons' code points, Chinese, Japanese and Korean |

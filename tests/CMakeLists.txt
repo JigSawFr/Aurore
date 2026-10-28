@@ -58,3 +58,9 @@ add_test(NAME aurore_preview
         COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
 set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)
+
+# docs/xml-attributes.md as the sources register the attributes
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME xml_attributes_doc COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/xml_attributes.py --check)
+endif()
