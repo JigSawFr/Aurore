@@ -176,6 +176,14 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Aurore::aurore Threads::Threads)
 # The demo's tests, bench and aurore-preview, on the test harness
 # (-DBRLS_BUILD_TESTS=ON, then ctest)
 if (BRLS_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
+    # Their reference screenshots are drawn with the resources built in: from
+    # files the desktop build picks other fonts
+    if (USE_LIBROMFS)
+        enable_testing()
+        add_subdirectory(tests)
+    elseif (AURORE_INSTALL)
+        message(STATUS "aurore: the test harness is installed; the demo's tests need AURORE_LIBROMFS=ON")
+    else ()
+        message(FATAL_ERROR "The demo's tests need AURORE_LIBROMFS=ON (their reference screenshots are drawn with the resources built in)")
+    endif ()
 endif ()

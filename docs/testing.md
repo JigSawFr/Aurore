@@ -93,7 +93,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Without `AURORE_LIBROMFS` they run too: the build copies `resources/` to `build/tests/`, where `ctest` runs them. With CMake 3.25 or later, `cmake --workflow --preset tests` configures, builds and runs them in `build/tests`.
+They need `AURORE_LIBROMFS=ON`, which configuring says: their reference screenshots are drawn with the resources built in, and from files the desktop build picks other fonts. With CMake 3.25 or later, `cmake --workflow --preset tests` configures, builds and runs them in `build/tests`.
 
 `tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
 
