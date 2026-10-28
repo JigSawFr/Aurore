@@ -51,7 +51,7 @@ If the app changes a property itself while a state styles it, its value is the o
     transition="backgroundColor 180ms ease-out, cornerRadius 300ms backOut" />
 ```
 
-Each entry is a property (or `all`), a duration (`150ms`, `0.2s`) and an easing: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out` (cubic), or one of tweeny's by name (`quadraticOut`, `sinusoidalInOut`, `backOut`, `elasticOut`, `bounceOut`…; the default is `ease`). A change made while a transition runs starts from where it is. Colours mix channel by channel.
+Each entry is a property (or `all`), a duration (`150ms`, `0.2s`, at most `60s`) and an easing: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out` (cubic), or one of tweeny's by name (`quadraticOut`, `sinusoidalInOut`, `backOut`, `elasticOut`, `bounceOut`…; the default is `ease`). A change made while a transition runs starts from where it is. Colours mix channel by channel.
 
 Transitions are skipped, the change applied at once, while `brls::Application::getReduceMotion()` is true.
 

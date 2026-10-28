@@ -640,7 +640,8 @@ void Box::inflateFromXMLString(std::string_view xml)
 
     if (!element)
     {
-        tinyxml2::XMLError error = document->Parse(xml.data());
+        // A string_view need not end with a NUL: its size bounds the parse
+        tinyxml2::XMLError error = document->Parse(xml.data(), xml.size());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
             fatal("Invalid XML when inflating " + this->describe() + ": " + View::describeXMLError(document.get()));

@@ -87,7 +87,7 @@ class PanGestureRecognizer : public GestureRecognizer
     Point delta;
     PanAxis axis;
     std::vector<Point> posHistory;
-    GestureState lastState;
+    GestureState lastState = GestureState::FAILED;
 };
 
 } // namespace brls
