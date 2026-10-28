@@ -73,6 +73,10 @@ struct Options
     // else "references" and "test-output" in the working directory.
     std::string referenceDir;
     std::string outputDir;
+    // The system's fonts (Chinese, Japanese and Korean, colour emoji) looked
+    // up: off, the pictures are the same on every machine, with the app's
+    // fonts only
+    bool systemFonts = false;
 };
 
 // An RGBA picture, rows top-down

@@ -18,32 +18,32 @@
 
 #include <borealis.hpp>
 
-class Pokemon
+class Gem
 {
   public:
     std::string id;
     std::string name;
 
-    Pokemon(std::string id, std::string name)
+    Gem(std::string id, std::string name)
         : id(id)
         , name(name)
     {
     }
 };
 
-class PokemonView : public brls::Box
+class GemView : public brls::Box
 {
   public:
-    PokemonView(Pokemon pokemon);
-    PokemonView()
-        : PokemonView(Pokemon("001", "ТУПА ПАКИМОН!!!"))
+    GemView(Gem gem);
+    GemView()
+        : GemView(Gem("amber", "Amber"))
     {
     }
 
     static brls::View* create();
 
   private:
-    Pokemon pokemon;
+    Gem gem;
     BRLS_BIND(brls::Image, image, "image");
     BRLS_BIND(brls::Label, description, "description");
 };

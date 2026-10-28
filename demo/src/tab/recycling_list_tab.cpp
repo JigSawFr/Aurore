@@ -15,9 +15,9 @@
 */
 
 #include "tab/recycling_list_tab.hpp"
-#include "view/pokemon_view.hpp"
+#include "view/gem_view.hpp"
 
-std::vector<Pokemon> pokemons;
+std::vector<Gem> gems;
 
 RecyclerCell::RecyclerCell()
 {
@@ -38,7 +38,7 @@ int DataSource::numberOfSections(brls::RecyclerFrame* recycler)
 
 int DataSource::numberOfRows(brls::RecyclerFrame* recycler, int section)
 {
-    return pokemons.size();
+    return gems.size();
 }
 
 std::string DataSource::titleForHeader(brls::RecyclerFrame* recycler, int section)
@@ -51,15 +51,15 @@ std::string DataSource::titleForHeader(brls::RecyclerFrame* recycler, int sectio
 brls::RecyclerCell* DataSource::cellForRow(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
 {
     RecyclerCell* item = (RecyclerCell*)recycler->dequeueReusableCell("Cell");
-    item->label->setText(pokemons[indexPath.row].name);
-    item->image->setImageFromRes("img/pokemon/thumbnails/" + pokemons[indexPath.row].id + ".png");
+    item->label->setText(gems[indexPath.row].name);
+    item->image->setImageFromRes("img/gallery/thumbnails/" + gems[indexPath.row].id + ".png");
     return item;
 }
 
 void DataSource::didSelectRowAt(brls::RecyclerFrame* recycler, brls::IndexPath indexPath)
 {
     //    brls::Logger::info("Item Index(" + std::to_string(index.section) + ":" + std::to_string(index.row) + ") selected.");
-    recycler->present(new PokemonView(pokemons[indexPath.row]));
+    recycler->present(new GemView(gems[indexPath.row]));
 }
 
 // RECYCLER VIEW
@@ -69,16 +69,16 @@ RecyclingListTab::RecyclingListTab()
     // Inflate the tab from the XML file
     this->inflateFromXMLRes("xml/tabs/recycling_list.xml");
 
-    pokemons.clear();
-    pokemons.push_back(Pokemon("001", "Bulbasaur"));
-    pokemons.push_back(Pokemon("004", "Charmander"));
-    pokemons.push_back(Pokemon("007", "Squirtle"));
-    pokemons.push_back(Pokemon("011", "Metapod"));
-    pokemons.push_back(Pokemon("014", "Kakuna"));
-    pokemons.push_back(Pokemon("017", "Pidgeotto"));
-    pokemons.push_back(Pokemon("021", "Spearow"));
-    pokemons.push_back(Pokemon("024", "Arbok"));
-    pokemons.push_back(Pokemon("027", "Sandshrew"));
+    gems.clear();
+    gems.push_back(Gem("amber", "Amber"));
+    gems.push_back(Gem("coral", "Coral"));
+    gems.push_back(Gem("jade", "Jade"));
+    gems.push_back(Gem("lapis", "Lapis"));
+    gems.push_back(Gem("onyx", "Onyx"));
+    gems.push_back(Gem("opal", "Opal"));
+    gems.push_back(Gem("pearl", "Pearl"));
+    gems.push_back(Gem("ruby", "Ruby"));
+    gems.push_back(Gem("topaz", "Topaz"));
 
     recycler->estimatedRowHeight = 70;
     recycler->registerCell("Header", []()

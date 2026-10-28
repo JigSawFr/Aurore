@@ -11,6 +11,11 @@ add_executable(aurore_tests demo_tests.cpp)
 target_link_libraries(aurore_tests PRIVATE aurore_demo_views Aurore::test)
 brls_add_tests(aurore_tests REFERENCES ${CMAKE_CURRENT_SOURCE_DIR}/references)
 
+# openBrowser(): accepted links, no shell between the link and the opener
+add_executable(aurore_open_url_tests open_url_tests.cpp)
+target_link_libraries(aurore_open_url_tests PRIVATE Aurore::test)
+brls_add_tests(aurore_open_url_tests)
+
 # Pictures too large are refused before they are decoded
 add_executable(aurore_image_limits_tests image_limits_tests.cpp)
 target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)

@@ -64,7 +64,7 @@ if (AURORE_FETCH_DEPS)
             FIND_PACKAGE_ARGS NAMES glfw3)
     FetchContent_Declare(SDL2
             GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-            GIT_TAG release-2.32.10
+            GIT_TAG release-2.28.5
             GIT_SHALLOW TRUE
             FIND_PACKAGE_ARGS)
 endif ()
@@ -216,7 +216,12 @@ if (PLATFORM_DESKTOP)
         list(APPEND BRLS_PLATFORM_LIBS "-framework SystemConfiguration" "-framework Cocoa")
         list(APPEND BRLS_PLATFORM_LIBS "-framework IOKit" "-framework CoreFoundation")
         list(APPEND BRLS_PLATFORM_LIBS "-framework AppKit" "-framework Foundation" "-framework CoreServices" "-lobjc")
+        # The system's fonts for Chinese, Japanese and Korean (desktop_font.cpp)
+        list(APPEND BRLS_PLATFORM_LIBS "-framework CoreText")
         list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwin.mm)
+    elseif (UNIX)
+        # fontconfig, opened at run time when there (desktop_font.cpp)
+        list(APPEND BRLS_PLATFORM_LIBS ${CMAKE_DL_LIBS})
     endif ()
     list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/desktop)
     set(BRLS_PLATFORM_RESOURCES_PATH "\"${BRLS_RESOURCES_DIR}/resources/\"")
@@ -314,7 +319,7 @@ elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     list(APPEND BOREALIS_SOURCE
             ${BOREALIS_PATH}/lib/platforms/sdl
             ${BOREALIS_PATH}/lib/platforms/desktop)
-    list(APPEND BRLS_PLATFORM_LIBS SDL2-static SDL2main)
+    list(APPEND BRLS_PLATFORM_LIBS SDL2-static SDL2main "-framework CoreText" "-framework CoreFoundation")
     list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/desktop/ios_darwin.mm)
 
     if(PLATFORM_IOS)

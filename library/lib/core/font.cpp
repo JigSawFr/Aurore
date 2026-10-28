@@ -28,6 +28,9 @@ namespace brls
 
 bool FontLoader::loadFontFromFile(std::string fontName, std::string filePath)
 {
+    if (filePath.rfind("@res/", 0) == 0)
+        return Application::loadFontFromFile(fontName, filePath);
+
     if (access(filePath.c_str(), F_OK) != -1)
     {
         bool loaded = Application::loadFontFromFile(fontName, filePath);

@@ -64,7 +64,7 @@ endif ()
 set(ASSEMBLE_RESOURCES
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${AURORE_DIR}/resources ${MERGED_RESOURCES}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}/xml ${MERGED_RESOURCES}/img/pokemon ${MERGED_RESOURCES}/themes
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${MERGED_RESOURCES}/xml ${MERGED_RESOURCES}/img/gallery ${MERGED_RESOURCES}/themes
     COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/img/tiles.png ${MERGED_RESOURCES}/img/demo_icon.jpg
             ${MERGED_RESOURCES}/i18n/en-US/demo.json ${MERGED_RESOURCES}/i18n/en-US/scroll.json
             ${MERGED_RESOURCES}/i18n/fr/demo.json ${MERGED_RESOURCES}/i18n/zh-Hans/demo.json
@@ -73,7 +73,7 @@ set(ASSEMBLE_RESOURCES
 
 if (PLATFORM_SWITCH)
     list(APPEND ASSEMBLE_RESOURCES
-        COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/font/switch_font.ttf ${MERGED_RESOURCES}/font/switch_icons.ttf)
+        COMMAND ${CMAKE_COMMAND} -E remove -f ${MERGED_RESOURCES}/font/aurore_text.ttf ${MERGED_RESOURCES}/font/aurore_buttons.ttf)
 endif ()
 
 add_custom_target(${PROJECT_NAME}_resources ${ASSEMBLE_RESOURCES} COMMENT "Assembling the resources")

@@ -14,6 +14,8 @@
     limitations under the License.
 */
 
+#include <algorithm>
+#include <cctype>
 #include <borealis/core/platform.hpp>
 
 #ifdef __SWITCH__
@@ -62,6 +64,24 @@ Platform* Platform::createPlatform()
 #endif
 
     return nullptr;
+}
+
+bool Platform::isBrowserUrl(const std::string& url)
+{
+    size_t sep = url.find("://");
+    if (sep == std::string::npos || sep == 0 || sep + 3 == url.size())
+        return false;
+
+    std::string scheme;
+    for (size_t i = 0; i < sep; i++)
+        scheme += (char)std::tolower((unsigned char)url[i]);
+    if (std::find(BROWSER_URL_SCHEMES.begin(), BROWSER_URL_SCHEMES.end(), scheme) == BROWSER_URL_SCHEMES.end())
+        return false;
+
+    for (unsigned char c : url)
+        if (c < 0x20 || c == 0x7f)
+            return false;
+    return true;
 }
 
 } // namespace brls
