@@ -406,7 +406,6 @@ BRLS_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
     namespace fs  = std::filesystem;
     fs::path root = fs::temp_directory_path() / ("aurore-custom-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
     writeFile(root / "xml/cells/cell.xml", "<brls:Box><brls:Unknown/></brls:Box>");
-    writeFile(root / "xml/views/captioned_image.xml", "<brls:Box><unclosed></brls:Box>");
 
     Harness harness;
     std::string before                = brls::View::CUSTOM_RESOURCES_PATH;
@@ -423,7 +422,9 @@ BRLS_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
     brls::View* invalid = nullptr;
     try
     {
-        invalid = brls::View::createFromXMLResource("views/captioned_image.xml");
+        writeFile(root / "xml/cells/cell.xml", "<brls:Box><unclosed></brls:Box>");
+        brls::View::forgetXMLCache((root / "xml/cells/cell.xml").string());
+        invalid = brls::View::createFromXMLResource("cells/cell.xml");
     }
     catch (const std::exception& e)
     {
@@ -462,10 +463,10 @@ BRLS_TEST(xml_durations_out_of_range_are_refused)
 {
     Harness harness;
     brls::Box box;
-    BRLS_CHECK(box.setTransition("opacity 250ms"));
-    BRLS_CHECK(box.setTransition("opacity 2s cubicOut"));
-    BRLS_CHECK(box.setTransition("opacity 60s"));
-    for (const char* spec : { "opacity 1e30s", "opacity 3e9ms", "opacity nans", "opacity infms", "opacity -1s", "opacity 61s" })
+    BRLS_CHECK(box.setTransition("backgroundColor 250ms"));
+    BRLS_CHECK(box.setTransition("backgroundColor 2s cubicOut"));
+    BRLS_CHECK(box.setTransition("backgroundColor 60s"));
+    for (const char* spec : { "backgroundColor 1e30s", "backgroundColor 3e9ms", "backgroundColor nans", "backgroundColor infms", "backgroundColor -1s", "backgroundColor 61s" })
         BRLS_CHECK(!box.setTransition(spec));
 }
 
