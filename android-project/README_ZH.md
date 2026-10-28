@@ -2,11 +2,11 @@
 
 [English](./README.md)
 
-本目录是将 Aurore 演示程序构建为安卓应用的 Gradle 工程。它遵循 SDL 的安卓移植方式（[SDL 2.28 文档](https://github.com/libsdl-org/SDL/blob/release-2.28.x/docs/README-android.md)）：由 SDL 的 Java Activity 启动应用，Aurore 以共享库的形式构建，使用 SDL2 平台和 OpenGL ES 2，资源文件通过 libromfs 打包进库中。
+本目录是将 Aurore 演示程序构建为安卓应用的 Gradle 工程。它遵循 SDL 的安卓移植方式（[SDL 2.32 文档](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md)）：由 SDL 的 Java Activity 启动应用，Aurore 以共享库的形式构建，使用 SDL2 平台和 OpenGL ES 2，资源文件通过 libromfs 打包进库中。
 
 | | |
 | --- | --- |
-| SDL | 2.28.5，子模块 `library/lib/extern/SDL`（`app/jni/SDL` 是指向它的链接） |
+| SDL | 2.32.10，子模块 `library/lib/extern/SDL`（`app/jni/SDL` 是指向它的链接）。`app/src/main/java/org/libsdl/app` 中的 Java 代码取自同一标签的 SDL（`SDLActivity` 拒绝其他版本的原生库），只改了一处：`HIDDeviceManager` 以 `RECEIVER_EXPORTED` 注册 USB 广播接收器，这是安卓 14 的要求 |
 | Android Gradle Plugin、Gradle | 8.1.1（使用 `gradlew`） |
 | JDK | 17，Android Gradle Plugin 8 的要求 |
 | NDK | 22.1.7171670（`app/build.gradle` 中的 `ndkVersion`） |
