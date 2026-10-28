@@ -30,7 +30,7 @@ The files are looked at about three times a second; a file seen changed is acted
 
 ## Limits
 
-- An XML file with a mistake (a tag not closed, an unknown attribute) is logged, and the screen stays as it was until the next save.
+- An XML file with a mistake (a tag not closed, an unknown attribute, a `brls:View` that includes the file it is in: elements nest at most 64 levels deep) is logged, and the screen stays as it was until the next save.
 - An activity given its view in its constructor (`new Activity(view)`) cannot be made again; one with `CONTENT_FROM_XML_RES` or its own `createContentView()` can.
 - What the activity set up outside its content view stays as it was: a subscription made in `onContentAvailable()` is made a second time, unless the activity takes it back in its destructor or before. Views bound with `BRLS_BIND` in the activity are looked up again in the new content.
 - A view's state not in its XML (a scroll position, a text typed) starts again.

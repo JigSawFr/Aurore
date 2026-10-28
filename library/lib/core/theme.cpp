@@ -914,6 +914,8 @@ bool Theme::resolveAsset(const std::string& raw, const std::string& directory, c
         }
         catch (const std::exception& e)
         {
+            // Not resolved (a broken link): no file to read either
+            Logger::debug("theme: cannot resolve {}: {}", resolved, e.what());
         }
         if (out)
             return refuse("a link out of the theme's folder");
@@ -2034,6 +2036,7 @@ std::vector<ThemeInfo> Theme::listThemes(const std::string& directory, bool deco
         }
         catch (const std::exception& e)
         {
+            Logger::warning("theme: cannot list {}: {}", directory, e.what());
         }
     }
     else

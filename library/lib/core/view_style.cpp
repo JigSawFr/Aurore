@@ -273,7 +273,7 @@ bool View::parseStyleValue(const std::string& text, StyleValue::Type type, Style
                 std::string digits = endsWith(text, "px") ? text.substr(0, text.size() - 2) : text;
                 size_t used        = 0;
                 number             = std::stof(digits, &used);
-                if (used != digits.size())
+                if (used != digits.size() || !std::isfinite(number))
                     return false;
             }
             *value = StyleValue::of(number);
@@ -497,6 +497,8 @@ static bool parseEasing(const std::string& name, EasingFunction* easing)
     return true;
 }
 
+static constexpr double MAX_DURATION_MS = 60000;
+
 static bool parseDuration(const std::string& text, int32_t* duration)
 {
     try
@@ -504,13 +506,19 @@ static bool parseDuration(const std::string& text, int32_t* duration)
         size_t used      = 0;
         float value      = std::stof(text, &used);
         std::string unit = text.substr(used);
+        double ms;
         if (unit == "ms")
-            *duration = (int32_t)std::lround(value);
+            ms = value;
         else if (unit == "s")
-            *duration = (int32_t)std::lround(value * 1000.0f);
+            ms = value * 1000.0;
         else
             return false;
-        return *duration >= 0;
+        // Not a number, negative or past a minute: refused, before it is
+        // rounded to an int32_t it may not fit
+        if (!std::isfinite(ms) || ms < 0 || ms > MAX_DURATION_MS)
+            return false;
+        *duration = (int32_t)std::lround(ms);
+        return true;
     }
     catch (const std::exception& e)
     {
