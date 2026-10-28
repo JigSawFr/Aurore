@@ -2,11 +2,11 @@
 
 [中文](./README_ZH.md)
 
-The Gradle project that builds Aurore's demo as an Android app. It follows SDL's Android port ([SDL 2.28's documentation](https://github.com/libsdl-org/SDL/blob/release-2.28.x/docs/README-android.md)): SDL's Java activity starts the app, which Aurore builds as a shared library with the SDL2 platform and OpenGL ES 2, its resources inside it (libromfs).
+The Gradle project that builds Aurore's demo as an Android app. It follows SDL's Android port ([SDL 2.32's documentation](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md)): SDL's Java activity starts the app, which Aurore builds as a shared library with the SDL2 platform and OpenGL ES 2, its resources inside it (libromfs).
 
 | | |
 | --- | --- |
-| SDL | 2.28.5, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it) |
+| SDL | 2.32.10, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it). The Java code in `app/src/main/java/org/libsdl/app` is SDL's from the same tag (`SDLActivity` refuses a native library of another version), with one change: `HIDDeviceManager` registers its USB receiver with `RECEIVER_EXPORTED`, which Android 14 requires |
 | Android Gradle Plugin, Gradle | 8.1.1 (the wrapper, `gradlew`) |
 | JDK | 17, as the Android Gradle Plugin 8 needs |
 | NDK | 22.1.7171670 (`ndkVersion` in `app/build.gradle`) |

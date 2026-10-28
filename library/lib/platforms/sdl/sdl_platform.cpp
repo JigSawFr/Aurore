@@ -176,7 +176,9 @@ std::string SDLPlatform::pasteFromClipboard()
     char* str = SDL_GetClipboardText();
     if (!str)
         return "";
-    return std::string { str };
+    std::string text { str };
+    SDL_free(str);
+    return text;
 }
 
 std::string SDLPlatform::getName()

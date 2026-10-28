@@ -1,6 +1,6 @@
 # Platforms
 
-How to build Aurore's demo, and an app on Aurore, for each platform. The configure and build commands are those the CI runs (`.github/workflows/ci.yaml`, where the toolchains are pinned), but for a browser, which it does not build; its artifacts are the demo built for each platform. Getting the toolchains themselves is each SDK's business: the links say where.
+How to build Aurore's demo, and an app on Aurore, for each platform. The configure and build commands are those the CI runs (`.github/workflows/ci.yaml`, where the toolchains are pinned; `site.yml` for a browser); its artifacts are the demo built for each platform. Getting the toolchains themselves is each SDK's business: the links say where.
 
 An app builds the same way as the demo: its `CMakeLists.txt` includes `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, then `add_subdirectory(library/aurore/library)` and links `Aurore::aurore` (see the [README](../README.md#-use-it-in-your-project) and [`template/`](../template/README.md)). The platform is chosen with `-DAURORE_PLATFORM=…` (borealis' `-DPLATFORM_…=ON` still works, with a deprecation warning), and the packaging (an `.nro`, a `.vpk`, a `.pkg`, an app bundle) is the app's own: the demo's `CMakeLists.txt` has each one, to copy. [porting.md](porting.md) has what an app's code should mind on each.
 
@@ -14,7 +14,9 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 | iOS, tvOS | `IOS`, `TVOS` | SDL2 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
 | Browser | Emscripten (`emcmake`) | SDL2 | OpenGL ES 3 (WebGL 2) | packaged with the page |
 
-Every build needs CMake 3.16 or later and a C++20 compiler. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
+Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 built from the submodule) and a C++20 compiler. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
+
+SDL2 is the submodule `library/lib/extern/SDL` (2.32.10) on the desktop, Android, iOS and tvOS, and on the Vita without `USE_SYSTEM_SDL2`. Elsewhere it is the toolchain's: devkitPro's `switch-sdl2` on the Switch, PacBrew's SDL 2.0.18 on the PS4, Emscripten's port in a browser, and the SDL in the Docker image of the Vita's OpenGL ES build (2.28.5 with `psv/scripts/sdl2/ime.patch` in the image the CI pins; `psv/scripts` now makes one with 2.32.10 and the same patch). Aurore's SDL code builds with all of them.
 
 ## Linux
 
@@ -126,7 +128,7 @@ The notch, the rounded corners and the home indicator (on tvOS, the TV's safe ar
 
 ## In a browser
 
-Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. Aurore's own CI does not build the demo for the web; [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is a complete example. In short, under `emcmake cmake`:
+Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. The demo builds for it under `emcmake cmake` and runs on the website, <https://aurore.boreale.dev/demo/> ([web/README.md](https://github.com/JigSawFr/Aurore/blob/main/web/README.md) says how); [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is an app's complete example. In short, under `emcmake cmake`:
 
 - set `AURORE_PLATFORM=DESKTOP`, `AURORE_WINDOW=SDL2`, `AURORE_GRAPHICS=GLES3` and `USE_SYSTEM_SDL2` before including `commonOption.cmake`, and compile with `-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions`, SDL2 coming from Emscripten's ports (a `SDL2Config.cmake` that finds nothing to link);
 - package the resources into the page's file system (`--preload-file`) and set `AURORE_RESOURCES_ROOT` to where they land;

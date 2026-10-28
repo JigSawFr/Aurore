@@ -1,0 +1,181 @@
+name: site
+
+# Aurore's website (site/README.md): the home page, the documentation, the
+# changelog, the API reference (Doxygen) and the demo in a browser
+# (web/README.md), built and checked for each pull request and for main, and
+# main's published on GitHub Pages (Settings › Pages › Source: GitHub Actions).
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels the build of the commit it replaces.
+concurrency:
+  group: site-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Emscripten, pinned: a new one is a pull request of its own (its ports,
+  # its threads and its file packager can change).
+  EMSDK_VERSION: 6.0.12
+  # The emsdk tool itself, at that version's tag, checked against the commit
+  # the tag pointed to when pinned: a tag can be moved, a commit cannot.
+  EMSDK_COMMIT: 35ff8a6d150541276abbc6bae512ca90bcfbe220
+  # Playwright, pinned, for the layout and accessibility check.
+  PLAYWRIGHT_VERSION: 1.64.0
+  # axe-core, for accessibility (tools/site_layout.py): its npm package,
+  # checked against the hash it had when pinned.
+  AXE_VERSION: 4.13.0
+  AXE_SHA256: 096912f6e77b4b695fc9304b7be65091db42d98de054da674ae222a11cb33f70
+
+jobs:
+  # The demo compiled with Emscripten, and the page around it (<build>/web/).
+  demo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      # Emscripten's cache: its system libraries and ports (SDL2, zlib),
+      # built for threads and exceptions on first use, which takes minutes.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.emscripten_cache
+          key: emscripten-${{ env.EMSDK_VERSION }}
+      - name: Emscripten ${{ env.EMSDK_VERSION }}
+        run: |
+          git clone --depth 1 --branch "$EMSDK_VERSION" https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          test "$(git -C "$RUNNER_TEMP/emsdk" rev-parse HEAD)" = "$EMSDK_COMMIT" \
+            || { echo "::error::emsdk's $EMSDK_VERSION tag is not $EMSDK_COMMIT any more"; exit 1; }
+          "$RUNNER_TEMP/emsdk/emsdk" install "$EMSDK_VERSION"
+          "$RUNNER_TEMP/emsdk/emsdk" activate "$EMSDK_VERSION"
+      # Japanese, Korean and Chinese drawn with a font cut out of Noto Sans
+      # CJK (tools/web_cjk_font.py): a browser has none Aurore can read.
+      - name: Dependencies
+        run: |
+          sudo apt-get update -y -q
+          sudo apt-get install -y -q --no-install-recommends ninja-build fonts-noto-cjk python3-fonttools
+          python3 tools/web_cjk_font.py /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc "$RUNNER_TEMP/cjk.otf" .
+      - name: The demo
+        run: |
+          # After emsdk_env.sh, which unsets EM_CACHE
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          export EM_CACHE="$HOME/.emscripten_cache"
+          emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WEB_CJK_FONT="$RUNNER_TEMP/cjk.otf"
+          cmake --build build-web
+          {
+            echo "### The demo in a browser"
+            echo
+            echo "| File | Size | Compressed |"
+            echo "|---|---|---|"
+            for f in aurore_demo.wasm aurore_demo.data aurore_demo.js; do
+              echo "| \`$f\` | $(du -k "build-web/web/$f" | cut -f1) KB | $(gzip -9c "build-web/web/$f" | wc -c | awk '{print int($1/1024)}') KB |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: demo
+          path: build-web/web
+          retention-days: 7
+
+  build:
+    needs: demo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pages: read   # the site's address (a custom domain, once it has one)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Install Python-Markdown and Doxygen
+        run: |
+          sudo apt-get update -y -q
+          sudo apt-get install -y -q --no-install-recommends python3-markdown doxygen
+      # The site's address, as GitHub Pages serves it: its custom domain when
+      # it has one, else <owner>.github.io/<repo>/. A pull request's build is
+      # kept out of search engines.
+      - name: The site's address
+        env:
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # No Pages site yet (404): gh prints its error body on stdout, so
+          # nothing of a failed call is kept.
+          if ! pages=$(gh api "repos/$REPO/pages" \
+                         --jq 'if .https_enforced then (.html_url | sub("^http:"; "https:")) else .html_url end' 2>/dev/null); then
+            pages=""
+          fi
+          owner="${REPO%%/*}"
+          pages="${pages:-https://${owner,,}.github.io/${REPO#*/}/}"
+          {
+            echo "SITE_URL=${pages%/}/"
+            echo "SITE_NOINDEX=${PR:+1}"
+          } | tee -a "$GITHUB_ENV"
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: demo
+          path: demo
+      - name: The API reference
+        # Fails on a warning (WARN_AS_ERROR in docs/Doxyfile)
+        run: doxygen docs/Doxyfile
+      - name: The website
+        run: |
+          SITE_API=build_docs/html SITE_DEMO=demo python3 tools/build_site.py out .
+          # The catalogs, every link and #anchor, what the CSP would block.
+          python3 tools/check_site.py out "$SITE_URL"
+      # No page wider than the screen on a phone, a tablet or a desktop, no
+      # script that throws, nothing axe finds against WCAG 2.2 AA. Seconds.
+      - name: The website on a phone, a tablet and a desktop
+        timeout-minutes: 10
+        run: |
+          python3 -m venv "$RUNNER_TEMP/playwright"
+          "$RUNNER_TEMP/playwright/bin/pip" install -q "playwright==$PLAYWRIGHT_VERSION"
+          sudo "$RUNNER_TEMP/playwright/bin/python" -m playwright install-deps chromium
+          "$RUNNER_TEMP/playwright/bin/python" -m playwright install chromium
+          curl -sfL --retry 3 -o "$RUNNER_TEMP/axe.tgz" "https://registry.npmjs.org/axe-core/-/axe-core-$AXE_VERSION.tgz"
+          echo "$AXE_SHA256  $RUNNER_TEMP/axe.tgz" | sha256sum -c --quiet
+          python3 -c 'import sys, tarfile; open(sys.argv[2], "wb").write(tarfile.open(sys.argv[1]).extractfile("package/axe.min.js").read())' \
+            "$RUNNER_TEMP/axe.tgz" "$RUNNER_TEMP/axe.min.js"
+          SITE_AXE="$RUNNER_TEMP/axe.min.js" "$RUNNER_TEMP/playwright/bin/python" -u tools/site_layout.py out
+      - name: Upload the site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: out
+      - name: Upload the site for the pull request
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: site
+          path: out
+          include-hidden-files: true   # .nojekyll
+          retention-days: 14
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    # One deployment at a time.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

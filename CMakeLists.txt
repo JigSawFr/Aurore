@@ -2,6 +2,22 @@ cmake_minimum_required(VERSION 3.16...3.31)
 
 set(AURORE_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)
 
+# The demo in a browser (web/README.md): the desktop build, compiled by
+# Emscripten (emcmake), with SDL2 and OpenGL ES 3 (WebGL 2) from Emscripten's
+# own ports. Its toolchain file is only read by project(), below.
+set(AURORE_WEB OFF)
+if (CMAKE_TOOLCHAIN_FILE MATCHES "Emscripten\\.cmake$")
+    set(AURORE_WEB ON)
+    set(AURORE_PLATFORM DESKTOP CACHE STRING "" FORCE)
+    set(AURORE_WINDOW SDL2 CACHE STRING "" FORCE)
+    set(AURORE_GRAPHICS GLES3 CACHE STRING "" FORCE)
+    set(USE_SYSTEM_SDL2 ON CACHE BOOL "" FORCE)
+    set(SDL2_DIR ${CMAKE_CURRENT_SOURCE_DIR}/web/cmake)
+    # Packaged into the page's file system at /app/resources (below)
+    set(AURORE_RESOURCES_ROOT /app CACHE STRING "" FORCE)
+    add_compile_options(-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions)
+endif ()
+
 # build options
 include(${AURORE_LIBRARY}/cmake/commonOption.cmake)
 
@@ -40,6 +56,11 @@ set(PROJECT_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
 if (USE_LIBROMFS)
     add_libromfs(${PROJECT_NAME} ${PROJECT_RESOURCES})
+endif ()
+
+# Emscripten's libc++ needs no stdc++fs, which the library links under clang
+if (AURORE_WEB)
+    add_library(stdc++fs INTERFACE)
 endif ()
 
 add_subdirectory(library)
@@ -171,6 +192,38 @@ elseif (PLATFORM_TVOS)
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/iOSBundleInfo.plist.in"
             "Aurore"
             "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}")
+endif ()
+
+# The demo in a browser (web/README.md): threads (a pool started with the
+# page: a thread asked for later waits for the browser, which a busy main
+# thread never lets it have), WebGL 2, the resources packaged (aurore_demo.data),
+# then the page around it in <build>/web/.
+if (AURORE_WEB)
+    target_link_options(${PROJECT_NAME} PRIVATE
+        -pthread -fexceptions -sUSE_SDL=2 -sUSE_ZLIB=1
+        -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES3
+        -sALLOW_MEMORY_GROWTH -sINITIAL_MEMORY=128MB -sSTACK_SIZE=1MB -sDEFAULT_PTHREAD_STACK_SIZE=1MB
+        -sPTHREAD_POOL_SIZE=8 -sEXIT_RUNTIME=0
+        -sEXPORTED_RUNTIME_METHODS=ENV,ccall
+        "SHELL:--preload-file ${PROJECT_RESOURCES}@/app/resources")
+    # A browser has no font with han, kana or hangul: tools/web_cjk_font.py
+    # cuts one out of Noto Sans CJK, packaged as the app's font/cjk.otf
+    set(AURORE_WEB_CJK_FONT "" CACHE FILEPATH "Web: the CJK font to package (tools/web_cjk_font.py)")
+    if (AURORE_WEB_CJK_FONT)
+        target_link_options(${PROJECT_NAME} PRIVATE "SHELL:--preload-file ${AURORE_WEB_CJK_FONT}@/app/resources/font/cjk.otf")
+    endif ()
+    set(AURORE_WEB_SITE ${CMAKE_BINARY_DIR}/web)
+    add_custom_target(${PROJECT_NAME}_web ALL DEPENDS ${PROJECT_NAME}
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${AURORE_WEB_SITE}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/web/page ${AURORE_WEB_SITE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.js ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.wasm
+                ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.data
+                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/mark.svg
+                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/sora.woff2
+                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/figtree.woff2
+                ${AURORE_WEB_SITE}
+        COMMENT "Assembling the demo's page in ${AURORE_WEB_SITE}")
 endif ()
 
 target_include_directories(${PROJECT_NAME} PRIVATE demo demo/include)
