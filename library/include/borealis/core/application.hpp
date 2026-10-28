@@ -300,6 +300,8 @@ class Application
 
     /**
      * Loads a font from a given file and stores it in the font stash.
+     * A BRLS_ASSET() path ("@res/...") is read from the resources built
+     * into the program when they are (USE_LIBROMFS).
      * Returns true if the operation succeeded.
      */
     static bool loadFontFromFile(std::string fontName, std::string filePath);
@@ -309,6 +311,11 @@ class Application
      * Returns true if the operation succeeded.
      */
     static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData);
+
+    /**
+     * The same, with the face at `faceIndex` of a font collection (.ttc).
+     */
+    static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData, int faceIndex);
 
     /**
      * Returns the nanovg handle to the given font name, or FONT_INVALID if

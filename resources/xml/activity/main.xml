@@ -43,7 +43,7 @@
             <brls:View xml="@res/xml/tabs/scroll_test.xml" />
         </brls:Tab>
 
-        <brls:Tab label="@i18n/demo/tabs/pokedex">
+        <brls:Tab label="@i18n/demo/tabs/list">
             <RecyclingListTab />
         </brls:Tab>
 

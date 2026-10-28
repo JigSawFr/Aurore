@@ -16,6 +16,7 @@ limitations under the License.
 #ifdef __linux__
 
 #include <borealis/core/logger.hpp>
+#include <borealis/core/platform.hpp>
 #include <borealis/platforms/desktop/steam_deck.hpp>
 
 namespace brls
@@ -29,6 +30,22 @@ void runSteamDeckCommand(const std::string& cmd)
 {
     if (!isSteamDeck())
         return;
+    // One command per line: a line break or control character inside would
+    // start another one
+    std::string line = cmd;
+    if (!line.empty() && line.back() == '\n')
+        line.pop_back();
+    if (line.empty())
+        return;
+    for (unsigned char c : line)
+    {
+        if (c < 0x20 || c == 0x7f)
+        {
+            Logger::warning("steam.pipe: refused a command with a control character");
+            return;
+        }
+    }
+    line += '\n';
     int fd = open(STEAM_CLIENT_PIPE_PATH, O_WRONLY | O_NONBLOCK);
     if (fd < 0)
     {
@@ -36,9 +53,16 @@ void runSteamDeckCommand(const std::string& cmd)
     }
     else
     {
-        write(fd, cmd.c_str(), cmd.size());
+        write(fd, line.c_str(), line.size());
         close(fd);
     }
+}
+
+std::string steamOpenUrlCommand(const std::string& url)
+{
+    if (!Platform::isBrowserUrl(url))
+        return "";
+    return "steam://openurl/" + url + "\n";
 }
 
 bool isSteamDeck()

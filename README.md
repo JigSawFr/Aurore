@@ -148,6 +148,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A label tells when it is cut with "…" | `Label::isTruncated` |
 | A wrapped line no longer starts with a space; a no-break space keeps words together | — |
 | The default font looked up for each new label | — |
+| Free fonts off the Switch (Inter, PromptFont's buttons at the Switch's code points); Chinese, Japanese and Korean from the system (fontconfig, CoreText…) or the app's `font/cjk` | [docs/fonts.md](docs/fonts.md) |
 | FreeType instead of stb_truetype, hinted (an option) | `-DUSE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
 | stb_truetype: a glyph read within its own data, a font's tables within the font (CVE-2026-18497); fonts still from trusted sources | — |
 | Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
@@ -184,6 +185,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
 | deko3d: the command memory grows instead of aborting; image descriptors reused | — |
 | Switch: the applet hook removed first at shutdown | — |
+| `openBrowser`: http and https links only, handed to `xdg-open`/`open` as one argument (no shell), one line on the Steam Deck pipe | `Platform::isBrowserUrl`, `Platform::BROWSER_URL_SCHEMES` |
 | Logger: flushed after every line | — |
 
 **Speed**
@@ -265,6 +267,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 | [Components](docs/components.md) | The views Aurore adds |
 | [Keyboard and mouse](docs/input.md) | The keys for the controller's buttons, the mouse |
 | [Testing](docs/testing.md) | The test harness |
+| [Fonts](docs/fonts.md) | The fonts on each platform, the buttons' code points, Chinese, Japanese and Korean |
 | [Inspector](docs/inspector.md) · [Hot reload](docs/hot_reload.md) | Debugging aids |
 | [Overlay](docs/overlay.md) | Design note on a Switch overlay mode (not built) |
 
@@ -286,7 +289,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 
 ## 📜 License and credits
 
-borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`LICENSE.GPL`](LICENSE.GPL)), and so is an app built with it. [`NOTICE`](NOTICE) says which is which, and the licences of what is bundled (QR Code generator, Twemoji, Sora). Maintained by [JigSawFr](https://github.com/JigSawFr).
+borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`LICENSE.GPL`](LICENSE.GPL)), and so is an app built with it. [`NOTICE`](NOTICE) says which is which, and [`resources/THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md) lists what is bundled (the libraries in `library/lib/extern`, Inter, PromptFont, Sora, Material Icons, Twemoji) with its licence. Maintained by [JigSawFr](https://github.com/JigSawFr).
 
 <details>
 <summary>Credits</summary>
@@ -295,6 +298,7 @@ borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`
 - borealis was created by [natinusala](https://github.com/natinusala/borealis) and its [contributors](AUTHORS); carried on by [xfangfang](https://github.com/xfangfang/borealis) and [dragonflylee](https://github.com/dragonflylee).
 - Changes picked from the forks of Nika0000, Kelvin Wong, kawaii-flesh, Alexander Kiselev, youngzyl, Elias da Rosa, XITRIX, CostelaBR, PalindromicBreadLoaf and xlanor, each commit keeping its author.
 - Built on [nanovg](https://github.com/memononen/nanovg), [Yoga](https://github.com/facebook/yoga), [GLFW](https://www.glfw.org/), [SDL](https://www.libsdl.org/), [tinyxml2](https://github.com/leethomason/tinyxml2), [fmt](https://github.com/fmtlib/fmt), [nlohmann/json](https://github.com/nlohmann/json), [tweeny](https://github.com/mobius3/tweeny) and the others in `library/lib/extern`, under their own licences.
+- The text font is [Inter](https://rsms.me/inter/) and the controller buttons come from [PromptFont](https://shinmera.com/promptfont) by Shinmera (Yukari Hafner), both under the SIL Open Font License.
 - The demo's logo by @MeganRoshelle; Aurore's icon and banner in [`.github/branding`](.github/branding).
 
 </details>

@@ -249,8 +249,11 @@ std::string PsvPlatform::getDnsServer()
 
 void PsvPlatform::openBrowser(std::string url)
 {
-    if (url.empty())
+    if (!isBrowserUrl(url))
+    {
+        brls::Logger::warning("open url: refused, not an http(s) link");
         return;
+    }
     SceAppUtilWebBrowserParam browser_param;
     browser_param.str        = url.c_str();
     browser_param.strlen     = url.length();

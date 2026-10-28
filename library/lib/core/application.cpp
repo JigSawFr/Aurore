@@ -1868,6 +1868,23 @@ void Application::tryDeinitFirstResponder(View* view)
 
 bool Application::loadFontFromFile(std::string fontName, std::string filePath)
 {
+#ifdef USE_LIBROMFS
+    // BRLS_ASSET() paths are in the resources built into the program
+    if (filePath.rfind("@res/", 0) == 0)
+    {
+        try
+        {
+            auto& font = romfs::get(filePath.substr(5));
+            if (font.valid())
+                return Application::loadFontFromMemory(fontName, (void*)font.data(), font.size(), false);
+        }
+        catch (...)
+        {
+        }
+        Logger::warning("Could not load the font \"{}\" ({} is not in the resources)", fontName, filePath);
+        return false;
+    }
+#endif
     int handle = nvgCreateFont(Application::getNVGContext(), fontName.c_str(), filePath.c_str());
 
     if (handle == FONT_INVALID)
@@ -1882,7 +1899,12 @@ bool Application::loadFontFromFile(std::string fontName, std::string filePath)
 
 bool Application::loadFontFromMemory(std::string fontName, void* address, size_t size, bool freeData)
 {
-    int handle = nvgCreateFontMem(Application::getNVGContext(), fontName.c_str(), (unsigned char*)address, size, freeData);
+    return Application::loadFontFromMemory(fontName, address, size, freeData, 0);
+}
+
+bool Application::loadFontFromMemory(std::string fontName, void* address, size_t size, bool freeData, int faceIndex)
+{
+    int handle = nvgCreateFontMemAtIndex(Application::getNVGContext(), fontName.c_str(), (unsigned char*)address, size, freeData, faceIndex);
 
     if (handle == FONT_INVALID)
     {
