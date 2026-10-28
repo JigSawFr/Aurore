@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <borealis.hpp>
+#include <borealis/views/edit_text_dialog.hpp>
 
 #include <borealis/cadran/ui/cadran_kit.hpp>
 
@@ -54,6 +55,10 @@ brls::Box* dialog_badge(const char* icon, const char* color_key, const char* sof
 // install_screens). Call it after the dialog's last addButton. DANGER and
 // FAILURE also put a coral warning before a dialog_body's title.
 void style_dialog(brls::Dialog* dialog, Emphasis emphasis = Emphasis::NONE);
+
+// The desktop's text field (brls::EditTextDialog) as a dialog's card, its
+// title in it over the text. Once, as style_dialog (install_screens).
+void style_edit_text_dialog(brls::EditTextDialog* dialog);
 
 // A button of a dialog's own, not of its row (one that must act before the
 // dialog closes): a pill as style_dialog draws them, plain unless PRIMARY or

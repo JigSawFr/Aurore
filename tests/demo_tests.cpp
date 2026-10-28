@@ -2545,3 +2545,40 @@ BRLS_TEST(language_from_the_environment_wins)
     for (const char* name : { "BRLS_LANG", "BOREALIS_LANG", "BRLS_THEME", "BOREALIS_THEME" })
         unsetenv(name);
 }
+
+// The desktop's text field: Cadran's card with its title in it, the cursor
+// shown at the end of the text, Y to take the text out
+BRLS_TEST(text_field_is_a_card_with_a_cursor)
+{
+    DemoHarness h;
+    brls::Application::setReduceMotion(true); // the cursor still
+    auto* dialog = new brls::EditTextDialog();
+    dialog->setHeaderText("Input text");
+    dialog->setText("https://github.com");
+    dialog->setCursor((int)brls::CursorPosition::END);
+    dialog->setCountText("18/32");
+    bool cleared = false;
+    dialog->getClearEvent()->subscribe([&cleared]()
+        { cleared = true; });
+    dialog->open();
+    h.settle();
+
+    auto* card  = dynamic_cast<brls::Box*>(dialog->getView("brls/dialog/applet"));
+    auto* title = dialog->getView("brls/dialog/header");
+    BRLS_CHECK(card != nullptr && title != nullptr);
+    if (!card || !title)
+        return;
+    BRLS_CHECK(title->getParent() == card);
+    BRLS_CHECK(card->getView("cadran_dialog") != nullptr);
+    BRLS_CHECK(h.matchesReference("text_field_cadran"));
+
+    // The cursor is drawn: without it, the text's end differs
+    brls::test::Image with = h.screenshot();
+    dialog->setCursor((int)brls::CursorPosition::UNSET);
+    h.step(2);
+    BRLS_CHECK(brls::test::compareImages(h.screenshot(), with).differingPixels > 0);
+
+    h.tap(brls::BUTTON_Y);
+    BRLS_CHECK(cleared);
+    brls::Application::setReduceMotion(false);
+}

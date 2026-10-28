@@ -22,6 +22,8 @@ class EditTextDialog : public Box
     Event<>* getBackspaceEvent();
     Event<>* getCancelEvent();
     Event<>* getSubmitEvent();
+    // Y: the whole text taken out (to type another in place of the one given)
+    Event<>* getClearEvent();
     Event<std::string>* getClipboardEvent();
     void updateUI();
 
@@ -29,7 +31,7 @@ class EditTextDialog : public Box
     std::string content;
     std::string hint;
     Event<Point> layoutEvent;
-    Event<> backspaceEvent, cancelEvent, summitEvent;
+    Event<> backspaceEvent, cancelEvent, summitEvent, clearEvent;
     Event<std::string> clipboardEvent;
     bool init = false;
 
