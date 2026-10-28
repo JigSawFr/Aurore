@@ -60,6 +60,11 @@ struct Hooks
     // The title of the main screen's tab `screen` ("tab/about"), for the
     // crumb of a screen opened from it. Unset: none.
     std::function<std::string(const std::string& screen)> tab_title;
+    // Whether `frame` (a screen's root view) is a screen of its own, not a
+    // step from the one under it: a child's screen, a lock screen. It gets
+    // no crumb and no version badge (cadran::is_standalone_screen). Unset:
+    // the screens holding a view with the id "cadran/standalone".
+    std::function<bool(brls::View* frame)> standalone_screen;
     // Today, "2026-10-08", by the app's own clock (the console's user clock).
     // Unset: the system's local date.
     std::function<std::string()> today;

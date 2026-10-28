@@ -37,6 +37,11 @@ void style_frame(brls::AppletFrame* frame, brls::View* tab_frame);
 // id "main_tabs"). install_screens() styles it with style_frame() the first
 // time it takes the focus, unless the app did already.
 bool is_main_frame(brls::View* frame);
+// Whether `frame` is a screen of its own, not a step from the one under it
+// (a child's screen): no "Console ›" crumb before its title, no version
+// badge after it. The app says so with ui::hooks' standalone_screen, or by a
+// view with the id "cadran/standalone" in the screen.
+bool is_standalone_screen(brls::View* frame);
 // The main screen's header pill: its text, or hidden when empty (each
 // screen says what it has to: "Library up to date", "Play timer on"…), its
 // icon, and its tone: amber for a state that needs the user, coral for
