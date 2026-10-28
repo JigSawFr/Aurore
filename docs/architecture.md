@@ -34,6 +34,10 @@ The core calls Cadran from one file, `application.cpp`: `init()` and `createWind
 
 `<aurore.hpp>` includes the whole public API; `<aurore/cadran.hpp>` adds Cadran's. Everything is in the `aurore` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
 
+<!-- legacy-names: begin -->
+`include/borealis/` and `<borealis.hpp>` are generated: each includes its new header and `<aurore/legacy.hpp>`, which declares borealis' names (`namespace brls = aurore`, the `BRLS_` macros, the `Brls` types) as deprecated aliases until 1.0 ([migrating-from-borealis.md](migrating-from-borealis.md)). The library's own code uses the new names only.
+<!-- legacy-names: end -->
+
 ## The main loop
 
 An app is a loop around `Application::mainLoop()`:
