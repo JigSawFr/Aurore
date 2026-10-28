@@ -31,6 +31,9 @@
 #include <borealis/core/theme_image.hpp>
 #include <borealis/core/util.hpp>
 #include <borealis/platforms/desktop/desktop_font.hpp>
+#ifdef __GLFW__
+#include <borealis/platforms/glfw/glfw_ime.hpp>
+#endif
 #include <borealis/test/harness.hpp>
 #include <borealis/views/edit_text_dialog.hpp>
 
@@ -2280,3 +2283,25 @@ BRLS_TEST(focus_on_a_scrolling_frame_shows_its_place)
     BRLS_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
     BRLS_CHECK(h.matchesReference("scrolling_frame_focus"));
 }
+
+#ifdef __GLFW__
+// A word being composed with an input method: its focused block in [ ], and
+// block sizes that do not add up to the text read no further than blockCount
+BRLS_TEST(ime_preedit_text_stays_in_its_blocks)
+{
+    const unsigned int word[] = { 'a', 'b', 'c', 0x1F600 };
+    const int sizes[]         = { 1, 2 };
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, sizes, 1), std::string("a[bc]"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, sizes, 0), std::string("[a]bc"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(4, word, 2, sizes, 5), std::string("abc\xF0\x9F\x98\x80"));
+    // One block said (sizes[1] is past it): the rest is in none, and block 1
+    // is never focused
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 1, sizes, 1), std::string("abc"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 1, sizes, 0), std::string("[a]bc"));
+    // An empty block, and nothing at all
+    const int empty[] = { 0, 3 };
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 2, empty, 1), std::string("[abc]"));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(0, word, 2, sizes, 0), std::string(""));
+    BRLS_CHECK_EQ(brls::glfwPreeditText(3, word, 0, sizes, 0), std::string(""));
+}
+#endif
