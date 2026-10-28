@@ -7,7 +7,13 @@
         "slider": "スライダー",
         "text_field": "テキストフィールド",
         "tab": "タブ",
-        "list": "リスト"
+        "list": "リスト",
+        "dialog": "ダイアログ"
     },
-    "disabled": "無効"
+    "disabled": "無効",
+    "on": "オン",
+    "off": "オフ",
+    "selected": "選択中",
+    "position": "{1}項目中{0}番目",
+    "percent": "{}%"
 }

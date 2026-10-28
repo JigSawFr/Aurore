@@ -434,6 +434,17 @@ bool Harness::focusByText(const std::string& text, ControllerButton button, int 
     return focusText() == text;
 }
 
+std::vector<std::string> Harness::silentFocusables()
+{
+    std::vector<std::string> silent;
+    walkShown([&silent](View* view)
+        {
+        if (view->isFocusable() && view->getDefaultFocus() == view && view->getAccessibilityLabel().empty()
+            && view->getAccessibilityValue().empty())
+            silent.push_back(view->describe()); });
+    return silent;
+}
+
 void Harness::walkShown(const std::function<void(View*)>& visit)
 {
     std::function<void(View*)> walk = [&](View* view)

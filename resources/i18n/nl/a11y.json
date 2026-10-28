@@ -7,7 +7,13 @@
         "slider": "schuifregelaar",
         "text_field": "tekstveld",
         "tab": "tabblad",
-        "list": "lijst"
+        "list": "lijst",
+        "dialog": "dialoogvenster"
     },
-    "disabled": "uitgeschakeld"
+    "disabled": "niet beschikbaar",
+    "on": "aan",
+    "off": "uit",
+    "selected": "geselecteerd",
+    "position": "{} van {}",
+    "percent": "{}%"
 }

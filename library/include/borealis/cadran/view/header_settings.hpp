@@ -35,6 +35,11 @@ class HeaderSetting : public brls::View
     // Touched although it is not focusable.
     brls::View* hitTest(brls::Point point) override;
 
+  protected:
+    // A button: "Language, Français (France)", "Theme, Dark", "Text size, Larger".
+    brls::AccessibilityRole getDefaultAccessibilityRole() override { return brls::AccessibilityRole::BUTTON; }
+    std::string getDefaultAccessibilityLabel() override;
+
   private:
     Kind kind;
 

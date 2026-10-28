@@ -26,6 +26,7 @@
 #include <cstring>
 
 #include <algorithm>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <borealis/core/application.hpp>
@@ -1437,6 +1438,7 @@ void Application::setSwapInterval(int interval)
 void Application::notify(const std::string& text, View* leading)
 {
     Application::notificationManager->notify(text, leading);
+    Application::announce(text);
 }
 
 void Application::giveFocus(View* view)
@@ -1457,12 +1459,7 @@ void Application::giveFocus(View* view)
             newFocus->onFocusGained();
             Logger::debug("Giving focus to {}", newFocus->describe());
 
-            if (Application::focusAnnouncer)
-            {
-                std::string description = newFocus->getAccessibilityDescription();
-                if (!description.empty())
-                    Application::focusAnnouncer(description);
-            }
+            Application::announceFocus(oldFocus, newFocus);
         }
 
         Application::globalHintsUpdateEvent.fire();
@@ -1473,6 +1470,65 @@ void Application::setHighlightIdleFade(bool fade)
 {
     Application::highlightIdleFade = fade;
     Application::lastInputTime     = getCPUTimeUsec();
+}
+
+// Whether `view` is `ancestor` or under it.
+static bool isUnder(View* view, View* ancestor)
+{
+    for (View* v = view; v; v = v->hasParent() ? v->getParent() : nullptr)
+        if (v == ancestor)
+            return true;
+    return false;
+}
+
+void Application::announceFocus(View* oldFocus, View* newFocus)
+{
+    std::string description = newFocus->getAccessibilityDescription();
+
+    // Entering a dialog or a list from outside: what it is first ("Delete
+    // the profile?, dialog, Cancel, button, 1 of 2").
+    std::string context;
+    for (View* v = newFocus->hasParent() ? newFocus->getParent() : nullptr; v; v = v->hasParent() ? v->getParent() : nullptr)
+    {
+        AccessibilityRole role = v->getAccessibilityRole();
+        if (role != AccessibilityRole::DIALOG && role != AccessibilityRole::LIST)
+            continue;
+        if (oldFocus && isUnder(oldFocus, v))
+            continue;
+        std::string entered = v->getAccessibilityDescription();
+        if (!entered.empty())
+            context = entered + (context.empty() ? "" : ", " + context);
+    }
+
+    if (newFocus->getAccessibilityLabel().empty() && newFocus->getAccessibilityValue().empty())
+    {
+        // Once per kind of view: a focusable view that says nothing but its
+        // role ("button") is one a screen reader user cannot tell apart.
+#ifdef NDEBUG
+        bool warn = (bool)Application::focusAnnouncer;
+#else
+        bool warn = true;
+#endif
+        static std::set<std::string> warned;
+        std::string name = newFocus->describe();
+        if (warn && warned.insert(name).second)
+            Logger::warning("accessibility: {} took the focus with no label: give it an "
+                            "accessibilityLabel (or a text)",
+                name);
+    }
+
+    if (!context.empty())
+        description = context + (description.empty() ? "" : ", " + description);
+    Application::announce(description);
+}
+
+void Application::announce(const std::string& text)
+{
+    if (text.empty())
+        return;
+    Application::lastAnnouncement = text;
+    if (Application::focusAnnouncer)
+        Application::focusAnnouncer(text);
 }
 
 void Application::setFocusAnnouncer(std::function<void(const std::string&)> announcer)

@@ -2559,6 +2559,12 @@ void View::registerCommonAttributes()
     this->registerStringXMLAttribute("accessibilityLabel", [this](std::string value)
         { this->setAccessibilityLabel(value); });
 
+    this->registerStringXMLAttribute("accessibilityValue", [this](std::string value)
+        { this->setAccessibilityValue(value); });
+
+    this->registerBoolXMLAttribute("accessibilitySelected", [this](bool value)
+        { this->setAccessibilitySelected(value); });
+
     this->registerStringXMLAttribute("accessibilityRole", [this](std::string value)
         {
         static const std::unordered_map<std::string, AccessibilityRole> ROLES = {
@@ -2573,6 +2579,7 @@ void View::registerCommonAttributes()
             { "text_field", AccessibilityRole::TEXT_FIELD },
             { "tab", AccessibilityRole::TAB },
             { "list", AccessibilityRole::LIST },
+            { "dialog", AccessibilityRole::DIALOG },
         };
         auto it = ROLES.find(value);
         if (it == ROLES.end())

@@ -55,6 +55,7 @@ class RadioCell : public RecyclerCell
   protected:
     AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::CELL; }
     std::string getDefaultAccessibilityLabel() override { return this->title->getFullText(); }
+    bool getDefaultAccessibilitySelected() override { return this->selected; }
 
   private:
     bool selected = false;

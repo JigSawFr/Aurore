@@ -37,7 +37,12 @@ CaptionedImage::CaptionedImage()
     this->forwardXMLAttribute("imageWidth", this->image, "width");
     this->forwardXMLAttribute("imageHeight", this->image, "height");
 
-    this->forwardXMLAttribute("caption", this->label, "text");
+    // The caption is also what the image says when it takes the focus
+    this->registerStringXMLAttribute("caption", [this](std::string value)
+        {
+        this->label->setText(value);
+        this->image->setAccessibilityRole(brls::AccessibilityRole::IMAGE);
+        this->image->setAccessibilityLabel(value); });
 
     this->addGestureRecognizer(new brls::TapGestureRecognizer(this, brls::TapGestureConfig(false, brls::SOUND_NONE, brls::SOUND_NONE, brls::SOUND_NONE)));
 }

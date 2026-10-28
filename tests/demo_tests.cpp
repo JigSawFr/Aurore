@@ -19,6 +19,8 @@
 // BRLS_TEST_UPDATE=1 writes them again.
 
 #include <borealis.hpp>
+#include <borealis/cadran/ui/cadran_kit.hpp>
+#include <borealis/cadran/ui/cadran_list.hpp>
 #include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
@@ -31,6 +33,7 @@
 #include <borealis/test/harness.hpp>
 #include <borealis/views/edit_text_dialog.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -1731,6 +1734,244 @@ BRLS_TEST(images_compare_with_tolerance)
     BRLS_CHECK_EQ(diff.differingPixels, (size_t)1);
     BRLS_CHECK_EQ(diff.maxDelta, 40);
     BRLS_CHECK(!brls::test::compareImages(b, a.crop(0, 0, 2, 2)).sameSize);
+}
+
+// ---------------------------------------------------------------------------
+// The focus announcer: what a screen reader would be given
+// ---------------------------------------------------------------------------
+
+static const std::string& announced()
+{
+    return brls::Application::getLastAnnouncement();
+}
+
+BRLS_TEST(announcer_says_role_value_state_and_place)
+{
+    Harness h;
+    auto* toggle = new brls::BooleanCell();
+    toggle->init("Wi-Fi", false, [](bool) {});
+    auto* detail = new brls::DetailCell();
+    detail->setText("Language");
+    detail->setDetailText("English");
+    auto* radio = new brls::RadioCell();
+    radio->title->setText("Dark");
+    radio->setSelected(true);
+    auto* slider = new brls::SliderCell();
+    slider->init("Volume", 0.5f, [](float) {});
+    slider->slider->setDiscreteStep(0.1f);
+    std::vector<std::string> said;
+    brls::Application::setFocusAnnouncer([&said](const std::string& text)
+        { said.push_back(text); });
+    h.push(new brls::Activity(screenOf({ toggle, detail, radio, slider })));
+    h.settle();
+
+    BRLS_CHECK_EQ(announced(), std::string("Wi-Fi, switch, off, 1 of 3"));
+    h.tap(brls::BUTTON_A); // flipped in place: its new state alone
+    BRLS_CHECK(toggle->isOn());
+    BRLS_CHECK_EQ(announced(), std::string("on"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Language, English, 2 of 3"));
+    detail->setDetailText("Français"); // changed while focused, after a press
+    BRLS_CHECK_EQ(announced(), std::string("Français"));
+    h.advance(3000);
+    detail->setDetailText("Deutsch"); // on its own: not read out
+    BRLS_CHECK_EQ(announced(), std::string("Français"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Dark, selected, 3 of 3"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Volume, slider, 50%"));
+    h.tap(brls::BUTTON_RIGHT);
+    BRLS_CHECK_EQ(announced(), std::string("60%"));
+    // Gliding while held: said once, when let go
+    slider->slider->setDiscreteStep(0);
+    size_t before = said.size();
+    h.hold(brls::BUTTON_RIGHT, 400);
+    h.step(2);
+    BRLS_CHECK_EQ(said.size(), before + 1);
+    BRLS_CHECK(announced() != "60%" && announced().back() == '%');
+    // Each went to the announcer as it was said.
+    BRLS_CHECK(!said.empty() && said.back() == announced());
+    brls::Application::setFocusAnnouncer(nullptr);
+}
+
+BRLS_TEST(announcer_says_disabled_and_explicit_values)
+{
+    Harness h;
+    auto* first  = new brls::Button();
+    auto* second = new brls::Button();
+    first->setText("Save");
+    second->setText("Quit");
+    second->setStyleState(brls::StyleState::DISABLED, true);
+    auto* box = new brls::Box();
+    box->setFocusable(true);
+    box->setAccessibilityLabel("Battery");
+    box->setAccessibilityValue("80%");
+    h.push(new brls::Activity(screenOf({ first, second, box })));
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Save, button, 1 of 3"));
+    BRLS_CHECK_EQ(second->getAccessibilityDescription(), std::string("Quit, button, disabled, 2 of 3"));
+    // No role: no place said either.
+    BRLS_CHECK_EQ(box->getAccessibilityDescription(), std::string("Battery, 80%"));
+}
+
+BRLS_TEST(focusable_box_says_the_texts_in_it)
+{
+    Harness h;
+    auto* tile = new brls::Box(brls::Axis::COLUMN);
+    tile->setFocusable(true);
+    auto* name = new brls::Label();
+    name->setText("Mario Kart");
+    auto* hidden = new brls::Label();
+    hidden->setText("never said");
+    hidden->setVisibility(brls::Visibility::GONE);
+    auto* time = new brls::Label();
+    time->setText("2 h 10");
+    auto* inner = new brls::Button(); // speaks for itself
+    inner->setText("Play");
+    tile->addView(name);
+    tile->addView(hidden);
+    tile->addView(time);
+    tile->addView(inner);
+    auto* silent = new brls::Box();
+    silent->setFocusable(true);
+    silent->setWidth(40);
+    silent->setHeight(40);
+    h.push(new brls::Activity(screenOf({ tile, silent })));
+    h.settle();
+    BRLS_CHECK_EQ(tile->getAccessibilityDescription(), std::string("Mario Kart, 2 h 10"));
+    BRLS_CHECK_EQ(silent->getAccessibilityDescription(), std::string(""));
+}
+
+BRLS_TEST(toast_and_dialog_are_announced)
+{
+    Harness h;
+    auto* button = new brls::Button();
+    button->setText("Delete");
+    h.push(new brls::Activity(screenOf({ button })));
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Delete, button"));
+
+    brls::Application::notify("Profile saved");
+    BRLS_CHECK_EQ(announced(), std::string("Profile saved"));
+
+    auto* dialog = new brls::Dialog("Delete this profile?");
+    dialog->addButton("Cancel", [] {});
+    dialog->addButton("Delete", [] {});
+    dialog->open();
+    h.settle();
+    const std::string opened = announced();
+    BRLS_CHECK(opened.rfind("Delete this profile?, dialog, ", 0) == 0);
+    BRLS_CHECK(opened.find(", button") != std::string::npos);
+    // Within the dialog, only the button.
+    h.tap(brls::BUTTON_RIGHT);
+    BRLS_CHECK(announced().rfind("Delete this profile?", 0) != 0);
+    h.tap(brls::BUTTON_B);
+    BRLS_CHECK_EQ(announced(), std::string("Delete, button"));
+}
+
+BRLS_TEST(dropdown_says_its_title_and_the_choice)
+{
+    Harness h;
+    auto* selector = new brls::SelectorCell();
+    selector->init("Region", { "Europe", "America", "Asia" }, 1, [](int) {});
+    h.push(new brls::Activity(screenOf({ selector })));
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Region, America"));
+    h.tap(brls::BUTTON_A);
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Region, list, America, selected, 2 of 3"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Asia, 3 of 3"));
+}
+
+BRLS_TEST(announcer_speaks_the_app_language)
+{
+    Harness h;
+    auto* toggle = new brls::BooleanCell();
+    toggle->init("Wi-Fi", true, [](bool) {});
+    auto* other = new brls::Button();
+    other->setText("OK");
+    other->setStyleState(brls::StyleState::DISABLED, true);
+    h.push(new brls::Activity(screenOf({ toggle, other })));
+    h.settle();
+
+    brls::loadTranslations("fr");
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, interrupteur, activé, 1 sur 2"));
+    BRLS_CHECK_EQ(other->getAccessibilityDescription(), std::string("OK, bouton, indisponible, 2 sur 2"));
+    // A language that says the count first
+    brls::loadTranslations("ja");
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, スイッチ, オン, 2項目中1番目"));
+    brls::loadTranslations("en-US");
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, switch, on, 1 of 2"));
+}
+
+namespace
+{
+// The demo's hooks (Cadran's theme, pickers) without its main screen
+struct CadranHarness : Demo, Harness
+{
+};
+} // namespace
+
+BRLS_TEST(cadran_pieces_have_roles_and_labels)
+{
+    CadranHarness h;
+    brls::Box* chip = cadran::kit::chip("+15 min");
+    brls::Box* card = cadran::kit::card(true, false);
+    card->addView(cadran::kit::label("Today", cadran::kit::TEXT_META));
+    card->addView(cadran::kit::label("2 h 10", cadran::kit::TEXT_BODY));
+    auto* toggle = new brls::BooleanCell();
+    toggle->init("Notifications", true, [](bool) {});
+    cadran::List::row(toggle, "bell"); // its detail hidden, a drawn switch instead
+    auto* line = new brls::DetailCell();
+    line->setText("Updates");
+    line->setDetailText("3 new  ›");
+    cadran::List::row(line, "download");
+    h.push(new brls::Activity(screenOf({ chip, card, toggle, line })));
+    h.settle();
+
+    BRLS_CHECK_EQ(announced(), std::string("+15 min, button, 1 of 4"));
+    BRLS_CHECK_EQ(card->getAccessibilityDescription(), std::string("Today, 2 h 10, 2 of 4"));
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Notifications, switch, on, 3 of 4"));
+    BRLS_CHECK_EQ(line->getAccessibilityDescription(), std::string("Updates, 3 new, 4 of 4"));
+}
+
+BRLS_TEST(cadran_picker_says_its_title_and_the_choice)
+{
+    CadranHarness h;
+    auto* button = new brls::Button();
+    button->setText("Theme");
+    h.push(new brls::Activity(screenOf({ button })));
+    h.settle();
+    ui::pick("Theme", { "System", "Light", "Dark" }, 2, [](int) {});
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Theme, list, Dark, selected, 3 of 3"));
+    h.tap(brls::BUTTON_UP);
+    BRLS_CHECK_EQ(announced(), std::string("Light, 2 of 3"));
+}
+
+BRLS_TEST(every_focusable_demo_view_says_something)
+{
+    DemoHarness h;
+    BRLS_CHECK(announced().rfind("Cadran, tab, selected, 1 of ", 0) == 0);
+    // Each tab of the rail in turn (focusing its item shows it)
+    std::vector<std::string> silent;
+    std::vector<std::string> seen;
+    for (int tab = 0; tab < 20; tab++)
+    {
+        std::string name = h.focusText();
+        if (std::find(seen.begin(), seen.end(), name) != seen.end())
+            break;
+        seen.push_back(name);
+        h.settle();
+        for (const std::string& view : h.silentFocusables())
+            silent.push_back(name + ": " + view);
+        h.tap(brls::BUTTON_DOWN);
+    }
+    BRLS_CHECK(seen.size() > 5);
+    for (const std::string& name : silent)
+        std::fprintf(stderr, "silent: %s\n", name.c_str());
+    BRLS_CHECK(silent.empty());
 }
 
 int main(int argc, char** argv)

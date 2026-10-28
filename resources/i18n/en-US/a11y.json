@@ -7,7 +7,13 @@
         "slider": "slider",
         "text_field": "text field",
         "tab": "tab",
-        "list": "list"
+        "list": "list",
+        "dialog": "dialog"
     },
-    "disabled": "disabled"
+    "disabled": "disabled",
+    "on": "on",
+    "off": "off",
+    "selected": "selected",
+    "position": "{} of {}",
+    "percent": "{}%"
 }

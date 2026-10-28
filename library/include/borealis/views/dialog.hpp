@@ -66,6 +66,10 @@ class Dialog : public Box
     BRLS_BIND(Rectangle, button2separator, "brls/dialog/button2/separator");
     BRLS_BIND(Rectangle, button3separator, "brls/dialog/button3/separator");
 
+    // A dialog, said with its text when the focus enters it.
+    AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::DIALOG; }
+    std::string getDefaultAccessibilityLabel() override { return this->container->getAccessibilityText(); }
+
   public:
     Dialog(std::string text);
     Dialog(Box* contentView);

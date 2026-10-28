@@ -205,6 +205,15 @@ class Application
     static void setFocusAnnouncer(std::function<void(const std::string&)> announcer);
 
     /**
+     * Gives `text` to the focus announcer, outside of a focus move: a value
+     * changed in place (View::announceAccessibilityValue), a toast (notify
+     * says its text). Nothing for an empty text. getLastAnnouncement() is
+     * the last text given, announcer or not (for tests).
+     */
+    static void announce(const std::string& text);
+    static const std::string& getLastAnnouncement() { return Application::lastAnnouncement; }
+
+    /**
      * Reduced motion: the movements that are only there for show are skipped
      * (the transition= of views, the highlight's glide; Cadran's entrances,
      * glides and breathing glow). Off by default. getReduceMotion(), which
@@ -611,8 +620,10 @@ class Application
 
   private:
     static void updateHover(Point position, bool inside);
+    static void announceFocus(View* oldFocus, View* newFocus);
 
     inline static std::function<void(const std::string&)> focusAnnouncer;
+    inline static std::string lastAnnouncement;
     inline static bool reduceMotion = false;
     inline static std::unordered_map<std::string, DataModel*> models;
     inline static View* hoveredView = nullptr;
