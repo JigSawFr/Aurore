@@ -47,7 +47,9 @@ int shownTab = 0;
 void installCadranHooks()
 {
     static ui::Prefs prefs; // not saved: the demo starts in the defaults
-    const char* theme = std::getenv("BOREALIS_THEME");
+    const char* theme = std::getenv("BRLS_THEME");
+    if (!theme)
+        theme = std::getenv("BOREALIS_THEME");
     if (theme && !std::strcmp(theme, "LIGHT"))
         prefs.theme = "light";
     ui::use_prefs(prefs);

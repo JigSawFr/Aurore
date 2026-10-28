@@ -34,7 +34,7 @@ struct Prefs
 constexpr const char* LANGUAGES[]  = { "system", "en-US", "fr", "fr-CA", "de", "es", "es-419", "it", "nl",
      "pt", "pt-BR", "ru", "ja", "ko", "zh-Hans", "zh-Hant" };
 constexpr const char* THEMES[]     = { "system", "light", "dark" };
-constexpr const char* TEXT_SIZES[] = { "auto", "normal", "large" };
+constexpr const char* TEXT_SIZES[] = { "auto", "normal", "large", "largest" };
 constexpr const char* EFFECTS[]    = { "auto", "full", "reduced" };
 constexpr const char* RAILS[]      = { "auto", "open", "icons" };
 

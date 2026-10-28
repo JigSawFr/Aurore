@@ -233,6 +233,13 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
                 dialog->setCursor(cursor + preeditTextBuffer.size());
             } });
 
+    dialog->getClearEvent()->subscribe([dialog]()
+        {
+            if (isEditing) return;
+            textBuffer.clear();
+            cursor = -1;
+            dialog->setCursor(cursor); });
+
     // delete text
     dialog->getBackspaceEvent()->subscribe([dialog](...)
         {

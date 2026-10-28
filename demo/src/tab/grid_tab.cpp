@@ -22,8 +22,13 @@ using namespace brls::literals; // for _i18n
 
 namespace
 {
-const std::array<const char*, 9> names = { "Amber", "Coral", "Jade", "Lapis", "Onyx", "Opal", "Pearl", "Ruby", "Topaz" };
-const std::array<const char*, 9> ids   = { "amber", "coral", "jade", "lapis", "onyx", "opal", "pearl", "ruby", "topaz" };
+const std::array<const char*, 9> ids = { "amber", "coral", "jade", "lapis", "onyx", "opal", "pearl", "ruby", "topaz" };
+
+// A gem's name in the language shown
+std::string gemName(size_t index)
+{
+    return brls::getStr(std::string("demo/gems/") + ids[index % ids.size()]);
+}
 
 constexpr size_t PAGE      = 24;
 constexpr size_t MAX_ITEMS = 240;
@@ -74,7 +79,7 @@ class RowSource : public brls::RecyclingGridDataSource
 
     void onItemSelected(brls::View* recycler, size_t index) override
     {
-        brls::Application::notify(std::string(names[index % names.size()]) + " (#" + std::to_string(index + 1) + ")");
+        brls::Application::notify(gemName(index) + " (#" + std::to_string(index + 1) + ")");
     }
 };
 }
@@ -86,7 +91,7 @@ PictureCell::PictureCell()
     // X or a long press: the item's menu, next to it
     brls::ContextMenu::attach(this, [this](brls::ContextMenu* menu)
         {
-        std::string name = names[this->getIndex() % names.size()];
+        std::string name = gemName(this->getIndex());
         auto chosen      = [name](const std::string& what) {
             return [name, what]() { brls::Application::notify(name + ": " + what); };
         };
@@ -111,13 +116,13 @@ brls::RecyclingGridItem* PictureSource::cellForRow(brls::RecyclingView* recycler
 {
     auto* cell = (PictureCell*)recycler->dequeueReusableCell("Picture");
     cell->image->setImageFromRes(std::string("img/gallery/") + ids[index % ids.size()] + ".png");
-    cell->label->setText(std::to_string(index + 1) + ". " + names[index % names.size()]);
+    cell->label->setText(std::to_string(index + 1) + ". " + gemName(index));
     return cell;
 }
 
 void PictureSource::onItemSelected(brls::View* recycler, size_t index)
 {
-    brls::Application::notify(std::string(names[index % names.size()]) + " (#" + std::to_string(index + 1) + ")");
+    brls::Application::notify(gemName(index) + " (#" + std::to_string(index + 1) + ")");
 }
 
 GridTab::GridTab()

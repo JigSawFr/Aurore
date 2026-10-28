@@ -352,6 +352,20 @@ bool CadranIcon::glyph(NVGcontext* vg, const std::string& i, NVGcolor color, flo
         nvgFontSize(vg, i == "text-large" ? 28 : 18);
         nvgText(vg, 12, 20.5f, "A", nullptr);
     }
+    else if (i == "text-largest")
+    {
+        // The large A, a plus at its shoulder
+        nvgFontFaceId(vg, brls::Application::getDefaultFont());
+        nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+        nvgFontSize(vg, 26);
+        nvgText(vg, 9.5f, 21.5f, "A", nullptr);
+        nvgBeginPath(vg);
+        nvgMoveTo(vg, 20, 2.5f);
+        nvgLineTo(vg, 20, 9.5f);
+        nvgMoveTo(vg, 16.5f, 6);
+        nvgLineTo(vg, 23.5f, 6);
+        nvgStroke(vg);
+    }
     else if (i == "moon")
     {
         nvgBeginPath(vg);
@@ -1146,6 +1160,7 @@ const std::vector<std::string>& CadranIcon::names()
         "tv",
         "text-normal",
         "text-large",
+        "text-largest",
         "moon",
         "pause",
         "list",

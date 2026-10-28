@@ -7,7 +7,7 @@
 // unlock, phone, trash, server, pin, refresh, history, restore, save, upload,
 // language, contrast, home, bolt, sparkle, bell, chip, code, heart, folder,
 // file, flag, gamepad, calendar, alert, pencil, pencil-off, tag, user, sun, tv,
-// text-normal, text-large; for the palettes (theme files' `icon`): snowflake,
+// text-normal, text-large, text-largest; for the palettes (theme files' `icon`): snowflake,
 // lantern, blossom, wave, leaf, pumpkin, tree, firework, gem, dune, palette.
 // A theme replaces "mark" with its `logo`, and any other icon with its
 // `icon.<name>` picture, drawn as is or as a mask in the icon's colour

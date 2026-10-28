@@ -63,6 +63,7 @@
         "text_sizes": {
             "normal": "Normaal",
             "large": "Groter",
+            "largest": "Zeer groot",
             "auto": "Automatisch: groter op de tv"
         },
         "rail": "Zijbalk",

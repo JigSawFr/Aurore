@@ -24,6 +24,15 @@ using namespace brls::literals; // for _i18n
 
 bool radioSelected = false;
 
+// "Option 1" to "Option <count>"
+static std::vector<std::string> options(int count)
+{
+    std::vector<std::string> names;
+    for (int i = 1; i <= count; i++)
+        names.push_back(brls::getStr("demo/components_more/option", i));
+    return names;
+}
+
 static std::vector<std::string> NOTIFICATIONS = {
     "You have cool hair",
     "I like your shoes",
@@ -41,7 +50,7 @@ SettingsTab::SettingsTab()
     // Inflate the tab from the XML file
     this->inflateFromXMLRes("xml/tabs/settings.xml");
 
-    radio->title->setText("Radio cell");
+    radio->title->setText("demo/settings/radio"_i18n);
     radio->setSelected(radioSelected);
     radio->registerClickAction([this](brls::View* view)
         {
@@ -49,19 +58,19 @@ SettingsTab::SettingsTab()
         this->radio->setSelected(radioSelected);
         return true; });
 
-    boolean->title->setText("Switcher");
+    boolean->title->setText("demo/settings/switch"_i18n);
 
-    debug->init("Debug Layer", brls::Application::isDebuggingViewEnabled(), [](bool value)
+    debug->init("demo/settings/debug"_i18n, brls::Application::isDebuggingViewEnabled(), [](bool value)
         {
         brls::Application::enableDebuggingView(value);
         brls::sync([value](){
             brls::Logger::info("{} the debug layer", value ? "Open" : "Close");
         }); });
 
-    screenSaver->init("Disable ScreenSaver", brls::Application::getPlatform()->isScreenDimmingDisabled(), [](bool value)
+    screenSaver->init("demo/settings/screensaver"_i18n, brls::Application::getPlatform()->isScreenDimmingDisabled(), [](bool value)
         { brls::Application::getPlatform()->disableScreenDimming(value); });
 
-    bottomBar->init("Bottom Bar", !brls::AppletFrame::HIDE_BOTTOM_BAR, [](bool value)
+    bottomBar->init("demo/settings/bottom_bar"_i18n, !brls::AppletFrame::HIDE_BOTTOM_BAR, [](bool value)
         {
         brls::AppletFrame::HIDE_BOTTOM_BAR = !value;
         auto stack = brls::Application::getActivitiesStack();
@@ -73,32 +82,32 @@ SettingsTab::SettingsTab()
                                              : brls::Visibility::VISIBLE);
         } });
 
-    fps->init("FPS", brls::Application::getFPSStatus(), [](bool value)
+    fps->init("demo/settings/fps"_i18n, brls::Application::getFPSStatus(), [](bool value)
         { brls::Application::setFPSStatus(value); });
 
-    swapInterval->init("Swap Interval", { "0", "1", "2", "3", "4" }, 1, [](int selected) {}, [](int selected)
+    swapInterval->init("demo/settings/swap_interval"_i18n, { "0", "1", "2", "3", "4" }, 1, [](int selected) {}, [](int selected)
         { brls::Application::setSwapInterval(selected); });
 
-    alwaysOnTop->init("Always On Top", false, [](bool value)
+    alwaysOnTop->init("demo/settings/always_on_top"_i18n, false, [](bool value)
         { brls::Application::getPlatform()->setWindowAlwaysOnTop(value); });
 
-    selector->init("Selector", { "Test 1", "Test 2", "Test 3", "Test 4", "Test 5", "Test 6", "Test 7", "Test 8", "Test 9", "Test 10", "Test 11", "Test 12", "Test 13" }, 0, [](int selected) {}, [](int selected)
+    selector->init("demo/settings/selector"_i18n, options(13), 0, [](int selected) {}, [](int selected)
         {
-        auto dialog = new brls::Dialog(fmt::format("selected {}", selected));
+        auto dialog = new brls::Dialog(brls::getStr("demo/settings/selected", selected + 1));
         dialog->addButton("hints/ok"_i18n, []() {});
         dialog->open(); });
 
     input->init(
-        "Input text", "https://github.com", [](std::string text) {
+        "demo/settings/input"_i18n, "https://github.com", [](std::string text) {
 
         },
-        "Placeholder", "Hint");
+        "demo/settings/input_placeholder"_i18n, "demo/settings/input_hint"_i18n);
 
     inputNumeric->init(
-        "Input number", 2448, [](int number) {
+        "demo/settings/input_number"_i18n, 2448, [](int number) {
 
         },
-        "Hint");
+        "demo/settings/input_hint"_i18n);
 
     ipAddress->setDetailText(brls::Application::getPlatform()->getIpAddress());
     dnsServer->setDetailText(brls::Application::getPlatform()->getDnsServer());
@@ -110,7 +119,7 @@ SettingsTab::SettingsTab()
         return true; }, false, false, brls::SOUND_CLICK);
 
     float brightness = brls::Application::getPlatform()->getBacklightBrightness();
-    slider->init("Brightness", brightness, [this](float value)
+    slider->init("demo/settings/brightness"_i18n, brightness, [this](float value)
         {
         brls::Application::getPlatform()->setBacklightBrightness(value);
         slider->setDetailText(fmt::format("{:.2f}", value)); });
@@ -125,7 +134,7 @@ SettingsTab::SettingsTab()
     // The variant and the theme file go through Cadran's preferences, as
     // its own pickers do (the header's theme button): the screens are drawn
     // in them from the next frame, nothing is built again.
-    themeDark->init("Dark variant", ui::prefs().theme != "light", [](bool dark)
+    themeDark->init("demo/settings/dark"_i18n, ui::prefs().theme != "light", [](bool dark)
         {
         ui::prefs().theme = dark ? "dark" : "light";
         live_prefs::apply_theme(); });
@@ -139,7 +148,7 @@ void SettingsTab::listThemes()
         files.push_back(std::move(info));
 
     brls::ThemeInfo none;
-    none.name  = "Default (Cadran's palettes)";
+    none.name  = "demo/settings/default_theme"_i18n;
     none.light = none.dark = true;
     files.insert(files.begin(), none);
 
@@ -168,9 +177,9 @@ void SettingsTab::listThemes()
         }
 
         if (!info.ok())
-            cell->setDetailText(std::to_string(info.errors.size()) + " error(s): " + info.errors.front());
+            cell->setDetailText(brls::getStr("demo/settings/errors", info.errors.size(), info.errors.front()));
         else if (!info.warnings.empty())
-            cell->setDetailText(std::to_string(info.warnings.size()) + " warning(s)");
+            cell->setDetailText(brls::getStr("demo/settings/warnings", info.warnings.size()));
 
         std::string path = info.path;
         cell->registerClickAction([this, path](brls::View*)
@@ -178,11 +187,11 @@ void SettingsTab::listThemes()
             ui::prefs().theme_file = path;
             live_prefs::apply_theme();
             for (auto& [line, file] : this->themeCells)
-                line->setDetailText(file == path ? "Active" : "");
+                line->setDetailText(file == path ? "demo/settings/active"_i18n : "");
             this->themeDark->setOn(brls::Application::getThemeVariant() == brls::ThemeVariant::DARK, false);
             return true; });
         if (info.path == ui::prefs().theme_file)
-            cell->setDetailText("Active");
+            cell->setDetailText("demo/settings/active"_i18n);
         this->themeCells.emplace_back(cell, path);
         this->themes->addView(cell);
     }

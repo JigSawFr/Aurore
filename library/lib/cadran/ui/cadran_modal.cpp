@@ -435,6 +435,34 @@ void cadran::style_dialog(brls::Dialog* dialog, Emphasis emphasis)
     }
 }
 
+void cadran::style_edit_text_dialog(brls::EditTextDialog* dialog)
+{
+    auto* card = dialog ? dynamic_cast<brls::Box*>(dialog->getView("brls/dialog/applet")) : nullptr;
+    if (!card || dialog->getView("cadran_dialog"))
+        return;
+    card->setCornerRadius(kit::RADIUS_MODAL);
+    card->setThemeColor("backgroundColor", "cadran/surf");
+    card->setThemeColor("borderColor", "cadran/line");
+    card->setBorderThickness(1);
+    auto* mark = new brls::Box();
+    mark->setId("cadran_dialog");
+    mark->setVisibility(brls::Visibility::GONE);
+    card->addView(mark);
+    // The title in the card, over the text, where it stood above the card
+    auto* title = dynamic_cast<brls::Label*>(dialog->getView("brls/dialog/header"));
+    auto* above = title && title->hasParent() ? dynamic_cast<brls::Box*>(title->getParent()) : nullptr;
+    if (above && above != card)
+    {
+        card->setMarginTop(YGNodeStyleGetMargin(title->getYGNode(), YGEdgeTop).value);
+        above->removeView(title, false);
+        title->setMargins(24, 20, 0, 20);
+        title->setAlignSelf(brls::AlignSelf::FLEX_START);
+        title->setFontSize(kit::TEXT_TITLE);
+        title->setThemeColor("textColor", "cadran/text");
+        card->addView(title, 0);
+    }
+}
+
 void cadran::style_button(brls::Button* button, Emphasis emphasis)
 {
     pill(button, emphasis == Emphasis::PRIMARY ? &PRIMARY : emphasis == Emphasis::DANGER ? &DANGER

@@ -167,7 +167,7 @@ accent = #3ee8a5
 background_image = night.jpg
 ```
 
-To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BOREALIS_THEME=LIGHT` for the dawn), or the demo's Settings tab.
+To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`BRLS_THEME=LIGHT` for the dawn), or the demo's Settings tab.
 
 ### Pictures in memory
 
@@ -307,7 +307,7 @@ backdrop.sidebar = frost-night.png
 backdrop.dialog = frost-night.png
 ```
 
-To see it: `aurore_demo -t @res/themes/winter/theme.theme` (`BOREALIS_THEME=LIGHT` for the day). Its pictures are drawn by `tools/make_winter_decor.py` (a few KB each).
+To see it: `aurore_demo -t @res/themes/winter/theme.theme` (`BRLS_THEME=LIGHT` for the day). Its pictures are drawn by `tools/make_winter_decor.py` (a few KB each).
 
 ### Backdrops and strips
 
@@ -449,7 +449,7 @@ A preset is also a starting point: `inherit = builtin:ocean`, then the keys to c
 
 ### The seasons
 
-Each season has both variants and keeps the roles of every theme (the accent for what is chosen and the primary buttons, amber for warnings, red for removals), so that an app reads the same all year; the season is in the surfaces, the focus ring (it pulses between its two colours), the screens' glow, the loading bar, the charts' bars, the tiles' inks (`cadran/blue`, `violet`, `pink`) and the avatars. To see one: `aurore_demo -t builtin:halloween` (`BOREALIS_THEME=LIGHT` for the light variant).
+Each season has both variants and keeps the roles of every theme (the accent for what is chosen and the primary buttons, amber for warnings, red for removals), so that an app reads the same all year; the season is in the surfaces, the focus ring (it pulses between its two colours), the screens' glow, the loading bar, the charts' bars, the tiles' inks (`cadran/blue`, `violet`, `pink`) and the avatars. To see one: `aurore_demo -t builtin:halloween` (`BRLS_THEME=LIGHT` for the light variant).
 
 | Id | Dark | Light |
 | --- | --- | --- |
