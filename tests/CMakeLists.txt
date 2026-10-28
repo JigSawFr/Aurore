@@ -22,6 +22,24 @@ target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_image_limits_tests)
 
+# Markdown, safe text and XML layouts: bounds, time, errors
+add_executable(aurore_parser_tests parser_tests.cpp)
+target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
+brls_add_tests(aurore_parser_tests)
+
+# libFuzzer targets, with clang: -DBRLS_BUILD_FUZZERS=ON (docs/testing.md)
+option(BRLS_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
+if (BRLS_BUILD_FUZZERS)
+    set(FUZZ_FLAGS -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
+    add_executable(aurore_fuzz_markdown fuzz/markdown_fuzz.cpp
+            ${CMAKE_SOURCE_DIR}/library/lib/cadran/util/markdown.cpp
+            ${CMAKE_SOURCE_DIR}/library/lib/cadran/util/safe_text.cpp)
+    target_include_directories(aurore_fuzz_markdown PRIVATE ${CMAKE_SOURCE_DIR}/library/include)
+    target_compile_features(aurore_fuzz_markdown PRIVATE cxx_std_20)
+    target_compile_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
+    target_link_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
+endif ()
+
 # Tasks coming back to a view from another thread, task queues, events
 add_executable(aurore_async_tests async_tests.cpp)
 target_link_libraries(aurore_async_tests PRIVATE Aurore::test)
@@ -52,3 +70,9 @@ add_test(NAME aurore_preview
         COMMAND aurore-preview ${CMAKE_SOURCE_DIR}/resources/xml/tabs/layout.xml --theme light --lang fr --size 960x540
                 -o ${CMAKE_CURRENT_BINARY_DIR}/test-output/preview_layout.png)
 set_tests_properties(aurore_bench aurore_preview PROPERTIES TIMEOUT 300)
+
+# docs/xml-attributes.md as the sources register the attributes
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME xml_attributes_doc COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/xml_attributes.py --check)
+endif()

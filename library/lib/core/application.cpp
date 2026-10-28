@@ -2403,6 +2403,14 @@ bool Application::XMLViewsRegisterContains(std::string name)
     return Application::xmlViewsRegister.count(name) > 0;
 }
 
+std::vector<std::string> Application::getXMLViewNames()
+{
+    std::vector<std::string> names;
+    for (const auto& entry : Application::xmlViewsRegister)
+        names.push_back(entry.first);
+    return names;
+}
+
 XMLViewCreator Application::getXMLViewCreator(std::string name)
 {
     return Application::xmlViewsRegister[name];

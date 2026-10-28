@@ -100,11 +100,17 @@ void cadran::install_theme()
     style.addMetric("cadran/radius/card", kit::RADIUS_CARD);
     style.addMetric("cadran/radius/top", kit::RADIUS_TOP);
     style.addMetric("cadran/radius/modal", kit::RADIUS_MODAL);
+    // The gap between a filled button and the focus ring around it
+    style.addMetric("cadran/ring_gap", 4.0f);
     style.addMetric("brls/applet_frame/header_height", 84.0f);
     // 232 px, not the boards' 196: the console's font is wider than the
     // boards' (Nunito Sans), and the longest names must stay whole
     // (PlayGuard's "Tiempo de juego", "Einschränkungen" and their badges).
     style.addMetric("brls/tab_frame/sidebar_width", RAIL_OPEN);
+    // A tab's own content (@style/brls/tab_frame/content_padding_*): the
+    // margins of Cadran's pages, the cards' edges
+    style.addMetric("brls/tab_frame/content_padding_sides", 40.0f);
+    style.addMetric("brls/tab_frame/content_padding_top_bottom", 28.0f);
     style.addMetric("brls/sidebar/padding_top", 6.0f);
     style.addMetric("brls/sidebar/padding_right", 8.0f);
     style.addMetric("brls/sidebar/padding_bottom", 10.0f);
@@ -960,6 +966,9 @@ void cadran::style_rail(brls::View* tab_frame)
             label->setMarginRight(0);
             label->setMarginLeft(name.empty() ? 4 : 10);
             label->setSingleLine(true);
+            // A long tab name down to 80 % of its size rather than cut and
+            // scrolling
+            label->setShrinkToFitMin(17 * 0.8f);
         }
         // No icon from the app (ui::hooks' rail_icons): the label alone.
         if (!name.empty())

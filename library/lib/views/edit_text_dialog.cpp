@@ -62,7 +62,7 @@ const std::string editTextDialogXML = R"xml(
                 width="680"
                 horizontalAlign="right"
                 fontSize="18"
-                textColor="@theme/brls/text_disabled"
+                textColor="@theme/brls/text_secondary"
                 marginRight="30"
                 marginBottom="10"/>
 
@@ -234,7 +234,7 @@ void EditTextDialog::updateUI()
 {
     if (content.empty())
     {
-        label->setThemeColor("textColor", "brls/text_disabled");
+        label->setThemeColor("textColor", "brls/text_secondary");
         label->setText(hint);
         label->setCursor((int)CursorPosition::START);
     }

@@ -1868,6 +1868,20 @@ static bool splitStateAttribute(const std::string& name, StyleState* state, std:
     return true;
 }
 
+// std::stof(), a value past a float's range read as not a number (which
+// the callers refuse) instead of an exception they do not expect
+static float readXMLFloat(const std::string& text)
+{
+    try
+    {
+        return std::stof(text);
+    }
+    catch (const std::out_of_range&)
+    {
+        return NAN;
+    }
+}
+
 bool View::applyXMLAttribute(std::string name, std::string value)
 {
     this->ensureCommonAttributes();
@@ -1942,7 +1956,9 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         std::string newFloat = value.substr(0, value.length() - 2);
         try
         {
-            float floatValue = std::stof(newFloat);
+            float floatValue = readXMLFloat(newFloat);
+            if (!std::isfinite(floatValue))
+                return false;
             if (this->floatAttributes.count(name) > 0)
             {
                 this->floatAttributes[name](floatValue);
@@ -1966,9 +1982,9 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         std::string newFloat = value.substr(0, value.length() - 1);
         try
         {
-            float floatValue = std::stof(newFloat);
+            float floatValue = readXMLFloat(newFloat);
 
-            if (floatValue < -100 || floatValue > 100)
+            if (!std::isfinite(floatValue) || floatValue < -100 || floatValue > 100)
                 return false;
 
             if (this->percentageAttributes.count(name) > 0)
@@ -2045,7 +2061,9 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     // Valid float -> float, otherwise unknown attribute
     try
     {
-        float newValue = std::stof(value);
+        float newValue = readXMLFloat(value);
+        if (!std::isfinite(newValue))
+            return false;
         if (this->floatAttributes.count(name) > 0)
         {
             this->floatAttributes[name](newValue);
@@ -2062,10 +2080,90 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     }
 }
 
+// The file or resource each document read comes from, for the errors
+static std::unordered_map<const tinyxml2::XMLDocument*, std::string>& xmlDocumentNames()
+{
+    static std::unordered_map<const tinyxml2::XMLDocument*, std::string> names;
+    return names;
+}
+
+void nameXMLDocument(const tinyxml2::XMLDocument* document, const std::string& name)
+{
+    if (!name.empty())
+        xmlDocumentNames()[document] = name;
+}
+
+// The element being read, for fatalXML()
+static const tinyxml2::XMLElement* currentXMLElement = nullptr;
+
+ReadingXMLElement::ReadingXMLElement(const tinyxml2::XMLElement* element)
+    : previous(currentXMLElement)
+{
+    currentXMLElement = element;
+}
+
+ReadingXMLElement::~ReadingXMLElement()
+{
+    currentXMLElement = previous;
+}
+
+std::string View::describeXMLLocation(const tinyxml2::XMLElement* element)
+{
+    std::string line = std::to_string(element->GetLineNum());
+    auto it          = xmlDocumentNames().find(element->GetDocument());
+    if (it == xmlDocumentNames().end())
+        return "line " + line;
+    return it->second + ":" + line;
+}
+
+void View::fatalXML(const std::string& message)
+{
+    if (!currentXMLElement)
+        fatal(message);
+    fatal(describeXMLLocation(currentXMLElement) + ": <" + currentXMLElement->Name() + ">: " + message);
+}
+
+std::string View::closestXMLName(const std::string& name, const std::vector<std::string>& known)
+{
+    // Levenshtein's distance, case aside
+    auto distance = [](const std::string& a, const std::string& b)
+    {
+        std::vector<size_t> row(b.size() + 1);
+        for (size_t j = 0; j <= b.size(); j++)
+            row[j] = j;
+        for (size_t i = 1; i <= a.size(); i++)
+        {
+            size_t diagonal = row[0];
+            row[0]          = i;
+            for (size_t j = 1; j <= b.size(); j++)
+            {
+                size_t above = row[j];
+                bool same    = std::tolower((unsigned char)a[i - 1]) == std::tolower((unsigned char)b[j - 1]);
+                row[j]       = std::min({ row[j] + 1, row[j - 1] + 1, diagonal + (same ? 0 : 1) });
+                diagonal     = above;
+            }
+        }
+        return row[b.size()];
+    };
+    std::string best;
+    size_t bestDistance = std::max<size_t>(1, std::min<size_t>(3, name.size() / 3)) + 1;
+    for (const std::string& candidate : known)
+    {
+        size_t d = distance(name, candidate);
+        if (d < bestDistance)
+        {
+            best         = candidate;
+            bestDistance = d;
+        }
+    }
+    return best;
+}
+
 void View::applyXMLAttributes(tinyxml2::XMLElement* element)
 {
     if (!element)
         return;
+    ReadingXMLElement reading(element);
 
     for (const tinyxml2::XMLAttribute* attribute = element->FirstAttribute(); attribute != nullptr; attribute = attribute->Next())
     {
@@ -2088,6 +2186,21 @@ bool View::isXMLAttributeValid(std::string attributeName)
     return this->knownAttributes.count(attributeName) > 0;
 }
 
+// A custom resource (a folder the app's users may change): an error in it is
+// logged, and the built-in resource is used instead
+static View* createFromCustomXMLFile(const std::string& path)
+{
+    try
+    {
+        return View::createFromXMLFile(path);
+    }
+    catch (const std::exception& e)
+    {
+        Logger::error("{}; the built-in resource is used instead", e.what());
+        return nullptr;
+    }
+}
+
 View* View::createFromXMLResource(std::string name)
 {
     std::string disk = HotReload::diskResource("@res/xml/" + name);
@@ -2097,7 +2210,8 @@ View* View::createFromXMLResource(std::string name)
     // Check if custom xml file exists
     if (!View::CUSTOM_RESOURCES_PATH.empty() && std::ifstream { View::CUSTOM_RESOURCES_PATH + "xml/" + name }.good())
     {
-        return View::createFromXMLFile(View::CUSTOM_RESOURCES_PATH + "xml/" + name);
+        if (View* view = createFromCustomXMLFile(View::CUSTOM_RESOURCES_PATH + "xml/" + name))
+            return view;
     }
 
 #ifdef USE_LIBROMFS
@@ -2117,7 +2231,8 @@ View* View::createFromXMLString(std::string_view xml)
 
     if (!element)
     {
-        tinyxml2::XMLError error = document->Parse(xml.data());
+        // A string_view need not end with a NUL: its size bounds the parse
+        tinyxml2::XMLError error = document->Parse(xml.data(), xml.size());
 
         if (error != tinyxml2::XMLError::XML_SUCCESS)
             fatal("Invalid XML when creating View from XML: " + View::describeXMLError(document.get()));
@@ -2127,6 +2242,7 @@ View* View::createFromXMLString(std::string_view xml)
         if (!element)
             fatal("Invalid XML: no element found");
     }
+    nameXMLDocument(document.get(), View::currentXMLResource);
 
     View* view = View::createFromXMLElement(element);
     return view;
@@ -2150,17 +2266,40 @@ View* View::createFromXMLFile(std::string path)
         if (!element)
             fatal("Unable to load XML file \"" + path + "\": no root element found, is the file empty?");
     }
+    nameXMLDocument(document.get(), path);
 
     View* view = View::createFromXMLElement(element);
     return view;
 }
 
+// Elements read inside one another, brls:View files included: a file that
+// includes itself would recurse until the stack runs out
+static constexpr int MAX_XML_DEPTH = 64;
+static int xmlDepth                = 0;
+
+namespace
+{
+    struct XMLDepthGuard
+    {
+        XMLDepthGuard()
+        {
+            if (xmlDepth >= MAX_XML_DEPTH)
+                fatal("XML nested more than " + std::to_string(MAX_XML_DEPTH) + " levels deep (a brls:View including itself?)");
+            xmlDepth++;
+        }
+        ~XMLDepthGuard() { xmlDepth--; }
+    };
+} // namespace
+
 View* View::createFromXMLElement(tinyxml2::XMLElement* element)
 {
+    XMLDepthGuard depth;
+
     if (!element)
         return nullptr;
 
     std::string viewName = element->Name();
+    ReadingXMLElement reading(element);
 
     // Instantiate the view
     View* view = nullptr;
@@ -2180,21 +2319,30 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
                 view = View::createFromXMLFile(disk);
             else
 #ifdef USE_LIBROMFS
-                view = View::createFromXMLString(romfs::get(View::getFilePathXMLAttributeValue(xmlAttribute->Value())).string());
+            {
+                std::string resource     = View::getFilePathXMLAttributeValue(xmlAttribute->Value());
+                std::string outer        = View::currentXMLResource;
+                View::currentXMLResource = resource;
+                view                     = View::createFromXMLString(romfs::get(resource).string());
+                View::currentXMLResource = outer;
+            }
 #else
                 view = View::createFromXMLFile(View::getFilePathXMLAttributeValue(xmlAttribute->Value()));
 #endif
         }
         else
         {
-            fatal("brls:View XML tag must have an \"xml\" attribute");
+            fatalXML("brls:View XML tag must have an \"xml\" attribute");
         }
     }
     // Otherwise look in the register
     else
     {
         if (!Application::XMLViewsRegisterContains(viewName))
-            fatal("Unknown XML tag \"" + viewName + "\"");
+        {
+            std::string closest = closestXMLName(viewName, Application::getXMLViewNames());
+            fatalXML("Unknown XML tag \"" + viewName + "\"" + (closest.empty() ? "" : "; did you mean \"" + closest + "\"?"));
+        }
 
         view = Application::getXMLViewCreator(viewName)();
 
@@ -2206,7 +2354,7 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
     for (tinyxml2::XMLElement* child = element->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
     {
         if (count >= max)
-            fatal("View \"" + view->describe() + "\" is only allowed to have " + std::to_string(max) + " children XML elements");
+            fatalXML("View \"" + view->describe() + "\" is only allowed to have " + std::to_string(max) + " children XML elements");
         else
             view->handleXMLElement(child);
 
@@ -2218,7 +2366,8 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
 
 void View::handleXMLElement(tinyxml2::XMLElement* element)
 {
-    fatal("Raw views cannot have child XML tags");
+    ReadingXMLElement reading(element);
+    fatalXML("This view cannot have child XML tags");
 }
 
 void View::setMaximumAllowedXMLElements(unsigned max)
@@ -2637,10 +2786,11 @@ Visibility View::getVisibility()
 void View::printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::string name, std::string value)
 {
     this->ensureCommonAttributes();
+    ReadingXMLElement reading(element);
     if (this->knownAttributes.find(name) != this->knownAttributes.end())
-        fatal("Illegal value \"" + value + "\" for \"" + std::string(element->Name()) + "\" XML attribute \"" + name + "\"");
-    else
-        fatal("Unknown XML attribute \"" + name + "\" for tag \"" + std::string(element->Name()) + "\" (with value \"" + value + "\")");
+        fatalXML("Illegal value \"" + value + "\" for XML attribute \"" + name + "\"");
+    std::string closest = closestXMLName(name, std::vector<std::string>(this->knownAttributes.begin(), this->knownAttributes.end()));
+    fatalXML("Unknown XML attribute \"" + name + "\" (with value \"" + value + "\")" + (closest.empty() ? "" : "; did you mean \"" + closest + "\"?"));
 }
 
 void View::registerFloatXMLAttribute(std::string name, FloatAttributeHandler handler)

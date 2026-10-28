@@ -51,7 +51,7 @@ If the app changes a property itself while a state styles it, its value is the o
     transition="backgroundColor 180ms ease-out, cornerRadius 300ms backOut" />
 ```
 
-Each entry is a property (or `all`), a duration (`150ms`, `0.2s`) and an easing: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out` (cubic), or one of tweeny's by name (`quadraticOut`, `sinusoidalInOut`, `backOut`, `elasticOut`, `bounceOut`…; the default is `ease`). A change made while a transition runs starts from where it is. Colours mix channel by channel.
+Each entry is a property (or `all`), a duration (`150ms`, `0.2s`, at most `60s`) and an easing: `linear`, `ease`, `ease-in`, `ease-out`, `ease-in-out` (cubic), or one of tweeny's by name (`quadraticOut`, `sinusoidalInOut`, `backOut`, `elasticOut`, `bounceOut`…; the default is `ease`). A change made while a transition runs starts from where it is. Colours mix channel by channel.
 
 Transitions are skipped, the change applied at once, while `brls::Application::getReduceMotion()` is true.
 
@@ -154,7 +154,7 @@ A focusable view with no label and no value (an `IconButton` without text, a pic
 
 Both are settings of the core, which Cadran's preferences feed:
 
-- `brls::Application::setReduceMotion(true)`: the movements there only for show are left out: transitions, the focus highlight's glide, and Cadran's entrances, glides and breathing glow. `getReduceMotion()`, which transitions read, is also true while Cadran's effects leave movement out (Preferences › Visual effects "Reduced", the lighter effects in hand, `BRLS_STILL_FOCUS`); the highlight's glide follows the app's setting only.
+- `brls::Application::setReduceMotion(true)`: the movements there only for show are left out: transitions, the focus highlight's glide, and Cadran's entrances, glides and breathing glow. borealis' own views follow it too: a list scrolls straight to the focused line, a text cut short stays cut (ending with "…") instead of scrolling, a toast and a dropdown fade in where they stay, a switch cell does not bounce. `getReduceMotion()`, which transitions read, is also true while Cadran's effects leave movement out (Preferences › Visual effects "Reduced", the lighter effects in hand, `BRLS_STILL_FOCUS`); the highlight's glide follows the app's setting only.
 - `brls::Application::setTextScale(1.25f)`: every label drawn that much larger (`Label::setFontScale`), and every screen measured and laid out again at once. A view of the app that measures text of its own is told through `View::onTextScaleChanged()`. Cadran's Preferences › Text size goes through it.
 
 High contrast is a theme: the presets `builtin:high-contrast-dark` and `builtin:high-contrast-light` (docs/themes.md), offered by Cadran's palette picker, or any theme file (`brls::Theme::loadFile`, which warns about colours that read badly).

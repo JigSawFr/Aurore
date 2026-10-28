@@ -7,9 +7,9 @@
         width="auto"
         height="auto"
         grow="1.0"
-        paddingTop="@style/brls/sidebar/padding_top"
-        paddingRight="@style/brls/sidebar/padding_right"
-        paddingBottom="@style/brls/sidebar/padding_bottom"
-        paddingLeft="@style/brls/sidebar/padding_left"/>
+        paddingTop="@style/brls/tab_frame/content_padding_top_bottom"
+        paddingRight="@style/brls/tab_frame/content_padding_sides"
+        paddingBottom="@style/brls/tab_frame/content_padding_top_bottom"
+        paddingLeft="@style/brls/tab_frame/content_padding_sides"/>
 
 </brls:Box>

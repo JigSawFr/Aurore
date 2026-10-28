@@ -391,7 +391,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
         return;
     }
 
-    // Not virtual from the constructor: this class's own
+    // Not a virtual call from the constructor
     GLFWVideoContext::setSwapInterval(VideoContext::swapInterval);
 
     // Setup window state
