@@ -7,7 +7,13 @@
         "slider": "Schieberegler",
         "text_field": "Textfeld",
         "tab": "Tab",
-        "list": "Liste"
+        "list": "Liste",
+        "dialog": "Dialogfeld"
     },
-    "disabled": "deaktiviert"
+    "disabled": "deaktiviert",
+    "on": "ein",
+    "off": "aus",
+    "selected": "ausgewählt",
+    "position": "{} von {}",
+    "percent": "{} %"
 }

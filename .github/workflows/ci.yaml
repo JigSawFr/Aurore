@@ -2,34 +2,50 @@ name: Build the Aurore demo
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+
+# A new push to a pull request stops the run of the previous one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
 jobs:
   format:
     name: format
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
       - name: clang-format
         run: |
           # Ubuntu 24.04 ships clang-format 18, the version .clang-format is written for
           git ls-files '*.c' '*.cc' '*.cpp' '*.h' '*.hpp' '*.m' '*.mm' ':!:**/extern/**' \
             | xargs clang-format-18 --dry-run --Werror
   ios:
-    runs-on: macos-latest
+    runs-on: macos-14
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: cache
         id: cache-key
-        run: echo "IOS_CACHE_KEY=ios-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}" >> $GITHUB_OUTPUT
+        run: echo "IOS_CACHE_KEY=ios-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}-${{ github.sha }}" >> $GITHUB_OUTPUT
       - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         id: ios-cache
         with:
           path: build
           key: ${{ steps.cache-key.outputs.IOS_CACHE_KEY }}
+          restore-keys: ios-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}-
       - name: Build
         run: |
           ./build_libromfs_generator.sh
@@ -48,15 +64,17 @@ jobs:
           path: aurore_demo.zip
 
   ps4:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Build
         run: |
-          docker run --rm -v $(pwd):/src/ xfangfang/pacbrew:latest \
+          docker run --rm -v $(pwd):/src/ xfangfang/pacbrew@sha256:4774ccb28f5e05cd848a7c9204532ea409d1af63e9689d2dbb3e4cec925439d2 \
             "cmake -B build -DPLATFORM_PS4=ON \
                 -DCMAKE_BUILD_TYPE=Release && \
                 make -C build -j$(nproc)"
@@ -67,7 +85,8 @@ jobs:
           path: build/*.pkg
 
   psv:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -78,12 +97,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
 
       - name: Build GLES2
         if: ${{ matrix.driver == 'gles2' }}
         run: |
-          docker run --rm -v $(pwd):/src/ xfangfang/vitasdk_sdl2_gles2:latest \
+          docker run --rm -v $(pwd):/src/ xfangfang/vitasdk_sdl2_gles2@sha256:53befdff3313d57040658d9f32d973c4f6419b126cfcaa602cca81848e0260b2 \
             "cmake -B build -G Ninja -DPLATFORM_PSV=ON -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && \
              cmake --build build"
 
@@ -93,7 +113,7 @@ jobs:
           echo "cd /src" > build_gxm.sh
           echo "cmake -B build -DPLATFORM_PSV=ON -DCMAKE_BUILD_TYPE=Release -DUSE_GXM=ON" >> build_gxm.sh
           echo "cmake --build build -- -j$(nproc)" >> build_gxm.sh
-          docker run --rm -v $(pwd):/src/ vitasdk/vitasdk:latest sh -C /src/build_gxm.sh
+          docker run --rm -v $(pwd):/src/ vitasdk/vitasdk@sha256:61c173463b3d10d71464b6fc591f1fe1018736bf2e321e6852db06612eb05b07 sh -C /src/build_gxm.sh
 
       - name: Upload dist
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -102,9 +122,10 @@ jobs:
           path: build/*.vpk
 
   switch:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     container:
-      image: devkitpro/devkita64
+      image: devkitpro/devkita64:20260219@sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f876a187fd705de14b4440c00282
     strategy:
       fail-fast: false
       matrix:
@@ -117,6 +138,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Build
         run: |
@@ -128,11 +150,26 @@ jobs:
           name: aurore-switch-${{ matrix.ext }}
           path: build/aurore_demo.nro
 
+  gradle-wrapper:
+    name: android (Gradle wrapper)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Without the submodules: SDL's own Android project carries an old wrapper Aurore does not run
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Check the Gradle wrapper
+        uses: gradle/actions/wrapper-validation@b9bee63ef481cc545e4517ec730544a4d8b1dfa0 # v6.4.0
+
   android:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Setup
         run: |
@@ -151,6 +188,7 @@ jobs:
 
   macos:
     runs-on: macos-14
+    timeout-minutes: 30
     name: macos (${{ matrix.window.name }})
     strategy:
       matrix:
@@ -161,8 +199,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
+      - name: Compiler cache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: ${{ github.job }}-${{ strategy.job-index }}
       - name: Build
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DBUNDLE_MACOS_APP=ON ${{ matrix.window.cmake }}
           make -C build -j$(sysctl -n hw.ncpu)
@@ -176,7 +222,8 @@ jobs:
           path: aurore-macos-${{ matrix.window.name }}.tar.gz
 
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -199,6 +246,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Build
         run: |
@@ -217,7 +265,8 @@ jobs:
 
   linux:
     name: linux (${{ matrix.driver }}${{ matrix.ext }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     strategy:
       matrix:
         include:
@@ -230,13 +279,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Install dependencies
         run: |
           sudo apt update -y
           sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols xorg-dev
+      - name: Compiler cache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: ${{ github.job }}-${{ strategy.job-index }}
       - name: Build
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake }} \
               -DPLATFORM_DESKTOP=ON \
@@ -254,19 +311,27 @@ jobs:
           path: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}.tar.gz
   linux-run:
     name: linux (demo run, ASan + UBSan)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Install dependencies
         run: |
           sudo apt update -y
           sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols xorg-dev xvfb xdotool dbus
+      - name: Compiler cache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: ${{ github.job }}-${{ strategy.job-index }}
       - name: Build
         env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
           CFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer
           CXXFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer
           LDFLAGS: -fsanitize=address,undefined
@@ -302,10 +367,13 @@ jobs:
 
   docs:
     name: API reference (Doxygen)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
       - name: Install Doxygen
         run: |
           sudo apt update -y
@@ -321,11 +389,13 @@ jobs:
 
   linux-tests:
     name: linux (tests)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          persist-credentials: false
           submodules: recursive
       - name: Install dependencies
         run: |
@@ -334,11 +404,24 @@ jobs:
           sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols xorg-dev ninja-build \
             libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri
+          # A system font for Chinese, Japanese and Korean, which the library
+          # finds with fontconfig (the case cjk_from_the_system_fonts)
+          sudo apt install -y --no-install-recommends fontconfig fonts-wqy-microhei
+      - name: Compiler cache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: ${{ github.job }}-${{ strategy.job-index }}
       - name: Build
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON \
               -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
           cmake --build build
+      - name: Third-party notices
+        # Each vendored component and font listed, the versions they say (needs the submodules)
+        run: python3 tools/check_notices.py
       - name: Test
         run: ctest --test-dir build --output-on-failure
       - name: Bench

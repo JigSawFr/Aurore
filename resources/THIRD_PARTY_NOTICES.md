@@ -1,0 +1,141 @@
+# Third-party notices
+
+Aurore (a fork of borealis) is licensed under the Apache License 2.0, and its
+Cadran kit under the GNU GPL version 3 or later: see `NOTICE` at the root of
+the source. It is built with the code, fonts and pictures below, each under
+its own licence. This file is in the resources, so that every program built
+with Aurore carries it; the texts of the licences are at the end.
+
+`tools/check_notices.py` checks that each folder of `library/lib/extern` and
+`library/include/borealis/extern`, and each font, has an entry here, and the
+versions that can be read from the sources.
+
+## Code
+
+| Component | Version | Path | Licence | Copyright |
+|---|---|---|---|---|
+| nanovg | fork | `library/lib/extern/nanovg`, `library/include/borealis/extern/nanovg` | zlib | 2013 Mikko Mononen |
+| fontstash | fork | `library/include/borealis/extern/nanovg/fontstash.h` | zlib | 2009-2013 Mikko Mononen |
+| nanovg's deko3d renderer | fork | `library/lib/extern/nanovg/deko3d`, `library/include/borealis/extern/nanovg/dk_renderer.hpp`, `nanovg_dk.h` | zlib | 2020 Adubbz, Mikko Mononen |
+| deko3d sample framework | - | `library/include/borealis/extern/nanovg/framework`, `library/lib/extern/nanovg/deko3d/framework` | as switchbrew's deko3d examples (fincs) | fincs |
+| nanovg's Direct3D 11 renderer | fork | `library/include/borealis/extern/nanovg/nanovg_d3d11.h` | zlib | 2009-2013 Mikko Mononen |
+| nanovg's GXM renderer (PS Vita) | - | `library/include/borealis/extern/nanovg/nanovg_gxm*.h` | zlib | 2024 xfangfang |
+| nanovg's PS4 renderer | - | `library/lib/extern/nanovg/ps4`, `library/include/borealis/extern/nanovg/nanovg_ps4.h` | zlib | 2023 xfangfang |
+| stb_image | 2.30 | `library/include/borealis/extern/nanovg/stb_image.h` | MIT or public domain | 2017 Sean Barrett |
+| stb_truetype | 1.26 (and the htcw fork) | `library/include/borealis/extern/nanovg/stb_truetype*.h` | MIT or public domain | 2017 Sean Barrett |
+| stb_dxt | 1.12 | `library/include/borealis/extern/nanovg/stb_dxt.h` | MIT or public domain | 2017 Sean Barrett |
+| Yoga | 3.2.1 | `library/lib/extern/yoga` | MIT | Facebook, Inc. and its affiliates |
+| {fmt} | 12.2.0 | `library/lib/extern/fmt`, `library/lib/extern/nxfmtwrapper` (Aurore's build of it) | MIT | 2012 - present, Victor Zverovich and {fmt} contributors |
+| TinyXML-2 | 11.0.0 | `library/lib/extern/tinyxml2`, `library/include/borealis/extern/tinyxml2` | zlib | Lee Thomason |
+| JSON for Modern C++ | 3.12.0 | `library/include/borealis/extern/nlohmann` | MIT | 2013-2025 Niels Lohmann |
+| Tweeny | 3.2.1 | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
+| libromfs | - | `library/lib/extern/libromfs` | MIT | 2022 WerWolv |
+| GLFW | 3.4 (xfangfang's fork, 892256c) | `library/lib/extern/glfw` | zlib | 2002-2006 Marcus Geelnard, 2006-2019 Camilla Löwy |
+| SDL | 2.28.5 | `library/lib/extern/SDL`, `android-project/app/src/main/java/org/libsdl` | zlib | 1997-2023 Sam Lantinga |
+| libretro-common | - | `library/lib/extern/libretro-common`, `library/include/borealis/extern/libretro-common` | MIT | 2010-2020 The RetroArch team |
+| glad | 0.1.27 (generated: OpenGL 4.3 core) | `library/lib/extern/glad`, `library/include/borealis/extern/glad` | MIT (the generator); the code it writes is derived from the Khronos OpenGL registry | 2013-2018 David Herberth; The Khronos Group Inc. |
+| QR Code generator | - | `library/lib/extern/qrcodegen`, `library/include/borealis/extern/qrcodegen` | MIT | Project Nayuki |
+| Recycling grid and horizontal recycler | - | `library/include/borealis/views/recycling_grid.hpp`, `library/lib/views/recycling_grid.cpp` (adapted from Switchfin) | Apache 2.0 | 2022 xfangfang, 2023 dragonflylee and the Switchfin contributors |
+| ios-cmake | - | `library/cmake/ios.toolchain.cmake` (build only) | BSD 3-clause | 2014 Bogdan Cristea and LTE Engineering Software, Kitware, Inc., Insight Software Consortium |
+| FindDBus.cmake | - | `library/cmake/FindDBus.cmake` (build only) | BSD 2-clause | 2012 Raphael Kubo da Costa |
+
+Used from the system when there, not bundled: D-Bus (Linux), fontconfig
+(Linux, opened at run time), FreeType (`BRLS_USE_FREETYPE`), GNU FriBidi
+(`BRLS_USE_FRIBIDI`, LGPL 2.1 or later), OpenCC (`OPENCC`).
+
+## Fonts and pictures
+
+| Component | Version | Path | Licence | Copyright |
+|---|---|---|---|---|
+| Inter (as "Aurore Text": a subset, with other vertical metrics, made by `tools/make_fonts.py`) | 4.001 | `resources/font/aurore_text.ttf` | SIL OFL 1.1 (`resources/font/OFL-Inter.txt`) | 2016 The Inter Project Authors |
+| PromptFont (as "Aurore Buttons": its button glyphs at other code points, made by `tools/make_fonts.py`) | 1.15.0 | `resources/font/aurore_buttons.ttf` | SIL OFL 1.1 (`resources/font/OFL-PromptFont.txt`) | 2018-2026 Yukari Hafner; 2011-2016 Severin Meyer (Xolonium) |
+| Sora | - | `resources/font/sora_bold_latin.ttf` | SIL OFL 1.1 (`resources/font/OFL-Sora.txt`) | 2019 The Sora Project Authors |
+| Material Icons | - | `resources/material` | Apache 2.0 (`resources/material/LICENSE.txt`) | Google |
+| Twemoji | 15.1.0 | `resources/img/emoji` | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) | 2019 Twitter, Inc and other contributors; graphics by jdecked |
+
+PromptFont by Shinmera (Yukari Hafner), available at https://shinmera.com/promptfont.
+
+The demo's other pictures (`resources/img/gallery`, `resources/img/tiles.png`,
+the themes' pictures) are drawn by the `tools/make_*.py` scripts of the
+source, and are under its licence.
+
+## Licence texts
+
+### MIT
+
+Copyright (c) <year> <copyright holders> (see above)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+{fmt} adds: as an exception, if, as a result of your compiling your source
+code, portions of this Software are embedded into a machine-executable object
+form of such source code, you may redistribute such embedded portions in such
+object form without including the above copyright and permission notices.
+
+### zlib
+
+Copyright (c) <year> <copyright holders> (see above)
+
+This software is provided 'as-is', without any express or implied warranty. In
+no event will the authors be held liable for any damages arising from the use
+of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it freely,
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim
+   that you wrote the original software. If you use this software in a
+   product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
+### BSD 3-clause (ios-cmake; FindDBus.cmake: the first two clauses)
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+### Apache 2.0, SIL OFL 1.1, CC BY 4.0
+
+Apache 2.0: http://www.apache.org/licenses/LICENSE-2.0 (also `LICENSE` at the
+root of the source and `resources/material/LICENSE.txt`). SIL Open Font
+License 1.1: the `resources/font/OFL-*.txt` files. Creative Commons
+Attribution 4.0: https://creativecommons.org/licenses/by/4.0/legalcode.

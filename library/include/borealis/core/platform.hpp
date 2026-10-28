@@ -19,6 +19,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 #include <borealis/core/audio.hpp>
 #include <borealis/core/font.hpp>
 #include <borealis/core/i18n.hpp>
@@ -251,9 +252,21 @@ class Platform
 
     /**
      * Open a link in browser
-     * @param url the link which will be opened
+     * @param url the link which will be opened; one that isBrowserUrl()
+     * refuses is not opened
      */
     virtual void openBrowser(std::string url) = 0;
+
+    /**
+     * true if openBrowser() may open this url: it starts with one of
+     * BROWSER_URL_SCHEMES followed by "://" and has no control character
+     */
+    static bool isBrowserUrl(const std::string& url);
+
+    /**
+     * The schemes openBrowser() accepts, in lower case
+     */
+    static inline std::vector<std::string> BROWSER_URL_SCHEMES = { "http", "https" };
 
     /**
      * Paste text to clipboard

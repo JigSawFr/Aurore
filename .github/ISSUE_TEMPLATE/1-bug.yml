@@ -1,0 +1,33 @@
+name: Bug
+description: Something does not work as documented
+labels: [ bug ]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: What you did, what you expected, what happened instead. Logs and screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The smallest steps, ideally on the demo (`aurore_demo`) or with `aurore-preview`.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: A release (vX.Y.Z) or a commit of main
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options: [ Switch, Linux, Windows, macOS, PS Vita, PS4, Android, iOS, Web ]
+    validations:
+      required: true

@@ -34,7 +34,7 @@ What it gives:
 
 | Call | Does |
 |---|---|
-| `Harness(Options)` | `width`, `height`, `frameMs` (simulated time per frame), `locale`, `theme`, reference and output folders. One harness per process: `Application` is global |
+| `Harness(Options)` | `width`, `height`, `frameMs` (simulated time per frame), `locale`, `theme`, reference and output folders, `systemFonts` (the system's Chinese, Japanese and Korean fonts, off by default). One harness per process: `Application` is global |
 | `push(activity)`, `top()`, `find(id)` | a screen pushed (without transition), the one on top, a view of it by XML id |
 | `step(n)`, `advance(ms)`, `settle(maxMs)` | `n` frames; frames for `ms` of simulated time; frames until no animation runs and no `sync`/`async` task is queued or running |
 | `press`, `release`, `tap(button, times)`, `hold(button, ms)`, `setAxis` | the gamepad (`tap` presses for a frame, releases and settles; `hold` gets the repeats a device gets) |
@@ -44,6 +44,7 @@ What it gives:
 | `setKeyboardAnswer(text)` | the next keyboard opened (`ImeManager`) gets `text`; without one it is cancelled |
 | `focus()`, `focusText()`, `focusLog()`, `focusByText(text, button)` | the focused view, its text (a label's, a button's, a cell's title, else the first text in it), every focus change so far, the focus moved until it reads `text` |
 | `texts()`, `hasText(text)`, `findText(text)`, `cutTexts()` | the labels shown (one by its text, to tap it), and those their box cuts (`Label::isTruncated`): what `BRLS_FOCUS_LOG` and `BRLS_CUT_TEXT` wrote to the log and to `cut_text.txt`, as values |
+| `silentFocusables()`, `brls::Application::getLastAnnouncement()` | the views shown that take the focus with no accessibility label nor value (a role at most), and what the focus announcer was given last (docs/styles.md#accessibility) |
 | `screenshot()` | the last frame drawn, as an `Image` (RGBA, `savePng`, `loadPng`, `crop`) |
 | `matchesReference(name, tolerance, maxRatio)`, also with an area | the screenshot (or a part) against `<references>/<name>.png`, see below |
 | `resize(w, h)` | a new window size |
@@ -55,11 +56,11 @@ What it gives:
 
 ## Screenshots and references
 
-`matchesReference("main")` takes a screenshot, writes it to `<output>/main.png`, and compares it with `<references>/main.png`: it matches when at most `maxRatio` of the pixels (0.1 % by default) have a channel off by more than `tolerance` (8 by default). When it does not, `<output>/main.diff.png` shows the pixels that differ in red. A missing reference is written and matches; `BRLS_TEST_UPDATE=1` writes them all again, to commit after looking at them.
+`matchesReference("main")` takes a screenshot, writes it to `<output>/main.png`, and compares it with `<references>/main.png`: it matches when at most `maxRatio` of the pixels (0.1 % by default) have a channel off by more than `tolerance` (8 by default). When it does not, `<output>/main.diff.png` shows the pixels that differ in red. A missing reference is written and matches, except in CI (the `CI` variable set, as on GitHub Actions) where it fails: a test whose reference was not committed, or whose name has a typo, does not pass unseen. `BRLS_TEST_UPDATE=1` writes them all again, to commit after looking at them. Each case registered by `brls_add_tests` stops after 5 minutes.
 
 The folders: `Options::referenceDir` and `outputDir`, else `BRLS_TEST_REFERENCES` and `BRLS_TEST_OUTPUT`, else `references` and `test-output` in the working directory. `brls_add_tests` (below) sets them.
 
-The same frames are drawn on every run: the clock is simulated, the platform says the same thing everywhere (no battery or Wi-Fi shown, `127.0.0.1`, the locale and theme of `Options`), the fonts are the app's resources. On Linux, the drawing is Mesa's software renderer (llvmpipe), with no display: the references are made with it, and a tolerance absorbs what another version of it changes in the antialiasing.
+The same frames are drawn on every run: the clock is simulated, the platform says the same thing everywhere (no battery or Wi-Fi shown, `127.0.0.1`, the locale and theme of `Options`), the fonts are the app's resources: no system font is read unless `Options::systemFonts` asks for it ([fonts](fonts.md)). On Linux, the drawing is Mesa's software renderer (llvmpipe), with no display: the references are made with it, and a tolerance absorbs what another version of it changes in the antialiasing.
 
 ## How it draws without a display
 

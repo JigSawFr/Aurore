@@ -160,6 +160,11 @@ std::string AndroidPlatform::getDnsServer()
 
 void AndroidPlatform::openBrowser(std::string url)
 {
+    if (!isBrowserUrl(url))
+    {
+        Logger::warning("open url: refused, not an http(s) link");
+        return;
+    }
     auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
 
     jclass utilsClass = env->FindClass("org/libsdl/app/PlatformUtils");

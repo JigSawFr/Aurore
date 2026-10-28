@@ -68,8 +68,8 @@
                     title="Post a notification"
                     id="notify"/>
 
-            <brls:RadioCell/>
-            <brls:RadioCell/>
+            <brls:RadioCell title="Another radio cell"/>
+            <brls:RadioCell title="One more radio cell"/>
 
             <brls:Header
                 width="auto"

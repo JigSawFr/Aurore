@@ -135,6 +135,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
+| Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
 | A spinner's own colour | `ProgressSpinner::setColor` |
 | Toasts styled by the theme, with an optional icon | `brls/notification/background`, `…/text`, `…/corner_radius`, `…/spacing`, `…/margin_top`, `…/margin_right` · `Application::notify(text, leading)` |
 | The footer's clock in hours and minutes | — |
@@ -147,7 +148,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | A label tells when it is cut with "…" | `Label::isTruncated` |
 | A wrapped line no longer starts with a space; a no-break space keeps words together | — |
 | The default font looked up for each new label | — |
+| Free fonts off the Switch (Inter, PromptFont's buttons at the Switch's code points); Chinese, Japanese and Korean from the system (fontconfig, CoreText…) or the app's `font/cjk` | [docs/fonts.md](docs/fonts.md) |
 | FreeType instead of stb_truetype, hinted (an option) | `-DUSE_FREETYPE=ON`: the system's FreeType on desktop, `switch-freetype` on Switch |
+| stb_truetype: a glyph read within its own data, a font's tables within the font (CVE-2026-18497); fonts still from trusted sources | — |
 | Colour emoji (CBDT, sbix and COLR fonts) in any label, with FreeType | `FontLoader::USER_EMOJI_PATH`; on desktop, the system's emoji font when it is empty |
 | Hebrew and Arabic in reading order, Arabic letters joined (an option) | `-DUSE_FRIBIDI=ON` · `brls::bidiVisual()` |
 
@@ -182,6 +185,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
 | deko3d: the command memory grows instead of aborting; image descriptors reused | — |
 | Switch: the applet hook removed first at shutdown | — |
+| `openBrowser`: http and https links only, handed to `xdg-open`/`open` as one argument (no shell), one line on the Steam Deck pipe | `Platform::isBrowserUrl`, `Platform::BROWSER_URL_SCHEMES` |
 | Logger: flushed after every line | — |
 
 **Speed**
@@ -212,6 +216,8 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `USE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
+
+5. Pick a version: the submodule can follow a release tag (`vX.Y.Z`), and [`CHANGELOG.md`](CHANGELOG.md) says what each one changes. Before 1.0 a minor version may break the API. In code, `AURORE_VERSION` and `AURORE_VERSION_AT_LEAST(0, 2, 0)` come with `borealis.hpp`; an installed Aurore answers `find_package(Aurore 0.1)`.
 
 > [!TIP]
 > Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.
@@ -261,6 +267,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 | [Components](docs/components.md) | The views Aurore adds |
 | [XML attributes](docs/xml-attributes.md) | Every attribute of every view, generated from the sources |
 | [Testing](docs/testing.md) | The test harness |
+| [Fonts](docs/fonts.md) | The fonts on each platform, the buttons' code points, Chinese, Japanese and Korean |
 | [Inspector](docs/inspector.md) · [Hot reload](docs/hot_reload.md) | Debugging aids |
 | [Overlay](docs/overlay.md) | Design note on a Switch overlay mode (not built) |
 
@@ -278,11 +285,11 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 
 ## 🤝 Contributing
 
-The default branch is `main`; upstream's is `wiliwili`. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/). A fix that is not specific to Aurore is worth sending [upstream](https://github.com/xfangfang/borealis) too.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) has the build, the tests, the format and the rules for pull requests; [`SECURITY.md`](SECURITY.md) says how to report a vulnerability privately. The default branch is `main`; upstream's is `wiliwili`. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ## 📜 License and credits
 
-borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`LICENSE.GPL`](LICENSE.GPL)), and so is an app built with it. [`NOTICE`](NOTICE) says which is which, and the licences of what is bundled (QR Code generator, Twemoji, Sora). Maintained by [JigSawFr](https://github.com/JigSawFr).
+borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`LICENSE.GPL`](LICENSE.GPL)), and so is an app built with it. [`NOTICE`](NOTICE) says which is which, and [`resources/THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md) lists what is bundled (the libraries in `library/lib/extern`, Inter, PromptFont, Sora, Material Icons, Twemoji) with its licence. Maintained by [JigSawFr](https://github.com/JigSawFr).
 
 <details>
 <summary>Credits</summary>
@@ -291,6 +298,7 @@ borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`
 - borealis was created by [natinusala](https://github.com/natinusala/borealis) and its [contributors](AUTHORS); carried on by [xfangfang](https://github.com/xfangfang/borealis) and [dragonflylee](https://github.com/dragonflylee).
 - Changes picked from the forks of Nika0000, Kelvin Wong, kawaii-flesh, Alexander Kiselev, youngzyl, Elias da Rosa, XITRIX, CostelaBR, PalindromicBreadLoaf and xlanor, each commit keeping its author.
 - Built on [nanovg](https://github.com/memononen/nanovg), [Yoga](https://github.com/facebook/yoga), [GLFW](https://www.glfw.org/), [SDL](https://www.libsdl.org/), [tinyxml2](https://github.com/leethomason/tinyxml2), [fmt](https://github.com/fmtlib/fmt), [nlohmann/json](https://github.com/nlohmann/json), [tweeny](https://github.com/mobius3/tweeny) and the others in `library/lib/extern`, under their own licences.
+- The text font is [Inter](https://rsms.me/inter/) and the controller buttons come from [PromptFont](https://shinmera.com/promptfont) by Shinmera (Yukari Hafner), both under the SIL Open Font License.
 - The demo's logo by @MeganRoshelle; Aurore's icon and banner in [`.github/branding`](.github/branding).
 
 </details>

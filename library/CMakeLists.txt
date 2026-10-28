@@ -25,6 +25,11 @@ if (NOT BRLS_RESOURCES_DIR)
     endif ()
 endif ()
 
+# The version of library/include/borealis/version.hpp, which release-please updates
+file(STRINGS ${BOREALIS_PATH}/include/borealis/version.hpp AURORE_VERSION REGEX "^#define AURORE_VERSION \"")
+string(REGEX REPLACE ".*\"([0-9.]+)\".*" "\\1" AURORE_VERSION "${AURORE_VERSION}")
+set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
+
 option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
 
 # fmt, tinyxml2, GLFW and SDL2 from the system when find_package() finds
@@ -54,7 +59,7 @@ if (AURORE_FETCH_DEPS)
             FIND_PACKAGE_ARGS NAMES glfw3)
     FetchContent_Declare(SDL2
             GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-            GIT_TAG release-2.32.10
+            GIT_TAG release-2.28.5
             GIT_SHALLOW TRUE
             FIND_PACKAGE_ARGS)
 endif ()
@@ -202,7 +207,12 @@ if (PLATFORM_DESKTOP)
         list(APPEND BRLS_PLATFORM_LIBS "-framework SystemConfiguration" "-framework Cocoa")
         list(APPEND BRLS_PLATFORM_LIBS "-framework IOKit" "-framework CoreFoundation")
         list(APPEND BRLS_PLATFORM_LIBS "-framework AppKit" "-framework Foundation" "-framework CoreServices" "-lobjc")
+        # The system's fonts for Chinese, Japanese and Korean (desktop_font.cpp)
+        list(APPEND BRLS_PLATFORM_LIBS "-framework CoreText")
         list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/desktop/desktop_darwin.mm)
+    elseif (UNIX)
+        # fontconfig, opened at run time when there (desktop_font.cpp)
+        list(APPEND BRLS_PLATFORM_LIBS ${CMAKE_DL_LIBS})
     endif ()
     list(APPEND BOREALIS_SOURCE ${BOREALIS_PATH}/lib/platforms/desktop)
     set(BRLS_PLATFORM_RESOURCES_PATH "\"${BRLS_RESOURCES_DIR}/resources/\"")
@@ -226,7 +236,8 @@ elseif (PLATFORM_PSV)
                 include(FetchContent)
                 FetchContent_Populate(
                         libshacccg
-                        URL "https://codeload.github.com/AnimMouse/SceShaccCg/zip/refs/heads/main"
+                        # A fixed commit, not the moving main branch
+                        URL "https://codeload.github.com/AnimMouse/SceShaccCg/zip/f9511fc20ce905704f384b3a99a17c5e97f9a92c"
                         SOURCE_DIR "${CMAKE_BINARY_DIR}/vendor/SceShaccCg"
                         SUBBUILD_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
                         BINARY_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/SceShaccCg"
@@ -297,7 +308,7 @@ elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     list(APPEND BOREALIS_SOURCE
             ${BOREALIS_PATH}/lib/platforms/sdl
             ${BOREALIS_PATH}/lib/platforms/desktop)
-    list(APPEND BRLS_PLATFORM_LIBS SDL2-static SDL2main)
+    list(APPEND BRLS_PLATFORM_LIBS SDL2-static SDL2main "-framework CoreText" "-framework CoreFoundation")
     list(APPEND BOREALIS_SRC ${BOREALIS_PATH}/lib/platforms/desktop/ios_darwin.mm)
 
     if(PLATFORM_IOS)
@@ -568,7 +579,8 @@ foreach (case IN LISTS cases)
         add_test(${target}.\${case} \"$<TARGET_FILE:${target}>\" \${case})
         set_tests_properties(${target}.\${case} PROPERTIES
             WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\"
-            ENVIRONMENT \"${env}\")
+            ENVIRONMENT \"${env}\"
+            TIMEOUT 300)
     endif ()
 endforeach ()
 ")

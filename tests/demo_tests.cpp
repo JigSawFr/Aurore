@@ -19,14 +19,19 @@
 // BRLS_TEST_UPDATE=1 writes them again.
 
 #include <borealis.hpp>
+#include <borealis/cadran/ui/cadran_kit.hpp>
+#include <borealis/cadran/ui/cadran_list.hpp>
 #include <borealis/cadran/ui/cadran_modal.hpp>
 #include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
 #include <borealis/cadran/ui/ui.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
+#include <borealis/core/hot_reload.hpp>
 #include <borealis/core/theme_decor.hpp>
 #include <borealis/core/theme_image.hpp>
+#include <borealis/core/util.hpp>
+#include <borealis/platforms/desktop/desktop_font.hpp>
 #include <borealis/test/harness.hpp>
 
 #include <algorithm>
@@ -39,6 +44,9 @@
 #include <filesystem>
 #include <fstream>
 #include <thread>
+#ifndef _WIN32
+#include <sys/stat.h>
+#endif
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
@@ -86,6 +94,20 @@ class Swatch : public brls::View
     NVGcolor color = nvgRGB(200, 40, 40);
 };
 
+// The pictures of a theme are decoded on a worker thread: waits for them, 10 s at most, so a stuck decode fails
+// the test instead of hanging the job
+bool themeImagesDecoded()
+{
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+    while (brls::ThemeImages::decoding() > 0)
+    {
+        if (std::chrono::steady_clock::now() > deadline)
+            return false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    return true;
+}
+
 brls::Box* screenOf(std::initializer_list<brls::View*> views)
 {
     auto* box = new brls::Box(brls::Axis::COLUMN);
@@ -105,6 +127,21 @@ BRLS_TEST(main_screen)
     BRLS_CHECK(h.hasText("Aurore Demo"));
     BRLS_CHECK(h.hasText("Monday, January 5")); // the harness' wall clock
     BRLS_CHECK(h.matchesReference("main_screen"));
+}
+
+BRLS_TEST(missing_reference_fails_in_ci)
+{
+    DemoHarness h;
+    const char* ci    = std::getenv("CI");
+    std::string saved = ci ? ci : "";
+    setenv("CI", "true", 1);
+    bool matched = h.matchesReference("no_such_reference");
+    if (ci)
+        setenv("CI", saved.c_str(), 1);
+    else
+        unsetenv("CI");
+    BRLS_CHECK(!matched);
+    BRLS_CHECK(!std::filesystem::exists(h.options().referenceDir + "/no_such_reference.png"));
 }
 
 BRLS_TEST(rail_focus_moves)
@@ -620,6 +657,196 @@ BRLS_TEST(theme_pictures_stay_in_their_folder)
     brls::Theme::reset();
 }
 
+// A file that includes itself, or many files each including the next ones
+// many times: read once each at most, quickly, with errors that say where
+BRLS_TEST(theme_include_fanout_is_bounded)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_fanout_test");
+    std::string self = "accent = #3ddc97\n";
+    for (int i = 0; i < 10; i++)
+        self += "@include self.inc\n";
+    themes.write("self.inc", self);
+    const std::string fan = themes.write("fan.theme", "name = Fan\n@include self.inc\n");
+    // Ten files, each including the next one ten times: 10^9 reads unbounded
+    for (int f = 0; f < 10; f++)
+    {
+        std::string text;
+        for (int i = 0; i < 10; i++)
+            text += "@include part" + std::to_string(f + 1) + ".inc\n";
+        themes.write("part" + std::to_string(f) + ".inc", text);
+    }
+    const std::string wide = themes.write("wide.theme", "name = Wide\n@include part0.inc\n");
+    const std::string loop = themes.write("loop.theme", "name = Loop\ninherit = loop.theme\n");
+    std::string often      = "name = Often\n";
+    for (int i = 0; i < 70; i++)
+        often += "@include leaf.inc\n";
+    themes.write("leaf.inc", "accent = #3ddc97\n");
+    const std::string oftenPath = themes.write("often.theme", often);
+
+    auto start                = std::chrono::steady_clock::now();
+    brls::ThemeInfo fanInfo   = brls::Theme::inspect(fan);
+    brls::ThemeInfo wideInfo  = brls::Theme::inspect(wide);
+    brls::ThemeInfo loopInfo  = brls::Theme::inspect(loop);
+    brls::ThemeInfo oftenInfo = brls::Theme::inspect(oftenPath);
+    BRLS_CHECK(brls::Theme::loadFile(wide));
+    double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    BRLS_CHECK(seconds < 5.0);
+
+    BRLS_CHECK(hasErrorWith(fanInfo, "self.inc:2: @include self.inc includes itself (a loop)"));
+    BRLS_CHECK(fanInfo.errors.size() <= 10);
+    BRLS_CHECK(hasErrorWith(wideInfo, "part7.inc:1: @include part8.inc goes too deep"));
+    BRLS_CHECK_EQ(wideInfo.errors.size(), (size_t)101);
+    BRLS_CHECK(hasErrorWith(wideInfo, "more errors"));
+    BRLS_CHECK(hasErrorWith(oftenInfo, "line 66: @include leaf.inc: skipped, the theme reads more than 64 files"));
+    BRLS_CHECK(!hasErrorWith(oftenInfo, "line 65:"));
+    BRLS_CHECK(hasErrorWith(loopInfo, "inherit loop.theme inherits itself (a loop)"));
+    brls::Theme::reset();
+}
+
+// @include, inherit and counterpart read files of the theme's folder only, as
+// its pictures; a resource theme still includes resources
+BRLS_TEST(theme_includes_stay_in_their_folder)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_include_confined_test");
+    const std::string root = themes.dir.generic_string();
+    themes.picture("other/pic.png", 200, 20, 40);
+    themes.write("other/base.theme", "name = Base\nbackground_image = pic.png\naccent = #ff0000\n");
+    themes.write("outside.inc", "accent = #ff0000\n");
+    themes.write("mine/sibling.theme", "name = Sibling\naccent = #00ff00\n");
+
+    const std::string absolute = themes.write("mine/abs.theme", "name = Abs\n@include /etc/passwd\n");
+    brls::ThemeInfo info       = brls::Theme::inspect(absolute);
+    BRLS_CHECK(hasErrorWith(info, "line 2: @include /etc/passwd: an absolute path is not allowed"));
+    BRLS_CHECK(!hasErrorWith(info, "no '='")); // nothing of the file read
+    BRLS_CHECK(!hasErrorWith(info, "root:"));
+
+    info = brls::Theme::inspect(themes.write("mine/up.theme", "name = Up\n@include ../outside.inc\n"));
+    BRLS_CHECK(hasErrorWith(info, "line 2: @include ../outside.inc: goes out of the theme's folder"));
+
+    const std::string inherits = themes.write("mine/inherits.theme", "name = Inherits\ninherit = ../other/base.theme\n");
+    info                       = brls::Theme::inspect(inherits);
+    BRLS_CHECK(hasErrorWith(info, "inherit ../other/base.theme: goes out of the theme's folder"));
+    BRLS_CHECK(!info.darkBackground.hasImage());
+    BRLS_CHECK(brls::Theme::loadFile(inherits));
+    BRLS_CHECK(!brls::Theme::getBackground(brls::ThemeVariant::DARK).hasImage());
+    brls::Theme::reset();
+
+    info = brls::Theme::inspect(themes.write("mine/res.theme", "name = Res\n@include @res/themes/shared.inc\n"));
+    BRLS_CHECK(hasErrorWith(info, "not in the app's resources"));
+    info = brls::Theme::inspect(themes.write("mine/pair.theme", "name = Pair\ninherit = dark\ncounterpart = /etc/hostname\n"));
+    BRLS_CHECK(hasErrorWith(info, "counterpart /etc/hostname: an absolute path is not allowed"));
+    BRLS_CHECK(info.counterpart.empty());
+
+    // Still fine: a sibling, a preset by name, a resource theme's includes
+    BRLS_CHECK(brls::Theme::inspect(themes.write("mine/ok.theme", "name = Ok\ninherit = sibling.theme\n")).ok());
+    BRLS_CHECK(brls::Theme::inspect(themes.write("mine/preset.theme", "name = P\ninherit = ocean\n")).ok());
+    BRLS_CHECK(brls::Theme::inspect("@res/themes/rose.theme").ok());
+
+    // Too large, or not a file: not read
+    themes.write("mine/big.inc", "# " + std::string(300 * 1024, 'x') + "\n");
+    info = brls::Theme::inspect(themes.write("mine/big.theme", "name = Big\n@include big.inc\n"));
+    BRLS_CHECK(hasErrorWith(info, "@include big.inc: cannot read"));
+    std::filesystem::create_directories(themes.dir / "mine" / "folder.inc");
+    info = brls::Theme::inspect(themes.write("mine/dir.theme", "name = Dir\n@include folder.inc\n"));
+    BRLS_CHECK(hasErrorWith(info, "@include folder.inc: cannot read"));
+#ifndef _WIN32
+    // A pipe would block a reader for ever
+    BRLS_CHECK(::mkfifo((themes.dir / "mine" / "pipe.inc").c_str(), 0600) == 0);
+    info = brls::Theme::inspect(themes.write("mine/pipe.theme", "name = Pipe\n@include pipe.inc\n"));
+    BRLS_CHECK(hasErrorWith(info, "@include pipe.inc: cannot read"));
+
+    // A link out of the folder, to a file or to a folder, there or not
+    std::filesystem::create_symlink(themes.dir / "outside.inc", themes.dir / "mine" / "link.inc");
+    std::filesystem::create_directory_symlink(themes.dir / "other", themes.dir / "mine" / "away");
+    info = brls::Theme::inspect(themes.write("mine/link.theme", "name = Link\n@include link.inc\n"));
+    BRLS_CHECK(hasErrorWith(info, "a link out of the theme's folder"));
+    std::string path, error;
+    const std::string folder = root + "/mine";
+    BRLS_CHECK(!brls::Theme::resolveAsset("away/missing.png", folder, folder, &path, &error));
+    BRLS_CHECK(error.find("a link out of the theme's folder") != std::string::npos);
+    // A broken link: where it leads cannot be told, refused
+    std::filesystem::create_symlink(themes.dir / "nowhere.png", themes.dir / "mine" / "broken.png");
+    BRLS_CHECK(!brls::Theme::resolveAsset("broken.png", folder, folder, &path, &error));
+    // A file not there yet, in the folder: fine (inspect says it is missing)
+    BRLS_CHECK(brls::Theme::resolveAsset("later.png", folder, folder, &path, &error));
+#endif
+}
+
+// Colours and metrics are finite numbers in their ranges
+BRLS_TEST(theme_numbers_are_finite_and_in_range)
+{
+    Harness h;
+    NVGcolor color;
+    for (const char* bad : { "rgba(nan, 1, 1, 1)", "rgb(inf, 0, 0)", "rgb(1e39, 0, 0)", "rgb(256, 0, 0)", "rgb(-5, 0, 0)",
+             "rgba(0, 0, 0, 1.5)", "rgba(0, 0, 0, -0.1)", "rgba(0, 0, 0, nan)", "rgb(0x1p9, 0, 0)" })
+        BRLS_CHECK(!brls::Theme::parseColor(bad, &color));
+    BRLS_CHECK(brls::Theme::parseColor("rgb(255, 0, 0)", &color) && color.r == 1.0f);
+    BRLS_CHECK(brls::Theme::parseColor("rgba(0, 0, 0, 0.5)", &color) && color.a == 0.5f);
+
+    ThemeFolder themes("aurore_theme_numbers_test");
+    brls::ThemeInfo info = brls::Theme::inspect(themes.write("nan.theme",
+        "name = N\naccent = rgba(nan, 1e39, -5, inf)\n[metrics]\nbrls/sidebar/width = nan\nbrls/header/height = inf\n"
+        "brls/highlight/stroke_width = 1e39\nbrls/sidebar/padding_top = -20000\nbrls/sidebar/padding_left = 12\n"));
+    BRLS_CHECK(!info.ok());
+    BRLS_CHECK(hasErrorWith(info, "line 2: rgba(nan, 1e39, -5, inf) is not a colour"));
+    for (const char* value : { "line 4: nan", "line 5: inf", "line 6: 1e39", "line 7: -20000" })
+        BRLS_CHECK(hasErrorWith(info, value));
+    BRLS_CHECK(!hasErrorWith(info, "line 8"));
+}
+
+// Errors quote the file: never a control character to the terminal, and at
+// most 100 of them
+BRLS_TEST(theme_errors_are_escaped_and_capped)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_errors_test");
+    brls::ThemeInfo info = brls::Theme::inspect(themes.write("ansi.theme", "name = \x1b]0;title\x07\n\x1b[2Jred\naccent = \xc2\x9b"
+                                                                           "31m\n"));
+    BRLS_CHECK(hasErrorWith(info, "line 2: no '=' in \"\\x1B[2Jred\""));
+    BRLS_CHECK(hasErrorWith(info, "\\x9B31m is not a colour"));
+    for (const std::string& error : info.errors)
+        for (unsigned char c : error)
+            BRLS_CHECK(c >= 0x20 && c != 0x7F && c != 0x9B);
+    BRLS_CHECK_EQ(brls::escapeControlChars("a\tb\x1b"
+                                           "c\xc2\x85"
+                                           "d\xc3\xa9"),
+        std::string("a\\x09b\\x1Bc\\x85d\xc3\xa9"));
+
+    std::string many = "name = Many\n";
+    for (int i = 0; i < 500; i++)
+        many += "nonsense\n";
+    info = brls::Theme::inspect(themes.write("many.theme", many));
+    BRLS_CHECK_EQ(info.errors.size(), (size_t)101);
+    BRLS_CHECK_EQ(info.errors.back(), std::string("and 400 more errors"));
+}
+
+// "@res/…" stays in the resources: in hot reload's folder and when a theme
+// is read
+BRLS_TEST(resource_names_stay_in_the_resources)
+{
+    Harness h;
+    BRLS_CHECK(brls::isResourceNameSafe("@res/themes/rose.theme"));
+    BRLS_CHECK(brls::isResourceNameSafe("@res/a..b/c"));
+    for (const char* name : { "@res/../x", "@res/themes/../../x", "@res/..", "@res/a\\..\\..\\x" })
+        BRLS_CHECK(!brls::isResourceNameSafe(name));
+
+    ThemeFolder resources("aurore_resources_test");
+    resources.write("themes/x.theme", "name = X\n");
+    resources.write("secret.theme", "name = Secret\n");
+    brls::HotReload::setEnabled(true, (resources.dir / "themes").string());
+    BRLS_CHECK(!brls::HotReload::diskResource("@res/x.theme").empty());
+    BRLS_CHECK(brls::HotReload::diskResource("@res/../secret.theme").empty());
+    BRLS_CHECK(!brls::Theme::loadFile("@res/../secret.theme"));
+    brls::HotReload::setEnabled(false);
+
+    // A language that is no locale's name is not a path either
+    brls::loadTranslations("../../etc");
+    BRLS_CHECK_EQ(brls::getStr("hints/ok"), std::string("OK"));
+    brls::loadTranslations(brls::LOCALE_DEFAULT);
+}
+
 BRLS_TEST(theme_background_keys_are_read_and_inherited)
 {
     Harness h;
@@ -762,8 +989,7 @@ static void auroraScreen(brls::ThemeVariant variant, const char* reference)
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/aurora/theme.theme"));
     brls::Application::getPlatform()->setThemeVariant(variant);
     h.step(); // the picture asked for: decoded, as many frames on any machine
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::Application::hasThemeBackground());
     BRLS_CHECK(brls::Theme::checkContrast(variant).empty());
@@ -823,8 +1049,7 @@ static void settlePictures(Harness& h)
     for (int round = 0; round < 3; round++)
     {
         h.step();
-        while (brls::ThemeImages::decoding() > 0)
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        BRLS_CHECK(themeImagesDecoded());
         h.settle();
     }
 }
@@ -1266,8 +1491,7 @@ BRLS_TEST(theme_decor_keys_are_read_and_inherited)
     BRLS_CHECK(brls::Theme::loadFile(base));
     brls::Application::getPlatform()->setThemeVariant(brls::ThemeVariant::DARK);
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP));
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::SIDEBAR));
@@ -1407,8 +1631,7 @@ BRLS_TEST(theme_decor_header_backdrop)
     themes.picture("red.png", 255, 0, 0);
     BRLS_CHECK(brls::Theme::loadFile(themes.write("red.theme", "inherit = dark\nbackdrop.header = red.png\n")));
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::HEADER));
     brls::test::Image shot = h.screenshot();
@@ -1430,8 +1653,7 @@ static void winterScreen(brls::ThemeVariant variant, const char* reference)
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/winter/theme.theme"));
     brls::Application::getPlatform()->setThemeVariant(variant);
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP));
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::BOTTOM));
@@ -1472,8 +1694,7 @@ BRLS_TEST(theme_decor_switches_back_and_forth)
     brls::Application::setReduceMotion(false);
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/winter/theme.theme"));
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     BRLS_CHECK(brls::ThemeDecorations::hasPicture(brls::ThemeArea::TOP) && brls::ThemeDecorations::particlesRunning());
     brls::Theme::reset();
@@ -1489,8 +1710,7 @@ BRLS_TEST(theme_decor_dialog_over_a_picture)
     brls::Application::setReduceMotion(true);
     BRLS_CHECK(brls::Theme::loadFile("@res/themes/aurora/theme.theme"));
     h.step();
-    while (brls::ThemeImages::decoding() > 0)
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    BRLS_CHECK(themeImagesDecoded());
     h.settle();
     h.tap(brls::BUTTON_RIGHT);
     h.tap(brls::BUTTON_DOWN);
@@ -1514,6 +1734,355 @@ BRLS_TEST(images_compare_with_tolerance)
     BRLS_CHECK_EQ(diff.differingPixels, (size_t)1);
     BRLS_CHECK_EQ(diff.maxDelta, 40);
     BRLS_CHECK(!brls::test::compareImages(b, a.crop(0, 0, 2, 2)).sameSize);
+}
+
+namespace
+{
+
+// A line of text, the same size whatever it says
+brls::Label* lineOf(const std::string& text)
+{
+    auto* label = new brls::Label();
+    label->setText(text);
+    label->setFontSize(40);
+    label->setSingleLine(true);
+    label->setWidth(600);
+    label->setHeight(60);
+    return label;
+}
+
+// What the screen shows where a view is
+brls::test::Image shotOf(Harness& h, brls::View* view)
+{
+    brls::Rect frame = view->getFrame();
+    return h.screenshot().crop((int)frame.getMinX(), (int)frame.getMinY(), (int)frame.getWidth(), (int)frame.getHeight());
+}
+
+// Two lines drawn differently: not the same glyphs
+bool drawnDifferently(Harness& h, brls::View* one, brls::View* other)
+{
+    return brls::test::compareImages(shotOf(h, one), shotOf(h, other), 8).differingPixels > 100;
+}
+
+} // namespace
+
+BRLS_TEST(fonts_are_the_free_ones)
+{
+    Harness h;
+    // The text and the buttons from the library's resources, the Switch's
+    // fonts nowhere
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_REGULAR) != brls::FONT_INVALID);
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_SWITCH_ICONS) != brls::FONT_INVALID);
+    BRLS_CHECK(!brls::Application::loadFontFromFile("old", BRLS_ASSET("font/switch_font.ttf")));
+    BRLS_CHECK(!brls::Application::loadFontFromFile("old", BRLS_ASSET("font/switch_icons.ttf")));
+    // The harness reads no system font: its pictures are the same everywhere
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_KOREAN_REGULAR) == brls::FONT_INVALID);
+    BRLS_CHECK(brls::Application::getFont(brls::FONT_JAPANESE) == brls::FONT_INVALID);
+}
+
+BRLS_TEST(button_glyphs_drawn)
+{
+    Harness h;
+    // At the code points of the Switch's shared font (Hint::getKeyIcon)
+    auto* a       = lineOf(brls::Hint::getKeyIcon(brls::BUTTON_A, true) + brls::Hint::getKeyIcon(brls::BUTTON_LB, true));
+    auto* b       = lineOf(brls::Hint::getKeyIcon(brls::BUTTON_B, true) + brls::Hint::getKeyIcon(brls::BUTTON_RB, true));
+    auto* missing = lineOf("\u0378\u0378"); // no such character: the empty box
+    h.push(new brls::Activity(screenOf({ a, b, missing })));
+    h.settle();
+    BRLS_CHECK(drawnDifferently(h, a, b));
+    BRLS_CHECK(drawnDifferently(h, a, missing));
+    BRLS_CHECK(drawnDifferently(h, b, missing));
+}
+
+BRLS_TEST(asset_fonts_load_from_the_resources)
+{
+    // BRLS_ASSET() is "@res/..." with the resources built in: read from them
+    Harness h;
+    BRLS_CHECK(brls::Application::loadFontFromFile("test/sora", BRLS_ASSET("font/sora_bold_latin.ttf")));
+    BRLS_CHECK(brls::Application::getFont("test/sora") != brls::FONT_INVALID);
+    BRLS_CHECK(!brls::Application::loadFontFromFile("test/none", BRLS_ASSET("font/none.ttf")));
+}
+
+BRLS_TEST(cadran_display_font_loaded)
+{
+    // Cadran's figures in Sora, with the resources built in too
+    DemoHarness h;
+    BRLS_CHECK(brls::Application::getFont("cadran/digits") != brls::FONT_INVALID);
+}
+
+BRLS_TEST(cjk_from_the_system_fonts)
+{
+    brls::test::Options options;
+    options.systemFonts = true;
+    Harness h(options);
+    struct Case
+    {
+        const char* language;
+        const std::string& font;
+        const char* text;
+        const char* missing; // as many characters, none drawn
+    };
+    const Case cases[] = {
+        { "ko", brls::FONT_KOREAN_REGULAR, "\uD55C\uAD6D\uC5B4", "\u0378\u0378\u0378" }, // 한국어
+        { "zh-Hans", brls::FONT_CHINESE_SIMPLIFIED, "\u7B80\u4F53\u4E2D\u6587", "\u0378\u0378\u0378\u0378" }, // 简体中文
+        { "zh-Hant", brls::FONT_CHINESE_TRADITIONAL, "\u7E41\u9AD4\u4E2D\u6587", "\u0378\u0378\u0378\u0378" }, // 繁體中文
+        { "ja", brls::FONT_JAPANESE, "\u65E5\u672C\u8A9E\u3042", "\u0378\u0378\u0378\u0378" }, // 日本語あ
+    };
+    for (const Case& c : cases)
+    {
+        brls::DesktopFontLoader::FontFile file = brls::DesktopFontLoader::findSystemFont(c.language);
+        if (file.path.empty())
+        {
+            std::printf("cjk_from_the_system_fonts: no %s font on this system, not checked\n", c.language);
+            continue;
+        }
+        BRLS_CHECK(brls::Application::getFont(c.font) != brls::FONT_INVALID);
+        auto* text    = lineOf(c.text);
+        auto* missing = lineOf(c.missing);
+        h.push(new brls::Activity(screenOf({ text, missing })));
+        h.settle();
+        if (!drawnDifferently(h, text, missing))
+            std::printf("cjk_from_the_system_fonts: %s drawn as missing glyphs (%s)\n", c.language, file.path.c_str());
+        BRLS_CHECK(drawnDifferently(h, text, missing));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// The focus announcer: what a screen reader would be given
+// ---------------------------------------------------------------------------
+
+static const std::string& announced()
+{
+    return brls::Application::getLastAnnouncement();
+}
+
+BRLS_TEST(announcer_says_role_value_state_and_place)
+{
+    Harness h;
+    auto* toggle = new brls::BooleanCell();
+    toggle->init("Wi-Fi", false, [](bool) {});
+    auto* detail = new brls::DetailCell();
+    detail->setText("Language");
+    detail->setDetailText("English");
+    auto* radio = new brls::RadioCell();
+    radio->title->setText("Dark");
+    radio->setSelected(true);
+    auto* slider = new brls::SliderCell();
+    slider->init("Volume", 0.5f, [](float) {});
+    slider->slider->setDiscreteStep(0.1f);
+    std::vector<std::string> said;
+    brls::Application::setFocusAnnouncer([&said](const std::string& text)
+        { said.push_back(text); });
+    h.push(new brls::Activity(screenOf({ toggle, detail, radio, slider })));
+    h.settle();
+
+    BRLS_CHECK_EQ(announced(), std::string("Wi-Fi, switch, off, 1 of 3"));
+    h.tap(brls::BUTTON_A); // flipped in place: its new state alone
+    BRLS_CHECK(toggle->isOn());
+    BRLS_CHECK_EQ(announced(), std::string("on"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Language, English, 2 of 3"));
+    detail->setDetailText("Français"); // changed while focused, after a press
+    BRLS_CHECK_EQ(announced(), std::string("Français"));
+    h.advance(3000);
+    detail->setDetailText("Deutsch"); // on its own: not read out
+    BRLS_CHECK_EQ(announced(), std::string("Français"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Dark, selected, 3 of 3"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Volume, slider, 50%"));
+    h.tap(brls::BUTTON_RIGHT);
+    BRLS_CHECK_EQ(announced(), std::string("60%"));
+    // Gliding while held: said once, when let go
+    slider->slider->setDiscreteStep(0);
+    size_t before = said.size();
+    h.hold(brls::BUTTON_RIGHT, 400);
+    h.step(2);
+    BRLS_CHECK_EQ(said.size(), before + 1);
+    BRLS_CHECK(announced() != "60%" && announced().back() == '%');
+    // Each went to the announcer as it was said.
+    BRLS_CHECK(!said.empty() && said.back() == announced());
+    brls::Application::setFocusAnnouncer(nullptr);
+}
+
+BRLS_TEST(announcer_says_disabled_and_explicit_values)
+{
+    Harness h;
+    auto* first  = new brls::Button();
+    auto* second = new brls::Button();
+    first->setText("Save");
+    second->setText("Quit");
+    second->setStyleState(brls::StyleState::DISABLED, true);
+    auto* box = new brls::Box();
+    box->setFocusable(true);
+    box->setAccessibilityLabel("Battery");
+    box->setAccessibilityValue("80%");
+    h.push(new brls::Activity(screenOf({ first, second, box })));
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Save, button, 1 of 3"));
+    BRLS_CHECK_EQ(second->getAccessibilityDescription(), std::string("Quit, button, disabled, 2 of 3"));
+    // No role: no place said either.
+    BRLS_CHECK_EQ(box->getAccessibilityDescription(), std::string("Battery, 80%"));
+}
+
+BRLS_TEST(focusable_box_says_the_texts_in_it)
+{
+    Harness h;
+    auto* tile = new brls::Box(brls::Axis::COLUMN);
+    tile->setFocusable(true);
+    auto* name = new brls::Label();
+    name->setText("Mario Kart");
+    auto* hidden = new brls::Label();
+    hidden->setText("never said");
+    hidden->setVisibility(brls::Visibility::GONE);
+    auto* time = new brls::Label();
+    time->setText("2 h 10");
+    auto* inner = new brls::Button(); // speaks for itself
+    inner->setText("Play");
+    tile->addView(name);
+    tile->addView(hidden);
+    tile->addView(time);
+    tile->addView(inner);
+    auto* silent = new brls::Box();
+    silent->setFocusable(true);
+    silent->setWidth(40);
+    silent->setHeight(40);
+    h.push(new brls::Activity(screenOf({ tile, silent })));
+    h.settle();
+    BRLS_CHECK_EQ(tile->getAccessibilityDescription(), std::string("Mario Kart, 2 h 10"));
+    BRLS_CHECK_EQ(silent->getAccessibilityDescription(), std::string(""));
+}
+
+BRLS_TEST(toast_and_dialog_are_announced)
+{
+    Harness h;
+    auto* button = new brls::Button();
+    button->setText("Delete");
+    h.push(new brls::Activity(screenOf({ button })));
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Delete, button"));
+
+    brls::Application::notify("Profile saved");
+    BRLS_CHECK_EQ(announced(), std::string("Profile saved"));
+
+    auto* dialog = new brls::Dialog("Delete this profile?");
+    dialog->addButton("Cancel", [] {});
+    dialog->addButton("Delete", [] {});
+    dialog->open();
+    h.settle();
+    const std::string opened = announced();
+    BRLS_CHECK(opened.rfind("Delete this profile?, dialog, ", 0) == 0);
+    BRLS_CHECK(opened.find(", button") != std::string::npos);
+    // Within the dialog, only the button.
+    h.tap(brls::BUTTON_RIGHT);
+    BRLS_CHECK(announced().rfind("Delete this profile?", 0) != 0);
+    h.tap(brls::BUTTON_B);
+    BRLS_CHECK_EQ(announced(), std::string("Delete, button"));
+}
+
+BRLS_TEST(dropdown_says_its_title_and_the_choice)
+{
+    Harness h;
+    auto* selector = new brls::SelectorCell();
+    selector->init("Region", { "Europe", "America", "Asia" }, 1, [](int) {});
+    h.push(new brls::Activity(screenOf({ selector })));
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Region, America"));
+    h.tap(brls::BUTTON_A);
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Region, list, America, selected, 2 of 3"));
+    h.tap(brls::BUTTON_DOWN);
+    BRLS_CHECK_EQ(announced(), std::string("Asia, 3 of 3"));
+}
+
+BRLS_TEST(announcer_speaks_the_app_language)
+{
+    Harness h;
+    auto* toggle = new brls::BooleanCell();
+    toggle->init("Wi-Fi", true, [](bool) {});
+    auto* other = new brls::Button();
+    other->setText("OK");
+    other->setStyleState(brls::StyleState::DISABLED, true);
+    h.push(new brls::Activity(screenOf({ toggle, other })));
+    h.settle();
+
+    brls::loadTranslations("fr");
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, interrupteur, activé, 1 sur 2"));
+    BRLS_CHECK_EQ(other->getAccessibilityDescription(), std::string("OK, bouton, indisponible, 2 sur 2"));
+    // A language that says the count first
+    brls::loadTranslations("ja");
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, スイッチ, オン, 2項目中1番目"));
+    brls::loadTranslations("en-US");
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Wi-Fi, switch, on, 1 of 2"));
+}
+
+namespace
+{
+// The demo's hooks (Cadran's theme, pickers) without its main screen
+struct CadranHarness : Demo, Harness
+{
+};
+} // namespace
+
+BRLS_TEST(cadran_pieces_have_roles_and_labels)
+{
+    CadranHarness h;
+    brls::Box* chip = cadran::kit::chip("+15 min");
+    brls::Box* card = cadran::kit::card(true, false);
+    card->addView(cadran::kit::label("Today", cadran::kit::TEXT_META));
+    card->addView(cadran::kit::label("2 h 10", cadran::kit::TEXT_BODY));
+    auto* toggle = new brls::BooleanCell();
+    toggle->init("Notifications", true, [](bool) {});
+    cadran::List::row(toggle, "bell"); // its detail hidden, a drawn switch instead
+    auto* line = new brls::DetailCell();
+    line->setText("Updates");
+    line->setDetailText("3 new  ›");
+    cadran::List::row(line, "download");
+    h.push(new brls::Activity(screenOf({ chip, card, toggle, line })));
+    h.settle();
+
+    BRLS_CHECK_EQ(announced(), std::string("+15 min, button, 1 of 4"));
+    BRLS_CHECK_EQ(card->getAccessibilityDescription(), std::string("Today, 2 h 10, 2 of 4"));
+    BRLS_CHECK_EQ(toggle->getAccessibilityDescription(), std::string("Notifications, switch, on, 3 of 4"));
+    BRLS_CHECK_EQ(line->getAccessibilityDescription(), std::string("Updates, 3 new, 4 of 4"));
+}
+
+BRLS_TEST(cadran_picker_says_its_title_and_the_choice)
+{
+    CadranHarness h;
+    auto* button = new brls::Button();
+    button->setText("Theme");
+    h.push(new brls::Activity(screenOf({ button })));
+    h.settle();
+    ui::pick("Theme", { "System", "Light", "Dark" }, 2, [](int) {});
+    h.settle();
+    BRLS_CHECK_EQ(announced(), std::string("Theme, list, Dark, selected, 3 of 3"));
+    h.tap(brls::BUTTON_UP);
+    BRLS_CHECK_EQ(announced(), std::string("Light, 2 of 3"));
+}
+
+BRLS_TEST(every_focusable_demo_view_says_something)
+{
+    DemoHarness h;
+    BRLS_CHECK(announced().rfind("Cadran, tab, selected, 1 of ", 0) == 0);
+    // Each tab of the rail in turn (focusing its item shows it)
+    std::vector<std::string> silent;
+    std::vector<std::string> seen;
+    for (int tab = 0; tab < 20; tab++)
+    {
+        std::string name = h.focusText();
+        if (std::find(seen.begin(), seen.end(), name) != seen.end())
+            break;
+        seen.push_back(name);
+        h.settle();
+        for (const std::string& view : h.silentFocusables())
+            silent.push_back(name + ": " + view);
+        h.tap(brls::BUTTON_DOWN);
+    }
+    BRLS_CHECK(seen.size() > 5);
+    for (const std::string& name : silent)
+        std::fprintf(stderr, "silent: %s\n", name.c_str());
+    BRLS_CHECK(silent.empty());
 }
 
 int main(int argc, char** argv)

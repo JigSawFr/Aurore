@@ -141,6 +141,7 @@ void cadran::install_theme()
              brls::Application::getFont(brls::FONT_CHINESE_SIMPLIFIED),
              brls::Application::getFont(brls::FONT_CHINESE_SIMPLIFIED_EXT),
              brls::Application::getFont(brls::FONT_CHINESE_TRADITIONAL),
+             brls::Application::getFont(brls::FONT_JAPANESE),
              brls::Application::getFont(brls::FONT_KOREAN_REGULAR) })
         if (font != brls::FONT_INVALID && font != digits)
             nvgAddFallbackFontId(vg, digits, font);

@@ -70,7 +70,10 @@ void DetailCell::setTextColor(NVGcolor color)
 
 void DetailCell::setDetailText(std::string title)
 {
+    bool changed = this->detail->getFullText() != title;
     this->detail->setText(title);
+    if (changed)
+        this->announceAccessibilityValue();
 }
 
 void DetailCell::setDetailTextColor(NVGcolor color)
@@ -91,11 +94,27 @@ bool DetailCell::setBoundText(const std::string& text)
 
 std::string DetailCell::getDefaultAccessibilityLabel()
 {
-    std::string label  = this->title->getFullText();
-    std::string detail = this->detail->getVisibility() == Visibility::VISIBLE ? this->detail->getFullText() : "";
-    if (!detail.empty())
-        label += (label.empty() ? "" : ", ") + detail;
-    return label;
+    return this->title->getFullText();
+}
+
+std::string DetailCell::getDefaultAccessibilityValue()
+{
+    std::string value;
+    for (View* child : this->getChildren())
+    {
+        if (child == this->title || child->isFocusable())
+            continue;
+        std::string text = child->getAccessibilityText();
+        // The "›" of a line that opens something is not read out.
+        size_t chevron;
+        while ((chevron = text.find("\u203a")) != std::string::npos)
+            text.erase(chevron, 3);
+        while (!text.empty() && text.back() == ' ')
+            text.pop_back();
+        if (!text.empty())
+            value += (value.empty() ? "" : ", ") + text;
+    }
+    return value;
 }
 
 } // namespace brls

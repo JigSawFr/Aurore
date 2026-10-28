@@ -73,6 +73,10 @@ struct Options
     // else "references" and "test-output" in the working directory.
     std::string referenceDir;
     std::string outputDir;
+    // The system's fonts (Chinese, Japanese and Korean, colour emoji) looked
+    // up: off, the pictures are the same on every machine, with the app's
+    // fonts only
+    bool systemFonts = false;
 };
 
 // An RGBA picture, rows top-down
@@ -200,6 +204,14 @@ class Harness
     bool hasText(const std::string& text);
     // The first label shown with exactly this text (nullptr: none), to tap
     View* findText(const std::string& text);
+
+    // Accessibility
+
+    // The views shown that take the focus themselves (not passing it on)
+    // with nothing to tell them apart: no accessibility label nor value
+    // (a role at most), as View::describe(). What the focus announcer was
+    // given last: Application::getLastAnnouncement().
+    std::vector<std::string> silentFocusables();
 
     // Pictures
 

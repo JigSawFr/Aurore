@@ -205,6 +205,15 @@ class Application
     static void setFocusAnnouncer(std::function<void(const std::string&)> announcer);
 
     /**
+     * Gives `text` to the focus announcer, outside of a focus move: a value
+     * changed in place (View::announceAccessibilityValue), a toast (notify
+     * says its text). Nothing for an empty text. getLastAnnouncement() is
+     * the last text given, announcer or not (for tests).
+     */
+    static void announce(const std::string& text);
+    static const std::string& getLastAnnouncement() { return Application::lastAnnouncement; }
+
+    /**
      * Reduced motion: the movements that are only there for show are skipped
      * (the transition= of views, the highlight's glide, the scrolling of
      * lists and of texts cut short, the toasts' and dropdowns' slide, the
@@ -293,6 +302,8 @@ class Application
 
     /**
      * Loads a font from a given file and stores it in the font stash.
+     * A BRLS_ASSET() path ("@res/...") is read from the resources built
+     * into the program when they are (USE_LIBROMFS).
      * Returns true if the operation succeeded.
      */
     static bool loadFontFromFile(std::string fontName, std::string filePath);
@@ -302,6 +313,11 @@ class Application
      * Returns true if the operation succeeded.
      */
     static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData);
+
+    /**
+     * The same, with the face at `faceIndex` of a font collection (.ttc).
+     */
+    static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData, int faceIndex);
 
     /**
      * Returns the nanovg handle to the given font name, or FONT_INVALID if
@@ -605,8 +621,10 @@ class Application
 
   private:
     static void updateHover(Point position, bool inside);
+    static void announceFocus(View* oldFocus, View* newFocus);
 
     inline static std::function<void(const std::string&)> focusAnnouncer;
+    inline static std::string lastAnnouncement;
     inline static bool reduceMotion = false;
     inline static std::unordered_map<std::string, DataModel*> models;
     inline static View* hoveredView = nullptr;

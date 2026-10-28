@@ -178,6 +178,8 @@ Harness::Harness(Options options)
         setSimulatedWallTime(opts.wallTime);
     }
 
+    DesktopFontLoader::useSystemFonts = opts.systemFonts;
+
     Platform::setFactory([this]()
         {
         this->headless = new HeadlessPlatform(opts.width, opts.height, opts.locale, opts.theme);
@@ -425,6 +427,17 @@ bool Harness::focusByText(const std::string& text, ControllerButton button, int 
     return focusText() == text;
 }
 
+std::vector<std::string> Harness::silentFocusables()
+{
+    std::vector<std::string> silent;
+    walkShown([&silent](View* view)
+        {
+        if (view->isFocusable() && view->getDefaultFocus() == view && view->getAccessibilityLabel().empty()
+            && view->getAccessibilityValue().empty())
+            silent.push_back(view->describe()); });
+    return silent;
+}
+
 void Harness::walkShown(const std::function<void(View*)>& visit)
 {
     std::function<void(View*)> walk = [&](View* view)
@@ -517,6 +530,14 @@ bool Harness::matchesReference(const std::string& name, const Rect& area, int to
     actual.savePng(outputPath);
 
     Image expected = Image::loadPng(referencePath);
+    if (expected.empty() && !flagFromEnvironment("BRLS_TEST_UPDATE") && std::getenv("CI"))
+    {
+        // In CI a missing reference is a test that was never checked: a typo in its name, or a file not committed
+        Logger::error("test harness: no reference {} (run with BRLS_TEST_UPDATE=1 to write it, then commit it)",
+            referencePath);
+        this->diff = ImageDiff();
+        return false;
+    }
     if (expected.empty() || flagFromEnvironment("BRLS_TEST_UPDATE"))
     {
         Logger::info("test harness: reference {} written", referencePath);

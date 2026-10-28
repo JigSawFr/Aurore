@@ -7,7 +7,13 @@
         "slider": "cursore",
         "text_field": "campo di testo",
         "tab": "scheda",
-        "list": "elenco"
+        "list": "elenco",
+        "dialog": "finestra di dialogo"
     },
-    "disabled": "disattivato"
+    "disabled": "non disponibile",
+    "on": "attivo",
+    "off": "disattivo",
+    "selected": "selezionato",
+    "position": "{} di {}",
+    "percent": "{}%"
 }

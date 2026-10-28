@@ -34,8 +34,6 @@
 #include <tuple>
 #include <vector>
 
-#include "borealis/extern/nanovg/stb_image.h"
-
 namespace brls
 {
 
@@ -104,7 +102,7 @@ namespace
             const unsigned char* row = rgba + (size_t)y * width * 4;
             for (int x = 0; x < width; x += step)
             {
-                const unsigned char* p = row + x * 4;
+                const unsigned char* p = row + (size_t)x * 4;
                 double a               = p[3] / 255.0;
                 r += linear[p[0]] * a;
                 g += linear[p[1]] * a;
@@ -148,44 +146,38 @@ namespace
         auto rows    = spans(height, outH);
 
         // Premultiplied while averaging, so a transparent pixel's colour does
-        // not bleed into its neighbours
-        std::vector<uint32_t> horizontal((size_t)outW * height * 4);
-        for (int y = 0; y < height; y++)
-        {
-            const unsigned char* row = source + (size_t)y * width * 4;
-            uint32_t* out            = horizontal.data() + (size_t)y * outW * 4;
-            for (int x = 0; x < outW; x++)
-            {
-                uint32_t sum[4] = { 0, 0, 0, 0 };
-                for (int sx = columns[x].first; sx < columns[x].second; sx++)
-                {
-                    const unsigned char* p = row + sx * 4;
-                    sum[0] += p[0] * p[3];
-                    sum[1] += p[1] * p[3];
-                    sum[2] += p[2] * p[3];
-                    sum[3] += p[3];
-                }
-                uint32_t count = columns[x].second - columns[x].first;
-                for (int c = 0; c < 4; c++)
-                    out[x * 4 + c] = sum[c] / count;
-            }
-        }
-
+        // not bleed into its neighbours; one output row at a time, in 64 bits
+        std::vector<uint64_t> sums((size_t)outW * 4);
         pixels->rgba.resize((size_t)outW * outH * 4);
         for (int y = 0; y < outH; y++)
         {
+            std::fill(sums.begin(), sums.end(), 0);
+            for (int sy = rows[y].first; sy < rows[y].second; sy++)
+            {
+                const unsigned char* row = source + (size_t)sy * width * 4;
+                for (int x = 0; x < outW; x++)
+                {
+                    uint64_t* sum = sums.data() + (size_t)x * 4;
+                    for (int sx = columns[x].first; sx < columns[x].second; sx++)
+                    {
+                        const unsigned char* p = row + (size_t)sx * 4;
+                        sum[0] += p[0] * p[3];
+                        sum[1] += p[1] * p[3];
+                        sum[2] += p[2] * p[3];
+                        sum[3] += p[3];
+                    }
+                }
+            }
+
             unsigned char* out = pixels->rgba.data() + (size_t)y * outW * 4;
-            uint32_t count     = rows[y].second - rows[y].first;
+            uint64_t rowCount  = rows[y].second - rows[y].first;
             for (int x = 0; x < outW; x++)
             {
-                uint64_t sum[4] = { 0, 0, 0, 0 };
-                for (int sy = rows[y].first; sy < rows[y].second; sy++)
-                    for (int c = 0; c < 4; c++)
-                        sum[c] += horizontal[((size_t)sy * outW + x) * 4 + c];
-                uint64_t alpha = sum[3] / count;
+                const uint64_t* sum = sums.data() + (size_t)x * 4;
+                uint64_t count      = rowCount * (uint64_t)(columns[x].second - columns[x].first);
                 for (int c = 0; c < 3; c++)
-                    out[x * 4 + c] = alpha ? (unsigned char)std::min<uint64_t>(255, sum[c] / count / alpha) : 0;
-                out[x * 4 + 3] = (unsigned char)alpha;
+                    out[x * 4 + c] = sum[3] ? (unsigned char)std::min<uint64_t>(255, sum[c] / sum[3]) : 0;
+                out[x * 4 + 3] = (unsigned char)(sum[3] / count);
             }
         }
     }
@@ -209,15 +201,15 @@ namespace
     // Decodes (any thread): false when it cannot
     bool decode(const Source& source, Pixels* pixels, int maxWidth, int maxHeight)
     {
-        int width = 0, height = 0, channels = 0;
-        unsigned char* data = source.data
-            ? stbi_load_from_memory(source.data, (int)source.size, &width, &height, &channels, 4)
-            : stbi_load(source.file.c_str(), &width, &height, &channels, 4);
+        // Refused from its header when too large (NVG_MAX_IMAGE_PIXELS)
+        int width = 0, height = 0;
+        unsigned char* data = source.data ? nvgDecodeImageMem(source.data, (int)source.size, &width, &height)
+                                          : nvgDecodeImage(source.file.c_str(), &width, &height);
         if (!data)
             return false;
         if (width <= 0 || height <= 0)
         {
-            stbi_image_free(data);
+            nvgFreeImageData(data);
             return false;
         }
         if (maxWidth > 0)
@@ -228,7 +220,7 @@ namespace
             pixels->height = height;
         }
         pixels->mean = maxWidth > 0 ? averageOf(pixels->rgba.data(), pixels->width, pixels->height) : averageOf(data, width, height);
-        stbi_image_free(data);
+        nvgFreeImageData(data);
         return true;
     }
 

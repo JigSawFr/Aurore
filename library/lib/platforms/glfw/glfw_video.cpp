@@ -43,7 +43,7 @@ std::unique_ptr<brls::D3D11Context> D3D11_CONTEXT;
 #endif
 
 #if defined(__linux__) || defined(_WIN32)
-#include "stb_image.h"
+#include <nanovg.h>
 #ifdef USE_LIBROMFS
 #include <romfs/romfs.hpp>
 #else
@@ -289,8 +289,10 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     try
     {
         auto& icon       = romfs::get("icon/icon.png");
-        images[0].pixels = stbi_load_from_memory((stbi_uc*)icon.data(), icon.size(), &images[0].width, &images[0].height, 0, 4);
-        glfwSetWindowIcon(this->window, 1, images);
+        images[0].pixels = nvgDecodeImageMem((const unsigned char*)icon.data(), (int)icon.size(), &images[0].width, &images[0].height);
+        if (images[0].pixels)
+            glfwSetWindowIcon(this->window, 1, images);
+        nvgFreeImageData(images[0].pixels);
     }
     catch (...)
     {
@@ -299,8 +301,10 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     const char* icon_path = BRLS_ASSET("icon/icon.png");
     if (access(icon_path, F_OK) != -1)
     {
-        images[0].pixels = stbi_load(icon_path, &images[0].width, &images[0].height, 0, 4);
-        glfwSetWindowIcon(this->window, 1, images);
+        images[0].pixels = nvgDecodeImage(icon_path, &images[0].width, &images[0].height);
+        if (images[0].pixels)
+            glfwSetWindowIcon(this->window, 1, images);
+        nvgFreeImageData(images[0].pixels);
     }
 #endif
 #endif

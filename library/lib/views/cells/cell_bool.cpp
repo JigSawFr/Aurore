@@ -44,7 +44,10 @@ void BooleanCell::init(std::string title, bool isOn, std::function<void(bool)> c
 
 void BooleanCell::setOn(bool on, bool animated)
 {
-    this->state = on;
+    bool changed = this->state != on;
+    this->state  = on;
+    if (changed)
+        this->announceAccessibilityValue();
 
     // Cancel any previous bounce without letting its completion callback
     // mutate the view during a new state change. Its size is put back only
@@ -101,6 +104,11 @@ void BooleanCell::updateUI()
 void BooleanCell::scaleTick()
 {
     detail->setFontSize(baseDetailTextSize * scale);
+}
+
+std::string BooleanCell::getDefaultAccessibilityValue()
+{
+    return accessibilityStateWord(this->state ? "on" : "off");
 }
 
 View* BooleanCell::create()
