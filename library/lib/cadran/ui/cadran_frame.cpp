@@ -525,9 +525,8 @@ void add_crumb(brls::AppletFrame* frame)
 {
     auto* title = dynamic_cast<brls::Label*>(frame->getView("brls/applet_frame/title_label"));
     auto* row   = title ? dynamic_cast<brls::Box*>(title->getParent()) : nullptr;
-    // Not on a screen of its own (a view "child_root": PlayGuard's child
-    // screen), which is not a step of the one below.
-    const std::string crumb = row && !frame->getView("child_root") ? crumb_of(frame) : "";
+    // Not on a screen of its own, which is not a step of the one below.
+    const std::string crumb = row && !cadran::is_standalone_screen(frame) ? crumb_of(frame) : "";
     // Nothing said twice (a game's screen is titled as its tab: Activity).
     if (crumb.empty() || title->getFullText().empty() || crumb == title->getFullText())
         return;
@@ -1011,6 +1010,18 @@ void cadran::style_rail(brls::View* tab_frame)
 bool cadran::is_main_frame(brls::View* frame)
 {
     return frame && (frame->getView("main_tabs") || frame->getView("brls/tab_frame/sidebar"));
+}
+
+bool cadran::is_standalone_screen(brls::View* frame)
+{
+    if (!frame)
+        return false;
+    const auto& standalone = ui::hooks::get().standalone_screen;
+    if (standalone)
+        return standalone(frame);
+    // "child_root": the id PlayGuard gave its child screen before the hook,
+    // kept until it sets the hook.
+    return frame->getView("cadran/standalone") || frame->getView("child_root");
 }
 
 void cadran::style_frame(brls::AppletFrame* frame, brls::View* tab_frame)

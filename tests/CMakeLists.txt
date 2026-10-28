@@ -22,7 +22,7 @@ target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_image_limits_tests PRIVATE AURORE_SOURCE_RESOURCES="${CMAKE_SOURCE_DIR}/resources/")
 brls_add_tests(aurore_image_limits_tests)
 
-# Markdown, safe text and XML layouts: bounds, time, errors
+# XML layouts: bounds, errors
 add_executable(aurore_parser_tests parser_tests.cpp)
 target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
 brls_add_tests(aurore_parser_tests)
@@ -76,3 +76,6 @@ find_package(Python3 COMPONENTS Interpreter QUIET)
 if(Python3_Interpreter_FOUND)
     add_test(NAME xml_attributes_doc COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/xml_attributes.py --check)
 endif()
+
+# Cadran's plain C++ parts, without a window
+add_subdirectory(host)

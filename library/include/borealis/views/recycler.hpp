@@ -29,6 +29,8 @@
 namespace brls
 {
 
+/// A cell's place in a RecyclerFrame: its section and row (`item`: the row, or the
+/// item's index for a grid).
 struct IndexPath
 {
     size_t section;
@@ -58,32 +60,36 @@ struct IndexPath
     }
 };
 
+/// A cell of a RecyclerFrame, reused as the list scrolls: subclass it, fill it in
+/// RecyclerDataSource::cellForRow().
 class RecyclerCell : public Box
 {
   public:
+    /// An empty cell.
     RecyclerCell();
     ~RecyclerCell();
 
-    /*
+    /**
      * Cell's position inside recycler frame
      */
     IndexPath getIndexPath() const { return indexPath; }
 
-    /*
+    /**
      * DO NOT USE! FOR INTERNAL USAGE ONLY!
      */
     void setIndexPath(IndexPath value);
 
-    /*
+    /**
      * A string used to identify a cell that is reusable.
      */
     std::string reuseIdentifier;
 
-    /*
+    /**
      * Prepares a reusable cell for reuse by the recycler frame's data source.
      */
     virtual void prepareForReuse() { }
 
+    /// Makes an empty cell (registerCell's default).
     static RecyclerCell* create();
 
     void onFocusGained() override;
@@ -95,15 +101,19 @@ class RecyclerCell : public Box
     Event<InputType>::Subscription subscription;
 };
 
+/// A section's header in a RecyclerFrame: a title and a subtitle.
 class RecyclerHeader
     : public RecyclerCell
 {
   public:
     RecyclerHeader();
 
+    /// The header's title.
     void setTitle(std::string text);
+    /// The header's subtitle, on the right.
     void setSubtitle(std::string text);
 
+    /// Makes an empty header.
     static RecyclerHeader* create();
 
   private:
@@ -111,47 +121,49 @@ class RecyclerHeader
 };
 
 class RecyclerFrame;
+/// What a RecyclerFrame shows: the app subclasses it and gives it with
+/// RecyclerFrame::setDataSource().
 class RecyclerDataSource
 {
   public:
-    /*
+    /**
      * Asks the data source to return the number of sections in the recycler frame.
      */
     virtual int numberOfSections(RecyclerFrame* recycler) { return 1; }
 
-    /*
+    /**
      * Tells the data source to return the number of rows in a recycler frame.
      */
     virtual int numberOfRows(RecyclerFrame* recycler, int section) { return 0; }
 
-    /*
+    /**
      * Asks the data source for a cell to insert in a particular location of the recycler frame.
      */
     virtual RecyclerCell* cellForRow(RecyclerFrame* recycler, IndexPath index) { return nullptr; }
 
-    /*
+    /**
      * Asks the data source for a cell to display in the header of the specified section of the recycler frame.
      */
     virtual RecyclerCell* cellForHeader(RecyclerFrame* recycler, int section);
 
-    /*
+    /**
      * Asks the data source for the height to use for a row in a specified location.
      * Return -1 to use autoscaling.
      */
     virtual float heightForRow(RecyclerFrame* recycler, IndexPath index) { return -1; }
 
-    /*
+    /**
      * Asks the data source for the height to use for the header of a particular section.
      * Return -1 to use autoscaling.
      */
     virtual float heightForHeader(RecyclerFrame* recycler, int section);
 
-    /*
+    /**
      * Asks the data source for the title of the header of the specified section of the recycler frame.
      */
     virtual std::string titleForHeader(RecyclerFrame* recycler, int section) { return ""; }
 
-    /*
+    /**
      * Tells the data source a row is selected.
      */
     virtual void didSelectRowAt(RecyclerFrame* recycler, IndexPath index) { }
@@ -159,6 +171,7 @@ class RecyclerDataSource
     virtual ~RecyclerDataSource() = default;
 };
 
+/// The box a RecyclerFrame lays its cells in, which asks it where the focus goes.
 class RecyclerContentBox : public Box
 {
   public:
@@ -169,13 +182,18 @@ class RecyclerContentBox : public Box
     RecyclerFrame* recycler;
 };
 
-// Custom Box for propper recycling navigation
+/// A list that makes only the cells on screen, and reuses them as it
+/// scrolls: a long list at the cost of a short one. Its rows come from a
+/// RecyclerDataSource; its cells are registered by a reuse identifier
+/// (registerCell) and taken back with dequeueReusableCell().
 class RecyclerFrame : public ScrollingFrame
 {
   public:
+    /// An empty list; give it a data source and register its cells.
     RecyclerFrame();
     ~RecyclerFrame();
 
+    /// The cell the focus goes to from `currentView` (cells off screen included).
     View* getNextCellFocus(FocusDirection direction, View* currentView);
     void draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx) override;
     void onLayout() override;
@@ -187,7 +205,7 @@ class RecyclerFrame : public ScrollingFrame
     void setPaddingBottom(float bottom) override;
     void setPaddingLeft(float left) override;
 
-    /*
+    /**
      * Set an object that acts as the data source of the recycler frame.
      *
      * deleteDataSource: set to false if source object deletion should NOT be
@@ -195,47 +213,50 @@ class RecyclerFrame : public ScrollingFrame
      */
     void setDataSource(RecyclerDataSource* source, bool deleteDataSource = true);
 
-    /*
+    /**
      * Get an object that acts as the data source of the recycler frame.
      */
     RecyclerDataSource* getDataSource() const;
 
-    /*
+    /**
      * Reloads the rows of the recycler frame.
      */
     void reloadData();
 
-    /*
+    /**
      * Registers a class for use in creating new recycler cells.
      */
     void registerCell(std::string identifier, std::function<RecyclerCell*(void)> allocation);
 
-    /*
+    /**
      * Returns a reusable recycler-frame cell object for the specified reuse identifier
      */
     RecyclerCell* dequeueReusableCell(std::string identifier);
 
-    /*
+    /**
      * Selects a row in the recycler frame identified by index path.
      */
     void selectRowAt(IndexPath indexPath, bool animated);
 
-    /*
+    /**
      * Used for initial recycler's frame calculation if rows autoscaling selected.
-     * To provide more accurate height implement DataSource->cellHeightForRow().
+     * To provide more accurate height implement RecyclerDataSource::heightForRow().
      */
     float estimatedRowHeight = 44;
 
+    /// The cell that takes the focus first.
     IndexPath getDefaultCellFocus()
     {
         return this->defaultCellFocus;
     }
 
+    /// See getDefaultCellFocus().
     void setDefaultCellFocus(IndexPath indexPath)
     {
         this->defaultCellFocus = indexPath;
     }
 
+    /// Makes a list for XML (`<brls:RecyclerFrame>`).
     static View* create();
 
   private:

@@ -13,45 +13,50 @@
 
 namespace cadran
 {
-// The boards' two palettes on borealis' two variants (dark: navy; light:
-// cool white), the rail's metrics and the display font: before any view.
+/// The boards' two palettes on borealis' two variants (dark: navy; light:
+/// cool white), the rail's metrics and the display font: before any view.
 void install_theme();
-// A frame's header after the boards: the mark for the app icon, the title
-// at 24, a pill at the right (`icon` and `text`; `filled` teal, else a
-// bordered one) and, when asked, the date.
+/// A frame's header after the boards: the mark for the app icon, the title
+/// at 24, a pill at the right (`icon` and `text`; `filled` teal, else a
+/// bordered one) and, when asked, the date.
 void style_header(brls::AppletFrame* frame, const char* icon, const std::string& text, bool filled, bool with_date);
-// From then on, every screen but the main one gets the header after the
-// boards (the mark, the title) and its list in cards (cadran::List), the
-// first time it takes the focus.
+/// From then on, every screen but the main one gets the header after the
+/// boards (the mark, the title) and its list in cards (cadran::List), the
+/// first time it takes the focus.
 void install_screens();
-// A TabFrame's sidebar as the boards' rail: an icon before each label, the
-// active tab on a teal pill; open, on its icons, or folding by itself as
-// ui::prefs() says (ui::RAILS).
+/// A TabFrame's sidebar as the boards' rail: an icon before each label, the
+/// active tab on a teal pill; open, on its icons, or folding by itself as
+/// ui::prefs() says (ui::RAILS).
 void style_rail(brls::View* tab_frame);
-// ui::prefs().rail changed (an app's Preferences › Sidebar): the main
-// screen's rail after it, at once.
+/// ui::prefs().rail changed (an app's Preferences › Sidebar): the main
+/// screen's rail after it, at once.
 void apply_rail();
-// Both, for the main screen.
+/// Both, for the main screen.
 void style_frame(brls::AppletFrame* frame, brls::View* tab_frame);
-// Whether `frame` is a main screen: it holds a TabFrame (or a view with the
-// id "main_tabs"). install_screens() styles it with style_frame() the first
-// time it takes the focus, unless the app did already.
+/// Whether `frame` is a main screen: it holds a TabFrame (or a view with the
+/// id "main_tabs"). install_screens() styles it with style_frame() the first
+/// time it takes the focus, unless the app did already.
 bool is_main_frame(brls::View* frame);
-// The main screen's header pill: its text, or hidden when empty (each
-// screen says what it has to: "Library up to date", "Play timer on"…), its
-// icon, and its tone: amber for a state that needs the user, coral for
-// something off that should be on. While the app writes nothing (ui::hooks'
-// read_only), the pill says so instead, whatever the screen.
+/// Whether `frame` is a screen of its own, not a step from the one under it
+/// (a child's screen): no "Console ›" crumb before its title, no version
+/// badge after it. The app says so with ui::hooks' standalone_screen, or by a
+/// view with the id "cadran/standalone" in the screen.
+bool is_standalone_screen(brls::View* frame);
+/// The main screen's header pill: its text, or hidden when empty (each
+/// screen says what it has to: "Library up to date", "Play timer on"…), its
+/// icon, and its tone: amber for a state that needs the user, coral for
+/// something off that should be on. While the app writes nothing (ui::hooks'
+/// read_only), the pill says so instead, whatever the screen.
 enum class Tone
 {
     OK,
     WARN,
     DANGER
 };
-// A mode of the app the main screen's pill says over what every screen
-// says, as long as it lasts (ui::hooks' pill fills it in; read-only is
-// Aurore's own): its text, icon and tone, and what a tap on the pill opens
-// (nullptr: nothing). PlayGuard's: parental controls paused or unlocked.
+/// A mode of the app the main screen's pill says over what every screen
+/// says, as long as it lasts (ui::hooks' pill fills it in; read-only is
+/// Aurore's own): its text, icon and tone, and what a tap on the pill opens
+/// (nullptr: nothing). PlayGuard's: parental controls paused or unlocked.
 struct PillMode
 {
     std::string text;
@@ -60,11 +65,11 @@ struct PillMode
     std::function<void()> on_tap;
 };
 void set_pill(const std::string& text, const char* icon = "check", Tone tone = Tone::OK);
-// The pill again after a mode changed (ui::hooks' pill, read-only).
+/// The pill again after a mode changed (ui::hooks' pill, read-only).
 void refresh_pill();
-// The soft glow of the boards, an absolute full-screen view to add first in
-// a frame: a radial gradient of `color_key` centred on (cx, cy), `radius`
-// wide. Nothing with the lighter effects (cadran/ui/effects), without the
-// glow (ui::prefs) or with BRLS_CADRAN_NOGLOW=1 (ui::env_flag).
+/// The soft glow of the boards, an absolute full-screen view to add first in
+/// a frame: a radial gradient of `color_key` centred on (cx, cy), `radius`
+/// wide. Nothing with the lighter effects (cadran/ui/effects), without the
+/// glow (ui::prefs) or with BRLS_CADRAN_NOGLOW=1 (ui::env_flag).
 brls::View* make_glow(float cx, float cy, float radius, const char* color_key);
 }

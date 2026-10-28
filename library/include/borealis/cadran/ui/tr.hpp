@@ -18,8 +18,8 @@ namespace internal
     std::string getRawStr(std::string stringName);
 } // namespace internal
 
-// As borealis' (core/i18n.hpp): a string that does not take the arguments
-// reads as its key.
+/// As borealis' (core/i18n.hpp): a string that does not take the arguments
+/// reads as its key.
 template <typename... Args>
 std::string getStr(std::string stringName, Args&&... args)
 {
