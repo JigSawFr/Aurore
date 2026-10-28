@@ -55,9 +55,9 @@ const std::string LOCALE_AUTO = "auto";
 const std::string LOCALE_DEFAULT = LOCALE_EN_US;
 
 /**
- * The locale borealis uses (one of the LOCALE_ above) for a system one:
+ * The locale Aurore uses (one of the LOCALE_ above) for a system one:
  * POSIX ("fr_FR.UTF-8", "pt_BR@euro"), BCP 47 ("fr-CA", "zh-Hant-TW") or a
- * language alone ("de"). en-US when no locale of borealis matches.
+ * language alone ("de"). en-US when no locale of Aurore matches.
  */
 std::string localeFromSystem(std::string system);
 

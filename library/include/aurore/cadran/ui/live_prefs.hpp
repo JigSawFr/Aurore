@@ -13,7 +13,7 @@
 
 namespace live_prefs
 {
-/// Right after borealis starts, which reads the console's own theme and
+/// Right after Aurore starts, which reads the console's own theme and
 /// language (what "system" means): those kept, and the strings loaded in the
 /// preferences' language.
 void start();

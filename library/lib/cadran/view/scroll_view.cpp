@@ -9,7 +9,7 @@
 
 ScrollView::ScrollView()
 {
-    // "centered" turns borealis' natural scrolling off; the scrolling itself
+    // "centered" turns Aurore's natural scrolling off; the scrolling itself
     // is ours (onChildFocusGained, step).
     this->setScrollingBehavior(aurore::ScrollingBehavior::CENTERED);
     this->registerAction("", aurore::BUTTON_NAV_DOWN, [this](aurore::View*)
@@ -26,7 +26,7 @@ aurore::View* ScrollView::create()
 void ScrollView::willAppear(bool resetState)
 {
     aurore::ScrollingFrame::willAppear(resetState);
-    // Not borealis' centring: our reveal, once the first layout is known.
+    // Not Aurore's centring: our reveal, once the first layout is known.
     this->updateScrollingOnNextFrame = false;
     if (resetState)
         this->reveal_pending = true;
@@ -229,7 +229,7 @@ void ScrollView::reveal(aurore::View* view, bool animated)
     this->startScrolling(animated, target);
 }
 
-// A D-pad press: false lets borealis move the focus (then reveal() scrolls),
+// A D-pad press: false lets Aurore move the focus (then reveal() scrolls),
 // true when the press only scrolled, through a text taller than the screen.
 bool ScrollView::step(aurore::FocusDirection direction)
 {
@@ -249,7 +249,7 @@ bool ScrollView::step(aurore::FocusDirection direction)
             return false;
         this->startScrolling(true, target);
         // The focused line scrolled out of sight: the focus waits on the frame
-        // (no highlight, borealis would draw it over the header or the footer).
+        // (no highlight, Aurore would draw it over the header or the footer).
         if (focus != this)
         {
             const Span line = this->span_of(focus);

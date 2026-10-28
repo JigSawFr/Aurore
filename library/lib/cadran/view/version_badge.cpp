@@ -18,7 +18,7 @@ VersionBadge::VersionBadge()
     this->setAlignItems(aurore::AlignItems::CENTER);
     this->setAlignSelf(aurore::AlignSelf::CENTER);
     this->setMarginLeft(16);
-    // Level with the title, which borealis moves down by this much, less 8:
+    // Level with the title, which Aurore moves down by this much, less 8:
     // centred like the title's box, the tag and the commit sat 4 px below
     // the middle of its capitals (the larger font has more room under them),
     // and a centred box moves by half its margin.
@@ -57,7 +57,7 @@ VersionBadge::VersionBadge()
 }
 
 // Adds the badge right after the title of the screen holding `focus` (its
-// root view: borealis gives a new screen the focus before putting it on the
+// root view: Aurore gives a new screen the focus before putting it on the
 // activity stack), unless it has one. Screens without the applet frame's
 // header (the loading screen, dialogs) are left alone.
 static void badge_screen_of(aurore::View* focus)

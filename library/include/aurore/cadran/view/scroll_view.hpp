@@ -1,7 +1,7 @@
 // ScrollView — the scrolling frame of every Cadran screen (<ScrollView> in
 // the XML, with aurore:ScrollingFrame's attributes).
 //
-// borealis' default ("natural") scrolling moves a frame's worth of pixels per
+// Aurore's default ("natural") scrolling moves a frame's worth of pixels per
 // D-pad press once the next line is partly off screen, so a short press barely
 // scrolls and the focus can sit on the frame itself, with no highlight; its
 // "centered" mode keeps the focused line mid-screen, which hides a section's

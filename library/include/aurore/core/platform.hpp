@@ -31,7 +31,7 @@
 namespace aurore
 {
 
-// Interface to provide everything platform specific required to run borealis: graphics context, inputs, audio...
+// Interface to provide everything platform specific required to run Aurore: graphics context, inputs, audio...
 // The best platform is automatically selected when the application starts, and cannot be changed by the user at the moment
 class Platform
 {
@@ -139,7 +139,7 @@ class Platform
      * @param reason If disable is true, pass Inhibited reason to the system.
      * @param app If disable is true, pass app name to the system.
      */
-    virtual void disableScreenDimming(bool disable, const std::string& reason = "disable dimming", const std::string& app = "borealis") = 0;
+    virtual void disableScreenDimming(bool disable, const std::string& reason = "disable dimming", const std::string& app = "aurore") = 0;
 
     /**
      * Returns true if screen dimming is disabled

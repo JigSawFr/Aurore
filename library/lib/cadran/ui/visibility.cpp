@@ -101,7 +101,7 @@ void set_detail(aurore::DetailCell* cell, const std::string& text)
 
 void batch_layout(aurore::Box* box, const std::function<void()>& fill)
 {
-    // Out of its parent's Yoga node only: borealis' views, their parents and
+    // Out of its parent's Yoga node only: Aurore's views, their parents and
     // the focus stay as they are, and a change inside stops at the box.
     YGNodeRef node  = box ? box->getYGNode() : nullptr;
     YGNodeRef owner = node ? YGNodeGetOwner(node) : nullptr;

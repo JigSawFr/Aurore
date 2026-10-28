@@ -1,6 +1,6 @@
 // cadran_palette — the boards' two palettes as plain values (no view, no
 // nanovg), every colour Cadran draws with: cadran::install_theme puts them
-// in borealis' themes under their keys (KEYS below), where a theme file
+// in Aurore's themes under their keys (KEYS below), where a theme file
 // can change any of them (docs/themes.md), and a host suite checks the
 // contrast of every ink on every surface it is drawn on (tests/host;
 // Theme::checkContrast does the same at run time, with CONTRAST below).
@@ -180,7 +180,7 @@ constexpr Palette LIGHT = {
 };
 
 /// Each colour's theme keys: the Cadran one ("cadran/…"), and the core's it
-/// also sets so that borealis' own views take the boards' look.
+/// also sets so that Aurore's own views take the boards' look.
 struct Key
 {
     const char* name;
@@ -314,7 +314,7 @@ constexpr Contrast CONTRAST[] = {
     { "aurore/highlight/color2", "aurore/background", 3.0f },
     { "aurore/highlight/color1", "cadran/surf", 3.0f },
     { "aurore/highlight/color2", "cadran/surf", 3.0f },
-    // Secondary text in borealis' cells, on a card too.
+    // Secondary text in Aurore's cells, on a card too.
     { "aurore/text_secondary", "cadran/surf", 4.5f },
     { "aurore/list/listItem_value_color", "cadran/surf", 4.5f },
     // Shapes that carry meaning, at 3:1 (WCAG 1.4.11): a tile's icon, a

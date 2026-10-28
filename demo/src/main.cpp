@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
         }
         else if (std::strcmp(argv[i], "-o") == 0)
         {
-            const char* path = (i + 1 < argc) ? argv[++i] : "borealis.log";
+            const char* path = (i + 1 < argc) ? argv[++i] : "aurore.log";
             aurore::Logger::setLogOutput(std::fopen(path, "w+"));
         }
         else if (std::strcmp(argv[i], "-v") == 0)
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
     // Init the app and i18n
     if (!aurore::Application::init())
     {
-        aurore::Logger::error("Unable to init Borealis application");
+        aurore::Logger::error("Unable to init Aurore application");
         return EXIT_FAILURE;
     }
 

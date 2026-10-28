@@ -604,7 +604,7 @@ void SDLInputManager::updateControllerState(ControllerState* state, int controll
 
     for (size_t i = 0; i < SDL_GAMEPAD_BUTTON_MAX; i++)
     {
-        // Translate SDL gamepad to borealis controller
+        // Translate SDL gamepad to Aurore controller
         size_t auroreButton          = SDL_BUTTONS_MAPPING[i];
         state->buttons[auroreButton] = (bool)SDL_GameControllerGetButton(c, (SDL_GameControllerButton)i);
     }

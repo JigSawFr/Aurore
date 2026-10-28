@@ -16,7 +16,7 @@ static aurore::Time s_timed_until = 0;
 static aurore::Time s_timed_total = 0;
 
 // Each hint's room on either side and between its button and its text
-// (borealis' hint XML), and the least they get here: 2 × 6 px still part
+// (Aurore's hint XML), and the least they get here: 2 × 6 px still part
 // one hint from the next.
 static constexpr float HINT_PADDING     = 16;
 static constexpr float HINT_PADDING_MIN = 6;
@@ -75,7 +75,7 @@ void FooterHints::fit()
     status->setShrink(0);
     this->setShrink(0); // the hints at the width they ask for
 
-    // The row has no padding on its sides (borealis' bottom_bar.cpp).
+    // The row has no padding on its sides (Aurore's bottom_bar.cpp).
     const float room = row->getWidth() - status->getWidth() - CLOCK_GAP;
     const float over = this->getWidth() - room;
     if (over <= 0)
@@ -83,7 +83,7 @@ void FooterHints::fit()
 
     // Closer together, by no more than they need: less room on their sides
     // first, then between button and text. Refilled hints are new views, so
-    // each starts from borealis' spacing again.
+    // each starts from Aurore's spacing again.
     float need              = std::ceil(over / this->getChildren().size()); // per hint
     const float padding_cut = std::min<float>(std::ceil(need / 2), HINT_PADDING - HINT_PADDING_MIN);
     need                    = std::max(0.0f, need - 2 * padding_cut);

@@ -23,7 +23,7 @@ namespace ui
 {
 
 // The status colours below are the boards' inks (cadran::install_theme(),
-// which must run before the first lookup: borealis aborts on an unknown
+// which must run before the first lookup: Aurore aborts on an unknown
 // theme key), one shade per theme (>= 4.5:1).
 
 /// On the console: the default font of the labels made from now on, for the
@@ -56,7 +56,7 @@ void error(const std::string& what, const std::string& why);
 /// The dialog the three open, now: the title, the reason, the code small, and
 /// Send a report (OK focused) when `f.report`.
 void show_failure(const cadran_text::Failure& f);
-/// `next` in place of the current screen. Borealis never pops the first
+/// `next` in place of the current screen. Aurore never pops the first
 /// activity (the loading screen, under every start screen): a screen that
 /// cannot be popped gets `next` pushed over it instead.
 void replace_screen(aurore::Activity* next);
@@ -117,7 +117,7 @@ aurore::Dialog* dialog(const std::string& text, aurore::View* below);
 /// in a scrolling frame when taller than the dialog's room.
 aurore::Dialog* box_dialog(aurore::Box* body);
 
-/// B closes `dialog` and runs `on_cancel` (borealis' own B only closes it).
+/// B closes `dialog` and runs `on_cancel` (Aurore's own B only closes it).
 void on_cancel(aurore::Dialog* dialog, std::function<void()> on_cancel);
 /// A Cancel button and B, both closing `dialog` and running `cancel`: a
 /// dialog that waits for something (a check, an answer from the network).
@@ -219,19 +219,19 @@ void set_visible(aurore::View* view, bool visible);
 /// the focus.
 void set_visible_all(std::initializer_list<std::pair<aurore::View*, bool>> changes);
 
-/// A label's text, or a cell's detail, set only when it changes: borealis lays
+/// A label's text, or a cell's detail, set only when it changes: Aurore lays
 /// the whole screen out again on every setText, and the tabs that refresh
 /// themselves every few seconds mostly write the same values back.
 void set_text(aurore::Label* label, const std::string& text);
 void set_detail(aurore::DetailCell* cell, const std::string& text);
 
 /// Runs `fill`, which adds many views to `box` (or changes them), with the box
-/// out of the screen's layout, then lays the screen out once. borealis lays
+/// out of the screen's layout, then lays the screen out once. Aurore lays
 /// the whole screen out again on each addView and setText: a list of n rows
 /// built in place cost n layouts of the whole screen, n of them on screen.
 void batch_layout(aurore::Box* box, const std::function<void()>& fill);
 
-/// For an activity's onResume(): borealis then gives the focus back to the
+/// For an activity's onResume(): Aurore then gives the focus back to the
 /// view that opened the dialog (or screen) just closed, and gives none when
 /// that view was hidden meanwhile; the focus would stay on the closed
 /// dialog's button, deleted after its animation, and no button answer any
@@ -240,10 +240,10 @@ void batch_layout(aurore::Box* box, const std::function<void()>& fill);
 void keep_focus(aurore::Activity* activity, aurore::View* fallback = nullptr);
 
 /// Whether `activity` has the focus: nothing (a dialog, another screen) is
-/// open over it. Unlike the top of borealis' stack, true again as soon as a
+/// open over it. Unlike the top of Aurore's stack, true again as soon as a
 /// dialog over it starts closing.
 bool has_focus(aurore::Activity* activity);
-/// Whether `activity` is the top of borealis' stack: no screen or dialog
+/// Whether `activity` is the top of Aurore's stack: no screen or dialog
 /// pushed over it, one closing included.
 bool on_top(aurore::Activity* activity);
 /// The main screen, wherever it is in the stack; nullptr before it opens.

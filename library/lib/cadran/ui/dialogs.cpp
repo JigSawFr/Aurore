@@ -92,7 +92,7 @@ aurore::Dialog* box_dialog(aurore::Box* body)
     const float room = content_height();
     if (YGNodeLayoutGetHeight(body->getYGNode()) <= room)
         return new aurore::Dialog(body);
-    // In a scrolling frame, each line keeps the height of its text (borealis
+    // In a scrolling frame, each line keeps the height of its text (Aurore
     // caps a label at its parent's, which a scrolling body does not settle).
     std::function<void(aurore::View*)> unbounded = [&unbounded](aurore::View* view)
     {
@@ -351,7 +351,7 @@ namespace
         std::function<void()> full; // held long enough
     };
     constexpr int64_t HOLD_US = 2000000;
-    // borealis repeats a held key's action after 250 ms, then every 100 ms: a
+    // Aurore repeats a held key's action after 250 ms, then every 100 ms: a
     // longer gap is a key let go.
     constexpr int64_t LET_GO_US = 350000;
 

@@ -642,7 +642,7 @@ int runTests(int argc, char** argv)
         return 2;
     }
 
-    // Each case in a process of its own: borealis' Application is global
+    // Each case in a process of its own: Aurore's Application is global
     int failed = 0;
     for (auto& test : tests)
     {

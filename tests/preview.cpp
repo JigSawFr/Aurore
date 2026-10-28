@@ -20,7 +20,7 @@
 //   aurore-preview layout.xml [--theme dark|light|<theme file>] [--lang <code>]
 //                  [--size WxH] [-o out.png]
 //
-// The XML may use borealis' views, Cadran's and the demo's (an app with
+// The XML may use Aurore's views, Cadran's and the demo's (an app with
 // views of its own builds the same tool with aurore::test::Harness, after
 // registering them). Resources are the demo's: "@res/..." and i18n strings.
 

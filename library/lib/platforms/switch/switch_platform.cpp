@@ -122,7 +122,7 @@ void SwitchPlatform::createWindow(std::string windowTitle, uint32_t windowWidth,
     this->videoContext = new GLFWVideoContext(windowTitle, windowWidth, windowHeight);
 #endif
 
-    // Reinitialise controllers with settings from borealis, not by GLFW or SDL
+    // Reinitialise controllers with settings from Aurore, not by GLFW or SDL
     this->inputManager = new SwitchInputManager();
 }
 

@@ -13,7 +13,7 @@
 
 namespace cadran
 {
-/// The boards' two palettes on borealis' two variants (dark: navy; light:
+/// The boards' two palettes on Aurore's two variants (dark: navy; light:
 /// cool white), the rail's metrics and the display font: before any view.
 void install_theme();
 /// A frame's header after the boards: the mark for the app icon, the title

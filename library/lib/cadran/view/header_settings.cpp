@@ -25,7 +25,7 @@ static constexpr const char* THEME_ID    = "header_theme";
 static constexpr const char* TEXT_ID     = "header_text_size";
 
 // "FR" for "fr" and "fr-CA", "ZH" for "zh-Hans": the language, not the region
-// (the list says which one). "system": the language the console gave borealis.
+// (the list says which one). "system": the language the console gave Aurore.
 static std::string language_code()
 {
     std::string locale = ui::prefs().language;

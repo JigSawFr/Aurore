@@ -91,7 +91,7 @@ void start()
     if (done)
         return;
     done = true;
-    // The platform read the console's language (the app leaves borealis'
+    // The platform read the console's language (the app leaves Aurore's
     // locale on auto), and the strings are in it: the preferences' instead.
     s_system_theme            = aurore::Application::getPlatform()->getThemeVariant();
     s_system_locale           = aurore::Application::getLocale();

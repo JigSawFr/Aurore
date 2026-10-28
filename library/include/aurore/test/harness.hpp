@@ -28,7 +28,7 @@
 //     AURORE_CHECK(h.focusText() == "Settings");
 //     AURORE_CHECK(h.matchesReference("main_settings"));
 //
-// One Harness per process: borealis' Application is global.
+// One Harness per process: Aurore's Application is global.
 
 #include <aurore/core/activity.hpp>
 #include <aurore/core/geometry.hpp>

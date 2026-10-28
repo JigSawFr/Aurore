@@ -29,7 +29,7 @@
 
 namespace cadran
 {
-/// Once borealis has started (Application::init): the console's theme and
+/// Once Aurore has started (Application::init): the console's theme and
 /// language kept, the strings loaded in the preferences' language. The app
 /// sets ui::hooks and calls ui::use_prefs before.
 void start();

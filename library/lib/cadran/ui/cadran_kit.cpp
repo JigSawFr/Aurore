@@ -231,7 +231,7 @@ Chip::Chip()
 
 void Chip::frame(aurore::FrameContext* ctx)
 {
-    // The press's flash (borealis' click animation, 0 → 1 → 0) as a dip of
+    // The press's flash (Aurore's click animation, 0 → 1 → 0) as a dip of
     // the whole chip, background and words, about its middle.
     const float press = effects::motion() ? this->getClickAlpha() : 0.0f;
     if (press <= 0.0f)

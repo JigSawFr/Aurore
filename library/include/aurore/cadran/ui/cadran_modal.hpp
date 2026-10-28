@@ -1,4 +1,4 @@
-// cadran — the Cadran look of borealis' dialogs and pickers: a rounded card
+// cadran — the Cadran look of Aurore's dialogs and pickers: a rounded card
 // on a navy backdrop, the buttons as pills (a confirmation in teal, or coral
 // when it deletes or stops something), the picker floating above the hints
 // with its current row in teal. The toasts and the backdrop are theme values

@@ -74,7 +74,7 @@ class Application
     inline static std::string appId               = ""; ///< See setAppId().
 
     /**
-     * Inits the borealis application.
+     * Inits the Aurore application.
      * Returns true if it succeeded, false otherwise.
      */
     static bool init();
@@ -92,7 +92,7 @@ class Application
 
     /**
      * Aurore draws every app in Cadran's look (docs/cadran.md): init() and
-     * createWindow() start it. false, before init(), keeps borealis' own
+     * createWindow() start it. false, before init(), keeps Aurore's own
      * look instead.
      */
     static void setCadran(bool on) { Application::cadran = on; }

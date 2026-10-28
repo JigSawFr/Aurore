@@ -50,7 +50,7 @@ typedef std::vector<DelayOperation>::iterator DelayOperationIterator;
  * Enqueue a function to be executed before
  * the application is redrawn the next time.
  *
- * Borealis is not thread-safe, and sync() provides a mechanism
+ * Aurore is not thread-safe, and sync() provides a mechanism
  * for queuing up UI-related state changes from other threads.
  *
  * It's a shortcut for aurore::Application::sync(&func);
@@ -80,7 +80,7 @@ class Threading
      * Enqueue a function to be executed before
      * the application is redrawn the next time.
      *
-     * Borealis is not thread-safe, and sync() provides a mechanism
+     * Aurore is not thread-safe, and sync() provides a mechanism
      * for queuing up UI-related state changes from other threads.
      */
     static void sync(std::function<void()> func);

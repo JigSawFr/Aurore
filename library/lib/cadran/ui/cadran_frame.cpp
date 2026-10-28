@@ -423,7 +423,7 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
             const float icons   = style["aurore/sidebar/padding_left"] + RAIL_ITEM_PAD + RAIL_ICON / 2;
             const float start   = style["aurore/applet_frame/padding_sides"] + style["aurore/applet_frame/header_padding_sides"];
             mark->setMarginLeft(icons - MARK_SIZE / 2 - start);
-            mark->setCulled(false); // left of its box, which borealis would take for off-screen
+            mark->setCulled(false); // left of its box, which Aurore would take for off-screen
         }
         left->addView(mark, 0);
     }

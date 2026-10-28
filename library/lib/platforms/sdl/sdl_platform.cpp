@@ -79,7 +79,7 @@ SDLPlatform::SDLPlatform()
         SDL_Locale* locales = SDL_GetPreferredLocales();
         if (locales != nullptr && locales->language != nullptr)
         {
-            // Every locale of borealis (a browser in French gave English:
+            // Every locale of Aurore (a browser in French gave English:
             // only five were known)
             std::string lang = std::string { locales->language };
             if (locales->country)

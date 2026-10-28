@@ -320,7 +320,7 @@ void GLFWInputManager::updateControllerState(ControllerState* state, int control
 
     for (size_t i = 0; i < GLFW_GAMEPAD_BUTTON_MAX; i++)
     {
-        // Translate GLFW gamepad to borealis controller
+        // Translate GLFW gamepad to Aurore controller
         size_t auroreButton          = GLFW_BUTTONS_MAPPING[i];
         state->buttons[auroreButton] = (bool)glfwState.buttons[i];
     }

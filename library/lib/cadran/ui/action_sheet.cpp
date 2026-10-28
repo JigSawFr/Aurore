@@ -4,7 +4,7 @@
 // each line its icon in a soft square (or a swatch of colours), its label
 // and, at its end, what is set now, a switch, or the check of the value
 // chosen; removals in coral.
-// It sits where borealis' Dropdown did (880 px wide, above the hints), over
+// It sits where Aurore's Dropdown did (880 px wide, above the hints), over
 // the screen it was opened from, as tall as its lines (the rest scrolls);
 // B, or a touch outside it, closes it.
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).

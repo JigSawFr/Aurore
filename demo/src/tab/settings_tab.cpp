@@ -36,7 +36,7 @@ static std::vector<std::string> options(int count)
 static std::vector<std::string> NOTIFICATIONS = {
     "You have cool hair",
     "I like your shoes",
-    "borealis is powered by nanovg",
+    "Aurore is powered by nanovg",
     "The Triforce is an inside job",
     "Pozznx will trigger in one day and twelve hours",
     "Aurora Borealis? At this time of day, at this time of year, in this part of the gaming market, located entirely within your Switch?!",

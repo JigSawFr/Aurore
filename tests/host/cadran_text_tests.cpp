@@ -1,6 +1,6 @@
 // Host tests for cadran/ui/cadran_text.cpp, translated by Cadran's real
 // catalog (resources/i18n/<lang>/cadran.json) through ui/tr.hpp's stand-in
-// for borealis (catalog.hpp): a dialog's table marked and read back, a week's
+// for Aurore (catalog.hpp): a dialog's table marked and read back, a week's
 // identical lines as one (and a short table left alone), and a failure's
 // title, reason, code and report, in English and French, with or without
 // each part.

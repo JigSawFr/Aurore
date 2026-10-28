@@ -1,5 +1,5 @@
-// FooterHints — borealis' footer hints (aurore:Hints), fitted to the footer.
-// borealis gives the hints the width they ask for and the clock what is
+// FooterHints — Aurore's footer hints (aurore:Hints), fitted to the footer.
+// Aurore gives the hints the width they ask for and the clock what is
 // left: with five hints in French and the Switch's battery and Wi-Fi icons,
 // the clock wrapped onto two lines and every hint ended in "…". Here the
 // clock keeps its one line; the hints first come closer together (less room
@@ -17,7 +17,7 @@ class FooterHints : public aurore::Hints
     FooterHints();
     ~FooterHints() override;
 
-    /// Takes aurore:Hints' place in borealis' footer. Called once, at start-up,
+    /// Takes aurore:Hints' place in Aurore's footer. Called once, at start-up,
     /// before the first screen opens.
     static void install();
     static aurore::View* create();

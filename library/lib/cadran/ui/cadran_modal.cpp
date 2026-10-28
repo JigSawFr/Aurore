@@ -18,7 +18,7 @@ using namespace aurore::literals;
 
 namespace
 {
-// The pills' looks (theme and style keys, as borealis' own button styles):
+// The pills' looks (theme and style keys, as Aurore's own button styles):
 // plain on the second surface with a hairline, the confirmation filled.
 // The focus ring stands off a filled pill (cadran/ring_gap): its colour is
 // often the fill's own.
@@ -322,7 +322,7 @@ aurore::Box* cadran::dialog_body(const std::string& text)
     }
     // Taller than the dialog's room, the body scrolls (ui::dialog): its lines
     // keep their height there. A label offered less than its wrapped text
-    // needs draws one cut line, and borealis caps a label at its parent's
+    // needs draws one cut line, and Aurore caps a label at its parent's
     // height (100 %), which a scrolling body does not settle before it.
     std::function<void(aurore::View*)> unbounded = [&unbounded](aurore::View* view)
     {
@@ -396,7 +396,7 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
         head->addView(badge, 0);
     }
 
-    // borealis' order: button3 alone above, button1 and button2 in a row.
+    // Aurore's order: button3 alone above, button1 and button2 in a row.
     aurore::Button* b1   = button(dialog, "aurore/dialog/button1");
     aurore::Button* b2   = button(dialog, "aurore/dialog/button2");
     aurore::Button* b3   = button(dialog, "aurore/dialog/button3");
@@ -415,7 +415,7 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
         else if ((emphasis == Emphasis::NONE || emphasis == Emphasis::FAILURE) && b->getText() == ok)
             look = &PRIMARY;
         pill(b, look);
-        // A says what the focused button does ("A Cancel"), not borealis' "OK".
+        // A says what the focused button does ("A Cancel"), not Aurore's "OK".
         b->updateActionHint(aurore::BUTTON_A, b->getText());
     }
     hide(dialog, "aurore/dialog/button2/separator");
