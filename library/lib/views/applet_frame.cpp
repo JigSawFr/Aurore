@@ -102,7 +102,7 @@ AppletFrame::AppletFrame()
     header->setThemeArea(ThemeArea::HEADER);
 
     // Edge to edge: the header and the footer grow into the safe area,
-    // their backgrounds and lines up to the window's edges
+    // their backgrounds up to the window's edges
     header->setBoxSizing(BoxSizing::CONTENT_BOX);
     header->setSafeArea(SafeAreaEdges::TOP);
     footer->setBoxSizing(BoxSizing::CONTENT_BOX);

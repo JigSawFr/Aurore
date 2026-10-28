@@ -300,7 +300,8 @@ void Box::applySafeArea(SafeAreaEdges reach)
         const float bottom = own(YGEdgeBottom, this->safePadding.bottom);
         const float left   = own(YGEdgeLeft, this->safePadding.left);
         this->safePadding  = padding;
-        this->setPadding(top, right, bottom, left);
+        // Into the layout, not through a subclass' own padding
+        this->Box::setPadding(top, right, bottom, left);
     }
 
     for (View* child : this->children)
