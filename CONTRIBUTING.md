@@ -8,11 +8,15 @@ reaches both apps, so it comes with its tests and keeps the public API working (
 
 ```sh
 git clone --recursive https://github.com/JigSawFr/aurore.git && cd aurore
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_GLFW=ON \
-      -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW \
+      -DAURORE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
+
+With CMake 3.25 or later, `cmake --workflow --preset tests` does the same in `build/tests`. The build configurations
+other jobs do not cover (install and `find_package`, `AURORE_FETCH_DEPS`, FreeType and FriBidi, the unity build, the
+template) are in `tools/ci_variant.sh`, which the `linux (variants)` job runs.
 
 On Linux the tests draw with Mesa's software renderer and need no display (`libegl1 libegl-mesa0 libgl1-mesa-dri`).
 A compiler cache speeds rebuilds up: add `-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache`.
