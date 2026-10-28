@@ -2403,3 +2403,59 @@ BRLS_TEST(focus_on_a_scrolling_frame_shows_its_place)
     BRLS_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
     BRLS_CHECK(h.matchesReference("scrolling_frame_focus"));
 }
+
+namespace
+{
+bool s_second_tab_broken = false;
+
+brls::View* tabWith(const std::string& text)
+{
+    auto* button = new brls::Button();
+    button->setText(text);
+    return screenOf({ button });
+}
+
+// Two tabs, the second one's content throwing as a bad XML file does
+class TwoTabs : public brls::Activity
+{
+  public:
+    brls::View* createContentView() override
+    {
+        auto* frame = new brls::TabFrame();
+        frame->addTab("One", []
+            { return tabWith("first"); });
+        frame->addTab("Two", []
+            {
+            if (s_second_tab_broken)
+                throw std::logic_error("two.xml:3: <brls:Label>: Unknown XML attribute \"fontSise\"");
+            return tabWith("second"); });
+        return frame;
+    }
+};
+} // namespace
+
+BRLS_TEST(hot_reload_keeps_the_screen_when_a_tab_fails)
+{
+    Harness h;
+    s_second_tab_broken = false;
+    h.push(new TwoTabs());
+    h.settle();
+    BRLS_CHECK(h.focusByText("Two"));
+    h.tap(brls::BUTTON_RIGHT);
+    BRLS_CHECK_EQ(h.focusText(), std::string("second"));
+    brls::View* content = h.top()->getContentView();
+    brls::View* focused = h.focus();
+
+    s_second_tab_broken = true;
+    BRLS_CHECK(!brls::Application::rebuildActivity());
+    h.settle();
+    BRLS_CHECK(h.top()->getContentView() == content);
+    BRLS_CHECK(h.focus() == focused);
+    BRLS_CHECK(h.hasText("second"));
+
+    s_second_tab_broken = false;
+    BRLS_CHECK(brls::Application::rebuildActivity());
+    h.settle();
+    BRLS_CHECK(h.top()->getContentView() != content);
+    BRLS_CHECK_EQ(h.focusText(), std::string("second"));
+}

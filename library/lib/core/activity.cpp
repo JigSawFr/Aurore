@@ -42,10 +42,20 @@ void Activity::setContentView(View* view)
         delete this->contentView;
     }
 
+    this->contentView = nullptr;
+    this->swapContentView(view);
+}
+
+View* Activity::swapContentView(View* view)
+{
+    View* previous = this->contentView;
+    if (previous)
+        previous->setParentActivity(nullptr);
+
     this->contentView = view;
     this->contentGeneration++;
     if (!view)
-        return;
+        return previous;
 
     this->contentView->setParentActivity(this);
     // willAppear is only called when the activity is pushed onto the stack
@@ -55,6 +65,7 @@ void Activity::setContentView(View* view)
     this->contentView->resolveBindings(this);
 
     this->resizeToFitWindow();
+    return previous;
 }
 
 void Activity::registerModel(const std::string& name, DataModel* model)

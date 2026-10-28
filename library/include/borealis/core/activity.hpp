@@ -53,6 +53,13 @@ class Activity
     void setContentView(View* view);
 
     /**
+     * Sets the content view as setContentView() does, but gives the previous
+     * one back instead of deleting it: detached from the activity, still
+     * "appeared" (no willDisappear), for the caller to put back or delete.
+     */
+    View* swapContentView(View* view);
+
+    /**
      * Called when the activity is created. Should return the activity content view, if any.
      *
      * Returning nullptr means the content is not known when the activity is created.

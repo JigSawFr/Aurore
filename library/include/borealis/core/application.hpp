@@ -571,7 +571,9 @@ class Application
      * Builds the content of the activity on top again from its
      * createContentView(), as hot reload does. False when it cannot (an
      * activity given its view in its constructor) or the new content
-     * throws while being made, the old one then staying.
+     * throws while being made (its XML, onContentAvailable(), or a tab
+     * shown, made when it takes the focus): the old one then stays, with
+     * the focus, and the error is shown in a notification.
      */
     static bool rebuildActivity();
 

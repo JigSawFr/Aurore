@@ -1348,6 +1348,7 @@ bool Application::rebuildActivity()
     {
         HotReload::building = nullptr;
         Logger::error("rebuild: {} kept as it was: {}", old ? old->describe() : "the activity", e.what());
+        Application::notify(std::string("XML: ") + e.what());
         return false;
     }
 
@@ -1358,37 +1359,65 @@ bool Application::rebuildActivity()
         return false;
     }
 
-    activity->setContentView(fresh);
+    // The old content is kept until the new one has made the tabs shown (a
+    // tab is made when it takes the focus, its own XML may throw then): a
+    // mistake anywhere leaves the screen as it was
+    View* oldFocus = Application::currentFocus && Application::currentFocus->getParentActivity() == activity ? Application::currentFocus : nullptr;
+    activity->swapContentView(fresh);
+    std::string error;
     try
     {
         activity->onContentAvailable();
     }
     catch (const std::exception& e)
     {
-        Logger::error("rebuild: onContentAvailable: {}", e.what());
+        error = std::string("onContentAvailable: ") + e.what();
     }
     HotReload::building = nullptr;
     activity->resizeToFitWindow();
 
-    if (Application::globalQuitEnabled)
-        Application::gloablQuitIdentifier = activity->registerExitAction();
-
-    activity->willAppear(true);
-    try
+    if (error.empty())
     {
-        // A tab is made when it takes the focus: its own XML may throw here
-        Application::giveFocus(activity->getDefaultFocus());
-        for (const auto& path : restore)
+        if (Application::globalQuitEnabled)
+            Application::gloablQuitIdentifier = activity->registerExitAction();
+
+        activity->willAppear(true);
+        try
         {
-            if (path.empty())
-                continue;
-            if (View* view = viewAtPath(fresh, path))
-                Application::giveFocus(view);
+            Application::giveFocus(activity->getDefaultFocus());
+            for (const auto& path : restore)
+            {
+                if (path.empty())
+                    continue;
+                if (View* view = viewAtPath(fresh, path))
+                    Application::giveFocus(view);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            error = e.what();
         }
     }
-    catch (const std::exception& e)
+
+    if (!error.empty())
     {
-        Logger::error("rebuild: {}", e.what());
+        Logger::error("rebuild: {} kept as it was: {}", old ? old->describe() : "the activity", error);
+        activity->swapContentView(old);
+        if (oldFocus)
+            Application::giveFocus(oldFocus);
+        else if (old)
+            Application::giveFocus(activity->getDefaultFocus());
+        fresh->willDisappear();
+        delete fresh;
+        Application::notify("XML: " + error);
+        Application::requestRedraw();
+        return false;
+    }
+
+    if (old)
+    {
+        old->willDisappear();
+        delete old;
     }
 
     Application::requestRedraw();
