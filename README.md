@@ -10,6 +10,7 @@
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
+[**Website**](https://jigsawfr.github.io/Aurore/) ·
 [**What's new**](#-what-aurore-adds) ·
 [**Use&nbsp;it**](#-use-it-in-your-project) ·
 [**Build&nbsp;the&nbsp;demo**](#-build-the-demo) ·
@@ -258,6 +259,8 @@ New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the dem
 The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
+
+Also on the website, with a search and the API reference: <https://jigsawfr.github.io/Aurore/>.
 
 | Page | |
 | --- | --- |
