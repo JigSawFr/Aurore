@@ -1,7 +1,7 @@
 // safe_text — text from outside (GitHub: a release's or a pull request's
 // title, notes, branch) made safe to show: only valid UTF-8 is kept, and
 // none of the characters that could make it lie about itself or upset the
-// layout. Plain C++ for the host tests (tests/markdown).
+// layout. Plain C++ for the host tests (tests/host/markdown_tests.cpp).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 

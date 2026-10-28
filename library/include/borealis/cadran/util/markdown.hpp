@@ -13,7 +13,7 @@
 // (util/safe_text.hpp), and bounded: the first MAX_SOURCE bytes are read, at
 // most MAX_BLOCKS blocks, MAX_CODE_LINES lines of a code block, MAX_COLUMNS
 // columns and MAX_ROWS rows of a table, MAX_DEPTH levels of nesting. Plain
-// C++, tested in tests/markdown_tests.cpp.
+// C++ for the host tests (tests/host/markdown_tests.cpp).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 

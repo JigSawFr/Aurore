@@ -2049,6 +2049,53 @@ BRLS_TEST(cadran_pieces_have_roles_and_labels)
     BRLS_CHECK_EQ(line->getAccessibilityDescription(), std::string("Updates, 3 new, 4 of 4"));
 }
 
+namespace
+{
+// A screen with the applet frame's header, titled `title`
+brls::AppletFrame* titledScreen(const std::string& title, const std::string& markId = "")
+{
+    brls::Box* box = screenOf({ new brls::Button() });
+    if (!markId.empty())
+    {
+        auto* mark = new brls::Rectangle();
+        mark->setId(markId);
+        box->addView(mark);
+    }
+    auto* frame = new brls::AppletFrame(box);
+    frame->setTitle(title);
+    return frame;
+}
+} // namespace
+
+BRLS_TEST(cadran_crumb_skips_screens_of_their_own)
+{
+    CadranHarness h;
+    h.push(new brls::Activity(titledScreen("First")));
+    h.settle();
+    h.push(new brls::Activity(titledScreen("Second")));
+    h.settle();
+    BRLS_CHECK(h.hasText("First  ›")); // opened from First
+    // A screen of its own (a child's): no crumb, by the id in it…
+    h.push(new brls::Activity(titledScreen("Third", "cadran/standalone")));
+    h.settle();
+    BRLS_CHECK(h.hasText("Third"));
+    BRLS_CHECK(!h.hasText("Second  ›"));
+    // … or as the app's hook says
+    ui::hooks::get().standalone_screen = [](brls::View* frame)
+    {
+        auto* title = dynamic_cast<brls::Label*>(frame->getView("brls/applet_frame/title_label"));
+        return title && title->getFullText() == "Fourth";
+    };
+    h.push(new brls::Activity(titledScreen("Fourth")));
+    h.settle();
+    BRLS_CHECK(h.hasText("Fourth"));
+    BRLS_CHECK(!h.hasText("Third  ›"));
+    h.push(new brls::Activity(titledScreen("Fifth")));
+    h.settle();
+    BRLS_CHECK(h.hasText("Fourth  ›"));
+    ui::hooks::get().standalone_screen = nullptr;
+}
+
 BRLS_TEST(cadran_picker_says_its_title_and_the_choice)
 {
     CadranHarness h;

@@ -105,6 +105,8 @@ TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R au
 
 `tests/tsan.supp` leaves out what Mesa's software renderer, which draws the tests and is not built with the sanitizer, does in its own threads.
 
+`tests/host/`: Cadran's plain C++ parts without a window, each suite linked only to the sources it tests: the palettes' contrast (every pair of `cadran::palette::CONTRAST`, both themes), safe text and the Markdown parser, `ui::guarded`, and the text helpers (`cadran_text`, `format_text`) over the real `cadran.json` catalogs. `ctest -R host` runs them alone.
+
 ## The bench
 
 `aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, nanovg draw calls, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, flush, swap, total).
