@@ -1,0 +1,118 @@
+/* The demo's page in a browser (web/README.md), in the website's look:
+   Boréale's night, Sora for the name, Figtree for the rest. */
+@font-face { font-family: "Sora"; src: url("sora.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
+@font-face { font-family: "Figtree"; src: url("figtree.woff2") format("woff2"); font-weight: 300 900; font-display: swap; }
+
+:root {
+  --abyss: #0b1424;
+  --night: #0e1a33;
+  --night-2: #12213f;
+  --line: #22324f;
+  --snow: #e8eef7;
+  --mist: #a9b6cc;
+  --aurora: #00ffcc;
+  --ice: #33bbff;
+  --link: #6fd0ff;
+  --violet: #8a5cff;
+  --grad: linear-gradient(100deg, var(--aurora) 0%, var(--ice) 55%, var(--violet) 100%);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--abyss); color: var(--snow); }
+body { font: 1rem/1.55 "Figtree", "Segoe UI", system-ui, sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+a { color: var(--link); text-underline-offset: 3px; }
+a:hover { color: var(--aurora); }
+:focus-visible { outline: 2px solid var(--aurora); outline-offset: 2px; border-radius: 6px; }
+[hidden] { display: none !important; }
+
+.bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  padding: 10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--line);
+  background: radial-gradient(60% 160% at 10% -80%, rgba(0, 255, 204, 0.16), transparent 70%),
+              radial-gradient(50% 160% at 90% -80%, rgba(138, 92, 255, 0.18), transparent 70%), var(--abyss);
+}
+.brand { display: flex; align-items: center; gap: 8px; color: var(--snow); text-decoration: none; font: 700 1.2rem "Sora", system-ui, sans-serif; letter-spacing: -0.02em; min-height: 44px; }
+.brand:hover { color: var(--snow); }
+.brand small { font: 500 0.75rem "Figtree", system-ui, sans-serif; color: var(--abyss); background: var(--grad); border-radius: 99px; padding: 2px 8px; letter-spacing: 0; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.select { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; color: var(--mist); }
+select, .controls button {
+  min-height: 40px; padding: 0 12px; font: 16px "Figtree", system-ui, sans-serif; color: var(--snow);
+  background: var(--night); border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
+}
+.controls button { font-size: 0.9375rem; }
+.controls button[aria-pressed="true"] { border-color: var(--aurora); color: var(--aurora); }
+select:hover, .controls button:hover { border-color: var(--mist); }
+
+.stage { display: grid; gap: 20px; padding: 20px max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left)); max-width: 1320px; margin: 0 auto; }
+.screen-wrap { display: grid; place-items: center; }
+.screen {
+  position: relative; width: min(100%, calc((100vh - 120px) * 16 / 9)); aspect-ratio: 16 / 9; min-width: 0;
+  border-radius: 14px; overflow: hidden; background: #000;
+  box-shadow: 0 0 0 1px rgba(232, 238, 247, 0.12), 0 0 0 7px rgba(14, 26, 51, 0.8), 0 30px 90px -30px rgba(0, 0, 0, 0.9), 0 0 110px -20px rgba(51, 187, 255, 0.35);
+}
+#canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.loading, .error {
+  position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; padding: 24px; text-align: center;
+  background: radial-gradient(70% 60% at 50% 0%, rgba(0, 255, 204, 0.12), transparent 70%), var(--abyss);
+}
+.loading img { animation: glow 2.4s ease-in-out infinite; }
+@keyframes glow { 50% { filter: drop-shadow(0 0 18px rgba(0, 255, 204, 0.6)); } }
+.progress { width: min(320px, 70vw); height: 6px; border-radius: 99px; background: var(--night-2); overflow: hidden; }
+.progress span { display: block; height: 100%; width: 0; background: var(--grad); transition: width 0.2s; }
+.hint { color: var(--mist); font-size: 0.875rem; }
+.error p { max-width: 52ch; color: var(--mist); }
+
+/* The on-screen pad: under the screen in portrait, beside it in landscape. */
+.pad { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "sh sh sh" "dpad . face"; gap: 16px; align-items: center; user-select: none; -webkit-user-select: none; touch-action: none; }
+.pad button {
+  font: 600 1rem "Sora", system-ui, sans-serif; color: var(--snow); background: var(--night); border: 1px solid var(--line);
+  min-width: 48px; min-height: 48px; border-radius: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.pad button.held { background: var(--night-2); border-color: var(--aurora); color: var(--aurora); }
+.shoulders { grid-area: sh; display: flex; justify-content: space-between; gap: 8px; }
+.shoulders button { flex: 1; max-width: 72px; }
+.dpad, .face { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 52px); gap: 4px; }
+.dpad { grid-area: dpad; }
+.face { grid-area: face; }
+.dpad .up, .face .x { grid-area: 1 / 2; }
+.dpad .left, .face .y { grid-area: 2 / 1; }
+.dpad .right, .face .a { grid-area: 2 / 3; }
+.dpad .down, .face .b { grid-area: 3 / 2; }
+.face button { border-radius: 50%; }
+
+.help { display: grid; gap: 12px; max-width: 760px; margin: 12px auto 0; color: var(--mist); }
+.help h1 { font: 600 clamp(1.4rem, 3vw, 1.9rem)/1.2 "Sora", system-ui, sans-serif; letter-spacing: -0.02em; color: var(--snow); margin: 0; }
+.help p { margin: 0; }
+.keys { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.keys li { display: flex; align-items: center; gap: 6px; }
+kbd { font: 500 0.8125rem "JetBrains Mono", ui-monospace, monospace; color: var(--snow); background: var(--night); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; }
+.links { font-size: 0.9375rem; }
+
+/* Full screen: the screen and the pad only. */
+body.full .bar, body.full .help { display: none; }
+body.full .stage { padding: 0; max-width: none; height: 100vh; align-content: center; }
+body.full .screen { width: min(100vw, calc(100vh * 16 / 9)); border-radius: 0; box-shadow: none; }
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .stage { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; padding-top: 8px; }
+  .screen { width: min(100%, calc((100vh - 70px) * 16 / 9)); }
+  .screen-wrap { grid-column: 2; grid-row: 1; }
+  .pad:not([hidden]) { display: contents; }
+  .pad .shoulders { display: none; }
+  .pad .dpad { grid-column: 1; grid-row: 1; }
+  .pad .face { grid-column: 3; grid-row: 1; }
+  .help { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { .loading img { animation: none; } }
+
+/* A phone: the header's controls on one line, their labels for screen readers only. */
+@media (max-width: 640px) {
+  .select span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .controls { gap: 6px; }
+  select { max-width: 7.5rem; padding: 0 8px; }
+  .controls button { padding: 0 10px; }
+  #fullscreen { font-size: 0; min-width: 44px; }
+  #fullscreen::after { content: "⛶"; font-size: 1.15rem; }
+}

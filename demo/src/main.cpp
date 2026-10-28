@@ -29,6 +29,17 @@
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+
+// One frame, called by the browser at each display refresh
+static void webFrame()
+{
+    if (!aurore::Application::mainLoop())
+        emscripten_cancel_main_loop();
+}
+#endif
+
 #if defined(__PSV__) && defined(AURORE_USE_OPENGL)
 // Needed for the OpenGL driver to work
 extern "C" unsigned int sceLibcHeapSize = 2 * 1024 * 1024;
@@ -156,8 +167,15 @@ int main(int argc, char* argv[])
     aurore::Application::pushActivity(new MainActivity());
 
     // Run the app
+#ifdef __EMSCRIPTEN__
+    // In a browser a frame hands the thread back to the page (web/README.md):
+    // the browser calls one per display refresh, and main() returns at once
+    emscripten_set_main_loop(webFrame, 0, false);
+    return EXIT_SUCCESS;
+#else
     while (aurore::Application::mainLoop())
         ;
+#endif
 
     aurore::Logger::info("{} frames drawn", aurore::Application::getDrawnFrameCount());
 
