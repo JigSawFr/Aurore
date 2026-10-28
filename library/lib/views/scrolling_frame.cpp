@@ -194,8 +194,23 @@ void ScrollingFrame::updateScrollingIndicatior()
 
     float scrollViewOffset = getContentOffsetY() / contentHeight * getHeight();
 
+    // The focus on the frame itself (scrolling through a long text, or
+    // between two lines out of sight) has no highlight: the indicator shows
+    // where it is, in the focus colour, for as long as it stays there
+    const bool showsFocus = focused && Application::getInputType() == InputType::GAMEPAD;
+    if (showsFocus != indicatorShowsFocus)
+    {
+        indicatorShowsFocus = showsFocus;
+        scrollingIndicator->setThemeColor("color", showsFocus ? "brls/highlight/color1" : "brls/text");
+        scrollingIndicator->setWidth(showsFocus ? SCROLLING_INDICATOR_WIDTH * 2 : SCROLLING_INDICATOR_WIDTH);
+        scrollingIndicator->setCornerRadius(showsFocus ? SCROLLING_INDICATOR_WIDTH : SCROLLING_INDICATOR_WIDTH / 2);
+        Application::requestRedraw();
+    }
+
     float alpha = 0.3f;
-    if (autoHideScrollingIndicator)
+    if (showsFocus)
+        alpha = 1.0f;
+    else if (autoHideScrollingIndicator)
     {
         // Shown while the offset moves, then faded out over 300 ms once it
         // has been still for 600 ms
@@ -217,7 +232,8 @@ void ScrollingFrame::updateScrollingIndicatior()
     scrollingIndicator->setAlpha(alpha);
     scrollingIndicator->setHeight(viewHeight / contentHeight * viewHeight);
 
-    scrollingIndicator->setDetachedPosition(getWidth() - 14 - SCROLLING_INDICATOR_WIDTH, scrollViewOffset);
+    const float indicatorWidth = indicatorShowsFocus ? SCROLLING_INDICATOR_WIDTH * 2 : SCROLLING_INDICATOR_WIDTH;
+    scrollingIndicator->setDetachedPosition(getWidth() - 14 - indicatorWidth, scrollViewOffset);
 }
 
 void ScrollingFrame::draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx)

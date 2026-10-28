@@ -91,6 +91,7 @@ class HeadlessInputManager : public InputManager
     std::set<BrlsKeyboardScancode> keys;
     std::vector<RawTouchState> touches;
     RawMouseState mouse;
+    ButtonLatch leftLatch;
 };
 
 // Answers the keyboard with the text the harness was given, at once

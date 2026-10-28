@@ -21,7 +21,7 @@ cmake --build build
 ./build/aurore_demo
 ```
 
-The arrows move the focus, Enter is A, Escape is B, the mouse and a controller work too. `-DUSE_LIBROMFS=ON` builds the `resources/` folder into the program; without it, the folder is copied next to it. Press **F12**: that is the [inspector](inspector.md), showing the views on screen, the focus and what a frame costs. Press it twice more to close it.
+The arrows move the focus, Enter is A, Escape is B, X, Y, L and R are themselves ([the other keys](input.md)), the mouse and a controller work too. `-DUSE_LIBROMFS=ON` builds the `resources/` folder into the program; without it, the folder is copied next to it. Press **F12**: that is the [inspector](inspector.md), showing the views on screen, the focus and what a frame costs. Press it twice more to close it.
 
 The demo's code is in `demo/`, its screens in `resources/xml/`: they are the examples for what follows.
 
