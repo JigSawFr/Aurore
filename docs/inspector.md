@@ -8,7 +8,7 @@ It is off unless asked for, and costs nothing then (one key and two buttons read
 
 - in code, at any time: `brls::Application::setInspectorEnabled(true);`
 - in a debug build: `-DBRLS_INSPECTOR=ON` at configure time;
-- on a desktop, for one run: `BRLS_INSPECTOR=1 ./my_app` (`BRLS_INSPECTOR=0` turns it off again, even in a build that has it on).
+- on a desktop, for one run: `BRLS_INSPECTOR=1 ./my_app` (`BRLS_INSPECTOR=0` turns it off again, even in a build that has it on), in a build with the debugging aids: not a `Release` or `MinSizeRel` one unless `-DBRLS_DEV_TOOLS=ON` ([hot reload](hot_reload.md#turning-it-on)).
 
 The demo turns it on.
 

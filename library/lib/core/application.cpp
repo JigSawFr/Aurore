@@ -114,6 +114,9 @@ bool Application::init()
 #ifdef BRLS_INSPECTOR
     Inspector::setEnabled(true);
 #endif
+    // From the environment only in a build with BRLS_DEV_TOOLS (not a
+    // release one, by default)
+#ifdef BRLS_DEV_TOOLS
     if (const char* inspector = std::getenv("BRLS_INSPECTOR"))
         Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
     if (const char* hotReload = std::getenv("BRLS_HOT_RELOAD"))
@@ -121,8 +124,9 @@ bool Application::init()
         if (std::strcmp(hotReload, "0") != 0)
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
     }
+#endif
 
-#if !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
+#if defined(BRLS_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
     const char* redrawDebugEnv = std::getenv("BRLS_REDRAW_DEBUG");
     if (redrawDebugEnv && *redrawDebugEnv && *redrawDebugEnv != '0')
         Application::setRedrawDebug(true);
