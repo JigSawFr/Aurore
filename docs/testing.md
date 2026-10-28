@@ -38,7 +38,7 @@ What it gives:
 | `push(activity)`, `top()`, `find(id)` | a screen pushed (without transition), the one on top, a view of it by XML id |
 | `step(n)`, `advance(ms)`, `settle(maxMs)` | `n` frames; frames for `ms` of simulated time; frames until no animation runs and no `sync`/`async` task is queued or running |
 | `press`, `release`, `tap(button, times)`, `hold(button, ms)`, `setAxis` | the gamepad (`tap` presses for a frame, releases and settles; `hold` gets the repeats a device gets) |
-| `pressKey`, `releaseKey`, `tapKey` | the keyboard (`BRLS_KBD_KEY_*`): Enter is A, Escape is B, the arrows the D-pad, as on the desktop; watched keys (`Application::addToWatchedKeys`) and `getKeyboardKeyStateChanged()` see them |
+| `pressKey`, `releaseKey`, `tapKey` | the keyboard (`BRLS_KBD_KEY_*`): Enter is A, Escape is B, the arrows the D-pad and the other keys of [input.md](input.md), as on the desktop; watched keys (`Application::addToWatchedKeys`) and `getKeyboardKeyStateChanged()` see them |
 | `touchDown`, `touchMove`, `touchUp`, `tapAt`, `tapView`, `swipe` | touch, in the views' coordinates (`View::getFrame()`) |
 | `mouseMove`, `mouseClick`, `mouseScroll` | the mouse |
 | `setKeyboardAnswer(text)` | the next keyboard opened (`ImeManager`) gets `text`; without one it is cancelled |

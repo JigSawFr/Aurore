@@ -582,6 +582,17 @@ class Application
 
     static void setSwapInputKeys(bool swap);
 
+    // The keyboard keys that press a controller button, on top of Enter (A),
+    // Escape (B) and the arrows. By default X, Y, L, R, Shift+L (ZL),
+    // Shift+R (ZR), P or + (Plus), M or - (Minus) and Backspace (B); keys
+    // are named after their place on a US keyboard (docs/input.md).
+    // A key a view registers an action for keeps that action only, and
+    // none applies while a text is being typed.
+    static void mapKey(BrlsKeyCombination key, ControllerButton button);
+    static void unmapKey(BrlsKeyCombination key);
+    static void clearKeyMap();
+    static const std::vector<std::pair<BrlsKeyCombination, ControllerButton>>& getKeyMap();
+
     inline static bool isSwapInputKeys()
     {
         return swapInputKeys;
@@ -653,6 +664,8 @@ class Application
     inline static std::vector<BrlsKeyState> watchedKeys;
     inline static std::vector<BrlsKeyState> oldWatchedKeys;
     inline static std::unordered_map<int, int> watchedKeysMap;
+    static std::vector<std::pair<BrlsKeyCombination, ControllerButton>> keyMap;
+    static void applyKeyMap(InputManager* inputManager, ControllerState* state);
     inline static ControllerState controllerState = {};
 
     inline static void processInput();
