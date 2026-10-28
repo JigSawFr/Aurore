@@ -75,10 +75,10 @@ MEASURE = """(screen) => {
 def pages():
     """Each language's folder ('' for English) and its pages, from the built site."""
     folders = [""] + sorted(d + "/" for d in os.listdir(SITE)
-                            if os.path.isfile(os.path.join(SITE, d, "index.html")) and d not in ("api", "changelog", "docs"))
+                            if os.path.isfile(os.path.join(SITE, d, "index.html")) and d not in ("api", "demo", "changelog", "docs"))
     every = []
     for root, dirs, files in os.walk(SITE):
-        dirs[:] = [d for d in dirs if d not in ("api", "assets")]
+        dirs[:] = [d for d in dirs if d not in ("api", "demo", "assets")]
         # Not a page that sends its visitor on (docs/: the guide's first page).
         if "index.html" in files and 'http-equiv="refresh"' not in open(os.path.join(root, "index.html"), encoding="utf-8").read():
             every.append(os.path.relpath(root, SITE).replace(os.sep, "/").removeprefix(".") + "/")

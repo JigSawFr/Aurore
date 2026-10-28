@@ -16,8 +16,10 @@ found, in English at the root and in French in /fr/.
 - SITE_API names a folder holding the API reference Doxygen built
   (docs/Doxyfile, build_docs/html): it is published in /api/, and the pages
   link to it. Without it, they do not.
-- SITE_URL is the site's address (https://jigsawfr.github.io/Aurore/ by
-  default), for the links that must be absolute: the canonical page, the
+- SITE_DEMO names the folder of the demo built for a browser (web/README.md,
+  <build>/web/): it is published in /demo/, and the pages offer to try it.
+  Without it, they do not.
+- SITE_URL is the site's address (https://aurore.boreale.dev/ by default), for the links that must be absolute: the canonical page, the
   other language, the preview image, the sitemap. SITE_NOINDEX=1 keeps a
   preview out of search engines.
 
@@ -35,9 +37,10 @@ from urllib.parse import urlsplit
 import markdown
 
 REPO_URL = "https://github.com/JigSawFr/Aurore"
-SITE_URL = os.environ.get("SITE_URL", "https://jigsawfr.github.io/Aurore/").rstrip("/") + "/"
+SITE_URL = os.environ.get("SITE_URL", "https://aurore.boreale.dev/").rstrip("/") + "/"
 NOINDEX = os.environ.get("SITE_NOINDEX") == "1"
 API_DIR = os.environ.get("SITE_API", "")
+DEMO_DIR = os.environ.get("SITE_DEMO", "")
 # (code, folder, name in its own words, Open Graph's locale): English at the root.
 LANGUAGES = [("en", "", "English", "en_US"), ("fr", "fr", "Français", "fr_FR")]
 # The documentation in the sidebar's order: (page, group, short name).
@@ -315,6 +318,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     first_visit = " data-first-visit" if home and lang == "en" else ""
     base = f"{to_root}{lang_dir(lang)}"
     api = f'<li><a href="{to_root}api/">{t("nav_api")}</a></li>' if API_DIR else ""
+    api += f'<li><a class="nav-try" href="{to_root}demo/{demo_query(lang)}">{t("nav_demo")}</a></li>' if DEMO_DIR else ""
     sky = '<canvas id="sky" aria-hidden="true"></canvas>' if home else ""
     hero = body[0] if home else ""
     main = body[1] if home else body
@@ -471,6 +475,37 @@ def release_line(t, base):
             f'· <time datetime="{date}">{date}</time></p>')
 
 
+def demo_query(lang):
+    """The demo in the page's language (the browser's for English)."""
+    return "" if lang == "en" else f"?lang={lang}"
+
+
+def hero_actions(t, lang, to_root, base):
+    if DEMO_DIR:
+        return (f'<a class="button primary" href="{to_root}demo/{demo_query(lang)}">{t("cta_demo")}</a>\n'
+                f'        <a class="button ghost" href="{base}docs/getting-started/">{t("cta_start")}</a>')
+    return (f'<a class="button primary" href="{base}docs/getting-started/">{t("cta_start")}</a>\n'
+            f'        <a class="button ghost" href="{REPO_URL}">{t("cta_github")}</a>')
+
+
+def demo_band(t, lang, to_root):
+    """The home page's invitation to the demo in the browser."""
+    if not DEMO_DIR:
+        return ""
+    return f"""
+  <section class="wrap" id="demo">
+    <div class="band">
+      <div>
+        <p class="eyebrow">{t("demo_eyebrow")}</p>
+        <h2>{t("demo_band_title")}</h2>
+        <p>{t("demo_band_text")}</p>
+      </div>
+      <a class="button primary" href="{to_root}demo/{demo_query(lang)}">{t("cta_demo")}</a>
+    </div>
+  </section>
+"""
+
+
 def home_body(t, lang, to_root):
     base = f"{to_root}{lang_dir(lang)}"
     platforms = "".join(f"<li>{html.escape(p)}</li>" for p in PLATFORMS)
@@ -491,8 +526,7 @@ def home_body(t, lang, to_root):
       <h1>{t("hero_title")}</h1>
       <p class="lede">{t("hero_lede")}</p>
       <div class="actions">
-        <a class="button primary" href="{base}docs/getting-started/">{t("cta_start")}</a>
-        <a class="button ghost" href="{REPO_URL}">{t("cta_github")}</a>
+        {hero_actions(t, lang, to_root, base)}
       </div>
       {release_line(t, base)}
     </div>
@@ -516,6 +550,7 @@ def home_body(t, lang, to_root):
     </div>
   </section>
 
+{demo_band(t, lang, to_root)}
   <section class="wrap" id="features">
     <div class="section-head">
       <p class="eyebrow">{t("features_eyebrow")}</p>
@@ -774,6 +809,8 @@ def llms_txt(t, descriptions, full=None):
               f"- [Contributing]({REPO_URL}/blob/main/CONTRIBUTING.md)"]
     if API_DIR:
         lines.append(f"- [API reference (Doxygen)]({SITE_URL}api/)")
+    if DEMO_DIR:
+        lines.append(f"- [The demo in a browser (Emscripten, WebGL 2)]({SITE_URL}demo/)")
     if not full:
         lines.append(f"- [The whole documentation in one file]({SITE_URL}llms-full.txt)")
         return "\n".join(lines) + "\n"
@@ -918,9 +955,11 @@ def main():
             ico.write(favicon_ico(f.read()))
     if API_DIR:
         shutil.copytree(API_DIR, os.path.join(out, "api"), dirs_exist_ok=True)
+    if DEMO_DIR:
+        shutil.copytree(DEMO_DIR, os.path.join(out, "demo"), dirs_exist_ok=True)
     open(os.path.join(out, ".nojekyll"), "w").close()
     print(f"site: {count} pages in {len(LANGUAGES)} languages, {len(assets)} images"
-          f"{', the API reference' if API_DIR else ''}, in {out}")
+          f"{', the API reference' if API_DIR else ''}{', the demo' if DEMO_DIR else ''}, in {out}")
     return 0
 
 

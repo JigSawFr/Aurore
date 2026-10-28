@@ -3,8 +3,8 @@
 
 - the catalogs (site/i18n/*.json) have the same keys as en.json;
 - every link and image of a page that stays on the site reaches a file of it,
-  and every #anchor an id of the page it points to (the API reference, built
-  apart by Doxygen, is not followed);
+  and every #anchor an id of the page it points to (the API reference and the
+  demo, built apart, are not followed);
 - no page has what its Content-Security-Policy would block: an inline
   script (but schema.org's data), a style attribute or element, an event
   handler, a file from elsewhere;
@@ -83,7 +83,7 @@ def main():
     errors = catalogs(os.path.dirname(HERE))
     pages = {}
     for folder, dirs, files in os.walk(root):
-        if os.path.relpath(folder, root).split(os.sep)[0] == "api":
+        if os.path.relpath(folder, root).split(os.sep)[0] in ("api", "demo"):
             continue
         for name in files:
             path = os.path.join(folder, name)
@@ -122,7 +122,7 @@ def main():
             if os.path.isdir(file):
                 file = os.path.join(file, "index.html")
             rel = os.path.relpath(file, root)
-            if rel.split(os.sep)[0] == "api" or rel.startswith(".."):
+            if rel.split(os.sep)[0] in ("api", "demo") or rel.startswith(".."):
                 continue
             if not os.path.exists(file):
                 print(f"{rel_page}: {link}: no {rel}")

@@ -10,7 +10,8 @@
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
-[**Website**](https://jigsawfr.github.io/Aurore/) ·
+[**Website**](https://aurore.boreale.dev/) ·
+[**Try&nbsp;it**](https://aurore.boreale.dev/demo/) ·
 [**What's new**](#-what-aurore-adds) ·
 [**Use&nbsp;it**](#-use-it-in-your-project) ·
 [**Build&nbsp;the&nbsp;demo**](#-build-the-demo) ·
@@ -260,7 +261,7 @@ The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a b
 
 ## 📚 Documentation
 
-Also on the website, with a search and the API reference: <https://jigsawfr.github.io/Aurore/>.
+Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>. The demo runs there in a browser: <https://aurore.boreale.dev/demo/>.
 
 | Page | |
 | --- | --- |

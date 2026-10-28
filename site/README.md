@@ -1,10 +1,11 @@
 # The website
 
-Aurore's website, on GitHub Pages: <https://jigsawfr.github.io/Aurore/> (`aurore.boreale.dev` once it is served there). English at the root, French in `/fr/`; one dark look, Boréale's (the night, the aurora: [boreale/branding](https://github.com/JigSawFr/boreale/tree/main/branding)).
+Aurore's website, on GitHub Pages: <https://aurore.boreale.dev/>. English at the root, French in `/fr/`; one dark look, Boréale's (the night, the aurora: [boreale/branding](https://github.com/JigSawFr/boreale/tree/main/branding)).
 
 - **The home page**: what Aurore is, a screen in XML and its activity, the features, Cadran, the screenshots, what Aurore adds to borealis, how to use it in a project and build the demo, the apps made with it, the documentation, the licence.
 - **The documentation**: `docs/*.md`, converted at each build. It is written in English; the French site shows the same pages under its own header, saying so. Links between the docs and to the README become the site's pages, any other file of the repository links to GitHub, GitHub's `> [!NOTE]` blocks become callouts, headings keep GitHub's anchors. A search box above the pages searches `docs/search.json`; `/` goes to it.
 - **The API reference**, Doxygen's (`docs/Doxyfile`), in `/api/`.
+- **The demo in a browser** ([web/README.md](../web/README.md)) in `/demo/`, which the home page and the header offer to try.
 - **The changelog** (`/changelog/`, from `CHANGELOG.md`) and `releases.atom`.
 - **The page not found** (`404.html`, served at any address), in both languages.
 - **For search engines and AI assistants**: absolute links, `sitemap.xml`, schema.org data, the preview image (`.github/branding/social-preview.png`), each page of the documentation in Markdown next to it, listed in [`llms.txt`](https://llmstxt.org) (`llms-full.txt`: all of it in one file).
@@ -17,7 +18,7 @@ Aurore's website, on GitHub Pages: <https://jigsawfr.github.io/Aurore/> (`aurore
 - `site/assets/`: `site.css`, `site.js` (the aurora behind the home page, the screenshots' lightbox, the copy buttons, the search, the table of contents), `lang.js` (a first visit from a French browser goes to `/fr/`; the header's link changes it, remembered as `aurore-lang`), `mark.svg` (Boréale's drawing of Aurore's icon) and the fonts (Sora, Figtree, JetBrains Mono, SIL Open Font License), served with the site so that no visitor's browser asks anyone else for anything.
 - The screenshots are the README's (`.github/readme/`), the icon and the preview image Aurore's (`.github/branding/`).
 - The documentation's sidebar is `DOCS` in `build_site.py`: a new page of `docs/` is a line there.
-- `SITE_URL` is the site's address; `SITE_NOINDEX=1` keeps a build out of search engines; `SITE_API=<folder>` publishes Doxygen's HTML in `/api/` and links to it.
+- `SITE_URL` is the site's address; `SITE_NOINDEX=1` keeps a build out of search engines; `SITE_API=<folder>` publishes Doxygen's HTML in `/api/` and links to it; `SITE_DEMO=<folder>` the demo built for a browser (`build-web/web/`) in `/demo/`.
 - A **Content-Security-Policy** on every page (a `<meta>`: GitHub Pages sends no headers): only the site's own files, no inline script or style.
 
 To look at it locally:
@@ -36,6 +37,6 @@ With the API reference: `doxygen docs/Doxyfile`, then `SITE_API=build_docs/html 
 
 ## Publishing
 
-`.github/workflows/site.yml` builds the API reference and the site and runs both checks for each pull request (the `site` artifact) and for main, whose site it publishes on GitHub Pages.
+`.github/workflows/site.yml` builds the demo for a browser, the API reference and the site, and runs both checks for each pull request (the `site` artifact) and for main, whose site it publishes on GitHub Pages.
 
-Once, in the repository's settings: *Pages › Build and deployment › Source: GitHub Actions*. For `aurore.boreale.dev`: *Custom domain*, then a `CNAME` to `jigsawfr.github.io` at the registrar; the workflow reads the address from Pages.
+In the repository's settings, *Pages › Build and deployment › Source: GitHub Actions*, with the custom domain `aurore.boreale.dev`; the workflow reads the address from Pages.

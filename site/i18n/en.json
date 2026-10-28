@@ -6,28 +6,29 @@
   "nav_start": "Start",
   "nav_docs": "Documentation",
   "nav_api": "API",
+  "nav_demo": "Try it",
   "other_label": "Français",
   "language": "Language",
-
   "hero_eyebrow": "A Boréale project · fork of borealis",
   "hero_title": "A Switch-like interface for your app, <em>on every screen</em>",
   "hero_title_plain": "A Switch-like interface for your app, on every screen",
   "hero_lede": "Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like the Nintendo Switch's own menus out of the box, and can be restyled into anything else.",
   "cta_start": "Start in 15 minutes",
   "cta_github": "See it on GitHub",
+  "cta_demo": "Try it in your browser",
   "hero_shot_alt": "Aurore's demo in Cadran, its default look: a rail of icons on the left, cards, chips and buttons, the controller's hints at the bottom.",
   "release_none": "No release yet: the submodule follows <code>main</code>.",
   "release_latest": "Latest release",
   "changelog": "Changelog",
-
   "platforms_label": "Where it runs",
-
   "code_title": "A screen is a few lines of XML",
   "code_text": "Describe the screen in XML, laid out with flexbox; bind its views in C++. The focus moves with the D-pad on its own, touch and mouse work too, and every colour follows the theme.",
   "code_xml": "The screen",
   "code_cpp": "Its activity",
   "code_link": "Build it in 15 minutes",
-
+  "demo_eyebrow": "Live demo",
+  "demo_band_title": "The real demo, in your browser",
+  "demo_band_text": "Aurore's demo compiled with Emscripten: the same code as on a Switch, drawn with WebGL 2. The keyboard, the mouse, a touch screen or the pad on screen; every theme and language.",
   "features_eyebrow": "Features",
   "features_title": "Everything a console menu needs",
   "f_controllers_title": "Made for controllers",
@@ -47,12 +48,10 @@
   "f_tools_text": "A test harness with simulated time and screenshot comparison, an inspector (F12), hot reload of XML and themes, a profiler, an app template.",
   "f_toolbox_title": "The toolbox",
   "f_toolbox_text": "Logger, animations, timers, background tasks, storage: what an app needs around its screens.",
-
   "cadran_eyebrow": "Cadran",
   "cadran_title": "A look of its own, without a line of code",
   "cadran_text": "Cadran, the look of PlayGuard and PlayShelf, is Aurore's default: an icon rail, cards, modals, action sheets, vector icons, a light and a dark theme, language and theme switched while the app runs. <code>aurore::Application::setCadran(false)</code> keeps borealis' own.",
   "cadran_link": "Cadran's kit",
-
   "screens_eyebrow": "Screenshots",
   "screens_title": "The demo, in a few looks",
   "shot_cadran": "Cadran's pieces",
@@ -67,7 +66,6 @@
   "shot_palettes": "The palette picker",
   "shot_light": "The light theme",
   "shot_french": "In French, switched while the app runs",
-
   "adds_eyebrow": "What Aurore adds",
   "adds_title": "borealis, carried on",
   "adds_text": "Aurore follows upstream (xfangfang/borealis) and adds fixes and features picked from other forks, and what its apps need: each one opt-in unless it is a fix.",
@@ -80,7 +78,6 @@
   "add_platforms": "<strong>Platforms</strong>: controllers reconnected under SDL, the browser (Emscripten), deko3d's command memory on the Switch.",
   "add_speed": "<strong>Speed</strong>: no relayout for an unchanged text or size, XML attributes registered on demand, unused textures freed.",
   "adds_link": "Every change and its API",
-
   "start_eyebrow": "Use it",
   "start_title": "In your project",
   "start_1": "Build your project as <strong>C++20</strong>, with RTTI and exceptions.",
@@ -91,7 +88,6 @@
   "start_borealis": "Coming from borealis? <code>brls::</code>, <code>&lt;borealis.hpp&gt;</code> and <code>BRLS_</code> still work until 1.0: changing the submodule is enough.",
   "demo_title": "Build the demo",
   "demo_text": "On Linux, macOS or Windows; the other platforms' commands are those of the CI.",
-
   "made_eyebrow": "Made with borealis",
   "made_title": "Apps that run on it",
   "made_playguard": "Parental controls for the Nintendo Switch, on the console",
@@ -100,7 +96,6 @@
   "made_wiliwili": "bilibili client for PC, PS4, PS Vita, Xbox and the Switch",
   "made_switchfin": "Jellyfin client for PC, PS4 and the Switch",
   "made_smd": "GameBanana mods, downloaded on the Switch",
-
   "docs_eyebrow": "Documentation",
   "docs_title": "Documentation",
   "docs_start": "Start",
@@ -109,10 +104,8 @@
   "docs_tools": "Tools",
   "api_title": "API reference",
   "api_text": "Every class and function, built from the headers by Doxygen.",
-
   "license_title": "Licence",
   "license_text": "borealis' code is under the <strong>Apache 2.0</strong> licence; Cadran, Aurore's default look, is <strong>GPLv3</strong>, and so is an app built with it. Free software, maintained by JigSawFr.",
-
   "footer_boreale": "A Boréale project",
   "footer_license": "Apache 2.0 · Cadran GPLv3",
   "footer_project": "Project",
@@ -120,7 +113,6 @@
   "footer_contributing": "Contributing",
   "footer_upstream": "Upstream: xfangfang/borealis",
   "footer_nintendo": "Not affiliated with or endorsed by Nintendo. Nintendo Switch is a trademark of Nintendo.",
-
   "search_placeholder": "Search the documentation",
   "search_none": "Nothing found.",
   "on_this_page": "On this page",
@@ -133,13 +125,11 @@
   "copied": "Copied",
   "close": "Close",
   "back_to_top": "Back to the top",
-
   "changelog_title": "Changelog",
   "changelog_intro": "Each release and what it changes, written from the commit messages. Before 1.0, a minor version may break the API: read its entry before updating the submodule.",
   "changelog_none": "No release yet. The submodule follows <code>main</code>, and its history is on GitHub:",
   "changelog_commits": "main's commits",
   "changelog_english": "",
-
   "not_found_title": "This page is not here",
   "not_found_text": "The address may be mistyped, or the page has moved. The home page and the documentation are a click away.",
   "home": "Home page"

@@ -1,9 +1,9 @@
 name: site
 
 # Aurore's website (site/README.md): the home page, the documentation, the
-# changelog and the API reference (Doxygen), built and checked for each pull
-# request and for main, and main's published on GitHub Pages (Settings ›
-# Pages › Source: GitHub Actions).
+# changelog, the API reference (Doxygen) and the demo in a browser
+# (web/README.md), built and checked for each pull request and for main, and
+# main's published on GitHub Pages (Settings › Pages › Source: GitHub Actions).
 on:
   push:
     branches: [ main ]
@@ -19,6 +19,12 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
+  # Emscripten, pinned: a new one is a pull request of its own (its ports,
+  # its threads and its file packager can change).
+  EMSDK_VERSION: 6.0.12
+  # The emsdk tool itself, at that version's tag, checked against the commit
+  # the tag pointed to when pinned: a tag can be moved, a commit cannot.
+  EMSDK_COMMIT: 35ff8a6d150541276abbc6bae512ca90bcfbe220
   # Playwright, pinned, for the layout and accessibility check.
   PLAYWRIGHT_VERSION: 1.64.0
   # axe-core, for accessibility (tools/site_layout.py): its npm package,
@@ -27,7 +33,59 @@ env:
   AXE_SHA256: 096912f6e77b4b695fc9304b7be65091db42d98de054da674ae222a11cb33f70
 
 jobs:
+  # The demo compiled with Emscripten, and the page around it (<build>/web/).
+  demo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      # Emscripten's cache: its system libraries and ports (SDL2, zlib),
+      # built for threads and exceptions on first use, which takes minutes.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.emscripten_cache
+          key: emscripten-${{ env.EMSDK_VERSION }}
+      - name: Emscripten ${{ env.EMSDK_VERSION }}
+        run: |
+          git clone --depth 1 --branch "$EMSDK_VERSION" https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          test "$(git -C "$RUNNER_TEMP/emsdk" rev-parse HEAD)" = "$EMSDK_COMMIT" \
+            || { echo "::error::emsdk's $EMSDK_VERSION tag is not $EMSDK_COMMIT any more"; exit 1; }
+          "$RUNNER_TEMP/emsdk/emsdk" install "$EMSDK_VERSION"
+          "$RUNNER_TEMP/emsdk/emsdk" activate "$EMSDK_VERSION"
+      # Japanese, Korean and Chinese drawn with a font cut out of Noto Sans
+      # CJK (tools/web_cjk_font.py): a browser has none Aurore can read.
+      - name: Dependencies
+        run: |
+          sudo apt-get update -y -q
+          sudo apt-get install -y -q --no-install-recommends ninja-build fonts-noto-cjk python3-fonttools
+          python3 tools/web_cjk_font.py /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc "$RUNNER_TEMP/cjk.otf" .
+      - name: The demo
+        run: |
+          # After emsdk_env.sh, which unsets EM_CACHE
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          export EM_CACHE="$HOME/.emscripten_cache"
+          emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WEB_CJK_FONT="$RUNNER_TEMP/cjk.otf"
+          cmake --build build-web
+          {
+            echo "### The demo in a browser"
+            echo
+            echo "| File | Size | Compressed |"
+            echo "|---|---|---|"
+            for f in aurore_demo.wasm aurore_demo.data aurore_demo.js; do
+              echo "| \`$f\` | $(du -k "build-web/web/$f" | cut -f1) KB | $(gzip -9c "build-web/web/$f" | wc -c | awk '{print int($1/1024)}') KB |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: demo
+          path: build-web/web
+          retention-days: 7
+
   build:
+    needs: demo
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -63,12 +121,16 @@ jobs:
             echo "SITE_URL=${pages%/}/"
             echo "SITE_NOINDEX=${PR:+1}"
           } | tee -a "$GITHUB_ENV"
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: demo
+          path: demo
       - name: The API reference
         # Fails on a warning (WARN_AS_ERROR in docs/Doxyfile)
         run: doxygen docs/Doxyfile
       - name: The website
         run: |
-          SITE_API=build_docs/html python3 tools/build_site.py out .
+          SITE_API=build_docs/html SITE_DEMO=demo python3 tools/build_site.py out .
           # The catalogs, every link and #anchor, what the CSP would block.
           python3 tools/check_site.py out "$SITE_URL"
       # No page wider than the screen on a phone, a tablet or a desktop, no
