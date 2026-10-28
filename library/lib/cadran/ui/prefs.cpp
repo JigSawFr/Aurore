@@ -1,6 +1,7 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <aurore/cadran/ui/hooks.hpp>
 #include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/core/util.hpp>
 
 #include <cctype>
 #include <cstdlib>
@@ -33,7 +34,7 @@ bool env_flag(const char* name)
     (void)name;
     return false;
 #else
-    const char* v = std::getenv((std::string("AURORE_") + name).c_str());
+    const char* v = aurore::environmentVariable(name);
     if (!v)
         return false;
     std::string value(v);

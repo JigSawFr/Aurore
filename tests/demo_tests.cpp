@@ -2642,12 +2642,11 @@ AURORE_TEST(header_settings_take_a_wider_touch)
     AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
 }
 
-// AURORE_LANG (or the older AURORE_LANG) gives the language over the
-// system's, a locale's name as it is or a system's read
+// AURORE_LANG gives the language over the system's, a locale's name as it
+// is or a system's read (borealis' names: tests/legacy_names_tests.cpp)
 AURORE_TEST(language_from_the_environment_wins)
 {
     Harness h;
-    unsetenv("AURORE_LANG");
     unsetenv("AURORE_LANG");
     std::string locale = "unchanged";
     AURORE_CHECK(!aurore::DesktopPlatform::localeFromEnvironmentVariable(&locale));
@@ -2667,9 +2666,7 @@ AURORE_TEST(language_from_the_environment_wins)
 
     setenv("AURORE_THEME", "LIGHT", 1);
     AURORE_CHECK_EQ(std::string(aurore::DesktopPlatform::environment("THEME")), std::string("LIGHT"));
-    setenv("AURORE_THEME", "DARK", 1);
-    AURORE_CHECK_EQ(std::string(aurore::DesktopPlatform::environment("THEME")), std::string("DARK"));
-    for (const char* name : { "AURORE_LANG", "AURORE_LANG", "AURORE_THEME", "AURORE_THEME" })
+    for (const char* name : { "AURORE_LANG", "AURORE_THEME" })
         unsetenv(name);
 }
 

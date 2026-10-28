@@ -504,9 +504,10 @@ ThemeValues::ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>>
     this->values = this->base;
 }
 
-void ThemeValues::addColor(const std::string& name, NVGcolor color)
+void ThemeValues::addColor(const std::string& key, NVGcolor color)
 {
-    auto it = this->base.find(name);
+    const std::string name = canonicalKey(key);
+    auto it                = this->base.find(name);
     if (it != this->base.end() && sameRgba(it->second, color))
         return;
     this->base[name] = color;
@@ -521,16 +522,18 @@ void ThemeValues::addColor(const std::string& name, NVGcolor color)
 NVGcolor ThemeValues::getColor(const std::string& name)
 {
     auto it = this->values.find(name);
+    if (it == this->values.end() && isLegacyKey(name))
+        it = this->values.find(canonicalKey(name));
     if (it == this->values.end())
         fatal("Unknown theme value \"" + name + "\" in size: " + std::to_string(this->values.size()));
     if (Inspector::recording)
-        Inspector::recordColor(name, it->second);
+        Inspector::recordColor(it->first, it->second);
     return it->second;
 }
 
 bool ThemeValues::hasColor(const std::string& name) const
 {
-    return this->values.count(name) > 0;
+    return this->values.count(name) > 0 || (isLegacyKey(name) && this->values.count(canonicalKey(name)) > 0);
 }
 
 void ThemeValues::setOverlay(const std::unordered_map<std::string, NVGcolor>& overlay)
@@ -538,7 +541,7 @@ void ThemeValues::setOverlay(const std::unordered_map<std::string, NVGcolor>& ov
     this->overlay = overlay;
     this->values  = this->base;
     for (auto& [name, color] : overlay)
-        this->values[name] = color;
+        this->values[canonicalKey(name)] = color;
     generation++;
 }
 
@@ -1521,7 +1524,8 @@ static void parseThemeText(const std::string& text, const std::string& directory
             report(out, where(number) + ": no '=' in \"" + (line.size() > 40 ? line.substr(0, 40) + "..." : line) + "\"");
             continue;
         }
-        std::string key   = trim(line.substr(0, equals));
+        // borealis' keys (deprecated) are read as Aurore's
+        std::string key   = canonicalKey(trim(line.substr(0, equals)));
         std::string value = trim(line.substr(equals + 1));
 
         if (section == "metrics")

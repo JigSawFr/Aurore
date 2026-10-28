@@ -167,16 +167,17 @@ StyleValues::StyleValues(std::initializer_list<std::pair<std::string, float>> li
     this->values = this->base;
 }
 
-void StyleValues::addMetric(const std::string& name, float metric)
+void StyleValues::addMetric(const std::string& key, float metric)
 {
-    this->base[name] = metric;
+    const std::string name = canonicalKey(key);
+    this->base[name]       = metric;
     if (this->overlay.count(name) == 0)
         this->values[name] = metric;
 }
 
 bool StyleValues::hasMetric(const std::string& name) const
 {
-    return this->values.count(name) > 0;
+    return this->values.count(name) > 0 || (isLegacyKey(name) && this->values.count(canonicalKey(name)) > 0);
 }
 
 void StyleValues::setOverlay(const std::unordered_map<std::string, float>& overlay)
@@ -184,20 +185,23 @@ void StyleValues::setOverlay(const std::unordered_map<std::string, float>& overl
     this->overlay = overlay;
     this->values  = this->base;
     for (auto& [name, metric] : overlay)
-        this->values[name] = metric;
+        this->values[canonicalKey(name)] = metric;
 }
 
 float StyleValues::getMetric(const std::string& name)
 {
-    if (this->values.count(name) == 0)
+    auto it = this->values.find(name);
+    if (it == this->values.end() && isLegacyKey(name))
+        it = this->values.find(canonicalKey(name));
+    if (it == this->values.end())
     {
         aurore::Logger::error("Unknown style metric {} in size: {}", name, std::to_string(this->values.size()));
         return 0;
     }
 
-    float metric = this->values[name];
+    float metric = it->second;
     if (Inspector::recording)
-        Inspector::recordMetric(name, metric);
+        Inspector::recordMetric(it->first, metric);
     return metric;
 }
 

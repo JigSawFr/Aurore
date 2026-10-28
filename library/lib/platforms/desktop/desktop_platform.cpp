@@ -21,6 +21,7 @@
 #include <memory>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>
+#include <aurore/core/util.hpp>
 #include <aurore/platforms/desktop/desktop_platform.hpp>
 #include <aurore/platforms/desktop/steam_deck.hpp>
 
@@ -541,9 +542,7 @@ static bool portalPrefersDark(DBusConnection* connection)
 
 const char* DesktopPlatform::environment(const std::string& name)
 {
-    if (const char* value = getenv(("AURORE_" + name).c_str()))
-        return value;
-    return getenv(("AURORE_" + name).c_str());
+    return environmentVariable(name);
 }
 
 bool DesktopPlatform::localeFromEnvironmentVariable(std::string* locale)

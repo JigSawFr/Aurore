@@ -17,6 +17,7 @@
 #include <aurore/core/inspector.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/core/profiler.hpp>
+#include <aurore/core/util.hpp>
 
 #include <cstdlib>
 
@@ -40,7 +41,7 @@ void Profiler::beginFrame()
 #if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
     static bool fromEnvironment = []
     {
-        const char* value = std::getenv("AURORE_PROFILE");
+        const char* value = environmentVariable("PROFILE");
         return value && *value && *value != '0';
     }();
     if (fromEnvironment && !logging)

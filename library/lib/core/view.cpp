@@ -2298,7 +2298,7 @@ View* View::createFromXMLElement(tinyxml2::XMLElement* element)
     if (!element)
         return nullptr;
 
-    std::string viewName = element->Name();
+    std::string viewName = canonicalXMLName(element->Name());
     ReadingXMLElement reading(element);
 
     // Instantiate the view

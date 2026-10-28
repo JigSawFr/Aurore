@@ -39,6 +39,12 @@ namespace fs = std::experimental::filesystem;
 #include <string>
 #include <vector>
 
+// legacy-names: begin
+// borealis' name, still read (deprecated)
+#if !defined(AURORE_I18N_PREFIX) && defined(BRLS_I18N_PREFIX)
+#define AURORE_I18N_PREFIX BRLS_I18N_PREFIX
+#endif
+// legacy-names: end
 #ifndef AURORE_I18N_PREFIX
 #define AURORE_I18N_PREFIX ""
 #endif

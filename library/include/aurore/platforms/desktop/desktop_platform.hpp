@@ -39,11 +39,12 @@ class DesktopPlatform : public Platform
     DesktopPlatform();
     ~DesktopPlatform() override;
 
-    /// The environment variable `AURORE_` + `name`, else `AURORE_` + `name`
-    /// (the older name): nullptr when neither is set.
+    /// The environment variable `AURORE_` + `name` (environmentVariable(),
+    /// which also reads the deprecated names borealis gave it): nullptr when
+    /// it is not set.
     static const char* environment(const std::string& name);
 
-    /// The locale AURORE_LANG (or AURORE_LANG) asks for: a locale's name as
+    /// The locale AURORE_LANG asks for: a locale's name as
     /// it is ("zh-Hant", an app's own), else read as a system's
     /// ("fr_FR.UTF-8" gives "fr"), never a path. False when neither is set:
     /// the system's language is used.
@@ -99,7 +100,7 @@ class DesktopPlatform : public Platform
     ThemeVariant themeVariant     = ThemeVariant::LIGHT;
     DesktopImeManager* imeManager = nullptr;
     std::string locale;
-    /// AURORE_LANG (or AURORE_LANG) gave the locale: the system's is not looked for
+    /// AURORE_LANG gave the locale: the system's is not looked for
     bool localeFromEnvironment = false;
     bool screenDimmingDisabled = false;
 #ifdef __linux__

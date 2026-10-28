@@ -5,6 +5,12 @@
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
+// legacy-names: begin
+// The older name, still read (deprecated)
+#if !defined(AURORE_CADRAN_HOST_I18N) && defined(BRLS_CADRAN_HOST_I18N)
+#define AURORE_CADRAN_HOST_I18N BRLS_CADRAN_HOST_I18N
+#endif
+// legacy-names: end
 #ifdef AURORE_CADRAN_HOST_I18N
 #include <fmt/format.h>
 #include <cstddef>

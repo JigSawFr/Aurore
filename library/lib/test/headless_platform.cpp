@@ -16,6 +16,7 @@
 
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
+#include <aurore/core/util.hpp>
 #include <aurore/test/headless_platform.hpp>
 
 #include <glad/glad.h>
@@ -67,7 +68,7 @@ HeadlessVideoContext::HeadlessVideoContext(int width, int height)
 
 bool HeadlessVideoContext::createContext()
 {
-    const char* forceGlfw = std::getenv("AURORE_HEADLESS_GLFW");
+    const char* forceGlfw = environmentVariable("HEADLESS_GLFW");
     bool useGlfw          = forceGlfw && *forceGlfw && *forceGlfw != '0';
 
 #if defined(AURORE_HEADLESS_EGL)

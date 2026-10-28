@@ -50,4 +50,28 @@ bool isResourceNameSafe(const std::string& name);
  */
 std::string escapeControlChars(const std::string& text);
 
+// legacy-names: begin
+/**
+ * The environment variable AURORE_<name>, else the names borealis gave it:
+ * BRLS_<name>, then BOREALIS_<name> (deprecated, logged once). nullptr when
+ * none is set.
+ */
+const char* environmentVariable(const std::string& name);
+
+/**
+ * True for a theme colour or style metric key with borealis' prefix
+ * ("brls/text"), deprecated: the same as "aurore/text".
+ */
+bool isLegacyKey(const std::string& key);
+
+/// `key` with "aurore/" for borealis' "brls/"; any other key as it is.
+std::string canonicalKey(const std::string& key);
+
+/**
+ * An XML tag with "aurore:" for borealis' "brls:" (deprecated, still read):
+ * <brls:Box> is <aurore:Box>.
+ */
+std::string canonicalXMLName(const std::string& name);
+// legacy-names: end
+
 } // namespace aurore

@@ -706,7 +706,7 @@ void Box::inflateFromXMLElement(tinyxml2::XMLElement* element)
 {
     // Ensure element is a Box
     ReadingXMLElement reading(element);
-    if (std::string(element->Name()) != "aurore:Box")
+    if (canonicalXMLName(element->Name()) != "aurore:Box")
         View::fatalXML("First XML element is " + std::string(element->Name()) + ", expected aurore:Box");
 
     // Apply attributes

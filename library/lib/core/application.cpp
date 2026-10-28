@@ -117,9 +117,9 @@ bool Application::init()
     // From the environment only in a build with AURORE_DEV_TOOLS (not a
     // release one, by default)
 #ifdef AURORE_DEV_TOOLS
-    if (const char* inspector = std::getenv("AURORE_INSPECTOR"))
+    if (const char* inspector = environmentVariable("INSPECTOR"))
         Inspector::setEnabled(std::strcmp(inspector, "0") != 0);
-    if (const char* hotReload = std::getenv("AURORE_HOT_RELOAD"))
+    if (const char* hotReload = environmentVariable("HOT_RELOAD"))
     {
         if (std::strcmp(hotReload, "0") != 0)
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
@@ -127,7 +127,7 @@ bool Application::init()
 #endif
 
 #if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
-    const char* redrawDebugEnv = std::getenv("AURORE_REDRAW_DEBUG");
+    const char* redrawDebugEnv = environmentVariable("REDRAW_DEBUG");
     if (redrawDebugEnv && *redrawDebugEnv && *redrawDebugEnv != '0')
         Application::setRedrawDebug(true);
 #endif
@@ -2429,7 +2429,7 @@ int Application::getDefaultFont()
 
 bool Application::XMLViewsRegisterContains(std::string name)
 {
-    return Application::xmlViewsRegister.count(name) > 0;
+    return Application::xmlViewsRegister.count(canonicalXMLName(name)) > 0;
 }
 
 std::vector<std::string> Application::getXMLViewNames()
@@ -2442,7 +2442,7 @@ std::vector<std::string> Application::getXMLViewNames()
 
 XMLViewCreator Application::getXMLViewCreator(std::string name)
 {
-    return Application::xmlViewsRegister[name];
+    return Application::xmlViewsRegister[canonicalXMLName(name)];
 }
 
 void Application::registerBuiltInXMLViews()
@@ -2486,7 +2486,8 @@ void Application::registerBuiltInXMLViews()
 
 void Application::registerXMLView(std::string name, XMLViewCreator creator)
 {
-    Application::xmlViewsRegister[name] = creator;
+    // borealis' prefix (deprecated) still registers (and replaces) an aurore: view
+    Application::xmlViewsRegister[canonicalXMLName(name)] = creator;
 }
 
 } // namespace aurore

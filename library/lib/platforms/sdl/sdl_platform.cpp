@@ -73,7 +73,7 @@ SDLPlatform::SDLPlatform()
     // Platform impls
     this->audioPlayer = new NullAudioPlayer();
 
-    // The system's language, unless AURORE_LANG (or AURORE_LANG) gave one
+    // The system's language, unless AURORE_LANG gave one
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO && !this->localeFromEnvironment)
     {
         SDL_Locale* locales = SDL_GetPreferredLocales();
