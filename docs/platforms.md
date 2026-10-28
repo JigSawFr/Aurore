@@ -122,7 +122,7 @@ The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DI
 
 ## In a browser
 
-Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. The demo builds for it under `emcmake cmake` and runs on the website, <https://aurore.boreale.dev/demo/> ([web/README.md](../web/README.md) says how); [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is an app's complete example. In short, under `emcmake cmake`:
+Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. The demo builds for it under `emcmake cmake` and runs on the website, <https://aurore.boreale.dev/demo/> ([web/README.md](https://github.com/JigSawFr/Aurore/blob/main/web/README.md) says how); [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is an app's complete example. In short, under `emcmake cmake`:
 
 - set `AURORE_PLATFORM=DESKTOP`, `AURORE_WINDOW=SDL2`, `AURORE_GRAPHICS=GLES3` and `USE_SYSTEM_SDL2` before including `commonOption.cmake`, and compile with `-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions`, SDL2 coming from Emscripten's ports (a `SDL2Config.cmake` that finds nothing to link);
 - package the resources into the page's file system (`--preload-file`) and set `AURORE_RESOURCES_ROOT` to where they land;
