@@ -29,6 +29,7 @@ aurore_add_tests(aurore_parser_tests)
 
 # libFuzzer targets, with clang: -DAURORE_BUILD_FUZZERS=ON (docs/testing.md)
 option(AURORE_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
+_aurore_legacy_bool(AURORE_BUILD_FUZZERS BRLS_BUILD_FUZZERS) # legacy-names: line
 if (AURORE_BUILD_FUZZERS)
     set(FUZZ_FLAGS -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
     add_executable(aurore_fuzz_markdown fuzz/markdown_fuzz.cpp

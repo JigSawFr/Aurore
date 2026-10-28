@@ -34,3 +34,11 @@ endforeach ()
 ")
     set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES "${script}")
 endfunction()
+
+# legacy-names: begin
+# borealis' name for it, deprecated
+function(brls_add_tests)
+    message(DEPRECATION "brls_add_tests() is deprecated: use aurore_add_tests()")
+    aurore_add_tests(${ARGV})
+endfunction()
+# legacy-names: end
