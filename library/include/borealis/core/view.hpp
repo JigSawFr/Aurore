@@ -38,9 +38,9 @@
 #include <romfs/romfs.hpp>
 #endif
 
-// Registers an "enum" XML attribute, which is just a string attribute with a map string -> enum inside
-// When using this macro please use the same (wonky) formatting as what you see in Box.cpp or View.cpp
-// otherwise clang-format will screw it up
+/// Registers an "enum" XML attribute, which is just a string attribute with a map string -> enum inside
+/// When using this macro please use the same (wonky) formatting as what you see in Box.cpp or View.cpp
+/// otherwise clang-format will screw it up
 #define BRLS_REGISTER_ENUM_XML_ATTRIBUTE(name, enumType, method, ...) \
     this->registerStringXMLAttribute(name, [this](std::string value) {                   \
         std::unordered_map<std::string, enumType> enumMap = __VA_ARGS__;                 \
@@ -49,13 +49,17 @@
         else                                                                             \
             brls::fatal("Illegal value \"" + value + "\" for XML attribute \"" + name + "\""); })
 
-// Shortcut to register an A key action (generic click) on a view given its id, that calls any function or method
-// To be used in activities or derivates of Box (internally uses the getView() method)
-// The function or method must return a boolean (true if the action was consumed, false otherwise) and take a single brls::View*
-// parameter (useful to know what was clicked if you use the same listener for multiple views)
+/// Shortcut to register an A key action (generic click) on a view given its id, that calls any function or method
+/// To be used in activities or derivates of Box (internally uses the getView() method)
+/// The function or method must return a boolean (true if the action was consumed, false otherwise) and take a single brls::View*
+/// parameter (useful to know what was clicked if you use the same listener for multiple views)
 #define BRLS_REGISTER_CLICK_BY_ID(id, method) \
     this->getView(id)->registerClickAction([this](brls::View* view) { return method(view); })
 
+/// For a view's member that starts work on another thread and comes back with
+/// brls::sync(): ASYNC_RETAIN before it, ASYNC_TOKEN in the lambdas' captures,
+/// ASYNC_RELEASE first in the one that runs on the main thread, which then
+/// returns if the view was deleted meanwhile (Image::setImageAsync).
 #define ASYNC_RETAIN                             \
     if (!deletionToken && !deletionTokenCounter) \
     {                                            \
@@ -66,6 +70,7 @@
     bool* token       = deletionToken;           \
     int* tokenCounter = deletionTokenCounter;
 
+/// See ASYNC_RETAIN.
 #define ASYNC_RELEASE                           \
     bool release = *token;                      \
     int counter  = *tokenCounter;               \
@@ -86,6 +91,7 @@
     if (release)                                \
         return;
 
+/// See ASYNC_RETAIN.
 #define ASYNC_TOKEN this, token, tokenCounter
 
 // Avoid conflicts with macro definitions in windows.h
@@ -107,7 +113,7 @@ namespace brls
 
 const NVGcolor TRANSPARENT = nvgRGBA(0, 0, 0, 0);
 
-// Focus direction when navigating
+/// Focus direction when navigating
 enum class FocusDirection
 {
     UP,
@@ -116,7 +122,7 @@ enum class FocusDirection
     RIGHT
 };
 
-// View background
+/// View background
 enum class ViewBackground
 {
     NONE,
@@ -139,47 +145,47 @@ enum class AlignSelf
     SPACE_AROUND,
 };
 
-// View visibility
+/// View visibility
 enum class Visibility
 {
-    VISIBLE, // the view is visible
-    INVISIBLE, // the view is invisible but still takes some space
-    GONE, // the view is invisible and doesn't take any space
+    VISIBLE, ///< the view is visible
+    INVISIBLE, ///< the view is invisible but still takes some space
+    GONE, ///< the view is invisible and doesn't take any space
 };
 
-// Position attribute behavior
+/// Position attribute behavior
 enum class PositionType
 {
-    RELATIVE, // position attributes offset the view from the base layout
-    ABSOLUTE, // position attributes set the absolute coordinates of the view
-    STATIC, // position attributes are ignored, and absolute children are placed against an ancestor that is not static
+    RELATIVE, ///< position attributes offset the view from the base layout
+    ABSOLUTE, ///< position attributes set the absolute coordinates of the view
+    STATIC, ///< position attributes are ignored, and absolute children are placed against an ancestor that is not static
 };
 
-// What the width and height of a view measure
+/// What the width and height of a view measure
 enum class BoxSizing
 {
-    BORDER_BOX, // the whole view, padding and border included
-    CONTENT_BOX, // the content only, padding and border are added to it
+    BORDER_BOX, ///< the whole view, padding and border included
+    CONTENT_BOX, ///< the content only, padding and border are added to it
 };
 
-// The animation to play when
-// pushing / popping an activity or
-// showing / hiding a view.
+/// The animation to play when
+/// pushing / popping an activity or
+/// showing / hiding a view.
 enum class TransitionAnimation
 {
-    FADE, // the old activity fades away and the new one fades in
-    SLIDE_LEFT, // the old activity slides out to the left and the new one slides in from the right
-    SLIDE_RIGHT, // inverted SLIDE_LEFT
+    FADE, ///< the old activity fades away and the new one fades in
+    SLIDE_LEFT, ///< the old activity slides out to the left and the new one slides in from the right
+    SLIDE_RIGHT, ///< inverted SLIDE_LEFT
     NONE,
     LINEAR,
 };
 
-// A View shape's shadow type
+/// A View shape's shadow type
 enum class ShadowType
 {
-    NONE, // do not draw any shadow around the shape
-    GENERIC, // generic all-purpose shadow
-    CUSTOM, // customized shadow (use the provided methods to tweak it)
+    NONE, ///< do not draw any shadow around the shape
+    GENERIC, ///< generic all-purpose shadow
+    CUSTOM, ///< customized shadow (use the provided methods to tweak it)
 };
 
 struct AppletFrameItem
@@ -235,15 +241,15 @@ typedef std::function<void(std::string)> FilePathAttributeHandler;
  */
 float ntz(float value);
 
-// Superclass for all the other views
-// Lifecycle of a view is :
-//   new -> [willAppear -> willDisappear] -> delete
-//
-// Users have do to the new, the rest of the lifecycle is taken
-// care of by the library
-//
-// willAppear and willDisappear can be called zero or multiple times
-// before deletion (in case of a TabLayout for instance)
+/// Superclass for all the other views
+/// Lifecycle of a view is :
+///   new -> [willAppear -> willDisappear] -> delete
+///
+/// Users have do to the new, the rest of the lifecycle is taken
+/// care of by the library
+///
+/// willAppear and willDisappear can be called zero or multiple times
+/// before deletion (in case of a TabLayout for instance)
 class View
 {
   private:
@@ -263,15 +269,15 @@ class View
     float highlightPadding      = 0.0f;
     float highlightCornerRadius = 0.0f;
 
-    Animatable clickAlpha = 0.0f; // animated between 0 and 1
+    Animatable clickAlpha = 0.0f; ///< animated between 0 and 1
 
     bool highlightShaking = false;
     Time highlightShakeStart;
     FocusDirection highlightShakeDirection;
     float highlightShakeAmplitude;
 
-    bool fadeIn          = false; // is the fade in animation running?
-    bool inFadeAnimation = false; // is any fade animation running?
+    bool fadeIn          = false; ///< is the fade in animation running?
+    bool inFadeAnimation = false; ///< is any fade animation running?
 
     Theme* themeOverride = nullptr;
 
@@ -306,7 +312,7 @@ class View
      */
     void* parentUserdata = nullptr;
 
-    bool culled = true; // will be culled by the parent Box, if any
+    bool culled = true; ///< will be culled by the parent Box, if any
 
     float aspectRatio = 0;
 
@@ -322,11 +328,11 @@ class View
 
     void registerCommonAttributes();
 
-    // The common XML attributes are registered when first needed (an XML
-    // attribute applied or checked), not by every View's constructor: 76
-    // handlers per view, for the many views built in code that never read
-    // one. Registered then without replacing a subclass's own handler for
-    // the same name (registered first, in its constructor).
+    /// The common XML attributes are registered when first needed (an XML
+    /// attribute applied or checked), not by every View's constructor: 76
+    /// handlers per view, for the many views built in code that never read
+    /// one. Registered then without replacing a subclass's own handler for
+    /// the same name (registered first, in its constructor).
     void ensureCommonAttributes();
     bool commonAttributesRegistered  = false;
     bool registeringCommonAttributes = false;
@@ -344,10 +350,10 @@ class View
 
     NVGcolor backgroundColor = TRANSPARENT;
 
-    // Background gradient colors for vertical linear style
+    /// Background gradient colors for vertical linear style
     NVGcolor backgroundStartColor = TRANSPARENT;
     NVGcolor backgroundEndColor   = nvgRGBA(0, 0, 0, 200);
-    // Background corner radii for vertical linear style: top-left, top-right, bottom-right, bottom-left
+    /// Background corner radii for vertical linear style: top-left, top-right, bottom-right, bottom-left
     std::vector<float> backgroundRadius { 0.0f, 0.0f, 0.0f, 0.0f };
 
     NVGcolor borderColor             = TRANSPARENT;
@@ -380,7 +386,7 @@ class View
 
     std::string id = "";
 
-    // Helper functions to apply this view's alpha to a color
+    /// Helper functions to apply this view's alpha to a color
     NVGcolor a(NVGcolor color);
     NVGpaint a(NVGpaint paint);
 
@@ -434,13 +440,16 @@ class View
     float getScaleX() const { return scaleX; }
     float getScaleY() const { return scaleY; }
 
+    /// A size or position left to the layout (`auto` in XML).
     static constexpr float AUTO = NAN;
 
+    /// A folder read before the resources for XML files ("": none).
     inline static std::string CUSTOM_RESOURCES_PATH;
 
     View();
     virtual ~View();
 
+    /// How the view's background is drawn: none, the sidebar's, the backdrop, a plain colour or a gradient.
     void setBackground(ViewBackground background);
 
     /**
@@ -449,16 +458,21 @@ class View
      */
     void setBackgroundLinearGradient(NVGcolor start, NVGcolor end, ViewBackground direction = ViewBackground::VERTICAL_LINEAR);
 
+    /// Shakes the focus highlight towards `direction`: there is nothing to go to there.
     void shakeHighlight(FocusDirection direction);
 
+    /// The view's position and size on the screen, after layout (getX(), getY(), getWidth(), getHeight()).
     Rect getFrame();
+    /// The position on the screen, in layout units: the parents' positions and translations added.
     float getX();
     float getY();
 
+    /// The position and size in the parent, as laid out by Yoga.
     Rect getLocalFrame();
     float getLocalX();
     float getLocalY();
 
+    /// The size as laid out by Yoga; the height without the collapse when `includeCollapse` is false.
     float getWidth();
     float getHeight(bool includeCollapse = true);
 
@@ -1027,6 +1041,7 @@ class View
         this->hideHighlight = hide;
     }
 
+    /// No click animation when the view is clicked.
     inline void setHideClickAnimation(bool hide)
     {
         this->hideClickAnimation = hide;
@@ -1253,6 +1268,7 @@ class View
         this->focusable = focusable;
     }
 
+    /// Whether the view takes the focus: focusable, and visible.
     bool isFocusable();
 
     /**
@@ -1282,6 +1298,7 @@ class View
      */
     void detach();
 
+    /// See detach().
     bool isDetached();
 
     /**
@@ -1307,6 +1324,7 @@ class View
         return detachedOrigin;
     }
 
+    /// The box this view is in (Box::addView sets it; `parentUserdata` is the box's own).
     void setParent(Box* parent, void* parentUserdata = nullptr);
     Box* getParent();
     bool hasParent();
@@ -1318,6 +1336,7 @@ class View
     template <class ButtonType>
     ActionIterator getAction(ButtonType button);
 
+    /// The action registered under `identifier`, or getActions().end().
     ActionIterator getAction(ActionIdentifier identifier);
 
     /**
@@ -1335,8 +1354,10 @@ class View
     template <class ButtonType, class ActionType>
     ActionIdentifier registerAction(const std::string& hintText, ButtonType button, const ActionListener& actionListener, bool hidden = false, bool allowRepeating = false, enum Sound sound = SOUND_NONE);
 
+    /// The same, on a controller button.
     ActionIdentifier registerAction(const std::string& hintText, ControllerButton button, const ActionListener& actionListener, bool hidden = false, bool allowRepeating = false, enum Sound sound = SOUND_NONE);
 
+    /// An action on a keyboard key (a combination with modifiers): no hint, no sound.
     ActionIdentifier registerAction(BrlsKeyCombination key, const ActionListener& actionListener, bool allowRepeating = false);
 
     void func(BrlsKeyCombination key);
@@ -1351,8 +1372,11 @@ class View
      */
     void registerClickAction(const ActionListener& actionListener);
 
+    /// Changes the hint of the action on `button`.
     void updateActionHint(enum ControllerButton button, const std::string& hintText);
+    /// Turns the action on `button` on or off (an action off runs nothing and shows no hint).
     void setActionAvailable(enum ControllerButton button, bool available);
+    /// The same for every action of the view.
     void setActionsAvailable(bool available) const;
 
     /**
@@ -1362,14 +1386,19 @@ class View
     void setActionHidden(enum ControllerButton button, bool hidden);
 
     void resetClickAnimation();
+    /// Plays the click animation (the flash over the view).
     void playClickAnimation(bool reverse = false, bool animateBack = true, bool force = false);
 
+    /// The view's class name ("Label", "Box"…).
     std::string getClassString() const;
 
+    /// The class name and the id, for logs: `Label (id="title")`.
     std::string describe() const;
 
+    /// The view's Yoga node.
     YGNode* getYGNode();
 
+    /// The actions registered on the view.
     const std::vector<std::shared_ptr<Action>>& getActions();
 
     /**
@@ -1472,8 +1501,10 @@ class View
      */
     void collapse(bool animated = true);
 
+    /// Whether collapse() hid the view.
     bool isCollapsed();
 
+    /// The view's opacity, 0 to 1 (a transition when its style has one).
     void setAlpha(float alpha);
 
     /**
@@ -1492,6 +1523,7 @@ class View
      */
     virtual void hide(std::function<void(void)> cb, bool animate, float animationDuration);
 
+    /// Whether hide() hid the view.
     bool isHidden();
 
     /**
@@ -1503,6 +1535,7 @@ class View
      */
     virtual bool isTranslucent();
 
+    /// Whether the view has the focus.
     bool isFocused();
 
     /**
@@ -1592,11 +1625,14 @@ class View
         // Nothing by default
     }
 
+    /// Fired with the view when it gains the focus.
     GenericEvent* getFocusEvent();
+    /// Fired with the view when it loses the focus.
     GenericEvent* getFocusLostEvent();
 
     Animatable alpha = 1.0f;
 
+    /// The opacity drawn: the view's alpha times its parents'.
     virtual float getAlpha(bool child = false);
 
     float getClickAlpha() { return this->clickAlpha; }
@@ -1623,6 +1659,7 @@ class View
         return this->culled;
     }
 
+    /// The width over the height, kept by the layout (values <= 0 are ignored).
     void setAspectRatio(float value);
 
     float getAspectRatio();
@@ -1682,6 +1719,7 @@ class View
 
     void updateAppletFrameItem();
 
+    /// Whether the children are clipped to the view's frame when drawn.
     bool getClipsToBounds() const
     {
         return clipsToBounds;
@@ -1692,18 +1730,26 @@ class View
         clipsToBounds = value;
     }
 
+    /// The AppletFrame the view is in, or nullptr.
     virtual AppletFrame* getAppletFrame();
 
+    /// Pushes `view` as the content of the view's AppletFrame (a page inside the frame).
     void present(View* view);
+    /// Pops the AppletFrame's content back to the one before, then runs `cb`.
     virtual void dismiss(std::function<void(void)> cb = [] {});
 
     bool* deletionToken       = nullptr;
     int* deletionTokenCounter = nullptr;
+    /// Keeps the view from being deleted by the deletion pool while a pointer to it
+    /// is in use (counted: one ptrUnlock() per ptrLock()).
     void ptrLock();
     void ptrUnlock();
+    /// Whether a ptrLock() holds the view.
     bool isPtrLocked();
+    /// Deletes the view at the end of the frame (Application::addToFreeQueue).
     void freeView();
 
+    /// The activity the view is in, through its parents; nullptr when none.
     Activity* getParentActivity();
     void setParentActivity(Activity* activity);
 
@@ -1784,6 +1830,7 @@ class View
      * it. XML: accessibilityRole="button", accessibilityLabel="@i18n/…".
      */
     void setAccessibilityRole(AccessibilityRole role);
+    /// See setAccessibilityRole().
     AccessibilityRole getAccessibilityRole();
     void setAccessibilityLabel(const std::string& label);
     std::string getAccessibilityLabel();
@@ -1902,8 +1949,8 @@ class View
     };
     std::unique_ptr<Extras, ExtrasDeleter> extras;
     Extras& getExtras();
-    // The focus, the click animation and the mouse: recorded only for a
-    // view that has state styles (or extras already).
+    /// The focus, the click animation and the mouse: recorded only for a
+    /// view that has state styles (or extras already).
     void noteStyleState(StyleState state, bool on);
     void notePress(bool pressed, bool releaseLater);
     void applyPendingStyles();
@@ -1914,8 +1961,8 @@ class View
     static bool parseStyleValue(const std::string& text, StyleValue::Type type, StyleValue* value);
     static unsigned pendingBindings;
 
-    // setThemeColor's: the property, its key, and the colour set last (to
-    // tell the app's own changes from ours)
+    /// setThemeColor's: the property, its key, and the colour set last (to
+    /// tell the app's own changes from ours)
     struct ThemeColor
     {
         std::string property;

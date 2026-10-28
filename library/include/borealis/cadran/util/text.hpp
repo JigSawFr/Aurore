@@ -12,8 +12,8 @@
 namespace text
 {
 
-// `s` without the white space (std::isspace in the C locale: space, \t, \n,
-// \v, \f, \r) at either end.
+/// `s` without the white space (std::isspace in the C locale: space, `\t`, `\n`,
+/// `\v`, `\f`, `\r`) at either end.
 inline std::string trim_space(const std::string& s)
 {
     const char* ws = " \t\n\v\f\r";
@@ -23,7 +23,7 @@ inline std::string trim_space(const std::string& s)
     return s.substr(a, s.find_last_not_of(ws) - a + 1);
 }
 
-// `s` without the white space (as trim_space) at its end; its start as it is.
+/// `s` without the white space (as trim_space) at its end; its start as it is.
 inline std::string trim_space_end(std::string s)
 {
     const size_t last = s.find_last_not_of(" \t\n\v\f\r");
@@ -31,8 +31,8 @@ inline std::string trim_space_end(std::string s)
     return s;
 }
 
-// `s` without the spaces and tabs at either end (what Markdown calls blank);
-// line ends stay.
+/// `s` without the spaces and tabs at either end (what Markdown calls blank);
+/// line ends stay.
 inline std::string trim_blank(const std::string& s)
 {
     const size_t a = s.find_first_not_of(" \t");
@@ -41,7 +41,7 @@ inline std::string trim_blank(const std::string& s)
     return s.substr(a, s.find_last_not_of(" \t") - a + 1);
 }
 
-// A..Z as a..z, every other byte as it is.
+/// A..Z as a..z, every other byte as it is.
 inline std::string lower_ascii(std::string s)
 {
     for (char& c : s)
@@ -50,8 +50,8 @@ inline std::string lower_ascii(std::string s)
     return s;
 }
 
-// The first byte a..z as A..Z ("play time" -> "Play time"); a text that
-// starts with anything else (a digit, a UTF-8 character) as it is.
+/// The first byte a..z as A..Z ("play time" -> "Play time"); a text that
+/// starts with anything else (a digit, a UTF-8 character) as it is.
 inline std::string capitalise_ascii(std::string s)
 {
     if (!s.empty() && s[0] >= 'a' && s[0] <= 'z')
@@ -74,9 +74,9 @@ inline bool ends_with(const std::string& s, const std::string& suffix)
     return s.size() >= suffix.size() && s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-// The lines of `s`, split at each \n, a \r before it dropped (CRLF read as
-// LF). The empty ones too: a text that ends with \n ends with an empty line,
-// and "" is one empty line.
+/// The lines of `s`, split at each `\n`, a `\r` before it dropped (CRLF read as
+/// LF). The empty ones too: a text that ends with `\n` ends with an empty line,
+/// and "" is one empty line.
 inline std::vector<std::string> lines(const std::string& s)
 {
     std::vector<std::string> out;
@@ -93,17 +93,17 @@ inline std::vector<std::string> lines(const std::string& s)
     return out;
 }
 
-// "https://ko-fi.com/jigsawfr" -> "ko-fi.com/jigsawfr": what to type by
-// hand. A text without a scheme as it is.
+/// "https://ko-fi.com/jigsawfr" -> "ko-fi.com/jigsawfr": what to type by
+/// hand. A text without a scheme as it is.
 inline std::string short_url(const std::string& url)
 {
     const size_t scheme = url.find("://");
     return scheme == std::string::npos ? url : url.substr(scheme + 3);
 }
 
-// `s` percent-encoded (RFC 3986) for a URL's query: the unreserved
-// characters (A..Z, a..z, 0..9, -_.~) as they are, every other byte as %XX
-// ("a b/é" -> "a%20b%2F%C3%A9").
+/// `s` percent-encoded (RFC 3986) for a URL's query: the unreserved
+/// characters (A..Z, a..z, 0..9, -_.~) as they are, every other byte as %XX
+/// ("a b/é" -> "a%20b%2F%C3%A9").
 inline std::string url_encode(const std::string& s)
 {
     static const char HEX[] = "0123456789ABCDEF";
@@ -124,8 +124,8 @@ inline std::string url_encode(const std::string& s)
     return out;
 }
 
-// The parts one after the other, `sep` between two of them: {"a", "b"} with
-// "\n" -> "a\nb"; none -> "".
+/// The parts one after the other, `sep` between two of them: {"a", "b"} with
+/// "\n" -> "a\nb"; none -> "".
 inline std::string join(const std::vector<std::string>& parts, const std::string& sep)
 {
     std::string out;
@@ -138,21 +138,21 @@ inline std::string join(const std::vector<std::string>& parts, const std::string
     return out;
 }
 
-// The HTML comments of a Markdown text, invisible on GitHub, read line by
-// line (each trimmed of white space, as trim_space): skipped, except the
-// console's own (an app's changelog and release notes)
-//   <!-- console: a line -->              that line, read here only;
-//   <!-- console:only  …  -->             the lines between, here only;
-//   <!-- console:hide --> … <!-- /console -->   the lines between, not here.
+/// The HTML comments of a Markdown text, invisible on GitHub, read line by
+/// line (each trimmed of white space, as trim_space): skipped, except the
+/// console's own (an app's changelog and release notes)
+///   `<!-- console: a line -->`              that line, read here only;
+///   `<!-- console:only  …  -->`             the lines between, here only;
+///   `<!-- console:hide --> … <!-- /console -->`   the lines between, not here.
 class ConsoleComments
 {
   public:
     enum Step
     {
-        Show, // an ordinary line (one inside console:only too)
-        Skip, // inside a comment or a console:hide block
-        Break, // a comment or a block starts or a console:only ends: no line
-        Directive, // <!-- console: … -->: `inner` is its line
+        Show, ///< an ordinary line (one inside console:only too)
+        Skip, ///< inside a comment or a console:hide block
+        Break, ///< a comment or a block starts or a console:only ends: no line
+        Directive, ///< `<!-- console: … -->`: `inner` is its line
     };
 
     Step next(const std::string& t, std::string& inner)

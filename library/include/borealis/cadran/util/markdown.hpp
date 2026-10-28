@@ -28,33 +28,35 @@ constexpr size_t MAX_COLUMNS    = 6;
 constexpr size_t MAX_ROWS       = 40;
 constexpr int MAX_DEPTH         = 4;
 
+/// A block of a Markdown text: its kind and what it holds.
 struct Block
 {
     enum Kind
     {
-        Heading, // `level` 1 to 6
-        Paragraph, // `text`, its line breaks kept
-        Item, // a list item: `level` its depth (0: top), `number` (0: a bullet), `task`
-        Code, // `lines`, as written
-        Quote, // `text`; `alert`: "note", "tip", "important", "warning", "caution" or ""
+        Heading, ///< `level` 1 to 6
+        Paragraph, ///< `text`, its line breaks kept
+        Item, ///< a list item: `level` its depth (0: top), `number` (0: a bullet), `task`
+        Code, ///< `lines`, as written
+        Quote, ///< `text`; `alert`: "note", "tip", "important", "warning", "caution" or ""
         Rule,
-        Table, // `rows`, the first one the header, each cut to MAX_COLUMNS cells
+        Table, ///< `rows`, the first one the header, each cut to MAX_COLUMNS cells
     };
     Kind kind = Paragraph;
     std::string text;
     int level  = 0;
     int number = 0;
-    int task   = -1; // Item: -1 not a task, 0 open, 1 done
+    int task   = -1; ///< Item: -1 not a task, 0 open, 1 done
     std::string alert;
-    std::string icon; // Heading / Item: the emoji it opens on, in hex ("1f680")
+    std::string icon; ///< Heading / Item: the emoji it opens on, in hex ("1f680")
     std::vector<std::string> lines;
     std::vector<std::vector<std::string>> rows;
 };
 
+/// The blocks of `md` (GitHub-flavoured, cleaned and bounded: see MAX_BLOCKS…).
 std::vector<Block> parse(const std::string& md);
 
-// One line's inline Markdown as plain text (links, images, emphasis, code,
-// entities, escapes, HTML tags, emoji).
+/// One line's inline Markdown as plain text (links, images, emphasis, code,
+/// entities, escapes, HTML tags, emoji).
 std::string inline_text(const std::string& md);
 
 } // namespace markdown

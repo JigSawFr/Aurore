@@ -26,23 +26,25 @@
 namespace brls
 {
 
+/// How a ScrollingFrame follows the focus.
 enum class ScrollingBehavior
 {
-    // Inputs scroll the view like the scroll wheel on a web page, focus changes only when the next view to focus is fully on screen
-    // To work properly, there must be at least one focusable view in the "top" area of the frame (there should not be the need to scroll to see it)
+    /// Inputs scroll the view like the scroll wheel on a web page, focus changes only when the next view to focus is fully on screen
+    /// To work properly, there must be at least one focusable view in the "top" area of the frame (there should not be the need to scroll to see it)
     NATURAL,
 
-    // The focused view is always in the center, inputs always change focus and scroll immediately
+    /// The focused view is always in the center, inputs always change focus and scroll immediately
     CENTERED,
 };
 
-// A vertical-only frame that can scroll if its content overflows.
-// This frame can only contain one child view.
-// The content view is detached from the rest of the tree
-// so that its height can grow as much as possible.
+/// A vertical-only frame that can scroll if its content overflows.
+/// This frame can only contain one child view.
+/// The content view is detached from the rest of the tree
+/// so that its height can grow as much as possible.
 class ScrollingFrame : public Box
 {
   public:
+    /// An empty frame, NATURAL scrolling.
     ScrollingFrame();
     ~ScrollingFrame();
 
@@ -63,6 +65,7 @@ class ScrollingFrame : public Box
     View* getNextFocus(FocusDirection direction, View* currentView) override;
     View* getDefaultFocus() override;
     enum Sound getFocusSound() override;
+    /// The part of the content in view: the local frame moved down by the scroll offset.
     Rect getVisibleFrame();
 
     /**
@@ -90,17 +93,19 @@ class ScrollingFrame : public Box
      */
     void setContentOffsetY(float value, bool animated);
 
-    // On by default: the indicator shows while scrolling, then fades
+    /// On by default: the indicator shows while scrolling, then fades
     void setScrollingIndicatorAutoHide(bool autoHide)
     {
         autoHideScrollingIndicator = autoHide;
     }
 
+    /// Whether the scroll bar on the right is drawn at all.
     void setScrollingIndicatorVisible(bool visible)
     {
         showScrollingIndicator = visible;
     }
 
+    /// Makes a frame for XML (`<brls:ScrollingFrame>`, one child: its content).
     static View* create();
 
   protected:
@@ -110,14 +115,14 @@ class ScrollingFrame : public Box
     bool updateScrollingOnNextFrame = false;
     bool childFocused               = false;
     bool showScrollingIndicator     = true;
-    // The indicator shows while the content scrolls, then fades away (or
-    // stays, as before, when off)
+    /// The indicator shows while the content scrolls, then fades away (or
+    /// stays, as before, when off)
     bool autoHideScrollingIndicator = true;
     float lastIndicatorOffset       = -1;
     Time lastScrollTime             = 0;
 
-    float middleY = 0; // y + height/2
-    float bottomY = 0; // y + height
+    float middleY = 0; ///< y + height/2
+    float bottomY = 0; ///< y + height
 
     Animatable contentOffsetY = 0.0f;
 

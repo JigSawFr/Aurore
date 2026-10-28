@@ -29,14 +29,14 @@
 
 namespace cadran
 {
-// Once borealis has started (Application::init): the console's theme and
-// language kept, the strings loaded in the preferences' language. The app
-// sets ui::hooks and calls ui::use_prefs before.
+/// Once borealis has started (Application::init): the console's theme and
+/// language kept, the strings loaded in the preferences' language. The app
+/// sets ui::hooks and calls ui::use_prefs before.
 void start();
-// Once the window is there (Application::createWindow): the preferences'
-// font and theme, the palettes, the text size, and the views and screens
-// that take Cadran's look from then on: the footer's hints, the header's
-// version badge and settings, every screen's header and list, and the main
-// screen (an AppletFrame holding a TabFrame) with its rail.
+/// Once the window is there (Application::createWindow): the preferences'
+/// font and theme, the palettes, the text size, and the views and screens
+/// that take Cadran's look from then on: the footer's hints, the header's
+/// version badge and settings, every screen's header and list, and the main
+/// screen (an AppletFrame holding a TabFrame) with its rail.
 void start_window();
 } // namespace cadran

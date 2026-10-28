@@ -19,31 +19,31 @@
 
 namespace motion
 {
-// Now, in µs (the clock every helper reads).
+/// Now, in µs (the clock every helper reads).
 brls::Time now();
-// 0..1: how far something begun at `since` (µs) is, over `duration_us`;
-// 1 once it is over, or when `since` is 0.
+/// 0..1: how far something begun at `since` (µs) is, over `duration_us`;
+/// 1 once it is over, or when `since` is 0.
 float progress(brls::Time since, float duration_us);
-// Easings, 0..1 to 0..1.
-float ease_out(float t); // cubic: fast, then settles
-float ease_in_out(float t); // sine
-float back_out(float t); // overshoots a little, then settles
+/// Easings, 0..1 to 0..1.
+float ease_out(float t); ///< cubic: fast, then settles
+float ease_in_out(float t); ///< sine
+float back_out(float t); ///< overshoots a little, then settles
 
-// `view` rises `rise` px into its place over `ms`, from nearly clear to
-// its alpha, after `delay_ms`; nothing (the view as it is) with the
-// motion off. For a brls::Box; any other view is left as it is.
+/// `view` rises `rise` px into its place over `ms`, from nearly clear to
+/// its alpha, after `delay_ms`; nothing (the view as it is) with the
+/// motion off. For a brls::Box; any other view is left as it is.
 void reveal(brls::View* view, float rise = 10.0f, int ms = 180, int delay_ms = 0);
-// The same for each of `views` in turn, `stagger_ms` apart, the first
-// `limit` of them only (the rest come as they are): a list's lines.
+/// The same for each of `views` in turn, `stagger_ms` apart, the first
+/// `limit` of them only (the rest come as they are): a list's lines.
 void reveal_all(const std::vector<brls::View*>& views, float rise = 8.0f, int ms = 220, int stagger_ms = 35,
     int limit = 8);
-// `view` bows out: up `rise` px and to clear over `ms`, then `then` (what
-// hides it, guarded by its caller: the view may be gone by then). With the
-// motion off, `then` at once.
+/// `view` bows out: up `rise` px and to clear over `ms`, then `then` (what
+/// hides it, guarded by its caller: the view may be gone by then). With the
+/// motion off, `then` at once.
 void dismiss(brls::View* view, std::function<void()> then, float rise = 8.0f, int ms = 200);
-// `view` was just moved by (`dx`, `dy`): it slides from where it was to
-// where it is, over `ms`.
+/// `view` was just moved by (`dx`, `dy`): it slides from where it was to
+/// where it is, over `ms`.
 void slide_from(brls::View* view, float dx, float dy, int ms = 220);
-// `view` breathes once: to `low` alpha and back, over `ms`.
+/// `view` breathes once: to `low` alpha and back, over `ms`.
 void breathe(brls::View* view, float low = 0.45f, int ms = 700);
 } // namespace motion
