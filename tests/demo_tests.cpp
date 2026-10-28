@@ -25,6 +25,7 @@
 #include <borealis/cadran/ui/hooks.hpp>
 #include <borealis/cadran/ui/live_prefs.hpp>
 #include <borealis/cadran/ui/prefs.hpp>
+#include <borealis/cadran/ui/text_size.hpp>
 #include <borealis/cadran/ui/ui.hpp>
 #include <borealis/cadran/view/cadran_icon.hpp>
 #include <borealis/core/hot_reload.hpp>
@@ -2581,6 +2582,123 @@ BRLS_TEST(text_field_is_a_card_with_a_cursor)
     h.tap(brls::BUTTON_Y);
     BRLS_CHECK(cleared);
     brls::Application::setReduceMotion(false);
+}
+
+namespace
+{
+// The demo in `locale`
+struct LocaleHarness : Demo, Harness
+{
+    explicit LocaleHarness(const std::string& locale)
+        : Harness(optionsFor(locale))
+    {
+        demo::registerViews();
+        push(new MainActivity());
+        settle();
+    }
+
+    static brls::test::Options optionsFor(const std::string& locale)
+    {
+        brls::test::Options options;
+        options.locale = locale;
+        return options;
+    }
+};
+
+// Each tab of the rail in turn (focusing its item shows it), `visit` on it
+template <typename H, typename F>
+size_t eachDemoTab(H& h, F visit)
+{
+    std::vector<std::string> seen;
+    for (int tab = 0; tab < 20; tab++)
+    {
+        std::string name = h.focusText();
+        if (std::find(seen.begin(), seen.end(), name) != seen.end())
+            break;
+        seen.push_back(name);
+        h.settle();
+        visit(name);
+        h.tapKey(brls::BRLS_KBD_KEY_DOWN);
+    }
+    return seen.size();
+}
+
+// The texts cut on the Cadran and Settings tabs at the very large text size
+std::vector<std::string> cutAtTheLargestSize(const std::string& locale)
+{
+    LocaleHarness h(locale);
+    ui::prefs().text_size = "largest";
+    text_size::apply();
+    h.settle();
+    BRLS_CHECK_EQ(brls::Application::getTextScale(), text_size::LARGEST);
+    std::vector<std::string> cut;
+    for (const char* tab : { "demo/tabs/cadran", "demo/tabs/settings" })
+    {
+        if (!h.focusByText(brls::getStr(tab), brls::BUTTON_DOWN, 20))
+            continue;
+        h.tap(brls::BUTTON_RIGHT);
+        // Down the tab, its texts as they scroll into view
+        for (int i = 0; i < 40; i++)
+        {
+            for (const std::string& text : h.cutTexts())
+                if (std::find(cut.begin(), cut.end(), text) == cut.end())
+                    cut.push_back(text);
+            h.tap(brls::BUTTON_DOWN);
+        }
+        h.tap(brls::BUTTON_B);
+    }
+    for (const std::string& text : cut)
+        std::fprintf(stderr, "%s, cut: %s\n", locale.c_str(), text.c_str());
+    ui::prefs().text_size = "auto";
+    text_size::apply();
+    return cut;
+}
+} // namespace
+
+// From the rail, the keyboard's arrows reach into every tab that has
+// something to focus, and Escape comes back
+BRLS_TEST(every_demo_screen_reachable_by_keyboard)
+{
+    DemoHarness h;
+    // A page to read, nothing on it to act on or to scroll
+    const std::string still = brls::getStr("demo/tabs/about");
+    std::vector<std::string> unreached;
+    size_t tabs = eachDemoTab(h, [&](const std::string& name)
+        {
+        brls::View* item = h.focus();
+        h.tapKey(brls::BRLS_KBD_KEY_RIGHT);
+        if (h.focus() == item || dynamic_cast<brls::SidebarItem*>(h.focus()))
+        {
+            if (name != still)
+                unreached.push_back(name);
+            return;
+        }
+        h.tapKey(brls::BRLS_KBD_KEY_ESCAPE);
+        BRLS_CHECK(h.focus() == item); });
+    BRLS_CHECK(tabs > 5);
+    for (const std::string& name : unreached)
+        std::fprintf(stderr, "not reached: %s\n", name.c_str());
+    BRLS_CHECK(unreached.empty());
+}
+
+BRLS_TEST(no_cut_text_in_de_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("de").empty());
+}
+
+BRLS_TEST(no_cut_text_in_ru_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("ru").empty());
+}
+
+BRLS_TEST(no_cut_text_in_fr_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("fr").empty());
+}
+
+BRLS_TEST(no_cut_text_in_ja_largest)
+{
+    BRLS_CHECK(cutAtTheLargestSize("ja").empty());
 }
 
 // The rows of cells grow with the text: none cut at the very large size
