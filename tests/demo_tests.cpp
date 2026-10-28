@@ -2483,6 +2483,38 @@ BRLS_TEST(system_locales_map_to_the_catalogues)
     }
 }
 
+// The header's language, theme and text size: a finger a little beside the
+// drawing still finds them
+BRLS_TEST(header_settings_take_a_wider_touch)
+{
+    DemoHarness h;
+    brls::View* language = h.top()->getContentView()->getView("header_language");
+    brls::View* theme    = h.top()->getContentView()->getView("header_theme");
+    BRLS_CHECK(language != nullptr && theme != nullptr);
+    if (!language || !theme)
+        return;
+    brls::Rect frame = language->getFrame();
+    BRLS_CHECK_EQ(frame.size.height, 40.0f);
+    size_t screens = brls::Application::getActivitiesStack().size();
+
+    // 7 px above it: the language list
+    h.tapAt(frame.getMidX(), frame.getMinY() - 7);
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens + 1);
+    h.tap(brls::BUTTON_B);
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens);
+
+    // In the gap, nearer the theme: the theme's list, not the language's
+    brls::Rect next = theme->getFrame();
+    h.tapAt(next.getMinX() - 3, next.getMidY());
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens + 1);
+    BRLS_CHECK(!h.hasText("Français"));
+    h.tap(brls::BUTTON_B);
+
+    // Farther: nothing
+    h.tapAt(frame.getMidX(), frame.getMinY() - 12);
+    BRLS_CHECK_EQ(brls::Application::getActivitiesStack().size(), screens);
+}
+
 // BRLS_LANG (or the older BOREALIS_LANG) gives the language over the
 // system's, a locale's name as it is or a system's read
 BRLS_TEST(language_from_the_environment_wins)
