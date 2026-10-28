@@ -2170,7 +2170,7 @@ bool Application::computeSafeArea()
         units       = std::max(units, margin);
         // Whole units, without a rounding error's extra one
         units = std::ceil(units - 0.01f);
-        return std::clamp(units, 0.0f, std::max(0.0f, std::floor(size / 3)));
+        return std::clamp(units, 0.0f, std::max(0.0f, (float)std::floor(size / 3)));
     };
     const float overscanX = Application::overscan * width, overscanY = Application::overscan * height;
     Insets units {
