@@ -559,12 +559,13 @@ if (BRLS_BUILD_TESTS)
         # A context without any window system (Mesa's surfaceless EGL)
         find_package(OpenGL COMPONENTS EGL)
         if (OpenGL_EGL_FOUND)
-            # The library's path here, OpenGL::EGL for an installed copy:
-            # the imported target is only visible in this directory, and a
-            # static library hands its link dependencies to its users
+            # The library's path here, Aurore::egl for an installed copy (made
+            # by AuroreConfig.cmake): the imported target is only visible in
+            # this directory, a static library hands its link dependencies to
+            # its users, and OpenGL::EGL would also ask for libOpenGL
             target_include_directories(aurore_test SYSTEM PRIVATE ${OPENGL_EGL_INCLUDE_DIRS})
             target_link_libraries(aurore_test PRIVATE
-                    $<BUILD_INTERFACE:${OPENGL_egl_LIBRARY}> $<INSTALL_INTERFACE:OpenGL::EGL>)
+                    $<BUILD_INTERFACE:${OPENGL_egl_LIBRARY}> $<INSTALL_INTERFACE:Aurore::egl>)
             set(AURORE_TEST_EGL ON)
             target_compile_definitions(aurore_test PRIVATE BRLS_HEADLESS_EGL)
         else ()
