@@ -27,6 +27,13 @@ add_executable(aurore_parser_tests parser_tests.cpp)
 target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
 brls_add_tests(aurore_parser_tests)
 
+# The SDL2 driver's input, on a virtual controller
+if (USE_SDL2 AND PLATFORM_DESKTOP)
+    add_executable(aurore_sdl_input_tests sdl_input_tests.cpp)
+    target_link_libraries(aurore_sdl_input_tests PRIVATE Aurore::test)
+    brls_add_tests(aurore_sdl_input_tests)
+endif ()
+
 # libFuzzer targets, with clang: -DBRLS_BUILD_FUZZERS=ON (docs/testing.md)
 option(BRLS_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
 if (BRLS_BUILD_FUZZERS)
