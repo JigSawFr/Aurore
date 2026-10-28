@@ -69,13 +69,22 @@ template)
     test ! -e "${out}/template/resources/themes"
     ;;
 legacy)
-    # What an app that has not moved to the AURORE_ names passes
+    # legacy-names: begin
+    # What an app that has not moved to the AURORE_ names passes: borealis'
+    # options, its BRLS_ ones, its headers and names (tests/legacy_names_tests.cpp)
     cmake -S . -B "${out}/legacy" -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM_DESKTOP=ON -DUSE_SDL2=ON \
-        -DUSE_LIBROMFS=ON 2>&1 | tee "${out}/legacy.log"
-    grep -q "PLATFORM_DESKTOP is deprecated" "${out}/legacy.log"
+        -DUSE_LIBROMFS=ON -DBRLS_BUILD_TESTS=ON -DBRLS_DEV_TOOLS=ON -DBRLS_RESOURCES_DIR=. 2>&1 | tee "${out}/legacy.log"
+    for name in PLATFORM_DESKTOP BRLS_BUILD_TESTS BRLS_DEV_TOOLS BRLS_RESOURCES_DIR "brls_add_tests()"; do
+        grep -q "${name} is deprecated" "${out}/legacy.log"
+    done
     grep -q "^AURORE_WINDOW:STRING=SDL2$" "${out}/legacy/CMakeCache.txt"
     grep -q "^AURORE_LIBROMFS:BOOL=ON$" "${out}/legacy/CMakeCache.txt"
-    cmake --build "${out}/legacy" -j "${jobs}"
+    grep -q "^AURORE_BUILD_TESTS:BOOL=ON$" "${out}/legacy/CMakeCache.txt"
+    grep -q "^AURORE_DEV_TOOLS:STRING=ON$" "${out}/legacy/CMakeCache.txt"
+    cmake --build "${out}/legacy" -j "${jobs}" 2>&1 | tee "${out}/legacy-build.log"
+    grep -q "<borealis.hpp> is deprecated: include <aurore.hpp>" "${out}/legacy-build.log"
+    ctest --test-dir "${out}/legacy" --output-on-failure -R "aurore_(legacy_names|dev_tools)_tests"
+    # legacy-names: end
     ;;
 *)
     echo "unknown variant: ${variant}" >&2
