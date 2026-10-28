@@ -6,7 +6,7 @@ The Android port of borealis follows SDL's documentation: [SDL/docs](https://git
 
 Currently, this project uses SDL 2.28.*, but there are some interesting Android-specific features in SDL3. We plan to migrate to SDL3 once it is officially released.
 
-Theoretically, it supports Android API 16 and later (Android 4.1+), but I have only tested it on devices running Android 5.0+ because I couldn't find older devices.
+It runs on Android API 21 and later (Android 5.0+) and targets API 34. The app's data is left out of Android's backups and device transfers (`android:allowBackup="false"`, `res/xml/data_extraction_rules.xml`): an app that wants its settings backed up says which files there.
 
 ## Building
 

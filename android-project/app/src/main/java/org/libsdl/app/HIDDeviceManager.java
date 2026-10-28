@@ -193,7 +193,13 @@ public class HIDDeviceManager {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         filter.addAction(HIDDeviceManager.ACTION_USB_PERMISSION);
-        mContext.registerReceiver(mUsbBroadcast, filter);
+        // Android 14 and later refuse a receiver of the app's own broadcasts
+        // registered without saying whether it is exported
+        if (Build.VERSION.SDK_INT >= 33 /* Android 13.0 (TIRAMISU) */) {
+            mContext.registerReceiver(mUsbBroadcast, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            mContext.registerReceiver(mUsbBroadcast, filter);
+        }
 
         for (UsbDevice usbDevice : mUsbManager.getDeviceList().values()) {
             handleUsbDeviceAttached(usbDevice);
@@ -583,7 +589,11 @@ public class HIDDeviceManager {
                 } else {
                     flags = 0;
                 }
-                mUsbManager.requestPermission(usbDevice, PendingIntent.getBroadcast(mContext, 0, new Intent(HIDDeviceManager.ACTION_USB_PERMISSION), flags));
+                // Explicit: Android 14 and later refuse a mutable PendingIntent
+                // of an implicit intent
+                Intent intent = new Intent(HIDDeviceManager.ACTION_USB_PERMISSION);
+                intent.setPackage(mContext.getPackageName());
+                mUsbManager.requestPermission(usbDevice, PendingIntent.getBroadcast(mContext, 0, intent, flags));
             } catch (Exception e) {
                 Log.v(TAG, "Couldn't request permission for USB device " + usbDevice);
                 HIDDeviceOpenResult(deviceID, false);
