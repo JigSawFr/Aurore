@@ -114,7 +114,9 @@ class ScrollingFrame : public Box
     // stays, as before, when off)
     bool autoHideScrollingIndicator = true;
     float lastIndicatorOffset       = -1;
-    Time lastScrollTime             = 0;
+    // The focus waits on the frame itself: the indicator stands for it
+    bool indicatorShowsFocus = false;
+    Time lastScrollTime      = 0;
 
     float middleY = 0; // y + height/2
     float bottomY = 0; // y + height
