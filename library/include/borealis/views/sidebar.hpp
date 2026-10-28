@@ -67,6 +67,7 @@ class SidebarItem : public Box
   protected:
     AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::TAB; }
     std::string getDefaultAccessibilityLabel() override { return this->label->getFullText(); }
+    bool getDefaultAccessibilitySelected() override { return this->active; }
 
   private:
     BRLS_BIND(Rectangle, accent, "brls/sidebar/item_accent");

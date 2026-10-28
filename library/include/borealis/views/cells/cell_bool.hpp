@@ -46,7 +46,7 @@ class BooleanCell : public DetailCell
     static View* create();
 
   private:
-    bool state;
+    bool state = false;
     float baseDetailTextSize;
 
     Animatable scale = 1;
@@ -57,6 +57,8 @@ class BooleanCell : public DetailCell
 
   protected:
     AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::TOGGLE; }
+    // "on" or "off", whether its detail is shown or not.
+    std::string getDefaultAccessibilityValue() override;
 };
 
 } // namespace brls

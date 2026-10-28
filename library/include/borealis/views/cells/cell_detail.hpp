@@ -43,8 +43,10 @@ class DetailCell : public RecyclerCell
 
   protected:
     AccessibilityRole getDefaultAccessibilityRole() override { return AccessibilityRole::CELL; }
-    // Its title, then its detail (a value, On or Off).
+    // Its title.
     std::string getDefaultAccessibilityLabel() override;
+    // Its detail, and any other text shown in it (a state, a note).
+    std::string getDefaultAccessibilityValue() override;
 };
 
 } // namespace brls

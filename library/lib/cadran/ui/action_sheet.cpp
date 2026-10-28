@@ -114,6 +114,9 @@ namespace
             , focus(first)
         {
             this->setId("cadran_sheet");
+            // Said when the focus enters it: its title, then its row.
+            this->setAccessibilityRole(brls::AccessibilityRole::LIST);
+            this->setAccessibilityLabel(subtitle.empty() ? title : title + ", " + subtitle);
             this->setThemeColor("backgroundColor", "brls/backdrop");
             this->setAlignItems(brls::AlignItems::STRETCH);
             this->addView(sheet_outside(0, true));
@@ -304,6 +307,7 @@ namespace
             cell->setCornerRadius(kit::RADIUS_CARD);
             cell->setHighlightCornerRadius(kit::RADIUS_CARD);
             cell->setThemeColor("backgroundColor", l.checked ? "cadran/teal_soft" : "cadran/surf2");
+            cell->setAccessibilitySelected(l.checked);
             cell->title->setGrow(0);
             cell->title->setMarginRight(0);
             cell->title->setFontSize(kit::TEXT_NOTE);
@@ -383,6 +387,7 @@ namespace
             // The value chosen: a soft fill and its check at the end.
             if (l.checked)
             {
+                cell->setAccessibilitySelected(true);
                 cell->setThemeColor("backgroundColor", "cadran/teal_soft");
                 cell->setCornerRadius(kit::RADIUS_ROW);
                 CadranIcon* check = kit::icon("check", 22, "cadran/teal");

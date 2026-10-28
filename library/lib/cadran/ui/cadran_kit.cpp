@@ -83,6 +83,7 @@ brls::Box* card(bool focusable, bool grow)
         box->setFocusable(true);
         box->setHideHighlightBackground(true);
         box->setHighlightCornerRadius(RADIUS_CARD);
+        box->setAccessibilityRole(brls::AccessibilityRole::CELL);
     }
     if (grow)
     {
