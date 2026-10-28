@@ -49,7 +49,8 @@ brls::Label* display(const std::string& text, float size, const char* color_key 
 CadranIcon* icon(const char* name, float size, const char* color_key = "cadran/text2");
 
 // A card: the surface, a 1 px line, rounded; `focusable` takes the focus
-// ring (no highlight fill); `grow` shares a row with its neighbours.
+// ring (no highlight fill), and is said as a cell with the texts in it;
+// `grow` shares a row with its neighbours.
 brls::Box* card(bool focusable, bool grow);
 
 // A card at the top of a screen (not a list: no rows), larger, `grow`
@@ -124,6 +125,10 @@ class Chip : public brls::Box
   public:
     Chip();
     void frame(brls::FrameContext* ctx) override;
+
+  protected:
+    // A button, said with its text.
+    brls::AccessibilityRole getDefaultAccessibilityRole() override { return brls::AccessibilityRole::BUTTON; }
 };
 brls::Box* chip(const std::string& text, float height = 48);
 

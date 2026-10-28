@@ -286,7 +286,7 @@ For the other platforms, upstream's wiki has the toolchains and the commands:
 
 ## 🤝 Contributing
 
-The default branch is `main`; upstream's is `wiliwili`. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/). A fix that is not specific to Aurore is worth sending [upstream](https://github.com/xfangfang/borealis) too.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) has the build, the tests, the format and the rules for pull requests; [`SECURITY.md`](SECURITY.md) says how to report a vulnerability privately. The default branch is `main`; upstream's is `wiliwili`. Picks from upstream and other forks keep their author and their `cherry picked from` line; commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ## 📜 License and credits
 

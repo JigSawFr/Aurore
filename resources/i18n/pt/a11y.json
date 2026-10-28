@@ -7,7 +7,13 @@
         "slider": "controlo de deslize",
         "text_field": "campo de texto",
         "tab": "separador",
-        "list": "lista"
+        "list": "lista",
+        "dialog": "caixa de diálogo"
     },
-    "disabled": "desativado"
+    "disabled": "indisponível",
+    "on": "ativado",
+    "off": "desativado",
+    "selected": "selecionado",
+    "position": "{} de {}",
+    "percent": "{}%"
 }

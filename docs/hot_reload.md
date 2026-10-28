@@ -9,7 +9,9 @@ It is off unless asked for:
 - in code, after `init()`: `brls::Application::setHotReload(true);` or `setHotReload(true, "/path/to/my_app/resources");`
 - for one run: `BRLS_HOT_RELOAD=1 ./my_app`, or `BRLS_HOT_RELOAD=/path/to/my_app/resources ./my_app`.
 
-A theme file is watched when it is read by `Theme::loadFile()` after hot reload is on (with the environment variable, it is on from `init()`), with the files it `@include`s and `inherit`s (not the presets: they have no file). An `@res/…` theme is read from hot reload's resources folder when the file is there, as the XML files are.
+A theme file is watched when it is read by `Theme::loadFile()` after hot reload is on (with the environment variable, it is on from `init()`), with the files it `@include`s and `inherit`s (not the presets: they have no file). An `@res/…` theme is read from hot reload's resources folder when the file is there, as the XML files are (a name with `..` is not looked for there).
+
+Each file watched is looked at about three times a second, and read again only when its time or size has changed; one larger than 4 MB, or that is not a regular file, is not read.
 
 ### Where the XML files are read from
 

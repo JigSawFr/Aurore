@@ -7,7 +7,13 @@
         "slider": "滑桿",
         "text_field": "文字欄位",
         "tab": "分頁",
-        "list": "清單"
+        "list": "清單",
+        "dialog": "對話框"
     },
-    "disabled": "已停用"
+    "disabled": "已停用",
+    "on": "已開啟",
+    "off": "已關閉",
+    "selected": "已選取",
+    "position": "第{}項，共{}項",
+    "percent": "{}%"
 }

@@ -102,23 +102,53 @@ The binding is made when the view joins an activity (the XML is read before), ag
 
 ## Accessibility
 
-Every view has a role and a label, for what is said when it takes the focus:
+Every view has a role, a label, a value and a selected state, for what is said when it takes the focus:
 
 ```xml
 <brls:Box focusable="true" accessibilityRole="button" accessibilityLabel="@i18n/app/play" />
+<brls:Box focusable="true" accessibilityLabel="@i18n/app/battery" accessibilityValue="80%" />
 ```
 
-The roles are `none`, `button`, `label`, `header`, `image`, `cell`, `toggle`, `slider`, `text_field`, `tab` and `list` (`brls::AccessibilityRole`). Without them a view says what it shows: a `Label` its text, a `Button` its text, a cell its title and its value (a `BooleanCell` is a `toggle`, a `SliderCell` a `slider`, an input cell a `text_field`), a sidebar's item its label (a `tab`).
+The roles are `none`, `button`, `label`, `header`, `image`, `cell`, `toggle`, `slider`, `text_field`, `tab`, `list` and `dialog` (`brls::AccessibilityRole`). Without them a view says what it shows:
 
-`brls::Application::setFocusAnnouncer` is called with the focused view's description each time the focus moves: its label, then its role and `disabled` in the app's language (`resources/i18n/<language>/a11y.json`, English when the app has none), as in "Save, button, disabled". That is where a text-to-speech engine, a screen reader of the system or a log plugs in:
+| View | Role | Label | Value, state |
+| --- | --- | --- | --- |
+| `Label` | label | its text | |
+| `Button`, `IconButton` | button | its text (give an icon alone an `accessibilityLabel`) | |
+| `DetailCell`, `SelectorCell`, input cells | cell, text field | its title | its detail and the other texts in it (a "›" left out) |
+| `BooleanCell` | toggle | its title | "on" or "off", its detail shown or not |
+| `RadioCell` | cell | its title | "selected" when it is |
+| `SliderCell` (its knob takes the focus) | slider | the cell's title | "40%" |
+| sidebar item | tab | its label | "selected" for the tab shown |
+| `Dialog` | dialog | its text | |
+| any other focusable `Box` | none | the texts shown in it, a focusable view in it left out (it speaks for itself) | |
+
+In code: `setAccessibilityRole`, `setAccessibilityLabel`, `setAccessibilityValue` and `setAccessibilitySelected` (XML `accessibilitySelected="true"`); a view of the app's overrides `getDefaultAccessibilityRole()`, `getDefaultAccessibilityLabel()`, `getDefaultAccessibilityValue()` or `getDefaultAccessibilitySelected()` to say what it shows as it changes.
+
+`brls::Application::setFocusAnnouncer` is called with the focused view's description each time the focus moves: its label, its role, its value, "selected", "disabled", then its place among its neighbours, in the app's language (`resources/i18n/<language>/a11y.json`, English when the app has none):
+
+- "Wi-Fi, switch, on, 2 of 5", "Language, English, 3 of 5", "Save, button, disabled";
+- the place ("2 of 5") is said for a button, a cell, a toggle, a slider, a text field or a tab: a recycler's cell its row in its section, any other one among the focusable views of its parent; nothing for a view alone;
+- entering a dialog or a list (role `list` with a label) from outside, its description comes first: "Delete this profile?, dialog, Cancel, button, 1 of 2".
+
+The same function is given what changes in place, outside of a focus move (`brls::Application::announce`):
+
+- a value changed on the focused view by the user (a toggle flipped: "on"; a slider let go: "60%"; a cell's detail changed: its new detail; a radio cell checked: "selected"), within 2 s of a press or a touch, so that a value changing on its own (a clock) is not read out at each tick (`View::announceAccessibilityValue()`, which an app's own view calls after its value changed);
+- every toast (`Application::notify`), its text.
+
+That is where a text-to-speech engine, a screen reader of the system or a log plugs in:
 
 ```cpp
-brls::Application::setFocusAnnouncer([](const std::string& description) {
-    my_tts::say(description);
+brls::Application::setFocusAnnouncer([](const std::string& text) {
+    my_tts::say(text); // speech-dispatcher on Linux, SAPI on Windows, AVSpeechSynthesizer on iOS…
 });
 ```
 
-`View::getAccessibilityDescription()` can be overridden for a view that says more (a state of its own).
+Aurore does not talk to a platform's accessibility API (AT-SPI, UI Automation, TalkBack, VoiceOver) itself: this function is the only way out. `Application::getLastAnnouncement()` is the last text given, announcer or not.
+
+A focusable view with no label and no value (an `IconButton` without text, a picture) says its role at most, so it cannot be told apart from the next one: the first time each kind takes the focus, a warning names it (in a debug build, or whenever an announcer is set). The [inspector](inspector.md) shows each view's description and flags those; the test harness lists them (`Harness::silentFocusables()`, docs/testing.md).
+
+`View::getAccessibilityDescription()` can be overridden for a view that says more.
 
 ## Reduced motion and text scale
 

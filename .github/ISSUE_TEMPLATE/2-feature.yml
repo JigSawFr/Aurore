@@ -1,0 +1,16 @@
+name: Feature
+description: Something Aurore could do
+labels: [ enhancement ]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: The need
+      description: What an app (or its users) cannot do today, and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: An idea of the solution
+      description: The API, the theme key, the view… if you have one in mind.

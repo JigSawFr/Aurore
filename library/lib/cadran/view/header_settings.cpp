@@ -55,6 +55,15 @@ HeaderSetting::HeaderSetting(Kind setting)
         else ui::pick_text_size(ui::refresh_shown_tab); }));
 }
 
+std::string HeaderSetting::getDefaultAccessibilityLabel()
+{
+    if (this->kind == Kind::LANGUAGE)
+        return brls::getStr("cadran/tools/language") + ", " + ui::language_name();
+    if (this->kind == Kind::THEME)
+        return brls::getStr("cadran/tools/theme") + ", " + ui::theme_name();
+    return brls::getStr("cadran/prefs/text_size") + ", " + ui::text_size_name();
+}
+
 brls::View* HeaderSetting::hitTest(brls::Point point)
 {
     // brls::View::hitTest skips a view that cannot take the focus.

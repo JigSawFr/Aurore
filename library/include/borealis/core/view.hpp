@@ -1780,8 +1780,8 @@ class View
     /**
      * What the view is and what it says, for the focus announcer
      * (Application::setFocusAnnouncer). By default a Label says its text, a
-     * Button and the cells their title (and value). XML:
-     * accessibilityRole="button", accessibilityLabel="@i18n/…".
+     * Button and the cells their title, a focusable Box the texts shown in
+     * it. XML: accessibilityRole="button", accessibilityLabel="@i18n/…".
      */
     void setAccessibilityRole(AccessibilityRole role);
     AccessibilityRole getAccessibilityRole();
@@ -1789,10 +1789,50 @@ class View
     std::string getAccessibilityLabel();
 
     /**
+     * What the view is set to, said after its role: a cell's detail, "on"
+     * or "off" for a BooleanCell, "40%" for a slider. XML:
+     * accessibilityValue="…".
+     */
+    void setAccessibilityValue(const std::string& value);
+    std::string getAccessibilityValue();
+
+    /**
+     * The chosen one of its kind (a picker's current row, a checked radio
+     * cell): "selected" is said after its value.
+     */
+    void setAccessibilitySelected(bool selected);
+    bool isAccessibilitySelected();
+
+    /**
+     * Where the view is among the rows it belongs to, from 1, said as
+     * "3 of 10": a recycler's cell its row in its section, a cell, a
+     * button or a tab among the focusable views of its parent. False when
+     * that says nothing (a view alone, a label).
+     */
+    virtual bool getAccessibilityPosition(int* index, int* count);
+
+    /**
      * What is announced when the view takes the focus: its label, then its
-     * role and state in the app's language ("Save, button, disabled").
+     * role, its value and state in the app's language and its place
+     * ("Wi-Fi, switch, on, 2 of 5"; "Save, button, disabled").
      */
     virtual std::string getAccessibilityDescription();
+
+    /**
+     * The texts shown in the view, for a label made of them: its own label
+     * for a view with no children, else the labels of the views under it
+     * (a focusable one left out: it speaks for itself), joined by ", ".
+     * Nothing for a hidden view.
+     */
+    std::string getAccessibilityText();
+
+    /**
+     * Says the view's value and state again (Application::announce) when it
+     * has the focus and the user pressed or touched something in the last
+     * 2 s (not a value changing on its own): called by the views whose value
+     * changes in place (a toggle flipped, a slider moved, a detail changed).
+     */
+    void announceAccessibilityValue();
 
     /**
      * Resolves the bindings left pending in this view and its children
@@ -1840,6 +1880,8 @@ class View
      */
     virtual AccessibilityRole getDefaultAccessibilityRole() { return AccessibilityRole::NONE; }
     virtual std::string getDefaultAccessibilityLabel() { return ""; }
+    virtual std::string getDefaultAccessibilityValue() { return ""; }
+    virtual bool getDefaultAccessibilitySelected() { return false; }
 
     /**
      * Called by a style property's setter before it changes the value:
