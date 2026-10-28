@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Aurore demo · in your browser</title>
+<meta name="description" content="Aurore's demo, compiled with Emscripten: the real library in your browser, with a controller on screen.">
+<meta name="theme-color" content="#0b1424">
+<link rel="icon" href="mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="demo.css">
+<script src="demo.js" defer></script>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="../" data-i18n="home"><img src="mark.svg" alt="" width="28" height="28"><span>Aurore</span><small>demo</small></a>
+  <div class="controls">
+    <label class="select"><span data-i18n="theme">Theme</span>
+      <select id="theme">
+        <option value="" data-i18n="theme_default">Default (Cadran)</option>
+        <optgroup label="Theme folders" data-i18n-label="theme_folders">
+          <option value="winter" data-file="themes/winter/theme.theme">Winter</option>
+          <option value="aurora" data-file="themes/aurora/theme.theme">Aurora</option>
+          <option value="prism" data-file="themes/prism/theme.theme">Prism</option>
+        </optgroup>
+        <optgroup label="Theme files" data-i18n-label="theme_files">
+          <option value="mint" data-file="themes/mint.theme">Mint</option>
+          <option value="rose" data-file="themes/rose.theme">Rose</option>
+        </optgroup>
+        <optgroup label="Presets" data-i18n-label="theme_presets">
+          <option value="builtin:seasonal">Seasonal</option>
+          <option value="builtin:ocean">Ocean</option>
+          <option value="builtin:amethyst">Amethyst</option>
+          <option value="builtin:sand">Sand</option>
+          <option value="builtin:high-contrast-dark">High contrast</option>
+          <option value="builtin:halloween">Halloween</option>
+          <option value="builtin:christmas">Christmas</option>
+        </optgroup>
+      </select>
+    </label>
+    <label class="select"><span data-i18n="language">Language</span>
+      <select id="lang">
+        <option value="" data-i18n="lang_auto">Browser's</option>
+        <option value="en-US">English</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+        <option value="es">Español</option>
+        <option value="it">Italiano</option>
+        <option value="nl">Nederlands</option>
+        <option value="pt-BR">Português (Brasil)</option>
+        <option value="ru">Русский</option>
+        <option value="ja">日本語</option>
+        <option value="ko">한국어</option>
+        <option value="zh-Hans">简体中文</option>
+        <option value="zh-Hant">繁體中文</option>
+      </select>
+    </label>
+    <button type="button" id="pad-toggle" aria-pressed="false" data-i18n="pad">Pad</button>
+    <button type="button" id="fullscreen" data-i18n="fullscreen">Full screen</button>
+  </div>
+</header>
+
+<main class="stage">
+  <div class="screen-wrap">
+    <div class="screen">
+      <canvas id="canvas" width="1280" height="720" tabindex="0" aria-label="Aurore's demo" data-i18n-aria="screen"></canvas>
+      <div class="loading" id="loading" role="status">
+        <img src="mark.svg" alt="" width="64" height="64">
+        <p id="loading-text" data-i18n="loading">Loading Aurore…</p>
+        <div class="progress"><span id="progress"></span></div>
+        <p class="hint" id="loading-size"></p>
+      </div>
+      <div class="error" id="error" hidden role="alert">
+        <p id="error-text"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="pad" id="pad" hidden>
+    <div class="shoulders">
+      <button type="button" data-button="0">ZL</button><button type="button" data-button="1">L</button>
+      <button type="button" data-button="7">−</button><button type="button" data-button="9">+</button>
+      <button type="button" data-button="15">R</button><button type="button" data-button="16">ZR</button>
+    </div>
+    <div class="dpad" role="group" aria-label="D-pad">
+      <button type="button" class="up" data-button="3" aria-label="Up">▲</button>
+      <button type="button" class="left" data-button="6" aria-label="Left">◀</button>
+      <button type="button" class="right" data-button="4" aria-label="Right">▶</button>
+      <button type="button" class="down" data-button="5" aria-label="Down">▼</button>
+    </div>
+    <div class="face" role="group" aria-label="A B X Y">
+      <button type="button" class="x" data-button="14">X</button>
+      <button type="button" class="y" data-button="11">Y</button>
+      <button type="button" class="a" data-button="13">A</button>
+      <button type="button" class="b" data-button="12">B</button>
+    </div>
+  </div>
+
+  <section class="help">
+    <h1 data-i18n="title">Aurore's demo, in your browser</h1>
+    <p data-i18n="intro">The real library, compiled with Emscripten: the same code as on a Switch, drawn with WebGL 2. Click the screen, then:</p>
+    <ul class="keys">
+      <li><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> <span data-i18n="key_move">move the focus</span></li>
+      <li><kbd>Enter</kbd> <span>Ⓐ</span></li>
+      <li><kbd>Esc</kbd> <span>Ⓑ</span></li>
+      <li><kbd>X</kbd> <kbd>Y</kbd> <kbd>L</kbd> <kbd>R</kbd> <span data-i18n="key_buttons">the buttons of the same name</span></li>
+      <li><kbd>F12</kbd> <span data-i18n="key_inspector">the inspector</span></li>
+    </ul>
+    <p data-i18n="touch">A click is a touch; the pad (on a touch screen, shown at once) has the controller's buttons.</p>
+    <p class="links"><a href="../" data-i18n="link_site">The website</a> · <a href="../docs/getting-started/" data-i18n="link_start">Aurore in 15 minutes</a> · <a href="https://github.com/JigSawFr/Aurore">GitHub</a></p>
+  </section>
+</main>
+</body>
+</html>
