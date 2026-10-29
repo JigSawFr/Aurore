@@ -103,5 +103,5 @@ Look at the result before committing: an app's own name that starts with `BRLS_`
 ## 7. Afterwards
 
 - Turn on the debugging aids while checking the screens: `AURORE_INSPECTOR=1` and `AURORE_HOT_RELOAD=$PWD/resources` ([environment.md](environment.md)).
-- [architecture.md](architecture.md) explains the loop, the focus, ownership and threads; the API reference is built with `doxygen docs/Doxyfile`.
+- [architecture.md](architecture.md) explains the loop, the focus, ownership and threads; the [API reference](https://aurore.boreale.dev/api/) has each class and function.
 - Issues and fixes go to [JigSawFr/aurore](https://github.com/JigSawFr/aurore); a fix that belongs upstream is welcome there too.

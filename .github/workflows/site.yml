@@ -125,12 +125,15 @@ jobs:
         with:
           name: demo
           path: demo
+      # Doxygen reads the headers into XML (fails on a warning, WARN_AS_ERROR
+      # in docs/Doxyfile), which tools/build_api.py makes the site's pages.
       - name: The API reference
-        # Fails on a warning (WARN_AS_ERROR in docs/Doxyfile)
-        run: doxygen docs/Doxyfile
+        run: |
+          doxygen docs/Doxyfile
+          python3 tools/build_api.py build_docs/xml build_api
       - name: The website
         run: |
-          SITE_API=build_docs/html SITE_DEMO=demo python3 tools/build_site.py out .
+          SITE_API=build_api SITE_DEMO=demo python3 tools/build_site.py out .
           # The catalogs, every link and #anchor, what the CSP would block.
           python3 tools/check_site.py out "$SITE_URL"
       # No page wider than the screen on a phone, a tablet or a desktop, no

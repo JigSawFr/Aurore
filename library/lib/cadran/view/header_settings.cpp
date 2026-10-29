@@ -47,10 +47,11 @@ HeaderSetting::HeaderSetting(Kind setting)
     this->setId(setting == Kind::LANGUAGE ? LANGUAGE_ID : setting == Kind::THEME ? THEME_ID
                                                                                  : TEXT_ID);
     this->setFocusable(false);
+    // Touch targets: the same size at every density
     this->setWidth(setting == Kind::LANGUAGE ? SIZE * 1.3f : SIZE);
     this->setHeight(SIZE);
     this->setAlignSelf(aurore::AlignSelf::CENTER);
-    this->setMarginRight(GAP);
+    this->setMarginRight(aurore::dp(GAP));
     // A tap opens its list (hitTest finds it, focusable or not); the tab on
     // screen shows the new choice (Preferences says it too).
     this->addGestureRecognizer(new aurore::TapGestureRecognizer(this, [setting]()
@@ -207,6 +208,9 @@ static void settings_screen_of(aurore::View* focus)
         focus = focus->getParent();
     auto* frame = dynamic_cast<aurore::AppletFrame*>(focus);
     if (!frame || !cadran::is_main_frame(frame))
+        return;
+    // No room in a compact screen's header: Preferences has them
+    if (aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT)
         return;
     auto* tools = VersionBadge::header_tools(frame);
     if (!tools || tools->getView(LANGUAGE_ID))

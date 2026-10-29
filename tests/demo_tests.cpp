@@ -69,10 +69,29 @@ struct Demo
     Demo() { demo::installHooks(); }
 };
 
+// A small screen's design size (a 320-pixel one's, 480x360) and the dense
+// density, for the length of a test
+struct SmallScreen
+{
+    SmallScreen()
+    {
+        aurore::Application::ORIGINAL_WINDOW_WIDTH  = 480;
+        aurore::Application::ORIGINAL_WINDOW_HEIGHT = 360;
+        aurore::setDensity(aurore::DENSITY_DENSE);
+    }
+    ~SmallScreen()
+    {
+        aurore::Application::ORIGINAL_WINDOW_WIDTH  = 1280;
+        aurore::Application::ORIGINAL_WINDOW_HEIGHT = 720;
+        aurore::setDensity(aurore::DENSITY_COMFORTABLE);
+    }
+};
+
 // The harness, on the demo's main screen
 struct DemoHarness : Demo, Harness
 {
-    DemoHarness()
+    explicit DemoHarness(aurore::test::Options options = aurore::test::Options())
+        : Harness(options)
     {
         demo::registerViews();
         push(new MainActivity());
@@ -211,6 +230,84 @@ AURORE_TEST(window_resized)
     AURORE_CHECK_EQ(shot.height, 1080);
     AURORE_CHECK_EQ(aurore::Application::contentWidth, 1280.0f);
     AURORE_CHECK(h.matchesReference("main_screen_1080p"));
+}
+
+AURORE_TEST(main_screen_on_a_small_screen)
+{
+    SmallScreen small;
+    aurore::test::Options options;
+    options.width  = 960;
+    options.height = 720;
+    DemoHarness h(options);
+    AURORE_CHECK_EQ(aurore::Application::contentWidth, 480.0f);
+    AURORE_CHECK(aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT);
+    // No room for the date; the figures one under the other, as wide as the
+    // column, the rail on its icons once the focus is in the tab
+    AURORE_CHECK(!h.hasText("Monday, January 5"));
+    // Nor for the language, theme and text size (Preferences has them), and
+    // a lower header
+    AURORE_CHECK(h.top()->getContentView()->getView("header_language") == nullptr);
+    AURORE_CHECK(aurore::getStyle()["aurore/applet_frame/header_height"] < 84 * aurore::DENSITY_DENSE);
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    aurore::View* games = h.findText("games");
+    AURORE_CHECK(games != nullptr);
+    AURORE_CHECK(h.matchesReference("main_screen_compact"));
+}
+
+// A small screen's harness: 960x720 pixels for 480x360 units
+aurore::test::Options smallScreenOptions()
+{
+    aurore::test::Options options;
+    options.width  = 960;
+    options.height = 720;
+    return options;
+}
+
+AURORE_TEST(grid_tab_on_a_small_screen)
+{
+    SmallScreen small;
+    DemoHarness h(smallScreenOptions());
+    AURORE_CHECK(h.focusByText("Grid"));
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    // The headers' subtitles under their titles, cut on one line; the
+    // footer's hints whole, the clock left out
+    for (const std::string& cut : h.cutTexts())
+        AURORE_CHECK(cut.find("items") != std::string::npos);
+    AURORE_CHECK(!h.hasText("10:30"));
+    AURORE_CHECK(h.matchesReference("grid_tab_compact"));
+}
+
+AURORE_TEST(theme_list_on_a_small_screen)
+{
+    SmallScreen small;
+    DemoHarness h(smallScreenOptions());
+    AURORE_CHECK(h.focusByText("Settings"));
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    AURORE_CHECK(h.focusByText("Ocean", aurore::BUTTON_DOWN, 60));
+    // Each theme's name whole beside three colours (no author, no empty
+    // detail taking the line's room)
+    for (const std::string& cut : h.cutTexts())
+        AURORE_CHECK(cut.find("presets") != std::string::npos);
+    AURORE_CHECK(h.matchesReference("theme_list_compact"));
+}
+
+AURORE_TEST(action_sheet_on_a_small_screen)
+{
+    SmallScreen small;
+    DemoHarness h(smallScreenOptions());
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    AURORE_CHECK(h.focusByText("Confirm", aurore::BUTTON_DOWN, 30));
+    AURORE_CHECK(h.focusByText("Actions", aurore::BUTTON_RIGHT, 4));
+    h.tap(aurore::BUTTON_A);
+    h.settle();
+    // The panel takes the screen's width: its lines whole
+    AURORE_CHECK(h.hasText("Favourite"));
+    AURORE_CHECK(h.cutTexts().empty());
+    AURORE_CHECK(h.matchesReference("action_sheet_compact"));
 }
 
 AURORE_TEST(cut_texts_found)

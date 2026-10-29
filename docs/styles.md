@@ -173,6 +173,27 @@ What does not: the text (its scale is `Application::setTextScale`, below), a pla
 
 The views read their sizes when they are made: set the density before the first screen, or make the screens again after changing it. The value is kept between `DENSITY_MIN` (0.5) and `DENSITY_MAX` (1.5). On the desktop, `AURORE_DENSITY=compact` (or `dense`, or a number) sets it at start, to try a screen at another density.
 
+## Screen width
+
+A screen is compact, medium or expanded by its width in layout units (`Application::contentWidth`): `aurore::WidthClass::COMPACT` under 720, `MEDIUM` under 1080, `EXPANDED` from 1080 (the 1280-unit design width). `Application::getWidthClass()` gives it; `aurore::widthClassOf(width)` the class of any width.
+
+The design width sets it: `Application::ORIGINAL_WINDOW_WIDTH = 480` (before `init()`) lays a 320-pixel screen out on 480 units, a compact one, its text 0.67 times as large as written. On the desktop, `AURORE_DESIGN_SIZE=480x360` does the same at start, to try a small screen's layout in a window.
+
+In XML, an attribute prefixed with a class applies on such a screen only, over the plain one whatever their order; on the other screens its name is checked, its value is not read:
+
+```xml
+<aurore:Box
+    axis="row"
+    compact:axis="column"
+    width="400"
+    compact:width="100%"
+    expanded:marginLeft="40dp" />
+```
+
+A state may follow (`compact:focus:cornerRadius="4"`). The attributes are read when the view is made: a screen that changes class (a window resized past a threshold) is laid out for its new class when it is made again. A view laid out in code reads `getWidthClass()` the same way.
+
+On a compact screen the library's own views make room for the content: a `Header` puts its subtitle under its title, on one line; the footer leaves out the clock, battery and Wi-Fi, its hints taking the row; dialogs take 94% of the width. With Cadran, the header is lower and without its language, theme and text size buttons (Preferences has them), the rail on its icons narrower, a tab's margins smaller, and action sheets and pickers take the screen's width.
+
 ## Reduced motion and text scale
 
 Both are settings of the core, which Cadran's preferences feed:

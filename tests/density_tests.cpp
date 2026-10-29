@@ -19,6 +19,7 @@
 
 #include <yoga/Yoga.h>
 #include <aurore.hpp>
+#include <aurore/cadran/ui/cadran_kit.hpp>
 #include <aurore/test/harness.hpp>
 
 #include <cmath>
@@ -139,6 +140,23 @@ AURORE_TEST(density_is_kept_in_range_and_read_by_name)
     AURORE_CHECK(aurore::parseDensity("0.8", &density) && near(density, 0.8f));
     for (const char* text : { "", "loose", "0.8x", "nan", "1e99" })
         AURORE_CHECK(!aurore::parseDensity(text, &density));
+}
+
+AURORE_TEST(density_reaches_cadran_kit)
+{
+    Harness harness;
+    Density dense(aurore::DENSITY_DENSE);
+    // A card's padding and corner, an icon's size: Cadran's own numbers
+    aurore::Box* card = cadran::kit::card(false, false);
+    AURORE_CHECK(near(YGNodeStyleGetPadding(card->getYGNode(), YGEdgeLeft).value, 24 * 0.7f));
+    AURORE_CHECK(near(card->getCornerRadius(), cadran::kit::RADIUS_CARD * 0.7f));
+    aurore::View* icon = cadran::kit::icon("check", 20, "cadran/text");
+    AURORE_CHECK(near(styleWidth(icon), 14));
+    aurore::Box* chip = cadran::kit::chip("15 min", 40);
+    AURORE_CHECK(near(YGNodeStyleGetHeight(chip->getYGNode()).value, 28));
+    delete card;
+    delete icon;
+    delete chip;
 }
 
 int main(int argc, char** argv)

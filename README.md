@@ -267,13 +267,13 @@ cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 
 With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
 
-New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
+New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme. The [API reference](https://aurore.boreale.dev/api/) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
 The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
 
-Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>. The demo runs there in a browser: <https://aurore.boreale.dev/demo/>.
+Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>, in the consoles' 15 languages (these pages in English under each language's header). Its home page shows the demo on a console, a screen's XML and its activity in an editor's window beside the screen they draw, the features, Cadran and the screenshots; the demo runs there in a browser: <https://aurore.boreale.dev/demo/>. How the site is made: [site/README.md](site/README.md).
 
 | Page | |
 | --- | --- |

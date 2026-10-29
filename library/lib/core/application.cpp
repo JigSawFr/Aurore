@@ -85,6 +85,20 @@ bool Application::init()
     Application::inited        = false;
     Application::quitRequested = false;
 
+    // The design size, to try a small screen's on the desktop (480x360)
+    if (const char* design = environmentVariable("DESIGN_SIZE"))
+    {
+        unsigned width = 0, height = 0;
+        char end = 0;
+        if (std::sscanf(design, "%ux%u%c", &width, &height, &end) == 2 && width >= 160 && width <= 7680 && height >= 120
+            && height <= 4320)
+        {
+            Application::ORIGINAL_WINDOW_WIDTH  = width;
+            Application::ORIGINAL_WINDOW_HEIGHT = height;
+        }
+        else
+            Logger::warning("AURORE_DESIGN_SIZE: \"{}\" is not a size such as 480x360", design);
+    }
     if (Application::ORIGINAL_WINDOW_WIDTH == 0)
         Application::ORIGINAL_WINDOW_WIDTH = 1280;
     if (Application::ORIGINAL_WINDOW_HEIGHT == 0)
@@ -1624,6 +1638,21 @@ void Application::setTextScale(float scale)
 float Application::getTextScale()
 {
     return Label::getFontScale();
+}
+
+WidthClass widthClassOf(float width)
+{
+    if (width < WIDTH_MEDIUM)
+        return WidthClass::COMPACT;
+    if (width < WIDTH_EXPANDED)
+        return WidthClass::MEDIUM;
+    return WidthClass::EXPANDED;
+}
+
+WidthClass Application::getWidthClass()
+{
+    // Before the window: the design width it will have
+    return widthClassOf(Application::contentWidth > 0 ? Application::contentWidth : (float)ORIGINAL_WINDOW_WIDTH);
 }
 
 void Application::registerModel(const std::string& name, DataModel* model)

@@ -35,7 +35,8 @@ extern "C"
 #include <orbis/Pigletv2VSH.h>
 #define NANOVG_GLES2_IMPLEMENTATION
 #else
-#include <glad/glad.h>
+#include <glad/gl.h>
+#include <aurore/platforms/driver/gl_loader.hpp>
 #ifdef USE_GLES2
 #define NANOVG_GLES2_IMPLEMENTATION
 #elif USE_GLES3
@@ -298,8 +299,8 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     SDL_AddEventWatch(sdlWindowEventWatcher, window);
 #ifdef AURORE_USE_OPENGL
 #if !defined(__PSV__) && !defined(PS4)
-    // Load OpenGL routines using glad
-    gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+    if (!loadGL((GLADloadfunc)SDL_GL_GetProcAddress, "sdl"))
+        fatal("sdl: the OpenGL context cannot be used (see the log)");
 #endif
 
     Logger::info("sdl: GL Vendor: {}", (const char*)glGetString(GL_VENDOR));

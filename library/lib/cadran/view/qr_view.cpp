@@ -6,8 +6,8 @@
 
 QrView::QrView(const std::string& text, float side)
 {
-    this->setWidth(side);
-    this->setHeight(side);
+    this->setWidth(aurore::dp(side));
+    this->setHeight(aurore::dp(side));
     this->setFocusable(false);
     try
     {

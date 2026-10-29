@@ -72,14 +72,14 @@ namespace
         const int level = b.level >= 1 && b.level <= 6 ? b.level : 6;
         auto* row       = new aurore::Box(aurore::Axis::ROW);
         row->setAlignItems(aurore::AlignItems::CENTER);
-        row->setMarginTop(first ? 0 : (level <= 2 ? 26 : 18));
-        row->setMarginBottom(level <= 2 ? 10 : 6);
+        row->setMarginTop(first ? 0 : aurore::dp(level <= 2 ? 26 : 18));
+        row->setMarginBottom(aurore::dp(level <= 2 ? 10 : 6));
         const float size = level == 1 ? 22 : level == 2 ? 20
             : level == 3                                ? kit::TEXT_KICKER
                                                         : 18;
         if (aurore::Image* image = icon(b.icon, size + 4))
         {
-            image->setMarginRight(10);
+            image->setMarginRight(aurore::dp(10));
             row->addView(image);
         }
         aurore::Label* text = level <= 2 ? kit::display(b.text, size)
@@ -95,23 +95,23 @@ namespace
     aurore::View* checkbox(bool done)
     {
         auto* box = new aurore::Box(aurore::Axis::ROW);
-        box->setWidth(20);
-        box->setHeight(20);
+        box->setWidth(aurore::dp(20));
+        box->setHeight(aurore::dp(20));
         box->setShrink(0.0f);
-        box->setCornerRadius(4);
+        box->setCornerRadius(aurore::dp(4));
         box->setBorderThickness(2);
         box->setThemeColor("borderColor", done ? "cadran/teal_fill" : "cadran/text3");
         box->setJustifyContent(aurore::JustifyContent::CENTER);
         box->setAlignItems(aurore::AlignItems::CENTER);
-        box->setMarginTop(4);
+        box->setMarginTop(aurore::dp(4));
         if (done)
         {
             box->setThemeColor("backgroundColor", "cadran/teal_fill");
             auto* mark = new aurore::Rectangle();
             mark->setThemeColor("color", "cadran/navy");
-            mark->setWidth(8);
-            mark->setHeight(8);
-            mark->setCornerRadius(2);
+            mark->setWidth(aurore::dp(8));
+            mark->setHeight(aurore::dp(8));
+            mark->setCornerRadius(aurore::dp(2));
             box->addView(mark);
         }
         return box;
@@ -121,8 +121,8 @@ namespace
     {
         auto* row = new aurore::Box(aurore::Axis::ROW);
         row->setAlignItems(aurore::AlignItems::FLEX_START);
-        row->setMarginLeft(8 + 26 * b.level);
-        row->setMarginTop(6);
+        row->setMarginLeft(aurore::dp(8 + 26 * b.level));
+        row->setMarginTop(aurore::dp(6));
         aurore::View* marker = nullptr;
         if (b.task >= 0)
             marker = checkbox(b.task == 1);
@@ -130,8 +130,8 @@ namespace
             marker = kit::label(std::to_string(b.number) + ".", 18, "cadran/teal");
         else if (!(marker = icon(b.icon, 20)))
             marker = kit::label(b.level == 0 ? "•" : "–", 18, "cadran/teal");
-        marker->setMinWidth(22);
-        marker->setMarginRight(10);
+        marker->setMinWidth(aurore::dp(22));
+        marker->setMarginRight(aurore::dp(10));
         marker->setShrink(0.0f);
         row->addView(marker);
         // A task done reads quieter, as GitHub greys it.
@@ -145,10 +145,10 @@ namespace
         box->setThemeColor("backgroundColor", "cadran/surf2");
         box->setThemeColor("borderColor", "cadran/line");
         box->setBorderThickness(1);
-        box->setCornerRadius(kit::RADIUS_ROW);
-        box->setPadding(12, 18, 12, 18);
-        box->setMarginTop(8);
-        box->setMarginBottom(4);
+        box->setCornerRadius(aurore::dp(kit::RADIUS_ROW));
+        box->setPadding(aurore::dp(12), aurore::dp(18), aurore::dp(12), aurore::dp(18));
+        box->setMarginTop(aurore::dp(8));
+        box->setMarginBottom(aurore::dp(4));
         box->addView(kit::label(text::join(b.lines, "\n"), kit::TEXT_BODY, "cadran/text"));
         return box;
     }
@@ -171,27 +171,27 @@ namespace
             color = "cadran/coral", title = "cadran/markdown/caution"_i18n;
         auto* row = new aurore::Box(aurore::Axis::ROW);
         row->setAlignItems(aurore::AlignItems::STRETCH);
-        row->setMarginTop(8);
+        row->setMarginTop(aurore::dp(8));
         if (!title.empty())
         {
             row->setThemeColor("backgroundColor", "cadran/surf2");
-            row->setCornerRadius(kit::RADIUS_ROW);
-            row->setPaddingLeft(10);
+            row->setCornerRadius(aurore::dp(kit::RADIUS_ROW));
+            row->setPaddingLeft(aurore::dp(10));
         }
         auto* bar = new aurore::Rectangle();
         bar->setThemeColor("color", color);
-        bar->setWidth(4);
-        bar->setCornerRadius(2);
-        bar->setMarginRight(14);
+        bar->setWidth(aurore::dp(4));
+        bar->setCornerRadius(aurore::dp(2));
+        bar->setMarginRight(aurore::dp(14));
         row->addView(bar);
         auto* body = new aurore::Box(aurore::Axis::COLUMN);
         body->setGrow(1.0f);
         body->setShrink(1.0f);
-        body->setPadding(6, 8, 6, 0);
+        body->setPadding(aurore::dp(6), aurore::dp(8), aurore::dp(6), 0);
         if (!title.empty())
         {
             aurore::Label* t = kit::label(cadran::upper(title), kit::TEXT_META, color);
-            t->setMarginBottom(4);
+            t->setMarginBottom(aurore::dp(4));
             body->addView(t);
         }
         if (!b.text.empty())
@@ -206,10 +206,10 @@ namespace
         for (const auto& r : b.rows)
             columns = std::max(columns, r.size());
         auto* grid = new aurore::Box(aurore::Axis::COLUMN);
-        grid->setMarginTop(8);
+        grid->setMarginTop(aurore::dp(8));
         grid->setBorderThickness(1);
         grid->setThemeColor("borderColor", "cadran/line");
-        grid->setCornerRadius(kit::RADIUS_ROW);
+        grid->setCornerRadius(aurore::dp(kit::RADIUS_ROW));
         grid->setThemeColor("backgroundColor", "cadran/surf");
         for (size_t r = 0; r < b.rows.size(); r++)
         {
@@ -225,7 +225,7 @@ namespace
                 const std::string text = c < b.rows[r].size() ? b.rows[r][c] : "";
                 auto* cell             = new aurore::Box(aurore::Axis::ROW);
                 cell->setWidthPercentage(100.0f / (float)columns);
-                cell->setPadding(8, 14, 8, 14);
+                cell->setPadding(aurore::dp(8), aurore::dp(14), aurore::dp(8), aurore::dp(14));
                 cell->addView(growing(text, kit::TEXT_BODY, r == 0 ? "cadran/text2" : "cadran/text"));
                 row->addView(cell);
             }
@@ -248,7 +248,7 @@ void fill(aurore::Box* box, const std::vector<markdown::Block>& blocks)
                 break;
             case markdown::Block::Paragraph:
                 view = kit::label(b.text, 18, "cadran/text");
-                view->setMarginTop(8);
+                view->setMarginTop(aurore::dp(8));
                 break;
             case markdown::Block::Item:
                 view = item(b);
@@ -264,8 +264,8 @@ void fill(aurore::Box* box, const std::vector<markdown::Block>& blocks)
                 auto* rule = new aurore::Rectangle();
                 rule->setThemeColor("color", "cadran/line");
                 rule->setHeight(1);
-                rule->setMarginTop(14);
-                rule->setMarginBottom(6);
+                rule->setMarginTop(aurore::dp(14));
+                rule->setMarginBottom(aurore::dp(6));
                 view = rule;
                 break;
             }

@@ -114,8 +114,8 @@ CadranIcon* make_icon(const char* name, float size, const char* color_key)
 {
     auto* icon = new CadranIcon();
     icon->setIcon(name);
-    icon->setWidth(size);
-    icon->setHeight(size);
+    icon->setWidth(aurore::dp(size));
+    icon->setHeight(aurore::dp(size));
     icon->setThemeColor("color", color_key);
     return icon;
 }
@@ -161,7 +161,7 @@ class TileGlow : public aurore::View
         inner.a = std::min(alpha, 1.0f);
         outer.a = 0;
         nvgBeginPath(vg);
-        nvgRoundedRect(vg, x, y, width, height, kit::RADIUS_CARD);
+        nvgRoundedRect(vg, x, y, width, height, aurore::dp(kit::RADIUS_CARD));
         nvgFillPaint(vg, nvgRadialGradient(vg, cx, cy, 0.0f, radius, inner, outer));
         nvgFill(vg);
     }
@@ -258,14 +258,14 @@ class TileFit : public aurore::View
 aurore::Box* row_icon(const char* name)
 {
     auto* square = new aurore::Box(aurore::Axis::ROW);
-    square->setWidth(ICON_SQUARE);
-    square->setHeight(ICON_SQUARE);
-    square->setCornerRadius(10);
+    square->setWidth(aurore::dp(ICON_SQUARE));
+    square->setHeight(aurore::dp(ICON_SQUARE));
+    square->setCornerRadius(aurore::dp(10));
     square->setShrink(0);
     square->setThemeColor("backgroundColor", "cadran/surf2");
     square->setAlignItems(aurore::AlignItems::CENTER);
     square->setJustifyContent(aurore::JustifyContent::CENTER);
-    square->setMarginRight(ICON_GAP);
+    square->setMarginRight(aurore::dp(ICON_GAP));
     square->addView(make_icon(name, 19, "cadran/text2"));
     return square;
 }
@@ -334,7 +334,7 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
         return;
     }
     nvgBeginPath(vg);
-    nvgRoundedRect(vg, x + 0.5f, y + 0.5f, width - 1, height - 1, kit::RADIUS_CARD);
+    nvgRoundedRect(vg, x + 0.5f, y + 0.5f, width - 1, height - 1, aurore::dp(kit::RADIUS_CARD));
     const NVGcolor border = ctx->theme[this->border];
     nvgFillColor(vg, this->a(ctx->theme[this->fill]));
     nvgFill(vg);
@@ -350,9 +350,9 @@ void cadran::Card::draw(NVGcontext* vg, float x, float y, float width, float hei
         // No line above a card's foot (a note): it belongs to the rows.
         if (previous && !dynamic_cast<aurore::Label*>(row))
         {
-            const float inset = has_icon(previous) ? ROW_PAD_ICON + ICON_SQUARE + ICON_GAP : ROW_PAD;
+            const float inset = aurore::dp(has_icon(previous) ? ROW_PAD_ICON + ICON_SQUARE + ICON_GAP : ROW_PAD);
             nvgBeginPath(vg);
-            nvgRect(vg, x + inset, row->getY() - 0.5f, width - inset - ROW_PAD_END, 1);
+            nvgRect(vg, x + inset, row->getY() - 0.5f, width - inset - aurore::dp(ROW_PAD_END), 1);
             nvgFillColor(vg, this->a(border));
             nvgFill(vg);
         }
@@ -367,8 +367,8 @@ cadran::Switch::Switch(aurore::BooleanCell* boolean_cell)
     : cell(boolean_cell)
 {
     this->setFocusable(false);
-    this->setWidth(50);
-    this->setHeight(28);
+    this->setWidth(aurore::dp(50));
+    this->setHeight(aurore::dp(28));
     this->setShrink(0);
 }
 
@@ -384,7 +384,7 @@ void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float h
     {
         // On: a white knob on the filled track
         nvgBeginPath(vg);
-        nvgCircle(vg, x + width - r, y + r, r - 4);
+        nvgCircle(vg, x + width - r, y + r, r - aurore::dp(4));
         nvgFillColor(vg, this->a(ctx->theme["cadran/knob"]));
         nvgFill(vg);
         return;
@@ -397,7 +397,7 @@ void cadran::Switch::draw(NVGcontext* vg, float x, float y, float width, float h
     nvgStrokeWidth(vg, 1.5f);
     nvgStroke(vg);
     nvgBeginPath(vg);
-    nvgCircle(vg, x + r, y + r, r - 7);
+    nvgCircle(vg, x + r, y + r, r - aurore::dp(7));
     nvgFillColor(vg, this->a(ctx->theme["cadran/text3"]));
     nvgFill(vg);
 }
@@ -414,9 +414,9 @@ cadran::List::List(aurore::View* screen, bool sub_screen)
     if (!this->box)
         return;
     if (sub_screen)
-        this->box->setPadding(20, 72, 36, 72);
+        this->box->setPadding(aurore::dp(20), aurore::dp(72), aurore::dp(36), aurore::dp(72));
     else
-        this->box->setPadding(16, 48, 36, 32);
+        this->box->setPadding(aurore::dp(16), aurore::dp(48), aurore::dp(36), aurore::dp(32));
 }
 
 cadran::List::List(aurore::View* screen, aurore::Box* column)
@@ -482,10 +482,10 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
         return nullptr;
     auto* row = new aurore::Box(aurore::Axis::ROW);
     row->setAlignItems(aurore::AlignItems::STRETCH);
-    row->setMarginBottom(12);
+    row->setMarginBottom(aurore::dp(12));
     // Spaced by the row, not by the tiles' margins: a hidden tile (hekate
     // without its update.bin) leaves no gap behind.
-    YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, 12);
+    YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, aurore::dp(12));
     this->box->addView(row, at);
     for (size_t i = 0; i < cells.size(); i++)
     {
@@ -501,16 +501,16 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
         // At least this tall, taller when a title takes two lines (larger
         // text); an action tile as tall as its line (and its words, if any).
         cell->setHeight(aurore::View::AUTO);
-        cell->setMinHeight(status ? 128 : 0);
+        cell->setMinHeight(status ? aurore::dp(128) : 0);
         if (status)
             this->readings.push_back(cell);
         if (status)
-            cell->setPadding(20, 22, 18, 22);
+            cell->setPadding(aurore::dp(20), aurore::dp(22), aurore::dp(18), aurore::dp(22));
         else
-            cell->setPadding(17, 20, 15, 20);
+            cell->setPadding(aurore::dp(17), aurore::dp(20), aurore::dp(15), aurore::dp(20));
         cell->setMarginRight(0);
-        cell->setCornerRadius(kit::RADIUS_CARD);
-        cell->setHighlightCornerRadius(kit::RADIUS_CARD);
+        cell->setCornerRadius(aurore::dp(kit::RADIUS_CARD));
+        cell->setHighlightCornerRadius(aurore::dp(kit::RADIUS_CARD));
         cell->setThemeColor("backgroundColor", "cadran/surf");
         cell->setThemeColor("borderColor", "cadran/line");
         cell->setBorderThickness(1);
@@ -519,7 +519,7 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
         // action tile's, on the same line.
         auto* head = new aurore::Box(aurore::Axis::ROW);
         head->setAlignItems(aurore::AlignItems::CENTER);
-        head->setMarginBottom(status ? 10 : 0);
+        head->setMarginBottom(status ? aurore::dp(10) : 0);
         // A tile's ink: its icon, and an action tile's light (TileGlow).
         const size_t inks  = sizeof(TILE_INKS) / sizeof(TILE_INKS[0]);
         const char* ink    = TILE_INKS[i % inks];
@@ -530,7 +530,7 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
         if (!status)
         {
             cell->addView(new TileGlow(cell, ink, TILE_INKS[(i + 1) % inks]), 0);
-            icon->setMarginRight(ACTION_ICON_GAP);
+            icon->setMarginRight(aurore::dp(ACTION_ICON_GAP));
             cell->removeView(cell->title, false);
             head->addView(cell->title);
             cell->title->setShrink(1.0f);
@@ -544,14 +544,14 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
         cell->detail->setHorizontalAlign(aurore::HorizontalAlign::LEFT);
         cell->detail->setMaxWidth(10000);
         cell->detail->setFontSize(status ? 22.0f : kit::TEXT_META);
-        cell->detail->setMarginTop(status ? 4 : 2);
+        cell->detail->setMarginTop(aurore::dp(status ? 4 : 2));
         // A status tile's value is a figure, on one line; another's words
         // too (TileFit).
         cell->detail->setSingleLine(status);
         if (!status)
         {
             // Under the title, from where it starts: past the icon.
-            cell->detail->setMarginLeft(ACTION_ICON + ACTION_ICON_GAP);
+            cell->detail->setMarginLeft(aurore::dp(ACTION_ICON + ACTION_ICON_GAP));
             cell->detail->setThemeColor("textColor", "cadran/text2");
             cell->addView(new TileFit(cell, cell->title));
         }
@@ -560,10 +560,10 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
             // Its value after a mark of its state (state()), hidden until set.
             auto* value = new aurore::Box(aurore::Axis::ROW);
             value->setAlignItems(aurore::AlignItems::CENTER);
-            value->setMarginTop(4);
+            value->setMarginTop(aurore::dp(4));
             cell->detail->setMarginTop(0);
             auto* mark = new kit::Mark("cadran/text3");
-            mark->setMarginRight(10);
+            mark->setMarginRight(aurore::dp(10));
             mark->setShrink(0);
             mark->setVisibility(aurore::Visibility::GONE);
             const int detail_at = index_in(cell, cell->detail);
@@ -577,9 +577,9 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
             auto* pill = new aurore::Box(aurore::Axis::ROW);
             pill->setAlignSelf(aurore::AlignSelf::FLEX_START);
             pill->setAlignItems(aurore::AlignItems::CENTER);
-            pill->setMarginTop(10);
-            pill->setPadding(4, 12, 5, 12);
-            pill->setCornerRadius(13);
+            pill->setMarginTop(aurore::dp(10));
+            pill->setPadding(aurore::dp(4), aurore::dp(12), aurore::dp(5), aurore::dp(12));
+            pill->setCornerRadius(aurore::dp(13));
             pill->setBorderThickness(1);
             pill->setVisibility(aurore::Visibility::GONE);
             aurore::Label* words = kit::label("", kit::TEXT_META, "cadran/text2");
@@ -588,7 +588,7 @@ aurore::Box* cadran::List::tiles(const std::vector<std::pair<const char*, const 
             cell->addView(pill, detail_at + 1);
             aurore::Label* note = kit::label("", kit::TEXT_META, "cadran/text3");
             note->setSingleLine(false);
-            note->setMarginTop(6);
+            note->setMarginTop(aurore::dp(6));
             note->setVisibility(aurore::Visibility::GONE);
             cell->addView(note, detail_at + 2);
             this->tags.push_back({ cell, pill });
@@ -637,15 +637,15 @@ void cadran::List::apply(const std::vector<std::pair<const char*, const char*>>&
                 note->setMarginLeft(0);
                 note->setMarginRight(0);
                 if (margin_top(note) >= 10)
-                    note->setMarginTop(10);
+                    note->setMarginTop(aurore::dp(10));
                 // Right under a card it explains: the card's foot, in it,
                 // so it reads as that card's (and the next card stays apart).
                 if (above)
                 {
-                    const float below = std::max(margin_bottom(note), 18.0f);
-                    note->setMarginTop(2);
+                    const float below = std::max(margin_bottom(note), aurore::dp(18.0f));
+                    note->setMarginTop(aurore::dp(2));
                     note->setMarginBottom(0);
-                    note->setMargins(2, ROW_PAD_END, 16, ROW_PAD);
+                    note->setMargins(aurore::dp(2), aurore::dp(ROW_PAD_END), aurore::dp(16), aurore::dp(ROW_PAD));
                     note->setThemeColor("textColor", "cadran/text3");
                     move_to(note, above);
                     above->setMarginBottom(std::max(margin_bottom(above), below));
@@ -688,9 +688,9 @@ void cadran::List::section(aurore::Header* header)
     header->setPaddingTop(0);
     header->setPaddingBottom(0);
     header->setMarginLeft(0); // flush with the cards, as the boards' kickers
-    header->setMarginBottom(10);
+    header->setMarginBottom(aurore::dp(10));
     if (margin_top(header) > 0)
-        header->setMarginTop(26);
+        header->setMarginTop(aurore::dp(26));
     if (!header->getChildren().empty())
         header->getChildren()[0]->setVisibility(aurore::Visibility::GONE); // the bar
     // A kicker: read from across the room (its capitals: sync()).
@@ -700,18 +700,18 @@ void cadran::List::section(aurore::Header* header)
 
 void cadran::List::row(aurore::DetailCell* cell, const char* icon, bool alone)
 {
-    cell->setHeight(60);
-    cell->setPaddingLeft(ROW_PAD_ICON);
-    cell->setPaddingRight(ROW_PAD_END);
+    cell->setHeight(aurore::dp(60));
+    cell->setPaddingLeft(aurore::dp(ROW_PAD_ICON));
+    cell->setPaddingRight(aurore::dp(ROW_PAD_END));
     cell->setLineBottom(0);
     cell->setLineTop(0);
-    cell->setHighlightCornerRadius(kit::RADIUS_ROW);
+    cell->setHighlightCornerRadius(aurore::dp(kit::RADIUS_ROW));
     cell->title->setFontSize(18);
     cell->detail->setFontSize(kit::TEXT_NOTE);
     if (icon)
         cell->addView(row_icon(icon), 0);
     else
-        cell->setPaddingLeft(ROW_PAD);
+        cell->setPaddingLeft(aurore::dp(ROW_PAD));
     if (auto* toggle = dynamic_cast<aurore::BooleanCell*>(cell))
     {
         toggle->detail->setVisibility(aurore::Visibility::GONE);
@@ -719,31 +719,31 @@ void cadran::List::row(aurore::DetailCell* cell, const char* icon, bool alone)
     }
     if (alone)
     {
-        cell->setCornerRadius(kit::RADIUS_ROW);
+        cell->setCornerRadius(aurore::dp(kit::RADIUS_ROW));
         cell->setThemeColor("backgroundColor", "cadran/surf");
         cell->setThemeColor("borderColor", "cadran/line");
         cell->setBorderThickness(1);
-        cell->setMarginBottom(8);
+        cell->setMarginBottom(aurore::dp(8));
     }
 }
 
 void cadran::List::row_image(aurore::DetailCell* cell, const std::string& image)
 {
     row(cell);
-    cell->setPaddingLeft(ROW_PAD_ICON);
+    cell->setPaddingLeft(aurore::dp(ROW_PAD_ICON));
     // In a box as row_icon()'s square, so the rows' lines start after it too.
     auto* square = new aurore::Box(aurore::Axis::ROW);
-    square->setWidth(ICON_SQUARE);
-    square->setHeight(ICON_SQUARE);
+    square->setWidth(aurore::dp(ICON_SQUARE));
+    square->setHeight(aurore::dp(ICON_SQUARE));
     square->setShrink(0);
     square->setAlignItems(aurore::AlignItems::CENTER);
     square->setJustifyContent(aurore::JustifyContent::CENTER);
-    square->setMarginRight(ICON_GAP);
+    square->setMarginRight(aurore::dp(ICON_GAP));
     auto* picture = new aurore::Image();
     picture->setScalingType(aurore::ImageScalingType::FIT);
     picture->setImageFromRes(image);
-    picture->setWidth(30);
-    picture->setHeight(30);
+    picture->setWidth(aurore::dp(30));
+    picture->setHeight(aurore::dp(30));
     square->addView(picture);
     cell->addView(square, 0);
 }
@@ -751,13 +751,13 @@ void cadran::List::row_image(aurore::DetailCell* cell, const std::string& image)
 void cadran::List::row_swatch(aurore::DetailCell* cell, const CadranSwatch::Colors& colors)
 {
     row(cell);
-    cell->setPaddingLeft(ROW_PAD_ICON);
+    cell->setPaddingLeft(aurore::dp(ROW_PAD_ICON));
     // row_icon()'s square, so the rows' lines start after it too
     auto* swatch = new CadranSwatch(colors);
-    swatch->setWidth(ICON_SQUARE);
-    swatch->setHeight(ICON_SQUARE);
+    swatch->setWidth(aurore::dp(ICON_SQUARE));
+    swatch->setHeight(aurore::dp(ICON_SQUARE));
     swatch->setShrink(0);
-    swatch->setMarginRight(ICON_GAP);
+    swatch->setMarginRight(aurore::dp(ICON_GAP));
     cell->addView(swatch, 0);
 }
 
@@ -795,7 +795,7 @@ cadran::Card* cadran::List::wrap(const char* id)
     if (at < 0)
         return nullptr;
     auto* card = new Card();
-    card->setPadding(18, 24, 18, 24);
+    card->setPadding(aurore::dp(18), aurore::dp(24), aurore::dp(18), aurore::dp(24));
     this->box->addView(card, at);
     move_to(line, card);
     return card;
