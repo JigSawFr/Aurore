@@ -262,7 +262,7 @@ The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a b
 
 ## 📚 Documentation
 
-Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>. The demo runs there in a browser: <https://aurore.boreale.dev/demo/>.
+Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>, in the consoles' 15 languages (these pages in English under each language's header). Its home page shows the demo on a console, a screen's XML and its activity in an editor's window beside the screen they draw, the features, Cadran and the screenshots; the demo runs there in a browser: <https://aurore.boreale.dev/demo/>. How the site is made: [site/README.md](site/README.md).
 
 | Page | |
 | --- | --- |

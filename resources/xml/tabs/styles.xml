@@ -22,7 +22,7 @@
                 accessibilityRole="header"
                 marginBottom="10" />
 
-        <aurore:Box axis="row" height="auto">
+        <aurore:Box axis="row" height="auto" compact:flexWrap="wrap">
 
             <!-- focus: and pressed:, with a transition on each -->
             <aurore:Box
@@ -83,7 +83,7 @@
             </aurore:Box>
         </aurore:Box>
 
-        <aurore:Box axis="row" height="auto" alignItems="center">
+        <aurore:Box axis="row" height="auto" alignItems="center" compact:flexWrap="wrap">
             <aurore:Button
                     id="styles/disabled"
                     text="@i18n/demo/styles/disabled"
@@ -106,7 +106,7 @@
                 marginTop="20"
                 marginBottom="10" />
 
-        <aurore:Box axis="row" height="auto" alignItems="center">
+        <aurore:Box axis="row" height="auto" alignItems="center" compact:flexWrap="wrap">
             <aurore:Button
                     id="styles/increment"
                     text="@i18n/demo/styles/add_one"

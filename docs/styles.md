@@ -192,6 +192,8 @@ In XML, an attribute prefixed with a class applies on such a screen only, over t
 
 A state may follow (`compact:focus:cornerRadius="4"`). The attributes are read when the view is made: a screen that changes class (a window resized past a threshold) is laid out for its new class when it is made again. A view laid out in code reads `getWidthClass()` the same way.
 
+On a compact screen the library's own views make room for the content: a `Header` puts its subtitle under its title, on one line; the footer leaves out the clock, battery and Wi-Fi, its hints taking the row; dialogs take 94% of the width. With Cadran, the header is lower and without its language, theme and text size buttons (Preferences has them), the rail on its icons narrower, a tab's margins smaller, and action sheets and pickers take the screen's width.
+
 ## Reduced motion and text scale
 
 Both are settings of the core, which Cadran's preferences feed:

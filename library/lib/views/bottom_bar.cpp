@@ -58,12 +58,14 @@ const std::string bottomBarXML = R"xml(
                 width="auto"
                 height="auto"/>
 
+            <!-- The clock, battery and Wi-Fi: the hints' room on a compact screen -->
             <aurore:Box
                 width="auto"
                 height="auto"
                 axis="row"
                 alignItems="center"
-                direction="leftToRight" >
+                direction="leftToRight"
+                compact:visibility="gone" >
 
                 <aurore:Battery
                     id="aurore/battery"
