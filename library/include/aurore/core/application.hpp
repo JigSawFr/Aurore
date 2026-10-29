@@ -59,6 +59,23 @@ class DebugLayer;
 class EditTextDialog;
 struct ThemeImage;
 
+/**
+ * How wide the screen is, in layout units (Application::contentWidth): what a
+ * layout picks its variant from (XML `compact:`, `medium:`, `expanded:`).
+ */
+enum class WidthClass
+{
+    COMPACT, ///< under WIDTH_MEDIUM: a phone, a small console screen (one column)
+    MEDIUM, ///< under WIDTH_EXPANDED
+    EXPANDED, ///< the 1280-unit design width and more
+};
+
+inline constexpr float WIDTH_MEDIUM   = 720.0f; ///< The narrowest MEDIUM width
+inline constexpr float WIDTH_EXPANDED = 1080.0f; ///< The narrowest EXPANDED width
+
+/// The class of a width in layout units.
+WidthClass widthClassOf(float width);
+
 /// Makes a new view for an XML tag (Application::registerXMLView).
 typedef std::function<View*(void)> XMLViewCreator;
 
@@ -264,6 +281,15 @@ class Application
      */
     static void setDensity(float density) { aurore::setDensity(density); }
     static float getDensity() { return aurore::getDensity(); }
+
+    /**
+     * The class of the screen's width now (widthClassOf(contentWidth)). XML
+     * reads it when a view is made; a view that lays itself out in code
+     * reads it there too, and the window size changed event says when it may
+     * have changed. ORIGINAL_WINDOW_WIDTH sets it for a small screen (480
+     * on a 320-pixel one); AURORE_DESIGN_SIZE=480x360 tries it on the desktop.
+     */
+    static WidthClass getWidthClass();
 
     /**
      * The data models XML bindings read (View::bind, bind="text: name.key"),

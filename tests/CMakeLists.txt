@@ -32,6 +32,11 @@ add_executable(aurore_density_tests density_tests.cpp)
 target_link_libraries(aurore_density_tests PRIVATE Aurore::test)
 aurore_add_tests(aurore_density_tests)
 
+# The classes of width: compact:, medium:, expanded: in XML
+add_executable(aurore_width_tests width_tests.cpp)
+target_link_libraries(aurore_width_tests PRIVATE Aurore::test)
+aurore_add_tests(aurore_width_tests)
+
 # The SDL driver's input (SDL2 or SDL3), on a virtual controller
 if ((USE_SDL2 OR USE_SDL3) AND PLATFORM_DESKTOP)
     add_executable(aurore_sdl_input_tests sdl_input_tests.cpp)

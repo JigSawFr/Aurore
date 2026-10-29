@@ -1868,6 +1868,26 @@ static bool splitStateAttribute(const std::string& name, StyleState* state, std:
     return true;
 }
 
+// `compact:width` -> COMPACT and `width`: an attribute for one class of
+// screen width (Application::getWidthClass)
+static bool splitWidthAttribute(const std::string& name, WidthClass* widthClass, std::string* attribute)
+{
+    size_t colon = name.find(':');
+    if (colon == std::string::npos)
+        return false;
+    static const std::unordered_map<std::string, WidthClass> CLASSES = {
+        { "compact", WidthClass::COMPACT },
+        { "medium", WidthClass::MEDIUM },
+        { "expanded", WidthClass::EXPANDED },
+    };
+    auto it = CLASSES.find(name.substr(0, colon));
+    if (it == CLASSES.end())
+        return false;
+    *widthClass = it->second;
+    *attribute  = name.substr(colon + 1);
+    return true;
+}
+
 // std::stof(), a value past a float's range read as not a number (which
 // the callers refuse) instead of an exception they do not expect
 static float readXMLFloat(const std::string& text)
@@ -1885,6 +1905,16 @@ static float readXMLFloat(const std::string& text)
 bool View::applyXMLAttribute(std::string name, std::string value)
 {
     this->ensureCommonAttributes();
+
+    // For one class of width: applied on such a screen, checked on the others
+    WidthClass widthClass;
+    std::string attribute;
+    if (splitWidthAttribute(name, &widthClass, &attribute))
+    {
+        if (widthClass == Application::getWidthClass())
+            return this->applyXMLAttribute(attribute, value);
+        return this->isXMLAttributeValid(attribute);
+    }
 
     StyleState state;
     std::string property;
@@ -2182,19 +2212,30 @@ void View::applyXMLAttributes(tinyxml2::XMLElement* element)
         return;
     ReadingXMLElement reading(element);
 
-    for (const tinyxml2::XMLAttribute* attribute = element->FirstAttribute(); attribute != nullptr; attribute = attribute->Next())
-    {
-        std::string name  = attribute->Name();
-        std::string value = std::string(attribute->Value());
+    // The attributes for a class of width last, over the others whatever
+    // their order (compact:width="200" beats width="400")
+    WidthClass widthClass;
+    std::string unused;
+    for (bool widthPass : { false, true })
+        for (const tinyxml2::XMLAttribute* attribute = element->FirstAttribute(); attribute != nullptr; attribute = attribute->Next())
+        {
+            std::string name  = attribute->Name();
+            std::string value = std::string(attribute->Value());
+            if (splitWidthAttribute(name, &widthClass, &unused) != widthPass)
+                continue;
 
-        if (!this->applyXMLAttribute(name, value))
-            this->printXMLAttributeErrorMessage(element, name, value);
-    }
+            if (!this->applyXMLAttribute(name, value))
+                this->printXMLAttributeErrorMessage(element, name, value);
+        }
 }
 
 bool View::isXMLAttributeValid(std::string attributeName)
 {
     this->ensureCommonAttributes();
+    WidthClass widthClass;
+    std::string attribute;
+    if (splitWidthAttribute(attributeName, &widthClass, &attribute))
+        return this->isXMLAttributeValid(attribute);
     StyleState state;
     std::string property;
     StyleValue probe;

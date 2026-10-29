@@ -85,20 +85,38 @@ const char* const MARKDOWN = "## Markdown\n"
 
 CadranTab::CadranTab()
 {
-    auto* column = new aurore::Box(aurore::Axis::COLUMN);
-    column->setPadding(28, 40, 40, 40);
+    auto* column       = new aurore::Box(aurore::Axis::COLUMN);
+    const bool compact = aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT;
+    // The tab's margins (@style/aurore/tab_frame/content_padding_*)
+    aurore::Style style = aurore::getStyle();
+    const float sides   = style["aurore/tab_frame/content_padding_sides"];
+    const float top     = style["aurore/tab_frame/content_padding_top_bottom"];
+    column->setPadding(top, sides, sides, sides);
     this->setContentView(column);
 
     // The figures, as a dashboard's top cards.
     aurore::Box* head = kit::kicker("today", "demo/cadran/figures"_i18n);
-    head->setMarginBottom(12);
+    head->setMarginBottom(aurore::dp(12));
     column->addView(head);
-    auto* figures = new aurore::Box(aurore::Axis::ROW);
+    // In a row, or one under the other on a narrow screen
+    auto* figures = new aurore::Box(compact ? aurore::Axis::COLUMN : aurore::Axis::ROW);
     figures->addView(figure("2:45", "demo/cadran/played"_i18n, "demo/cadran/on_track"_i18n, "cadran/teal"));
     figures->addView(figure("12", "demo/cadran/games"_i18n, "demo/cadran/updates"_i18n, "cadran/amber"));
     figures->addView(figure("98%", "demo/cadran/storage"_i18n, "demo/cadran/almost_full"_i18n, "cadran/coral"));
+    // A column's cards take its width (in a row, they share it)
+    if (compact)
+        for (aurore::View* card : figures->getChildren())
+        {
+            card->setGrow(0);
+            card->setWidthPercentage(100);
+        }
     for (size_t i = 0; i + 1 < figures->getChildren().size(); i++)
-        figures->getChildren()[i]->setMarginRight(16);
+    {
+        if (compact)
+            figures->getChildren()[i]->setMarginBottom(aurore::dp(12));
+        else
+            figures->getChildren()[i]->setMarginRight(aurore::dp(16));
+    }
     column->addView(figures);
 
     // Chips and a bar.
