@@ -81,11 +81,15 @@ else()
   add_subdirectory(${AURORE_PATH}/lib/extern/fmt ${AURORE_EXTERN_EXCLUDE})
 endif()
 
-# tweeny
+# tweeny 4: its easings, in animation.cpp only (header-only, not in the
+# library's headers, so not a dependency of an app or of the installed
+# package). Its own CMakeLists.txt asks for CMake 3.23: its headers here.
 if (USE_SYSTEM_TWEENY)
-  find_package(Tweeny REQUIRED)
+  find_package(Tweeny 4 REQUIRED)
 else()
-  add_subdirectory(${AURORE_PATH}/lib/extern/tweeny ${AURORE_EXTERN_EXCLUDE})
+  add_library(tweeny INTERFACE)
+  target_include_directories(tweeny SYSTEM INTERFACE ${AURORE_PATH}/lib/extern/tweeny/include)
+  add_library(tweeny::tweeny ALIAS tweeny)
 endif()
 
 # yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
@@ -552,7 +556,7 @@ if (AURORE_DKSH_INCLUDE)
     target_include_directories(aurore PRIVATE ${AURORE_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
-foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
+foreach (dep fmt yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
     if (TARGET ${dep})
         get_target_property(dep_imported ${dep} IMPORTED)
         get_target_property(dep_include ${dep} INTERFACE_INCLUDE_DIRECTORIES)
@@ -564,8 +568,8 @@ endforeach ()
 # The projects that link the library build with C++20 too, so its headers can use it
 target_compile_features(aurore PUBLIC cxx_std_20)
 target_link_libraries(aurore
-        PUBLIC fmt::fmt tweeny yogacore ${AURORE_PLATFORM_LIBS}
-        PRIVATE ${AURORE_PRIVATE_LIBS})
+        PUBLIC fmt::fmt yogacore ${AURORE_PLATFORM_LIBS}
+        PRIVATE ${AURORE_PRIVATE_LIBS} $<BUILD_INTERFACE:tweeny::tweeny>)
 if (PLATFORM_PSV)
     # vita-elf-create writes the module's SCE data (module info, exports,
     # imports: about 3 KB for the demo) right after the text segment, and

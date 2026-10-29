@@ -28,7 +28,7 @@ versions that can be read from the sources.
 | {fmt} | 12.2.0 | `library/lib/extern/fmt`, `library/lib/extern/nxfmtwrapper` (Aurore's build of it) | MIT | 2012 - present, Victor Zverovich and {fmt} contributors |
 | TinyXML-2 | 11.0.0 | `library/lib/extern/tinyxml2`, `library/include/aurore/extern/tinyxml2` | zlib | Lee Thomason |
 | JSON for Modern C++ | 3.12.0 | `library/include/aurore/extern/nlohmann` | MIT | 2013-2025 Niels Lohmann |
-| Tweeny | 3.2.1 | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
+| Tweeny | 4.2.0 (its headers) | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
 | libromfs | - | `library/lib/extern/libromfs` | MIT | 2022 WerWolv |
 | GLFW | 3.4 (xfangfang's fork, 892256c) | `library/lib/extern/glfw` | zlib | 2002-2006 Marcus Geelnard, 2006-2019 Camilla Löwy |
 | SDL | 2.32.10 | `library/lib/extern/SDL`, `android-project/app/src/sdl2/java/org/libsdl` | zlib | 1997-2025 Sam Lantinga |
