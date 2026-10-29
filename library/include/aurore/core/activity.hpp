@@ -80,6 +80,14 @@ class Activity
     /// The root of the activity's views, nullptr before it is set.
     View* getContentView();
 
+    /// What the activity shows on a screen to look at, above its content:
+    /// the New 3DS's top screen (aurore/core/top_screen.hpp). The activity
+    /// owns it, and frees the one it replaces; without one (nullptr, the
+    /// default) the screen shows TopScreenHeader. It is laid out at the
+    /// screen's size and drawn there only: no focus nor touch goes to it.
+    void setTopScreenView(View* view);
+    View* getTopScreenView() { return this->topScreenView; }
+
     /**
      * Counts the content views set (setContentView): what views were bound
      * to (AURORE_BIND) is looked up again in a content made anew.
@@ -203,6 +211,7 @@ class Activity
     std::unordered_map<std::string, DataModel*> models;
     View* constructorView      = nullptr;
     View* contentView          = nullptr;
+    View* topScreenView        = nullptr;
     unsigned contentGeneration = 0;
 };
 

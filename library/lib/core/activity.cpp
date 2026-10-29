@@ -1,10 +1,13 @@
 // SPDX-FileCopyrightText: 2020 natinusala
 // SPDX-License-Identifier: Apache-2.0
 
+#include <algorithm>
+
 #include <aurore/core/activity.hpp>
 #include <aurore/core/application.hpp>
 #include <aurore/core/hot_reload.hpp>
 #include <aurore/core/i18n.hpp>
+#include <aurore/core/top_screen.hpp>
 
 using namespace aurore::literals;
 
@@ -55,6 +58,27 @@ View* Activity::swapContentView(View* view)
     return previous;
 }
 
+void Activity::setTopScreenView(View* view)
+{
+    if (this->topScreenView)
+    {
+        this->topScreenView->setParentActivity(nullptr);
+        this->topScreenView->willDisappear();
+        this->topScreenView->freeView();
+    }
+
+    this->topScreenView = view;
+    if (!view)
+        return;
+    view->setParentActivity(this);
+    view->resolveBindings(this);
+    view->setDimensions(TopScreen::getContentWidth(), TopScreen::getContentHeight());
+    // Shown with the activity: now if it is already
+    const auto stack = Application::getActivitiesStack();
+    if (std::find(stack.begin(), stack.end(), this) != stack.end())
+        view->willAppear(true);
+}
+
 void Activity::registerModel(const std::string& name, DataModel* model)
 {
     this->models[name] = model;
@@ -80,6 +104,8 @@ void Activity::resizeToFitWindow()
 
     this->contentView->setDimensions(Application::contentWidth, Application::contentHeight);
     this->applySafeArea();
+    if (this->topScreenView)
+        this->topScreenView->setDimensions(TopScreen::getContentWidth(), TopScreen::getContentHeight());
 }
 
 void Activity::applySafeArea()
@@ -118,12 +144,16 @@ void Activity::willAppear(bool resetState)
 {
     if (this->contentView)
         this->contentView->willAppear(resetState);
+    if (this->topScreenView)
+        this->topScreenView->willAppear(resetState);
 }
 
 void Activity::willDisappear(bool resetState)
 {
     if (this->contentView)
         this->contentView->willDisappear(resetState);
+    if (this->topScreenView)
+        this->topScreenView->willDisappear(resetState);
 }
 
 void Activity::setInFadeAnimation(bool inFadeAnimation)
@@ -221,6 +251,12 @@ Activity::~Activity()
 
         this->contentView->freeView();
         this->contentView = nullptr;
+    }
+    if (this->topScreenView)
+    {
+        this->topScreenView->willDisappear();
+        this->topScreenView->freeView();
+        this->topScreenView = nullptr;
     }
 }
 

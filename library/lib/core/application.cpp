@@ -27,6 +27,7 @@
 #include <aurore/core/thread.hpp>
 #include <aurore/core/time.hpp>
 #include <aurore/core/timer.hpp>
+#include <aurore/core/top_screen.hpp>
 #include <aurore/core/util.hpp>
 #include <aurore/views/bottom_bar.hpp>
 #include <aurore/views/button.hpp>
@@ -1195,6 +1196,14 @@ void Application::frame(bool present)
             (float)Application::framebufferHeight, Application::screenRect);
     }
     nvgEndFrame(Application::getNVGContext());
+
+    // The top screen, its own target: its own nanovg frame
+    if (TopScreen::isAvailable() && videoContext->beginTopScreen(frameContext.theme["aurore/clear"]))
+    {
+        nvgBeginFrame(frameContext.vg, (float)TopScreen::getWidth(), (float)TopScreen::getHeight(), 1.0f);
+        TopScreen::draw(frameContext.vg, Rect(0, 0, (float)TopScreen::getWidth(), (float)TopScreen::getHeight()));
+        nvgEndFrame(frameContext.vg);
+    }
 
     if (!present)
         return;

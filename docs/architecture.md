@@ -110,6 +110,7 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 | --- | --- |
 | `Platform` | the window, the system's language and theme variant, battery and network, the browser, the clipboard, the loop itself |
 | `ScreenFrame` | a frame around the app's screen, the window holding more than the screen (the demo's simulated consoles, [platforms.md](platforms.md#simulated-platforms)) |
+| `TopScreen` | a second screen to look at, above the app's (the New 3DS's top one): the activity's top screen view, else `TopScreenHeader` ([platforms.md](platforms.md#new-3ds)) |
 | `VideoContext` | the graphics context and nanovg: OpenGL 3 by default, or OpenGL 2, OpenGL ES 2 or 3, SDL_GPU (Direct3D 12, Metal, Vulkan; a prototype), deko3d (Switch), GXM (PS Vita), citro3d (New 3DS) |
 | `InputManager` | controllers, keyboard, mouse and touch, read once per frame |
 | `AudioPlayer` | the interface sounds |
