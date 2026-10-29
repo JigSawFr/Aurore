@@ -381,6 +381,16 @@
     editor.classList.add("tabbed");
     choose(0);
   }
+  // A block of code wider than its box: its right edge fades while there
+  // is more to scroll.
+  for (const pre of document.querySelectorAll("pre")) {
+    const box = pre.closest(".editor-pane") || (pre.parentElement.classList.contains("code-wrap") ? pre.parentElement : null);
+    if (!box) continue;
+    const update = () => box.classList.toggle("more", pre.scrollLeft + pre.clientWidth < pre.scrollWidth - 2);
+    pre.addEventListener("scroll", update, { passive: true });
+    if ("ResizeObserver" in window) new ResizeObserver(update).observe(pre);
+    update();
+  }
   const hello = document.querySelector(".preview-button");
   const notice = document.querySelector(".preview-notice");
   if (hello && notice) {

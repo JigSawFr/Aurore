@@ -643,6 +643,20 @@ figure.editor-pane figcaption { grid-column: 1; grid-row: 1; margin: 0; padding:
 /* Without script, the two blocks one under the other: the screen at the top. */
 .code-pair:not(:has(.tabbed)) .preview-stage { place-items: start center; }
 
+/* A column beside a taller one keeps its lines together at the top. */
+.adds .section-head, .made li { align-content: start; }
+
+/* A block of code wider than its box: its right edge fades while there is
+   more to scroll (site.js); the block takes the keyboard's arrows (tabindex). */
+.code-wrap.more::after {
+  content: ""; position: absolute; top: 1px; right: 1px; bottom: 1px; width: 56px; border-radius: 0 11px 11px 0; pointer-events: none;
+  background: linear-gradient(to right, rgb(8 16 32 / 0), #081020 85%);
+}
+.editor-pane.more::after {
+  content: ""; grid-column: 1 / -1; grid-row: 2; justify-self: end; align-self: stretch; width: 56px; pointer-events: none;
+  background: linear-gradient(to right, rgb(8 16 32 / 0), #081020 85%);
+}
+
 /* From one page of the site to the next: a short cross-fade, the header
    staying where it is (where the browser can; not with less motion asked). */
 @media (prefers-reduced-motion: no-preference) {
