@@ -116,6 +116,18 @@ README_SECTIONS = {"-features": "features", "-what-aurore-adds": "adds", "-use-i
 ROOT = "."
 
 
+# The console's two sides around the hero's screen (site.css's .device): a
+# stick and a cross on the left, the four buttons and a stick on the right;
+# a handheld of our own, no maker's. The same on Boréale's four sites.
+DEVICE_GRIPS = (
+    '<svg class="grip grip-l" viewBox="0 0 140 470" aria-hidden="true">'
+    '<path d="M86 44h20"/><circle class="stick" cx="70" cy="128" r="34"/><circle class="cap" cx="70" cy="128" r="22"/>'
+    '<circle cx="70" cy="262" r="12"/><circle cx="70" cy="330" r="12"/><circle cx="36" cy="296" r="12"/><circle cx="104" cy="296" r="12"/></svg>'
+    '<svg class="grip grip-r" viewBox="0 0 140 470" aria-hidden="true">'
+    '<path d="M34 44h20M44 34v20"/><circle cx="70" cy="92" r="12"/><circle cx="70" cy="160" r="12"/><circle cx="36" cy="126" r="12"/><circle cx="104" cy="126" r="12"/>'
+    '<circle class="stick" cx="70" cy="300" r="34"/><circle class="cap" cx="70" cy="300" r="22"/></svg>')
+
+
 def icon(name):
     return (f'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
             f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICONS[name]}</svg>')
@@ -563,6 +575,44 @@ def code_block(code, lang, label=None, t=None):
             f'</figure>')
 
 
+def editor(t):
+    """The home page's screen in XML and its activity in C++, in an editor's
+    window (two tabs, site.js; both blocks one under the other without
+    script), beside the screen they make, drawn in HTML in Aurore's look:
+    the frame's header with the box's title, the label (its translation,
+    @i18n/hello/welcome) and the "Say hello" button, which shows the
+    activity's "Hello!" (site.js)."""
+    panes = []
+    for key, code, lang, name, path in (("xml", HELLO_XML, "xml", "XML", "resources/xml/activity/hello.xml"),
+                                         ("cpp", HELLO_CPP, "cpp", "C++", "hello_activity.hpp")):
+        panes.append(f'<figure class="code editor-pane" id="code-{key}" data-tab="{name}">'
+                     f'<figcaption><span class="pane-name">{t(f"code_{key}")}</span> <span class="pane-file">{path.replace("/", "/<wbr>")}</span></figcaption>'
+                     f'<pre tabindex="0"><code class="language-{lang}">{highlight(code, lang)}</code></pre></figure>')
+    return f"""    <div class="code-pair">
+      <div class="editor">
+        <div class="editor-bar"><span class="editor-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <div class="editor-panes">
+          {panes[0]}
+          {panes[1]}
+        </div>
+      </div>
+      <figure class="preview">
+        <figcaption class="preview-bar">{t("code_result")}</figcaption>
+        <div class="preview-stage">
+          <div class="preview-screen">
+            <p class="preview-head">Hello</p>
+            <div class="preview-body">
+              <p class="preview-label">{t("code_welcome")}</p>
+              <button class="preview-button" type="button" data-notice="Hello!">Say hello</button>
+            </div>
+            <p class="preview-notice" role="status"></p>
+            <p class="preview-foot"><span class="preview-key" aria-hidden="true">B</span> {t("code_back")}</p>
+          </div>
+        </div>
+      </figure>
+    </div>"""
+
+
 def release_line(t, base):
     found = releases()
     if not found:
@@ -627,7 +677,10 @@ def home_body(t, lang, to_root):
       </div>
       {release_line(t, base)}
     </div>
-    <figure class="hero-shot">
+    <!-- The demo on a console's screen: a handheld drawn by site.css
+         (.device), leaning towards the text on a wide screen. -->
+    <figure class="hero-shot device">
+      {DEVICE_GRIPS}
       <a href="{to_root}assets/screenshots/cadran.png" data-caption="{t.plain('shot_cadran')}"><img src="{to_root}assets/screenshots/cadran.png" alt="{html.escape(t.plain('hero_shot_alt'))}" width="1280" height="720"></a>
     </figure>
     <div class="platforms">
@@ -641,10 +694,7 @@ def home_body(t, lang, to_root):
       <p>{t("code_text")}</p>
       <p><a href="{base}docs/getting-started/#3-a-screen-from-xml-3-minutes">{t("code_link")} →</a></p>
     </div>
-    <div class="code-pair">
-      {code_block(HELLO_XML, "xml", t("code_xml"))}
-      {code_block(HELLO_CPP, "cpp", t("code_cpp"))}
-    </div>
+{editor(t)}
   </section>
 
 {demo_band(t, lang, to_root)}
