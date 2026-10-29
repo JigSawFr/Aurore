@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <nanovg.h>
 #include <string>
 #include <vector>
 
@@ -48,6 +49,9 @@ const Device* find(const std::string& id);
 const Device& current();
 /// What the picker shows for it
 std::string displayName(const Device& device);
+/// The console drawn in `x, y, width, height` (a picture of it, the Home
+/// tab's): its screen a night with the aurora, as the frame draws the rest
+void drawPreview(NVGcontext* vg, const Device& device, float x, float y, float width, float height);
 
 /// Before Application::init(): the one from the command line or
 /// AURORE_SIMULATE, its layout preset given to Aurore. `fromCommandLine` wins.

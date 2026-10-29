@@ -384,6 +384,12 @@ namespace
             nvgFill(vg);
 
             Map m { screen.getMinX(), screen.getMinY(), screen.getWidth() / device.screenWidth };
+            drawConsole(vg, m, screen);
+        }
+
+        // The console alone, around `screen`
+        void drawConsole(NVGcontext* vg, const Map& m, const aurore::Rect& screen)
+        {
             if (!std::strcmp(device.id, "switch"))
                 drawSwitch(vg, m, screen);
             else if (!std::strcmp(device.id, "vita"))
@@ -439,6 +445,31 @@ namespace
         windowSizeChosen = true;
     }
 } // namespace
+
+void drawPreview(NVGcontext* vg, const Device& device, float x, float y, float width, float height)
+{
+    if (isDesktop(device))
+        return;
+    DeviceFrame frame(device);
+    aurore::Rect screen = frame.layout(width, height);
+    screen              = aurore::Rect(x + screen.getMinX(), y + screen.getMinY(), screen.getWidth(), screen.getHeight());
+    nvgSave(vg);
+    nvgIntersectScissor(vg, x, y, width, height);
+    // The screen: a night, the aurora low on it
+    float sx = screen.getMinX(), sy = screen.getMinY(), sw = screen.getWidth(), sh = screen.getHeight();
+    nvgBeginPath(vg);
+    nvgRect(vg, sx, sy, sw, sh);
+    nvgFillPaint(vg, nvgLinearGradient(vg, sx, sy, sx, sy + sh, nvgRGB(0x10, 0x18, 0x2C), nvgRGB(0x0A, 0x0F, 0x1C)));
+    nvgFill(vg);
+    nvgBeginPath(vg);
+    nvgRect(vg, sx, sy + sh * 0.55f, sw, sh * 0.45f);
+    nvgFillPaint(vg, nvgLinearGradient(vg, sx, sy + sh * 0.55f, sx + sw, sy + sh, nvgRGBA(0x00, 0xFF, 0xCC, 0x48), nvgRGBA(0x8A, 0x5C, 0xFF, 0x48)));
+    nvgFill(vg);
+    // The rest as the frame draws it, without its window's background
+    Map m { sx, sy, sw / device.screenWidth };
+    frame.drawConsole(vg, m, screen);
+    nvgRestore(vg);
+}
 
 const std::vector<Device>& devices()
 {
