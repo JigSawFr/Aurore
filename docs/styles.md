@@ -25,7 +25,7 @@ An attribute prefixed with a state applies while the view is in that state, and 
 
 When several states style the same property, the later one in this table wins.
 
-Values are written as for the property itself: colours as `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(…)`, `rgba(…)` or `@theme/<name>`; numbers as `4`, `4px`, `4dp` (at the [density](#density) in use) or `@style/<name>`. A `@theme/` value is read each time the state comes on, and again when the theme changes, so it follows a theme loaded or switched since; a plain `textColor="@theme/…"` attribute does too (`View::setThemeColor`, docs/themes.md).
+Values are written as for the property itself: colours as `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(…)`, `rgba(…)` or `@theme/<name>`; numbers as `4`, `4px`, `4dp` (at the density in use, below) or `@style/<name>`. A `@theme/` value is read each time the state comes on, and again when the theme changes, so it follows a theme loaded or switched since; a plain `textColor="@theme/…"` attribute does too (`View::setThemeColor`, docs/themes.md).
 
 The properties are those that are drawn, never laid out (a size or a margin would move the screen around):
 
@@ -150,7 +150,7 @@ A focusable view with no label and no value (an `IconButton` without text, a pic
 
 `View::getAccessibilityDescription()` can be overridden for a view that says more.
 
-## Density
+## Density of the lengths
 
 The density shrinks or widens the lengths of a screen (margins, paddings, heights, radii, the sidebar's width) without touching the text, for a small screen or a user who wants more on it:
 
