@@ -99,7 +99,7 @@ jobs:
       - name: Install Python-Markdown and Doxygen
         run: |
           sudo apt-get update -y -q
-          sudo apt-get install -y -q --no-install-recommends python3-markdown doxygen
+          sudo apt-get install -y -q --no-install-recommends python3-markdown python3-yaml doxygen
       # The site's address, as GitHub Pages serves it: its custom domain when
       # it has one, else <owner>.github.io/<repo>/. A pull request's build is
       # kept out of search engines.

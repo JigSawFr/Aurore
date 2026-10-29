@@ -24,7 +24,7 @@ others each in its folder (/fr/, /de/, /zh-hant/…).
   other languages, the preview image, the sitemap. SITE_NOINDEX=1 keeps a
   preview out of search engines.
 
-Usage: tools/build_site.py <out-dir> [repo-root]          (needs Python-Markdown)
+Usage: tools/build_site.py <out-dir> [repo-root]          (needs Python-Markdown and PyYAML)
 """
 import html
 import json
@@ -37,6 +37,9 @@ import urllib.request
 from urllib.parse import urlsplit
 
 import markdown
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import stack as under_the_hood  # noqa: E402 (tools/stack.py: the versions and figures of "Under the hood")
 
 REPO_URL = "https://github.com/JigSawFr/Aurore"
 SITE_URL = os.environ.get("SITE_URL", "https://aurore.boreale.dev/").rstrip("/") + "/"
@@ -731,6 +734,59 @@ def demo_band(t, lang, to_root):
 """
 
 
+# The figures of "Under the hood" (tools/stack.py's), in this order
+STACK_FIGURES = [("ci", "{ci_jobs}"), ("tests", "{tests}"), ("refs", "{references}"),
+                 ("actions", "{actions_pinned}/{actions}")]
+STACK_CHECKS = ["sanitizers", "deprecated", "format", "notices"]
+STACK = {}  # tools/stack.py's facts, read once (stack_facts())
+
+
+def stack_facts():
+    if not STACK:
+        STACK.update(under_the_hood.facts())
+    return STACK
+
+
+def stack_section(t):
+    """Under the hood: what Aurore is built with and how it is checked, read
+    from the repository when the site is built (tools/stack.py)."""
+    facts = stack_facts()
+    figures = "\n".join(
+        f'      <li class="stat"><p class="stat-figure"><span class="now">{value.format(**facts["figures"])}</span></p>'
+        f'<p class="stat-text">{t(f"stack_fig_{k}")}</p></li>'
+        for k, value in STACK_FIGURES)
+    versions = "\n".join(
+        f'          <li><span>{t("stack_language") if name == "Language" else html.escape(name)}</span>'
+        f'<code>{html.escape(version)}</code></li>'
+        for name, version in facts["versions"])
+    checks = "\n".join(f"          <li>{t(f'stack_check_{k}')}</li>" for k in STACK_CHECKS)
+    return f"""  <section class="wrap" id="stack">
+    <div class="section-head">
+      <p class="eyebrow">{t("stack_eyebrow")}</p>
+      <h2>{t("stack_title")}</h2>
+      <p>{t("stack_text")}</p>
+    </div>
+    <ul class="glance">
+{figures}
+    </ul>
+    <div class="columns stack">
+      <div>
+        <h3>{t("stack_versions")}</h3>
+        <ul class="versions">
+{versions}
+        </ul>
+      </div>
+      <div>
+        <h3>{t("stack_checks")}</h3>
+        <ul class="checks">
+{checks}
+        </ul>
+        <p><a href="{REPO_URL}#-under-the-hood">{t("stack_link")} →</a></p>
+      </div>
+    </div>
+  </section>"""
+
+
 def home_body(t, lang, to_root):
     base = f"{to_root}{lang_dir(lang)}"
     platforms = "".join(f"<li>{html.escape(p)}</li>" for p in PLATFORMS)
@@ -822,6 +878,8 @@ def home_body(t, lang, to_root):
       </ul>
     </div>
   </section>
+
+{stack_section(t)}
 
   <section class="wrap" id="start">
     <div class="section-head">
@@ -1233,6 +1291,7 @@ def llms_txt(t, descriptions, full=None):
     lines = ["# Aurore", "", f"> {t.plain('meta_description')}", "", t.plain("hero_lede"), "",
              f"- {t.plain('cadran_text')}",
              f"- {t.plain('start_borealis')}",
+             "- Built with: " + ", ".join(v if n == "Language" else f"{n} {v}" for n, v in stack_facts()["versions"]),
              f"- {t.plain('license_text')}",
              f"- Source: {REPO_URL}", ""]
     for group in GROUPS:
