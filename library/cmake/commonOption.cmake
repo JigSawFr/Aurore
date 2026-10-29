@@ -26,10 +26,10 @@ include(CMakeDependentOption)
 set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, 3DS (New 3DS, citro3d), ANDROID, IOS or TVOS")
 set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 3DS ANDROID IOS TVOS)
 
-# Window and input, on desktop and Switch: GLFW (the default) or SDL2. SDL3
-# in place of SDL2 on desktop, in a browser, on Android, iOS and tvOS (the
-# consoles have no SDL3 yet). The other platforms choose for themselves:
-# SDL2 on Android, iOS and tvOS unless SDL3 is asked for.
+# Window and input. SDL3 by default on desktop, in a browser, on Android,
+# iOS and tvOS; SDL2 or GLFW (desktop) when asked for. The consoles have no
+# SDL3 yet: GLFW (the default) or SDL2 on the Switch, SDL2 on the PS Vita and
+# the PS4, their own elsewhere.
 set(AURORE_WINDOW "" CACHE STRING "Window and input: GLFW, SDL2 or SDL3 (empty: the platform's default)")
 set_property(CACHE AURORE_WINDOW PROPERTY STRINGS GLFW SDL2 SDL3)
 
@@ -114,7 +114,7 @@ endif ()
 if (AURORE_PLATFORM STREQUAL "3DS" AND (AURORE_WINDOW OR AURORE_GRAPHICS))
     message(FATAL_ERROR "AURORE_PLATFORM=3DS takes no AURORE_WINDOW nor AURORE_GRAPHICS: its window is libctru's, and its renderer citro3d")
 endif ()
-if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4)$")
+if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4|3DS)$")
     message(FATAL_ERROR "AURORE_WINDOW=SDL3 is for DESKTOP, ANDROID, IOS and TVOS: ${AURORE_PLATFORM} has no SDL3 yet")
 endif ()
 

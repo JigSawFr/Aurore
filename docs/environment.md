@@ -14,7 +14,7 @@ A flag is on when it is set to anything but `0` (Cadran's: `1`, `true` or `yes`)
 | `AURORE_SAFE_AREA` | `Application::init()` | A [safe area](safe-areas.md) in place of the platform's, in the window's unit: `top,right,bottom,left` as a CSS padding (`47,0,34,0`, `0,48`, `30`), a phone's notch or a TV seen on the desktop |
 | `AURORE_REDRAW_DEBUG` | `Application::init()` | `1` checks redraw on demand: each frame it skips is drawn anyway and compared, a difference logged as a warning (`Application::setRedrawDebug`, OpenGL only). Not on the Switch nor in a browser |
 | `AURORE_RESOURCES_DIR` | libromfs | With the resources built in (`-DAURORE_LIBROMFS=ON`): a folder laid out like `resources/` whose files are read before the built-in ones, so changed XML, pictures or translations need only a restart |
-| `AURORE_THEME` | the desktop platform | `DARK` starts in the dark variant, anything else in the light one, instead of the system's mode. The preferences' theme (`ui::Prefs::theme`, dark by default) is applied over it: the demo maps `AURORE_THEME=LIGHT` onto them. `AURORE_THEME` wins when both are set |
+| `AURORE_THEME` | the desktop platform | `DARK` starts in the dark variant, anything else in the light one, instead of the system's mode (which SDL3 otherwise follows while the app runs). The preferences' theme (`ui::Prefs::theme`, dark by default) is applied over it: the demo maps `AURORE_THEME=LIGHT` onto them. `AURORE_THEME` wins when both are set |
 | `AURORE_DENSITY` | `Application::init()` | The [density](styles.md#density-of-the-lengths) at start: `comfortable`, `compact`, `dense` or a number from 0.5 to 1.5 (`Application::setDensity`); anything else is logged and ignored |
 | `AURORE_SIMULATE` | the demo's `main()` | The console the demo simulates on the desktop (`switch`, `vita`, `ps4`, `3ds`, `phone`; `desktop` or unset for none), as `--simulate` does ([platforms.md](platforms.md#simulated-platforms)); anything else is logged and ignored |
 | `AURORE_PRESET` | `Application::init()` | `small` lays the screens out as on a small screen (`PRESET_SMALL_SCREEN`: 480x360 units, dense, the text 1.25 times larger), `standard` as usual, over the app's and the platform's preset ([styles.md](styles.md#screen-width)); anything else is logged and ignored |
@@ -49,7 +49,7 @@ Read by the [test harness](testing.md) (`-DAURORE_BUILD_TESTS=ON`) and the demo'
 | `AURORE_TEST_OUTPUT` | The folder the screenshots and their differences are written to (default `test-output`) |
 | `AURORE_TEST_UPDATE` | `1` writes every reference again from the screenshots taken, to commit after looking at them |
 | `CI` | Set (as on GitHub Actions): a missing reference fails instead of being written |
-| `AURORE_HEADLESS_GLFW` | `1` draws in a hidden GLFW window instead of EGL's surfaceless context (needs a display) |
+| `AURORE_HEADLESS_WINDOW` (older name `AURORE_HEADLESS_GLFW`) | `1` draws in a hidden SDL3 or GLFW window instead of EGL's surfaceless context (needs a display) |
 | `AURORE_DECOR_SHOTS` | `tests/demo_tests.cpp` only: a folder where the case of the theme decorations saves a picture of each kind of particles |
 
 ## Names

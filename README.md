@@ -95,7 +95,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
 - 🎯 **Focus and hints** — no focus lost in hidden or destroyed views; optional and steady footer hints.
-- 🖥️ **Platforms** — SDL3 beside SDL2 (desktop, browser, Android, iOS), controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
+- 🖥️ **Platforms** — SDL3 by default (desktop, browser, Android, iOS), SDL2 for the consoles, controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
 - ⚡ **Speed** — no relayout for an unchanged text or size, XML attributes registered on demand, unused textures freed.
 
 Side by side with borealis, change by change: <https://aurore.boreale.dev/borealis/>.
@@ -190,7 +190,7 @@ Side by side with borealis, change by change: <https://aurore.boreale.dev/boreal
 
 | Change | API |
 | --- | --- |
-| SDL3 in place of SDL2 on the desktop, in a browser, on Android, iOS and tvOS; the face buttons read by their label, as under SDL2 | `-DAURORE_WINDOW=SDL3`, `__SDL__` |
+| SDL3 by default on the desktop (in place of GLFW), in a browser, on Android, iOS and tvOS; SDL2 for the consoles, GLFW and SDL2 kept as options; the face buttons read by their label, as under SDL2 | `AURORE_WINDOW`, `__SDL__` |
 | SDL: the right controller closed when one is unplugged, every controller read after a reconnection | — |
 | SDL in a browser (Emscripten), with an on-screen pad | `aurore_web_button()` |
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
@@ -238,7 +238,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | Android API | 36 |
 | Emscripten | 6.0.13 |
 
-Checked on every pull request: 154 test cases in the headless harness, 32 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 42 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 56 of the 56 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: 155 test cases in the headless harness, 32 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 41 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 56 of the 56 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 <!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
@@ -254,7 +254,7 @@ Checked on every pull request: 154 test cases in the headless harness, 32 refere
 3. Copy its `resources` folder to the root of your project.
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
-   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `3DS`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`, `SDL3`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
+   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `3DS`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`SDL3`, `GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
@@ -292,9 +292,9 @@ Aurore builds with CMake only (3.16 or later): upstream's xmake files (`xmake.lu
 With CMake 3.25 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>` (`cmake --list-presets`: also `desktop-debug`, `desktop-asan` and `tests`):
 
 ```sh
-cmake --preset desktop-glfw        # or desktop-sdl, desktop-sdl3
-cmake --build --preset desktop-glfw
-./build/desktop-glfw/aurore_demo
+cmake --preset desktop-sdl3        # or desktop-glfw, desktop-sdl (SDL2)
+cmake --build --preset desktop-sdl3
+./build/desktop-sdl3/aurore_demo
 cmake --workflow --preset tests    # configure, build and run the tests
 
 export DEVKITPRO=/opt/devkitpro    # Switch: switch-deko3d or switch-gl (OpenGL)
@@ -302,7 +302,7 @@ cmake --preset switch-deko3d
 cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 ```
 
-With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
+With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-sdl3/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
 
 New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme, and `--simulate 3ds` (or `switch`, `vita`, `ps4`, `phone`) on a console's screen, the console drawn around it ([platforms.md](docs/platforms.md#simulated-platforms)). The [API reference](https://aurore.boreale.dev/api/) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 

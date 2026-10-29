@@ -50,9 +50,9 @@
     },
     {
       "name": "desktop-debug",
-      "displayName": "Desktop (GLFW, debug)",
-      "description": "desktop-glfw with debug information, no optimisation and the inspector on from the start",
-      "inherits": "desktop-glfw",
+      "displayName": "Desktop (SDL3, debug)",
+      "description": "desktop-sdl3 with debug information, no optimisation and the inspector on from the start",
+      "inherits": "desktop-sdl3",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "AURORE_INSPECTOR": "ON"
@@ -60,9 +60,9 @@
     },
     {
       "name": "desktop-asan",
-      "displayName": "Desktop (GLFW, ASan + UBSan)",
-      "description": "desktop-glfw in debug with AddressSanitizer and UndefinedBehaviorSanitizer; GCC or Clang",
-      "inherits": "desktop-glfw",
+      "displayName": "Desktop (SDL3, ASan + UBSan)",
+      "description": "desktop-sdl3 in debug with AddressSanitizer and UndefinedBehaviorSanitizer; GCC or Clang",
+      "inherits": "desktop-sdl3",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
@@ -72,9 +72,9 @@
     },
     {
       "name": "tests",
-      "displayName": "Tests (desktop, GLFW)",
+      "displayName": "Tests (desktop, SDL3)",
       "description": "The test harness, the demo's tests, the bench and aurore-preview (docs/testing.md)",
-      "inherits": "desktop-glfw",
+      "inherits": "desktop-sdl3",
       "cacheVariables": {
         "AURORE_BUILD_TESTS": "ON"
       }

@@ -2606,8 +2606,12 @@ void Application::checkThemeChanged()
             view->onThemeChanged();
     Application::notificationManager->onThemeChanged();
 
-    // The console records its clear colour once (deko3d): again
+#ifdef __SWITCH__
+    // The console records its clear colour once (deko3d): again. Not
+    // elsewhere: setThemeVariant is the app's choice, which stops a desktop
+    // following the system's.
     Application::platform->setThemeVariant(variant);
+#endif
 
     Application::themeChangedEvent.fire(variant);
     Application::requestRedraw();

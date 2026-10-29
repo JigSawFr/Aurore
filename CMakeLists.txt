@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.16...3.31)
 set(AURORE_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)
 
 # The demo in a browser (web/README.md): the desktop build, compiled by
-# Emscripten (emcmake), with SDL2 (or SDL3: -DAURORE_WINDOW=SDL3) and
+# Emscripten (emcmake), with SDL3 (or SDL2: -DAURORE_WINDOW=SDL2) and
 # OpenGL ES 3 (WebGL 2) from Emscripten's own ports. Its toolchain file is
 # only read by project(), below.
 set(AURORE_WEB OFF)
@@ -14,8 +14,8 @@ if (CMAKE_TOOLCHAIN_FILE MATCHES "Emscripten\\.cmake$")
     set(AURORE_WEB ON)
     set(AURORE_PLATFORM DESKTOP CACHE STRING "" FORCE)
     string(TOUPPER "${AURORE_WINDOW}" AURORE_WINDOW)
-    if (NOT AURORE_WINDOW STREQUAL "SDL3")
-        set(AURORE_WINDOW SDL2)
+    if (NOT AURORE_WINDOW STREQUAL "SDL2")
+        set(AURORE_WINDOW SDL3)
     endif ()
     set(AURORE_WINDOW ${AURORE_WINDOW} CACHE STRING "" FORCE)
     string(REPLACE "SDL" "" AURORE_WEB_SDL ${AURORE_WINDOW})

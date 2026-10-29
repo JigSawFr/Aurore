@@ -65,7 +65,7 @@ The same frames are drawn on every run: the clock is simulated, the platform say
 
 ## How it draws without a display
 
-`HeadlessPlatform` (`aurore/test/headless_platform.hpp`) takes the place of GLFW or SDL (`Platform::setFactory`). Its video context draws into an offscreen framebuffer of an OpenGL 3.2 context made by EGL on Mesa's surfaceless platform: no X server, no Xvfb. Where EGL is missing (macOS, Windows), or with `AURORE_HEADLESS_GLFW=1`, the context is a hidden GLFW window's (which needs a display). On Ubuntu: `libegl-dev` to build, `libegl1` and `libgl1-mesa-dri` to run.
+`HeadlessPlatform` (`aurore/test/headless_platform.hpp`) takes the place of GLFW or SDL (`Platform::setFactory`). Its video context draws into an offscreen framebuffer of an OpenGL 3.2 context made by EGL on Mesa's surfaceless platform: no X server, no Xvfb. Where EGL is missing (macOS, Windows), or with `AURORE_HEADLESS_WINDOW=1`, the context is a hidden window's, SDL3's or GLFW's (whichever the library is built with; it needs a display). On Ubuntu: `libegl-dev` to build, `libegl1` and `libgl1-mesa-dri` to run.
 
 The clock is borealis' own: `getCPUTimeUsec()` returns the simulated time once `setSimulatedTimeUsec()` set one, which the harness moves one frame's time before each frame. Animations, timers, `aurore::delay`, button repeats and the highlight read it; the main loop no longer sleeps to wait for a frame.
 

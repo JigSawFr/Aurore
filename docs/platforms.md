@@ -6,20 +6,20 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 
 | Platform | `AURORE_PLATFORM` | Window and input (`AURORE_WINDOW`) | Drawing (`AURORE_GRAPHICS`) | Resources |
 | --- | --- | --- | --- | --- |
-| Linux, macOS, Windows | `DESKTOP` | GLFW (default), SDL2 or SDL3 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
+| Linux, macOS, Windows | `DESKTOP` | SDL3 (default), GLFW or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
 | Nintendo Switch | `SWITCH` | GLFW (default) or SDL2 | deko3d (`DEKO3D`) or OpenGL 4.3 | romfs, in the `.nro` |
 | PS Vita | `PSV` | SDL2, or the system's | GXM (`GXM`) or OpenGL ES 2 | in the `.vpk` |
 | PS4 | `PS4` | SDL2 | OpenGL ES 2 | in the `.pkg` |
 | New 3DS (library and test card) | `3DS` | libctru's | citro3d | `romfs:/` |
-| Android | `ANDROID` | SDL2 (default) or SDL3 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
-| iOS, tvOS | `IOS`, `TVOS` | SDL2 (default) or SDL3 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
-| Browser | Emscripten (`emcmake`) | SDL2 (default) or SDL3 | OpenGL ES 3 (WebGL 2) | packaged with the page |
+| Android | `ANDROID` | SDL3 (default) or SDL2 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
+| iOS, tvOS | `IOS`, `TVOS` | SDL3 (default) or SDL2 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
+| Browser | Emscripten (`emcmake`) | SDL3 (default) or SDL2 | OpenGL ES 3 (WebGL 2) | packaged with the page |
 
 Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 or SDL3 built from the submodule) and a C++20 compiler. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
 
-SDL2 is the submodule `library/lib/extern/SDL` (2.32.10) on the desktop, Android, iOS and tvOS, and on the Vita without `USE_SYSTEM_SDL2`. Elsewhere it is the toolchain's: devkitPro's `switch-sdl2` on the Switch, PacBrew's SDL 2.0.18 on the PS4, Emscripten's port in a browser, and the SDL in the Docker image of the Vita's OpenGL ES build (2.28.5 with `psv/scripts/sdl2/ime.patch` in the image the CI pins; `psv/scripts` now makes one with 2.32.10 and the same patch). Aurore's SDL code builds with all of them.
+SDL3 is the window and input everywhere it runs: the desktop, a browser, Android, iOS and tvOS. It is the submodule `library/lib/extern/SDL3` (3.4.18), the system's with `USE_SYSTEM_SDL3=ON` (`find_package(SDL3)`), a download with `AURORE_FETCH_DEPS`, Emscripten's port in a browser. On the desktop it gives what GLFW gave: the app's ID for the taskbar (`Application::setAppId`), the window's icon (`icon/icon.png`), a saved position kept only while it is on a screen, the app's controller mappings (`gamepad/gamecontrollerdb.txt`), and the system's light or dark theme on every system, Linux's desktop portal too, followed while the app runs until it picks one (`Platform::setThemeVariant`; `Platform::followSystemTheme` goes back to it) or `AURORE_THEME` gives it. Windows and X11 size windows in pixels: a first window, before any size is saved, is opened at the main screen's density (1280x720 is 2560x1440 at 200 %), and a window keeps its size in points when the density changes under it (moved to another screen on Windows, `Xft.dpi` changed on X11), each time within the screen's free area. Under SDL3 as under SDL2, a controller's face buttons are read by their label: A is the button marked A, on a Nintendo controller as on an Xbox one (SDL3 itself numbers them by place). An app's code that means either SDL tests `__SDL__`, defined under both; `__SDL2__` or `__SDL3__` for one only.
 
-SDL3 takes SDL2's place with `-DAURORE_WINDOW=SDL3` on the desktop, in a browser, on Android, iOS and tvOS: the submodule `library/lib/extern/SDL3` (3.4.18), the system's with `USE_SYSTEM_SDL3=ON` (`find_package(SDL3)`), a download with `AURORE_FETCH_DEPS`, Emscripten's port in a browser. The consoles stay on SDL2 (the option stops the configuration there): devkitPro has no SDL3 for the Switch, nor PacBrew for the PS4, and the Vita's OpenGL ES build would need an SDL3 built with PVR_PSP2 in its Docker image. Under SDL3 as under SDL2, a controller's face buttons are read by their label: A is the button marked A, on a Nintendo controller as on an Xbox one (SDL3 itself numbers them by place). An app's code that means either SDL tests `__SDL__`, defined under both; `__SDL2__` or `__SDL3__` for one only.
+SDL2 stays for the consoles, which have no SDL3: devkitPro has none for the Switch, nor PacBrew for the PS4, and the Vita's OpenGL ES build would need an SDL3 built with PVR_PSP2 in its Docker image (`AURORE_WINDOW=SDL3` stops the configuration there). Elsewhere it is an option, `-DAURORE_WINDOW=SDL2` (`-PauroreSdl=2` on Android). SDL2 is the submodule `library/lib/extern/SDL` (2.32.10) on the desktop, Android, iOS and tvOS, and on the Vita without `USE_SYSTEM_SDL2`. Elsewhere it is the toolchain's: devkitPro's `switch-sdl2` on the Switch, PacBrew's SDL 2.0.18 on the PS4, Emscripten's port in a browser, and the SDL in the Docker image of the Vita's OpenGL ES build (2.28.5 with `psv/scripts/sdl2/ime.patch` in the image the CI pins; `psv/scripts` now makes one with 2.32.10 and the same patch). Aurore's SDL code builds with all of them.
 
 ## Linux
 
@@ -33,7 +33,7 @@ cmake --build build
 ./build/aurore_demo
 ```
 
-`-DAURORE_WINDOW=SDL2` (or `SDL3`) builds with SDL instead of GLFW; `-DAURORE_GRAPHICS=GL2`, `-DAURORE_GRAPHICS=GLES2` or `-DAURORE_GRAPHICS=GLES3` another OpenGL. Without `AURORE_LIBROMFS`, the `resources/` folder is copied next to the program at each build. The presets do the same in fewer words: `cmake --preset desktop-glfw` (or `desktop-sdl`, `desktop-sdl3`), then `cmake --build --preset desktop-glfw`.
+`-DAURORE_WINDOW=GLFW` builds with GLFW instead of SDL3, `-DAURORE_WINDOW=SDL2` with SDL2; `-DAURORE_GRAPHICS=GL2`, `-DAURORE_GRAPHICS=GLES2` or `-DAURORE_GRAPHICS=GLES3` another OpenGL. Without `AURORE_LIBROMFS`, the `resources/` folder is copied next to the program at each build. The presets do the same in fewer words: `cmake --preset desktop-sdl3` (or `desktop-glfw`, `desktop-sdl` for SDL2), then `cmake --build --preset desktop-sdl3`.
 
 The tests need EGL and Mesa as well (`libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri`), then `-DAURORE_BUILD_TESTS=ON` and `ctest --test-dir build` ([testing.md](testing.md)).
 
@@ -47,7 +47,7 @@ make -C build -j$(sysctl -n hw.ncpu)
 open build/aurore_demo.app
 ```
 
-The build is universal (arm64 and x86_64) and runs from macOS 10.15 (11 on Apple silicon). `-DBUNDLE_MACOS_APP=ON` makes an `.app` with the resources inside; without it, a plain program with `resources/` next to it. `-DAURORE_WINDOW=SDL2` builds with SDL2, `-DAURORE_WINDOW=SDL3` with SDL3.
+The build is universal (arm64 and x86_64) and runs from macOS 10.15 (11 on Apple silicon). `-DBUNDLE_MACOS_APP=ON` makes an `.app` with the resources inside; without it, a plain program with `resources/` next to it. `-DAURORE_WINDOW=GLFW` builds with GLFW, `-DAURORE_WINDOW=SDL2` with SDL2.
 
 ## Windows
 
@@ -117,11 +117,11 @@ The renderer has no fragment shader to work with (the PICA200 has none): the pai
 
 ## Android
 
-The Gradle project in [`android-project/`](../android-project/), on SDL2's Android port, or SDL3's with `-PauroreSdl=3`:
+The Gradle project in [`android-project/`](../android-project/), on SDL3's Android port, or SDL2's with `-PauroreSdl=2`:
 
 ```sh
 ./build_libromfs_generator.sh
-cd android-project && ./gradlew assembleDebug        # or: ./gradlew assembleDebug -PauroreSdl=3
+cd android-project && ./gradlew assembleDebug        # or: ./gradlew assembleDebug -PauroreSdl=2
 ```
 
 The APK is in `android-project/app/build/outputs/apk/debug/`. The page in `android-project/` has the SDK and NDK it needs, and how to turn it into an app of your own.
@@ -140,15 +140,15 @@ cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DPLATFORM=OS64 -DDEPLOYMENT_TARGE
 cmake --build build
 ```
 
-The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `-DAURORE_WINDOW=SDL3` builds on SDL3. `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
+The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `-DAURORE_WINDOW=SDL2` builds on SDL2. `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
 
 The notch, the rounded corners and the home indicator (on tvOS, the TV's safe area) are the [safe area](safe-areas.md), from `UIWindow.safeAreaInsets`.
 
 ## In a browser
 
-Aurore runs on its SDL platform under [Emscripten](https://emscripten.org/), SDL2 or SDL3 (`emcmake cmake -DAURORE_WINDOW=SDL3`): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. The demo builds for it under `emcmake cmake` and runs on the website, <https://aurore.boreale.dev/demo/> ([web/README.md](https://github.com/JigSawFr/Aurore/blob/main/web/README.md) says how); [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is an app's complete example. In short, under `emcmake cmake`:
+Aurore runs on its SDL platform under [Emscripten](https://emscripten.org/), SDL3 or SDL2 (`emcmake cmake -DAURORE_WINDOW=SDL2`): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. The demo builds for it under `emcmake cmake` and runs on the website, <https://aurore.boreale.dev/demo/> ([web/README.md](https://github.com/JigSawFr/Aurore/blob/main/web/README.md) says how); [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is an app's complete example. In short, under `emcmake cmake`:
 
-- set `AURORE_PLATFORM=DESKTOP`, `AURORE_WINDOW=SDL2`, `AURORE_GRAPHICS=GLES3` and `USE_SYSTEM_SDL2` before including `commonOption.cmake`, and compile with `-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions`, SDL2 coming from Emscripten's ports (a `SDL2Config.cmake` that finds nothing to link); for SDL3, `AURORE_WINDOW=SDL3`, `USE_SYSTEM_SDL3`, `-sUSE_SDL=3` and a `SDL3Config.cmake` that makes an empty `SDL3::SDL3` (`web/cmake/` has both);
+- set `AURORE_PLATFORM=DESKTOP`, `AURORE_WINDOW=SDL3`, `AURORE_GRAPHICS=GLES3` and `USE_SYSTEM_SDL3` before including `commonOption.cmake`, and compile with `-pthread -sUSE_SDL=3 -sUSE_ZLIB=1 -fexceptions`, SDL3 coming from Emscripten's ports (a `SDL3Config.cmake` that makes an empty `SDL3::SDL3`); for SDL2, `AURORE_WINDOW=SDL2`, `USE_SYSTEM_SDL2`, `-sUSE_SDL=2` and a `SDL2Config.cmake` that finds nothing to link (`web/cmake/` has both);
 - package the resources into the page's file system (`--preload-file`) and set `AURORE_RESOURCES_ROOT` to where they land;
 - run the loop with `emscripten_set_main_loop`, one `mainLoop()` per frame, since a browser needs its thread back between frames;
 - start the threads with the page (`-sPTHREAD_POOL_SIZE`), which then needs the cross-origin isolation headers;

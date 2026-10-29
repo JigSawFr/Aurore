@@ -2,12 +2,12 @@
 
 [English](./README.md)
 
-本目录是将 Aurore 演示程序构建为安卓应用的 Gradle 工程。它遵循 SDL 的安卓移植方式（[SDL 2.32 文档](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md)、[SDL 3.4 文档](https://github.com/libsdl-org/SDL/blob/release-3.4.x/docs/README-android.md)）：由 SDL 的 Java Activity 启动应用，Aurore 以共享库的形式构建，使用 SDL 平台和 OpenGL ES 2，资源文件通过 libromfs 打包进库中。默认基于 SDL2，加 `-PauroreSdl=3`（或在 `gradle.properties` 中写 `auroreSdl=3`）则基于 SDL3。
+本目录是将 Aurore 演示程序构建为安卓应用的 Gradle 工程。它遵循 SDL 的安卓移植方式（[SDL 2.32 文档](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md)、[SDL 3.4 文档](https://github.com/libsdl-org/SDL/blob/release-3.4.x/docs/README-android.md)）：由 SDL 的 Java Activity 启动应用，Aurore 以共享库的形式构建，使用 SDL 平台和 OpenGL ES 2，资源文件通过 libromfs 打包进库中。默认基于 SDL3，加 `-PauroreSdl=2`（或在 `gradle.properties` 中写 `auroreSdl=2`）则基于 SDL2。
 
 | | |
 | --- | --- |
 | SDL2 | 2.32.10，子模块 `library/lib/extern/SDL`（`app/jni/SDL` 是指向它的链接）。`app/src/sdl2/java/org/libsdl/app` 中的 Java 代码取自同一标签的 SDL（`SDLActivity` 拒绝其他版本的原生库），只改了一处：`HIDDeviceManager` 以 `RECEIVER_EXPORTED` 注册 USB 广播接收器，这是安卓 14 的要求 |
-| SDL3 | 3.4.18，子模块 `library/lib/extern/SDL3`（`app/jni/SDL3` 是指向它的链接），使用 `-PauroreSdl=3`。其 Java 代码直接从子模块读取（其中的 `android-project/app/src/main/java`） |
+| SDL3 | 3.4.18，子模块 `library/lib/extern/SDL3`（`app/jni/SDL3` 是指向它的链接），默认使用。其 Java 代码直接从子模块读取（其中的 `android-project/app/src/main/java`） |
 | Aurore 的 Java 代码 | `app/src/main/java/org/libsdl/app`：库所调用的 `PlatformUtils` 和 `AuroreHandler`（亮度、网络、系统语言），两种 SDL 通用 |
 | Android Gradle Plugin、Gradle | 9.5.0，Gradle 9.8.2（使用 `gradlew`） |
 | JDK | 17 或更高，Android Gradle Plugin 9 的要求 |
@@ -34,7 +34,7 @@ NDK 决定应用能运行的最低安卓版本：r30 支持到 API 21。面向 A
 cd android-project
 export ANDROID_SDK_ROOT=~/Android/Sdk          # macOS: ~/Library/Android/sdk
 ./gradlew assembleDebug                        # app/build/outputs/apk/debug/*.apk
-./gradlew assembleDebug -PauroreSdl=3          # 同上，基于 SDL3
+./gradlew assembleDebug -PauroreSdl=2          # 同上，基于 SDL2
 ./gradlew installDebug                         # 安装到通过 adb 连接的设备或模拟器
 ```
 

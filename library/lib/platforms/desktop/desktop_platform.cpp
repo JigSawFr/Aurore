@@ -550,7 +550,8 @@ bool DesktopPlatform::localeFromEnvironmentVariable(std::string* locale)
 DesktopPlatform::DesktopPlatform()
 {
     // Theme
-    const char* themeEnv = environment("THEME");
+    const char* themeEnv       = environment("THEME");
+    this->themeFromEnvironment = themeEnv != nullptr;
     if (themeEnv == nullptr)
     {
 #if defined(IOS) || defined(TVOS)
@@ -601,6 +602,7 @@ DesktopPlatform::DesktopPlatform()
     {
         this->themeVariant = ThemeVariant::DARK;
     }
+    this->systemThemeVariant = this->themeVariant;
 
     // Locale
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO)
@@ -1155,7 +1157,23 @@ ThemeVariant DesktopPlatform::getThemeVariant()
 
 void DesktopPlatform::setThemeVariant(ThemeVariant theme)
 {
-    this->themeVariant = theme;
+    // The app's choice: the system's changes no longer replace it
+    this->themeFollowsSystem = false;
+    this->themeVariant       = theme;
+}
+
+void DesktopPlatform::systemThemeChanged(ThemeVariant theme)
+{
+    this->systemThemeVariant = theme;
+    if (this->themeFollowsSystem)
+        this->themeVariant = theme;
+}
+
+void DesktopPlatform::followSystemTheme()
+{
+    this->themeVariant = this->systemThemeVariant;
+    // Under SDL3, its changes from now on (AURORE_THEME's never change)
+    this->themeFollowsSystem = !this->themeFromEnvironment;
 }
 
 std::string DesktopPlatform::getLocale()

@@ -52,6 +52,8 @@ class HeadlessVideoContext : public VideoContext
     void* eglDisplay = nullptr;
     void* eglContext = nullptr;
     void* glfwWindow = nullptr;
+    void* sdlWindow  = nullptr;
+    void* sdlContext = nullptr;
 };
 
 class HeadlessInputManager : public InputManager
@@ -114,6 +116,9 @@ class HeadlessPlatform : public DesktopPlatform
     VideoContext* getVideoContext() override { return videoContext; }
     InputManager* getInputManager() override { return &inputManager; }
     ImeManager* getImeManager() override { return &headlessImeManager; }
+
+    /// The system's variant changes, as SDL3 tells it
+    void setSystemTheme(ThemeVariant theme) { this->systemThemeChanged(theme); }
 
     bool canShowBatteryLevel() override { return showStatus; }
     bool canShowWirelessLevel() override { return showStatus; }

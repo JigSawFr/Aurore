@@ -5,10 +5,10 @@ plugins {
     id 'com.android.application'
 }
 
-// The SDL the app is built on: 2 (the default) or 3, with -PauroreSdl=3 on
-// gradlew's command line or auroreSdl=3 in gradle.properties. Each has its
-// Java code: SDL2's in src/sdl2/java, SDL3's from its submodule.
-def auroreSdl = (project.findProperty('auroreSdl') ?: '2').toString()
+// The SDL the app is built on: 3 (the default) or 2, with -PauroreSdl=2 on
+// gradlew's command line or auroreSdl=2 in gradle.properties. Each has its
+// Java code: SDL3's from its submodule, SDL2's in src/sdl2/java.
+def auroreSdl = (project.findProperty('auroreSdl') ?: '3').toString()
 if (!(auroreSdl in ['2', '3'])) {
     throw new GradleException("auroreSdl=${auroreSdl}: 2 or 3")
 }
