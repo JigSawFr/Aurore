@@ -71,6 +71,12 @@ endif ()
 
 add_subdirectory(library)
 
+# The New 3DS has no renderer yet: a smoke test in place of the demo
+if (PLATFORM_3DS)
+    add_subdirectory(ctr)
+    return()
+endif ()
+
 find_package(Threads REQUIRED)
 
 file(GLOB_RECURSE MAIN_SRC CONFIGURE_DEPENDS demo/*.cpp)

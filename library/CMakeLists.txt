@@ -382,6 +382,14 @@ elseif(PLATFORM_SWITCH)
     # devkitPro's portlibs (GLFW, SDL2, EGL, curl…) last: it also has a
     # tinyxml2.h and a glad/gl.h, which must not hide the library's own
     list(APPEND AURORE_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
+elseif(PLATFORM_3DS)
+    # The New 3DS through libctru: a platform without a renderer yet
+    # (lib/platforms/ctr), its video context drawing nothing
+    file(GLOB_RECURSE CTR_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/ctr/*.cpp")
+    list(APPEND AURORE_SRC ${CTR_PLATFORM_SRC})
+    list(APPEND AURORE_PUBLIC_DEFINITIONS STBI_NO_THREAD_LOCALS)
+    list(APPEND AURORE_PLATFORM_LIBS ctru m)
+    set(AURORE_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
 else ()
     message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
 endif ()
@@ -398,7 +406,7 @@ list(APPEND AURORE_SOURCE
         # Cadran, Aurore's look (GPLv3, LICENSE.GPL)
         ${AURORE_PATH}/lib/cadran
         )
-if (PLATFORM_PSV OR PLATFORM_PS4 OR AURORE_USE_D3D11)
+if (PLATFORM_PSV OR PLATFORM_PS4 OR PLATFORM_3DS OR AURORE_USE_D3D11)
         list(REMOVE_ITEM AURORE_SOURCE ${AURORE_PATH}/lib/extern/glad)
 endif ()
 
@@ -481,7 +489,9 @@ endforeach (lib)
 
 # The graphics driver
 set(AURORE_DRIVER AURORE_USE_OPENGL)
-if (AURORE_USE_METAL)
+if (AURORE_USE_NULL_VIDEO)
+    set(AURORE_DRIVER AURORE_USE_NULL_VIDEO)
+elseif (AURORE_USE_METAL)
     set(AURORE_DRIVER AURORE_USE_METAL)
 elseif (AURORE_USE_D3D11)
     set(AURORE_DRIVER AURORE_USE_D3D11)

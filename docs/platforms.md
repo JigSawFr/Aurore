@@ -10,6 +10,7 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 | Nintendo Switch | `SWITCH` | GLFW (default) or SDL2 | deko3d (`DEKO3D`) or OpenGL 4.3 | romfs, in the `.nro` |
 | PS Vita | `PSV` | SDL2, or the system's | GXM (`GXM`) or OpenGL ES 2 | in the `.vpk` |
 | PS4 | `PS4` | SDL2 | OpenGL ES 2 | in the `.pkg` |
+| New 3DS (library and smoke test only) | `3DS` | libctru's (no input read yet) | none yet (citro3d to come) | `romfs:/` (none packed in the smoke test yet) |
 | Android | `ANDROID` | SDL2 (default) or SDL3 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
 | iOS, tvOS | `IOS`, `TVOS` | SDL2 (default) or SDL3 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
 | Browser | Emscripten (`emcmake`) | SDL2 (default) or SDL3 | OpenGL ES 3 (WebGL 2) | packaged with the page |
@@ -100,6 +101,17 @@ docker run --rm -v $(pwd):/src/ xfangfang/pacbrew \
 ```
 
 The result is `build/*.pkg`; the demo's `CMakeLists.txt` copies `ps4/` (the package's `sce_sys`) and the resources into `build/ps4/`, read at `/app0/` once installed. `-DAURORE_LIBJBC=ON` asks for root access (an app that needs it).
+
+## New 3DS
+
+Library and smoke test only, no renderer: the library builds and lays screens out with the small screen preset (480x360 units on the 320x240 screen), nothing is drawn nor read from the buttons yet. The New 3DS only (its 804 MHz CPU and 256 MB of memory); the original 3DS is not aimed at. With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `3ds-dev` group. The CI uses the `devkitpro/devkitarm` image.
+
+```sh
+cmake -B build_3ds -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=3DS
+cmake --build build_3ds -j$(nproc)
+```
+
+The result is `build_3ds/ctr/aurore_3ds_smoke.3dsx`, the smoke test of `ctr/` instead of the demo: it lays an XML layout out and writes its sizes on the top screen, START quits. It goes to `/3ds/` on the SD card, or to the console with `3dslink`. `AURORE_WINDOW` and `AURORE_GRAPHICS` stop the configuration: the window is libctru's, and the renderer (citro3d) is not written yet. Until then the platform (`library/lib/platforms/ctr/`) reads the system's language and the battery, and its nanovg draws nothing.
 
 ## Android
 
