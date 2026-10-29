@@ -83,20 +83,14 @@ static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode w
         .height = height,
     };
 
+    // No text: no size but the one imposed (not the room it may take: an
+    // empty detail beside a title would take its room)
     if (fullText.empty())
     {
-        if (widthMode == YGMeasureModeExactly && heightMode == YGMeasureModeExactly)
-        {
-            return size;
-        }
-        else if (heightMode == YGMeasureModeExactly)
-        {
+        if (widthMode != YGMeasureModeExactly)
             size.width = 0;
-        }
-        else if (widthMode == YGMeasureModeExactly)
-        {
+        if (heightMode != YGMeasureModeExactly)
             size.height = 0;
-        }
         return size;
     }
 
