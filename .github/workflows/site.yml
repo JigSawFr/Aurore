@@ -65,12 +65,18 @@ jobs:
           sudo apt-get install -y -q --no-install-recommends ninja-build fonts-noto-cjk python3-fonttools
           python3 tools/web_cjk_font.py /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc "$RUNNER_TEMP/cjk.otf" .
       - name: The demo
+        env:
+          REF: ${{ github.head_ref || github.ref_name }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PR: ${{ github.event.pull_request.number }}
         run: |
           # After emsdk_env.sh, which unsets EM_CACHE
           source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
           export EM_CACHE="$HOME/.emscripten_cache"
           emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WEB_CJK_FONT="$RUNNER_TEMP/cjk.otf"
           cmake --build build-web
+          # The build the page's header names (web/page/demo.js' showBuild())
+          python3 -c 'import json, os; json.dump({"repo": os.environ["GITHUB_REPOSITORY"], "ref": os.environ["REF"], "sha": os.environ["SHA"], "pr": int(os.environ["PR"]) if os.environ["PR"] else None}, open("build-web/web/build.json", "w"))'
           {
             echo "### The demo in a browser"
             echo

@@ -11,10 +11,13 @@
 #   - served without them, as GitHub Pages does: the service worker (sw.js)
 #     adds them and the page loads once more under it;
 #   - ?lang=fr&theme=winter: the address' language and a theme folder,
-#     the demo drawn otherwise.
+#     the demo drawn otherwise, the page in French;
+#   - ?simulate=3ds&variant=light: a console drawn around the screen, in the
+#     light theme.
 #
 # In each, the first screen is not blank, and a press of the down arrow moves
-# the focus (the screen changes). The canvas of each is written to
+# the focus (the screen changes); the header's language menu has the 15
+# languages, and the menu of Boréale's sites opens. The canvas of each is written to
 # <out-dir>/<name>.png, and what the demo logged to <out-dir>/<name>.log.
 #
 #     python3 tools/web_smoke.py build-web/web build-web/smoke
@@ -72,7 +75,7 @@ def differs(a, b):
     return diff.histogram()[255] / (one.width * one.height)
 
 
-def scenario(browser, site, out, name, isolate, query=""):
+def scenario(browser, site, out, name, isolate, query="", title=""):
     server = serve(site, isolate)
     url = f"http://127.0.0.1:{server.server_address[1]}/{query}"
     context = browser.new_context(viewport={"width": 1400, "height": 1000}, locale="en-US")
@@ -83,13 +86,13 @@ def scenario(browser, site, out, name, isolate, query=""):
     started = time.monotonic()
     try:
         page.goto(url)
-        # The page hides #loading on the demo's first frame, and shows #error
-        # when it cannot start or has stopped
+        # <body data-demo> is "ready" on the demo's first frame, "error" when
+        # it cannot start or has stopped (web/page/demo.js)
         page.wait_for_function(
-            "() => document.getElementById('loading').hidden || !document.getElementById('error').hidden",
+            "() => document.body && ['ready', 'error'].includes(document.body.dataset.demo)",
             timeout=START_S * 1000)
-        if page.is_visible("#error"):
-            raise AssertionError(f"the page says: {page.inner_text('#error-text')}")
+        if page.evaluate("document.body.dataset.demo") == "error":
+            raise AssertionError(f"the page says: {page.inner_text('#status')}")
         took = time.monotonic() - started
         if not page.evaluate("window.crossOriginIsolated"):
             raise AssertionError("the page is not cross-origin isolated")
@@ -106,6 +109,17 @@ def scenario(browser, site, out, name, isolate, query=""):
         moved = differs(first, canvas.screenshot())
         if moved < 0.002:
             raise AssertionError(f"the down arrow changed nothing on screen ({moved:.2%} of the pixels)")
+        languages = page.locator("#languages a").count()
+        if languages != 15:
+            raise AssertionError(f"the language menu has {languages} languages, not 15")
+        # The header's tag, translated (the window's title is the demo's: SDL sets it)
+        tag = page.inner_text(".brand .tag")
+        if title and tag != title:
+            raise AssertionError(f"the header says {tag!r}, not {title!r}: the page is not in its language")
+        page.click("#sites-button")
+        if not page.evaluate("document.getElementById('sites').matches(':popover-open')"):
+            raise AssertionError("the menu of Boréale's sites does not open")
+        page.keyboard.press("Escape")
         if errors:
             raise AssertionError("the page threw: " + "; ".join(errors))
         print(f"{name}: started in {took:.1f} s, the down arrow changed {moved:.1%} of the screen")
@@ -135,7 +149,8 @@ def main(args):
         results = [
             scenario(browser, site, out, "isolated", isolate=True),
             scenario(browser, site, out, "service_worker", isolate=False),
-            scenario(browser, site, out, "french_winter", isolate=True, query="?lang=fr&theme=winter"),
+            scenario(browser, site, out, "french_winter", isolate=True, query="?lang=fr&theme=winter", title="Démo"),
+            scenario(browser, site, out, "3ds_light", isolate=True, query="?simulate=3ds&variant=light"),
         ]
         browser.close()
     if not all(results):

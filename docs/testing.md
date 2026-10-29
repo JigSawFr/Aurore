@@ -87,6 +87,20 @@ An Aurore installed with `-DAURORE_INSTALL=ON -DAURORE_BUILD_TESTS=ON` installs 
 
 A smoke scenario of an Xvfb script (start, press keys, wait, grab the screen, compare) becomes a case: `h.tap(aurore::BUTTON_DOWN, 3)` for the key presses, `h.settle()` for the waits, `matchesReference` for the grab and the comparison, `focusText()` and `cutTexts()` for what was read in the log and in `cut_text.txt`.
 
+### From outside the app
+
+A test that drives the real program from outside (Xvfb and key presses through X, as PlayGuard's and PlayShelf's desktop smoke tests) cannot step its frames. With `AURORE_SETTLE_FILE=<path>` (a build with `AURORE_DEV_TOOLS`), the main loop rewrites that file on every loop: its number, then `1` once the screen has settled (`Application::isSettled()`: no animation nor timer waiting, a repeating timer aside, no task on the threads, inputs not blocked, no redraw asked for), else `0`. After a press, the test waits for a loop later than the one it read before, settled, rather than for a fixed time: no longer than the screen needs, however slow the machine. Something that never settles (a label scrolling for good) calls for a bound: the fixed pause it replaces.
+
+```python
+def settled_after(path, loop, timeout=5):
+    end = time.time() + timeout
+    while time.time() < end:
+        n, ok = open(path).read().split()
+        if int(n) > loop + 1 and ok == "1":
+            return int(n)
+        time.sleep(0.01)
+```
+
 ## The demo's tests
 
 ```sh
@@ -125,7 +139,7 @@ TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R au
 
 ## The demo in a browser
 
-`tools/web_smoke.py` starts the demo's build for a browser in headless Chromium: its first screen, a key, the service worker GitHub Pages needs, the address' language and theme ([web/README.md](../web/README.md#testing-it)).
+`tools/web_smoke.py` starts the demo's build for a browser in headless Chromium: its first screen, a key, the service worker GitHub Pages needs, the address' language, theme and console, the header's menus ([web/README.md](../web/README.md#testing-it)).
 
 ## Fuzzing
 
