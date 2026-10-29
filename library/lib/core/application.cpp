@@ -484,6 +484,23 @@ void Application::processInput()
     inputManager->runloopStart();
     inputManager->updateTouchStates(&rawTouch);
     inputManager->updateMouseStates(&rawMouse);
+    // Read in the window: moved to the screen's corner, the touches past
+    // the screen dropped (a frame's bezel is not the screen)
+    if (Application::screenFrame && Application::windowScale > 0)
+    {
+        float dx = Application::screenRect.getMinX() / Application::windowScale;
+        float dy = Application::screenRect.getMinY() / Application::windowScale;
+        rawMouse.position.x -= dx;
+        rawMouse.position.y -= dy;
+        for (auto it = rawTouch.begin(); it != rawTouch.end();)
+        {
+            it->position.x -= dx;
+            it->position.y -= dy;
+            bool inside = it->position.x >= 0 && it->position.y >= 0 && it->position.x < Application::contentWidth
+                && it->position.y < Application::contentHeight;
+            it = inside || !it->pressed ? it + 1 : rawTouch.erase(it);
+        }
+    }
     inputManager->updateUnifiedControllerState(&controllerState);
     keepDominantStickDirection(&controllerState);
 
@@ -1052,7 +1069,9 @@ void Application::frame(bool present)
     videoContext->clear(Application::getTheme().getColor("aurore/clear"));
     float scaleFactor = videoContext->getScaleFactor();
 
-    nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
+    nvgBeginFrame(frameContext.vg, Application::framebufferWidth, Application::framebufferHeight, scaleFactor);
+    if (Application::screenFrame)
+        nvgTranslate(frameContext.vg, Application::screenRect.getMinX(), Application::screenRect.getMinY());
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
     Application::drawThemeBackgroundImage(frameContext.vg, 0, 0, Application::contentWidth, Application::contentHeight);
     ThemeDecorations::drawStrips(frameContext.vg, 0, 0, Application::contentWidth, Application::contentHeight);
@@ -1145,6 +1164,14 @@ void Application::frame(bool present)
 
     // End frame
     nvgResetTransform(Application::getNVGContext()); // scale
+    // The frame around the screen, over what the app drew past it
+    if (Application::screenFrame)
+    {
+        nvgResetScissor(frameContext.vg);
+        nvgGlobalAlpha(frameContext.vg, 1.0f);
+        Application::screenFrame->draw(frameContext.vg, (float)Application::framebufferWidth,
+            (float)Application::framebufferHeight, Application::screenRect);
+    }
     nvgEndFrame(Application::getNVGContext());
 
     if (!present)
@@ -1215,7 +1242,10 @@ void Application::checkSkippedFrame()
         return;
 
     float scale = Application::windowScale > 0 ? Application::windowScale : 1.0f;
-    Rect area(minX / scale, minY / scale, (maxX + 1 - minX) / scale, (maxY + 1 - minY) / scale);
+    // In the screen's units (a frame puts the screen past the window's corner)
+    float offsetX = Application::screenRect.getMinX();
+    float offsetY = Application::screenRect.getMinY();
+    Rect area((minX - offsetX) / scale, (minY - offsetY) / scale, (maxX + 1 - minX) / scale, (maxY + 1 - minY) / scale);
     Application::missedRedraws++;
     bool sameArea = Application::missedRedrawArea.getMinX() == area.getMinX() && Application::missedRedrawArea.getMinY() == area.getMinY()
         && Application::missedRedrawArea.getWidth() == area.getWidth() && Application::missedRedrawArea.getHeight() == area.getHeight();
@@ -2187,6 +2217,13 @@ float Application::getMaximumUIScale()
 
 void Application::setWindowSize(int width, int height)
 {
+    Application::framebufferWidth  = width;
+    Application::framebufferHeight = height;
+    // With a frame, the app's screen is where the frame puts it
+    Application::screenRect   = Application::screenFrame ? Application::screenFrame->layout((float)width, (float)height)
+                                                         : Rect(0, 0, (float)width, (float)height);
+    width                     = std::max(1, (int)std::lround(Application::screenRect.getWidth()));
+    height                    = std::max(1, (int)std::lround(Application::screenRect.getHeight()));
     Application::windowWidth  = width;
     Application::windowHeight = height;
 
@@ -2296,6 +2333,27 @@ void Application::setOverscan(float fraction)
 float Application::getOverscan()
 {
     return Application::overscan;
+}
+
+void Application::setScreenFrame(ScreenFrame* frame)
+{
+    Application::screenFrame.reset(frame);
+    if (Application::framebufferWidth > 0 && Application::framebufferHeight > 0)
+    {
+        Application::setWindowSize((int)Application::framebufferWidth, (int)Application::framebufferHeight);
+        Application::getWindowSizeChangedEvent()->fire();
+    }
+    Application::requestRedraw();
+}
+
+ScreenFrame* Application::getScreenFrame()
+{
+    return Application::screenFrame.get();
+}
+
+Rect Application::getScreenRect()
+{
+    return Application::screenRect;
 }
 
 void Application::onWindowResized(int width, int height)
