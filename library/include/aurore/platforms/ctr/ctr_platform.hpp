@@ -3,8 +3,8 @@
 
 // The New 3DS, through libctru: its system's language and battery, the
 // small screen preset (480x360 layout units on the 320x240 screen), and
-// citro3d on the bottom screen. No input nor keyboard yet: the buttons are
-// scanned each frame but not passed to Aurore (docs/platforms.md).
+// citro3d on the bottom screen, its buttons, sticks and touch screen. No
+// keyboard yet (docs/platforms.md).
 
 #pragma once
 
@@ -18,7 +18,8 @@
 namespace aurore
 {
 
-/// No controller nor touch read yet: every button up, no touch
+/// The console's buttons as the Switch's (same layout), the Circle Pad as
+/// the left stick, the C-stick as the right one, the bottom screen's touches
 class CtrInputManager : public InputManager
 {
   public:
@@ -26,7 +27,7 @@ class CtrInputManager : public InputManager
     void updateUnifiedControllerState(ControllerState* state) override;
     void updateControllerState(ControllerState* state, int controller) override;
     bool getKeyboardKeyState(AuroreKeyboardScancode key) override { return false; }
-    void updateTouchStates(std::vector<RawTouchState>* states) override { }
+    void updateTouchStates(std::vector<RawTouchState>* states) override;
     void updateMouseStates(RawMouseState* state) override { }
     void sendRumble(unsigned short controller, unsigned short lowFreqMotor, unsigned short highFreqMotor) override { }
 };
