@@ -148,8 +148,7 @@ bool Application::init()
     // Init i18n
     loadTranslations();
     // Cadran: the preferences' language in place of the console's
-    if (Application::cadran)
-        cadran::start();
+    cadran::start();
 
     Threading::start();
 
@@ -239,8 +238,7 @@ void Application::createWindow(std::string windowTitle)
     Application::registerBuiltInXMLViews();
 
     // Cadran's look, from the first screen on
-    if (Application::cadran)
-        cadran::start_window();
+    cadran::start_window();
 
     Application::getWindowCreationDoneEvent()->fire();
 }
@@ -1619,7 +1617,7 @@ void Application::setReduceMotion(bool reduce)
 
 bool Application::getReduceMotion()
 {
-    return Application::reduceMotion || (Application::cadran && !effects::motion());
+    return Application::reduceMotion || !effects::motion();
 }
 
 // Each label measured again (and what else measures text), and the roots to
@@ -2532,7 +2530,6 @@ void Application::registerBuiltInXMLViews()
     Application::registerXMLView("aurore:Button", Button::create);
     Application::registerXMLView("aurore:IconButton", IconButton::create);
     Application::registerXMLView("aurore:CheckBox", CheckBox::create);
-    Application::registerXMLView("aurore:Hints", Hints::create);
     Application::registerXMLView("aurore:Slider", Slider::create);
     Application::registerXMLView("aurore:BottomBar", BottomBar::create);
     Application::registerXMLView("aurore:ProgressSpinner", ProgressSpinner::create);

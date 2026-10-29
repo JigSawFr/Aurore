@@ -318,8 +318,6 @@
         "file_lead": "Un fichier texte : quelques couleurs, et toutes les clés en découlent ; des images et des décors aussi.",
         "picker": "Le choix de palette de Cadran",
         "contrast": "Chaque palette est vérifiée : le texte à 4,5:1, les formes à 3:1.",
-        "look": "L’apparence",
-        "look_lead": "Cadran est l’apparence d’Aurore ; une application peut garder celle de borealis, choisie avant de démarrer.",
         "default": "Cadran"
     },
     "input": {

@@ -30,7 +30,7 @@ Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like
 It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. Its code has its own names (`aurore::`, `<aurore.hpp>`, `AURORE_`), in place of borealis' (`brls::`, `<borealis.hpp>`, `BRLS_`): a borealis app moves to Aurore by changing its submodule and renaming them, a search and replace ([migrating from borealis](docs/migrating-from-borealis.md)).
 
 > [!IMPORTANT]
-> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's default look: an app gets it without a line of code, and `aurore::Application::setCadran(false)` keeps borealis' own. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
+> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's look: an app gets it without a line of code. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
 
 ## ✨ Features
 
@@ -237,7 +237,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | Android API | 36 |
 | Emscripten | 6.0.13 |
 
-Checked on every pull request: 145 test cases in the headless harness, 25 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 40 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 49 of the 49 GitHub Actions used are pinned to a commit. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: 145 test cases in the headless harness, 25 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 40 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 50 of the 50 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 <!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
@@ -320,7 +320,7 @@ Also on the website, with a search and the API reference: <https://aurore.boreal
 | [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
 | [Views](docs/views.md) | Every XML tag, its class and its header |
 | [Themes](docs/themes.md) | Theme files and folders, presets, pictures, decorations, keys |
-| [Cadran](docs/cadran.md) | The default look and its kit |
+| [Cadran](docs/cadran.md) | The look and its kit |
 | [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
 | [Components](docs/components.md) | The views Aurore adds |
 | [XML attributes](docs/xml-attributes.md) | Every attribute of every view, generated from the sources |

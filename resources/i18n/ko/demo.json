@@ -318,8 +318,6 @@
         "file_lead": "텍스트 파일에 색 몇 가지만 적으면 모든 키가 정해집니다. 이미지와 장식도.",
         "picker": "Cadran의 팔레트 선택",
         "contrast": "모든 팔레트를 검사합니다: 텍스트 4.5:1, 도형 3:1.",
-        "look": "모습",
-        "look_lead": "Cadran은 Aurore의 모습입니다. 앱은 시작하기 전에 borealis의 모습을 고를 수도 있습니다.",
         "default": "Cadran"
     },
     "input": {

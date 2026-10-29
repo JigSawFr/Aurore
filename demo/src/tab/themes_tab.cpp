@@ -165,11 +165,6 @@ ThemesTab::ThemesTab()
     picker->addView(checked);
     file->addView(picker);
 
-    // The look: Cadran, or borealis' own
-    aurore::Box* look = show::section(page, "sparkle", "demo/themes/look"_i18n, "demo/themes/look_lead"_i18n);
-    look->addView(show::code("// before aurore::Application::init()\n"
-                             "aurore::Application::setCadran(false);   // borealis' own look"));
-
     this->markChosen();
 }
 

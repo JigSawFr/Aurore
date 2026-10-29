@@ -318,8 +318,6 @@
         "file_lead": "一個文字檔：寫幾種顏色，所有的鍵都由此推導；圖片和裝飾也可以。",
         "picker": "Cadran 的色盤選擇",
         "contrast": "每個色盤都經過檢查：文字 4.5:1，圖形 3:1。",
-        "look": "外觀",
-        "look_lead": "Cadran 是 Aurore 的外觀；應用程式也可以在啟動前選擇保留 borealis 的外觀。",
         "default": "Cadran"
     },
     "input": {

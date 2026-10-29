@@ -325,7 +325,7 @@ static bool isSeed(const std::string& key)
 
 // Every key a palette (seeds) changes, from `base` (the variant without a
 // theme file) for the seeds it does not give. Keys the base does not have
-// (Cadran's when it is off) are left out.
+// are left out.
 static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
 {
     ColorMap out;
