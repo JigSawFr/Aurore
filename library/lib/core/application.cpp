@@ -85,6 +85,36 @@ bool Application::init()
     Application::inited        = false;
     Application::quitRequested = false;
 
+    // Init platform
+    Application::platform            = Platform::createPlatform();
+    Application::notificationManager = new NotificationManager();
+
+    if (!Application::platform)
+    {
+        fatal("Did not find a valid platform");
+        return false;
+    }
+
+    Logger::info("Using platform {}", platform->getName());
+
+    // The platform's layout preset, unless the app chose one
+    // (Application::usePreset); AURORE_PRESET over both
+    if (!Application::presetChosen)
+        if (const LayoutPreset* preset = Application::platform->getLayoutPreset())
+        {
+            Application::usePreset(*preset);
+            Application::presetChosen = false; // the platform's: another init() asks it again
+        }
+    if (const char* presetEnv = environmentVariable("PRESET"))
+    {
+        if (std::strcmp(presetEnv, "small") == 0)
+            Application::usePreset(PRESET_SMALL_SCREEN);
+        else if (std::strcmp(presetEnv, "standard") == 0)
+            Application::usePreset(PRESET_STANDARD);
+        else
+            Logger::warning("AURORE_PRESET: \"{}\" is not a preset (small or standard)", presetEnv);
+    }
+
     // The design size, to try a small screen's on the desktop (480x360)
     if (const char* design = environmentVariable("DESIGN_SIZE"))
     {
@@ -103,18 +133,6 @@ bool Application::init()
         Application::ORIGINAL_WINDOW_WIDTH = 1280;
     if (Application::ORIGINAL_WINDOW_HEIGHT == 0)
         Application::ORIGINAL_WINDOW_HEIGHT = 720;
-
-    // Init platform
-    Application::platform            = Platform::createPlatform();
-    Application::notificationManager = new NotificationManager();
-
-    if (!Application::platform)
-    {
-        fatal("Did not find a valid platform");
-        return false;
-    }
-
-    Logger::info("Using platform {}", platform->getName());
 
     // The density, before any screen is made (comfortable, compact, dense or
     // a number)
@@ -1647,6 +1665,16 @@ WidthClass widthClassOf(float width)
     if (width < WIDTH_EXPANDED)
         return WidthClass::MEDIUM;
     return WidthClass::EXPANDED;
+}
+
+void Application::usePreset(const LayoutPreset& preset)
+{
+    Application::presetChosen           = true;
+    Application::ORIGINAL_WINDOW_WIDTH  = preset.designWidth;
+    Application::ORIGINAL_WINDOW_HEIGHT = preset.designHeight;
+    aurore::setDensity(preset.density);
+    Application::presetTextScale = preset.textScale;
+    Label::setFontScale(preset.textScale);
 }
 
 WidthClass Application::getWidthClass()

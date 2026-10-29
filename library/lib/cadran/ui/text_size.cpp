@@ -29,15 +29,17 @@ bool docked()
 
 float scale()
 {
+    // Over the layout preset's own (a small screen's text is larger already)
+    const float base        = aurore::Application::getPresetTextScale();
     const std::string& size = ui::prefs().text_size;
     if (size == "largest")
-        return LARGEST;
-    return size == "large" || (size == "auto" && docked()) ? LARGE : 1.0f;
+        return base * LARGEST;
+    return base * (size == "large" || (size == "auto" && docked()) ? LARGE : 1.0f);
 }
 
 bool larger()
 {
-    return scale() > 1.0f;
+    return scale() > aurore::Application::getPresetTextScale();
 }
 
 namespace
