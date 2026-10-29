@@ -10,8 +10,8 @@ headless Chromium (Playwright), failing when one:
 - has a field under 16px on a phone (iOS zooms into it when it is touched).
 
 Every page on an iPhone (402x874), the API reference's included; the pages
-most likely to be too wide (the home page, the documentation's widest, the
-changelog, and the API's widest) in each language also
+most likely to be too wide (the home page, the page on borealis, the
+documentation's widest, the changelog, and the API's widest) in each language also
 on a small phone (320), a phone in landscape (874x402), a tablet (1024) and
 a desktop (1440). The images are not loaded: their boxes are
 in the pages (width, height), and the check takes seconds, not minutes.
@@ -45,7 +45,7 @@ PHONE = ("iPhone", 402, 874, True)
 OTHERS = [("small phone", 320, 640, True), ("phone in landscape", 874, 402, True),
           ("tablet", 1024, 768, False), ("desktop", 1440, 900, False)]
 # The pages every screen sees, under each language's folder.
-WIDEST = ["", "docs/xml-attributes/", "docs/platforms/", "docs/themes/", "changelog/"]
+WIDEST = ["", "borealis/", "docs/xml-attributes/", "docs/platforms/", "docs/themes/", "changelog/"]
 # The API reference's widest (tools/build_api.py), in English only.
 API_WIDEST = ["api/", "api/aurore/", "api/aurore/View/", "api/aurore/Application/", "api/ui/"]
 
