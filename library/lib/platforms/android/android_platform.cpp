@@ -304,14 +304,14 @@ bool AndroidPlatform::canSetBacklightBrightness()
 // in pixels on Android), top, right, bottom, left
 Insets AndroidPlatform::getSafeAreaInsets()
 {
-    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    auto env = static_cast<JNIEnv*>(sdlJNIEnv());
     if (env == nullptr)
         return {};
     jclass utilsClass;
     jmethodID method;
     if (!findUtilsMethod(env, "getSafeAreaInsets", "(Landroid/app/Activity;)[I", &utilsClass, &method))
         return {};
-    auto activity = (jobject)SDL_AndroidGetActivity();
+    auto activity = (jobject)sdlActivity();
     if (activity == nullptr)
     {
         env->DeleteLocalRef(utilsClass);
