@@ -464,6 +464,13 @@ class Application
      */
     static bool isSettled();
 
+    /**
+     * Work of the app's own that Aurore cannot see (threads of its own, not
+     * Threading's): isSettled() is false while `busy` returns true. One
+     * check, the last set; an empty function removes it.
+     */
+    static void setBusyCheck(std::function<bool()> busy);
+
     /// The controller's buttons and sticks as read this frame.
     static const ControllerState& getControllerState();
 
