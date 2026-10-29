@@ -57,6 +57,7 @@
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
+#include "simulation.hpp"
 
 using aurore::test::Harness;
 
@@ -3079,4 +3080,61 @@ AURORE_TEST(cells_grow_with_the_text)
     aurore::Application::setTextScale(1.0f);
     h.settle();
     AURORE_CHECK_EQ(cell->getHeight(), normal);
+}
+
+// Each simulated console: its screen in the window with the console's
+// proportions, the console drawn around it, the touches read on the screen
+AURORE_TEST(simulated_consoles)
+{
+    aurore::test::Options options;
+    options.width  = 1440;
+    options.height = 860;
+    DemoHarness h(options);
+    for (const char* id : { "switch", "vita", "ps4", "3ds", "phone" })
+    {
+        demo::simulation::use(id);
+        h.settle();
+        const demo::simulation::Device* device = demo::simulation::find(id);
+        aurore::Rect screen                    = aurore::Application::getScreenRect();
+        AURORE_CHECK(screen.getMinX() > 0 && screen.getMinY() > 0);
+        AURORE_CHECK(screen.getMaxX() < aurore::Application::framebufferWidth);
+        AURORE_CHECK(screen.getMaxY() < aurore::Application::framebufferHeight);
+        float ratio = (float)device->screenWidth / (float)device->screenHeight;
+        AURORE_CHECK(std::abs(screen.getWidth() / screen.getHeight() - ratio) < 0.02f);
+        AURORE_CHECK_EQ(aurore::Application::windowWidth, (unsigned)screen.getWidth());
+        AURORE_CHECK(h.matchesReference(std::string("simulated_") + id));
+    }
+
+    // The New 3DS: the small screen preset, its renderer without antialiasing
+    demo::simulation::use("3ds");
+    h.settle();
+    AURORE_CHECK_EQ(aurore::Application::contentWidth, 480.0f);
+    AURORE_CHECK(aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT);
+    AURORE_CHECK_EQ(nvgInternalParams(aurore::Application::getNVGContext())->edgeAntiAlias, 0);
+
+    // A touch where the screen is in the window opens the tab there; one on
+    // the console's body is not the screen's
+    demo::simulation::use("switch");
+    h.settle();
+    aurore::View* themes = h.findText("Themes");
+    AURORE_CHECK(themes != nullptr);
+    if (themes)
+    {
+        aurore::Rect frame = themes->getFrame();
+        aurore::Rect s     = aurore::Application::getScreenRect();
+        float scale        = aurore::Application::windowScale;
+        h.tapAt((s.getMinX() + frame.getMidX() * scale) / scale, (s.getMinY() + frame.getMidY() * scale) / scale);
+        AURORE_CHECK(h.hasText("Boréale"));
+    }
+    size_t screens = aurore::Application::getActivitiesStack().size();
+    h.tapAt(2, 2);
+    AURORE_CHECK_EQ(aurore::Application::getActivitiesStack().size(), screens);
+
+    // Back on the desktop: the whole window is the screen again
+    demo::simulation::use("desktop");
+    h.settle();
+    AURORE_CHECK_EQ(aurore::Application::getScreenFrame(), (aurore::ScreenFrame*)nullptr);
+    AURORE_CHECK_EQ(aurore::Application::getScreenRect().getMinX(), 0.0f);
+    AURORE_CHECK_EQ(aurore::Application::contentWidth, 1280.0f);
+    AURORE_CHECK_EQ(nvgInternalParams(aurore::Application::getNVGContext())->edgeAntiAlias, 1);
 }
