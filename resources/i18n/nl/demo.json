@@ -318,8 +318,6 @@
         "file_lead": "Een tekstbestand: een paar kleuren, en elke sleutel volgt daaruit; ook afbeeldingen en versieringen.",
         "picker": "Paletkeuze van Cadran",
         "contrast": "Elk palet wordt gecontroleerd: tekst op 4,5:1, vormen op 3:1.",
-        "look": "Het uiterlijk",
-        "look_lead": "Cadran is het uiterlijk van Aurore; een app kan dat van borealis houden, gekozen voor de start.",
         "default": "Cadran"
     },
     "input": {

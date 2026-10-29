@@ -318,8 +318,6 @@
         "file_lead": "テキストファイルにいくつかの色を書くだけで、すべてのキーが決まります。画像や飾りも。",
         "picker": "Cadran のパレット選択",
         "contrast": "パレットはすべて検査済み：テキストは 4.5:1、図形は 3:1。",
-        "look": "外観",
-        "look_lead": "Cadran は Aurore の外観です。アプリは起動前に borealis の外観を選ぶこともできます。",
         "default": "Cadran"
     },
     "input": {

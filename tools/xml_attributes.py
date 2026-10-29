@@ -30,6 +30,8 @@ ENUM = re.compile(r'AURORE_REGISTER_ENUM_XML_ATTRIBUTE\(\s*"([^"]+)"\s*,[^{]*\{(
 ENUM_VALUE = re.compile(r'\{\s*"([^"]+)"\s*,')
 FUNCTION = re.compile(r'^(?:[\w:<>*&]+\s+)?((?:\w+::)*\w+)::~?\w+\([^;]*$', re.M)
 VIEW_TAG = re.compile(r'registerXMLView\("([^"]+)",\s*(?:\w+::)*(\w+)::create\)')
+BASE = re.compile(r'^class\s+(\w+)(?:\s+final)?\s*:\s*public\s+(?:\w+::)*(\w+)', re.M)
+HEADERS = os.path.join(ROOT, "library", "include")
 
 
 def owner_at(text, offset):
@@ -67,6 +69,22 @@ def collect():
                 continue
             entry = attributes.setdefault(owner, {}).setdefault(match.group(1), [set(), []])
             entry[1] = sorted(ENUM_VALUE.findall(match.group(2)))
+    # A tag registered by a class that adds no attributes (Cadran's
+    # FooterHints for <aurore:Hints>) is its base's, which has them
+    bases = {}
+    for folder, _, names in os.walk(HEADERS):
+        if os.sep + "extern" in folder:
+            continue
+        for name in names:
+            if name.endswith(".hpp"):
+                with open(os.path.join(folder, name), encoding="utf-8") as f:
+                    bases.update(BASE.findall(f.read()))
+    for owner, tag in list(tags.items()):
+        base = owner
+        while base not in attributes and base in bases:
+            base = bases[base]
+        if base != owner and base in attributes and base not in tags:
+            tags[base] = tag
     return tags, attributes
 
 

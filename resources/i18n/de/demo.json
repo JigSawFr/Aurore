@@ -318,8 +318,6 @@
         "file_lead": "Eine Textdatei: ein paar Farben, und jeder Schlüssel ergibt sich daraus; auch Bilder und Dekorationen.",
         "picker": "Palettenauswahl von Cadran",
         "contrast": "Jede Palette wird geprüft: Text mit 4,5:1, Formen mit 3:1.",
-        "look": "Das Aussehen",
-        "look_lead": "Cadran ist das Aussehen von Aurore; eine App kann das von borealis behalten, gewählt vor dem Start.",
         "default": "Cadran"
     },
     "input": {

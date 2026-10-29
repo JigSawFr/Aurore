@@ -66,4 +66,4 @@ When something is a platform's own (a Switch service, an Android intent), keep i
 
 ## Licence
 
-Cadran, Aurore's default look, is GPLv3: an app built with Aurore is GPLv3 on every platform, stores included. `Application::setCadran(false)` before `init()` drops Cadran's look, not the licence of the code linked in ([cadran.md](cadran.md)).
+Cadran, Aurore's look, is GPLv3: an app built with Aurore is GPLv3 on every platform, stores included.

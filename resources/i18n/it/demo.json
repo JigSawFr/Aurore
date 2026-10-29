@@ -318,8 +318,6 @@
         "file_lead": "Un file di testo: pochi colori, e ogni chiave ne deriva; anche immagini e decorazioni.",
         "picker": "La scelta di tavolozza di Cadran",
         "contrast": "Ogni tavolozza è verificata: il testo a 4,5:1, le forme a 3:1.",
-        "look": "L'aspetto",
-        "look_lead": "Cadran è l'aspetto di Aurore; un'app può tenere quello di borealis, scelto prima dell'avvio.",
         "default": "Cadran"
     },
     "input": {
