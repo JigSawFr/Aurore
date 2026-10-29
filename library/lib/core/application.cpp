@@ -39,6 +39,7 @@
 #include <aurore/core/theme_image.hpp>
 #include <aurore/core/thread.hpp>
 #include <aurore/core/time.hpp>
+#include <aurore/core/timer.hpp>
 #include <aurore/core/util.hpp>
 #include <aurore/views/bottom_bar.hpp>
 #include <aurore/views/button.hpp>
@@ -76,6 +77,25 @@
 
 namespace aurore
 {
+
+#ifdef AURORE_DEV_TOOLS
+// AURORE_SETTLE_FILE: the loop's number and whether the screen is settled,
+// rewritten in place on every loop ("<loop> <0|1>", fixed width, so a reader
+// never meets half a line). A test driving the app from outside (a desktop
+// smoke test pressing keys through X) waits for a loop after its press
+// that is settled, rather than for a fixed time.
+static FILE* settleFile              = nullptr;
+static unsigned long long settleLoop = 0;
+
+static void writeSettleFile()
+{
+    if (!settleFile)
+        return;
+    std::fseek(settleFile, 0, SEEK_SET);
+    std::fprintf(settleFile, "%020llu %d\n", ++settleLoop, Application::isSettled() ? 1 : 0);
+    std::fflush(settleFile);
+}
+#endif
 
 static std::thread::id mainThreadId;
 
@@ -165,6 +185,14 @@ bool Application::init()
     {
         if (std::strcmp(hotReload, "0") != 0)
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
+    }
+    if (const char* settle = environmentVariable("SETTLE_FILE"))
+    {
+        if (settleFile)
+            std::fclose(settleFile);
+        settleFile = nullptr;
+        if (*settle && !(settleFile = std::fopen(settle, "w")))
+            Logger::warning("Application: cannot write AURORE_SETTLE_FILE {}", settle);
     }
 #endif
 
@@ -380,6 +408,10 @@ bool Application::internalMainLoop()
 
     Profiler::endPhase(Profiler::Phase::UPDATE);
     Profiler::endFrame(draw);
+
+#ifdef AURORE_DEV_TOOLS
+    writeSettleFile();
+#endif
 
     // The simulated clock (the test harness) moves on its own: nothing to
     // wait for
@@ -2057,6 +2089,22 @@ void Application::unblockInputs()
 
     getGlobalHintsUpdateEvent()->fire();
     Logger::debug("Removing an inputs block token (tokens={})", Application::blockInputsTokens);
+}
+
+bool Application::isSettled()
+{
+    // A redraw asked for, with redraw on demand or not: a view drawing
+    // itself on the clock asks for one until it is done (a scroll bar
+    // fading out)
+    if (Application::blockInputsTokens != 0 || !Threading::isIdle() || Application::redrawFrames > 0)
+        return false;
+    // Every ticking but a repeating timer (a clock's refresh, a poll), which
+    // runs as long as its screen is open. A waiting one counts: what it
+    // starts (a scroll bar fading out) is still to come
+    for (Ticking* ticking : Ticking::runningTickings)
+        if (!dynamic_cast<RepeatingTimer*>(ticking))
+            return false;
+    return true;
 }
 
 bool Application::isInputBlocks()
