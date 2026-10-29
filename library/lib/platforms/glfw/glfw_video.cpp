@@ -23,11 +23,6 @@
 #elif defined(AURORE_USE_METAL)
 static void* METAL_CONTEXT = nullptr;
 #include <aurore/platforms/glfw/driver/metal.hpp>
-#elif defined(AURORE_USE_D3D11)
-#include <nanovg_d3d11.h>
-
-#include <aurore/platforms/driver/d3d11.hpp>
-std::unique_ptr<aurore::D3D11Context> D3D11_CONTEXT;
 #endif
 
 #if defined(__linux__) || defined(_WIN32)
@@ -135,14 +130,6 @@ static void glfwWindowFramebufferSizeCallback(GLFWwindow* window, int width, int
     // cocoa 画布大小和窗口一致
     width  = wWidth;
     height = wHeight;
-#elif defined(AURORE_USE_D3D11)
-    if (D3D11_CONTEXT == nullptr)
-    {
-        return;
-    }
-    scaleFactor = D3D11_CONTEXT->getScaleFactor();
-    int wWidth = width, wHeight = height;
-    D3D11_CONTEXT->onFramebufferSize(width, height);
 #endif
 
     Application::onWindowResized(width, height);
@@ -366,11 +353,6 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     METAL_CONTEXT    = ctx;
     this->nvgContext = nvgCreateMTL(GetMetalLayer(ctx), NVG_STENCIL_STROKES | NVG_ANTIALIAS);
     scaleFactor      = GetMetalScaleFactor(ctx);
-#elif defined(AURORE_USE_D3D11)
-    Logger::info("glfw: USE_D3D11");
-    D3D11_CONTEXT    = std::make_unique<D3D11Context>(this->window, windowWidth, windowHeight);
-    this->nvgContext = nvgCreateD3D11(D3D11_CONTEXT->getDevice(), NVG_ANTIALIAS | NVG_STENCIL_STROKES);
-    scaleFactor      = D3D11_CONTEXT->getScaleFactor();
 #endif
     if (!this->nvgContext)
     {
@@ -394,10 +376,7 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
     glfwGetWindowPos(window, &xPos, &yPos);
     Application::setWindowPosition(xPos, yPos);
 
-#if defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->onFramebufferSize(width, height);
-#elif defined(AURORE_USE_METAL)
-#else
+#ifndef AURORE_USE_METAL
     scaleFactor = width * 1.0 / wWidth;
     glViewport(0, 0, width, height);
 #endif
@@ -429,8 +408,6 @@ void GLFWVideoContext::beginFrame()
 
         glfwSetWindowSize(window, r->width, r->height);
     }
-#elif defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->beginFrame();
 #endif
 }
 
@@ -438,19 +415,13 @@ void GLFWVideoContext::endFrame()
 {
 #ifdef AURORE_USE_OPENGL
     glfwSwapBuffers(this->window);
-#elif defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->endFrame();
 #endif
 }
 
 void GLFWVideoContext::setSwapInterval(int interval)
 {
     VideoContext::swapInterval = interval;
-#ifdef AURORE_USE_D3D11
-    D3D11_CONTEXT->setSwapInterval(interval);
-#else
     glfwSwapInterval(interval);
-#endif
 }
 
 void GLFWVideoContext::clear(NVGcolor color)
@@ -466,12 +437,6 @@ void GLFWVideoContext::clear(NVGcolor color)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 #elif defined(AURORE_USE_METAL)
     nvgClearWithColor(nvgContext, nvgRGBAf(color.r, color.g, color.b, color.a));
-#elif defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->clear(nvgRGBAf(
-        color.r,
-        color.g,
-        color.b,
-        color.a));
 #endif
 }
 
@@ -521,9 +486,6 @@ GLFWVideoContext::~GLFWVideoContext()
 #elif defined(AURORE_USE_METAL)
             nvgDeleteMTL(this->nvgContext);
             METAL_CONTEXT = nullptr;
-#elif defined(AURORE_USE_D3D11)
-            nvgDeleteD3D11(this->nvgContext);
-            D3D11_CONTEXT = nullptr;
 #endif
         }
     }

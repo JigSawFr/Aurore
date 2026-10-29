@@ -47,7 +47,7 @@
   "f_layout_title": "Раскладка flexbox",
   "f_layout_text": "Каждое представление размещает Yoga, описано оно в XML, код — только там, где он нужен. <code>gap</code>, <code>flexWrap</code>, свой радиус для каждого угла.",
   "f_graphics_title": "Векторная графика",
-  "f_graphics_text": "Аппаратное ускорение через nanovg: OpenGL, Direct3D 11, deko3d на Switch, GXM на Vita, citro3d на New 3DS, с масштабом под телевизор.",
+  "f_graphics_text": "Аппаратное ускорение через nanovg: OpenGL, Direct3D 12, deko3d на Switch, GXM на Vita, citro3d на New 3DS, с масштабом под телевизор.",
   "f_components_title": "Готовые компоненты",
   "f_components_title_short": "Компоненты",
   "f_components_text": "Вкладки, списки и сетки с переиспользованием ячеек, ячейки настроек, диалоги, листы действий, всплывающие уведомления, ползунки, Markdown — всё оформляется темой.",

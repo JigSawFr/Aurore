@@ -47,7 +47,7 @@
   "f_layout_title": "Disposição flexbox",
   "f_layout_text": "Cada vista é disposta pelo Yoga, descrita em XML, com código só onde importa. <code>gap</code>, <code>flexWrap</code>, um raio por canto.",
   "f_graphics_title": "Gráficos vetoriais",
-  "f_graphics_text": "Acelerados por hardware com o nanovg: OpenGL, Direct3D 11, deko3d na Switch, GXM na Vita, citro3d na New 3DS, à escala de um televisor.",
+  "f_graphics_text": "Acelerados por hardware com o nanovg: OpenGL, Direct3D 12, deko3d na Switch, GXM na Vita, citro3d na New 3DS, à escala de um televisor.",
   "f_components_title": "Componentes prontos",
   "f_components_title_short": "Componentes",
   "f_components_text": "Separadores, listas e grelhas que reciclam as células, células de definições, caixas de diálogo, folhas de ações, avisos, controlos deslizantes, Markdown, todos com o estilo de um tema.",

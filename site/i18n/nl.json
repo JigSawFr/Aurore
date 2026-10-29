@@ -47,7 +47,7 @@
   "f_layout_title": "Flexbox-opmaak",
   "f_layout_text": "Elke view wordt door Yoga geplaatst en in XML beschreven, code alleen waar het ertoe doet. <code>gap</code>, <code>flexWrap</code>, een straal per hoek.",
   "f_graphics_title": "Vectorafbeeldingen",
-  "f_graphics_text": "Hardwareversneld door nanovg: OpenGL, Direct3D 11, deko3d op de Switch, GXM op de Vita, citro3d op de New 3DS, geschaald voor een tv.",
+  "f_graphics_text": "Hardwareversneld door nanovg: OpenGL, Direct3D 12, deko3d op de Switch, GXM op de Vita, citro3d op de New 3DS, geschaald voor een tv.",
   "f_components_title": "Kant-en-klare componenten",
   "f_components_title_short": "Componenten",
   "f_components_text": "Tabbladen, lijsten en rasters die hun cellen hergebruiken, instellingscellen, dialoogvensters, actiemenu's, meldingen, schuifregelaars, Markdown, allemaal opgemaakt door een thema.",

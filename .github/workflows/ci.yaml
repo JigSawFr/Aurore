@@ -257,6 +257,8 @@ jobs:
           - { name: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
           - { name: sdl2, cmake: "-DAURORE_WINDOW=SDL2" }
           - { name: sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
+          # SDL_GPU on Metal
+          - { name: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -290,11 +292,11 @@ jobs:
       fail-fast: false
       matrix:
         # SDL3 by default; GLFW kept
-        driver: [gl, d3d11, gl-glfw, d3d11-glfw]
+        driver: [gl, gl-glfw, sdlgpu]
         include:
-          - { driver: d3d11, cmake: "-DAURORE_GRAPHICS=D3D11" }
+          # SDL_GPU on Direct3D 12
+          - { driver: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
           - { driver: gl-glfw, cmake: "-DAURORE_WINDOW=GLFW" }
-          - { driver: d3d11-glfw, cmake: "-DAURORE_GRAPHICS=D3D11 -DAURORE_WINDOW=GLFW" }
     defaults:
       run:
         shell: msys2 {0}
@@ -322,6 +324,18 @@ jobs:
             -DAURORE_LIBROMFS=ON \
             -DZLIB_USE_STATIC_LIBS=ON
           cmake --build build
+      - name: Run the demo on Direct3D 12
+        if: ${{ matrix.driver == 'sdlgpu' }}
+        run: |
+          # On the runner's software adapter (WARP): it passes if the demo
+          # still runs after a while, drawn by Direct3D 12
+          ./build/aurore_demo.exe > demo.log 2>&1 &
+          pid=$!
+          sleep 20
+          cat demo.log
+          kill -0 $pid
+          kill $pid || true
+          grep -q 'sdlgpu: direct3d12 driver' demo.log
       - name: Upload dist
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
@@ -385,6 +399,8 @@ jobs:
         include:
           - { window: sdl3, cmake: "" }
           - { window: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
+          # SDL_GPU on Mesa's software Vulkan (lavapipe)
+          - { window: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -396,6 +412,21 @@ jobs:
           sudo apt update -y
           sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols xorg-dev xvfb xdotool dbus
+      - name: Install Vulkan and glslang
+        if: ${{ matrix.window == 'sdlgpu' }}
+        run: sudo apt install -y --no-install-recommends mesa-vulkan-drivers glslang-tools ninja-build
+      - name: SDL_shadercross cache
+        if: ${{ matrix.window == 'sdlgpu' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: build/shadercross/bin
+          key: shadercross-${{ hashFiles('tools/build_shadercross.sh') }}
+      - name: Check the SDL_GPU shaders
+        if: ${{ matrix.window == 'sdlgpu' }}
+        run: |
+          # SPIR-V, and the MSL and DXIL SDL_shadercross makes from it
+          tools/build_shadercross.sh
+          python3 tools/make_sdlgpu_shaders.py --check
       - name: Compiler cache
         uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
@@ -430,6 +461,9 @@ jobs:
             sleep 3
             if kill -0 $pid 2> /dev/null; then kill $pid; wait $pid; exit 0; fi
             wait $pid; echo "demo ended on its own: $?"; exit 1'
+      - name: Drawn by SDL_GPU
+        if: ${{ matrix.window == 'sdlgpu' }}
+        run: "grep -q 'sdlgpu: vulkan driver' demo.log"
       - name: Demo log
         if: always()
         run: cat demo.log || true
