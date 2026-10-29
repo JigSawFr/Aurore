@@ -520,6 +520,16 @@ target_compile_features(aurore PUBLIC cxx_std_20)
 target_link_libraries(aurore
         PUBLIC fmt::fmt tweeny yogacore ${AURORE_PLATFORM_LIBS}
         PRIVATE ${AURORE_PRIVATE_LIBS})
+if (PLATFORM_PSV)
+    # vita-elf-create writes the module's SCE data (module info, exports,
+    # imports: about 3 KB for the demo) right after the text segment, and
+    # fails when the data segment starts there. VitaSDK's linker aligns the
+    # data segment to 64 KiB, so a text segment ending less than that before
+    # a boundary fails at random as the code grows; __sce_headroom (VitaSDK
+    # 2026.08's linker script) keeps room between the two segments. An
+    # older linker ignores the symbol.
+    target_link_options(aurore INTERFACE "LINKER:--defsym=__sce_headroom=0x4000")
+endif ()
 list(REMOVE_DUPLICATES AURORE_PUBLIC_DEFINITIONS)
 target_compile_definitions(aurore
         PUBLIC

@@ -6,69 +6,14 @@
 #include <string>
 #include <vector>
 
+#include "view/showcase.hpp"
+
 using namespace aurore::literals; // for _i18n
 
 namespace kit = cadran::kit;
 
 namespace
 {
-// A section: its kicker, then a card holding `content`.
-aurore::Box* section(aurore::Box* column, const char* icon, const std::string& title)
-{
-    aurore::Box* head = kit::kicker(icon, title);
-    head->setMarginTop(column->getChildren().empty() ? 0 : 28);
-    head->setMarginBottom(12);
-    column->addView(head);
-    aurore::Box* card = kit::card(false, false);
-    card->setAxis(aurore::Axis::COLUMN);
-    card->setPadding(20, 22, 20, 22);
-    column->addView(card);
-    return card;
-}
-
-// A row of the cards above: their figure, its caption, a pill.
-aurore::Box* figure(const std::string& value, const std::string& caption, const std::string& state, const char* dot)
-{
-    aurore::Box* card = kit::top_card(true);
-    card->setAxis(aurore::Axis::COLUMN);
-    card->setPadding(18, 20, 18, 20);
-    auto* digits = new CadranDigits();
-    digits->setText(value);
-    digits->setFontSize(44);
-    digits->setTextColor(kit::color("cadran/text"));
-    digits->setHeight(54);
-    card->addView(digits);
-    aurore::Label* label = kit::label(caption, kit::TEXT_NOTE, "cadran/text2");
-    label->setMarginBottom(12);
-    card->addView(label);
-    aurore::Box* pill = kit::pill(state, dot);
-    pill->setAlignSelf(aurore::AlignSelf::FLEX_START);
-    card->addView(pill);
-    return card;
-}
-
-// A button of the dialogs' card: its text, what it opens.
-aurore::Button* action(const std::string& text, std::function<void()> run, cadran::Emphasis emphasis)
-{
-    auto* button = new aurore::Button();
-    button->setText(text);
-    button->setMarginRight(12);
-    button->setMarginBottom(12);
-    button->registerClickAction([run](aurore::View*)
-        {
-        run();
-        return true; });
-    cadran::style_button(button, emphasis);
-    kit::fit_button(button);
-    return button;
-}
-
-const char* const ICONS[] = { "today", "timer", "activity", "shield", "lock", "globe", "settings", "tools",
-    "info", "eye", "check", "moon", "sun", "list", "download", "key",
-    "phone", "trash", "server", "refresh", "history", "save", "upload", "home",
-    "bolt", "sparkle", "bell", "code", "heart", "folder", "file", "flag",
-    "gamepad", "calendar", "alert", "pencil", "tag", "user", "tv", "chip" };
-
 const char* const MARKDOWN = "## Markdown\n"
                              "Cadran draws **headings**, *emphasis*, `code`, lists and tables, "
                              "with the emoji they open on.\n\n"
@@ -83,82 +28,56 @@ const char* const MARKDOWN = "## Markdown\n"
                              "| Cards | `cadran::kit` |\n";
 } // namespace
 
-CadranTab::CadranTab()
+namespace cadran_pieces
 {
-    auto* column       = new aurore::Box(aurore::Axis::COLUMN);
-    const bool compact = aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT;
-    // The tab's margins (@style/aurore/tab_frame/content_padding_*)
-    aurore::Style style = aurore::getStyle();
-    const float sides   = style["aurore/tab_frame/content_padding_sides"];
-    const float top     = style["aurore/tab_frame/content_padding_top_bottom"];
-    column->setPadding(top, sides, sides, sides);
-    this->setContentView(column);
 
-    // The figures, as a dashboard's top cards.
-    aurore::Box* head = kit::kicker("today", "demo/cadran/figures"_i18n);
-    head->setMarginBottom(aurore::dp(12));
-    column->addView(head);
-    // In a row, or one under the other on a narrow screen
-    auto* figures = new aurore::Box(compact ? aurore::Axis::COLUMN : aurore::Axis::ROW);
-    figures->addView(figure("2:45", "demo/cadran/played"_i18n, "demo/cadran/on_track"_i18n, "cadran/teal"));
-    figures->addView(figure("12", "demo/cadran/games"_i18n, "demo/cadran/updates"_i18n, "cadran/amber"));
-    figures->addView(figure("98%", "demo/cadran/storage"_i18n, "demo/cadran/almost_full"_i18n, "cadran/coral"));
-    // A column's cards take its width (in a row, they share it)
-    if (compact)
-        for (aurore::View* card : figures->getChildren())
-        {
-            card->setGrow(0);
-            card->setWidthPercentage(100);
-        }
-    for (size_t i = 0; i + 1 < figures->getChildren().size(); i++)
-    {
-        if (compact)
-            figures->getChildren()[i]->setMarginBottom(aurore::dp(12));
-        else
-            figures->getChildren()[i]->setMarginRight(aurore::dp(16));
-    }
-    column->addView(figures);
-
-    // Chips and a bar.
-    aurore::Box* chips = section(column, "timer", "demo/cadran/chips"_i18n);
-    auto* row          = new aurore::Box(aurore::Axis::ROW);
-    for (const char* text : { "15 min", "30 min", "1 h", "2 h" })
-    {
-        aurore::Box* chip = kit::chip(text);
-        chip->setMarginRight(12);
-        row->addView(chip);
-    }
-    chips->addView(row);
-    auto* bar = new kit::Bar();
-    bar->setMarginTop(20);
-    bar->set(0.62f);
-    chips->addView(bar);
-
-    // Dialogs, sheets and toasts.
-    aurore::Box* dialogs = section(column, "sparkle", "demo/cadran/dialogs"_i18n);
-    auto* buttons        = new aurore::Box(aurore::Axis::ROW);
-    kit::wrap(buttons);
-    const auto E = cadran::Emphasis::NONE;
-    buttons->addView(action("demo/cadran/confirm"_i18n, []
+aurore::Box* dialogs()
+{
+    aurore::Box* buttons = show::row(true, 12);
+    buttons->addView(show::button("demo/cadran/confirm"_i18n, []
         { ui::confirm("demo/cadran/confirm_text"_i18n, "demo/cadran/confirm"_i18n,
               []
-              { ui::notify("demo/cadran/done"_i18n, ui::Toast::Done); }); }, cadran::Emphasis::PRIMARY));
-    buttons->addView(action("demo/cadran/delete"_i18n, []
+              { ui::notify("demo/cadran/done"_i18n, ui::Toast::Done); }); }, true));
+    aurore::Button* remove = show::button("demo/cadran/delete"_i18n, []
         { ui::confirm_danger("demo/cadran/delete_text"_i18n, "demo/cadran/delete"_i18n,
               []
-              { ui::notify("demo/cadran/deleted"_i18n, ui::Toast::Done); }); }, cadran::Emphasis::DANGER));
-    buttons->addView(action("demo/cadran/sheet"_i18n, []
+              { ui::notify("demo/cadran/deleted"_i18n, ui::Toast::Done); }); });
+    cadran::style_button(remove, cadran::Emphasis::DANGER);
+    buttons->addView(remove);
+    buttons->addView(show::button("demo/cadran/sheet"_i18n, []
         { ui::pick_actions("demo/cadran/sheet"_i18n,
               { ui::Choice("demo/cadran/share"_i18n, []
                     { ui::notify("demo/cadran/shared"_i18n); }, "upload"),
                   ui::Choice("demo/cadran/favourite"_i18n, [] {}, "heart").switched(true), ui::Choice("demo/cadran/rename"_i18n, [] {}, "pencil", "Aurore"), ui::Choice("demo/cadran/delete"_i18n, [] {}, "trash", "", "", ui::Choice::Tone::DANGER) },
-              "demo/cadran/sheet_subtitle"_i18n); }, E));
-    buttons->addView(action("demo/cadran/pick"_i18n, []
+              "demo/cadran/sheet_subtitle"_i18n); }));
+    buttons->addView(show::button("demo/cadran/pick"_i18n, []
         {
         static int chosen = 1;
         ui::pick("demo/cadran/pick"_i18n, { "15 min", "30 min", "1 h", "2 h" }, chosen,
-                 [](int i) { chosen = i; }, true, {}, { "timer", "timer", "timer", "timer" }); }, E));
-    buttons->addView(action("demo/cadran/checklist"_i18n, []
+                 [](int i) { chosen = i; }, true, {}, { "timer", "timer", "timer", "timer" }); }));
+    buttons->addView(show::button("demo/cadran/tiles"_i18n, []
+        {
+        static int chosen = 0;
+        ui::pick_grid("demo/cadran/tiles"_i18n,
+            { "demo/tabs/home"_i18n, "demo/tabs/library"_i18n, "demo/tabs/themes"_i18n, "demo/tabs/input"_i18n },
+            { "home", "shelf", "palette", "gamepad" }, chosen, [](int i) { chosen = i; }); }));
+    buttons->addView(show::button("demo/cadran/marked"_i18n, []
+        {
+        static std::vector<bool> marks = { true, false, true, false };
+        static std::function<void(int)> open;
+        open = [](int focus)
+        {
+            ui::pick_marked("demo/cadran/marked"_i18n,
+                { "demo/library/genres/adventure"_i18n, "demo/library/genres/racing"_i18n,
+                  "demo/library/genres/puzzle"_i18n, "demo/library/genres/rhythm"_i18n },
+                marks, focus, [](int i)
+                {
+                    marks[i] = !marks[i];
+                    open(i);
+                });
+        };
+        open(0); }));
+    buttons->addView(show::button("demo/cadran/checklist"_i18n, []
         {
         aurore::Box* body = ui::checklist_body("demo/cadran/checklist"_i18n,
                                              { { ui::Check::Ok, "demo/cadran/check_ok"_i18n },
@@ -168,43 +87,73 @@ CadranTab::CadranTab()
                                              "demo/cadran/check_note"_i18n);
         aurore::Dialog* dialog = ui::box_dialog(body);
         dialog->addButton("hints/ok"_i18n, [] {});
-        dialog->open(); }, E));
-    buttons->addView(action("demo/cadran/hold"_i18n, []
+        dialog->open(); }));
+    buttons->addView(show::button("demo/cadran/hold"_i18n, []
         { ui::hold_confirm(cadran::dialog_body("demo/cadran/hold_text"_i18n), "demo/cadran/hold"_i18n,
               []
-              { ui::notify("demo/cadran/done"_i18n, ui::Toast::Done); }); }, E));
-    buttons->addView(action("demo/cadran/qr"_i18n, []
-        { ui::qr_dialog("demo/cadran/qr_text"_i18n, "https://github.com/JigSawFr/aurore"); }, E));
-    buttons->addView(action("demo/cadran/toast"_i18n, []
-        { ui::notify("demo/cadran/toast_text"_i18n); }, E));
-    buttons->addView(action("demo/cadran/refused"_i18n, []
-        { ui::refuse("demo/cadran/refused_text"_i18n); }, E));
-    buttons->addView(action("cadran/quick/title_text"_i18n, []
-        { ui::quick_settings(); }, E));
-    buttons->addView(action("cadran/prefs/rail"_i18n, []
-        { ui::pick_rail(); }, E));
-    buttons->addView(action("cadran/prefs/density"_i18n, []
-        { ui::pick_density(); }, E));
-    dialogs->addView(buttons);
-
-    // The icons.
-    aurore::Box* icons = section(column, "eye", "demo/cadran/icons"_i18n);
-    auto* grid         = new aurore::Box(aurore::Axis::ROW);
-    kit::wrap(grid);
-    for (const char* name : ICONS)
-    {
-        CadranIcon* icon = kit::icon(name, 30, "cadran/text2");
-        icon->setMargins(8, 12, 8, 12);
-        grid->addView(icon);
-    }
-    icons->addView(grid);
-
-    // Markdown.
-    aurore::Box* text = section(column, "file", "demo/cadran/markdown"_i18n);
-    markdown_view::fill(text, markdown::parse(MARKDOWN));
+              { ui::notify("demo/cadran/done"_i18n, ui::Toast::Done); }); }));
+    buttons->addView(show::button("demo/cadran/wait"_i18n, []
+        {
+        // A spinner while something is under way, closed after a while
+        aurore::Dialog* dialog = ui::box_dialog(cadran::wait_body("demo/cadran/wait_text"_i18n));
+        ui::add_cancel(dialog, [] {});
+        dialog->open();
+        aurore::delay(2500, [dialog]
+            {
+            if (aurore::Application::getActivitiesStack().back()->getContentView() == dialog)
+                dialog->close();
+            ui::notify("demo/cadran/done"_i18n, ui::Toast::Done); }); }));
+    buttons->addView(show::button("demo/cadran/notice"_i18n, []
+        { ui::notice("sparkle", ui::Check::Ok, "demo/cadran/notice_title"_i18n, "demo/cadran/notice_text"_i18n); }));
+    buttons->addView(show::button("demo/cadran/qr"_i18n, []
+        { ui::qr_dialog("demo/cadran/qr_text"_i18n, "https://aurore.boreale.dev/"); }));
+    buttons->addView(show::button("demo/cadran/keyboard"_i18n, []
+        { ui::prompt_text("demo/cadran/keyboard_title"_i18n, "Aurore", 32, [](std::string text)
+              { ui::notify(aurore::getStr("demo/cadran/typed", text)); }); }));
+    buttons->addView(show::button("demo/cadran/quick"_i18n, []
+        { ui::quick_settings(); }));
+    buttons->addView(show::button("cadran/prefs/rail"_i18n, []
+        { ui::pick_rail(); }));
+    buttons->addView(show::button("cadran/prefs/density"_i18n, []
+        { ui::pick_density(); }));
+    return buttons;
 }
 
-aurore::View* CadranTab::create()
+aurore::Box* toasts()
 {
-    return new CadranTab();
+    aurore::Box* buttons = show::row(true, 12);
+    buttons->addView(show::button("demo/cadran/toast"_i18n, []
+        { ui::notify("demo/cadran/toast_text"_i18n); }));
+    buttons->addView(show::button("demo/cadran/toast_done"_i18n, []
+        { ui::notify("demo/cadran/done"_i18n, ui::Toast::Done); }));
+    buttons->addView(show::button("demo/cadran/refused"_i18n, []
+        { ui::refuse("demo/cadran/refused_text"_i18n); }));
+    buttons->addView(show::button("demo/cadran/error"_i18n, []
+        { ui::error("demo/cadran/error_what"_i18n, "demo/cadran/error_why"_i18n); }));
+    buttons->addView(show::button("demo/cadran/notification"_i18n, []
+        { aurore::Application::notify("demo/cadran/notification_text"_i18n); }));
+    return buttons;
 }
+
+aurore::Box* icons()
+{
+    aurore::Box* grid = show::row(true, 0);
+    for (const std::string& name : CadranIcon::names())
+    {
+        auto* cell = new aurore::Box(aurore::Axis::COLUMN);
+        cell->setWidth(52);
+        cell->setHeight(52);
+        cell->setAlignItems(aurore::AlignItems::CENTER);
+        cell->setJustifyContent(aurore::JustifyContent::CENTER);
+        cell->addView(kit::icon(name.c_str(), 28, "cadran/text2"));
+        grid->addView(cell);
+    }
+    return grid;
+}
+
+void markdown(aurore::Box* box)
+{
+    markdown_view::fill(box, markdown::parse(MARKDOWN));
+}
+
+} // namespace cadran_pieces

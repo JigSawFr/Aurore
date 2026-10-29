@@ -1,16 +1,19 @@
-// CadranTab — the demo's first tab: Cadran's pieces (cards, pills, chips,
-// digits, a bar, icons), its dialogs, sheets and toasts, and its Markdown,
-// each built in code.
+// The demo's Cadran pieces: the buttons that open Cadran's dialogs, sheets
+// and toasts, its icons and a Markdown text, each built in code for the
+// Components tab (tab/components_tab.cpp).
 // Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore.hpp>
-#include <aurore/cadran/view/scroll_view.hpp>
 
-class CadranTab : public ScrollView
+namespace cadran_pieces
 {
-  public:
-    CadranTab();
-
-    static aurore::View* create();
-};
+/// A row of buttons, each opening one of Cadran's dialogs or sheets.
+aurore::Box* dialogs();
+/// A row of buttons, each posting a toast, a notification or an error.
+aurore::Box* toasts();
+/// Every icon of Cadran, in rows.
+aurore::Box* icons();
+/// A Markdown text as Cadran lays it out, added to `box`.
+void markdown(aurore::Box* box);
+} // namespace cadran_pieces

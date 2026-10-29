@@ -56,9 +56,9 @@ Used from the system when there, not bundled: D-Bus (Linux), fontconfig
 
 PromptFont by Shinmera (Yukari Hafner), available at https://shinmera.com/promptfont.
 
-The demo's other pictures (`resources/img/gallery`, `resources/img/tiles.png`,
-the themes' pictures) are drawn by the `tools/make_*.py` scripts of the
-source, and are under its licence.
+The demo's other pictures (`resources/img/tiles.png`, the themes' pictures)
+are drawn by the `tools/make_*.py` scripts of the source, and are under its
+licence.
 
 ## Licence texts
 

@@ -1,0 +1,96 @@
+<!-- The Motion tab's state styles (docs/styles.md): each box changes how it
+     looks while it has the focus, is pressed or under the mouse, the
+     changes animated by its transition. XML only, no code. -->
+<aurore:Box
+    axis="row"
+    width="auto"
+    height="auto"
+    gap="16">
+
+    <!-- focus: and pressed:, each with its transition -->
+    <aurore:Box
+        focusable="true"
+        hideHighlightBackground="true"
+        highlightCornerRadius="20"
+        grow="1"
+        width="0"
+        height="132"
+        cornerRadius="20"
+        borderThickness="1"
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor="@theme/cadran/surf"
+        borderColor="@theme/cadran/line"
+        focus:backgroundColor="@theme/cadran/teal_fill"
+        pressed:scale="0.94"
+        transition="backgroundColor 220ms ease-out, scale 120ms ease-out"
+        accessibilityRole="button"
+        accessibilityLabel="@i18n/demo/styles/fade">
+        <aurore:Label
+            text="@i18n/demo/styles/fade"
+            fontSize="18"
+            horizontalAlign="center"
+            textColor="@theme/cadran/text"
+            focus:textColor="@theme/cadran/navy"
+            transition="textColor 220ms ease-out"
+            marginLeft="16"
+            marginRight="16" />
+    </aurore:Box>
+
+    <!-- several properties at once, with an overshoot -->
+    <aurore:Box
+        focusable="true"
+        hideHighlight="true"
+        grow="1"
+        width="0"
+        height="132"
+        cornerRadius="6"
+        borderThickness="3"
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor="@theme/cadran/surf"
+        borderColor="@theme/cadran/line"
+        focus:borderColor="@theme/cadran/teal"
+        focus:cornerRadius="40"
+        transition="all 420ms backOut"
+        accessibilityRole="button"
+        accessibilityLabel="@i18n/demo/styles/corners">
+        <aurore:Label
+            text="@i18n/demo/styles/corners"
+            fontSize="18"
+            horizontalAlign="center"
+            textColor="@theme/cadran/text"
+            marginLeft="16"
+            marginRight="16" />
+    </aurore:Box>
+
+    <!-- grows a little and lights up -->
+    <aurore:Box
+        focusable="true"
+        hideHighlightBackground="true"
+        highlightCornerRadius="20"
+        grow="1"
+        width="0"
+        height="132"
+        cornerRadius="20"
+        borderThickness="1"
+        justifyContent="center"
+        alignItems="center"
+        backgroundColor="@theme/cadran/surf"
+        borderColor="@theme/cadran/line"
+        focus:scale="1.06"
+        focus:backgroundColor="@theme/cadran/surf2"
+        hover:borderColor="@theme/cadran/teal"
+        transition="scale 360ms elasticOut, backgroundColor 200ms, borderColor 150ms"
+        accessibilityRole="button"
+        accessibilityLabel="@i18n/demo/styles/grow">
+        <aurore:Label
+            text="@i18n/demo/styles/grow"
+            fontSize="18"
+            horizontalAlign="center"
+            textColor="@theme/cadran/text"
+            marginLeft="16"
+            marginRight="16" />
+    </aurore:Box>
+
+</aurore:Box>

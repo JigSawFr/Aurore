@@ -24,16 +24,17 @@
 #include <aurore/cadran.hpp>
 
 #include "activity/main_activity.hpp"
-#include "tab/cadran_tab.hpp"
+#include "tab/about_tab.hpp"
 #include "tab/components_tab.hpp"
-#include "tab/grid_tab.hpp"
-#include "tab/recycling_list_tab.hpp"
-#include "tab/settings_tab.hpp"
-#include "tab/styles_tab.hpp"
-#include "tab/text_test_tab.hpp"
+#include "tab/developers_tab.hpp"
+#include "tab/home_tab.hpp"
+#include "tab/input_tab.hpp"
+#include "tab/library_tab.hpp"
+#include "tab/motion_tab.hpp"
+#include "tab/text_tab.hpp"
+#include "tab/themes_tab.hpp"
 #include "tab/transform_tab.hpp"
-#include "view/captioned_image.hpp"
-#include "view/gem_view.hpp"
+#include "view/aurora_view.hpp"
 
 namespace
 {
@@ -57,8 +58,8 @@ void installCadranHooks()
     { return std::string("@res/themes"); };
     h.rail_icons = []()
     {
-        return std::vector<std::string> { "sparkle", "list", "lines", "refresh", "pencil", "contrast", "language", "", "activity", "gamepad",
-            "shelf", "", "settings", "", "info" };
+        return std::vector<std::string> { "home", "shelf", "sparkle", "bolt", "language", "palette", "gamepad", "", "code", "",
+            "info" };
     };
     h.shown_screen = []()
     { return "tab/" + std::to_string(shownTab); };
@@ -89,6 +90,52 @@ void installCadranHooks()
 namespace demo
 {
 
+bool isSeparator(int position)
+{
+    return position == 7 || position == 9;
+}
+
+const char* tabName(int position)
+{
+    switch (position)
+    {
+        case TAB_HOME:
+            return "home";
+        case TAB_LIBRARY:
+            return "library";
+        case TAB_COMPONENTS:
+            return "components";
+        case TAB_MOTION:
+            return "motion";
+        case TAB_TEXT:
+            return "text";
+        case TAB_THEMES:
+            return "themes";
+        case TAB_INPUT:
+            return "input";
+        case TAB_DEVELOPERS:
+            return "developers";
+        case TAB_ABOUT:
+            return "about";
+        default:
+            return "";
+    }
+}
+
+void openTab(aurore::View* from, int position)
+{
+    ui::go_to_tab(from, position);
+}
+
+void pushScreen(aurore::View* content, const std::string& title, bool dressed)
+{
+    if (dressed)
+        content->setId("cadran_list"); // Cadran leaves its lines as they are
+    auto* frame = new aurore::AppletFrame(content);
+    frame->setTitle(title);
+    aurore::Application::pushActivity(new aurore::Activity(frame), aurore::TransitionAnimation::FADE);
+}
+
 void installHooks()
 {
     installCadranHooks();
@@ -99,35 +146,21 @@ void installHooks()
 
 void registerViews()
 {
-    // Custom views (including tabs, which are views)
-    aurore::Application::registerXMLView("CaptionedImage", CaptionedImage::create);
-    aurore::Application::registerXMLView("CadranTab", CadranTab::create);
-    aurore::Application::registerXMLView("RecyclingListTab", RecyclingListTab::create);
+    // The demo's views, for its XML (tabs are views too)
+    aurore::Application::registerXMLView("HomeTab", HomeTab::create);
+    aurore::Application::registerXMLView("LibraryTab", LibraryTab::create);
     aurore::Application::registerXMLView("ComponentsTab", ComponentsTab::create);
-    aurore::Application::registerXMLView("GridTab", GridTab::create);
-    aurore::Application::registerXMLView("TransformTab", TransformTab::create);
+    aurore::Application::registerXMLView("MotionTab", MotionTab::create);
+    aurore::Application::registerXMLView("TextTab", TextTab::create);
+    aurore::Application::registerXMLView("ThemesTab", ThemesTab::create);
+    aurore::Application::registerXMLView("InputTab", InputTab::create);
+    aurore::Application::registerXMLView("DevelopersTab", DevelopersTab::create);
+    aurore::Application::registerXMLView("AboutTab", AboutTab::create);
+    aurore::Application::registerXMLView("AuroraView", AuroraView::create);
     aurore::Application::registerXMLView("TransformBox", TransformBox::create);
-    aurore::Application::registerXMLView("GemView", GemView::create);
-    aurore::Application::registerXMLView("SettingsTab", SettingsTab::create);
-    aurore::Application::registerXMLView("TextTestTab", TextTestTab::create);
-    aurore::Application::registerXMLView("StylesTab", StylesTab::create);
-
-    // Add custom values to the theme
-    aurore::Theme::getLightTheme().addColor("captioned_image/caption", nvgRGB(2, 176, 183));
-    aurore::Theme::getDarkTheme().addColor("captioned_image/caption", nvgRGB(51, 186, 227));
-    const std::pair<const char*, NVGcolor> swatches[] = { { "demo/swatch/teal", nvgRGB(46, 196, 182) },
-        { "demo/swatch/orange", nvgRGB(255, 159, 28) }, { "demo/swatch/red", nvgRGB(231, 29, 54) },
-        { "demo/swatch/blue", nvgRGB(58, 123, 213) } };
-    for (const auto& [key, color] : swatches)
-    {
-        aurore::Theme::getLightTheme().addColor(key, color);
-        aurore::Theme::getDarkTheme().addColor(key, color);
-    }
-
-    // Add custom values to the style
-    aurore::getStyle().addLength("about/padding_top_bottom", 50);
-    aurore::getStyle().addLength("about/padding_sides", 75);
-    aurore::getStyle().addLength("about/description_margin", 50);
+    aurore::Application::registerXMLView("ScrollView", ScrollView::create);
+    aurore::Application::registerXMLView("CadranIcon", CadranIcon::create);
+    aurore::Application::registerXMLView("CadranDigits", CadranDigits::create);
 }
 
 } // namespace demo
