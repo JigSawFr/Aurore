@@ -257,6 +257,8 @@ jobs:
           - { name: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
           - { name: sdl2, cmake: "-DAURORE_WINDOW=SDL2" }
           - { name: sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
+          # SDL_GPU on Metal
+          - { name: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -385,6 +387,8 @@ jobs:
         include:
           - { window: sdl3, cmake: "" }
           - { window: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
+          # SDL_GPU on Mesa's software Vulkan (lavapipe)
+          - { window: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -396,6 +400,12 @@ jobs:
           sudo apt update -y
           sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
             libwayland-dev wayland-protocols xorg-dev xvfb xdotool dbus
+      - name: Install Vulkan and the shader tools
+        if: ${{ matrix.window == 'sdlgpu' }}
+        run: sudo apt install -y --no-install-recommends mesa-vulkan-drivers glslang-tools spirv-cross
+      - name: Check the SDL_GPU shaders
+        if: ${{ matrix.window == 'sdlgpu' }}
+        run: python3 tools/make_sdlgpu_shaders.py --check
       - name: Compiler cache
         uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
@@ -430,6 +440,9 @@ jobs:
             sleep 3
             if kill -0 $pid 2> /dev/null; then kill $pid; wait $pid; exit 0; fi
             wait $pid; echo "demo ended on its own: $?"; exit 1'
+      - name: Drawn by SDL_GPU
+        if: ${{ matrix.window == 'sdlgpu' }}
+        run: "grep -q 'sdlgpu: vulkan driver' demo.log"
       - name: Demo log
         if: always()
         run: cat demo.log || true

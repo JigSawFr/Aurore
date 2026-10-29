@@ -6,7 +6,7 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 
 | Platform | `AURORE_PLATFORM` | Window and input (`AURORE_WINDOW`) | Drawing (`AURORE_GRAPHICS`) | Resources |
 | --- | --- | --- | --- | --- |
-| Linux, macOS, Windows | `DESKTOP` | SDL3 (default), GLFW or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
+| Linux, macOS, Windows | `DESKTOP` | SDL3 (default), GLFW or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`); SDL_GPU, a prototype (`SDLGPU`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
 | Nintendo Switch | `SWITCH` | GLFW (default) or SDL2 | deko3d (`DEKO3D`) or OpenGL 4.3 | romfs, in the `.nro` |
 | PS Vita | `PSV` | SDL2, or the system's | GXM (`GXM`) or OpenGL ES 2 | in the `.vpk` |
 | PS4 | `PS4` | SDL2 | OpenGL ES 2 | in the `.pkg` |
@@ -173,6 +173,9 @@ The demo shows on the desktop how it looks on a console: its screen at the conso
 The Home tab shows the consoles (*On every screen*, `demo::simulation::drawPreview`) and the Developers tab lists them (*Simulated platform*): choosing one while the demo runs shows it there, the screens made again for it. The consoles are Boréale's, drawn as on its sites (PlayGuard's `site.css`, `.device` and its `DEVICE_GRIPS`, the reference): a body in the night's blues with a glow of aurora under it, dark controls, the sticks' caps ringed in teal; plain shapes, without a maker's logo, name or colours. The touches and the mouse are read on the screen only, and the window is sized for the console; the New 3DS's top screen shows the app's name and the time until an activity can give a view of its own. The screen is drawn at the window's resolution, not the console's pixels.
 
 An app does the same with `aurore::ScreenFrame` (`aurore/core/screen_frame.hpp`) and `Application::setScreenFrame()`: the frame says where the screen goes in the window and draws itself around it, the app is laid out and drawn in the screen, and its input read there. `tests/demo_tests.cpp` (`simulated_consoles`) checks each console against its picture in `tests/references/`.
+## SDL_GPU on the desktop (prototype)
+
+`-DAURORE_GRAPHICS=SDLGPU` draws with SDL3's GPU API instead of OpenGL: Vulkan on Linux and Windows, Metal on macOS. It needs the SDL3 window (the default). nanovg's renderer for it is `nanovg_sdlgpu.h`, a port of the OpenGL 3 one with the same shaders and passes; `driver/sdlgpu.cpp` draws each frame into a texture of the window's size, then onto the window, and reads it back for the screenshots. Its shaders are compiled ahead, into `nvg_shader/sdlgpu/sdlgpu_shaders.h`: SPIR-V and MSL, by `tools/make_sdlgpu_shaders.py` (glslang and spirv-cross; CI checks the header is up to date). Not there yet: Direct3D 12 (it needs DXIL shaders, from dxc), mobile, and the test harness, which stays on OpenGL. `SDL_GPU_DRIVER=vulkan` or `metal` picks the driver, `AURORE_GPU_DEBUG=1` turns its validation on. CI runs the demo on Mesa's software Vulkan (lavapipe) and builds it on macOS.
 
 ## Options for every platform
 

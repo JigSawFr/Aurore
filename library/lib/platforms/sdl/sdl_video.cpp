@@ -57,6 +57,9 @@ extern "C"
 
 #include <aurore/platforms/driver/d3d11.hpp>
 std::unique_ptr<aurore::D3D11Context> D3D11_CONTEXT;
+#elif defined(AURORE_USE_SDLGPU)
+#include <aurore/platforms/driver/sdlgpu.hpp>
+static std::unique_ptr<aurore::SDLGPUContext> SDLGPU_CONTEXT;
 #endif
 
 namespace aurore
@@ -177,6 +180,11 @@ static void sdlWindowFramebufferSizeCallback(SDL_Window* window, int width, int 
     fHeight     = height;
     scaleFactor = D3D11_CONTEXT->getScaleFactor();
     D3D11_CONTEXT->onFramebufferSize(fWidth, fHeight);
+#elif defined(AURORE_USE_SDLGPU)
+    sdlDrawableSize(window, &fWidth, &fHeight);
+    scaleFactor = fWidth * 1.0 / width;
+    if (SDLGPU_CONTEXT)
+        SDLGPU_CONTEXT->resize(fWidth, fHeight);
 #endif
 
     Application::onWindowResized(fWidth, fHeight);
@@ -497,6 +505,9 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     Logger::info("sdl: USE_D3D11");
     D3D11_CONTEXT    = std::make_unique<D3D11Context>(this->window, windowWidth, windowHeight);
     this->nvgContext = nvgCreateD3D11(D3D11_CONTEXT->getDevice(), NVG_ANTIALIAS | NVG_STENCIL_STROKES);
+#elif defined(AURORE_USE_SDLGPU)
+    SDLGPU_CONTEXT   = std::make_unique<SDLGPUContext>(this->window);
+    this->nvgContext = SDLGPU_CONTEXT->getNVGContext();
 #endif
     if (!this->nvgContext)
     {
@@ -521,6 +532,11 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     fHeight     = height;
     Application::setWindowSize(fWidth, fHeight);
     D3D11_CONTEXT->onFramebufferSize(fWidth, fHeight);
+#elif defined(AURORE_USE_SDLGPU)
+    sdlDrawableSize(window, &fWidth, &fHeight);
+    scaleFactor = fWidth * 1.0 / width;
+    Application::setWindowSize(fWidth, fHeight);
+    SDLGPU_CONTEXT->resize(fWidth, fHeight);
 #endif
 
     int xPos, yPos;
@@ -540,6 +556,8 @@ void SDLVideoContext::beginFrame()
 {
 #if defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->beginFrame();
+#elif defined(AURORE_USE_SDLGPU)
+    SDLGPU_CONTEXT->beginFrame();
 #endif
 }
 
@@ -549,6 +567,8 @@ void SDLVideoContext::endFrame()
     SDL_GL_SwapWindow(this->window);
 #elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->endFrame();
+#elif defined(AURORE_USE_SDLGPU)
+    SDLGPU_CONTEXT->endFrame();
 #endif
 }
 
@@ -559,6 +579,8 @@ void SDLVideoContext::setSwapInterval(int interval)
     SDL_GL_SetSwapInterval(interval);
 #elif defined(AURORE_USE_D3D11)
     D3D11_CONTEXT->setSwapInterval(interval);
+#elif defined(AURORE_USE_SDLGPU)
+    SDLGPU_CONTEXT->setSwapInterval(interval);
 #endif
 }
 
@@ -578,6 +600,8 @@ void SDLVideoContext::clear(NVGcolor color)
         color.g,
         color.b,
         color.a));
+#elif defined(AURORE_USE_SDLGPU)
+    SDLGPU_CONTEXT->clear(color);
 #endif
 }
 
@@ -603,6 +627,9 @@ bool SDLVideoContext::readPixels(std::vector<unsigned char>* rgba, int* width, i
     *width  = (int)Application::framebufferWidth;
     *height = (int)Application::framebufferHeight;
     return glReadPixelsTopDown(*width, *height, rgba);
+#elif defined(AURORE_USE_SDLGPU)
+    // Top row first already
+    return SDLGPU_CONTEXT->readPixels(rgba, width, height);
 #else
     return false;
 #endif
@@ -629,6 +656,10 @@ SDLVideoContext::~SDLVideoContext()
             D3D11_CONTEXT = nullptr;
 #endif
         }
+#ifdef AURORE_USE_SDLGPU
+        // nanovg's renderer with it
+        SDLGPU_CONTEXT = nullptr;
+#endif
     }
     catch (...)
     {
