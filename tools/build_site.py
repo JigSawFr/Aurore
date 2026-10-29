@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Builds Aurore's website (site/README.md) into <out-dir>: a home page, the
 documentation (docs/*.md), the changelog (CHANGELOG.md) and the page not
-found, in English at the root and in French in /fr/.
+found, in the consoles' 15 languages (LANGUAGES): English at the root, the
+others each in its folder (/fr/, /de/, /zh-hant/…).
 
-- The texts around the content are site/i18n/<language>.json (en.json the
-  reference; a key missing elsewhere is an error, tools/check_site.py says
-  which). They are HTML: `{{repo}}` in them is the repository's address.
-- The documentation is the Markdown of docs/, in English: the French site
-  shows the same pages under its own header, saying so. Links between the
+- The texts around the content are site/i18n/<language>.json (en-US.json
+  the reference; a key missing elsewhere is an error, tools/check_site.py
+  says which). They are HTML: `{{repo}}` in them is the repository's address.
+- The documentation is the Markdown of docs/, in English: every other
+  language shows the same pages under its own header, saying so. Links between the
   docs and to the README become the site's pages, any other file of the
   repository links to GitHub, and GitHub's `> [!NOTE]` blocks become callouts.
   Each page is published in Markdown next to it too, listed in llms.txt.
@@ -20,7 +21,7 @@ found, in English at the root and in French in /fr/.
   <build>/web/): it is published in /demo/, and the pages offer to try it.
   Without it, they do not.
 - SITE_URL is the site's address (https://aurore.boreale.dev/ by default), for the links that must be absolute: the canonical page, the
-  other language, the preview image, the sitemap. SITE_NOINDEX=1 keeps a
+  other languages, the preview image, the sitemap. SITE_NOINDEX=1 keeps a
   preview out of search engines.
 
 Usage: tools/build_site.py <out-dir> [repo-root]          (needs Python-Markdown)
@@ -50,8 +51,35 @@ UMAMI_WEBSITE = "6410ffdd-ae2e-4ddb-8e18-0a77e9fa374e"
 UMAMI_DOMAIN = urlsplit(SITE_URL).hostname
 API_DIR = os.environ.get("SITE_API", "")
 DEMO_DIR = os.environ.get("SITE_DEMO", "")
-# (code, folder, name in its own words, Open Graph's locale): English at the root.
-LANGUAGES = [("en", "", "English", "en_US"), ("fr", "fr", "Français", "fr_FR")]
+# The consoles' languages, Aurore's own (resources/i18n/): the catalog's code
+# (site/i18n/<code>.json), the site's folder ('' for the root), the name in
+# its own words, the html lang. PlayGuard's and PlayShelf's sites have the same.
+LANGUAGES = [
+    ("en-US", "", "English", "en"),
+    ("fr", "fr", "Français", "fr"),
+    ("fr-CA", "fr-ca", "Français (Canada)", "fr-CA"),
+    ("de", "de", "Deutsch", "de"),
+    ("es", "es", "Español", "es"),
+    ("es-419", "es-419", "Español (Latinoamérica)", "es-419"),
+    ("it", "it", "Italiano", "it"),
+    ("nl", "nl", "Nederlands", "nl"),
+    ("pt", "pt", "Português", "pt-PT"),
+    ("pt-BR", "pt-br", "Português (Brasil)", "pt-BR"),
+    ("ru", "ru", "Русский", "ru"),
+    ("ja", "ja", "日本語", "ja"),
+    ("ko", "ko", "한국어", "ko"),
+    ("zh-Hans", "zh-hans", "简体中文", "zh-Hans"),
+    ("zh-Hant", "zh-hant", "繁體中文", "zh-Hant"),
+]
+# Each language's flag in the language menu (fonts/twemoji-flags.woff2 draws
+# them the same everywhere, Windows included): the country of the console's
+# language, Mexico for Latin America's Spanish, Taiwan for Traditional Chinese.
+FLAGS = {"en-US": "US", "fr": "FR", "fr-CA": "CA", "de": "DE", "es": "ES", "es-419": "MX", "it": "IT", "nl": "NL",
+         "pt": "PT", "pt-BR": "BR", "ru": "RU", "ja": "JP", "ko": "KR", "zh-Hans": "CN", "zh-Hant": "TW"}
+# Open Graph's name of each language.
+OG_LOCALES = {"en-US": "en_US", "fr": "fr_FR", "fr-CA": "fr_CA", "de": "de_DE", "es": "es_ES", "es-419": "es_LA",
+              "it": "it_IT", "nl": "nl_NL", "pt": "pt_PT", "pt-BR": "pt_BR", "ru": "ru_RU", "ja": "ja_JP",
+              "ko": "ko_KR", "zh-Hans": "zh_CN", "zh-Hant": "zh_TW"}
 # The documentation in the sidebar's order: (page, group, short name).
 DOCS = [
     ("getting-started", "start", "Aurore in 15 minutes"),
@@ -177,17 +205,17 @@ def boreale_versions():
 
 def switcher(t, lang, to_root, home, here, name, versions):
     """The header's name (`name`), a button that opens the menu of Boréale's
-    sites, `here` marked and leading to `home`, each in French where the page
-    is (the four sites have it), with its latest release (`versions`). A
+    sites, `here` marked and leading to `home`, each in the page's language
+    (the four sites have the same 15 folders), with its latest release (`versions`). A
     popover: the browser closes it on Esc or a click elsewhere; site.css's
     and site.js's "site switcher" blocks."""
     label = t("sites_label")
-    french = lang.lower().startswith("fr")
+    folder = lang_dir(lang)   # the same folder on each of Boréale's sites
     groups = []
     for title, sites in SITES:
         items = []
         for key, site, url in sites:
-            href = home if key == here else url + ("fr/" if french else "")
+            href = home if key == here else url + folder
             soon = f'<em class="soon">{t("sites_soon")}</em>' if key == "playshelf" else ""
             version = f' <span class="sites-version">{html.escape(versions[key])}</span>' if key in versions else ""
             current = ' aria-current="true"' if key == here else ""
@@ -214,9 +242,47 @@ def reading_toggle(t):
             f'{SUN_ICON}<span>{t("reading_light")}</span></button>')
 
 
+def punctuation(lang, mark):
+    """A colon or a full stop the code adds after a text, as `lang` writes it:
+    French's space before the colon, Chinese and Japanese full-width marks."""
+    if lang.startswith(("ja", "zh")):
+        return {":": "：", ".": "。"}[mark]
+    if lang.startswith("fr") and mark == ":":
+        return "\u00a0:"
+    return mark
+
+
 def lang_dir(lang):
     folder = next(l[1] for l in LANGUAGES if l[0] == lang)
     return f"{folder}/" if folder else ""
+
+
+def html_lang(lang):
+    return next(l[3] for l in LANGUAGES if l[0] == lang)
+
+
+def flag(lang):
+    """`lang`'s flag, two regional indicator letters, for the eyes only."""
+    emoji = "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in FLAGS[lang])
+    return f'<span class="flag" aria-hidden="true">{emoji}</span>'
+
+
+def language_menu(t, lang, to_root, path):
+    """The header's languages: a button showing the page's (its flag, its
+    name, its code on a phone), and under it their menu, a popover as the
+    menu of Boréale's sites, this page in each (site.css's and site.js's
+    "languages" blocks; lang.js keeps the one chosen)."""
+    name = next(n for c, _, n, _ in LANGUAGES if c == lang)
+    current = ' aria-current="true"'
+    options = "\n".join(
+        f'        <li><a href="{to_root}{f"{d}/" if d else ""}{path}" data-lang="{c}" lang="{hl}" hreflang="{hl}"'
+        f'{current if c == lang else ""}>{flag(c)}{html.escape(n)}</a></li>'
+        for c, d, n, hl in LANGUAGES)
+    return (f'<div class="settings">\n'
+            f'      <button class="lang-button" type="button" popovertarget="languages" aria-label="{t.plain("language")} · {html.escape(name)}">'
+            f'{flag(lang)}<span class="lang-name">{html.escape(name)}</span><span class="lang-code">{lang.split("-")[0].upper()}</span>'
+            f'<svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>\n'
+            f'      <ul id="languages" class="langs" popover aria-label="{t.plain("language")}">\n{options}\n      </ul>\n    </div>')
 
 
 # ---- Code ------------------------------------------------------------------
@@ -381,22 +447,21 @@ def json_ld(data):
 def page(t, lang, to_root, path, title, body, description=None, home=False, structured=(), indexed=True,
          markdown_url=None, lost=False):
     """A whole page: `path` is its place under the language's folder ('' or 'docs/x/')."""
-    code, folder, _, og_locale = next(l for l in LANGUAGES if l[0] == lang)
-    other = next(l for l in LANGUAGES if l[0] != lang)
+    code, folder, _, hl = next(l for l in LANGUAGES if l[0] == lang)
     description = description or t.plain("meta_description")
     full_title = title or f"Aurore — {t.plain('hero_title_plain')}"
     url = f"{SITE_URL}{lang_dir(lang)}{path}"
     head = []
     if indexed:
         head.append(f'<link rel="canonical" href="{url}">')
-        head += [f'<link rel="alternate" hreflang="{c}" href="{SITE_URL}{f"{d}/" if d else ""}{path}">'
-                 for c, d, _, _ in LANGUAGES]
+        head += [f'<link rel="alternate" hreflang="{h}" href="{SITE_URL}{f"{d}/" if d else ""}{path}">'
+                 for _, d, _, h in LANGUAGES]
         head.append(f'<link rel="alternate" hreflang="x-default" href="{SITE_URL}{path}">')
     if markdown_url:
         head.append(f'<link rel="alternate" type="text/markdown" href="{markdown_url}">')
     if NOINDEX or not indexed:
         head.append('<meta name="robots" content="noindex">')
-    first_visit = " data-first-visit" if home and lang == "en" else ""
+    first_visit = " data-first-visit" if home and lang == "en-US" else ""
     base = f"{to_root}{lang_dir(lang)}"
     api = f'<li><a href="{to_root}api/">{t("nav_api")}</a></li>' if API_DIR else ""
     api += f'<li><a class="nav-try" href="{to_root}demo/{demo_query(lang)}">{t("nav_demo")}</a></li>' if DEMO_DIR else ""
@@ -419,12 +484,13 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
                    f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
                    f'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
                    f'{reading_toggle(t)}</div></div>\n')
+    sites_dir = lang_dir(lang)   # Boréale's other sites, in the page's language (the same folders)
     docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
                          for p, g, n in DOCS if g == "start")
     umami = "" if NOINDEX else (f'<script src="{to_root}assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
                                f'data-domains="{UMAMI_DOMAIN}"></script>\n')
     return f"""<!doctype html>
-<html lang="{code}"{first_visit}>
+<html lang="{hl}" data-lang="{code}"{first_visit}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -451,12 +517,12 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta property="og:image:alt" content="Aurore">
-<meta property="og:locale" content="{og_locale}">
+<meta property="og:locale" content="{OG_LOCALES[code]}">
 <meta name="twitter:card" content="summary_large_image">
 {"".join(json_ld(d) for d in structured)}<script src="{to_root}assets/lang.js"></script>
 <script src="{to_root}assets/site.js" defer></script>
 {umami}</head>
-<body class="{'home' if home else 'inner'}">
+<body class="{'home' if home else 'inner'}" data-copy="{t.plain('copy')}" data-copied="{t.plain('copied')}">
 <a class="skip" href="#main">{t("skip")}</a>
 {doc_bar}<div class="sky{' sky-home' if aurora else ''}">
   {sky}
@@ -468,9 +534,9 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
         <li><a href="{base}docs/getting-started/">{t("nav_docs")}</a></li>
         {api}
         <li class="nav-gh"><a href="{REPO_URL}">GitHub</a></li>
-        <li><a href="{to_root}{lang_dir(other[0])}{path}" lang="{other[0]}" hreflang="{other[0]}">{t("other_label")}</a></li>
       </ul>
     </nav>
+    {language_menu(t, lang, to_root, path)}
   </header>
 {hero}
 </div>
@@ -482,7 +548,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     <div>
       <p class="footer-brand"><img src="{to_root}assets/mark.svg" alt="" width="24" height="24"> <strong>Aurore</strong></p>
       <p>{t("footer_license")}</p>
-      <p><a href="https://boreale.dev/">{t("footer_boreale")}</a></p>
+      <p><a href="https://boreale.dev/{sites_dir}">{t("footer_boreale")}</a></p>
     </div>
     <div>
       <h2>{t("docs_title")}</h2>
@@ -490,10 +556,10 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     </div>
     <div>
       <h2>Boréale</h2>
-      <ul><li><a href="https://boreale.dev/{"fr/" if lang == "fr" else ""}">boreale.dev</a></li>
-        <li><a href="https://guard.boreale.dev/{"fr/" if lang == "fr" else ""}">PlayGuard</a></li>
-        <li><a href="https://shelf.boreale.dev/{"fr/" if lang == "fr" else ""}">PlayShelf</a></li>
-        <li><a href="https://boreale.dev/{"fr/" if lang == "fr" else ""}legal/">{t("sites_legal")}</a></li>
+      <ul><li><a href="https://boreale.dev/{sites_dir}">boreale.dev</a></li>
+        <li><a href="https://guard.boreale.dev/{sites_dir}">PlayGuard</a></li>
+        <li><a href="https://shelf.boreale.dev/{sites_dir}">PlayShelf</a></li>
+        <li><a href="https://boreale.dev/{sites_dir}legal/">{t("sites_legal")}</a></li>
         <li><a href="mailto:contact@boreale.dev">contact@boreale.dev</a></li></ul>
     </div>
     <div>
@@ -618,13 +684,13 @@ def release_line(t, base):
     if not found:
         return f'<p class="release">{t("release_none")}</p>'
     version, date, _ = found[0]
-    return (f'<p class="release">{t("release_latest")}: <a href="{base}changelog/#v{version}">v{version}</a> '
+    return (f'<p class="release">{t("release_latest")}{punctuation(t.lang, ":")} <a href="{base}changelog/#v{version}">v{version}</a> '
             f'· <time datetime="{date}">{date}</time></p>')
 
 
 def demo_query(lang):
     """The demo in the page's language (the browser's for English)."""
-    return "" if lang == "en" else f"?lang={lang}"
+    return "" if lang == "en-US" else f"?lang={lang}"
 
 
 def hero_actions(t, lang, to_root, base):
@@ -856,7 +922,7 @@ def changelog_body(t, lang):
     note = f'<p class="callout note">{t("changelog_english")}</p>\n' if t("changelog_english") and found else ""
     parts = []
     if not found:
-        parts.append(f'<p>{t("changelog_none")} <a href="{REPO_URL}/commits/main">{t("changelog_commits")}</a>.</p>')
+        parts.append(f'<p>{t("changelog_none")} <a href="{REPO_URL}/commits/main">{t("changelog_commits")}</a>{punctuation(t.lang, ".")}</p>')
     for version, date, body in found:
         parts.append(f'<section class="release-entry"><h2 id="v{version}">{version} '
                      f'<small><time datetime="{date}">{date}</time></small></h2>\n{body}\n'
@@ -994,8 +1060,9 @@ def releases_atom():
 def sitemap(paths):
     entries = []
     for path in paths:
-        alternates = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{c}" href="{SITE_URL}{f"{d}/" if d else ""}{path}"/>'
-                             for c, d, _, _ in LANGUAGES)
+        alternates = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{h}" href="{SITE_URL}{f"{d}/" if d else ""}{path}"/>'
+                             for _, d, _, h in LANGUAGES)
+        alternates += f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE_URL}{path}"/>'
         for _, d, _, _ in LANGUAGES:
             entries.append(f'  <url>\n    <loc>{SITE_URL}{f"{d}/" if d else ""}{path}</loc>{alternates}\n  </url>')
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -1044,7 +1111,7 @@ def main():
         write(out, f"{base}index.html",
               page(t, lang, to_root, "", "", home_body(t, lang, to_root), home=True,
                    structured=[{"@context": "https://schema.org", "@type": "WebSite", "name": "Aurore",
-                                "url": f"{SITE_URL}{base}", "inLanguage": lang}, software(t, lang)]))
+                                "url": f"{SITE_URL}{base}", "inLanguage": html_lang(lang)}, software(t, lang)]))
         index = []
         for name, _, short in DOCS:
             doc_root = to_root + "../../"
@@ -1055,7 +1122,7 @@ def main():
                   page(t, lang, doc_root, f"docs/{name}/", f"{title} · Aurore", body, description=description,
                        structured=doc_data(t, lang, name, title, description),
                        markdown_url=f"{SITE_URL}docs/{name}.md"))
-            if lang == "en":
+            if lang == "en-US":
                 text = markdown_doc(name, assets)
                 write(out, f"docs/{name}.md", text)
                 full.append(text)
@@ -1067,7 +1134,7 @@ def main():
               page(t, lang, to_root + "../", "changelog/", f"{t.plain('changelog_title')} · Aurore",
                    changelog_body(t, lang)))
         count += 2
-    t = Texts("en")
+    t = Texts("en-US")
     write(out, "llms.txt", llms_txt(t, descriptions))
     write(out, "llms-full.txt", llms_txt(t, descriptions, full))
     write(out, "sitemap.xml", sitemap([""] + [f"docs/{p}/" for p, _, _ in DOCS] + ["changelog/"]))
@@ -1076,16 +1143,16 @@ def main():
     if at_root:
         write(out, "robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n")
     # 404.html, served at any address: its links start from the site's root,
-    # both languages in it, site.js shows the visitor's.
+    # every language in it, site.js shows the address' or the visitor's.
     root_path = urlsplit(SITE_URL).path
     blocks = []
     for lang, folder, _, _ in LANGUAGES:
         tl = Texts(lang)
-        blocks.append(f'<div class="not-found" lang="{lang}" data-lang="{lang}"{" hidden" if lang != "en" else ""}>'
+        blocks.append(f'<div class="not-found" lang="{html_lang(lang)}" data-lang="{lang}"{" hidden" if lang != "en-US" else ""}>'
                       f'<h1>{tl("not_found_title")}</h1><p>{tl("not_found_text")}</p>'
                       f'<p class="actions"><a class="button primary" href="{root_path}{f"{folder}/" if folder else ""}">{tl("home")}</a> '
                       f'<a class="button ghost" href="{root_path}{f"{folder}/" if folder else ""}docs/getting-started/">{tl("docs_title")}</a></p></div>')
-    write(out, "404.html", page(t, "en", root_path, "", f"{t.plain('not_found_title')} · Aurore",
+    write(out, "404.html", page(t, "en-US", root_path, "", f"{t.plain('not_found_title')} · Aurore",
                                 ('  <div class="wrap lost">\n' + "\n".join(blocks) + "\n  </div>", ""), indexed=False, lost=True))
     write(out, "manifest.webmanifest", json.dumps({
         "name": "Aurore", "short_name": "Aurore", "start_url": "./", "scope": "./", "display": "browser",

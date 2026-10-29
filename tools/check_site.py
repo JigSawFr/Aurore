@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Checks the built website (site/README.md):
 
-- the catalogs (site/i18n/*.json) have the same keys as en.json;
+- the catalogs (site/i18n/*.json) have the same keys as en-US.json;
 - every link and image of a page that stays on the site reaches a file of it,
   and every #anchor an id of the page it points to (the API reference and the
   demo, built apart, are not followed);
@@ -61,7 +61,7 @@ class Page(HTMLParser):
 
 def catalogs(root):
     folder = os.path.join(root, "site", "i18n")
-    english = set(json.load(open(os.path.join(folder, "en.json"), encoding="utf-8")))
+    english = set(json.load(open(os.path.join(folder, "en-US.json"), encoding="utf-8")))
     errors = 0
     for name in sorted(os.listdir(folder)):
         keys = set(json.load(open(os.path.join(folder, name), encoding="utf-8")))
@@ -69,7 +69,7 @@ def catalogs(root):
             print(f"site/i18n/{name}: no {key!r}")
             errors += 1
         for key in sorted(keys - english):
-            print(f"site/i18n/{name}: {key!r} is not in en.json")
+            print(f"site/i18n/{name}: {key!r} is not in en-US.json")
             errors += 1
     return errors
 
