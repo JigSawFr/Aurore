@@ -123,13 +123,14 @@
   });
 })();
 
-// A copy button on each block of code.
+// A copy button on each block of code (not on the names changed of the page
+// on borealis, a diff: .no-copy).
 (function () {
   const texts = document.querySelector("[data-copy]");   // the body: the page's language
   const label = texts ? texts.dataset.copy : "Copy";
   const done = texts ? texts.dataset.copied : "Copied";
   if (!navigator.clipboard) return;
-  for (const pre of document.querySelectorAll("pre")) {
+  for (const pre of document.querySelectorAll("pre:not(.no-copy)")) {
     const wrap = document.createElement("div");
     wrap.className = "code-wrap";
     pre.parentNode.insertBefore(wrap, pre);
