@@ -3082,6 +3082,274 @@ AURORE_TEST(cells_grow_with_the_text)
     AURORE_CHECK_EQ(cell->getHeight(), normal);
 }
 
+// Safe areas (docs/safe-areas.md)
+
+namespace
+{
+
+// The focusable views shown under `view`
+void focusablesIn(aurore::View* view, std::vector<aurore::View*>* found)
+{
+    if (!view || view->getVisibility() != aurore::Visibility::VISIBLE)
+        return;
+    if (view->isFocusable())
+        found->push_back(view);
+    if (auto* box = dynamic_cast<aurore::Box*>(view))
+        for (aurore::View* child : box->getChildren())
+            focusablesIn(child, found);
+}
+
+bool sameRect(const aurore::Rect& a, const aurore::Rect& b)
+{
+    return a.getMinX() == b.getMinX() && a.getMinY() == b.getMinY() && a.getWidth() == b.getWidth()
+        && a.getHeight() == b.getHeight();
+}
+
+// A notch on the left, as a phone held in landscape with its bars: in
+// framebuffer pixels, layout units at 1280 x 720
+const aurore::Insets NOTCH = { 24, 48, 20, 48 };
+
+} // namespace
+
+AURORE_TEST(safe_area_zero_by_default)
+{
+    DemoHarness h;
+    AURORE_CHECK(aurore::Application::getSafeArea().empty());
+    AURORE_CHECK(!aurore::Application::isSafeAreaInUse());
+    auto* frame = dynamic_cast<aurore::AppletFrame*>(h.top()->getContentView());
+    AURORE_CHECK(frame != nullptr);
+    AURORE_CHECK(frame->getSafeAreaPadding().empty());
+}
+
+AURORE_TEST(safe_area_moves_the_frame_in)
+{
+    DemoHarness h;
+    auto* frame = dynamic_cast<aurore::AppletFrame*>(h.top()->getContentView());
+    AURORE_CHECK(frame != nullptr);
+    aurore::Box* header   = frame->getHeader();
+    aurore::Box* footer   = frame->getFooter();
+    aurore::View* title   = h.find("aurore/applet_frame/title_label");
+    aurore::View* content = frame->getContentView();
+    AURORE_CHECK(header && footer && title && content);
+    const aurore::Rect header0 = header->getFrame(), footer0 = footer->getFrame();
+    const aurore::Rect title0 = title->getFrame(), content0 = content->getFrame();
+    const aurore::test::Image plain = h.screenshot();
+
+    h.setSafeArea(NOTCH);
+    AURORE_CHECK(aurore::Application::getSafeArea() == NOTCH);
+
+    // The header reaches the top and grows by the inset; its title moves in
+    AURORE_CHECK_EQ(header->getFrame().getMinY(), 0.0f);
+    AURORE_CHECK_EQ(header->getFrame().getHeight(), header0.getHeight() + NOTCH.top);
+    AURORE_CHECK_EQ(title->getFrame().getMinY(), title0.getMinY() + NOTCH.top);
+    AURORE_CHECK_EQ(title->getFrame().getMinX(), title0.getMinX() + NOTCH.left);
+    // The footer reaches the bottom and grows by the inset
+    AURORE_CHECK_EQ(footer->getFrame().getMaxY(), 720.0f);
+    AURORE_CHECK_EQ(footer->getFrame().getHeight(), footer0.getHeight() + NOTCH.bottom);
+    // The content between them, clear of the sides
+    AURORE_CHECK_EQ(content->getFrame().getMinX(), content0.getMinX() + NOTCH.left);
+    AURORE_CHECK_EQ(content->getFrame().getWidth(), content0.getWidth() - NOTCH.left - NOTCH.right);
+    AURORE_CHECK_EQ(content->getFrame().getMinY(), header->getFrame().getMaxY());
+    // The frame's own padding is the app's: the safe area is apart
+    AURORE_CHECK_EQ(frame->getPaddingLeft(), 0.0f);
+    AURORE_CHECK_EQ(frame->getSafeAreaPadding().left, NOTCH.left);
+    // Nothing to focus under the insets
+    std::vector<aurore::View*> focusables;
+    focusablesIn(frame, &focusables);
+    AURORE_CHECK(!focusables.empty());
+    for (aurore::View* view : focusables)
+    {
+        const aurore::Rect at = view->getFrame();
+        bool inside           = at.getMinX() >= NOTCH.left && at.getMaxX() <= 1280 - NOTCH.right && at.getMinY() >= NOTCH.top;
+        if (!inside)
+            std::fprintf(stderr, "under the safe area: %s at %s\n", view->describe().c_str(), view->getFrame().describe().c_str());
+        AURORE_CHECK(inside);
+    }
+
+    // Edge to edge: the corners drawn as without the insets (the
+    // backgrounds reach them)
+    const aurore::test::Image notched = h.screenshot();
+    for (auto [x, y] : { std::pair { 2, 2 }, { 1277, 2 }, { 2, 717 }, { 1277, 717 } })
+        AURORE_CHECK(std::equal(notched.at(x, y), notched.at(x, y) + 4, plain.at(x, y)));
+    AURORE_CHECK(h.matchesReference("safe_area_main_screen"));
+
+    // And back
+    h.setSafeArea({});
+    AURORE_CHECK(aurore::Application::getSafeArea().empty());
+    AURORE_CHECK(sameRect(header->getFrame(), header0));
+    AURORE_CHECK(sameRect(footer->getFrame(), footer0));
+    AURORE_CHECK(sameRect(title->getFrame(), title0));
+    AURORE_CHECK(sameRect(content->getFrame(), content0));
+}
+
+AURORE_TEST(safe_area_header_hidden_gives_the_top_to_the_content)
+{
+    DemoHarness h;
+    auto* frame = dynamic_cast<aurore::AppletFrame*>(h.top()->getContentView());
+    AURORE_CHECK(frame != nullptr);
+    h.setSafeArea(NOTCH);
+    frame->setHeaderVisibility(aurore::Visibility::GONE);
+    frame->setFooterVisibility(aurore::Visibility::GONE);
+    h.settle();
+    const aurore::Insets padding = frame->getSafeAreaPadding();
+    AURORE_CHECK(padding == NOTCH);
+    AURORE_CHECK_EQ(frame->getContentView()->getFrame().getMinY(), NOTCH.top);
+    AURORE_CHECK_EQ(frame->getContentView()->getFrame().getMaxY(), 720.0f - NOTCH.bottom);
+    frame->setHeaderVisibility(aurore::Visibility::VISIBLE);
+    h.settle();
+    AURORE_CHECK_EQ(frame->getSafeAreaPadding().top, 0.0f);
+    AURORE_CHECK_EQ(frame->getHeader()->getSafeAreaPadding().top, NOTCH.top);
+}
+
+AURORE_TEST(safe_area_from_xml)
+{
+    Harness h;
+    h.setSafeArea(NOTCH);
+    // The content view of an activity keeps clear of every edge (auto)
+    auto* plain = new aurore::Box(aurore::Axis::COLUMN);
+    h.push(new aurore::Activity(plain));
+    h.settle();
+    AURORE_CHECK(plain->getSafeAreaPadding() == NOTCH);
+
+    // none lets the views in it take it: a bar at the top, edge to edge
+    aurore::View* root = aurore::View::createFromXMLString(R"xml(
+        <aurore:Box width="auto" height="auto" axis="column" safeArea="none" backgroundColor="#202838">
+            <aurore:Box id="bar" width="auto" height="60" padding="10" boxSizing="contentBox" safeArea="top|horizontal"
+                backgroundColor="#2f6f8f">
+                <aurore:Box id="inner" width="auto" height="20" grow="1" safeArea="all" backgroundColor="#e0e0e0"/>
+            </aurore:Box>
+            <aurore:Box id="rest" width="auto" grow="1" safeArea="bottom | left,right" backgroundColor="#303040">
+                <aurore:Box width="auto" grow="1" backgroundColor="#8fbf5f"/>
+            </aurore:Box>
+        </aurore:Box>)xml");
+    h.push(new aurore::Activity(root));
+    h.settle();
+    auto* bar   = dynamic_cast<aurore::Box*>(h.find("bar"));
+    auto* inner = dynamic_cast<aurore::Box*>(h.find("inner"));
+    auto* rest  = dynamic_cast<aurore::Box*>(h.find("rest"));
+    AURORE_CHECK(bar && inner && rest);
+    AURORE_CHECK(dynamic_cast<aurore::Box*>(root)->getSafeAreaPadding().empty());
+    AURORE_CHECK_EQ(bar->getPaddingTop(), 10.0f); // its own
+    AURORE_CHECK(bar->getSafeAreaPadding() == (aurore::Insets { NOTCH.top, NOTCH.right, 0, NOTCH.left }));
+    AURORE_CHECK_EQ(bar->getFrame().getMinY(), 0.0f);
+    AURORE_CHECK_EQ(bar->getFrame().getHeight(), 60.0f + 20.0f + NOTCH.top);
+    AURORE_CHECK_EQ(inner->getFrame().getMinY(), 10.0f + NOTCH.top);
+    AURORE_CHECK_EQ(inner->getFrame().getMinX(), 10.0f + NOTCH.left);
+    AURORE_CHECK(inner->getSafeAreaPadding().empty()); // the bar took it
+    AURORE_CHECK(rest->getSafeAreaPadding() == (aurore::Insets { 0, NOTCH.right, NOTCH.bottom, NOTCH.left }));
+    // The bar's colour up to the window's edges, the views in it clear of them
+    AURORE_CHECK(h.matchesReference("safe_area_xml"));
+
+    // Padding set afterwards keeps the safe area on top of it
+    bar->setPaddingTop(4);
+    h.settle();
+    AURORE_CHECK_EQ(bar->getPaddingTop(), 4.0f);
+    AURORE_CHECK_EQ(inner->getFrame().getMinY(), 4.0f + NOTCH.top);
+
+    // A view added later takes it as the others
+    auto* late = new aurore::Box();
+    late->setSafeArea(aurore::SafeAreaEdges::RIGHT);
+    dynamic_cast<aurore::Box*>(root)->addView(late);
+    AURORE_CHECK_EQ(late->getSafeAreaPadding().right, NOTCH.right);
+    late->setSafeArea(aurore::SafeAreaEdges::NONE);
+    AURORE_CHECK(late->getSafeAreaPadding().empty());
+}
+
+AURORE_TEST(safe_area_words_and_numbers)
+{
+    aurore::SafeAreaEdges edges = aurore::SafeAreaEdges::NONE;
+    AURORE_CHECK(aurore::parseSafeAreaEdges("top|bottom", &edges));
+    AURORE_CHECK(edges == aurore::SafeAreaEdges::VERTICAL);
+    AURORE_CHECK(aurore::parseSafeAreaEdges("left, top", &edges));
+    AURORE_CHECK(edges == (aurore::SafeAreaEdges::LEFT | aurore::SafeAreaEdges::TOP));
+    AURORE_CHECK(aurore::parseSafeAreaEdges("all", &edges));
+    AURORE_CHECK(edges == aurore::SafeAreaEdges::ALL);
+    AURORE_CHECK(aurore::parseSafeAreaEdges("none", &edges));
+    AURORE_CHECK(edges == aurore::SafeAreaEdges::NONE);
+    AURORE_CHECK(aurore::parseSafeAreaEdges("auto", &edges));
+    AURORE_CHECK(edges == aurore::SafeAreaEdges::AUTO);
+    AURORE_CHECK(!aurore::parseSafeAreaEdges("auto|top", &edges));
+    AURORE_CHECK(!aurore::parseSafeAreaEdges("up", &edges));
+    AURORE_CHECK(!aurore::parseSafeAreaEdges("", &edges));
+    AURORE_CHECK(edges == aurore::SafeAreaEdges::AUTO); // unchanged
+
+    aurore::Insets insets;
+    AURORE_CHECK(aurore::Insets::parse("10", &insets));
+    AURORE_CHECK(insets == (aurore::Insets { 10, 10, 10, 10 }));
+    AURORE_CHECK(aurore::Insets::parse("10,20", &insets));
+    AURORE_CHECK(insets == (aurore::Insets { 10, 20, 10, 20 }));
+    AURORE_CHECK(aurore::Insets::parse("1 2 3", &insets));
+    AURORE_CHECK(insets == (aurore::Insets { 1, 2, 3, 2 }));
+    AURORE_CHECK(aurore::Insets::parse("47,0,34,0", &insets));
+    AURORE_CHECK(insets == (aurore::Insets { 47, 0, 34, 0 }));
+    AURORE_CHECK(!aurore::Insets::parse("1,2,3,4,5", &insets));
+    AURORE_CHECK(!aurore::Insets::parse("-1", &insets));
+    AURORE_CHECK(!aurore::Insets::parse("top", &insets));
+    AURORE_CHECK(!aurore::Insets::parse("nan", &insets));
+    AURORE_CHECK(!aurore::Insets::parse("", &insets));
+    AURORE_CHECK(insets == (aurore::Insets { 47, 0, 34, 0 })); // unchanged
+}
+
+AURORE_TEST(safe_area_override_overscan_and_scale)
+{
+    Harness h;
+    aurore::Insets seen;
+    int fired = 0;
+    aurore::Application::getSafeAreaChangedEvent()->subscribe([&](aurore::Insets insets)
+        { seen = insets; fired++; });
+
+    // The platform's, in framebuffer pixels: layout units at 1920 x 1080
+    h.resize(1920, 1080);
+    h.setSafeArea({ 60, 0, 30, 0 });
+    AURORE_CHECK(aurore::Application::getSafeArea() == (aurore::Insets { 40, 0, 20, 0 }));
+    AURORE_CHECK(seen == aurore::Application::getSafeArea());
+    AURORE_CHECK_EQ(fired, 1);
+    // The same again: no event
+    aurore::Application::updateSafeArea();
+    AURORE_CHECK_EQ(fired, 1);
+
+    // The override in place of the platform's
+    const aurore::Insets tv = { 0, 0, 0, 0 };
+    aurore::Application::setSafeAreaOverride(&tv);
+    AURORE_CHECK(aurore::Application::getSafeArea().empty());
+    // A TV's overscan: 5 % of the window at least
+    aurore::Application::setOverscan(0.05f);
+    AURORE_CHECK(aurore::Application::getSafeArea() == (aurore::Insets { 36, 64, 36, 64 }));
+    aurore::Application::setOverscan(1.0f); // at most a quarter
+    AURORE_CHECK_EQ(aurore::Application::getOverscan(), 0.25f);
+    aurore::Application::setOverscan(0.0f);
+    aurore::Application::setSafeAreaOverride(nullptr);
+    AURORE_CHECK(aurore::Application::getSafeArea() == (aurore::Insets { 40, 0, 20, 0 }));
+
+    // Nonsense from a platform: at most a third of the window
+    h.setSafeArea({ 5000, -10, NAN, 0 });
+    AURORE_CHECK(aurore::Application::getSafeArea() == (aurore::Insets { 240, 0, 0, 0 }));
+}
+
+AURORE_TEST(safe_area_dialog_keeps_clear)
+{
+    DemoHarness h;
+    h.setSafeArea(NOTCH);
+    auto* dialog = new aurore::Dialog("Leave the safe area?");
+    dialog->addButton("Cancel", []() {});
+    dialog->addButton("OK", []() {});
+    dialog->open();
+    h.settle();
+    // An activity's content view: every edge
+    auto* root = dynamic_cast<aurore::Box*>(h.top()->getContentView());
+    AURORE_CHECK(root != nullptr);
+    AURORE_CHECK(root->getSafeAreaPadding() == NOTCH);
+    std::vector<aurore::View*> focusables;
+    focusablesIn(root, &focusables);
+    AURORE_CHECK(!focusables.empty());
+    for (aurore::View* view : focusables)
+    {
+        const aurore::Rect at = view->getFrame();
+        AURORE_CHECK(at.getMinX() >= NOTCH.left && at.getMaxX() <= 1280 - NOTCH.right);
+        AURORE_CHECK(at.getMinY() >= NOTCH.top && at.getMaxY() <= 720 - NOTCH.bottom);
+    }
+}
+
 // Each simulated console: its screen in the window with the console's
 // proportions, the console drawn around it, the touches read on the screen
 AURORE_TEST(simulated_consoles)

@@ -25,6 +25,7 @@
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/ime.hpp>
 #include <aurore/core/input.hpp>
+#include <aurore/core/safe_area.hpp>
 #include <aurore/core/theme.hpp>
 #include <aurore/core/video.hpp>
 
@@ -83,6 +84,18 @@ class Platform
      *
      */
     virtual void setWindowState(uint32_t windowWidth, uint32_t windowHeight, int windowXPos, int windowYPos) {};
+
+    /**
+     * The window's safe area: how far the display cutouts, the rounded
+     * corners and the system bars reach in from each edge of the window, in
+     * the unit of the window's size (points where the system has them,
+     * pixels on Android). The on-screen keyboard is not part of it. Zero by
+     * default (desktops, consoles).
+     *
+     * A platform whose safe area can change (a rotation, bars shown or
+     * hidden) calls Application::updateSafeArea() when it may have.
+     */
+    virtual Insets getSafeAreaInsets() { return {}; }
 
     /**
      * Returns the human-readable name of the platform.

@@ -48,6 +48,7 @@ What it gives:
 | `screenshot()` | the last frame drawn, as an `Image` (RGBA, `savePng`, `loadPng`, `crop`) |
 | `matchesReference(name, tolerance, maxRatio)`, also with an area | the screenshot (or a part) against `<references>/<name>.png`, see below |
 | `resize(w, h)` | a new window size |
+| `setSafeArea(insets)` | the platform reports this safe area (a notch, the system's bars: [safe-areas.md](safe-areas.md)), the screen laid out again |
 | `platform()` | the `HeadlessPlatform`: `openedUrls` (what `openBrowser` was asked), the clipboard, `requestClose()` |
 
 `compareImages(actual, expected, tolerance)` compares two images on its own: a pixel differs when a channel is off by more than `tolerance`, and the result has the count, the ratio, the largest difference and a map of the differences.

@@ -53,6 +53,9 @@ class SDLPlatform : public DesktopPlatform
     InputManager* getInputManager() override;
     ImeManager* getImeManager() override;
     bool processEvent(SDL_Event* event);
+#if defined(IOS) || defined(TVOS)
+    Insets getSafeAreaInsets() override;
+#endif
 
   protected:
     NullAudioPlayer* audioPlayer  = nullptr;
@@ -60,6 +63,11 @@ class SDLPlatform : public DesktopPlatform
     SDLInputManager* inputManager = nullptr;
     SDLImeManager* imeManager     = nullptr;
     Event<SDL_Event*> otherEvent;
+
+  private:
+    // The safe area read again now and once the system settled (a rotation)
+    void safeAreaMayHaveChanged();
+    size_t safeAreaCheck = 0;
 };
 
 } // namespace aurore

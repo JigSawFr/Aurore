@@ -582,6 +582,14 @@ void Harness::resize(int width, int height)
     settle();
 }
 
+void Harness::setSafeArea(const Insets& insets)
+{
+    headless->safeAreaInsets = insets;
+    Application::updateSafeArea();
+    step();
+    settle();
+}
+
 // Runner
 
 namespace

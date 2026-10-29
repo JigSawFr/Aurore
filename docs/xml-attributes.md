@@ -100,6 +100,7 @@ Any attribute prefixed with `compact:`, `medium:` or `expanded:` applies on a sc
 | `paddingRight` | number |
 | `paddingTop` | number |
 | `rowGap` | number |
+| `safeArea` | edges joined with `\|`: `top` · `right` · `bottom` · `left` · `vertical` · `horizontal` · `all` · `none`; or `auto` ([safe areas](safe-areas.md)) |
 
 ## `CadranDigits`
 
