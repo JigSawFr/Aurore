@@ -1,5 +1,5 @@
 //
-// nanovg's renderer on SDL3's GPU API (SDL_GPU): Vulkan, Metal, and later
+// nanovg's renderer on SDL3's GPU API (SDL_GPU): Vulkan, Metal and
 // Direct3D 12. A port of nanovg_gl.h's GL3 renderer, with the same shaders
 // (nvg_shader/sdlgpu, compiled by tools/make_sdlgpu_shaders.py) and the same
 // draw calls, stencil passes included.
@@ -39,7 +39,8 @@
 #include "nanovg.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 // As the GL and D3D11 renderers have them
@@ -54,19 +55,19 @@ extern "C" {
 
 // The shader formats the renderer brings: what SDL_CreateGPUDevice is asked
 // for
-#define NVG_SDLGPU_SHADER_FORMATS (SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_MSL)
+#define NVG_SDLGPU_SHADER_FORMATS (SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_DXIL)
 
-// colorFormat and depthStencilFormat: the targets' (nvgSDLGPUSetTarget).
-// flags: NVG_ANTIALIAS, NVG_STENCIL_STROKES.
-NVGcontext* nvgCreateSDLGPU(SDL_GPUDevice* device, SDL_GPUTextureFormat colorFormat,
-                            SDL_GPUTextureFormat depthStencilFormat, int flags);
-void nvgDeleteSDLGPU(NVGcontext* ctx);
+    // colorFormat and depthStencilFormat: the targets' (nvgSDLGPUSetTarget).
+    // flags: NVG_ANTIALIAS, NVG_STENCIL_STROKES.
+    NVGcontext* nvgCreateSDLGPU(SDL_GPUDevice* device, SDL_GPUTextureFormat colorFormat,
+        SDL_GPUTextureFormat depthStencilFormat, int flags);
+    void nvgDeleteSDLGPU(NVGcontext* ctx);
 
-// What the next nvgEndFrame draws into: the frame's command buffer, a colour
-// texture and a depth-stencil one, cleared first when clear is not NULL (and
-// even with nothing drawn)
-void nvgSDLGPUSetTarget(NVGcontext* ctx, SDL_GPUCommandBuffer* cmd, SDL_GPUTexture* color,
-                        SDL_GPUTexture* depthStencil, const SDL_FColor* clear);
+    // What the next nvgEndFrame draws into: the frame's command buffer, a colour
+    // texture and a depth-stencil one, cleared first when clear is not NULL (and
+    // even with nothing drawn)
+    void nvgSDLGPUSetTarget(NVGcontext* ctx, SDL_GPUCommandBuffer* cmd, SDL_GPUTexture* color,
+        SDL_GPUTexture* depthStencil, const SDL_FColor* clear);
 
 #ifdef __cplusplus
 }
@@ -106,12 +107,12 @@ enum SDLGPUNVGcallType
 // The stencil states of nanovg_gl.h's passes
 enum SDLGPUNVGstencil
 {
-    SDLGPUNVG_STENCIL_NONE,          // no test
-    SDLGPUNVG_STENCIL_WINDING,       // always; front faces add, back faces take away
-    SDLGPUNVG_STENCIL_EQUAL_KEEP,    // where 0
+    SDLGPUNVG_STENCIL_NONE, // no test
+    SDLGPUNVG_STENCIL_WINDING, // always; front faces add, back faces take away
+    SDLGPUNVG_STENCIL_EQUAL_KEEP, // where 0
     SDLGPUNVG_STENCIL_NOTEQUAL_ZERO, // where not 0, back to 0
-    SDLGPUNVG_STENCIL_EQUAL_INCR,    // where 0, then 1: no overlap
-    SDLGPUNVG_STENCIL_ALWAYS_ZERO,   // back to 0
+    SDLGPUNVG_STENCIL_EQUAL_INCR, // where 0, then 1: no overlap
+    SDLGPUNVG_STENCIL_ALWAYS_ZERO, // back to 0
     SDLGPUNVG_STENCIL_ALWAYS_REPLACE, // the reference (1), for nvgStencil
     SDLGPUNVG_STENCIL_COUNT
 };
@@ -244,9 +245,8 @@ static SDLGPUNVGtexture* sdlgpunvg__allocTexture(SDLGPUNVGcontext* gpu)
     {
         if (gpu->ntextures + 1 > gpu->ctextures)
         {
-            int ctextures = sdlgpunvg__maxi(gpu->ntextures + 1, 4) + gpu->ctextures / 2;
-            SDLGPUNVGtexture* textures =
-                (SDLGPUNVGtexture*)realloc(gpu->textures, sizeof(SDLGPUNVGtexture) * ctextures);
+            int ctextures              = sdlgpunvg__maxi(gpu->ntextures + 1, 4) + gpu->ctextures / 2;
+            SDLGPUNVGtexture* textures = (SDLGPUNVGtexture*)realloc(gpu->textures, sizeof(SDLGPUNVGtexture) * ctextures);
             if (textures == NULL)
                 return NULL;
             gpu->textures  = textures;
@@ -286,8 +286,9 @@ static int sdlgpunvg__deleteTexture(SDLGPUNVGcontext* gpu, int id)
 }
 
 static SDL_GPUShader* sdlgpunvg__createShader(SDLGPUNVGcontext* gpu, SDL_GPUShaderStage stage,
-                                              const unsigned char* spirv, size_t spirvSize, const char* msl,
-                                              Uint32 samplers, Uint32 uniformBuffers)
+    const unsigned char* spirv, size_t spirvSize, const char* msl,
+    const unsigned char* dxil, size_t dxilSize, Uint32 samplers,
+    Uint32 uniformBuffers)
 {
     SDL_GPUShaderCreateInfo info;
     SDL_GPUShaderFormat formats = SDL_GetGPUShaderFormats(gpu->device);
@@ -302,6 +303,13 @@ static SDL_GPUShader* sdlgpunvg__createShader(SDLGPUNVGcontext* gpu, SDL_GPUShad
         info.code_size  = spirvSize;
         info.entrypoint = "main";
     }
+    else if (formats & SDL_GPU_SHADERFORMAT_DXIL)
+    {
+        info.format     = SDL_GPU_SHADERFORMAT_DXIL;
+        info.code       = dxil;
+        info.code_size  = dxilSize;
+        info.entrypoint = "main";
+    }
     else if (formats & SDL_GPU_SHADERFORMAT_MSL)
     {
         info.format     = SDL_GPU_SHADERFORMAT_MSL;
@@ -311,7 +319,7 @@ static SDL_GPUShader* sdlgpunvg__createShader(SDLGPUNVGcontext* gpu, SDL_GPUShad
     }
     else
     {
-        SDL_SetError("nanovg: the GPU takes neither SPIR-V nor MSL");
+        SDL_SetError("nanovg: the GPU takes none of SPIR-V, DXIL and MSL");
         return NULL;
     }
     return SDL_CreateGPUShader(gpu->device, &info);
@@ -386,7 +394,7 @@ static Uint32 sdlgpunvg__pipelineKey(int stencil, int strip, int colorWrite, int
 }
 
 static SDL_GPUGraphicsPipeline* sdlgpunvg__pipeline(SDLGPUNVGcontext* gpu, int stencil, int strip, int colorWrite,
-                                                    int cull, const SDLGPUNVGblend* blend)
+    int cull, const SDLGPUNVGblend* blend)
 {
     Uint32 key = sdlgpunvg__pipelineKey(stencil, strip, colorWrite, cull, blend);
     SDL_GPUGraphicsPipelineCreateInfo info;
@@ -405,72 +413,66 @@ static SDL_GPUGraphicsPipeline* sdlgpunvg__pipeline(SDLGPUNVGcontext* gpu, int s
     memset(&buffer, 0, sizeof(buffer));
     memset(attributes, 0, sizeof(attributes));
 
-    buffer.slot       = 0;
-    buffer.pitch      = sizeof(NVGvertex);
-    buffer.input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX;
-    attributes[0].location    = 0;
-    attributes[0].format      = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
-    attributes[0].offset      = 0;
-    attributes[1].location    = 1;
-    attributes[1].format      = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
-    attributes[1].offset      = 2 * sizeof(float);
+    buffer.slot            = 0;
+    buffer.pitch           = sizeof(NVGvertex);
+    buffer.input_rate      = SDL_GPU_VERTEXINPUTRATE_VERTEX;
+    attributes[0].location = 0;
+    attributes[0].format   = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
+    attributes[0].offset   = 0;
+    attributes[1].location = 1;
+    attributes[1].format   = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
+    attributes[1].offset   = 2 * sizeof(float);
 
-    target.format                            = gpu->colorFormat;
-    target.blend_state.enable_blend          = true;
-    target.blend_state.src_color_blendfactor = blend->srcRGB;
-    target.blend_state.dst_color_blendfactor = blend->dstRGB;
-    target.blend_state.color_blend_op        = SDL_GPU_BLENDOP_ADD;
-    target.blend_state.src_alpha_blendfactor = blend->srcAlpha;
-    target.blend_state.dst_alpha_blendfactor = blend->dstAlpha;
-    target.blend_state.alpha_blend_op        = SDL_GPU_BLENDOP_ADD;
+    target.format                              = gpu->colorFormat;
+    target.blend_state.enable_blend            = true;
+    target.blend_state.src_color_blendfactor   = blend->srcRGB;
+    target.blend_state.dst_color_blendfactor   = blend->dstRGB;
+    target.blend_state.color_blend_op          = SDL_GPU_BLENDOP_ADD;
+    target.blend_state.src_alpha_blendfactor   = blend->srcAlpha;
+    target.blend_state.dst_alpha_blendfactor   = blend->dstAlpha;
+    target.blend_state.alpha_blend_op          = SDL_GPU_BLENDOP_ADD;
     target.blend_state.enable_color_write_mask = true;
-    target.blend_state.color_write_mask =
-        colorWrite ? (SDL_GPU_COLORCOMPONENT_R | SDL_GPU_COLORCOMPONENT_G | SDL_GPU_COLORCOMPONENT_B | SDL_GPU_COLORCOMPONENT_A) : 0;
+    target.blend_state.color_write_mask        = colorWrite ? (SDL_GPU_COLORCOMPONENT_R | SDL_GPU_COLORCOMPONENT_G | SDL_GPU_COLORCOMPONENT_B | SDL_GPU_COLORCOMPONENT_A) : 0;
 
-    info.vertex_shader                                = gpu->vert;
-    info.fragment_shader                              = gpu->frag;
+    info.vertex_shader                                 = gpu->vert;
+    info.fragment_shader                               = gpu->frag;
     info.vertex_input_state.vertex_buffer_descriptions = &buffer;
-    info.vertex_input_state.num_vertex_buffers        = 1;
-    info.vertex_input_state.vertex_attributes         = attributes;
-    info.vertex_input_state.num_vertex_attributes     = 2;
-    info.primitive_type = strip ? SDL_GPU_PRIMITIVETYPE_TRIANGLESTRIP : SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
-    info.rasterizer_state.fill_mode  = SDL_GPU_FILLMODE_FILL;
-    info.rasterizer_state.cull_mode  = cull ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
-    info.rasterizer_state.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
-    info.target_info.color_target_descriptions = &target;
-    info.target_info.num_color_targets         = 1;
-    info.target_info.depth_stencil_format      = gpu->depthStencilFormat;
-    info.target_info.has_depth_stencil_target  = true;
+    info.vertex_input_state.num_vertex_buffers         = 1;
+    info.vertex_input_state.vertex_attributes          = attributes;
+    info.vertex_input_state.num_vertex_attributes      = 2;
+    info.primitive_type                                = strip ? SDL_GPU_PRIMITIVETYPE_TRIANGLESTRIP : SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+    info.rasterizer_state.fill_mode                    = SDL_GPU_FILLMODE_FILL;
+    info.rasterizer_state.cull_mode                    = cull ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
+    info.rasterizer_state.front_face                   = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
+    info.target_info.color_target_descriptions         = &target;
+    info.target_info.num_color_targets                 = 1;
+    info.target_info.depth_stencil_format              = gpu->depthStencilFormat;
+    info.target_info.has_depth_stencil_target          = true;
 
-    info.depth_stencil_state.compare_mask = 0xff;
-    info.depth_stencil_state.write_mask   = 0xff;
+    info.depth_stencil_state.compare_mask        = 0xff;
+    info.depth_stencil_state.write_mask          = 0xff;
     info.depth_stencil_state.enable_stencil_test = stencil != SDLGPUNVG_STENCIL_NONE;
     switch (stencil)
     {
         case SDLGPUNVG_STENCIL_WINDING:
-            info.depth_stencil_state.front_stencil_state =
-                sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_STENCILOP_INCREMENT_AND_WRAP);
-            info.depth_stencil_state.back_stencil_state =
-                sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_STENCILOP_DECREMENT_AND_WRAP);
+            info.depth_stencil_state.front_stencil_state = sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_STENCILOP_INCREMENT_AND_WRAP);
+            info.depth_stencil_state.back_stencil_state  = sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_STENCILOP_DECREMENT_AND_WRAP);
             break;
         case SDLGPUNVG_STENCIL_EQUAL_KEEP:
             info.depth_stencil_state.front_stencil_state = sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_EQUAL, SDL_GPU_STENCILOP_KEEP);
             break;
         case SDLGPUNVG_STENCIL_NOTEQUAL_ZERO:
-            info.depth_stencil_state.front_stencil_state =
-                sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_NOT_EQUAL, SDL_GPU_STENCILOP_ZERO);
+            info.depth_stencil_state.front_stencil_state         = sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_NOT_EQUAL, SDL_GPU_STENCILOP_ZERO);
             info.depth_stencil_state.front_stencil_state.fail_op = SDL_GPU_STENCILOP_ZERO;
             break;
         case SDLGPUNVG_STENCIL_EQUAL_INCR:
-            info.depth_stencil_state.front_stencil_state =
-                sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_EQUAL, SDL_GPU_STENCILOP_INCREMENT_AND_CLAMP);
+            info.depth_stencil_state.front_stencil_state = sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_EQUAL, SDL_GPU_STENCILOP_INCREMENT_AND_CLAMP);
             break;
         case SDLGPUNVG_STENCIL_ALWAYS_ZERO:
             info.depth_stencil_state.front_stencil_state = sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_STENCILOP_ZERO);
             break;
         case SDLGPUNVG_STENCIL_ALWAYS_REPLACE:
-            info.depth_stencil_state.front_stencil_state =
-                sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_STENCILOP_REPLACE);
+            info.depth_stencil_state.front_stencil_state = sdlgpunvg__stencilOp(SDL_GPU_COMPAREOP_ALWAYS, SDL_GPU_STENCILOP_REPLACE);
             break;
         default:
             break;
@@ -486,9 +488,8 @@ static SDL_GPUGraphicsPipeline* sdlgpunvg__pipeline(SDLGPUNVGcontext* gpu, int s
     }
     if (gpu->npipelines + 1 > gpu->cpipelines)
     {
-        int cpipelines = sdlgpunvg__maxi(gpu->npipelines + 1, 16) * 2;
-        SDLGPUNVGpipeline* pipelines =
-            (SDLGPUNVGpipeline*)realloc(gpu->pipelines, sizeof(SDLGPUNVGpipeline) * cpipelines);
+        int cpipelines               = sdlgpunvg__maxi(gpu->npipelines + 1, 16) * 2;
+        SDLGPUNVGpipeline* pipelines = (SDLGPUNVGpipeline*)realloc(gpu->pipelines, sizeof(SDLGPUNVGpipeline) * cpipelines);
         if (pipelines == NULL)
         {
             SDL_ReleaseGPUGraphicsPipeline(gpu->device, pipeline);
@@ -514,13 +515,13 @@ static SDL_GPUSampler* sdlgpunvg__sampler(SDLGPUNVGcontext* gpu, int imageFlags)
         SDL_GPUSamplerCreateInfo info;
         memset(&info, 0, sizeof(info));
         info.min_filter = info.mag_filter = (index & 1) ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
-        info.mipmap_mode = (index & 1) ? SDL_GPU_SAMPLERMIPMAPMODE_NEAREST : SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
-        info.address_mode_u = (index & 2) ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-        info.address_mode_v = (index & 4) ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-        info.address_mode_w = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
-        info.min_lod        = 0.0f;
-        info.max_lod        = (index & 8) ? 1000.0f : 0.0f;
-        gpu->samplers[index] = SDL_CreateGPUSampler(gpu->device, &info);
+        info.mipmap_mode                  = (index & 1) ? SDL_GPU_SAMPLERMIPMAPMODE_NEAREST : SDL_GPU_SAMPLERMIPMAPMODE_LINEAR;
+        info.address_mode_u               = (index & 2) ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+        info.address_mode_v               = (index & 4) ? SDL_GPU_SAMPLERADDRESSMODE_REPEAT : SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+        info.address_mode_w               = SDL_GPU_SAMPLERADDRESSMODE_CLAMP_TO_EDGE;
+        info.min_lod                      = 0.0f;
+        info.max_lod                      = (index & 8) ? 1000.0f : 0.0f;
+        gpu->samplers[index]              = SDL_CreateGPUSampler(gpu->device, &info);
     }
     return gpu->samplers[index];
 }
@@ -533,12 +534,14 @@ static int sdlgpunvg__renderCreate(void* uptr)
     SDLGPUNVGcontext* gpu = (SDLGPUNVGcontext*)uptr;
     int aa                = (gpu->flags & NVG_ANTIALIAS) != 0;
 
-    gpu->vert = sdlgpunvg__createShader(gpu, SDL_GPU_SHADERSTAGE_VERTEX, sdlgpu_nvg_vert_spirv,
-                                        sizeof(sdlgpu_nvg_vert_spirv), sdlgpu_nvg_vert_msl, 0, 1);
-    gpu->frag = aa ? sdlgpunvg__createShader(gpu, SDL_GPU_SHADERSTAGE_FRAGMENT, sdlgpu_nvg_frag_aa_spirv,
-                                             sizeof(sdlgpu_nvg_frag_aa_spirv), sdlgpu_nvg_frag_aa_msl, 1, 1)
-                   : sdlgpunvg__createShader(gpu, SDL_GPU_SHADERSTAGE_FRAGMENT, sdlgpu_nvg_frag_spirv,
-                                             sizeof(sdlgpu_nvg_frag_spirv), sdlgpu_nvg_frag_msl, 1, 1);
+// A shader of sdlgpu_shaders.h, in each of its formats
+#define SDLGPUNVG_SHADER(name)                                                                                       \
+    sdlgpu_nvg_##name##_spirv, sizeof(sdlgpu_nvg_##name##_spirv), sdlgpu_nvg_##name##_msl, sdlgpu_nvg_##name##_dxil, \
+        sizeof(sdlgpu_nvg_##name##_dxil)
+    gpu->vert = sdlgpunvg__createShader(gpu, SDL_GPU_SHADERSTAGE_VERTEX, SDLGPUNVG_SHADER(vert), 0, 1);
+    gpu->frag = aa ? sdlgpunvg__createShader(gpu, SDL_GPU_SHADERSTAGE_FRAGMENT, SDLGPUNVG_SHADER(frag_aa), 1, 1)
+                   : sdlgpunvg__createShader(gpu, SDL_GPU_SHADERSTAGE_FRAGMENT, SDLGPUNVG_SHADER(frag), 1, 1);
+#undef SDLGPUNVG_SHADER
     if (gpu->vert == NULL || gpu->frag == NULL)
     {
         SDL_Log("nanovg: no SDL_GPU shader: %s", SDL_GetError());
@@ -571,11 +574,11 @@ static int sdlgpunvg__renderCreateTexture(void* uptr, int type, int w, int h, in
         return 0;
 
     memset(&info, 0, sizeof(info));
-    info.type   = SDL_GPU_TEXTURETYPE_2D;
-    info.format = type == NVG_TEXTURE_RGBA ? SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM : SDL_GPU_TEXTUREFORMAT_R8_UNORM;
-    info.usage  = SDL_GPU_TEXTUREUSAGE_SAMPLER;
-    info.width  = (Uint32)w;
-    info.height = (Uint32)h;
+    info.type                 = SDL_GPU_TEXTURETYPE_2D;
+    info.format               = type == NVG_TEXTURE_RGBA ? SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM : SDL_GPU_TEXTUREFORMAT_R8_UNORM;
+    info.usage                = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+    info.width                = (Uint32)w;
+    info.height               = (Uint32)h;
     info.layer_count_or_depth = 1;
     info.num_levels           = 1;
     if (imageFlags & NVG_IMAGE_GENERATE_MIPMAPS)
@@ -720,7 +723,7 @@ static NVGcolor sdlgpunvg__premulColor(NVGcolor c)
 }
 
 static int sdlgpunvg__convertPaint(SDLGPUNVGcontext* gpu, SDLGPUNVGfragUniforms* frag, NVGpaint* paint,
-                                   NVGscissor* scissor, float width, float fringe, float strokeThr)
+    NVGscissor* scissor, float width, float fringe, float strokeThr)
 {
     SDLGPUNVGtexture* tex = NULL;
     float invxform[6];
@@ -741,12 +744,10 @@ static int sdlgpunvg__convertPaint(SDLGPUNVGcontext* gpu, SDLGPUNVGfragUniforms*
     {
         nvgTransformInverse(invxform, scissor->xform);
         sdlgpunvg__xformToMat3x4(frag->scissorMat, invxform);
-        frag->scissorExt[0] = scissor->extent[0];
-        frag->scissorExt[1] = scissor->extent[1];
-        frag->scissorScale[0] =
-            sqrtf(scissor->xform[0] * scissor->xform[0] + scissor->xform[2] * scissor->xform[2]) / fringe;
-        frag->scissorScale[1] =
-            sqrtf(scissor->xform[1] * scissor->xform[1] + scissor->xform[3] * scissor->xform[3]) / fringe;
+        frag->scissorExt[0]   = scissor->extent[0];
+        frag->scissorExt[1]   = scissor->extent[1];
+        frag->scissorScale[0] = sqrtf(scissor->xform[0] * scissor->xform[0] + scissor->xform[2] * scissor->xform[2]) / fringe;
+        frag->scissorScale[1] = sqrtf(scissor->xform[1] * scissor->xform[1] + scissor->xform[3] * scissor->xform[3]) / fringe;
     }
 
     memcpy(frag->extent, paint->extent, sizeof(frag->extent));
@@ -819,7 +820,7 @@ static void sdlgpunvg__setUniforms(SDLGPUNVGcontext* gpu, SDL_GPURenderPass* pas
 }
 
 static int sdlgpunvg__bind(SDLGPUNVGcontext* gpu, SDL_GPURenderPass* pass, int stencil, int strip, int colorWrite,
-                           int cull, const SDLGPUNVGblend* blend)
+    int cull, const SDLGPUNVGblend* blend)
 {
     SDL_GPUGraphicsPipeline* pipeline = sdlgpunvg__pipeline(gpu, stencil, strip, colorWrite, cull, blend);
     if (pipeline == NULL)
@@ -844,7 +845,7 @@ typedef struct SDLGPUNVGpassState
 
 static void sdlgpunvg__fill(SDLGPUNVGcontext* gpu, SDLGPUNVGpassState* state, SDLGPUNVGcall* call)
 {
-    SDLGPUNVGpath* paths = &gpu->paths[call->pathOffset];
+    SDLGPUNVGpath* paths    = &gpu->paths[call->pathOffset];
     SDL_GPURenderPass* pass = state->pass;
     int i, npaths = call->pathCount;
 
@@ -871,9 +872,9 @@ static void sdlgpunvg__fill(SDLGPUNVGcontext* gpu, SDLGPUNVGpassState* state, SD
 }
 
 static void sdlgpunvg__convexFill(SDLGPUNVGcontext* gpu, SDLGPUNVGpassState* state, SDLGPUNVGcall* call, int stencil,
-                                  int colorWrite)
+    int colorWrite)
 {
-    SDLGPUNVGpath* paths = &gpu->paths[call->pathOffset];
+    SDLGPUNVGpath* paths    = &gpu->paths[call->pathOffset];
     SDL_GPURenderPass* pass = state->pass;
     int i, npaths = call->pathCount;
 
@@ -889,9 +890,9 @@ static void sdlgpunvg__convexFill(SDLGPUNVGcontext* gpu, SDLGPUNVGpassState* sta
 
 static void sdlgpunvg__stroke(SDLGPUNVGcontext* gpu, SDLGPUNVGpassState* state, SDLGPUNVGcall* call)
 {
-    SDLGPUNVGpath* paths = &gpu->paths[call->pathOffset];
+    SDLGPUNVGpath* paths    = &gpu->paths[call->pathOffset];
     SDL_GPURenderPass* pass = state->pass;
-    int npaths = call->pathCount, i;
+    int npaths              = call->pathCount, i;
 
     if (gpu->flags & NVG_STENCIL_STROKES)
     {
@@ -917,7 +918,7 @@ static void sdlgpunvg__stroke(SDLGPUNVGcontext* gpu, SDLGPUNVGpassState* state, 
     {
         sdlgpunvg__setUniforms(gpu, pass, call->uniformOffset, call->image);
         if (sdlgpunvg__bind(gpu, pass, state->clipped ? SDLGPUNVG_STENCIL_EQUAL_KEEP : SDLGPUNVG_STENCIL_NONE, 1, 1, 1,
-                            &call->blend))
+                &call->blend))
             for (i = 0; i < npaths; i++)
                 sdlgpunvg__draw(pass, paths[i].strokeOffset, paths[i].strokeCount);
     }
@@ -927,7 +928,7 @@ static void sdlgpunvg__triangles(SDLGPUNVGcontext* gpu, SDLGPUNVGpassState* stat
 {
     sdlgpunvg__setUniforms(gpu, state->pass, call->uniformOffset, call->image);
     if (sdlgpunvg__bind(gpu, state->pass, state->clipped ? SDLGPUNVG_STENCIL_EQUAL_KEEP : SDLGPUNVG_STENCIL_NONE, 0, 1,
-                        1, &call->blend))
+            1, &call->blend))
         sdlgpunvg__draw(state->pass, call->triangleOffset, call->triangleCount);
 }
 
@@ -1155,9 +1156,8 @@ static int sdlgpunvg__allocFragUniforms(SDLGPUNVGcontext* gpu, int n)
     int ret = 0;
     if (gpu->nuniforms + n > gpu->cuniforms)
     {
-        int cuniforms = sdlgpunvg__maxi(gpu->nuniforms + n, 128) + gpu->cuniforms / 2;
-        SDLGPUNVGfragUniforms* uniforms =
-            (SDLGPUNVGfragUniforms*)realloc(gpu->uniforms, sizeof(SDLGPUNVGfragUniforms) * cuniforms);
+        int cuniforms                   = sdlgpunvg__maxi(gpu->nuniforms + n, 128) + gpu->cuniforms / 2;
+        SDLGPUNVGfragUniforms* uniforms = (SDLGPUNVGfragUniforms*)realloc(gpu->uniforms, sizeof(SDLGPUNVGfragUniforms) * cuniforms);
         if (uniforms == NULL)
             return -1;
         gpu->uniforms  = uniforms;
@@ -1190,7 +1190,7 @@ static int sdlgpunvg__unfoldFan(NVGvertex* verts, const NVGvertex* fan, int n)
 }
 
 static void sdlgpunvg__renderFill(void* uptr, NVGpaint* paint, NVGcompositeOperationState compositeOperation,
-                                  NVGscissor* scissor, float fringe, const float* bounds, const NVGpath* paths, int npaths)
+    NVGscissor* scissor, float fringe, const float* bounds, const NVGpath* paths, int npaths)
 {
     SDLGPUNVGcontext* gpu = (SDLGPUNVGcontext*)uptr;
     SDLGPUNVGcall* call   = sdlgpunvg__allocCall(gpu);
@@ -1228,8 +1228,8 @@ static void sdlgpunvg__renderFill(void* uptr, NVGpaint* paint, NVGcompositeOpera
 
     for (i = 0; i < npaths; i++)
     {
-        SDLGPUNVGpath* copy  = &gpu->paths[call->pathOffset + i];
-        const NVGpath* path  = &paths[i];
+        SDLGPUNVGpath* copy = &gpu->paths[call->pathOffset + i];
+        const NVGpath* path = &paths[i];
         memset(copy, 0, sizeof(SDLGPUNVGpath));
         if (path->nfill > 2)
         {
@@ -1286,7 +1286,7 @@ error:
 }
 
 static void sdlgpunvg__renderStroke(void* uptr, NVGpaint* paint, NVGcompositeOperationState compositeOperation,
-                                    NVGscissor* scissor, float fringe, float strokeWidth, const NVGpath* paths, int npaths)
+    NVGscissor* scissor, float fringe, float strokeWidth, const NVGpath* paths, int npaths)
 {
     SDLGPUNVGcontext* gpu = (SDLGPUNVGcontext*)uptr;
     SDLGPUNVGcall* call   = sdlgpunvg__allocCall(gpu);
@@ -1331,7 +1331,7 @@ static void sdlgpunvg__renderStroke(void* uptr, NVGpaint* paint, NVGcompositeOpe
             goto error;
         sdlgpunvg__convertPaint(gpu, &gpu->uniforms[call->uniformOffset], paint, scissor, strokeWidth, fringe, -1.0f);
         sdlgpunvg__convertPaint(gpu, &gpu->uniforms[call->uniformOffset + 1], paint, scissor, strokeWidth, fringe,
-                                1.0f - 0.5f / 255.0f);
+            1.0f - 0.5f / 255.0f);
     }
     else
     {
@@ -1348,7 +1348,7 @@ error:
 }
 
 static void sdlgpunvg__renderTriangles(void* uptr, NVGpaint* paint, NVGcompositeOperationState compositeOperation,
-                                       NVGscissor* scissor, const NVGvertex* verts, int nverts, float fringe)
+    NVGscissor* scissor, const NVGvertex* verts, int nverts, float fringe)
 {
     SDLGPUNVGcontext* gpu = (SDLGPUNVGcontext*)uptr;
     SDLGPUNVGcall* call   = sdlgpunvg__allocCall(gpu);
@@ -1414,7 +1414,7 @@ static void sdlgpunvg__renderDelete(void* uptr)
 }
 
 NVGcontext* nvgCreateSDLGPU(SDL_GPUDevice* device, SDL_GPUTextureFormat colorFormat,
-                            SDL_GPUTextureFormat depthStencilFormat, int flags)
+    SDL_GPUTextureFormat depthStencilFormat, int flags)
 {
     NVGparams params;
     NVGcontext* ctx       = NULL;
@@ -1461,7 +1461,7 @@ void nvgDeleteSDLGPU(NVGcontext* ctx)
 }
 
 void nvgSDLGPUSetTarget(NVGcontext* ctx, SDL_GPUCommandBuffer* cmd, SDL_GPUTexture* color, SDL_GPUTexture* depthStencil,
-                        const SDL_FColor* clear)
+    const SDL_FColor* clear)
 {
     SDLGPUNVGcontext* gpu = (SDLGPUNVGcontext*)nvgInternalParams(ctx)->userPtr;
     gpu->cmd              = cmd;

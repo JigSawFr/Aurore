@@ -24,7 +24,7 @@
 namespace aurore
 {
 
-// AURORE_GRAPHICS=SDLGPU: SDL3's GPU API (Vulkan, Metal) under the SDL3
+// AURORE_GRAPHICS=SDLGPU: SDL3's GPU API (Direct3D 12, Vulkan, Metal) under the SDL3
 // window. Each frame is drawn by nanovg (nanovg_sdlgpu.h) into a texture of
 // the window's size in pixels, then copied onto the window's swapchain: the
 // texture is what readPixels reads, as GL reads its framebuffer.

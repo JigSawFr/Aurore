@@ -12,11 +12,14 @@
 #     python3 tools/make_sdlgpu_shaders.py
 #     python3 tools/make_sdlgpu_shaders.py --check   the header is up to date
 #
-# SPIR-V for Vulkan (glslangValidator), MSL for Metal (spirv-cross, from the
-# SPIR-V), the fragment shader with and without EDGE_AA. No DXIL yet: D3D12
-# needs dxc, so SDL_GPU uses Vulkan on Windows. Ubuntu's glslang-tools and
-# spirv-cross packages have both.
+# SPIR-V for Vulkan (glslangValidator, Ubuntu's glslang-tools), then from it
+# MSL for Metal and DXIL for Direct3D 12 by SDL_shadercross, SDL's own
+# translator, which lays their resources out as SDL_GPU expects; the
+# fragment shader with and without EDGE_AA. tools/build_shadercross.sh
+# builds shadercross at pinned versions, into build/shadercross (SHADERCROSS
+# names another one).
 
+import os
 import pathlib
 import subprocess
 import sys
@@ -25,26 +28,31 @@ import tempfile
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DIR = ROOT / "library/include/aurore/extern/nanovg/nvg_shader/sdlgpu"
 HEADER = DIR / "sdlgpu_shaders.h"
+SHADERCROSS = os.environ.get("SHADERCROSS", str(ROOT / "build/shadercross/bin/shadercross"))
 
-# name in the header, source, glslang's defines
+# name in the header, source, stage, glslang's defines
 SHADERS = [
-    ("vert", "nanovg.vert", []),
-    ("frag", "nanovg.frag", []),
-    ("frag_aa", "nanovg.frag", ["-DEDGE_AA"]),
+    ("vert", "nanovg.vert", "vertex", []),
+    ("frag", "nanovg.frag", "fragment", []),
+    ("frag_aa", "nanovg.frag", "fragment", ["-DEDGE_AA"]),
 ]
 
 
 def run(args):
-    return subprocess.run(args, check=True, capture_output=True, text=True).stdout
+    # shadercross finds libdxcompiler, libdxil and libSDL3 next to it
+    env = dict(os.environ)
+    env["LD_LIBRARY_PATH"] = os.pathsep.join(filter(None, [str(pathlib.Path(SHADERCROSS).parent), env.get("LD_LIBRARY_PATH")]))
+    return subprocess.run(args, check=True, capture_output=True, text=True, env=env).stdout
 
 
-def compile_shader(tmp, name, source, defines):
+def compile_shader(tmp, name, source, stage, defines):
     spv = pathlib.Path(tmp) / f"{name}.spv"
+    msl = pathlib.Path(tmp) / f"{name}.msl"
+    dxil = pathlib.Path(tmp) / f"{name}.dxil"
     run(["glslangValidator", "-V", *defines, str(DIR / source), "-o", str(spv)])
-    # Metal: the bindings SDL_GPU expects come from the SPIR-V's own
-    # decorations (buffer 0 for the uniforms, texture and sampler 0)
-    msl = run(["spirv-cross", "--msl", "--msl-version", "20100", "--msl-decoration-binding", str(spv)])
-    return spv.read_bytes(), msl
+    run([SHADERCROSS, str(spv), "-s", "SPIRV", "-d", "MSL", "-t", stage, "--msl-version", "2.1.0", "-o", str(msl)])
+    run([SHADERCROSS, str(spv), "-s", "SPIRV", "-d", "DXIL", "-t", stage, "-o", str(dxil)])
+    return spv.read_bytes(), msl.read_text(), dxil.read_bytes()
 
 
 def c_bytes(data):
@@ -72,13 +80,16 @@ def make_header():
         "",
     ]
     with tempfile.TemporaryDirectory() as tmp:
-        for name, source, defines in SHADERS:
-            spirv, msl = compile_shader(tmp, name, source, defines)
+        for name, source, stage, defines in SHADERS:
+            spirv, msl, dxil = compile_shader(tmp, name, source, stage, defines)
             parts.append(f"static const unsigned char sdlgpu_nvg_{name}_spirv[] = {{")
             parts.append(c_bytes(spirv))
             parts.append("};")
             parts.append(f"static const char sdlgpu_nvg_{name}_msl[] =")
             parts.append(c_string(msl) + ";")
+            parts.append(f"static const unsigned char sdlgpu_nvg_{name}_dxil[] = {{")
+            parts.append(c_bytes(dxil))
+            parts.append("};")
             parts.append("")
     return "\n".join(parts)
 

@@ -30,7 +30,7 @@ static const SDL_GPUTextureFormat COLOR_FORMAT = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_
 SDLGPUContext::SDLGPUContext(SDL_Window* window)
     : window(window)
 {
-    // SDL_GPU_DRIVER (vulkan, metal) picks the driver; AURORE_GPU_DEBUG=1
+    // SDL_GPU_DRIVER (direct3d12, vulkan, metal) picks the driver; AURORE_GPU_DEBUG=1
     // turns the driver's validation on
     const char* debug = SDL_getenv("AURORE_GPU_DEBUG");
     this->device      = SDL_CreateGPUDevice(NVG_SDLGPU_SHADER_FORMATS, debug && strcmp(debug, "1") == 0, nullptr);
