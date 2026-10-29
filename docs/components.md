@@ -1,6 +1,6 @@
 # Components
 
-Views of Aurore beyond borealis' own. The demo shows them: its **Library** tab (302 covers in a recycled grid, a menu on each: X or a long press; a game's page, with a recycled row of games like it) and its **Components** tab (icon buttons, a menu under a button).
+Views of Aurore beyond borealis' own. The demo shows them: its **Library** tab (302 covers in a recycled grid, each one of its genre's pictures in `resources/img/covers` loaded by `ThemeImages`, its title drawn over it, a menu on each: X or a long press; a game's page, with a recycled row of games like it) and its **Components** tab (icon buttons, a menu under a button).
 
 ## Recycled grid and row
 

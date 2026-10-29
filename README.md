@@ -268,7 +268,7 @@ Checked on every pull request: 156 test cases in the headless harness, 32 refere
 The demo is a guided tour of Aurore, a tab per subject, each saying what it shows. It runs in a browser too: <https://aurore.boreale.dev/demo/>.
 
 - **Welcome**: Aurore in a sentence over an aurora drawn with nanovg, a dashboard of live cards (a ring, bars, figures), a tile per tab.
-- **Library**: 302 made-up games, their covers drawn in code, in a grid that keeps only the cells on screen; sorted, filtered by genre, a menu on each, a page for each with a row of games like it; the same games by genre in a long recycled list.
+- **Library**: 302 made-up games, their covers key art made up for the demo (28 pictures, eight genres, `tools/make_covers.py`), in a grid that keeps only the cells on screen; sorted, filtered by genre, a menu on each, a page for each with a row of games like it; the same games by genre in a long recycled list.
 - **Components**: borealis' button styles and Cadran's, cells in cards, bars, chips, pills, keys, every dialog, sheet and toast, images, icons, an empty list, Markdown, and a screen of settings cells.
 - **Motion**: easings drawn and played, state styles and their transitions (XML only), the focus gliding and shaking, reduced motion, the transform lab.
 - **Text and languages**: the 15 languages switched live, the text sizes, scripts and emoji, long texts (scrolling, shrinking, wrapping), the text lab.
