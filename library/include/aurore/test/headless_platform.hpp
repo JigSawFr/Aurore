@@ -65,6 +65,8 @@ class HeadlessVideoContext : public VideoContext
     void* eglDisplay = nullptr;
     void* eglContext = nullptr;
     void* glfwWindow = nullptr;
+    void* sdlWindow  = nullptr;
+    void* sdlContext = nullptr;
 };
 
 class HeadlessInputManager : public InputManager

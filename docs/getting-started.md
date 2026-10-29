@@ -16,7 +16,7 @@ Then:
 ```sh
 git clone --recursive https://github.com/JigSawFr/aurore.git
 cd aurore
-cmake -B build -G Ninja -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON
+cmake -B build -G Ninja -DAURORE_PLATFORM=DESKTOP -DAURORE_LIBROMFS=ON
 cmake --build build
 ./build/aurore_demo
 ```

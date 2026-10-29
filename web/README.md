@@ -12,7 +12,7 @@ cmake --build build-web
 python3 -m http.server -d build-web/web 8000      # http://localhost:8000/
 ```
 
-Under `emcmake`, the top `CMakeLists.txt` builds the desktop platform with SDL2 and OpenGL ES 3 from Emscripten's ports (`web/cmake/SDL2Config.cmake` finds nothing to link; `-DAURORE_WINDOW=SDL3` takes Emscripten's SDL3 port instead, with `web/cmake/SDL3Config.cmake`), packages `resources/` into `aurore_demo.data` at `/app/resources`, and assembles the page in `build-web/web/`: `web/page/`, `aurore_demo.js`, `.wasm` and `.data`, the mark and the site's fonts.
+Under `emcmake`, the top `CMakeLists.txt` builds the desktop platform with SDL3 and OpenGL ES 3 from Emscripten's ports (`web/cmake/SDL3Config.cmake` gives an empty `SDL3::SDL3`; `-DAURORE_WINDOW=SDL2` takes Emscripten's SDL2 port instead, with `web/cmake/SDL2Config.cmake`), packages `resources/` into `aurore_demo.data` at `/app/resources`, and assembles the page in `build-web/web/`: `web/page/`, `aurore_demo.js`, `.wasm` and `.data`, the mark and the site's fonts.
 
 - **Japanese, Korean and Chinese** need a font a browser does not give: `python3 tools/web_cjk_font.py /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc build-web/cjk.otf` cuts the characters the catalogs use out of Noto Sans CJK (`fonts-noto-cjk`, and fontTools), and `-DAURORE_WEB_CJK_FONT=build-web/cjk.otf` packages it as the app's `font/cjk.otf` (about 270 KB).
 - `demo/src/main.cpp` hands each frame back to the browser (`emscripten_set_main_loop`); the rest is Aurore's own: `aurore_web_button()` for the pad, the window kept at 1280×720 and scaled by the page ([docs/platforms.md](../docs/platforms.md#in-a-browser)).

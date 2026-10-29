@@ -563,7 +563,8 @@ bool DesktopPlatform::localeFromEnvironmentVariable(std::string* locale)
 DesktopPlatform::DesktopPlatform()
 {
     // Theme
-    const char* themeEnv = environment("THEME");
+    const char* themeEnv       = environment("THEME");
+    this->themeFromEnvironment = themeEnv != nullptr;
     if (themeEnv == nullptr)
     {
 #if defined(IOS) || defined(TVOS)

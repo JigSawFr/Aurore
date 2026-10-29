@@ -47,7 +47,7 @@ Read by the [test harness](testing.md) (`-DAURORE_BUILD_TESTS=ON`) and the demo'
 | `AURORE_TEST_OUTPUT` | The folder the screenshots and their differences are written to (default `test-output`) |
 | `AURORE_TEST_UPDATE` | `1` writes every reference again from the screenshots taken, to commit after looking at them |
 | `CI` | Set (as on GitHub Actions): a missing reference fails instead of being written |
-| `AURORE_HEADLESS_GLFW` | `1` draws in a hidden GLFW window instead of EGL's surfaceless context (needs a display) |
+| `AURORE_HEADLESS_WINDOW` (older name `AURORE_HEADLESS_GLFW`) | `1` draws in a hidden SDL3 or GLFW window instead of EGL's surfaceless context (needs a display) |
 | `AURORE_DECOR_SHOTS` | `tests/demo_tests.cpp` only: a folder where the case of the theme decorations saves a picture of each kind of particles |
 
 ## Names

@@ -138,6 +138,20 @@ void SDLPlatform::createWindow(std::string windowTitle, uint32_t windowWidth, ui
     this->videoContext = new SDLVideoContext(windowTitle, windowWidth, windowHeight, windowXPos, windowYPos);
     this->inputManager = new SDLInputManager(this->videoContext->getSDLWindow());
     this->imeManager   = new SDLImeManager(&this->otherEvent);
+
+#ifdef __SDL3__
+    // The system's light or dark, which SDL3 reads everywhere (Linux's
+    // desktop portal too), unless AURORE_THEME gave one. Its video must be
+    // started first.
+    if (!this->themeFromEnvironment)
+    {
+        SDL_SystemTheme theme = SDL_GetSystemTheme();
+        if (theme == SDL_SYSTEM_THEME_DARK)
+            this->themeVariant = ThemeVariant::DARK;
+        else if (theme == SDL_SYSTEM_THEME_LIGHT)
+            this->themeVariant = ThemeVariant::LIGHT;
+    }
+#endif
 }
 
 void SDLPlatform::restoreWindow()

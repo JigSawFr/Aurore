@@ -1,4 +1,4 @@
-# An app built on Aurore: a desktop binary (GLFW, SDL2 or SDL3) and a Switch .nro.
+# An app built on Aurore: a desktop binary (SDL3, or GLFW or SDL2) and a Switch .nro.
 #
 #   cmake -B build -DAURORE_PLATFORM=DESKTOP && cmake --build build
 #   cmake -B build-switch -DAURORE_PLATFORM=SWITCH && cmake --build build-switch --target my_app.nro

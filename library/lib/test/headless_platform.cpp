@@ -38,6 +38,8 @@
 #if defined(__GLFW__)
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#elif defined(__SDL3__)
+#include <SDL3/SDL.h>
 #endif
 
 namespace aurore
@@ -51,7 +53,7 @@ HeadlessVideoContext::HeadlessVideoContext(int width, int height)
 {
     if (!createContext())
     {
-        Logger::error("headless: no OpenGL context (EGL surfaceless, or a hidden GLFW window)");
+        Logger::error("headless: no OpenGL context (EGL surfaceless, or a hidden GLFW or SDL3 window)");
         return;
     }
     Logger::info("headless: GL Renderer: {}", (const char*)glGetString(GL_RENDERER));
@@ -69,8 +71,12 @@ HeadlessVideoContext::HeadlessVideoContext(int width, int height)
 
 bool HeadlessVideoContext::createContext()
 {
-    const char* forceGlfw = environmentVariable("HEADLESS_GLFW");
-    bool useGlfw          = forceGlfw && *forceGlfw && *forceGlfw != '0';
+    // AURORE_HEADLESS_WINDOW (or its older name AURORE_HEADLESS_GLFW): a
+    // hidden window of the library's GLFW or SDL3 even where EGL works
+    const char* forceGlfw = environmentVariable("HEADLESS_WINDOW");
+    if (!forceGlfw)
+        forceGlfw = environmentVariable("HEADLESS_GLFW");
+    bool useGlfw = forceGlfw && *forceGlfw && *forceGlfw != '0';
 
 #if defined(AURORE_HEADLESS_EGL)
     if (!useGlfw)
@@ -106,7 +112,7 @@ bool HeadlessVideoContext::createContext()
                 eglDestroyContext(display, context);
             eglTerminate(display);
         }
-        Logger::warning("headless: EGL surfaceless unavailable, trying a hidden GLFW window");
+        Logger::warning("headless: EGL surfaceless unavailable, trying a hidden window");
     }
 #endif
 
@@ -125,6 +131,28 @@ bool HeadlessVideoContext::createContext()
     if (!loadGL((GLADloadfunc)glfwGetProcAddress, "headless"))
         return false;
     this->glfwWindow = window;
+    return true;
+#elif defined(__SDL3__)
+    (void)useGlfw;
+    if (!SDL_Init(SDL_INIT_VIDEO))
+        return false;
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_Window* window = SDL_CreateWindow("headless", 64, 64, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+    if (!window)
+        return false;
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+    if (!context || !SDL_GL_MakeCurrent(window, context) || !loadGL((GLADloadfunc)SDL_GL_GetProcAddress, "headless"))
+    {
+        if (context)
+            SDL_GL_DestroyContext(context);
+        SDL_DestroyWindow(window);
+        return false;
+    }
+    this->sdlWindow  = window;
+    this->sdlContext = context;
     return true;
 #else
     (void)useGlfw;
@@ -218,7 +246,7 @@ HeadlessVideoContext::~HeadlessVideoContext()
 {
     if (this->nvgContext)
         nvgDeleteGL3(this->nvgContext);
-    if (this->eglContext || this->glfwWindow)
+    if (this->eglContext || this->glfwWindow || this->sdlWindow)
         destroyFramebuffer();
 #if defined(AURORE_HEADLESS_EGL)
     if (this->eglContext)
@@ -233,6 +261,13 @@ HeadlessVideoContext::~HeadlessVideoContext()
     {
         glfwDestroyWindow((GLFWwindow*)this->glfwWindow);
         glfwTerminate();
+    }
+#elif defined(__SDL3__)
+    if (this->sdlWindow)
+    {
+        SDL_GL_DestroyContext((SDL_GLContext)this->sdlContext);
+        SDL_DestroyWindow((SDL_Window*)this->sdlWindow);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
 #endif
 }

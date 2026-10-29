@@ -101,6 +101,8 @@ class DesktopPlatform : public Platform
     std::string locale;
     /// AURORE_LANG gave the locale: the system's is not looked for
     bool localeFromEnvironment = false;
+    /// AURORE_THEME gave the theme: the system's is not looked for
+    bool themeFromEnvironment  = false;
     bool screenDimmingDisabled = false;
 #ifdef __linux__
     uint32_t inhibitCookie = 0;

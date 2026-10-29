@@ -19,6 +19,12 @@
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/sdl/sdl_input.hpp>
+#if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(TVOS)
+#include <unistd.h>
+
+#include <aurore/platforms/desktop/desktop_platform.hpp>
+#define AURORE_SDL_GAMEPAD_DB
+#endif
 
 #include "sdl_compat.hpp"
 #ifdef __EMSCRIPTEN__
@@ -563,6 +569,18 @@ SDLInputManager::SDLInputManager(SDL_Window* window)
     {
         aurore::fatal("Couldn't initialize joystick: " + std::string(SDL_GetError()));
     }
+
+#ifdef AURORE_SDL_GAMEPAD_DB
+    // The app's own controller mappings, on top of SDL's, as GLFW reads them
+    if (access(DesktopPlatform::GAMEPAD_DB.c_str(), F_OK) != -1)
+    {
+        int added = SDL_AddGamepadMappingsFromFile(DesktopPlatform::GAMEPAD_DB.c_str());
+        if (added < 0)
+            Logger::warning("sdl: gamepad db {}: {}", DesktopPlatform::GAMEPAD_DB, SDL_GetError());
+        else
+            Logger::info("sdl: gamepad db {}: {} mappings", DesktopPlatform::GAMEPAD_DB, added);
+    }
+#endif
 
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 #if defined(__APPLE__) && !defined(PLATFORM_IOS) && !defined(PLATFORM_TVOS) && !defined(PLATFORM_VISIONOS)
