@@ -6,13 +6,18 @@
 // every build
 
 #include <aurore/cadran/ui/prefs.hpp>
+#include <aurore/core/animation.hpp>
 #include <aurore/core/application.hpp>
 #include <aurore/core/hot_reload.hpp>
 #include <aurore/core/inspector.hpp>
 #include <aurore/core/profiler.hpp>
+#include <aurore/core/timer.hpp>
 #include <aurore/test/harness.hpp>
 
+#include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <string>
 
 using aurore::test::Harness;
 
@@ -58,6 +63,56 @@ AURORE_TEST(the_debugging_aids_functions_work_in_every_build)
     AURORE_CHECK(aurore::Application::getSafeArea() == notch);
     aurore::Application::setSafeAreaOverride(nullptr);
     AURORE_CHECK(aurore::Application::getSafeArea().empty());
+}
+
+// A screen settles once its animations are over; AURORE_SETTLE_FILE, built
+// in, says so on every loop for a test driving the app from outside
+AURORE_TEST(settle_file_says_when_the_screen_has_settled)
+{
+    const std::string path = "settle_file_test.txt";
+    std::remove(path.c_str());
+    setenv("AURORE_SETTLE_FILE", path.c_str(), 1);
+    Harness harness;
+    unsetenv("AURORE_SETTLE_FILE");
+    AURORE_CHECK(harness.settle());
+    AURORE_CHECK(aurore::Application::isSettled());
+
+    // A repeating timer (a clock's refresh) runs as long as its screen: the
+    // screen settles all the same
+    aurore::RepeatingTimer clock;
+    clock.setPeriod(1000);
+    clock.start();
+    harness.step(2);
+    AURORE_CHECK(aurore::Application::isSettled());
+    clock.stop();
+
+    aurore::Animatable moving = 0.0f;
+    moving.addStep(1.0f, 300);
+    moving.start();
+    AURORE_CHECK(!aurore::Application::isSettled());
+
+    harness.step();
+    std::ifstream during(path);
+    unsigned long long loop = 0;
+    int settled             = -1;
+    AURORE_CHECK_EQ((bool)(during >> loop >> settled), BUILT_IN);
+    if (BUILT_IN)
+    {
+        AURORE_CHECK(loop > 0);
+        AURORE_CHECK_EQ(settled, 0);
+    }
+
+    AURORE_CHECK(harness.settle());
+    AURORE_CHECK(aurore::Application::isSettled());
+    std::ifstream after(path);
+    unsigned long long later = 0;
+    AURORE_CHECK_EQ((bool)(after >> later >> settled), BUILT_IN);
+    if (BUILT_IN)
+    {
+        AURORE_CHECK(later > loop);
+        AURORE_CHECK_EQ(settled, 1);
+    }
+    std::remove(path.c_str());
 }
 
 int main(int argc, char** argv)

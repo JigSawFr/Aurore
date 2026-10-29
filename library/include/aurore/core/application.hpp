@@ -450,6 +450,19 @@ class Application
     /// Whether blockInputs() is in force.
     static bool isInputBlocks();
 
+    /**
+     * True when the screen has stopped moving: no animation running nor
+     * Timer waiting (a RepeatingTimer does not count: a clock's refresh runs
+     * as long as its screen is open), no task queued or running on the
+     * threads (Threading::isIdle()), inputs not blocked (a screen opening or
+     * closing), and no redraw asked for (a view fading on the clock). What a
+     * test waits for before it presses the next button or takes a screenshot.
+     * With AURORE_DEV_TOOLS, AURORE_SETTLE_FILE (a file's path) has it
+     * written there on every loop, for a test driving the app from outside
+     * (docs/testing.md).
+     */
+    static bool isSettled();
+
     /// The controller's buttons and sticks as read this frame.
     static const ControllerState& getControllerState();
 
