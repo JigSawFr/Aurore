@@ -157,7 +157,8 @@ jobs:
 
   # The New 3DS before its renderer: the library and a smoke test on the console
   # (docs/platforms.md)
-  3ds:
+  ctr:
+    name: 3ds
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     container:
