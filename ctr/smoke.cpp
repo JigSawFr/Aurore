@@ -147,7 +147,7 @@ int main(int argc, char** argv)
         return 1;
     aurore::Application::createWindow("Aurore");
     aurore::Application::setGlobalQuit(false);
-    std::printf("Aurore %s on the New 3DS\n", AURORE_VERSION);
+    std::printf("Aurore %s on the %s\n", AURORE_VERSION, aurore::Application::getPlatform()->getName().c_str());
     std::printf("Design size %ux%u, density %.2f\n", aurore::Application::ORIGINAL_WINDOW_WIDTH,
         aurore::Application::ORIGINAL_WINDOW_HEIGHT, aurore::getDensity());
     std::printf("START quits.\n\n");
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
     if (auto* title = dynamic_cast<aurore::Label*>(root->getView("title")))
         title->setText("Aurore on citro3d");
     if (auto* details = dynamic_cast<aurore::Label*>(root->getView("details")))
-        details->setText(std::string("nanovg's citro3d renderer, ") + AURORE_VERSION);
+        details->setText(aurore::Application::getPlatform()->getName() + ", Aurore " + AURORE_VERSION);
     root->addView(new TestCard());
     aurore::Application::pushActivity(new aurore::Activity(root));
 

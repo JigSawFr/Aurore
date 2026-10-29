@@ -75,7 +75,11 @@ class CtrPlatform : public Platform
     ~CtrPlatform() override;
 
     void createWindow(std::string title, uint32_t width, uint32_t height, float windowXPos, float windowYPos) override;
-    std::string getName() override { return "New 3DS"; }
+    // The console's model: New 3DS, New 3DS XL or New 2DS XL (the original
+    // models run, at a third of the speed, and are not aimed at)
+    std::string getName() override { return this->modelName; }
+    // A New model (804 MHz, the L2 cache, the extra cores)
+    bool isNewModel() const { return this->newModel; }
     const LayoutPreset* getLayoutPreset() override;
 
     bool mainLoopIteration() override;
@@ -106,6 +110,8 @@ class CtrPlatform : public Platform
     FontLoader* getFontLoader() override { return &this->fontLoader; }
 
   private:
+    std::string modelName     = "3DS";
+    bool newModel             = false;
     ThemeVariant themeVariant = ThemeVariant::DARK;
     NullAudioPlayer audioPlayer;
     CtrInputManager inputManager;

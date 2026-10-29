@@ -104,7 +104,7 @@ The result is `build/*.pkg`; the demo's `CMakeLists.txt` copies `ps4/` (the pack
 
 ## New 3DS
 
-The library and a test card, drawn by citro3d on the bottom screen (the touch screen): the library lays screens out with the small screen preset (480x360 units on the 320x240 screen), and nanovg's citro3d renderer (`nanovg_citro3d.h`) draws them; the buttons and the touch screen are not read yet. The New 3DS only (its 804 MHz CPU and 256 MB of memory); the original 3DS is not aimed at, and the New 2DS XL is the console of reference. With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `3ds-dev` group. The CI uses the `devkitpro/devkitarm` image.
+The library and a test card, drawn by citro3d on the bottom screen (the touch screen): the library lays screens out with the small screen preset (480x360 units on the 320x240 screen), and nanovg's citro3d renderer (`nanovg_citro3d.h`) draws them; the buttons and the touch screen are not read yet. The New models only: the New 3DS, the New 3DS XL and the New 2DS XL, which share the CPU (804 MHz, the L2 cache), the memory (256 MB) and the screens' resolutions; the New 2DS XL has no stereoscopic 3D, which Aurore does not use, and is the console of reference. The platform reads the model (`CtrPlatform::getName()`, in the log and on the test card); the original 3DS, 3DS XL and 2DS run, at a third of the speed, and are not aimed at: the log says so. With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `3ds-dev` group. The CI uses the `devkitpro/devkitarm` image.
 
 ```sh
 cmake -B build_3ds -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=3DS
