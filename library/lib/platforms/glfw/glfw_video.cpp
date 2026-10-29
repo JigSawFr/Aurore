@@ -20,7 +20,7 @@
 
 // nanovg implementation
 #ifdef AURORE_USE_OPENGL
-#include <glad/glad.h>
+#include <glad/gl.h>
 #ifdef USE_GL2
 #define NANOVG_GL2_IMPLEMENTATION
 #elif defined(USE_GLES2)
@@ -31,6 +31,7 @@
 #define NANOVG_GL3_IMPLEMENTATION
 #endif /* USE_GL2 */
 #include <nanovg_gl.h>
+#include <aurore/platforms/driver/gl_loader.hpp>
 #include <aurore/platforms/driver/gl_read_pixels.hpp>
 #elif defined(AURORE_USE_METAL)
 static void* METAL_CONTEXT = nullptr;
@@ -352,8 +353,8 @@ GLFWVideoContext::GLFWVideoContext(const std::string& windowTitle, uint32_t wind
 
 #ifdef AURORE_USE_OPENGL
     glfwMakeContextCurrent(window);
-    // Load OpenGL routines using glad
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    if (!loadGL((GLADloadfunc)glfwGetProcAddress, "glfw"))
+        fatal("glfw: the OpenGL context cannot be used (see the log)");
 
     Logger::info("glfw: GL Vendor: {}", (const char*)glGetString(GL_VENDOR));
     Logger::info("glfw: GL Renderer: {}", (const char*)glGetString(GL_RENDERER));
