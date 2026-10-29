@@ -87,6 +87,3 @@ class EasingPlot : public aurore::View
     aurore::EasingFunction easing;
     float progress = 1;
 };
-
-/// The value of `easing` at `t` (0 to 1).
-float ease(aurore::EasingFunction easing, float t);
