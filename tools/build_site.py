@@ -192,6 +192,16 @@ def switcher(t, lang, to_root, home, here, name, versions):
             + "\n".join(groups) + '\n      </div>\n    </div>')
 
 
+SUN_ICON = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>')
+
+
+def reading_toggle(t):
+    """The documentation on a light ground or on the night (site.js, kept as
+    aurore-reading; reading.js sets it before the first paint)."""
+    return (f'<button class="reading-toggle" type="button" aria-pressed="false" aria-label="{t.plain("reading_light")}">'
+            f'{SUN_ICON}<span>{t("reading_light")}</span></button>')
+
+
 def lang_dir(lang):
     folder = next(l[1] for l in LANGUAGES if l[0] == lang)
     return f"{folder}/" if folder else ""
@@ -384,6 +394,19 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     sky = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
     hero = body[0] if aurora else ""
     main = body[1] if aurora else body
+    # A page of the documentation: once the header is scrolled away, a slim
+    # bar at the top with the way home, the page's name, the search and the
+    # light reading (site.js).
+    doc_bar = ""
+    doc_title = re.search(r'<div class="wrap doc">.*?<h1[^>]*>(.*?)</h1>', main, re.S)
+    if doc_title:
+        doc_bar = (f'<div class="doc-bar" hidden><div class="wrap doc-bar-inner">'
+                   f'<a class="doc-bar-home" href="{base}" aria-label="Aurore"><img src="{to_root}assets/mark.svg" alt="" width="24" height="24"><span>Aurore</span></a>'
+                   f'<span class="doc-bar-title">{doc_title.group(1)}</span>'
+                   f'<button class="doc-bar-search" type="button" aria-label="{t.plain("search_placeholder")}">'
+                   f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
+                   f'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
+                   f'{reading_toggle(t)}</div></div>\n')
     docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
                          for p, g, n in DOCS if g == "start")
     umami = "" if NOINDEX else (f'<script src="{to_root}assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
@@ -405,6 +428,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <link rel="alternate" type="application/atom+xml" href="{SITE_URL}releases.atom" title="Aurore releases">
 <link rel="preload" href="{to_root}assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{to_root}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
+<script src="{to_root}assets/reading.js"></script>
 <link rel="stylesheet" href="{to_root}assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aurore">
@@ -422,7 +446,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 {umami}</head>
 <body class="{'home' if home else 'inner'}">
 <a class="skip" href="#main">{t("skip")}</a>
-<div class="sky{' sky-home' if aurora else ''}">
+{doc_bar}<div class="sky{' sky-home' if aurora else ''}">
   {sky}
   <header class="wrap top">
     {switcher(t, lang, to_root, base, "aurore", f'<img src="{to_root}assets/mark.svg" alt="" width="34" height="34">Aurore', VERSIONS)}
@@ -757,9 +781,11 @@ def doc_body(t, lang, to_root, page_name, assets):
     search = (f'<div class="doc-search" hidden><input type="search" placeholder="{t.plain("search_placeholder")}" '
               f'aria-label="{t.plain("search_placeholder")}" aria-controls="doc-results" autocomplete="off" '
               f'spellcheck="false" enterkeyhint="search" data-index="{base}docs/search.json" '
-              f'data-none="{t.plain("search_none")}"><ol id="doc-results" class="doc-results" hidden></ol></div>')
+              f'data-none="{t.plain("search_none")}"><kbd class="search-key" aria-hidden="true">/</kbd>'
+              f'<ol id="doc-results" class="doc-results" hidden></ol></div>')
     return title, description, body, f"""  <div class="wrap doc">
     <nav class="doc-nav" aria-label="{t.plain('docs_title')}">
+      {reading_toggle(t)}
       {search}
       <details class="doc-menu" open><summary>{t("docs_title")}</summary>
 {docs_list(t, lang, to_root, page_name)}

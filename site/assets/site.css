@@ -307,6 +307,60 @@ pre code { font-size: inherit; color: #d6deeb; }
 .pager .next { text-align: right; }
 .edit { font-size: 0.875rem; color: var(--dusk); }
 
+/* The search's key, "/", at the end of its field (not on a touch screen). */
+.search-key {
+  position: absolute; top: 11px; right: 10px; min-width: 22px; height: 22px; padding: 0 6px; display: grid; place-items: center;
+  border: 1px solid var(--night-line); border-radius: 6px; color: var(--mist); font: 500 12px var(--mono); pointer-events: none;
+}
+.doc-search input { padding-right: 40px; }
+.doc-search input:focus ~ .search-key, .doc-search input:not(:placeholder-shown) ~ .search-key { display: none; }
+@media (hover: none) { .search-key { display: none; } }
+
+/* The light reading's button, over the documentation's pages and in its bar. */
+.reading-toggle {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; margin-bottom: 14px; padding: 0 12px;
+  border: 1px solid var(--night-line); border-radius: 10px; background: transparent; color: var(--mist);
+  font: 500 14px var(--body); cursor: pointer;
+}
+.reading-toggle svg { width: 18px; height: 18px; }
+.reading-toggle:hover { color: var(--snow); border-color: var(--mist); }
+.reading-toggle[aria-pressed="true"] { color: var(--aurora); border-color: var(--aurora); background: rgba(0, 255, 204, 0.08); }
+
+/* The documentation's bar, once the header is scrolled away (site.js). */
+.doc-bar {
+  position: fixed; inset: 0 0 auto 0; z-index: 8; transform: translateY(-100%); transition: transform 0.2s;
+  background: rgba(11, 20, 36, 0.88); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-bottom: 1px solid #22324f;
+}
+.doc-bar.on { transform: none; }
+.doc-bar-inner { display: flex; align-items: center; gap: 14px; min-height: 52px; }
+.doc-bar-home { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: #e8eef7; text-decoration: none; font: 700 16px var(--display); }
+.doc-bar-home:hover { color: #e8eef7; }
+.doc-bar-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #a9b6cc; font-size: 15px; }
+.doc-bar-search { display: grid; place-items: center; width: 44px; height: 40px; border: 1px solid #22324f; border-radius: 10px; background: transparent; color: #e8eef7; cursor: pointer; }
+.doc-bar-search svg { width: 18px; height: 18px; }
+.doc-bar .reading-toggle { margin: 0; color: #a9b6cc; border-color: #22324f; }
+.doc-bar .reading-toggle[aria-pressed="true"] { color: #00ffcc; border-color: #00ffcc; background: rgba(0, 255, 204, 0.08); }
+@media (min-width: 900px) {
+  :root:has(.doc-bar.on) .doc-nav, :root:has(.doc-bar.on) .toc { top: 72px; max-height: calc(100vh - 92px); }
+}
+@media (max-width: 640px) { .doc-bar .reading-toggle span, .doc-bar-home span { display: none; } .doc-bar .reading-toggle { padding: 0 10px; } }
+@media (prefers-reduced-motion: reduce) { .doc-bar { transition: none; } }
+
+/* The light reading: the documentation's page on a light ground, the
+   header and its bar staying on the night. */
+:root[data-reading="light"] main:has(.doc) {
+  --snow: #121b2c; --mist: #4c5870; --dusk: #5c6780; --night: #ffffff; --night-2: #eef2f8; --night-line: #d6deea;
+  --link: #0a5fa8; --aurora: #0a705f; --ice: #0a5fa8; --violet: #6a3fd8;
+  background: #f5f7fb; color: var(--snow); color-scheme: light;
+}
+:root[data-reading="light"] main:has(.doc) :not(pre) > code { background: #eef2f8; border-color: #dbe2ec; }
+:root[data-reading="light"] main:has(.doc) .doc-nav .doc-group a[aria-current="page"] { background: #e2f4f0; }
+:root[data-reading="light"] main:has(.doc) .doc-results a:hover, :root[data-reading="light"] main:has(.doc) .doc-results a:focus-visible { background: #eef2f8; }
+:root[data-reading="light"] main:has(.doc) .callout { color: #3c475d; }
+:root[data-reading="light"] main:has(.doc) .callout.warning { border-left-color: #b26a00; background: #fff4e2; }
+:root[data-reading="light"] main:has(.doc) .callout.caution { border-left-color: #c2283a; background: #fde9eb; }
+
 /* ---- The lightbox (site.js) --------------------------------------------- */
 .lightbox { border: 0; padding: 0; background: transparent; max-width: 100vw; max-height: 100vh; width: 100vw; height: 100vh; }
 .lightbox::backdrop { background: rgba(5, 10, 20, 0.92); }
