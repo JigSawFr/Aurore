@@ -18,8 +18,9 @@
 // console (its screen's size and proportions, the layout preset, the
 // renderer's antialiasing) and the console drawn around the screen
 // (aurore::ScreenFrame). Chosen with --simulate <id> or AURORE_SIMULATE, or
-// on the Developers tab. The drawings are plain shapes: no maker's logo,
-// name nor colours.
+// on the Developers tab. The consoles are Boréale's, the one of its sites
+// (PlayGuard's site.css, .device and DEVICE_GRIPS): plain shapes in the
+// night's blues, no maker's logo, name nor colours.
 
 #pragma once
 
