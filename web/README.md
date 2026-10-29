@@ -20,7 +20,7 @@ Under `emcmake`, the top `CMakeLists.txt` builds the desktop platform with SDL2 
 ## The page
 
 - **Threads** need a cross-origin isolated page, which GitHub Pages cannot make with headers: `sw.js`, a service worker, adds them (as coi-serviceworker does), and the page loads once more under it. A browser without service workers (or a private window that refuses them) is told why the demo cannot start.
-- **The theme and the language** are in the address: `?theme=winter` (a theme folder or file of `resources/themes/`, or a preset: `builtin:halloween`) passes `-t` to the demo, `?lang=fr` sets `AURORE_LANG`. Without them, Cadran's default look and the browser's language. The header's lists change them, starting the demo again.
+- **The theme and the language** are in the address: `?theme=winter` (a theme folder or file of `resources/themes/`, or a preset: `builtin:halloween`) passes `-t` to the demo, `?lang=fr` sets `AURORE_LANG` (the consoles' 15 languages, `fr-CA`, `es-419` and `pt` among them; `?theme=boreale` is Boréale's night). Without them, Cadran's default look and the browser's language. The header's lists change them, starting the demo again.
 - **Controls**: the keyboard reaches SDL (the arrows, Enter for Ⓐ, Esc for Ⓑ, X, Y, L, R, F12 for the inspector), a click is a touch, and **Pad** shows the controller on screen (at once on a touch screen; the choice is remembered): under the screen in portrait, beside it in landscape. **Full screen** shows the screen and the pad only.
 - The page is in English, in French for a French browser; it follows the website's look (`site/assets/`).
 - Its Content-Security-Policy allows only its own files, WebAssembly and the workers Emscripten starts.

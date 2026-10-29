@@ -241,8 +241,8 @@ AURORE_TEST(main_screen_on_a_small_screen)
     DemoHarness h(options);
     AURORE_CHECK_EQ(aurore::Application::contentWidth, 480.0f);
     AURORE_CHECK(aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT);
-    // No room for the date; the figures one under the other, as wide as the
-    // column, the rail on its icons once the focus is in the tab
+    // No room for the date; the hero whole, its name, pitch and buttons
+    // alone, the rail on its icons once the focus is in the tab
     AURORE_CHECK(!h.hasText("Monday, January 5"));
     // Nor for the language, theme and text size (Preferences has them), and
     // a lower header
@@ -250,8 +250,9 @@ AURORE_TEST(main_screen_on_a_small_screen)
     AURORE_CHECK(aurore::getStyle()["aurore/applet_frame/header_height"] < 84 * aurore::DENSITY_DENSE);
     h.tap(aurore::BUTTON_RIGHT);
     h.settle();
-    aurore::View* games = h.findText("games");
-    AURORE_CHECK(games != nullptr);
+    AURORE_CHECK(h.hasText("Aurore"));
+    AURORE_CHECK(!h.hasText("Linux"));
+    AURORE_CHECK(h.cutTexts().empty());
     AURORE_CHECK(h.matchesReference("main_screen_compact"));
 }
 
@@ -264,40 +265,38 @@ aurore::test::Options smallScreenOptions()
     return options;
 }
 
-AURORE_TEST(grid_tab_on_a_small_screen)
+AURORE_TEST(library_on_a_small_screen)
 {
     SmallScreen small;
     DemoHarness h(smallScreenOptions());
-    AURORE_CHECK(h.focusByText("Grid"));
+    AURORE_CHECK(h.focusByText("Library"));
     h.tap(aurore::BUTTON_RIGHT);
     h.settle();
-    // The headers' subtitles under their titles, cut on one line; the
-    // footer's hints whole, the clock left out
-    for (const std::string& cut : h.cutTexts())
-        AURORE_CHECK(cut.find("items") != std::string::npos);
+    // The buttons alone over the grid, the covers' lines drawn smaller to
+    // stay whole; the footer's hints whole, the clock left out
+    AURORE_CHECK(h.cutTexts().empty());
     AURORE_CHECK(!h.hasText("10:30"));
-    AURORE_CHECK(h.matchesReference("grid_tab_compact"));
+    AURORE_CHECK(h.matchesReference("library_compact"));
 }
 
-AURORE_TEST(theme_list_on_a_small_screen)
+AURORE_TEST(palettes_on_a_small_screen)
 {
     SmallScreen small;
     DemoHarness h(smallScreenOptions());
-    AURORE_CHECK(h.focusByText("Settings"));
+    AURORE_CHECK(h.focusByText("Themes"));
     h.tap(aurore::BUTTON_RIGHT);
     h.settle();
     AURORE_CHECK(h.focusByText("Ocean", aurore::BUTTON_DOWN, 60));
-    // Each theme's name whole beside three colours (no author, no empty
-    // detail taking the line's room)
-    for (const std::string& cut : h.cutTexts())
-        AURORE_CHECK(cut.find("presets") != std::string::npos);
-    AURORE_CHECK(h.matchesReference("theme_list_compact"));
+    // A palette to a line, its name whole beside its swatch
+    AURORE_CHECK(h.cutTexts().empty());
+    AURORE_CHECK(h.matchesReference("palettes_compact"));
 }
 
 AURORE_TEST(action_sheet_on_a_small_screen)
 {
     SmallScreen small;
     DemoHarness h(smallScreenOptions());
+    AURORE_CHECK(h.focusByText("Components"));
     h.tap(aurore::BUTTON_RIGHT);
     h.settle();
     AURORE_CHECK(h.focusByText("Confirm", aurore::BUTTON_DOWN, 30));
@@ -1090,12 +1089,15 @@ AURORE_TEST(theme_text_is_checked_on_its_picture)
 static void auroraScreen(aurore::ThemeVariant variant, const char* reference)
 {
     DemoHarness h;
-    // What does not move (the focus ring pulses, the glow drifts): the last
-    // card and the header's right end
+    // What does not move (the focus ring pulses, the glow drifts, the
+    // hero's stars twinkle): the header's right end and the last card
     auto still = [&h]()
-    { return h.screenshot().crop(1000, 0, 280, 430); };
-    aurore::test::Image before = still();
-    auto colors                = aurore::Theme::getDarkTheme().getValues()->getColors();
+    {
+        aurore::test::Image shot = h.screenshot();
+        return std::make_pair(shot.crop(1000, 0, 280, 84), shot.crop(1000, 440, 280, 200));
+    };
+    auto before = still();
+    auto colors = aurore::Theme::getDarkTheme().getValues()->getColors();
 
     AURORE_CHECK(aurore::Theme::loadFile("@res/themes/aurora/theme.theme"));
     aurore::Application::getPlatform()->setThemeVariant(variant);
@@ -1111,8 +1113,10 @@ static void auroraScreen(aurore::ThemeVariant variant, const char* reference)
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.settle();
     AURORE_CHECK(!aurore::Application::hasThemeBackground());
-    auto diff = aurore::test::compareImages(still(), before, 0);
-    AURORE_CHECK(diff.sameSize && diff.differingPixels == 0);
+    auto after = still();
+    for (auto diff : { aurore::test::compareImages(after.first, before.first, 0),
+             aurore::test::compareImages(after.second, before.second, 0) })
+        AURORE_CHECK(diff.sameSize && diff.differingPixels == 0);
     auto again = aurore::Theme::getDarkTheme().getValues()->getColors();
     AURORE_CHECK_EQ(again.size(), colors.size());
     for (auto& [key, color] : colors)
@@ -2435,7 +2439,7 @@ AURORE_TEST(settings_screen_keeps_the_cards_margins)
         aurore::Rect frame = line->getFrame();
         AURORE_CHECK(frame.getMinX() >= 40 - 1);
         AURORE_CHECK(frame.getMaxX() <= 1280 - 40 + 1);
-        AURORE_CHECK(frame.getMinY() >= 84 + 28 - 1);
+        AURORE_CHECK(frame.getMinY() >= 84 + 16 - 1);
     }
     AURORE_CHECK(h.matchesReference("settings_screen"));
 }

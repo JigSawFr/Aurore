@@ -163,7 +163,7 @@ ComponentsTab::ComponentsTab()
     rows->addView(slider);
 
     aurore::Box* settings = show::row(true, 20);
-    settings->setMarginTop(show::GAP);
+    settings->setMarginTop(show::gap());
     settings->setAlignItems(aurore::AlignItems::CENTER);
     settings->addView(show::iconButton("settings", "demo/components/open_settings"_i18n, []
         { demo::pushScreen(SettingsTab::create(), "demo/components/settings_title"_i18n, false); }));

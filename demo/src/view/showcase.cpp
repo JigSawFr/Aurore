@@ -23,10 +23,70 @@ namespace kit = cadran::kit;
 namespace show
 {
 
+bool compact()
+{
+    return aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT;
+}
+
+namespace
+{
+    // The tab frame's margins (@style/aurore/tab_frame/content_padding_*)
+    float tabMargin(const char* key)
+    {
+        aurore::Style style = aurore::getStyle();
+        return style[key];
+    }
+} // namespace
+
+float pageTop()
+{
+    return compact() ? tabMargin("aurore/tab_frame/content_padding_top_bottom") : aurore::dp(28);
+}
+
+float pageSides()
+{
+    return compact() ? tabMargin("aurore/tab_frame/content_padding_sides") : aurore::dp(40);
+}
+
+float pageBottom()
+{
+    return aurore::dp(compact() ? 32 : 48);
+}
+
+float screenSides()
+{
+    return compact() ? pageSides() : aurore::dp(72);
+}
+
+float sectionGap()
+{
+    return aurore::dp(compact() ? 28 : 36);
+}
+
+float headGap()
+{
+    return aurore::dp(14);
+}
+
+float gap()
+{
+    return aurore::dp(16);
+}
+
+float padV()
+{
+    return aurore::dp(compact() ? 16 : 20);
+}
+
+float padH()
+{
+    return aurore::dp(compact() ? 16 : 22);
+}
+
 aurore::Box* page(ScrollView* scroll)
 {
     auto* column = new aurore::Box(aurore::Axis::COLUMN);
-    column->setPadding(PAGE_TOP, PAGE_SIDES, PAGE_BOTTOM, PAGE_SIDES);
+    column->setPadding(pageTop(), pageSides(), pageBottom(), pageSides());
     scroll->setContentView(column);
     return column;
 }
@@ -34,13 +94,13 @@ aurore::Box* page(ScrollView* scroll)
 aurore::Box* section(aurore::Box* page, const char* icon, const std::string& title, const std::string& lead)
 {
     aurore::Box* head = kit::kicker(icon, title);
-    head->setMarginTop(page->getChildren().empty() ? 0 : SECTION_GAP);
-    head->setMarginBottom(lead.empty() ? HEAD_GAP : 6);
+    head->setMarginTop(page->getChildren().empty() ? 0 : sectionGap());
+    head->setMarginBottom(lead.empty() ? headGap() : aurore::dp(6));
     page->addView(head);
     if (!lead.empty())
     {
         aurore::Label* line = kit::label(lead, kit::TEXT_NOTE, "cadran/text2");
-        line->setMarginBottom(HEAD_GAP);
+        line->setMarginBottom(headGap());
         page->addView(line);
     }
     aurore::Box* content = column();
@@ -51,8 +111,8 @@ aurore::Box* section(aurore::Box* page, const char* icon, const std::string& tit
 aurore::Box* row(bool wrap, float gap)
 {
     auto* box = new aurore::Box(aurore::Axis::ROW);
-    box->setGap(gap);
-    if (wrap)
+    box->setGap(gap < 0 ? show::gap() : aurore::dp(gap));
+    if (wrap || compact())
         box->setWrap(aurore::Wrap::WRAP);
     return box;
 }
@@ -60,7 +120,7 @@ aurore::Box* row(bool wrap, float gap)
 aurore::Box* column(float gap)
 {
     auto* box = new aurore::Box(aurore::Axis::COLUMN);
-    box->setGap(gap);
+    box->setGap(gap < 0 ? show::gap() : aurore::dp(gap));
     return box;
 }
 
@@ -68,10 +128,26 @@ aurore::Box* card(bool focusable, bool grow)
 {
     aurore::Box* box = kit::card(focusable, grow);
     box->setAxis(aurore::Axis::COLUMN);
-    box->setPadding(PAD_V, PAD_H, PAD_V, PAD_H);
-    if (grow)
+    box->setPadding(padV(), padH(), padV(), padH());
+    if (grow && compact())
+    {
+        // A line of its own: the rows wrap
+        box->setGrow(0);
+        box->setWidthPercentage(100);
+    }
+    else if (grow)
         box->setWidth(0); // the row shares its width, whatever the texts
     return box;
+}
+
+aurore::View* share(aurore::View* view, int perLine)
+{
+    if (!compact())
+        return view;
+    // A share of the line less the gaps, the rest grown into
+    view->setWidthPercentage(100.0f / perLine - 6.0f);
+    view->setGrow(1);
+    return view;
 }
 
 aurore::Label* title(const std::string& text)

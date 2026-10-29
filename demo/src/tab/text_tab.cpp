@@ -60,6 +60,7 @@ aurore::Box* language(int index, const std::string& code)
     tile->setGap(12);
     tile->setHeight(60);
     tile->setWidth(214); // five to a row
+    show::share(tile, 2);
     auto* flag = new aurore::Image();
     flag->setImageFromRes(std::string("img/emoji/") + FLAGS[index] + ".png");
     flag->setWidth(28);
@@ -70,6 +71,7 @@ aurore::Box* language(int index, const std::string& code)
     name->setGrow(1);
     name->setWidth(0);
     name->setShrinkToFit(true);
+    name->setShrinkToFitMin(12);
     name->setSingleLine(true);
     tile->addView(name);
     show::markChoice(tile, code == live_prefs::locale());
@@ -123,7 +125,7 @@ TextTab::TextTab()
     }
     sizes->addView(row);
     aurore::Box* scale = show::card(false, false);
-    scale->setMarginTop(show::GAP);
+    scale->setMarginTop(show::gap());
     scale->setGap(10);
     scale->addView(sample("Aurore 2026", 40, true));
     scale->addView(sample("demo/text/scale_title"_i18n, kit::TEXT_TITLE));
@@ -179,7 +181,7 @@ TextTab::TextTab()
     longRow->addView(fit);
     longText->addView(longRow);
     aurore::Box* paragraph = show::card(true, false);
-    paragraph->setMarginTop(show::GAP);
+    paragraph->setMarginTop(show::gap());
     aurore::Label* body = kit::label("demo/text/paragraph"_i18n, kit::TEXT_BODY, "cadran/text2");
     body->setLineHeight(1.5f);
     paragraph->addView(body);
@@ -190,7 +192,7 @@ TextTab::TextTab()
     aurore::Box* rows = cadran::List::rows_in(lab);
     auto* open        = new aurore::DetailCell();
     open->setText("demo/text/lab_open"_i18n);
-    open->setDetailText("demo/text/lab_detail"_i18n + "  ›");
+    open->setDetailText(show::compact() ? "›" : "demo/text/lab_detail"_i18n + "  ›");
     open->registerClickAction([](aurore::View*)
         {
         demo::pushScreen(TextTestTab::create(), "demo/text/lab_open"_i18n);

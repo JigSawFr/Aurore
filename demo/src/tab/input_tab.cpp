@@ -93,7 +93,7 @@ InputTab::InputTab()
     left->addView(keyLine({ "Esc", "⌫" }, "B", "demo/input/key_b"_i18n));
     left->addView(keyLine({ "X" }, "X", "demo/input/key_x"_i18n));
     left->addView(keyLine({ "Y" }, "Y", "demo/input/key_y"_i18n));
-    columns->addView(left);
+    columns->addView(show::share(left, 1));
     aurore::Box* right = show::column(4);
     right->setGrow(1);
     right->setWidth(0);
@@ -101,7 +101,7 @@ InputTab::InputTab()
     right->addView(keyLine({ "P", "+" }, "+", "demo/input/key_plus"_i18n));
     right->addView(keyLine({ "M", "−" }, "−", "demo/input/key_minus"_i18n));
     right->addView(keyLine({ "F12" }, "L3", "demo/input/key_inspector"_i18n));
-    columns->addView(right);
+    columns->addView(show::share(right, 1));
     keys->addView(columns);
     keyboard->addView(keys);
 
@@ -127,7 +127,7 @@ InputTab::InputTab()
             {
             ui::notify(name, ui::Toast::Done);
             return true; });
-        row->addView(card);
+        row->addView(show::share(card, 2));
     }
     hints->addView(row);
 }

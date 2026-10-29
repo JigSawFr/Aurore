@@ -91,6 +91,8 @@ class ListCell : public aurore::RecyclerCell
         this->bar = new kit::Bar();
         this->bar->setWidth(140);
         this->bar->setMarginLeft(16);
+        if (show::compact())
+            this->bar->setVisibility(aurore::Visibility::GONE);
         this->addView(this->bar);
     }
 
@@ -192,6 +194,9 @@ GameCell::GameCell()
     this->addView(this->cover);
     this->caption = kit::label("", kit::TEXT_META, "cadran/text2");
     this->caption->setSingleLine(true);
+    // A compact screen's narrow covers: the line drawn smaller to stay whole
+    this->caption->setShrinkToFit(true);
+    this->caption->setShrinkToFitMin(10);
     this->caption->setMarginTop(8);
     this->caption->setMarginLeft(2);
     this->addView(this->caption);
@@ -244,17 +249,21 @@ LibraryTab::LibraryTab()
 {
     // The margins on each piece: a RecyclerFrame places its cells as if
     // its box had none
-    this->setPadding(show::PAGE_TOP, 0, 0, 0);
+    this->setPadding(show::pageTop(), 0, 0, 0);
 
     // The head: what is shown, then how
     aurore::Box* head = show::row(true, 12);
     head->setAlignItems(aurore::AlignItems::CENTER);
-    head->setMargins(0, show::PAGE_SIDES, 18, show::PAGE_SIDES);
-    auto* titles = show::column(2);
+    head->setMargins(0, show::pageSides(), aurore::dp(18), show::pageSides());
+    // On a compact screen, the buttons alone: the rail names the tab
+    const bool compact = show::compact();
+    auto* titles       = show::column(2);
     titles->setGrow(1);
     titles->addView(kit::kicker("shelf", "demo/tabs/library"_i18n));
     this->count = kit::label("", kit::TEXT_NOTE, "cadran/text2");
     titles->addView(this->count);
+    if (compact)
+        titles->setVisibility(aurore::Visibility::GONE);
     head->addView(titles);
 
     this->sortButton = show::iconButton("lines", "", [this]
@@ -283,17 +292,19 @@ LibraryTab::LibraryTab()
             this->refresh(); }, true, {}, icons); });
     head->addView(this->genreButton);
 
-    head->addView(show::iconButton("list", "demo/library/by_genre"_i18n, []
-        { openGameList(); }));
+    aurore::IconButton* list = show::iconButton("list", compact ? "" : "demo/library/by_genre"_i18n, []
+        { openGameList(); });
+    list->setAccessibilityLabel("demo/library/by_genre"_i18n);
+    head->addView(list);
     this->addView(head);
 
     // The grid: as many columns 160 wide as fit, a cover 3:4 and its line
     this->grid = new aurore::RecyclingGrid();
     this->grid->setGrow(1);
-    this->grid->setColumnWidth(160);
-    this->grid->setItemHeight(262);
-    this->grid->setItemSpace(18);
-    this->grid->setPadding(4, show::PAGE_SIDES + 4, 32, show::PAGE_SIDES + 4);
+    this->grid->setColumnWidth(aurore::dp(160));
+    this->grid->setItemHeight(aurore::dp(262));
+    this->grid->setItemSpace(aurore::dp(18));
+    this->grid->setPadding(4, show::pageSides() + 4, aurore::dp(32), show::pageSides() + 4);
     this->grid->registerCell("Game", []
         { return GameCell::create(); });
 
@@ -335,7 +346,7 @@ void openGameList()
     auto* list = new aurore::RecyclerFrame();
     list->setGrow(1);
     list->estimatedRowHeight = 84;
-    list->setPadding(show::PAGE_TOP, show::SCREEN_SIDES, show::PAGE_BOTTOM, show::SCREEN_SIDES);
+    list->setPadding(show::pageTop(), show::screenSides(), show::pageBottom(), show::screenSides());
     list->registerCell("Genre", []
         { return GenreHeader::create(); });
     list->registerCell("Line", []

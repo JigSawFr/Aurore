@@ -37,6 +37,7 @@ aurore::Box* palette(ThemesTab* tab, const aurore::ThemeInfo& info)
     tile->setGap(14);
     tile->setWidth(271.5f); // four to a row
     tile->setMinHeight(72);
+    show::share(tile, 1);
 
     CadranSwatch::Colors colors;
     if (info.path.empty())
@@ -152,7 +153,7 @@ ThemesTab::ThemesTab()
     code->addView(more);
     file->addView(code);
     aurore::Box* picker = show::row(true, 20);
-    picker->setMarginTop(show::GAP);
+    picker->setMarginTop(show::gap());
     picker->setAlignItems(aurore::AlignItems::CENTER);
     picker->addView(show::iconButton("palette", "demo/themes/picker"_i18n, [this]
         { ui::pick_palette([this]

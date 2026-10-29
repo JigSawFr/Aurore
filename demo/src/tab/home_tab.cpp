@@ -49,9 +49,12 @@ aurore::Box* platform(const std::string& name)
 // two ways in
 aurore::View* hero(aurore::View* tab)
 {
-    auto* night = new AuroraView();
-    night->setPadding(34, 40, 34, 40);
-    night->setMinHeight(300);
+    auto* night        = new AuroraView();
+    const bool compact = show::compact();
+    const float pad    = aurore::dp(compact ? 22 : 40);
+    night->setPadding(aurore::dp(compact ? 22 : 34), pad, aurore::dp(compact ? 22 : 34), pad);
+    if (!compact)
+        night->setMinHeight(300);
 
     auto* head = new aurore::Box(aurore::Axis::ROW);
     head->setAlignItems(aurore::AlignItems::CENTER);
@@ -67,7 +70,7 @@ aurore::View* hero(aurore::View* tab)
     head->addView(name);
     night->addView(head);
 
-    aurore::Label* pitch = kit::label("demo/home/pitch"_i18n, 24);
+    aurore::Label* pitch = kit::label("demo/home/pitch"_i18n, compact ? 20 : 24);
     pitch->setTextColor(AuroraView::SNOW);
     pitch->setMarginTop(18);
     pitch->setMaxWidth(720);
@@ -77,6 +80,9 @@ aurore::View* hero(aurore::View* tab)
     more->setMarginTop(8);
     more->setMaxWidth(720);
     night->addView(more);
+    // A compact screen: the name, the pitch and the ways in, the hero whole
+    if (compact)
+        more->setVisibility(aurore::Visibility::GONE);
 
     aurore::Box* platforms = show::row(true, 8);
     platforms->setMarginTop(20);
@@ -84,6 +90,8 @@ aurore::View* hero(aurore::View* tab)
         platforms->addView(platform(name));
     platforms->addView(platform("demo/home/web"_i18n));
     night->addView(platforms);
+    if (compact)
+        platforms->setVisibility(aurore::Visibility::GONE);
 
     aurore::Box* actions = show::row(true, 12);
     actions->setMarginTop(24);
@@ -219,10 +227,10 @@ HomeTab::HomeTab()
     // Aurore in figures
     aurore::Box* facts   = show::section(page, "sparkle", "demo/home/figures"_i18n);
     aurore::Box* factRow = show::row();
-    factRow->addView(fact("15", "demo/home/languages"_i18n));
-    factRow->addView(fact("9", "demo/home/platforms"_i18n));
-    factRow->addView(fact("60+", "demo/home/icons"_i18n));
-    factRow->addView(fact("15", "demo/home/presets"_i18n));
+    factRow->addView(show::share(fact("15", "demo/home/languages"_i18n), 2));
+    factRow->addView(show::share(fact("9", "demo/home/platforms"_i18n), 2));
+    factRow->addView(show::share(fact("60+", "demo/home/icons"_i18n), 2));
+    factRow->addView(show::share(fact("15", "demo/home/presets"_i18n), 2));
     facts->addView(factRow);
 
     // The other tabs
@@ -248,11 +256,11 @@ HomeTab::HomeTab()
     {
         aurore::Box* tiles = show::row();
         if (line == 1)
-            tiles->setMarginTop(show::GAP);
+            tiles->setMarginTop(show::gap());
         for (int i = 0; i < 4; i++)
         {
             const Link& l = links[line * 4 + i];
-            tiles->addView(link(this, l.tab, l.icon, aurore::getStr(l.name), aurore::getStr(l.line)));
+            tiles->addView(show::share(link(this, l.tab, l.icon, aurore::getStr(l.name), aurore::getStr(l.line)), 2));
         }
         explore->addView(tiles);
     }

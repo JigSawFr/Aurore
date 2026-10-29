@@ -300,7 +300,7 @@
         "marquee": "Desliza com o foco",
         "marquee_text": "Um título demasiado longo para o seu mosaico desliza enquanto o mosaico tem o foco, depois espera e recomeça",
         "shrink": "Encolhe para caber",
-        "shrink_text": "Um título longo demais para o seu mosaico, desenhado cada vez mais pequeno para caber numa linha",
+        "shrink_text": "Um título longo que encolhe para caber numa linha",
         "paragraph": "Os textos mudam de linha sozinhos, quebram onde o idioma permite e crescem o que o seu texto precisar. Um ecrã mais alto do que a janela desliza linha a linha com o botão direcional, ou livremente com o dedo ou a roda do rato.",
         "lab": "O laboratório de texto",
         "lab_open": "Laboratório de texto",

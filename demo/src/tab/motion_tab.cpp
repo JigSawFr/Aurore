@@ -72,11 +72,11 @@ MotionTab::MotionTab()
         aurore::Label* name = kit::label(easing.name, kit::TEXT_NOTE, "cadran/text2");
         name->setMarginTop(8);
         card->addView(show::centred(name));
-        plots->addView(card);
+        plots->addView(show::share(card, 2));
     }
     easings->addView(plots);
     aurore::Box* play = show::row(true, 20);
-    play->setMarginTop(show::GAP);
+    play->setMarginTop(show::gap());
     play->setAlignItems(aurore::AlignItems::CENTER);
     play->addView(show::button("demo/motion/play"_i18n, [this]
         { this->play(); }, true));
@@ -95,17 +95,17 @@ MotionTab::MotionTab()
                                       "    focus:backgroundColor=\"@theme/cadran/teal_fill\"\n"
                                       "    pressed:scale=\"0.94\"\n"
                                       "    transition=\"backgroundColor 220ms ease-out, scale 120ms\" />");
-    snippet->setMarginTop(show::GAP);
+    snippet->setMarginTop(show::gap());
     states->addView(snippet);
 
     // The focus: it glides, and shakes where it cannot go
     aurore::Box* focus = show::section(page, "eye", "demo/motion/focus"_i18n, "demo/motion/focus_lead"_i18n);
     aurore::Box* tiles = show::row();
     for (int i = 1; i <= 4; i++)
-        tiles->addView(tile(std::to_string(i)));
+        tiles->addView(show::share(tile(std::to_string(i)), 2));
     focus->addView(tiles);
     aurore::Box* shake = show::row(true, 20);
-    shake->setMarginTop(show::GAP);
+    shake->setMarginTop(show::gap());
     shake->setAlignItems(aurore::AlignItems::CENTER);
     aurore::Button* button = show::button("demo/motion/shake"_i18n, [] {});
     button->registerClickAction([](aurore::View* view)
@@ -130,7 +130,8 @@ MotionTab::MotionTab()
     rows->addView(reduce);
     auto* lab = new aurore::DetailCell();
     lab->setText("demo/motion/transform"_i18n);
-    lab->setDetailText("demo/motion/transform_detail"_i18n + "  ›");
+    // A compact screen: the name alone, whole
+    lab->setDetailText(show::compact() ? "›" : "demo/motion/transform_detail"_i18n + "  ›");
     lab->registerClickAction([](aurore::View*)
         {
         demo::pushScreen(TransformTab::create(), "demo/motion/transform"_i18n);

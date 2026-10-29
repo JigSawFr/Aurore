@@ -84,7 +84,7 @@ CadranDigits* figure(aurore::Box* row, const std::string& caption)
     label->setSingleLine(true);
     label->setShrinkToFit(true);
     card->addView(label);
-    row->addView(card);
+    row->addView(show::share(card, 2));
     return digits;
 }
 
@@ -121,7 +121,7 @@ DevelopersTab::DevelopersTab()
     aurore::Box* tools = show::section(page, "tools", "demo/developers/tools"_i18n, "demo/developers/tools_lead"_i18n);
     aurore::Box* open  = show::row(true, 20);
     open->setAlignItems(aurore::AlignItems::CENTER);
-    open->setMarginBottom(show::GAP);
+    open->setMarginBottom(show::gap());
     open->addView(show::iconButton("eye", "demo/developers/inspector"_i18n, []
         {
         aurore::Application::setInspectorEnabled(true);
@@ -130,6 +130,7 @@ DevelopersTab::DevelopersTab()
     keys->setMarginTop(0);
     keys->setGrow(1);
     keys->setWidth(0);
+    show::share(keys, 1); // under the button on a compact screen
     open->addView(keys);
     tools->addView(open);
     aurore::Box* rows = cadran::List::rows_in(tools);
@@ -139,7 +140,7 @@ DevelopersTab::DevelopersTab()
         { aurore::Application::setRedrawOnDemand(on); });
     auto* layout = new aurore::DetailCell();
     layout->setText("demo/developers/layout"_i18n);
-    layout->setDetailText("demo/developers/layout_detail"_i18n + "  ›");
+    layout->setDetailText(show::compact() ? "›" : "demo/developers/layout_detail"_i18n + "  ›");
     layout->registerClickAction([](aurore::View*)
         {
         demo::pushScreen(aurore::View::createFromXMLResource("tabs/layout.xml"), "demo/developers/layout"_i18n);
@@ -182,7 +183,7 @@ DevelopersTab::DevelopersTab()
                                   "box->addView(card);");
     cpp->setGrow(1);
     cpp->setWidth(0);
-    pair->addView(cpp);
+    pair->addView(show::share(cpp, 1));
     aurore::Box* xml = show::code("<!-- The same in XML -->\n"
                                   "<aurore:Box axis=\"column\" gap=\"16\">\n"
                                   "  <aurore:Label text=\"@i18n/my/title\" />\n"
@@ -191,7 +192,7 @@ DevelopersTab::DevelopersTab()
                                   "</aurore:Box>");
     xml->setGrow(1);
     xml->setWidth(0);
-    pair->addView(xml);
+    pair->addView(show::share(xml, 1));
     code->addView(pair);
     aurore::Box* test = show::code("// A test: no window, simulated time, screenshots compared\n"
                                    "AURORE_TEST(opens) {\n"
@@ -200,10 +201,10 @@ DevelopersTab::DevelopersTab()
                                    "    h.tap(aurore::BUTTON_A);\n"
                                    "    AURORE_CHECK(h.matchesReference(\"opens\"));\n"
                                    "}");
-    test->setMarginTop(show::GAP);
+    test->setMarginTop(show::gap());
     code->addView(test);
     aurore::Label* reload = show::note("demo/developers/hot_reload"_i18n);
-    reload->setMarginTop(show::GAP);
+    reload->setMarginTop(show::gap());
     code->addView(reload);
 }
 

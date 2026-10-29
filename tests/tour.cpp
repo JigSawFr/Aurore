@@ -21,8 +21,11 @@
 // pictures.
 //
 //   aurore-tour [--theme dark|light|<theme file>] [--variant light|dark] [--lang <code>]
-//               [--size WxH] [-o folder] [--film folder] [scene...]
+//               [--size WxH] [--small] [-o folder] [--film folder] [scene...]
 //
+// `--small`: a small screen's layout, 480x360 units at the dense density
+// (what AURORE_DESIGN_SIZE=480x360 AURORE_DENSITY=dense does in a window),
+// drawn on 960x720 pixels unless --size says otherwise.
 // With scene names (as the files are named, without ".png", or a prefix of
 // them), only those; `--list` lists them. Also prints the texts cut short
 // ("…") on each picture. `--film folder`: the readme-tour scene writes a
@@ -55,7 +58,7 @@ struct Scene
 
 int usage(const char* program)
 {
-    std::fprintf(stderr, "usage: %s [--theme dark|light|<theme file>] [--lang <code>] [--variant light|dark] [--size WxH] [-o folder] [--film folder] [--list] [scene...]\n",
+    std::fprintf(stderr, "usage: %s [--theme dark|light|<theme file>] [--lang <code>] [--variant light|dark] [--size WxH] [--small] [-o folder] [--film folder] [--list] [scene...]\n",
         program);
     return 2;
 }
@@ -361,7 +364,7 @@ int main(int argc, char** argv)
     std::setvbuf(stdout, nullptr, _IOLBF, 0); // a line as each picture is written
     std::string theme = "dark", lang = "en-US", output = "tour", variant;
     int width = 1280, height = 720;
-    bool list = false;
+    bool list = false, small = false, sized = false;
     std::vector<std::string> only;
     for (int i = 1; i < argc; i++)
     {
@@ -379,7 +382,10 @@ int main(int argc, char** argv)
             std::string size = next();
             if (std::sscanf(size.c_str(), "%dx%d", &width, &height) != 2 || width <= 0 || height <= 0)
                 return usage(argv[0]);
+            sized = true;
         }
+        else if (arg == "--small")
+            small = true;
         else if (arg == "-o")
             output = next();
         else if (arg == "--list")
@@ -413,6 +419,15 @@ int main(int argc, char** argv)
                                                             : theme;
     prefs.language = lang;
     ui::use_prefs(prefs);
+
+    if (small)
+    {
+        aurore::Application::ORIGINAL_WINDOW_WIDTH  = 480;
+        aurore::Application::ORIGINAL_WINDOW_HEIGHT = 360;
+        aurore::setDensity(aurore::DENSITY_DENSE);
+        if (!sized)
+            width = 960, height = 720;
+    }
 
     aurore::test::Options options;
     options.width       = width;

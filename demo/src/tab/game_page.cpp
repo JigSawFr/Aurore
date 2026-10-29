@@ -88,20 +88,25 @@ class GamePage : public ScrollView
         const library::Game& game = library::games()[index];
         aurore::Box* page         = show::page(this);
 
-        aurore::Box* top = show::row(false, 36);
-        auto* cover      = new CoverArt();
+        // The cover beside what it says, or above it on a compact screen
+        const bool compact = show::compact();
+        aurore::Box* top   = compact ? show::column(20) : show::row(false, 36);
+        auto* cover        = new CoverArt();
         cover->setGame(&game);
         cover->setRadius(kit::RADIUS_TOP);
-        cover->setWidth(270);
-        cover->setHeight(360);
+        cover->setWidth(aurore::dp(compact ? 180 : 270));
+        cover->setHeight(aurore::dp(compact ? 240 : 360));
         cover->setShrink(0);
         top->addView(cover);
 
         aurore::Box* about = show::column(0);
-        about->setGrow(1);
-        about->setWidth(0);
+        if (!compact)
+        {
+            about->setGrow(1);
+            about->setWidth(0);
+        }
         about->addView(kit::kicker(library::genreIcon(game.genre), library::genreName(game.genre)));
-        aurore::Label* title = kit::display(game.title, 40);
+        aurore::Label* title = kit::display(game.title, compact ? 32 : 40);
         title->setMarginTop(10);
         about->addView(title);
 
@@ -183,9 +188,9 @@ class GamePage : public ScrollView
         // Games like it, in a row that keeps only the covers on screen
         aurore::Box* like = show::section(page, "sparkle", "demo/library/like"_i18n, "demo/library/like_lead"_i18n);
         auto* row         = new aurore::HRecyclerFrame();
-        row->setHeight(270);
-        row->setItemWidth(160);
-        row->setItemSpace(18);
+        row->setHeight(aurore::dp(270));
+        row->setItemWidth(aurore::dp(160));
+        row->setItemSpace(aurore::dp(18));
         row->setPadding(4, 4, 4, 4);
         row->registerCell("Game", []
             { return GameCell::create(); });

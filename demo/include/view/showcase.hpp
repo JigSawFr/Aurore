@@ -26,21 +26,26 @@
 // (cadran::kit::RADIUS_*) and type scale (cadran::kit::TEXT_*).
 namespace show
 {
+/// A compact screen (under 720 units wide, aurore::WidthClass::COMPACT):
+/// the pages' rows stack their cards, their margins are the tabs' own.
+bool compact();
+
 /// A page's margins: Cadran's (40 at the sides, 28 at the top), more at
-/// the bottom so that the last card clears the footer.
-constexpr float PAGE_TOP    = 28;
-constexpr float PAGE_SIDES  = 40;
-constexpr float PAGE_BOTTOM = 48;
+/// the bottom so that the last card clears the footer; on a compact
+/// screen, the tab frame's (@style/aurore/tab_frame/content_padding_*).
+float pageTop();
+float pageSides();
+float pageBottom();
 /// A screen of its own (no rail) whose content is not a ScrollView: its
 /// sides under the header's mark, where a ScrollView's page puts them.
-constexpr float SCREEN_SIDES = 72;
+float screenSides();
 /// Between two sections, from a section's kicker to its content, between
-/// two cards, inside a card.
-constexpr float SECTION_GAP = 36;
-constexpr float HEAD_GAP    = 14;
-constexpr float GAP         = 16;
-constexpr float PAD_V       = 20;
-constexpr float PAD_H       = 22;
+/// two cards, inside a card. All of them follow the density (aurore::dp).
+float sectionGap();
+float headGap();
+float gap();
+float padV();
+float padH();
 
 /// A tab's page: a Cadran ScrollView holding a column with the page's
 /// margins, which it returns.
@@ -51,14 +56,19 @@ aurore::Box* page(ScrollView* scroll);
 /// column, for its content.
 aurore::Box* section(aurore::Box* page, const char* icon, const std::string& title, const std::string& lead = "");
 
-/// A row (or a column) whose children are GAP apart; `wrap`: on to the next
-/// line when they do not fit.
-aurore::Box* row(bool wrap = false, float gap = GAP);
-aurore::Box* column(float gap = GAP);
+/// A row (or a column) whose children are gap() apart (`gap` < 0) or
+/// `gap` dp; `wrap`: on to the next line when they do not fit. On a compact
+/// screen every row wraps, and a card that grows takes a line of its own.
+aurore::Box* row(bool wrap = false, float gap = -1);
+aurore::Box* column(float gap = -1);
 
 /// A card of the page: Cadran's, padded, a column; `focusable` takes the
 /// focus ring, `grow` shares a row with its neighbours.
 aurore::Box* card(bool focusable = false, bool grow = true);
+
+/// On a compact screen, `view` shares its row's line with `perLine` - 1
+/// others (the row wraps); elsewhere, nothing changes. Returns `view`.
+aurore::View* share(aurore::View* view, int perLine);
 
 /// A card's title (TEXT_LEAD) and its note under it (TEXT_NOTE, the second ink).
 aurore::Label* title(const std::string& text);

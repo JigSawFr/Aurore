@@ -70,19 +70,26 @@ AboutTab::AboutTab()
     // The mark, a theme may replace it (image slot demo/about/art)
     auto* night = new AuroraView();
     night->setRidges(false);
-    night->setAxis(aurore::Axis::ROW);
-    night->setAlignItems(aurore::AlignItems::CENTER);
-    night->setPadding(28, 32, 28, 32);
-    night->setGap(28);
+    // Beside its words, or above them on a compact screen
+    const bool compact = show::compact();
+    night->setAxis(compact ? aurore::Axis::COLUMN : aurore::Axis::ROW);
+    night->setAlignItems(compact ? aurore::AlignItems::FLEX_START : aurore::AlignItems::CENTER);
+    night->setPadding(aurore::dp(28), aurore::dp(32), aurore::dp(28), aurore::dp(32));
+    night->setGap(aurore::dp(compact ? 16 : 28));
     auto* art = new aurore::Image();
     art->setThemeImage("demo/about/art");
-    art->setWidth(132);
-    art->setHeight(132);
+    art->setWidth(aurore::dp(compact ? 96 : 132));
+    art->setHeight(aurore::dp(compact ? 96 : 132));
     art->setShrink(0);
     night->addView(art);
     aurore::Box* words = show::column(8);
-    words->setGrow(1);
-    words->setWidth(0);
+    if (compact)
+        words->setWidthPercentage(100);
+    else
+    {
+        words->setGrow(1);
+        words->setWidth(0);
+    }
     aurore::Label* name = kit::display("demo/about/title"_i18n, 40);
     name->setTextColor(AuroraView::SNOW);
     words->addView(name);
@@ -98,7 +105,7 @@ AboutTab::AboutTab()
     page->addView(night);
 
     aurore::Box* links = show::row(true, 12);
-    links->setMarginTop(show::GAP);
+    links->setMarginTop(show::gap());
     links->addView(show::iconButton("phone", "demo/about/qr"_i18n, []
         { ui::qr_dialog("demo/cadran/qr_text"_i18n, "https://aurore.boreale.dev/"); }));
     links->addView(show::iconButton("globe", "demo/about/site"_i18n, []
@@ -113,7 +120,7 @@ AboutTab::AboutTab()
     row->addView(credit("list", "dragonflylee", "demo/about/dragonflylee"_i18n));
     people->addView(row);
     aurore::Box* more = show::row();
-    more->setMarginTop(show::GAP);
+    more->setMarginTop(show::gap());
     more->addView(credit("phone", "XITRIX", "demo/about/xitrix"_i18n));
     more->addView(credit("user", "demo/about/contributors"_i18n, "demo/about/contributors_text"_i18n));
     more->addView(credit("code", "JigSawFr", "demo/about/jigsawfr"_i18n));

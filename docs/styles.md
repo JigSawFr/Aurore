@@ -194,6 +194,8 @@ A state may follow (`compact:focus:cornerRadius="4"`). The attributes are read w
 
 On a compact screen the library's own views make room for the content: a `Header` puts its subtitle under its title, on one line; the footer leaves out the clock, battery and Wi-Fi, its hints taking the row; dialogs take 94% of the width. With Cadran, the header is lower and without its language, theme and text size buttons (Preferences has them), the rail on its icons narrower, a tab's margins smaller, and action sheets and pickers take the screen's width.
 
+The demo's pages show the same in code (`demo/src/view/showcase.cpp`): on a compact screen a page takes the tab's margins, its rows wrap, a card that grows takes a line of its own (`show::share` puts two to a line), and a game's cover goes above its words. `aurore-tour --small` draws every screen so ([testing.md](testing.md)).
+
 ## Reduced motion and text scale
 
 Both are settings of the core, which Cadran's preferences feed:
