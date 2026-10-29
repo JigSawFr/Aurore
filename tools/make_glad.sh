@@ -3,8 +3,10 @@
 # Licensed under the Apache License, Version 2.0.
 #
 # Makes the OpenGL loader the GL drivers use, with glad 2.0.8: OpenGL 4.3
-# core and OpenGL ES 3.2 in one header, no extensions, Aurore's code giving
-# the loader (gladLoadGL / gladLoadGLES2 with GLFW's, SDL's or EGL's).
+# (its compatibility profile, which the GL2 driver needs; the GL3 one asks
+# for a core context) and OpenGL ES 3.2 in one header, no extensions,
+# Aurore's code giving the loader (gladLoadGL / gladLoadGLES2 with GLFW's,
+# SDL's or EGL's).
 #
 #   library/include/aurore/extern/glad/gl.h
 #   library/include/aurore/extern/KHR/khrplatform.h
@@ -22,7 +24,7 @@ trap 'rm -rf "${work}"' EXIT
 
 python3 -m venv "${work}/venv"
 "${work}/venv/bin/pip" install --quiet glad2==2.0.8
-"${work}/venv/bin/glad" --quiet --reproducible --merge --api 'gl:core=4.3,gles2=3.2' --extensions '' \
+"${work}/venv/bin/glad" --quiet --reproducible --merge --api 'gl:compatibility=4.3,gles2=3.2' --extensions '' \
     --out-path "${work}/out" c
 
 install -D -m 644 "${work}/out/include/glad/gl.h" "${root}/library/include/aurore/extern/glad/gl.h"
