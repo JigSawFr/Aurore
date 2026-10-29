@@ -47,8 +47,9 @@ HeaderSetting::HeaderSetting(Kind setting)
     this->setId(setting == Kind::LANGUAGE ? LANGUAGE_ID : setting == Kind::THEME ? THEME_ID
                                                                                  : TEXT_ID);
     this->setFocusable(false);
-    this->setWidth(aurore::dp(setting == Kind::LANGUAGE ? SIZE * 1.3f : SIZE));
-    this->setHeight(aurore::dp(SIZE));
+    // Touch targets: the same size at every density
+    this->setWidth(setting == Kind::LANGUAGE ? SIZE * 1.3f : SIZE);
+    this->setHeight(SIZE);
     this->setAlignSelf(aurore::AlignSelf::CENTER);
     this->setMarginRight(aurore::dp(GAP));
     // A tap opens its list (hitTest finds it, focusable or not); the tab on
@@ -100,7 +101,7 @@ void HeaderSetting::draw_language(NVGcontext* vg, float x, float y, float width,
     const NVGcolor ink = cadran::kit::color("cadran/text");
     const float inset  = height * 0.16f;
     nvgBeginPath(vg);
-    nvgRoundedRect(vg, x + 1, y + inset, width - 2, height - 2 * inset, aurore::dp(6));
+    nvgRoundedRect(vg, x + 1, y + inset, width - 2, height - 2 * inset, 6);
     nvgStrokeColor(vg, ink);
     nvgStrokeWidth(vg, 2);
     nvgStroke(vg);

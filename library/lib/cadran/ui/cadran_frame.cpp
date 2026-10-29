@@ -674,7 +674,8 @@ class RailFold : public aurore::Box
         this->mode      = rail_mode();
         const bool fold = this->mode == RailMode::AUTO, icons = this->mode == RailMode::ICONS;
         this->setPositionType(fold ? aurore::PositionType::ABSOLUTE : aurore::PositionType::RELATIVE);
-        const float width = aurore::dp(icons ? RAIL_SHUT : RAIL_OPEN);
+        // Open, the rail is as wide as its longest name at every density
+        const float width = icons ? aurore::dp(RAIL_SHUT) : RAIL_OPEN;
         this->setWidth(width);
         this->bar->setWidth(width);
         this->spacer->setVisibility(fold ? aurore::Visibility::VISIBLE : aurore::Visibility::GONE);
@@ -824,7 +825,7 @@ class RailFold : public aurore::Box
 
   private:
     // The rail's width on screen now.
-    float visible() { return this->mode == RailMode::AUTO ? aurore::dp(RAIL_SHUT + (RAIL_OPEN - RAIL_SHUT) * s_rail_open) : this->getWidth(); }
+    float visible() { return this->mode == RailMode::AUTO ? aurore::dp(RAIL_SHUT) + (RAIL_OPEN - aurore::dp(RAIL_SHUT)) * s_rail_open : this->getWidth(); }
 
     bool focus_on_rail() const
     {
