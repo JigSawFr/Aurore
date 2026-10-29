@@ -533,6 +533,53 @@ jobs:
           doxygen docs/Doxyfile
           python3 tools/build_api.py build_docs/xml build_api
 
+  # The libFuzzer targets of tests/fuzz (docs/testing.md), a few minutes
+  # each: Cadran's Markdown and a theme file, under AddressSanitizer and
+  # UndefinedBehaviorSanitizer. The corpus each grows is kept from one run to
+  # the next; an input that crashes goes up as an artifact.
+  fuzz:
+    name: linux (fuzz)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y --no-install-recommends clang-18 libclang-rt-18-dev ninja-build \
+            libdbus-1-dev libxkbcommon-dev libwayland-dev wayland-protocols xorg-dev
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: fuzz-corpus
+          key: fuzz-corpus-${{ github.run_id }}
+          restore-keys: fuzz-corpus-
+      - name: Build
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+          cmake -B build-fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAURORE_PLATFORM=DESKTOP \
+            -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON -DAURORE_BUILD_TESTS=ON -DAURORE_BUILD_FUZZERS=ON
+          cmake --build build-fuzz --target aurore_fuzz_markdown aurore_fuzz_theme
+      - name: Fuzz
+        run: |
+          mkdir -p fuzz-corpus/markdown fuzz-corpus/theme fuzz-crashes
+          # Each grows its corpus from the repository's own files
+          build-fuzz/tests/aurore_fuzz_markdown -max_total_time=120 -max_len=16384 -timeout=10 \
+            -artifact_prefix=fuzz-crashes/markdown- fuzz-corpus/markdown docs
+          build-fuzz/tests/aurore_fuzz_theme -max_total_time=120 -max_len=8192 -timeout=10 \
+            -artifact_prefix=fuzz-crashes/theme- fuzz-corpus/theme resources/themes
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: failure()
+        with:
+          name: fuzz-crashes
+          path: fuzz-crashes
+          retention-days: 30
+
   linux-tests:
     name: linux (tests)
     runs-on: ubuntu-24.04

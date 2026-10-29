@@ -92,6 +92,13 @@ void Activity::resizeToFitWindow()
         return;
 
     this->contentView->setDimensions(Application::contentWidth, Application::contentHeight);
+    this->applySafeArea();
+}
+
+void Activity::applySafeArea()
+{
+    if (this->contentView)
+        this->contentView->applySafeArea(SafeAreaEdges::ALL);
 }
 
 View* Activity::createContentView()

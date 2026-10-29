@@ -33,6 +33,7 @@
 #include <aurore/core/frame_context.hpp>
 #include <aurore/core/geometry.hpp>
 #include <aurore/core/gesture.hpp>
+#include <aurore/core/safe_area.hpp>
 #include <aurore/core/util.hpp>
 #include <aurore/core/view_style.hpp>
 #ifdef USE_LIBROMFS
@@ -1638,6 +1639,13 @@ class View
     {
         // Nothing by default
     }
+
+    /**
+     * Takes the window's safe area on the edges in `reach` that the view
+     * keeps clear of, and gives the views in it theirs (Box::setSafeArea).
+     * Nothing for a view without children.
+     */
+    virtual void applySafeArea(SafeAreaEdges reach) { }
 
     /// Fired with the view when it gains the focus.
     GenericEvent* getFocusEvent();
