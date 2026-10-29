@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The demo's views, without its main(): what the tests, the bench and
 # aurore-preview show
 file(GLOB_RECURSE DEMO_VIEWS_SRC CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/demo/src/*.cpp)
@@ -55,6 +58,14 @@ if (AURORE_BUILD_FUZZERS)
     target_compile_features(aurore_fuzz_markdown PRIVATE cxx_std_20)
     target_compile_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
     target_link_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
+
+    # A theme file, read by the library itself: built for the fuzzer too, so
+    # that it follows the paths taken inside it (this build is for fuzzing)
+    target_compile_options(aurore PRIVATE -fsanitize=fuzzer-no-link,address,undefined -fno-omit-frame-pointer)
+    add_executable(aurore_fuzz_theme fuzz/theme_fuzz.cpp)
+    target_link_libraries(aurore_fuzz_theme PRIVATE Aurore::aurore)
+    target_compile_options(aurore_fuzz_theme PRIVATE ${FUZZ_FLAGS})
+    target_link_options(aurore_fuzz_theme PRIVATE ${FUZZ_FLAGS})
 endif ()
 
 # Tasks coming back to a view from another thread, task queues, events

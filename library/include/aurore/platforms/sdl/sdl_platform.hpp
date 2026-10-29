@@ -1,18 +1,5 @@
-/*
-    Copyright 2021 natinusala
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2021 natinusala
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -53,6 +40,9 @@ class SDLPlatform : public DesktopPlatform
     InputManager* getInputManager() override;
     ImeManager* getImeManager() override;
     bool processEvent(SDL_Event* event);
+#if defined(IOS) || defined(TVOS)
+    Insets getSafeAreaInsets() override;
+#endif
 
   protected:
     NullAudioPlayer* audioPlayer  = nullptr;
@@ -60,6 +50,16 @@ class SDLPlatform : public DesktopPlatform
     SDLInputManager* inputManager = nullptr;
     SDLImeManager* imeManager     = nullptr;
     Event<SDL_Event*> otherEvent;
+
+#ifdef __SDL3__
+    /// The system's light or dark (systemThemeChanged)
+    void readSystemTheme();
+#endif
+
+  private:
+    // The safe area read again now and once the system settled (a rotation)
+    void safeAreaMayHaveChanged();
+    size_t safeAreaCheck = 0;
 };
 
 } // namespace aurore

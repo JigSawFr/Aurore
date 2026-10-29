@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 """Builds Aurore's website (site/README.md) into <out-dir>: a home page, the
 documentation (docs/*.md), the changelog (CHANGELOG.md) and the page not
 found, in the consoles' 15 languages (LANGUAGES): English at the root, the
@@ -94,6 +97,7 @@ DOCS = [
     ("themes", "guides", "Themes"),
     ("cadran", "guides", "Cadran"),
     ("styles", "guides", "Styles"),
+    ("safe-areas", "guides", "Safe areas"),
     ("components", "guides", "Components"),
     ("xml-attributes", "reference", "XML attributes"),
     ("input", "reference", "Keyboard and mouse"),
@@ -108,6 +112,11 @@ GROUPS = ["start", "guides", "reference", "tools"]
 # The gallery, the README's screenshots (.github/readme/<name>.png, 1280x720).
 SHOTS = ["cadran", "sheet", "picker", "checklist", "markdown", "components",
          "winter", "prism", "aurora", "palettes", "light", "french"]
+# The demo on each simulated console (docs/platforms.md, Simulated platforms):
+# .github/readme/console-<id>.png, made by capture.sh; the name, the screen
+CONSOLES = [("switch", "Switch", "1280 × 720"), ("vita", "PS Vita", "960 × 544"),
+            ("ps4", "PS4", "1920 × 1080"), ("3ds", "New 3DS", "320 × 240 + 400 × 240"),
+            ("phone", None, "1600 × 720")]
 FEATURES = ["controllers", "layout", "graphics", "components", "themes", "languages", "tools", "toolbox"]
 ADDS = ["themes", "styles", "views", "layout", "text", "focus", "platforms", "speed"]
 PLATFORMS = ["Nintendo Switch", "Android", "iOS", "Windows", "macOS", "Linux", "PS4", "PS Vita", "Browser"]
@@ -737,7 +746,7 @@ def demo_band(t, lang, to_root):
 # The figures of "Under the hood" (tools/stack.py's), in this order
 STACK_FIGURES = [("ci", "{ci_jobs}"), ("tests", "{tests}"), ("refs", "{references}"),
                  ("actions", "{actions_pinned}/{actions}")]
-STACK_CHECKS = ["sanitizers", "deprecated", "format", "notices", "upstream"]
+STACK_CHECKS = ["sanitizers", "fuzz", "deprecated", "format", "notices", "upstream"]
 STACK = {}  # tools/stack.py's facts, read once (stack_facts())
 
 
@@ -785,6 +794,25 @@ def stack_section(t):
       </div>
     </div>
   </section>"""
+
+
+def png_size(path):
+    """A PNG's width and height, read from its header"""
+    with open(path, "rb") as f:
+        head = f.read(24)
+    return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+
+
+def consoles(t, to_root):
+    items = []
+    for key, name, screen in CONSOLES:
+        label = name or t.plain(f"console_{key}")
+        width, height = png_size(os.path.join(ROOT, ".github", "readme", f"console-{key}.png"))
+        alt = html.escape(t.plain("console_alt").replace("{console}", label))
+        src = f"{to_root}assets/screenshots/console-{key}.png"
+        items.append(f'      <li><a href="{src}" data-caption="{alt}"><img src="{src}" alt="{alt}" width="{width}" height="{height}" loading="lazy"></a>'
+                     f'<p><strong>{html.escape(label)}</strong><span>{screen}</span></p></li>')
+    return "\n".join(items)
 
 
 def home_body(t, lang, to_root):
@@ -862,6 +890,18 @@ def home_body(t, lang, to_root):
     <div class="gallery">
 {shots}
     </div>
+  </section>
+
+  <section class="wrap" id="consoles">
+    <div class="section-head">
+      <p class="eyebrow">{t("consoles_eyebrow")}</p>
+      <h2>{t("consoles_title")}</h2>
+      <p>{t("consoles_text")}</p>
+      <p><a href="{base}docs/platforms/#simulated-platforms">{t("consoles_link")} →</a></p>
+    </div>
+    <ul class="consoles">
+{consoles(t, to_root)}
+    </ul>
   </section>
 
   <section class="wrap" id="adds">
@@ -1380,7 +1420,7 @@ def main():
     global VERSIONS
     VERSIONS = boreale_versions()
     os.makedirs(out, exist_ok=True)
-    assets = {f"screenshots/{s}.png" for s in SHOTS}
+    assets = {f"screenshots/{s}.png" for s in SHOTS} | {f"screenshots/console-{c[0]}.png" for c in CONSOLES}
     count = 0
     descriptions, full = {}, []
     for lang, folder, _, _ in LANGUAGES:

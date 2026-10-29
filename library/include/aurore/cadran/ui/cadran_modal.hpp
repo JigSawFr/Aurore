@@ -1,9 +1,11 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // cadran — the Cadran look of Aurore's dialogs and pickers: a rounded card
 // on a navy backdrop, the buttons as pills (a confirmation in teal, or coral
 // when it deletes or stops something), the picker floating above the hints
 // with its current row in teal. The toasts and the backdrop are theme values
 // (cadran::install_theme).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <cstdint>

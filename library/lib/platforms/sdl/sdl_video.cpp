@@ -1,18 +1,9 @@
-/*
-    Copyright 2021 natinusala
+// SPDX-FileCopyrightText: 2021 natinusala
+// SPDX-License-Identifier: Apache-2.0
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+#include <algorithm>
+#include <cmath>
+#include <cstring>
 
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
@@ -20,6 +11,16 @@
 #include <aurore/platforms/sdl/sdl_video.hpp>
 
 #include "sdl_compat.hpp"
+#if defined(__SDL3__) && (defined(__linux__) || defined(_WIN32)) && !defined(ANDROID)
+// The window's icon, as GLFW gives it on Linux and Windows
+#include <nanovg.h>
+#ifdef USE_LIBROMFS
+#include <romfs/romfs.hpp>
+#else
+#include <unistd.h>
+#endif
+#define AURORE_SDL_WINDOW_ICON
+#endif
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -62,6 +63,88 @@ namespace aurore
 {
 
 static double scaleFactor = 1.0;
+
+#ifdef __SDL3__
+// A window at x, y, w, h lies whole on one of the screens: a position saved
+// on a screen since unplugged is not reused
+static bool sdlOnADisplay(int x, int y, int w, int h)
+{
+    int count               = 0;
+    SDL_DisplayID* displays = SDL_GetDisplays(&count);
+    bool inside             = false;
+    for (int i = 0; i < count && !inside; i++)
+    {
+        SDL_Rect bounds;
+        if (SDL_GetDisplayBounds(displays[i], &bounds))
+            inside = x >= bounds.x && y >= bounds.y && x + w <= bounds.x + bounds.w && y + h <= bounds.y + bounds.h;
+    }
+    SDL_free(displays);
+    return inside;
+}
+
+#if !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+// SDL3 sizes windows in pixels on Windows and X11, in points on macOS and
+// Wayland, which follow the screen's density themselves
+static bool sdlSizesInPixels()
+{
+    const char* driver = SDL_GetCurrentVideoDriver();
+    return driver && (strcmp(driver, "windows") == 0 || strcmp(driver, "x11") == 0);
+}
+
+// A first window (no size saved yet) at the main screen's density where
+// windows are sized in pixels: the app's size is the one it has at 100 %,
+// as macOS and Wayland show it. Kept within the screen's free area.
+static void sdlScaleFirstWindow(uint32_t& width, uint32_t& height)
+{
+    if (!sdlSizesInPixels())
+        return;
+    SDL_DisplayID display = SDL_GetPrimaryDisplay();
+    float scale           = SDL_GetDisplayContentScale(display);
+    if (scale <= 1.0f)
+        return;
+    SDL_Rect usable;
+    if (SDL_GetDisplayUsableBounds(display, &usable) && usable.w > 0 && usable.h > 0)
+        scale = std::min(scale, std::min(usable.w * 0.9f / width, usable.h * 0.9f / height));
+    if (scale <= 1.0f)
+        return;
+    Logger::info("sdl: first window at the screen's density, x{}", scale);
+    width  = (uint32_t)std::lround(width * scale);
+    height = (uint32_t)std::lround(height * scale);
+}
+#endif
+#endif
+
+#ifdef AURORE_SDL_WINDOW_ICON
+// icon/icon.png from the resources, when the app has one
+static void sdlSetWindowIcon(SDL_Window* window)
+{
+    int width = 0, height = 0;
+    unsigned char* pixels = nullptr;
+#ifdef USE_LIBROMFS
+    try
+    {
+        auto& icon = romfs::get("icon/icon.png");
+        pixels     = nvgDecodeImageMem((const unsigned char*)icon.data(), (int)icon.size(), &width, &height);
+    }
+    catch (...)
+    {
+    }
+#else
+    const char* iconPath = AURORE_ASSET("icon/icon.png");
+    if (access(iconPath, F_OK) != -1)
+        pixels = nvgDecodeImage(iconPath, &width, &height);
+#endif
+    if (!pixels)
+        return;
+    SDL_Surface* surface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA32, pixels, width * 4);
+    if (surface)
+    {
+        SDL_SetWindowIcon(window, surface);
+        SDL_DestroySurface(surface);
+    }
+    nvgFreeImageData(pixels);
+}
+#endif
 
 // The size of the window's framebuffer, in pixels
 static void sdlDrawableSize(SDL_Window* window, int* width, int* height)
@@ -215,6 +298,14 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     }
 #endif
 
+#ifdef __SDL3__
+    // Desktop environments match the window to the app's .desktop file by
+    // this ID (Wayland's app_id, X11's WM_CLASS), as GLFW's hints did
+    const std::string& appId = Application::getAppId();
+    if (!appId.empty())
+        SDL_SetHint(SDL_HINT_APP_ID, appId.c_str());
+#endif
+
     if (!AURORE_SDL_OK(SDL_Init(SDL_INIT_VIDEO)))
     {
         Logger::error("sdl: failed to initialize");
@@ -316,6 +407,10 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
         // Under SDL3, full screen on the desktop's mode unless a mode is set
         windowFlags |= fullscreen;
     }
+#if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+    if (VideoContext::sizeW == 0 || VideoContext::sizeH == 0)
+        sdlScaleFirstWindow(windowWidth, windowHeight);
+#endif
 #ifdef __SDL3__
     // SDL3 leaves the system's input method to show its own window
     // (SDL_HINT_IME_IMPLEMENTED_UI unset), as this hint did
@@ -324,11 +419,14 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, windowWidth);
     SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, windowHeight);
     SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
-    bool placed = !std::isnan(windowXPos) && !std::isnan(windowYPos);
+    // A saved position, if the window still fits on a screen there (on any
+    // screen: one left of the main one has negative coordinates)
+    bool placed = !std::isnan(windowXPos) && !std::isnan(windowYPos)
+        && sdlOnADisplay((int)windowXPos, (int)windowYPos, (int)windowWidth, (int)windowHeight);
     SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_X_NUMBER,
-        placed && windowXPos > 0 ? (Sint64)windowXPos : SDL_WINDOWPOS_UNDEFINED);
+        placed ? (Sint64)windowXPos : SDL_WINDOWPOS_UNDEFINED);
     SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_Y_NUMBER,
-        placed && windowYPos > 0 ? (Sint64)windowYPos : SDL_WINDOWPOS_UNDEFINED);
+        placed ? (Sint64)windowYPos : SDL_WINDOWPOS_UNDEFINED);
     this->window = SDL_CreateWindowWithProperties(windowProps);
     SDL_DestroyProperties(windowProps);
 #else
@@ -358,6 +456,12 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     {
         fatal("sdl: failed to create window");
     }
+#ifdef AURORE_SDL_WINDOW_ICON
+    sdlSetWindowIcon(this->window);
+#endif
+#if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+    this->displayScale = SDL_GetWindowDisplayScale(this->window);
+#endif
 #ifdef AURORE_USE_OPENGL
     // Configure window
     SDL_GLContext context = SDL_GL_CreateContext(window);
@@ -496,8 +600,8 @@ double SDLVideoContext::getScaleFactor()
 bool SDLVideoContext::readPixels(std::vector<unsigned char>* rgba, int* width, int* height)
 {
 #ifdef AURORE_USE_OPENGL
-    *width  = (int)Application::windowWidth;
-    *height = (int)Application::windowHeight;
+    *width  = (int)Application::framebufferWidth;
+    *height = (int)Application::framebufferHeight;
     return glReadPixelsTopDown(*width, *height, rgba);
 #else
     return false;
@@ -542,6 +646,44 @@ NVGcontext* SDLVideoContext::getNVGContext()
 SDL_Window* SDLVideoContext::getSDLWindow()
 {
     return this->window;
+}
+
+void SDLVideoContext::displayScaleChanged()
+{
+#if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+    // Moved to a screen of another density (Windows), or the density
+    // changed (X11's Xft.dpi): where windows are sized in pixels, the same
+    // size in points, kept within that screen's free area. Not when it fills
+    // the screen, which the system sizes.
+    float previous     = this->displayScale;
+    float scale        = SDL_GetWindowDisplayScale(this->window);
+    this->displayScale = scale;
+    if (previous <= 0.0f || scale <= 0.0f || scale == previous || !sdlSizesInPixels())
+        return;
+    if (SDL_GetWindowFlags(this->window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED))
+        return;
+    int width = 0, height = 0;
+    SDL_GetWindowSize(this->window, &width, &height);
+    float ratio = scale / previous;
+    SDL_Rect usable;
+    bool bounded = SDL_GetDisplayUsableBounds(SDL_GetDisplayForWindow(this->window), &usable) && usable.w > 0
+        && usable.h > 0;
+    if (bounded && ratio > 1.0f)
+        ratio = std::max(1.0f, std::min(ratio, std::min(usable.w * 0.9f / width, usable.h * 0.9f / height)));
+    Logger::info("sdl: the screen's density went from x{} to x{}", previous, scale);
+    width  = (int)std::lround(width * ratio);
+    height = (int)std::lround(height * ratio);
+    SDL_SetWindowSize(this->window, width, height);
+    // Grown past the screen's edge: back inside it
+    int x = 0, y = 0;
+    if (bounded && SDL_GetWindowPosition(this->window, &x, &y))
+    {
+        int inX = std::max(usable.x, std::min(x, usable.x + usable.w - width));
+        int inY = std::max(usable.y, std::min(y, usable.y + usable.h - height));
+        if (inX != x || inY != y)
+            SDL_SetWindowPosition(this->window, inX, inY);
+    }
+#endif
 }
 
 void SDLVideoContext::fullScreen(bool fs)

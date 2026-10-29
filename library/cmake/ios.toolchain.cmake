@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2014 Bogdan Cristea and LTE Engineering Software
+# SPDX-FileCopyrightText: Kitware, Inc.
+# SPDX-FileCopyrightText: Insight Software Consortium
+# SPDX-License-Identifier: BSD-3-Clause
+
 # This file is part of the ios-cmake project. It was retrieved from
 # https://github.com/leetal/ios-cmake.git, which is a fork of
 # https://github.com/gerstrong/ios-cmake.git, which is a fork of

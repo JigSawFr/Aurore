@@ -1,18 +1,5 @@
-/*
-    Copyright 2021 natinusala
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2021 natinusala
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -40,6 +27,9 @@ class SDLVideoContext : public VideoContext
     void fullScreen(bool fs) override;
 
     SDL_Window* getSDLWindow();
+    /// SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED: the window keeps its size in
+    /// points where SDL3 sizes it in pixels (Windows, X11)
+    void displayScaleChanged();
 
     double getScaleFactor() override;
     bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) override;
@@ -47,6 +37,7 @@ class SDLVideoContext : public VideoContext
   private:
     SDL_Window* window     = nullptr;
     NVGcontext* nvgContext = nullptr;
+    float displayScale     = 0.0f; // SDL_GetWindowDisplayScale, last seen
 };
 
 } // namespace aurore

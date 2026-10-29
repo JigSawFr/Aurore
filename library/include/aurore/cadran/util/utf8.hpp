@@ -1,9 +1,11 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // utf8 — reading and writing one UTF-8 character. Two readers, as their
 // callers need: decode() validates (what comes from outside: safe_text,
 // the exports), decode_loose() trusts the text (already cleaned, or shipped
 // with the app) and never fails; and where to cut a text between two
 // characters. Header-only, plain C++.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <cstddef>

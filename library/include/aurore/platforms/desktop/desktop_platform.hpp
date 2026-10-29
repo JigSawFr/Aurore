@@ -1,19 +1,6 @@
-/*
-    Copyright 2021 natinusala
-    Copyright 2023 xfangfang
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2021 natinusala
+// SPDX-FileCopyrightText: 2023 xfangfang
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -53,6 +40,7 @@ class DesktopPlatform : public Platform
 
     ThemeVariant getThemeVariant() override;
     void setThemeVariant(ThemeVariant theme) override;
+    void followSystemTheme() override;
     std::string getLocale() override;
     ImeManager* getImeManager() override;
 
@@ -95,12 +83,23 @@ class DesktopPlatform : public Platform
     inline static std::string GAMEPAD_DB = AURORE_ASSET("gamepad/gamecontrollerdb.txt");
 
   protected:
+    /// The system's variant is now this one: the app's too while it follows
+    /// the system's
+    void systemThemeChanged(ThemeVariant theme);
+
     DesktopFontLoader* fontLoader = nullptr;
     ThemeVariant themeVariant     = ThemeVariant::LIGHT;
-    DesktopImeManager* imeManager = nullptr;
+    /// The system's variant (AURORE_THEME's when set), whatever the app chose
+    ThemeVariant systemThemeVariant = ThemeVariant::LIGHT;
+    DesktopImeManager* imeManager   = nullptr;
     std::string locale;
     /// AURORE_LANG gave the locale: the system's is not looked for
     bool localeFromEnvironment = false;
+    /// AURORE_THEME gave the theme: the system's is not looked for
+    bool themeFromEnvironment = false;
+    /// The variant is the system's and changes with it, until the app gives
+    /// one (SDL3 tells when the system's changes; not with AURORE_THEME)
+    bool themeFollowsSystem    = false;
     bool screenDimmingDisabled = false;
 #ifdef __linux__
     uint32_t inhibitCookie = 0;

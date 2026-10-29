@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # A project that uses an installed Aurore (AURORE_INSTALL=ON), as a packager's
 # user would: CI installs the library, moves the prefix elsewhere and builds
 # this against it (tools/ci_variant.sh install).

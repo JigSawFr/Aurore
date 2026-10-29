@@ -1,19 +1,6 @@
-/*
-    Copyright 2019-2021 natinusala
-    Copyright 2019 p-sam
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2019-2021 natinusala
+// SPDX-FileCopyrightText: 2019 p-sam
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -33,6 +20,7 @@
 #include <aurore/core/frame_context.hpp>
 #include <aurore/core/geometry.hpp>
 #include <aurore/core/gesture.hpp>
+#include <aurore/core/safe_area.hpp>
 #include <aurore/core/util.hpp>
 #include <aurore/core/view_style.hpp>
 #ifdef USE_LIBROMFS
@@ -1638,6 +1626,13 @@ class View
     {
         // Nothing by default
     }
+
+    /**
+     * Takes the window's safe area on the edges in `reach` that the view
+     * keeps clear of, and gives the views in it theirs (Box::setSafeArea).
+     * Nothing for a view without children.
+     */
+    virtual void applySafeArea(SafeAreaEdges reach) { }
 
     /// Fired with the view when it gains the focus.
     GenericEvent* getFocusEvent();

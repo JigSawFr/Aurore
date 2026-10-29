@@ -2,12 +2,12 @@
 
 [中文](./README_ZH.md)
 
-The Gradle project that builds Aurore's demo as an Android app. It follows SDL's Android port ([SDL 2.32's documentation](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md), [SDL 3.4's](https://github.com/libsdl-org/SDL/blob/release-3.4.x/docs/README-android.md)): SDL's Java activity starts the app, which Aurore builds as a shared library with the SDL platform and OpenGL ES 2, its resources inside it (libromfs). It is built on SDL2, or on SDL3 with `-PauroreSdl=3` (or `auroreSdl=3` in `gradle.properties`).
+The Gradle project that builds Aurore's demo as an Android app. It follows SDL's Android port ([SDL 2.32's documentation](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md), [SDL 3.4's](https://github.com/libsdl-org/SDL/blob/release-3.4.x/docs/README-android.md)): SDL's Java activity starts the app, which Aurore builds as a shared library with the SDL platform and OpenGL ES 2, its resources inside it (libromfs). It is built on SDL3, or on SDL2 with `-PauroreSdl=2` (or `auroreSdl=2` in `gradle.properties`).
 
 | | |
 | --- | --- |
 | SDL2 | 2.32.10, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it). The Java code in `app/src/sdl2/java/org/libsdl/app` is SDL's from the same tag (`SDLActivity` refuses a native library of another version), with one change: `HIDDeviceManager` registers its USB receiver with `RECEIVER_EXPORTED`, which Android 14 requires |
-| SDL3 | 3.4.18, the submodule `library/lib/extern/SDL3` (`app/jni/SDL3` links to it), with `-PauroreSdl=3`. Its Java code is read from the submodule as it is (`android-project/app/src/main/java` there) |
+| SDL3 | 3.4.18, the submodule `library/lib/extern/SDL3` (`app/jni/SDL3` links to it), the default. Its Java code is read from the submodule as it is (`android-project/app/src/main/java` there) |
 | Aurore's Java | `app/src/main/java/org/libsdl/app`: `PlatformUtils` and `AuroreHandler`, which the library calls (brightness, network, the system's language), for either SDL |
 | Android Gradle Plugin, Gradle | 9.5.0, Gradle 9.8.2 (the wrapper, `gradlew`) |
 | JDK | 17 or later, as the Android Gradle Plugin 9 needs |
@@ -34,7 +34,7 @@ It leaves `libromfs-generator` at the root of the repository, where `app/jni/CMa
 cd android-project
 export ANDROID_SDK_ROOT=~/Android/Sdk          # macOS: ~/Library/Android/sdk
 ./gradlew assembleDebug                        # app/build/outputs/apk/debug/*.apk
-./gradlew assembleDebug -PauroreSdl=3          # the same on SDL3
+./gradlew assembleDebug -PauroreSdl=2          # the same on SDL2
 ./gradlew installDebug                         # onto a device or emulator connected with adb
 ```
 

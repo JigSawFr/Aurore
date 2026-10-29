@@ -1,18 +1,5 @@
-/*
-    Copyright 2023 xfangfang
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2023 xfangfang
+// SPDX-License-Identifier: Apache-2.0
 
 #include <strings.h>
 #include <unistd.h> /* chdir */
@@ -21,12 +8,21 @@
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 
 #include "sdl_compat.hpp"
 
 #if defined(IOS) || defined(TVOS)
 #include <sys/utsname.h>
+
+#ifndef __SDL3__
+namespace aurore
+{
+// ios_darwin.mm
+Insets ios_safe_area(SDL_Window* window);
+}
+#endif
 
 static bool isIPad()
 {
@@ -138,7 +134,29 @@ void SDLPlatform::createWindow(std::string windowTitle, uint32_t windowWidth, ui
     this->videoContext = new SDLVideoContext(windowTitle, windowWidth, windowHeight, windowXPos, windowYPos);
     this->inputManager = new SDLInputManager(this->videoContext->getSDLWindow());
     this->imeManager   = new SDLImeManager(&this->otherEvent);
+
+#ifdef __SDL3__
+    // The system's light or dark, which SDL3 reads everywhere (Linux's
+    // desktop portal too), unless AURORE_THEME gave one. Its video must be
+    // started first.
+    if (!this->themeFromEnvironment)
+    {
+        this->themeFollowsSystem = true;
+        this->readSystemTheme();
+    }
+#endif
 }
+
+#ifdef __SDL3__
+void SDLPlatform::readSystemTheme()
+{
+    SDL_SystemTheme theme = SDL_GetSystemTheme();
+    if (theme == SDL_SYSTEM_THEME_DARK)
+        this->systemThemeChanged(ThemeVariant::DARK);
+    else if (theme == SDL_SYSTEM_THEME_LIGHT)
+        this->systemThemeChanged(ThemeVariant::LIGHT);
+}
+#endif
 
 void SDLPlatform::restoreWindow()
 {
@@ -236,9 +254,40 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         if (manager)
             manager->getMouseCusorEntered()->fire(event->type == SDL_EVENT_WINDOW_MOUSE_ENTER);
     }
+    else if (event->type == SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED)
+    {
+        if (this->videoContext)
+            this->videoContext->displayScaleChanged();
+    }
+    else if (event->type == SDL_EVENT_SYSTEM_THEME_CHANGED)
+    {
+        // Kept for followSystemTheme when the app chose one; the next frame
+        // redraws in it otherwise (Application::checkThemeChanged)
+        if (!this->themeFromEnvironment)
+            this->readSystemTheme();
+    }
+    else if (event->type == SDL_EVENT_WINDOW_SAFE_AREA_CHANGED || event->type == SDL_EVENT_WINDOW_SHOWN
+        || event->type == SDL_EVENT_WINDOW_RESIZED || event->type == SDL_EVENT_WINDOW_MAXIMIZED
+        || event->type == SDL_EVENT_WINDOW_RESTORED || event->type == SDL_EVENT_WINDOW_FOCUS_GAINED
+        || event->type == SDL_EVENT_DISPLAY_ORIENTATION)
+    {
+        this->safeAreaMayHaveChanged();
+    }
 #else
     else if (event->type == SDL_WINDOWEVENT)
     {
+        switch (event->window.event)
+        {
+            case SDL_WINDOWEVENT_SHOWN:
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+            case SDL_WINDOWEVENT_MAXIMIZED:
+            case SDL_WINDOWEVENT_RESTORED:
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
+                this->safeAreaMayHaveChanged();
+                break;
+            default:
+                break;
+        }
         auto* manager = this->inputManager;
         if (event->window.event == SDL_WINDOWEVENT_LEAVE)
         {
@@ -250,6 +299,11 @@ bool SDLPlatform::processEvent(SDL_Event* event)
             if (manager)
                 manager->getMouseCusorEntered()->fire(true);
         }
+    }
+    else if (event->type == SDL_DISPLAYEVENT)
+    {
+        // A turn of 180 degrees: the same size, the notch on the other side
+        this->safeAreaMayHaveChanged();
     }
 #endif
     else if (event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP)
@@ -307,6 +361,38 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     aurore::Application::setActiveEvent(true);
     return true;
 }
+
+void SDLPlatform::safeAreaMayHaveChanged()
+{
+#if defined(IOS) || defined(TVOS) || defined(ANDROID)
+    if (!this->videoContext)
+        return;
+    Application::updateSafeArea();
+    // The system lays the window out again after telling us
+    aurore::cancelDelay(this->safeAreaCheck);
+    this->safeAreaCheck = aurore::delay(300, []()
+        { Application::updateSafeArea(); });
+#endif
+}
+
+#if defined(IOS) || defined(TVOS)
+Insets SDLPlatform::getSafeAreaInsets()
+{
+    if (!this->videoContext)
+        return {};
+#ifdef __SDL3__
+    // The part of the window, in points, nothing covers
+    SDL_Window* window = this->videoContext->getSDLWindow();
+    SDL_Rect safe;
+    int width, height;
+    if (!SDL_GetWindowSafeArea(window, &safe) || !SDL_GetWindowSize(window, &width, &height))
+        return {};
+    return { (float)safe.y, (float)(width - safe.x - safe.w), (float)(height - safe.y - safe.h), (float)safe.x };
+#else
+    return ios_safe_area(this->videoContext->getSDLWindow());
+#endif
+}
+#endif
 
 bool SDLPlatform::mainLoopIteration()
 {

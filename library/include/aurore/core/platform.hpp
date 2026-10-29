@@ -1,19 +1,6 @@
-/*
-    Copyright 2021 natinusala
-    Copyright 2023 xfangfang
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2021 natinusala
+// SPDX-FileCopyrightText: 2023 xfangfang
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -25,6 +12,7 @@
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/ime.hpp>
 #include <aurore/core/input.hpp>
+#include <aurore/core/safe_area.hpp>
 #include <aurore/core/theme.hpp>
 #include <aurore/core/video.hpp>
 
@@ -83,6 +71,18 @@ class Platform
      *
      */
     virtual void setWindowState(uint32_t windowWidth, uint32_t windowHeight, int windowXPos, int windowYPos) {};
+
+    /**
+     * The window's safe area: how far the display cutouts, the rounded
+     * corners and the system bars reach in from each edge of the window, in
+     * the unit of the window's size (points where the system has them,
+     * pixels on Android). The on-screen keyboard is not part of it. Zero by
+     * default (desktops, consoles).
+     *
+     * A platform whose safe area can change (a rotation, bars shown or
+     * hidden) calls Application::updateSafeArea() when it may have.
+     */
+    virtual Insets getSafeAreaInsets() { return {}; }
 
     /**
      * Returns the human-readable name of the platform.
@@ -188,19 +188,28 @@ class Platform
     virtual bool runLoop(const std::function<bool()>& runLoopImpl) { return runLoopImpl(); }
 
     /**
-     * Can be called at anytime to get the current system theme variant.
+     * Can be called at anytime to get the current theme variant: the
+     * system's until setThemeVariant gives one.
      *
-     * For now, the variant is assumed to stay the same during the whole time
-     * the app is running (no variant hot swap).
-     *
-     * As such, the result should be cached by the platform code.
+     * Under SDL3 it follows the system's when that changes (AURORE_THEME or
+     * a setThemeVariant call stops it); elsewhere it is read once, at start.
+     * The result should be cached by the platform code.
      */
     virtual ThemeVariant getThemeVariant() = 0;
 
     /**
-     * Overwrite current theme settings
+     * Overwrite current theme settings: the app's choice, kept whatever the
+     * system's becomes
      */
     virtual void setThemeVariant(ThemeVariant theme) = 0;
+
+    /**
+     * Back to the system's variant after setThemeVariant (a "system" choice
+     * in the app's settings): the one read at start, or AURORE_THEME's, and
+     * under SDL3 the system's as it changes from then on. A platform that
+     * reads no system's variant keeps the last one given.
+     */
+    virtual void followSystemTheme() { }
 
     /**
      * Can be called at anytime to get the current locale

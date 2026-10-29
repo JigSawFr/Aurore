@@ -1,18 +1,5 @@
-/*
-    Copyright 2026 JigSawFr
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -65,6 +52,8 @@ class HeadlessVideoContext : public VideoContext
     void* eglDisplay = nullptr;
     void* eglContext = nullptr;
     void* glfwWindow = nullptr;
+    void* sdlWindow  = nullptr;
+    void* sdlContext = nullptr;
 };
 
 class HeadlessInputManager : public InputManager
@@ -128,6 +117,9 @@ class HeadlessPlatform : public DesktopPlatform
     InputManager* getInputManager() override { return &inputManager; }
     ImeManager* getImeManager() override { return &headlessImeManager; }
 
+    /// The system's variant changes, as SDL3 tells it
+    void setSystemTheme(ThemeVariant theme) { this->systemThemeChanged(theme); }
+
     bool canShowBatteryLevel() override { return showStatus; }
     bool canShowWirelessLevel() override { return showStatus; }
     int getBatteryLevel() override { return batteryLevel; }
@@ -142,6 +134,7 @@ class HeadlessPlatform : public DesktopPlatform
     void openBrowser(std::string url) override { openedUrls.push_back(url); }
     void pasteToClipboard(const std::string& text) override { clipboard = text; }
     std::string pasteFromClipboard() override { return clipboard; }
+    Insets getSafeAreaInsets() override { return safeAreaInsets; }
 
     HeadlessInputManager* getHeadlessInput() { return &inputManager; }
     HeadlessImeManager* getHeadlessIme() { return &headlessImeManager; }
@@ -157,6 +150,8 @@ class HeadlessPlatform : public DesktopPlatform
     bool showStatus = false;
     // What getBatteryLevel() says (read on the task thread)
     std::atomic<int> batteryLevel { 100 };
+    // What getSafeAreaInsets() says: a phone's notch (Harness::setSafeArea)
+    Insets safeAreaInsets;
 
   private:
     int width, height;

@@ -1,10 +1,12 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // cadran_palette — the boards' two palettes as plain values (no view, no
 // nanovg), every colour Cadran draws with: cadran::install_theme puts them
 // in Aurore's themes under their keys (KEYS below), where a theme file
 // can change any of them (docs/themes.md), and a host suite checks the
 // contrast of every ink on every surface it is drawn on (tests/host;
 // Theme::checkContrast does the same at run time, with CONTRAST below).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <cstdint>

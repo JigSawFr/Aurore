@@ -37,7 +37,7 @@ cmake --build build
 ./build/my_app
 ```
 
-`-DAURORE_WINDOW=SDL2` (or `SDL3`) builds with SDL instead of GLFW. The resources are copied to `build/resources` at each build; the binary reads them there.
+The window and input are SDL3's; `-DAURORE_WINDOW=GLFW` builds with GLFW, `-DAURORE_WINDOW=SDL2` with SDL2. The resources are copied to `build/resources` at each build; the binary reads them there.
 
 ## Nintendo Switch
 

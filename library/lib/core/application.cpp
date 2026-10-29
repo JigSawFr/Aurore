@@ -1,21 +1,8 @@
-/*
-    Copyright 2019-2020 natinusala
-    Copyright 2019 p-sam
-    Copyright 2020 WerWolv
-    Copyright 2021 XITRIX
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2019-2020 natinusala
+// SPDX-FileCopyrightText: 2019 p-sam
+// SPDX-FileCopyrightText: 2020 WerWolv
+// SPDX-FileCopyrightText: 2021 XITRIX
+// SPDX-License-Identifier: Apache-2.0
 
 #include <yoga/Yoga.h>
 #include <yoga/event/event.h>
@@ -194,6 +181,15 @@ bool Application::init()
         if (*settle && !(settleFile = std::fopen(settle, "w")))
             Logger::warning("Application: cannot write AURORE_SETTLE_FILE {}", settle);
     }
+    // A notch or a TV's overscan seen on a desktop
+    if (const char* safeAreaEnv = environmentVariable("SAFE_AREA"))
+    {
+        Insets insets;
+        if (Insets::parse(safeAreaEnv, &insets))
+            Application::setSafeAreaOverride(&insets);
+        else
+            Logger::warning("AURORE_SAFE_AREA: \"{}\" is not \"top,right,bottom,left\"", safeAreaEnv);
+    }
 #endif
 
 #if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
@@ -226,6 +222,9 @@ void Application::createWindow(std::string windowTitle)
         Application::getPlatform()->createWindow(windowTitle, VideoContext::sizeW, VideoContext::sizeH,
             VideoContext::posX, VideoContext::posY);
     }
+
+    // The safe area again, now that the window is there to convert it
+    Application::updateSafeArea();
 
     // Load most commonly used sounds
     AudioPlayer* audioPlayer = Application::getAudioPlayer();
@@ -504,6 +503,23 @@ void Application::processInput()
     inputManager->runloopStart();
     inputManager->updateTouchStates(&rawTouch);
     inputManager->updateMouseStates(&rawMouse);
+    // Read in the window: moved to the screen's corner, the touches past
+    // the screen dropped (a frame's bezel is not the screen)
+    if (Application::screenFrame && Application::windowScale > 0)
+    {
+        float dx = Application::screenRect.getMinX() / Application::windowScale;
+        float dy = Application::screenRect.getMinY() / Application::windowScale;
+        rawMouse.position.x -= dx;
+        rawMouse.position.y -= dy;
+        for (auto it = rawTouch.begin(); it != rawTouch.end();)
+        {
+            it->position.x -= dx;
+            it->position.y -= dy;
+            bool inside = it->position.x >= 0 && it->position.y >= 0 && it->position.x < Application::contentWidth
+                && it->position.y < Application::contentHeight;
+            it = inside || !it->pressed ? it + 1 : rawTouch.erase(it);
+        }
+    }
     inputManager->updateUnifiedControllerState(&controllerState);
     keepDominantStickDirection(&controllerState);
 
@@ -1072,7 +1088,9 @@ void Application::frame(bool present)
     videoContext->clear(Application::getTheme().getColor("aurore/clear"));
     float scaleFactor = videoContext->getScaleFactor();
 
-    nvgBeginFrame(frameContext.vg, Application::windowWidth, Application::windowHeight, scaleFactor);
+    nvgBeginFrame(frameContext.vg, Application::framebufferWidth, Application::framebufferHeight, scaleFactor);
+    if (Application::screenFrame)
+        nvgTranslate(frameContext.vg, Application::screenRect.getMinX(), Application::screenRect.getMinY());
     nvgScale(frameContext.vg, Application::windowScale, Application::windowScale);
     Application::drawThemeBackgroundImage(frameContext.vg, 0, 0, Application::contentWidth, Application::contentHeight);
     ThemeDecorations::drawStrips(frameContext.vg, 0, 0, Application::contentWidth, Application::contentHeight);
@@ -1165,6 +1183,14 @@ void Application::frame(bool present)
 
     // End frame
     nvgResetTransform(Application::getNVGContext()); // scale
+    // The frame around the screen, over what the app drew past it
+    if (Application::screenFrame)
+    {
+        nvgResetScissor(frameContext.vg);
+        nvgGlobalAlpha(frameContext.vg, 1.0f);
+        Application::screenFrame->draw(frameContext.vg, (float)Application::framebufferWidth,
+            (float)Application::framebufferHeight, Application::screenRect);
+    }
     nvgEndFrame(Application::getNVGContext());
 
     if (!present)
@@ -1235,7 +1261,10 @@ void Application::checkSkippedFrame()
         return;
 
     float scale = Application::windowScale > 0 ? Application::windowScale : 1.0f;
-    Rect area(minX / scale, minY / scale, (maxX + 1 - minX) / scale, (maxY + 1 - minY) / scale);
+    // In the screen's units (a frame puts the screen past the window's corner)
+    float offsetX = Application::screenRect.getMinX();
+    float offsetY = Application::screenRect.getMinY();
+    Rect area((minX - offsetX) / scale, (minY - offsetY) / scale, (maxX + 1 - minX) / scale, (maxY + 1 - minY) / scale);
     Application::missedRedraws++;
     bool sameArea = Application::missedRedrawArea.getMinX() == area.getMinX() && Application::missedRedrawArea.getMinY() == area.getMinY()
         && Application::missedRedrawArea.getWidth() == area.getWidth() && Application::missedRedrawArea.getHeight() == area.getHeight();
@@ -2223,6 +2252,13 @@ float Application::getMaximumUIScale()
 
 void Application::setWindowSize(int width, int height)
 {
+    Application::framebufferWidth  = width;
+    Application::framebufferHeight = height;
+    // With a frame, the app's screen is where the frame puts it
+    Application::screenRect   = Application::screenFrame ? Application::screenFrame->layout((float)width, (float)height)
+                                                         : Rect(0, 0, (float)width, (float)height);
+    width                     = std::max(1, (int)std::lround(Application::screenRect.getWidth()));
+    height                    = std::max(1, (int)std::lround(Application::screenRect.getHeight()));
     Application::windowWidth  = width;
     Application::windowHeight = height;
 
@@ -2236,10 +2272,123 @@ void Application::setWindowSize(int width, int height)
     Application::contentWidth  = uiScaleIsCapped ? std::ceil((float)width / Application::windowScale) : (float)ORIGINAL_WINDOW_WIDTH;
     Application::contentHeight = std::ceil((float)height / Application::windowScale);
 
+    // In layout units: the scale changed
+    bool safeAreaChanged = Application::computeSafeArea();
+
     for (Activity* activity : Application::activitiesStack)
         activity->onWindowSizeChanged();
 
+    if (safeAreaChanged)
+        Application::safeAreaChangedEvent.fire(Application::safeArea);
+
     aurore::Application::setActiveEvent(true);
+}
+
+bool Application::computeSafeArea()
+{
+    Insets points;
+    if (Application::hasSafeAreaOverride)
+        points = Application::safeAreaOverride;
+    else if (Application::platform)
+        points = Application::platform->getSafeAreaInsets();
+
+    // Window points to layout units, as a touch's position
+    double factor = 1.0;
+    if (Application::platform && Application::platform->getVideoContext())
+        factor = Application::platform->getVideoContext()->getScaleFactor();
+    if (Application::windowScale > 0)
+        factor /= Application::windowScale;
+
+    const float width = Application::contentWidth, height = Application::contentHeight;
+    // At most a third of the window from each edge: a platform's nonsense
+    // never leaves the content without room
+    auto edge = [factor](float value, float margin, float size)
+    {
+        float units = std::isfinite(value) && value > 0 ? (float)(value * factor) : 0.0f;
+        units       = std::max(units, margin);
+        // Whole units, without a rounding error's extra one
+        units = std::ceil(units - 0.01f);
+        return std::clamp(units, 0.0f, std::max(0.0f, (float)std::floor(size / 3)));
+    };
+    const float overscanX = Application::overscan * width, overscanY = Application::overscan * height;
+    Insets units {
+        edge(points.top, overscanY, height),
+        edge(points.right, overscanX, width),
+        edge(points.bottom, overscanY, height),
+        edge(points.left, overscanX, width),
+    };
+
+    if (units == Application::safeArea)
+        return false;
+    Logger::info("Safe area: top {}, right {}, bottom {}, left {}", units.top, units.right, units.bottom,
+        units.left);
+    Application::safeArea = units;
+    if (!units.empty())
+        Application::safeAreaInUse = true;
+    return true;
+}
+
+Insets Application::getSafeArea()
+{
+    return Application::safeArea;
+}
+
+void Application::updateSafeArea()
+{
+    if (!Application::computeSafeArea())
+        return;
+    for (Activity* activity : Application::activitiesStack)
+        activity->applySafeArea();
+    Application::requestRedraw();
+    Application::setActiveEvent(true);
+    Application::safeAreaChangedEvent.fire(Application::safeArea);
+}
+
+Event<Insets>* Application::getSafeAreaChangedEvent()
+{
+    return &Application::safeAreaChangedEvent;
+}
+
+void Application::setSafeAreaOverride(const Insets* insets)
+{
+    Application::hasSafeAreaOverride = insets != nullptr;
+    if (insets)
+        Application::safeAreaOverride = *insets;
+    Application::updateSafeArea();
+}
+
+void Application::setOverscan(float fraction)
+{
+    if (!std::isfinite(fraction))
+        fraction = 0.0f;
+    Application::overscan = std::clamp(fraction, 0.0f, 0.25f);
+    Application::updateSafeArea();
+}
+
+float Application::getOverscan()
+{
+    return Application::overscan;
+}
+
+void Application::setScreenFrame(ScreenFrame* frame)
+{
+    Application::screenFrame.reset(frame);
+    if (Application::framebufferWidth > 0 && Application::framebufferHeight > 0)
+    {
+        Application::setWindowSize((int)Application::framebufferWidth, (int)Application::framebufferHeight);
+        Application::getWindowSizeChangedEvent()->fire();
+    }
+    Application::requestRedraw();
+}
+
+ScreenFrame* Application::getScreenFrame()
+{
+    return Application::screenFrame.get();
+}
+
+Rect Application::getScreenRect()
+{
+    return Application::screenRect;
 }
 
 void Application::onWindowResized(int width, int height)
@@ -2505,8 +2654,12 @@ void Application::checkThemeChanged()
             view->onThemeChanged();
     Application::notificationManager->onThemeChanged();
 
-    // The console records its clear colour once (deko3d): again
+#ifdef __SWITCH__
+    // The console records its clear colour once (deko3d): again. Not
+    // elsewhere: setThemeVariant is the app's choice, which stops a desktop
+    // following the system's.
     Application::platform->setThemeVariant(variant);
+#endif
 
     Application::themeChangedEvent.fire(variant);
     Application::requestRedraw();

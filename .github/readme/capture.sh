@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The README's screenshots (the website's gallery too) and tour.gif, drawn by
 # the test harness without a window or a display (aurore-tour, tests/tour.cpp):
 #   cmake --preset tests && cmake --build --preset tests
@@ -31,6 +34,10 @@ shot french --lang fr readme-cadran
 shot winter --theme @res/themes/winter/theme.theme readme-cadran
 shot prism --theme @res/themes/prism/theme.theme readme-cadran
 shot aurora --variant light --theme @res/themes/aurora/theme.theme readme-cadran
+# The demo on each simulated console (the website's "On every screen")
+for console in switch vita ps4 3ds phone; do
+    shot "console-$console" "readme-console-$console"
+done
 
 # The tour: through the tabs, into a game and back, at 12 pictures a second
 "$TOUR" -o "$TMP/tour" --film "$TMP/film" readme-tour > /dev/null

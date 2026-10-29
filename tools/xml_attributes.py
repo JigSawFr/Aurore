@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The XML attributes the library's views register (register*XMLAttribute,
 # AURORE_REGISTER_ENUM_XML_ATTRIBUTE), written as docs/xml-attributes.md.
 #
@@ -23,6 +26,11 @@ KINDS = {
     "Color": "colour (`#rrggbb`, `@theme/…`)",
     "Bool": "`true` / `false`",
     "FilePath": "file (`@res/…`)",
+}
+
+# Text attributes read with a grammar of their own: what they take
+TEXT_VALUES = {
+    "safeArea": "edges joined with `\\|`: `top` · `right` · `bottom` · `left` · `vertical` · `horizontal` · `all` · `none`; or `auto` ([safe areas](safe-areas.md))",
 }
 
 REGISTER = re.compile(r'register(Float|Percentage|Auto|String|Color|Bool|FilePath)XMLAttribute\(\s*"([^"]+)"')
@@ -114,7 +122,9 @@ def render(tags, attributes):
         lines += ["", "## " + title, "", "| Attribute | Value |", "|---|---|"]
         for name in sorted(attributes[owner], key=str.lower):
             kinds, values = attributes[owner][name]
-            described = [KINDS[k] for k in sorted(kinds) if not (values and k == "String")]
+            described = [KINDS[k] for k in sorted(kinds) if not ((values or name in TEXT_VALUES) and k == "String")]
+            if name in TEXT_VALUES:
+                described.append(TEXT_VALUES[name])
             if values:
                 described.append(" · ".join("`%s`" % v for v in values))
             lines.append("| `%s` | %s |" % (name, ", ".join(described)))

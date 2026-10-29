@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // Host tests for cadran/ui/guarded.hpp: the callback runs while its
 // token is held and true, with its arguments, and does nothing once the token
 // is gone or set to false; it fits a std::function of any arguments.

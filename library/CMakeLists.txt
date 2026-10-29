@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: borealis contributors
+# SPDX-License-Identifier: Apache-2.0
+
 cmake_minimum_required(VERSION 3.16...3.31)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 include(GNUInstallDirs)
@@ -52,10 +55,11 @@ if (AURORE_FETCH_DEPS)
             GIT_TAG 11.0.0
             GIT_SHALLOW TRUE
             FIND_PACKAGE_ARGS)
-    # The vendored GLFW is xfangfang's fork, for its fixes
+    # The vendored GLFW is GLFW 3.5.1 with xfangfang's fixes (IME, touch, soft
+    # fullscreen, dark title bar), carried in the aurore branch of JigSawFr/glfw
     FetchContent_Declare(glfw
-            GIT_REPOSITORY https://github.com/xfangfang/glfw.git
-            GIT_TAG 892256c3f630739fb02552544b8d83240883ec8a
+            GIT_REPOSITORY https://github.com/JigSawFr/glfw.git
+            GIT_TAG fd162259625651250feb3f382130bd0af4a6337e
             FIND_PACKAGE_ARGS NAMES glfw3)
     FetchContent_Declare(SDL2
             GIT_REPOSITORY https://github.com/libsdl-org/SDL.git

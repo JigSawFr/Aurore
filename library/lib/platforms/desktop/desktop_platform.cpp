@@ -1,19 +1,6 @@
-/*
-    Copyright 2021 natinusala
-    Copyright 2023 xfangfang
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2021 natinusala
+// SPDX-FileCopyrightText: 2023 xfangfang
+// SPDX-License-Identifier: Apache-2.0
 
 #include <strings.h>
 
@@ -563,7 +550,8 @@ bool DesktopPlatform::localeFromEnvironmentVariable(std::string* locale)
 DesktopPlatform::DesktopPlatform()
 {
     // Theme
-    const char* themeEnv = environment("THEME");
+    const char* themeEnv       = environment("THEME");
+    this->themeFromEnvironment = themeEnv != nullptr;
     if (themeEnv == nullptr)
     {
 #if defined(IOS) || defined(TVOS)
@@ -614,6 +602,7 @@ DesktopPlatform::DesktopPlatform()
     {
         this->themeVariant = ThemeVariant::DARK;
     }
+    this->systemThemeVariant = this->themeVariant;
 
     // Locale
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO)
@@ -1168,7 +1157,23 @@ ThemeVariant DesktopPlatform::getThemeVariant()
 
 void DesktopPlatform::setThemeVariant(ThemeVariant theme)
 {
-    this->themeVariant = theme;
+    // The app's choice: the system's changes no longer replace it
+    this->themeFollowsSystem = false;
+    this->themeVariant       = theme;
+}
+
+void DesktopPlatform::systemThemeChanged(ThemeVariant theme)
+{
+    this->systemThemeVariant = theme;
+    if (this->themeFollowsSystem)
+        this->themeVariant = theme;
+}
+
+void DesktopPlatform::followSystemTheme()
+{
+    this->themeVariant = this->systemThemeVariant;
+    // Under SDL3, its changes from now on (AURORE_THEME's never change)
+    this->themeFollowsSystem = !this->themeFromEnvironment;
 }
 
 std::string DesktopPlatform::getLocale()

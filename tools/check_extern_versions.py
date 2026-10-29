@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 """Checks that AURORE_FETCH_DEPS downloads the versions vendored in library/lib/extern.
 
 library/CMakeLists.txt declares fmt, tinyxml2, GLFW, SDL2 and SDL3 with

@@ -1,18 +1,5 @@
-/*
-    Copyright 2026 JigSawFr
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
 
 // aurore-tour: the demo's screens drawn offscreen to PNGs by the test
 // harness, without a window: every tab of the rail, its content scrolled a
@@ -45,6 +32,7 @@
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
+#include "simulation.hpp"
 
 namespace
 {
@@ -355,6 +343,18 @@ std::vector<Scene> scenes()
     }
     for (const Scene& scene : extraScenes())
         list.push_back(scene);
+    // The demo on each simulated console, the console drawn around it (the
+    // website's "On every screen"); last: the window stays the console's
+    for (const auto& device : demo::simulation::devices())
+    {
+        std::string id = device.id;
+        if (id == "desktop")
+            continue;
+        list.push_back({ "readme-console-" + id, [id](Harness& h)
+            {
+            demo::simulation::use(id);
+            h.settle(); } });
+    }
     return list;
 }
 } // namespace

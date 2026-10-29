@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // cadran_text — the words the Cadran screens lay out, with no view: a
 // dialog's table, a week's identical lines as one, a failure's title, reason
 // and code. Translated through ui/tr.hpp, so a host suite checks them against
 // the real catalogs (tests/host/cadran_text_tests.cpp).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <cstdint>

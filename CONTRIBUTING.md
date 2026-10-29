@@ -30,7 +30,7 @@ bench.
   purpose updates it with `aurore_bench --write-baseline tests/bench_baseline.json` and says why.
 - **Format**: `clang-format-18 -i <files>` on what you touch (`.clang-format`); CI checks every file outside `extern/`.
   Reformatting commits are listed in `.git-blame-ignore-revs` (`git config blame.ignoreRevsFile .git-blame-ignore-revs`).
-- **Other platforms** (Switch, PS Vita, PS4, Android, iOS, Windows, macOS) are built by CI on every pull request.
+- **Other platforms** (Switch, PS Vita, PS4, New 3DS, Android, iOS, Windows, macOS, a browser) are built by CI on every pull request. The macOS and iOS jobs are not required: GitHub's macOS runners sometimes leave them without a machine until they are cancelled, so their failure does not fail the run; a failure that comes from the change is still fixed.
 
 ## Pull requests
 
@@ -47,8 +47,17 @@ bench.
 ## Licences
 
 borealis' code is Apache 2.0, Cadran (`library/lib/cadran`, `library/include/aurore/cadran`) is GPLv3: a new file
-takes the licence of the part it belongs to, with the same header as its neighbours. Third-party code goes in
-`extern/` with its licence, and in [`NOTICE`](NOTICE).
+takes the licence of the part it belongs to. It starts with two SPDX tags, as its neighbours do:
+
+```cpp
+// SPDX-FileCopyrightText: 2026 Your Name
+// SPDX-License-Identifier: Apache-2.0
+```
+
+(`GPL-3.0-or-later` in Cadran; `#` in a script or a CMake file). A file that cannot hold a comment (an image, a font,
+JSON) is covered by [`REUSE.toml`](REUSE.toml), as is third-party code, which goes in `extern/` with its licence, in
+[`NOTICE`](NOTICE) and in `resources/THIRD_PARTY_NOTICES.md`. CI runs [`reuse lint`](https://reuse.software)
+(`pip install reuse`, then `reuse lint`): a file whose licence cannot be told fails it.
 
 ## Security
 

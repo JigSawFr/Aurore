@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # Builds one of the configurations the other CI jobs do not, on Linux (the CI
 # job "linux (variants)"; also by hand, from the root of the checkout):
 #

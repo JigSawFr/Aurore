@@ -1,20 +1,7 @@
-/*
-    Copyright 2019-2021 natinusala
-    Copyright 2021 XITRIX
-    Copyright 2019 p-sam
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2019-2021 natinusala
+// SPDX-FileCopyrightText: 2021 XITRIX
+// SPDX-FileCopyrightText: 2019 p-sam
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -78,6 +65,12 @@ class AppletFrame : public Box
 
     static View* create();
 
+    /// Edge to edge: the frame keeps clear of the left and right of the safe
+    /// area, its header of the top and its footer of the bottom (the content
+    /// of either when hidden). Set, the frame keeps clear of what it is told
+    /// instead, and its header and footer of nothing more.
+    void setSafeArea(SafeAreaEdges edges) override;
+
     inline static bool HIDE_BOTTOM_BAR = false;
 
   private:
@@ -89,7 +82,12 @@ class AppletFrame : public Box
 
     HeaderStyle style = HeaderStyle::REGULAR;
 
+    bool safeAreaManaged = true; // setSafeArea() not called
+
   protected:
+    SafeAreaEdges appliedSafeArea(SafeAreaEdges reach) override;
+    SafeAreaEdges childSafeAreaReach(View* child, SafeAreaEdges reach, SafeAreaEdges applied) override;
+
     std::vector<View*> contentViewStack;
     View* contentView = nullptr;
 

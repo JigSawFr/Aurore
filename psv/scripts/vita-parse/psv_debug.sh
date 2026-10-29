@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: borealis contributors
+# SPDX-License-Identifier: Apache-2.0
+
 set -e
 
 # This script is used to request the latest crash report from the PSV homebrew FTP server

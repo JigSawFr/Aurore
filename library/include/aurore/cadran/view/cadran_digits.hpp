@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // CadranDigits — a line of text in the display face of the Cadran boards
 // (Sora Bold, OFL, resources/font/sora_bold_latin.ttf, loaded as
 // "cadran/digits"; the default font when it is missing): the big figures,
 // the card values, the chips. Aurore's Label draws with the one default font.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

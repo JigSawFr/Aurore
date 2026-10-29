@@ -1,5 +1,8 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-FileCopyrightText: 2026 Taylor
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui — durations, days and short answers as text.
-// Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #include <aurore/cadran/ui/format_text.hpp>
 
 #include <fmt/format.h>

@@ -28,8 +28,31 @@ jobs:
           # Ubuntu 24.04 ships clang-format 18, the version .clang-format is written for
           git ls-files '*.c' '*.cc' '*.cpp' '*.h' '*.hpp' '*.m' '*.mm' ':!:**/extern/**' \
             | xargs clang-format-18 --dry-run --Werror
+
+  # Each file says its licence and copyright, in SPDX tags or REUSE.toml, and
+  # each licence named has its text in LICENSES/ (CONTRIBUTING.md)
+  licenses:
+    name: licences (REUSE)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      REUSE_VERSION: 6.2.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: reuse lint
+        run: |
+          python3 -m venv "$RUNNER_TEMP/reuse"
+          "$RUNNER_TEMP/reuse/bin/pip" install -q "reuse==$REUSE_VERSION"
+          "$RUNNER_TEMP/reuse/bin/reuse" lint
   ios:
     runs-on: macos-14
+    # Not required: GitHub's macOS runners sometimes leave the job without a
+    # machine until it is cancelled. A failure here is still shown, and
+    # looked at, but does not make the run fail (CONTRIBUTING.md).
+    continue-on-error: true
     timeout-minutes: 40
     name: ios (${{ matrix.window }})
     strategy:
@@ -222,6 +245,10 @@ jobs:
 
   macos:
     runs-on: macos-14
+    # Not required: GitHub's macOS runners sometimes leave the job without a
+    # machine until it is cancelled. A failure here is still shown, and
+    # looked at, but does not make the run fail (CONTRIBUTING.md).
+    continue-on-error: true
     timeout-minutes: 30
     name: macos (${{ matrix.window.name }})
     strategy:
@@ -262,11 +289,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        driver: [gl, d3d11, gl-sdl3, d3d11-sdl3]
+        # SDL3 by default; GLFW kept
+        driver: [gl, d3d11, gl-glfw, d3d11-glfw]
         include:
           - { driver: d3d11, cmake: "-DAURORE_GRAPHICS=D3D11" }
-          - { driver: gl-sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
-          - { driver: d3d11-sdl3, cmake: "-DAURORE_GRAPHICS=D3D11 -DAURORE_WINDOW=SDL3" }
+          - { driver: gl-glfw, cmake: "-DAURORE_WINDOW=GLFW" }
+          - { driver: d3d11-glfw, cmake: "-DAURORE_GRAPHICS=D3D11 -DAURORE_WINDOW=GLFW" }
     defaults:
       run:
         shell: msys2 {0}
@@ -313,7 +341,6 @@ jobs:
           - { driver: gl3, cmake: "-DAURORE_WINDOW=GLFW", ext: "-glfw" }
           - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL2", ext: "-sdl2" }
           - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL3", ext: "-sdl3" }
-          - { driver: gles3, cmake: "-DAURORE_GRAPHICS=GLES3 -DAURORE_WINDOW=SDL3", ext: "-sdl3" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -356,8 +383,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { window: glfw, cmake: "" }
-          - { window: sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
+          - { window: sdl3, cmake: "" }
+          - { window: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -443,16 +470,20 @@ jobs:
       - name: Run
         run: ctest --test-dir build -R aurore_sdl_input_tests --output-on-failure
 
-  # The demo in a browser on SDL3 (-DAURORE_WINDOW=SDL3: Emscripten's SDL3
-  # port). The site's workflow builds and publishes the SDL2 one.
-  web-sdl3:
-    name: web (sdl3)
+  # The demo in a browser on SDL2 (-DAURORE_WINDOW=SDL2: Emscripten's SDL2
+  # port), still an option. The site's workflow builds and publishes the SDL3
+  # one, the default.
+  web-sdl2:
+    name: web (sdl2)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
       # The site's Emscripten (.github/workflows/site.yml), checked the same way
       EMSDK_VERSION: 6.0.13
       EMSDK_COMMIT: 35659964bc2762fffec0d257997fb61475f765b7
+      # And its Playwright and Pillow, for tools/web_smoke.py
+      PLAYWRIGHT_VERSION: 1.64.0
+      PILLOW_VERSION: 13.0.0
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -461,7 +492,7 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.emscripten_cache
-          key: emscripten-sdl3-${{ env.EMSDK_VERSION }}
+          key: emscripten-sdl2-${{ env.EMSDK_VERSION }}
       - name: Emscripten ${{ env.EMSDK_VERSION }}
         run: |
           git clone --depth 1 --branch "$EMSDK_VERSION" https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
@@ -476,11 +507,27 @@ jobs:
           # After emsdk_env.sh, which unsets EM_CACHE
           source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
           export EM_CACHE="$HOME/.emscripten_cache"
-          emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WINDOW=SDL3
+          emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WINDOW=SDL2
           cmake --build build-web
+      # The demo started in headless Chromium: its first screen, a key, the
+      # service worker of GitHub Pages, the address' language and theme
+      - name: The demo in Chromium (tools/web_smoke.py)
+        timeout-minutes: 15
+        run: |
+          python3 -m venv "$RUNNER_TEMP/playwright"
+          "$RUNNER_TEMP/playwright/bin/pip" install -q "playwright==$PLAYWRIGHT_VERSION" "pillow==$PILLOW_VERSION"
+          sudo "$RUNNER_TEMP/playwright/bin/python" -m playwright install-deps chromium
+          "$RUNNER_TEMP/playwright/bin/python" -m playwright install chromium
+          "$RUNNER_TEMP/playwright/bin/python" -u tools/web_smoke.py build-web/web build-web/smoke
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: ${{ !cancelled() }}
+        with:
+          name: aurore-web-sdl3-smoke
+          path: build-web/smoke
+          retention-days: 7
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: aurore-web-sdl3
+          name: aurore-web-sdl2
           path: build-web/web
           retention-days: 7
 
@@ -505,6 +552,53 @@ jobs:
         run: |
           doxygen docs/Doxyfile
           python3 tools/build_api.py build_docs/xml build_api
+
+  # The libFuzzer targets of tests/fuzz (docs/testing.md), a few minutes
+  # each: Cadran's Markdown and a theme file, under AddressSanitizer and
+  # UndefinedBehaviorSanitizer. The corpus each grows is kept from one run to
+  # the next; an input that crashes goes up as an artifact.
+  fuzz:
+    name: linux (fuzz)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y --no-install-recommends clang-18 libclang-rt-18-dev ninja-build \
+            libdbus-1-dev libxkbcommon-dev libwayland-dev wayland-protocols xorg-dev
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: fuzz-corpus
+          key: fuzz-corpus-${{ github.run_id }}
+          restore-keys: fuzz-corpus-
+      - name: Build
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+          cmake -B build-fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAURORE_PLATFORM=DESKTOP \
+            -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON -DAURORE_BUILD_TESTS=ON -DAURORE_BUILD_FUZZERS=ON
+          cmake --build build-fuzz --target aurore_fuzz_markdown aurore_fuzz_theme
+      - name: Fuzz
+        run: |
+          mkdir -p fuzz-corpus/markdown fuzz-corpus/theme fuzz-crashes
+          # Each grows its corpus from the repository's own files
+          build-fuzz/tests/aurore_fuzz_markdown -max_total_time=120 -max_len=16384 -timeout=10 \
+            -artifact_prefix=fuzz-crashes/markdown- fuzz-corpus/markdown docs
+          build-fuzz/tests/aurore_fuzz_theme -max_total_time=120 -max_len=8192 -timeout=10 \
+            -artifact_prefix=fuzz-crashes/theme- fuzz-corpus/theme resources/themes
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: failure()
+        with:
+          name: fuzz-crashes
+          path: fuzz-crashes
+          retention-days: 30
 
   linux-tests:
     name: linux (tests)

@@ -1,19 +1,6 @@
-/*
-    Copyright 2020-2021 natinusala
-    Copyright 2019 p-sam
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2020-2021 natinusala
+// SPDX-FileCopyrightText: 2019 p-sam
+// SPDX-License-Identifier: Apache-2.0
 
 // Android and iOS start the app through SDL, which renames main()
 #if (defined(ANDROID) || defined(IOS)) && defined(__SDL3__)
@@ -31,6 +18,7 @@
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
+#include "simulation.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -87,6 +75,7 @@ int main(int argc, char* argv[])
     // We recommend to use INFO for real apps
     std::string themeFile;
     const char* checkThemes = nullptr;
+    const char* simulate    = nullptr;
     for (int i = 1; i < argc; i++)
     {
         if (std::strcmp(argv[i], "-d") == 0)
@@ -110,6 +99,10 @@ int main(int argc, char* argv[])
         { // Check the presets and a folder, then quit
             checkThemes = (i + 1 < argc) ? argv[++i] : "@res/themes";
         }
+        else if (std::strcmp(argv[i], "--simulate") == 0 && i + 1 < argc)
+        { // A console's screen, drawn around it (switch, vita, ps4, 3ds, phone)
+            simulate = argv[++i];
+        }
         else if (std::strcmp(argv[i], "-r") == 0)
         { // Redraw on demand
             aurore::Application::setRedrawOnDemand(true);
@@ -120,6 +113,8 @@ int main(int argc, char* argv[])
 
     // Before init(): Cadran reads its preferences from it on
     demo::installHooks();
+    // Before init() too: the simulated console's layout preset
+    demo::simulation::choose(simulate);
 
     // Init the app and i18n
     if (!aurore::Application::init())
@@ -129,6 +124,7 @@ int main(int argc, char* argv[])
     }
 
     aurore::Application::createWindow("demo/title"_i18n);
+    demo::simulation::start();
 
     // Out at once: nothing of the app to close
     if (checkThemes)

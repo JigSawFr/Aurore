@@ -1,24 +1,12 @@
-/*
-    Copyright 2026 JigSawFr
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
 
 #include "tab/home_tab.hpp"
 
 #include <aurore/cadran.hpp>
 
 #include "demo_app.hpp"
+#include "simulation.hpp"
 #include "view/aurora_view.hpp"
 #include "view/charts.hpp"
 #include "view/showcase.hpp"
@@ -101,6 +89,53 @@ aurore::View* hero(aurore::View* tab)
         { demo::openTab(tab, demo::TAB_COMPONENTS); }));
     night->addView(actions);
     return night;
+}
+
+// A console, drawn as the simulation draws it around its screen
+class ConsolePicture : public aurore::View
+{
+  public:
+    explicit ConsolePicture(const demo::simulation::Device& device)
+        : device(device)
+    {
+        this->setHeight(aurore::dp(show::compact() ? 96 : 132));
+        this->setWidthPercentage(100);
+    }
+
+    void draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style style, aurore::FrameContext* ctx) override
+    {
+        demo::simulation::drawPreview(vg, device, x, y, width, height);
+    }
+
+  private:
+    const demo::simulation::Device& device;
+};
+
+// A tile for each console: its picture and its name; chosen, the demo shows
+// itself on it (demo::simulation::use)
+aurore::View* console(const demo::simulation::Device& device)
+{
+    aurore::Box* tile = show::card(true, true);
+    tile->setPadding(aurore::dp(12), aurore::dp(12), aurore::dp(14), aurore::dp(12));
+    tile->setAlignItems(aurore::AlignItems::CENTER);
+    tile->addView(new ConsolePicture(device));
+    aurore::Label* name = kit::label(demo::simulation::displayName(device), kit::TEXT_BODY, "cadran/text");
+    name->setMarginTop(aurore::dp(8));
+    name->setSingleLine(true);
+    tile->addView(name);
+    if (&device == &demo::simulation::current())
+    {
+        aurore::Box* shown = kit::pill("demo/home/consoles_shown"_i18n, "cadran/teal");
+        shown->setMarginTop(aurore::dp(6));
+        tile->addView(shown);
+    }
+    std::string id = device.id;
+    tile->registerClickAction([id](aurore::View*)
+        {
+        demo::simulation::use(&demo::simulation::current() == demo::simulation::find(id) ? "desktop" : id);
+        return true; });
+    tile->addGestureRecognizer(new aurore::TapGestureRecognizer(tile));
+    return show::share(tile, 2);
 }
 
 // A card of the dashboard: a kicker of its own, then what it shows
@@ -232,6 +267,14 @@ HomeTab::HomeTab()
     factRow->addView(show::share(fact("60+", "demo/home/icons"_i18n), 2));
     factRow->addView(show::share(fact("15", "demo/home/presets"_i18n), 2));
     facts->addView(factRow);
+
+    // The consoles: the demo shown on each, the console drawn around it
+    aurore::Box* consoles   = show::section(page, "gamepad", "demo/home/consoles"_i18n, "demo/home/consoles_lead"_i18n);
+    aurore::Box* consoleRow = show::row();
+    for (const auto& device : demo::simulation::devices())
+        if (std::string(device.id) != "desktop")
+            consoleRow->addView(console(device));
+    consoles->addView(consoleRow);
 
     // The other tabs
     aurore::Box* explore = show::section(page, "list", "demo/home/explore_title"_i18n);

@@ -1,20 +1,7 @@
-/*
-    Copyright 2019-2021 natinusala
-    Copyright 2021 XITRIX
-    Copyright 2019 p-sam
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2019-2021 natinusala
+// SPDX-FileCopyrightText: 2021 XITRIX
+// SPDX-FileCopyrightText: 2019 p-sam
+// SPDX-License-Identifier: Apache-2.0
 
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
@@ -28,6 +15,9 @@ using namespace aurore::literals;
 
 namespace aurore
 {
+
+static const char* HEADER_ID = "aurore/applet_frame/header";
+static const char* FOOTER_ID = "aurore/applet_frame/footer";
 
 const std::string appletFrameXML = R"xml(
     <aurore:Box
@@ -98,6 +88,14 @@ AppletFrame::AppletFrame()
     this->inflateFromXMLString(appletFrameXML);
     header->setThemeArea(ThemeArea::HEADER);
 
+    // Edge to edge: the header and the footer grow into the safe area,
+    // their backgrounds up to the window's edges
+    header->setBoxSizing(BoxSizing::CONTENT_BOX);
+    header->setSafeArea(SafeAreaEdges::TOP);
+    footer->setBoxSizing(BoxSizing::CONTENT_BOX);
+    footer->setSafeArea(SafeAreaEdges::BOTTOM);
+    Box::setSafeArea(SafeAreaEdges::HORIZONTAL);
+
     this->forwardXMLAttribute("iconInterpolation", this->icon, "interpolation");
 
     AURORE_REGISTER_ENUM_XML_ATTRIBUTE(
@@ -153,11 +151,59 @@ void AppletFrame::setIcon(std::string path)
 void AppletFrame::setHeaderVisibility(Visibility visibility)
 {
     header->setVisibility(visibility);
+    this->reapplySafeArea();
 }
 
 void AppletFrame::setFooterVisibility(Visibility visibility)
 {
     footer->setVisibility(visibility);
+    this->reapplySafeArea();
+}
+
+void AppletFrame::setSafeArea(SafeAreaEdges edges)
+{
+    this->safeAreaManaged = false;
+    Box::setSafeArea(edges);
+}
+
+// The header or the footer: one of the frame's own children (not yet there
+// while the frame is inflated, maybe taken out by an app), not one of a frame
+// in the content
+static bool isBar(View* child, const char* id)
+{
+    return child && child->getId() == id;
+}
+
+SafeAreaEdges AppletFrame::appliedSafeArea(SafeAreaEdges reach)
+{
+    if (!this->safeAreaManaged)
+        return Box::appliedSafeArea(reach);
+    // The sides, and the top or the bottom where no bar takes it
+    bool headerShown = false, footerShown = false;
+    for (View* child : this->getChildren())
+    {
+        headerShown |= isBar(child, HEADER_ID) && child->getVisibility() != Visibility::GONE;
+        footerShown |= isBar(child, FOOTER_ID) && child->getVisibility() != Visibility::GONE;
+    }
+    SafeAreaEdges edges = SafeAreaEdges::HORIZONTAL;
+    if (!headerShown)
+        edges = edges | SafeAreaEdges::TOP;
+    if (!footerShown)
+        edges = edges | SafeAreaEdges::BOTTOM;
+    return edges & reach;
+}
+
+SafeAreaEdges AppletFrame::childSafeAreaReach(View* child, SafeAreaEdges reach, SafeAreaEdges applied)
+{
+    if (!this->safeAreaManaged)
+        return Box::childSafeAreaReach(child, reach, applied);
+    // The bars take the top and the bottom the frame left them; the
+    // content, between them, nothing
+    if (isBar(child, HEADER_ID))
+        return reach & SafeAreaEdges::TOP & ~applied;
+    if (isBar(child, FOOTER_ID))
+        return reach & SafeAreaEdges::BOTTOM & ~applied;
+    return SafeAreaEdges::NONE;
 }
 
 void AppletFrame::setTitle(std::string title)

@@ -14,3 +14,6 @@ libromfs-generator
 !.github/
 # Python
 __pycache__/
+
+# What the harness writes when run from tests/
+tests/test-output/

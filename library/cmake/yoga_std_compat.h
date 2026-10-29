@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // Forced into Yoga's sources: Yoga 3 uses C++20 library parts that the
 // standard libraries of some toolchains lack (OpenOrbis' libc++ on PS4, the
 // Android NDK's libc++, the Vita's libstdc++). Each one is defined here only

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Draws the backgrounds of the demo's Aurora theme (resources/themes/aurora):
 # a northern-lights sky, at night (night.jpg) and at dawn (day.jpg). Made

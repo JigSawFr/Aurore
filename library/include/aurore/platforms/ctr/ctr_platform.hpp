@@ -1,23 +1,10 @@
-/*
-    Copyright 2026 JigSawFr
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
 
 // The New 3DS, through libctru: its system's language and battery, the
 // small screen preset (480x360 layout units on the 320x240 screen), and
-// citro3d on the bottom screen. No input nor keyboard yet: the buttons are
-// scanned each frame but not passed to Aurore (docs/platforms.md).
+// citro3d on the bottom screen, its buttons, sticks and touch screen. No
+// keyboard yet (docs/platforms.md).
 
 #pragma once
 
@@ -31,7 +18,8 @@
 namespace aurore
 {
 
-/// No controller nor touch read yet: every button up, no touch
+/// The console's buttons as the Switch's (same layout), the Circle Pad as
+/// the left stick, the C-stick as the right one, the bottom screen's touches
 class CtrInputManager : public InputManager
 {
   public:
@@ -39,7 +27,7 @@ class CtrInputManager : public InputManager
     void updateUnifiedControllerState(ControllerState* state) override;
     void updateControllerState(ControllerState* state, int controller) override;
     bool getKeyboardKeyState(AuroreKeyboardScancode key) override { return false; }
-    void updateTouchStates(std::vector<RawTouchState>* states) override { }
+    void updateTouchStates(std::vector<RawTouchState>* states) override;
     void updateMouseStates(RawMouseState* state) override { }
     void sendRumble(unsigned short controller, unsigned short lowFreqMotor, unsigned short highFreqMotor) override { }
 };
@@ -85,6 +73,8 @@ class CtrPlatform : public Platform
     bool mainLoopIteration() override;
     ThemeVariant getThemeVariant() override { return this->themeVariant; }
     void setThemeVariant(ThemeVariant theme) override { this->themeVariant = theme; }
+    // The console has no light or dark of its own: the dark it starts in
+    void followSystemTheme() override { this->themeVariant = ThemeVariant::DARK; }
     std::string getLocale() override;
 
     int getBatteryLevel() override;

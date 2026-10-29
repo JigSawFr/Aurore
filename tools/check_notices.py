@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Checks resources/THIRD_PARTY_NOTICES.md against the source: each folder of
 # library/lib/extern and library/include/aurore/extern and each font has an
@@ -48,7 +48,8 @@ def versions():
                                           define(sdl3, "SDL_MICRO_VERSION"))
     glfw = lib / "glfw" / "include" / "GLFW" / "glfw3.h"
     if glfw.exists():
-        found["GLFW"] = "{}.{}".format(define(glfw, "GLFW_VERSION_MAJOR"), define(glfw, "GLFW_VERSION_MINOR"))
+        found["GLFW"] = "{}.{}.{}".format(define(glfw, "GLFW_VERSION_MAJOR"), define(glfw, "GLFW_VERSION_MINOR"),
+                                          define(glfw, "GLFW_VERSION_REVISION"))
     fmt = define(lib / "fmt" / "include" / "fmt" / "base.h", "FMT_VERSION")
     found["{fmt}"] = "{}.{}.{}".format(fmt // 10000, fmt // 100 % 100, fmt % 100)
     xml = read(inc / "tinyxml2" / "tinyxml2.h")

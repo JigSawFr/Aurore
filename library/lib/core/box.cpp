@@ -1,19 +1,6 @@
-/*
-    Copyright 2020-2021 natinusala
-    Copyright 2021 XITRIX
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2020-2021 natinusala
+// SPDX-FileCopyrightText: 2021 XITRIX
+// SPDX-License-Identifier: Apache-2.0
 
 #include <tinyxml2.h>
 #include <yoga/Yoga.h>
@@ -135,6 +122,15 @@ Box::Box(Axis axis)
 
     this->registerFloatXMLAttribute("padding", [this](float value)
         { this->setPadding(value); });
+
+    // Safe area: edges joined with |
+    this->registerStringXMLAttribute("safeArea", [this](std::string value)
+        {
+        SafeAreaEdges edges;
+        if (!parseSafeAreaEdges(value, &edges))
+            View::fatalXML("Illegal value \"" + value + "\" for XML attribute \"safeArea\"; expected edges joined "
+                "with |: top, right, bottom, left, vertical, horizontal, all, none, or auto alone");
+        this->setSafeArea(edges); });
 }
 
 Box::Box()
@@ -227,6 +223,76 @@ void Box::addView(View* view, size_t position)
 
     // Its bind= attributes, now that it may know its activity.
     view->resolveBindings();
+
+    // The safe area, from what reached this box
+    if (Application::isSafeAreaInUse())
+        view->applySafeArea(this->childSafeAreaReach(view, this->safeAreaReach, this->appliedSafeArea(this->safeAreaReach)));
+}
+
+void Box::setSafeArea(SafeAreaEdges edges)
+{
+    if (edges == this->safeArea)
+        return;
+    this->safeArea = edges;
+    this->reapplySafeArea();
+}
+
+void Box::reapplySafeArea()
+{
+    if (Application::isSafeAreaInUse())
+        this->applySafeArea(this->safeAreaReach);
+}
+
+SafeAreaEdges Box::appliedSafeArea(SafeAreaEdges reach)
+{
+    SafeAreaEdges edges = this->safeArea;
+    if (edges == SafeAreaEdges::AUTO)
+    {
+        // The content view of an activity
+        bool root = !this->hasParent() && this->getParentActivity() != nullptr;
+        edges     = root ? SafeAreaEdges::ALL : SafeAreaEdges::NONE;
+    }
+    return edges & reach;
+}
+
+SafeAreaEdges Box::childSafeAreaReach(View* child, SafeAreaEdges reach, SafeAreaEdges applied)
+{
+    return applied == SafeAreaEdges::NONE ? reach : SafeAreaEdges::NONE;
+}
+
+void Box::applySafeArea(SafeAreaEdges reach)
+{
+    this->safeAreaReach = reach;
+    if (!Application::isSafeAreaInUse())
+        return;
+
+    const SafeAreaEdges applied = this->appliedSafeArea(reach);
+    const Insets area           = Application::getSafeArea();
+    Insets padding;
+    padding.top    = hasEdge(applied, SafeAreaEdges::TOP) ? area.top : 0;
+    padding.right  = hasEdge(applied, SafeAreaEdges::RIGHT) ? area.right : 0;
+    padding.bottom = hasEdge(applied, SafeAreaEdges::BOTTOM) ? area.bottom : 0;
+    padding.left   = hasEdge(applied, SafeAreaEdges::LEFT) ? area.left : 0;
+
+    if (padding != this->safePadding)
+    {
+        // The box's own padding (none set: 0), then the safe area on it
+        auto own = [this](YGEdge edge, float safe)
+        {
+            const float value = YGNodeStyleGetPadding(this->ygNode, edge).value;
+            return std::isnan(value) ? 0.0f : value - safe;
+        };
+        const float top    = own(YGEdgeTop, this->safePadding.top);
+        const float right  = own(YGEdgeRight, this->safePadding.right);
+        const float bottom = own(YGEdgeBottom, this->safePadding.bottom);
+        const float left   = own(YGEdgeLeft, this->safePadding.left);
+        this->safePadding  = padding;
+        // Into the layout, not through a subclass' own padding
+        this->Box::setPadding(top, right, bottom, left);
+    }
+
+    for (View* child : this->children)
+        child->applySafeArea(this->childSafeAreaReach(child, reach, applied));
 }
 
 void Box::removeView(View* view, bool free)
@@ -331,10 +397,11 @@ void Box::onParentFocusLost(View* focusedView)
 
 void Box::setPadding(float top, float right, float bottom, float left)
 {
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeTop, top);
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeRight, right);
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeBottom, bottom);
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeLeft, left);
+    // The safe area stays added to the box's own padding
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeTop, top + this->safePadding.top);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeRight, right + this->safePadding.right);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeBottom, bottom + this->safePadding.bottom);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeLeft, left + this->safePadding.left);
 
     this->invalidate();
 }
@@ -346,45 +413,45 @@ void Box::setPadding(float padding)
 
 void Box::setPaddingTop(float top)
 {
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeTop, top);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeTop, top + this->safePadding.top);
     this->invalidate();
 }
 
 void Box::setPaddingRight(float right)
 {
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeRight, right);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeRight, right + this->safePadding.right);
     this->invalidate();
 }
 
 void Box::setPaddingBottom(float bottom)
 {
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeBottom, bottom);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeBottom, bottom + this->safePadding.bottom);
     this->invalidate();
 }
 
 void Box::setPaddingLeft(float left)
 {
-    YGNodeStyleSetPadding(this->ygNode, YGEdgeLeft, left);
+    YGNodeStyleSetPadding(this->ygNode, YGEdgeLeft, left + this->safePadding.left);
     this->invalidate();
 }
 
 float Box::getPaddingTop()
 {
-    return YGNodeStyleGetPadding(this->ygNode, YGEdgeTop).value;
+    return YGNodeStyleGetPadding(this->ygNode, YGEdgeTop).value - this->safePadding.top;
 }
 
 float Box::getPaddingBottom()
 {
-    return YGNodeStyleGetPadding(this->ygNode, YGEdgeBottom).value;
+    return YGNodeStyleGetPadding(this->ygNode, YGEdgeBottom).value - this->safePadding.bottom;
 }
 
 float Box::getPaddingLeft()
 {
-    return YGNodeStyleGetPadding(this->ygNode, YGEdgeLeft).value;
+    return YGNodeStyleGetPadding(this->ygNode, YGEdgeLeft).value - this->safePadding.left;
 }
 float Box::getPaddingRight()
 {
-    return YGNodeStyleGetPadding(this->ygNode, YGEdgeRight).value;
+    return YGNodeStyleGetPadding(this->ygNode, YGEdgeRight).value - this->safePadding.right;
 }
 
 void Box::setGap(float gap)

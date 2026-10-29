@@ -1,5 +1,9 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package org.libsdl.app;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
@@ -14,10 +18,15 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.DisplayCutout;
+import android.view.RoundedCorner;
+import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 public class PlatformUtils {
@@ -127,5 +136,85 @@ public class PlatformUtils {
         WindowManager.LayoutParams lp = window.getAttributes();
         if (lp.screenBrightness < 0) return getSystemScreenBrightness(activity);
         return lp.screenBrightness;
+    }
+
+    // The safe area over the SDL surface, in pixels: top, right, bottom,
+    // left. The system bars and the display cutout, not the keyboard; and the
+    // rounded corners. Called from the SDL thread, as the other getters.
+    public static int[] getSafeAreaInsets(Activity activity) {
+        int[] result = new int[4];
+        if (activity == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return result;
+        Window window = activity.getWindow();
+        if (window == null) return result;
+        View decor = window.getDecorView();
+        WindowInsets insets = decor.getRootWindowInsets();
+        if (insets == null) return result;
+
+        int top, right, bottom, left;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            android.graphics.Insets bars = insets.getInsets(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+            top = bars.top;
+            right = bars.right;
+            bottom = bars.bottom;
+            left = bars.left;
+        } else {
+            // The system window's insets have the keyboard in them, the
+            // stable ones the bars even hidden: the smaller of the two
+            top = Math.min(insets.getSystemWindowInsetTop(), insets.getStableInsetTop());
+            right = Math.min(insets.getSystemWindowInsetRight(), insets.getStableInsetRight());
+            bottom = Math.min(insets.getSystemWindowInsetBottom(), insets.getStableInsetBottom());
+            left = Math.min(insets.getSystemWindowInsetLeft(), insets.getStableInsetLeft());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                DisplayCutout cutout = insets.getDisplayCutout();
+                if (cutout != null) {
+                    top = Math.max(top, cutout.getSafeInsetTop());
+                    right = Math.max(right, cutout.getSafeInsetRight());
+                    bottom = Math.max(bottom, cutout.getSafeInsetBottom());
+                    left = Math.max(left, cutout.getSafeInsetLeft());
+                }
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            int[] corners = roundedCornerInsets(insets);
+            top = Math.max(top, Math.max(corners[0], corners[1]));
+            right = Math.max(right, Math.max(corners[1], corners[2]));
+            bottom = Math.max(bottom, Math.max(corners[2], corners[3]));
+            left = Math.max(left, Math.max(corners[3], corners[0]));
+        }
+
+        // The insets are the window's: over the SDL surface only
+        int width = decor.getWidth(), height = decor.getHeight();
+        int x = 0, y = 0, w = width, h = height;
+        View content = SDLActivity.getContentView();
+        if (content != null && content.getWidth() > 0 && content.getHeight() > 0) {
+            int[] at = new int[2];
+            content.getLocationInWindow(at);
+            x = at[0];
+            y = at[1];
+            w = content.getWidth();
+            h = content.getHeight();
+        }
+        result[0] = Math.max(0, top - y);
+        result[1] = Math.max(0, right - (width - (x + w)));
+        result[2] = Math.max(0, bottom - (height - (y + h)));
+        result[3] = Math.max(0, left - x);
+        return result;
+    }
+
+    // Top left, top right, bottom right, bottom left: how far in from both
+    // of its edges a rectangle's corner stays inside a rounded corner of
+    // radius r, r (1 - 1/sqrt 2)
+    @TargetApi(Build.VERSION_CODES.S)
+    private static int[] roundedCornerInsets(WindowInsets insets) {
+        int[] positions = { RoundedCorner.POSITION_TOP_LEFT, RoundedCorner.POSITION_TOP_RIGHT,
+                RoundedCorner.POSITION_BOTTOM_RIGHT, RoundedCorner.POSITION_BOTTOM_LEFT };
+        int[] result = new int[4];
+        for (int i = 0; i < 4; i++) {
+            RoundedCorner corner = insets.getRoundedCorner(positions[i]);
+            if (corner != null)
+                result[i] = (int) Math.ceil(corner.getRadius() * (1.0 - Math.sqrt(0.5)));
+        }
+        return result;
     }
 }

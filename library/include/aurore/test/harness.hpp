@@ -1,18 +1,5 @@
-/*
-    Copyright 2026 JigSawFr
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
 
 #pragma once
 
@@ -33,6 +20,7 @@
 #include <aurore/core/activity.hpp>
 #include <aurore/core/geometry.hpp>
 #include <aurore/core/input.hpp>
+#include <aurore/core/safe_area.hpp>
 #include <aurore/core/theme.hpp>
 #include <aurore/core/time.hpp>
 
@@ -236,6 +224,9 @@ class Harness
 
     // A new window size, then settles
     void resize(int width, int height);
+    // The platform reports this safe area (framebuffer pixels: a notch, the
+    // system's bars), then settles
+    void setSafeArea(const Insets& insets);
 
   private:
     void walkShown(const std::function<void(View*)>& visit);

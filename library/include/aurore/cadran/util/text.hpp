@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // text — the small string helpers the parsers share. The two trims differ on
 // purpose, and each says what it removes: Markdown keeps a line end that
 // matters to it, the other readers drop every kind of space. Header-only,
 // plain C++ (ASCII only: no locale).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <cstring>

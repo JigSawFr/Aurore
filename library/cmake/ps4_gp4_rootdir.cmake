@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # ps4 platform
 # Rewrites the <rootdir> of a gp4 project from the paths of its <file> entries.
 # create-gp4 drops a directory whose name starts another one beside it

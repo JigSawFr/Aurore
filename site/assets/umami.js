@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Umami Software, Inc.
+// SPDX-License-Identifier: MIT
+
 // Umami Cloud's tracker (MIT, https://github.com/umami-software/umami), copied
 // from https://cloud.umami.is/script.js on 2026-10-28 so that the page loads
 // no script from another site; it sends its counts to gateway.umami.is.
