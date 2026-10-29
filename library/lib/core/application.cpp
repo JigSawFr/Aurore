@@ -84,6 +84,9 @@ static void writeSettleFile()
 }
 #endif
 
+// The app's own work Aurore cannot see (setBusyCheck)
+static std::function<bool()> busyCheck;
+
 static std::thread::id mainThreadId;
 
 bool Application::init()
@@ -2120,12 +2123,19 @@ void Application::unblockInputs()
     Logger::debug("Removing an inputs block token (tokens={})", Application::blockInputsTokens);
 }
 
+void Application::setBusyCheck(std::function<bool()> busy)
+{
+    busyCheck = std::move(busy);
+}
+
 bool Application::isSettled()
 {
     // A redraw asked for, with redraw on demand or not: a view drawing
     // itself on the clock asks for one until it is done (a scroll bar
     // fading out)
     if (Application::blockInputsTokens != 0 || !Threading::isIdle() || Application::redrawFrames > 0)
+        return false;
+    if (busyCheck && busyCheck())
         return false;
     // Every ticking but a repeating timer (a clock's refresh, a poll), which
     // runs as long as its screen is open. A waiting one counts: what it

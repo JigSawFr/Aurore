@@ -86,6 +86,15 @@ AURORE_TEST(settle_file_says_when_the_screen_has_settled)
     AURORE_CHECK(aurore::Application::isSettled());
     clock.stop();
 
+    // The app's own work, on threads Aurore does not know
+    bool working = true;
+    aurore::Application::setBusyCheck([&working]()
+        { return working; });
+    AURORE_CHECK(!aurore::Application::isSettled());
+    working = false;
+    AURORE_CHECK(aurore::Application::isSettled());
+    aurore::Application::setBusyCheck({});
+
     aurore::Animatable moving = 0.0f;
     moving.addStep(1.0f, 300);
     moving.start();
