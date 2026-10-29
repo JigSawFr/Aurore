@@ -9,14 +9,14 @@ The Gradle project that builds Aurore's demo as an Android app. It follows SDL's
 | SDL2 | 2.32.10, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it). The Java code in `app/src/sdl2/java/org/libsdl/app` is SDL's from the same tag (`SDLActivity` refuses a native library of another version), with one change: `HIDDeviceManager` registers its USB receiver with `RECEIVER_EXPORTED`, which Android 14 requires |
 | SDL3 | 3.4.18, the submodule `library/lib/extern/SDL3` (`app/jni/SDL3` links to it), with `-PauroreSdl=3`. Its Java code is read from the submodule as it is (`android-project/app/src/main/java` there) |
 | Aurore's Java | `app/src/main/java/org/libsdl/app`: `PlatformUtils` and `AuroreHandler`, which the library calls (brightness, network, the system's language), for either SDL |
-| Android Gradle Plugin, Gradle | 8.1.1 (the wrapper, `gradlew`) |
-| JDK | 17, as the Android Gradle Plugin 8 needs |
-| NDK | 22.1.7171670 (`ndkVersion` in `app/build.gradle`) |
-| CMake | 3.16 or later |
-| SDK | compiled against API 34 (35 with SDL3, whose Java code calls Android 15's API); `minSdkVersion 21` (Android 5.0), `targetSdkVersion 34` |
+| Android Gradle Plugin, Gradle | 9.5.0, Gradle 9.8.2 (the wrapper, `gradlew`) |
+| JDK | 17 or later, as the Android Gradle Plugin 9 needs |
+| NDK | r30, 30.0.16248370 (`ndkVersion` in `app/build.gradle`): 16 KB pages, as Google Play asks |
+| CMake | 4.1.2, from the SDK (`externalNativeBuild` in `app/build.gradle`) |
+| SDK | compiled against and targeting API 36 (Android 16), what Google Play asks of new apps and updates; `minSdk 21` (Android 5.0) |
 | ABIs | `armeabi-v7a`, `arm64-v8a` |
 
-The NDK sets the oldest Android the app runs on: r22 and r23 go down to API 16, r24 and r25 to 19, r26 to 21. An app published on Google Play has to target a recent API: raise `compileSdkVersion` and `targetSdkVersion` in `app/build.gradle` (and the NDK, `minSdkVersion` and `-DANDROID_PLATFORM` with it if needed; a target above 34 also needs a newer Android Gradle Plugin). The CI builds the debug APK with the versions above.
+The NDK sets the oldest Android the app runs on: r30 goes down to API 21. Targeting API 36 turns Android 16's predictive back on, which no longer sends the back key to the app: `android:enableOnBackInvokedCallback="false"` in `AndroidManifest.xml` keeps it reaching SDL, which reads it as the B button. The CI builds the debug APK with the versions above.
 
 The app's data is left out of Android's backups and of transfers to a new device: `android:allowBackup="false"` in `AndroidManifest.xml`, and `res/xml/data_extraction_rules.xml` for Android 12 and later. An app that wants its settings backed up includes those files there.
 

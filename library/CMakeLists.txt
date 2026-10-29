@@ -380,7 +380,7 @@ elseif(PLATFORM_SWITCH)
     endif ()
     set(AURORE_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
     # devkitPro's portlibs (GLFW, SDL2, EGL, curl…) last: it also has a
-    # tinyxml2.h and a glad/glad.h, which must not hide the library's own
+    # tinyxml2.h and a glad/gl.h, which must not hide the library's own
     list(APPEND AURORE_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
 else ()
     message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
@@ -584,8 +584,10 @@ if (AURORE_BUILD_TESTS)
     add_library(Aurore::test ALIAS aurore_test)
     set_target_properties(aurore_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
     target_link_libraries(aurore_test PUBLIC aurore)
-    # stb_image_write, for the screenshots
-    target_include_directories(aurore_test PRIVATE ${AURORE_PATH}/lib/extern/glfw/deps)
+    # stb_image_write, for the screenshots: the file GLFW ships, not its
+    # folder (its glad/gl.h would hide the library's)
+    target_compile_definitions(aurore_test PRIVATE
+            AURORE_STB_IMAGE_WRITE="${AURORE_PATH}/lib/extern/glfw/deps/stb_image_write.h")
     if (UNIX AND NOT APPLE)
         # A context without any window system (Mesa's surfaceless EGL)
         find_package(OpenGL COMPONENTS EGL)

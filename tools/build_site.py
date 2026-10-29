@@ -32,12 +32,14 @@ import re
 import shutil
 import struct
 import sys
+import urllib.request
 from urllib.parse import urlsplit
 
 import markdown
 
 REPO_URL = "https://github.com/JigSawFr/Aurore"
 SITE_URL = os.environ.get("SITE_URL", "https://aurore.boreale.dev/").rstrip("/") + "/"
+VERSIONS = {}  # the projects' latest releases, for the menu of Boréale's sites (main())
 NOINDEX = os.environ.get("SITE_NOINDEX") == "1"
 # The audience, counted by Umami Cloud (site/README.md): its tracker, served
 # from assets/, sends each page seen to gateway.umami.is, without cookie, and
@@ -114,6 +116,18 @@ README_SECTIONS = {"-features": "features", "-what-aurore-adds": "adds", "-use-i
 ROOT = "."
 
 
+# The console's two sides around the hero's screen (site.css's .device): a
+# stick and a cross on the left, the four buttons and a stick on the right;
+# a handheld of our own, no maker's. The same on Boréale's four sites.
+DEVICE_GRIPS = (
+    '<svg class="grip grip-l" viewBox="0 0 140 470" aria-hidden="true">'
+    '<path d="M86 44h20"/><circle class="stick" cx="70" cy="128" r="34"/><circle class="cap" cx="70" cy="128" r="22"/>'
+    '<circle cx="70" cy="262" r="12"/><circle cx="70" cy="330" r="12"/><circle cx="36" cy="296" r="12"/><circle cx="104" cy="296" r="12"/></svg>'
+    '<svg class="grip grip-r" viewBox="0 0 140 470" aria-hidden="true">'
+    '<path d="M34 44h20M44 34v20"/><circle cx="70" cy="92" r="12"/><circle cx="70" cy="160" r="12"/><circle cx="36" cy="126" r="12"/><circle cx="104" cy="126" r="12"/>'
+    '<circle class="stick" cx="70" cy="300" r="34"/><circle class="cap" cx="70" cy="300" r="22"/></svg>')
+
+
 def icon(name):
     return (f'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
             f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICONS[name]}</svg>')
@@ -150,11 +164,23 @@ SITES = [(None, [("boreale", "Boréale", "https://boreale.dev/")]),
          ("sites_libraries", [("aurore", "Aurore", "https://aurore.boreale.dev/")])]
 
 
-def switcher(t, lang, to_root, home, here, name):
+def boreale_versions():
+    """The projects' latest releases as boreale.dev publishes them
+    (versions.json), for the menu; none when it cannot be read (offline, a
+    local build), and the menu shows no versions."""
+    try:
+        with urllib.request.urlopen("https://boreale.dev/versions.json", timeout=10) as r:
+            return {k: v for k, v in json.load(r).items() if isinstance(v, str)}
+    except (OSError, ValueError):
+        return {}
+
+
+def switcher(t, lang, to_root, home, here, name, versions):
     """The header's name (`name`), a button that opens the menu of Boréale's
     sites, `here` marked and leading to `home`, each in French where the page
-    is (the four sites have it). A popover: the browser closes it on Esc or a
-    click elsewhere; site.css's and site.js's "site switcher" blocks."""
+    is (the four sites have it), with its latest release (`versions`). A
+    popover: the browser closes it on Esc or a click elsewhere; site.css's
+    and site.js's "site switcher" blocks."""
     label = t("sites_label")
     french = lang.lower().startswith("fr")
     groups = []
@@ -163,10 +189,11 @@ def switcher(t, lang, to_root, home, here, name):
         for key, site, url in sites:
             href = home if key == here else url + ("fr/" if french else "")
             soon = f'<em class="soon">{t("sites_soon")}</em>' if key == "playshelf" else ""
+            version = f' <span class="sites-version">{html.escape(versions[key])}</span>' if key in versions else ""
             current = ' aria-current="true"' if key == here else ""
             items.append(f'<li><a href="{href}"{current}>'
                          f'<img src="{to_root}assets/marks/{key}.svg" alt="" width="36" height="36">'
-                         f'<span><strong>{site}</strong><small>{t(f"sites_{key}")}</small></span>{soon}</a></li>')
+                         f'<span><strong>{site}{version}</strong><small>{t(f"sites_{key}")}</small></span>{soon}</a></li>')
         heading = f'<p class="sites-title">{t(title)}</p>' if title else ""
         groups.append(f'        {heading}<ul>\n          ' + "\n          ".join(items) + '\n        </ul>')
     title = next(site for _, sites in SITES for key, site, _ in sites if key == here)
@@ -175,6 +202,16 @@ def switcher(t, lang, to_root, home, here, name):
             f'{name}<svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>\n'
             f'      <div id="sites" class="sites" popover aria-label="{label}">\n'
             + "\n".join(groups) + '\n      </div>\n    </div>')
+
+
+SUN_ICON = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>')
+
+
+def reading_toggle(t):
+    """The documentation on a light ground or on the night (site.js, kept as
+    aurore-reading; reading.js sets it before the first paint)."""
+    return (f'<button class="reading-toggle" type="button" aria-pressed="false" aria-label="{t.plain("reading_light")}">'
+            f'{SUN_ICON}<span>{t("reading_light")}</span></button>')
 
 
 def lang_dir(lang):
@@ -342,7 +379,7 @@ def json_ld(data):
 
 
 def page(t, lang, to_root, path, title, body, description=None, home=False, structured=(), indexed=True,
-         markdown_url=None):
+         markdown_url=None, lost=False):
     """A whole page: `path` is its place under the language's folder ('' or 'docs/x/')."""
     code, folder, _, og_locale = next(l for l in LANGUAGES if l[0] == lang)
     other = next(l for l in LANGUAGES if l[0] != lang)
@@ -363,9 +400,25 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     base = f"{to_root}{lang_dir(lang)}"
     api = f'<li><a href="{to_root}api/">{t("nav_api")}</a></li>' if API_DIR else ""
     api += f'<li><a class="nav-try" href="{to_root}demo/{demo_query(lang)}">{t("nav_demo")}</a></li>' if DEMO_DIR else ""
-    sky = '<canvas id="sky" aria-hidden="true"></canvas>' if home else ""
-    hero = body[0] if home else ""
-    main = body[1] if home else body
+    # The aurora behind the home page's hero, and the page not found's (body
+    # a pair, then: what stands under the sky, and the rest).
+    aurora = home or lost
+    sky = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
+    hero = body[0] if aurora else ""
+    main = body[1] if aurora else body
+    # A page of the documentation: once the header is scrolled away, a slim
+    # bar at the top with the way home, the page's name, the search and the
+    # light reading (site.js).
+    doc_bar = ""
+    doc_title = re.search(r'<div class="wrap doc">.*?<h1[^>]*>(.*?)</h1>', main, re.S)
+    if doc_title:
+        doc_bar = (f'<div class="doc-bar" hidden><div class="wrap doc-bar-inner">'
+                   f'<a class="doc-bar-home" href="{base}" aria-label="Aurore"><img src="{to_root}assets/mark.svg" alt="" width="24" height="24"><span>Aurore</span></a>'
+                   f'<span class="doc-bar-title">{doc_title.group(1)}</span>'
+                   f'<button class="doc-bar-search" type="button" aria-label="{t.plain("search_placeholder")}">'
+                   f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
+                   f'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
+                   f'{reading_toggle(t)}</div></div>\n')
     docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
                          for p, g, n in DOCS if g == "start")
     umami = "" if NOINDEX else (f'<script src="{to_root}assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
@@ -386,6 +439,8 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <link rel="manifest" href="{to_root}manifest.webmanifest">
 <link rel="alternate" type="application/atom+xml" href="{SITE_URL}releases.atom" title="Aurore releases">
 <link rel="preload" href="{to_root}assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{to_root}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
+<script src="{to_root}assets/reading.js"></script>
 <link rel="stylesheet" href="{to_root}assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aurore">
@@ -403,16 +458,16 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 {umami}</head>
 <body class="{'home' if home else 'inner'}">
 <a class="skip" href="#main">{t("skip")}</a>
-<div class="sky{' sky-home' if home else ''}">
+{doc_bar}<div class="sky{' sky-home' if aurora else ''}">
   {sky}
   <header class="wrap top">
-    {switcher(t, lang, to_root, base, "aurore", f'<img src="{to_root}assets/mark.svg" alt="" width="34" height="34">Aurore')}
+    {switcher(t, lang, to_root, base, "aurore", f'<img src="{to_root}assets/mark.svg" alt="" width="34" height="34">Aurore', VERSIONS)}
     <nav aria-label="{t.plain('nav_label')}">
       <ul>
         <li><a href="{base}#features">{t("nav_features")}</a></li>
         <li><a href="{base}docs/getting-started/">{t("nav_docs")}</a></li>
         {api}
-        <li><a href="{REPO_URL}">GitHub</a></li>
+        <li class="nav-gh"><a href="{REPO_URL}">GitHub</a></li>
         <li><a href="{to_root}{lang_dir(other[0])}{path}" lang="{other[0]}" hreflang="{other[0]}">{t("other_label")}</a></li>
       </ul>
     </nav>
@@ -432,6 +487,14 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     <div>
       <h2>{t("docs_title")}</h2>
       <ul>{docs_links}{f'<li><a href="{to_root}api/">{t("api_title")}</a></li>' if API_DIR else ""}</ul>
+    </div>
+    <div>
+      <h2>Boréale</h2>
+      <ul><li><a href="https://boreale.dev/{"fr/" if lang == "fr" else ""}">boreale.dev</a></li>
+        <li><a href="https://guard.boreale.dev/{"fr/" if lang == "fr" else ""}">PlayGuard</a></li>
+        <li><a href="https://shelf.boreale.dev/{"fr/" if lang == "fr" else ""}">PlayShelf</a></li>
+        <li><a href="https://boreale.dev/{"fr/" if lang == "fr" else ""}legal/">{t("sites_legal")}</a></li>
+        <li><a href="mailto:contact@boreale.dev">contact@boreale.dev</a></li></ul>
     </div>
     <div>
       <h2>{t("footer_project")}</h2>
@@ -512,6 +575,44 @@ def code_block(code, lang, label=None, t=None):
             f'</figure>')
 
 
+def editor(t):
+    """The home page's screen in XML and its activity in C++, in an editor's
+    window (two tabs, site.js; both blocks one under the other without
+    script), beside the screen they make, drawn in HTML in Aurore's look:
+    the frame's header with the box's title, the label (its translation,
+    @i18n/hello/welcome) and the "Say hello" button, which shows the
+    activity's "Hello!" (site.js)."""
+    panes = []
+    for key, code, lang, name, path in (("xml", HELLO_XML, "xml", "XML", "resources/xml/activity/hello.xml"),
+                                         ("cpp", HELLO_CPP, "cpp", "C++", "hello_activity.hpp")):
+        panes.append(f'<figure class="code editor-pane" id="code-{key}" data-tab="{name}">'
+                     f'<figcaption><span class="pane-name">{t(f"code_{key}")}</span> <span class="pane-file">{path.replace("/", "/<wbr>")}</span></figcaption>'
+                     f'<pre tabindex="0"><code class="language-{lang}">{highlight(code, lang)}</code></pre></figure>')
+    return f"""    <div class="code-pair">
+      <div class="editor">
+        <div class="editor-bar"><span class="editor-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+        <div class="editor-panes">
+          {panes[0]}
+          {panes[1]}
+        </div>
+      </div>
+      <figure class="preview">
+        <figcaption class="preview-bar">{t("code_result")}</figcaption>
+        <div class="preview-stage">
+          <div class="preview-screen">
+            <p class="preview-head">Hello</p>
+            <div class="preview-body">
+              <p class="preview-label">{t("code_welcome")}</p>
+              <button class="preview-button" type="button" data-notice="Hello!">Say hello</button>
+            </div>
+            <p class="preview-notice" role="status"></p>
+            <p class="preview-foot"><span class="preview-key" aria-hidden="true">B</span> {t("code_back")}</p>
+          </div>
+        </div>
+      </figure>
+    </div>"""
+
+
 def release_line(t, base):
     found = releases()
     if not found:
@@ -576,7 +677,10 @@ def home_body(t, lang, to_root):
       </div>
       {release_line(t, base)}
     </div>
-    <figure class="hero-shot">
+    <!-- The demo on a console's screen: a handheld drawn by site.css
+         (.device), leaning towards the text on a wide screen. -->
+    <figure class="hero-shot device">
+      {DEVICE_GRIPS}
       <a href="{to_root}assets/screenshots/cadran.png" data-caption="{t.plain('shot_cadran')}"><img src="{to_root}assets/screenshots/cadran.png" alt="{html.escape(t.plain('hero_shot_alt'))}" width="1280" height="720"></a>
     </figure>
     <div class="platforms">
@@ -590,10 +694,7 @@ def home_body(t, lang, to_root):
       <p>{t("code_text")}</p>
       <p><a href="{base}docs/getting-started/#3-a-screen-from-xml-3-minutes">{t("code_link")} →</a></p>
     </div>
-    <div class="code-pair">
-      {code_block(HELLO_XML, "xml", t("code_xml"))}
-      {code_block(HELLO_CPP, "cpp", t("code_cpp"))}
-    </div>
+{editor(t)}
   </section>
 
 {demo_band(t, lang, to_root)}
@@ -730,9 +831,11 @@ def doc_body(t, lang, to_root, page_name, assets):
     search = (f'<div class="doc-search" hidden><input type="search" placeholder="{t.plain("search_placeholder")}" '
               f'aria-label="{t.plain("search_placeholder")}" aria-controls="doc-results" autocomplete="off" '
               f'spellcheck="false" enterkeyhint="search" data-index="{base}docs/search.json" '
-              f'data-none="{t.plain("search_none")}"><ol id="doc-results" class="doc-results" hidden></ol></div>')
+              f'data-none="{t.plain("search_none")}"><kbd class="search-key" aria-hidden="true">/</kbd>'
+              f'<ol id="doc-results" class="doc-results" hidden></ol></div>')
     return title, description, body, f"""  <div class="wrap doc">
     <nav class="doc-nav" aria-label="{t.plain('docs_title')}">
+      {reading_toggle(t)}
       {search}
       <details class="doc-menu" open><summary>{t("docs_title")}</summary>
 {docs_list(t, lang, to_root, page_name)}
@@ -928,6 +1031,8 @@ def main():
         return 2
     out = sys.argv[1]
     ROOT = sys.argv[2] if len(sys.argv) > 2 else "."
+    global VERSIONS
+    VERSIONS = boreale_versions()
     os.makedirs(out, exist_ok=True)
     assets = {f"screenshots/{s}.png" for s in SHOTS}
     count = 0
@@ -981,7 +1086,7 @@ def main():
                       f'<p class="actions"><a class="button primary" href="{root_path}{f"{folder}/" if folder else ""}">{tl("home")}</a> '
                       f'<a class="button ghost" href="{root_path}{f"{folder}/" if folder else ""}docs/getting-started/">{tl("docs_title")}</a></p></div>')
     write(out, "404.html", page(t, "en", root_path, "", f"{t.plain('not_found_title')} · Aurore",
-                                '  <div class="wrap lost">\n' + "\n".join(blocks) + "\n  </div>", indexed=False))
+                                ('  <div class="wrap lost">\n' + "\n".join(blocks) + "\n  </div>", ""), indexed=False, lost=True))
     write(out, "manifest.webmanifest", json.dumps({
         "name": "Aurore", "short_name": "Aurore", "start_url": "./", "scope": "./", "display": "browser",
         "background_color": "#0b1424", "theme_color": "#0b1424",

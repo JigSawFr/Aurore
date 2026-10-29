@@ -274,3 +274,182 @@
     menu.style.left = `${Math.max(12, Math.min(box.left, screen - width - 12)) + window.scrollX}px`;
   });
 })();
+
+// The documentation: once the header is scrolled away, a slim bar at the top
+// (the way home, the page"s name, the search, the light reading); and the
+// light reading itself, kept as aurore-reading (reading.js sets it before the
+// first paint).
+(function () {
+  const root = document.documentElement;
+  const toggles = [...document.querySelectorAll(".reading-toggle")];
+  const shown = () => toggles.forEach((b) => b.setAttribute("aria-pressed", String(root.dataset.reading === "light")));
+  for (const b of toggles) {
+    b.addEventListener("click", () => {
+      const light = root.dataset.reading !== "light";
+      if (light) root.dataset.reading = "light"; else delete root.dataset.reading;
+      try { localStorage.setItem("aurore-reading", light ? "light" : "night"); } catch { /* storage refused */ }
+      shown();
+    });
+  }
+  shown();
+
+  const bar = document.querySelector(".doc-bar");
+  const sky = document.querySelector(".sky");
+  if (!bar || !sky || !("IntersectionObserver" in window)) return;
+  bar.hidden = false;
+  new IntersectionObserver((entries) => {
+    bar.classList.toggle("on", !entries[entries.length - 1].isIntersecting);
+  }).observe(sky);
+  bar.querySelector(".doc-bar-search").addEventListener("click", () => {
+    const input = document.querySelector(".doc-search input");
+    if (!input) return;
+    window.scrollTo({ top: 0 });
+    input.focus();
+  });
+})();
+
+// The showcase (site.css's block of the same name): the cards' edge lit
+// where the pointer is, the home page's sections rising into view once, the
+// screens on a wide screen, the one chosen large over a strip of the others,
+// and the code's editor: a tab for each file, and the screen's button saying
+// what the activity says.
+(function () {
+  for (const card of document.querySelectorAll(".card")) {
+    card.addEventListener("pointermove", (e) => {
+      const box = card.getBoundingClientRect();
+      card.style.setProperty("--mx", `${e.clientX - box.left}px`);
+      card.style.setProperty("--my", `${e.clientY - box.top}px`);
+    });
+  }
+
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!still && "IntersectionObserver" in window) {
+    const seen = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { e.target.classList.add("in"); seen.unobserve(e.target); }
+      }
+    }, { rootMargin: "0px 0px -12% 0px" });
+    for (const part of document.querySelectorAll(".home main > section")) {
+      // Already in view at load (a link to a section): shown at once.
+      if (part.getBoundingClientRect().top < window.innerHeight * 0.88) continue;
+      part.classList.add("reveal");
+      [...part.querySelectorAll(".card")].forEach((card, i) => card.style.setProperty("--i", i % 4));
+      seen.observe(part);
+    }
+  }
+
+  // The editor: the panes become tabs (the arrows, Home and End go from
+  // one to the next).
+  const editor = document.querySelector(".editor");
+  if (editor) {
+    const panes = [...editor.querySelectorAll(".editor-pane")];
+    const list = document.createElement("div");
+    list.className = "editor-tabs";
+    list.setAttribute("role", "tablist");
+    const tabs = panes.map((pane, i) => {
+      const tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "editor-tab";
+      tab.id = `${pane.id}-tab`;
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("aria-controls", pane.id);
+      tab.textContent = pane.dataset.tab;
+      const name = pane.querySelector(".pane-name");
+      if (name) tab.setAttribute("aria-label", `${pane.dataset.tab}: ${name.textContent}`);
+      pane.setAttribute("role", "tabpanel");
+      pane.setAttribute("aria-labelledby", tab.id);
+      tab.addEventListener("click", () => choose(i));
+      list.append(tab);
+      return tab;
+    });
+    const choose = (at, focus) => {
+      tabs.forEach((tab, i) => {
+        tab.setAttribute("aria-selected", String(i === at));
+        tab.tabIndex = i === at ? 0 : -1;
+        panes[i].classList.toggle("on", i === at);
+      });
+      if (focus) tabs[at].focus();
+    };
+    list.addEventListener("keydown", (e) => {
+      const at = tabs.indexOf(document.activeElement);
+      const to = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (at < 0 || to === undefined) return;
+      e.preventDefault();
+      choose((to + tabs.length) % tabs.length, true);
+    });
+    editor.querySelector(".editor-bar").append(list);
+    editor.classList.add("tabbed");
+    choose(0);
+  }
+  // A block of code wider than its box: its right edge fades while there
+  // is more to scroll.
+  for (const pre of document.querySelectorAll("pre")) {
+    const box = pre.closest(".editor-pane") || (pre.parentElement.classList.contains("code-wrap") ? pre.parentElement : null);
+    if (!box) continue;
+    const update = () => box.classList.toggle("more", pre.scrollLeft + pre.clientWidth < pre.scrollWidth - 2);
+    pre.addEventListener("scroll", update, { passive: true });
+    if ("ResizeObserver" in window) new ResizeObserver(update).observe(pre);
+    update();
+  }
+  const hello = document.querySelector(".preview-button");
+  const notice = document.querySelector(".preview-notice");
+  if (hello && notice) {
+    let timer = 0;
+    hello.addEventListener("click", () => {
+      notice.textContent = hello.dataset.notice;
+      notice.classList.add("on");
+      clearTimeout(timer);
+      timer = setTimeout(() => notice.classList.remove("on"), 2400);
+    });
+  }
+
+  const gallery = document.querySelector(".gallery");
+  if (!gallery) return;
+  const figures = [...gallery.querySelectorAll(":scope > figure")];
+  if (figures.length < 2) return;
+  const stage = document.createElement("figure");
+  stage.className = "gallery-stage";
+  const link = document.createElement("a");
+  const img = document.createElement("img");
+  img.width = 1280;
+  img.height = 720;
+  link.append(img);
+  const caption = document.createElement("figcaption");
+  const name = document.createElement("strong");
+  const what = document.createElement("span");
+  caption.append(name, what);
+  stage.append(link, caption);
+  let chosen = figures[0];
+  const choose = (figure) => {
+    const shot = figure.querySelector("img");
+    chosen = figure;
+    for (const f of figures) f.classList.toggle("on", f === figure);
+    link.href = figure.querySelector("a").href;
+    img.src = shot.currentSrc || shot.src;
+    img.alt = shot.alt;
+    name.textContent = figure.querySelector("figcaption")?.textContent || "";
+    what.textContent = shot.alt === name.textContent ? "" : shot.alt;
+  };
+  choose(figures[0]);
+  gallery.prepend(stage);
+  gallery.classList.add("staged");
+  const wide = window.matchMedia("(min-width: 861px)");
+  // On a wide screen, a screen of the strip comes up large, and the large
+  // one opens full screen (the lightbox, on the one chosen); elsewhere (one
+  // under the other) each opens full screen, as before. Caught before the
+  // lightbox's own listeners, on the links.
+  let passing = false;
+  gallery.addEventListener("click", (e) => {
+    const figure = e.target.closest("figure");
+    if (passing || !wide.matches || !figure || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (figure === stage) {
+      passing = true;
+      chosen.querySelector("a").click();
+      passing = false;
+    } else {
+      choose(figure);
+    }
+  }, true);
+})();

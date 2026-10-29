@@ -77,6 +77,8 @@ def render(tags, attributes):
         "Every attribute the library's views read from XML, by view: those of `View` are on every view, those of `Box` on every box (most views are boxes). Written by `tools/xml_attributes.py` from the sources; a test checks it is up to date. Styles per state (`focused:…`) are in [styles.md](styles.md), the theme keys (`@theme/…`) in [themes.md](themes.md).",
         "",
         "A misspelt attribute or a value outside the list stops the app with the file, the line and the closest name or the values expected (`View::fatalXML`).",
+        "",
+        "A number is written `16`, `16px` (the same), `16dp` (16 at the density in use: 11.2 when dense, see [styles.md](styles.md#density-of-the-lengths)), `25%` where a percentage is taken, or `@style/<name>` (a length of the style follows the density too).",
     ]
 
     def order(owner):

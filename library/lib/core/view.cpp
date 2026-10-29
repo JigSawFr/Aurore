@@ -1949,6 +1949,23 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         }
     }
 
+    // Ends with dp -> float at the density in use
+    if (endsWith(value, "dp"))
+    {
+        try
+        {
+            float floatValue = readXMLFloat(value.substr(0, value.length() - 2));
+            if (!std::isfinite(floatValue) || this->floatAttributes.count(name) == 0)
+                return false;
+            this->floatAttributes[name](dp(floatValue));
+            return true;
+        }
+        catch (const std::invalid_argument& exception)
+        {
+            return false;
+        }
+    }
+
     // Ends with px -> float
     if (endsWith(value, "px"))
     {

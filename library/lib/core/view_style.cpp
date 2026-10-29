@@ -276,11 +276,14 @@ bool View::parseStyleValue(const std::string& text, StyleValue::Type type, Style
                 number = Application::getStyle()[text.substr(7)];
             else
             {
-                std::string digits = endsWith(text, "px") ? text.substr(0, text.size() - 2) : text;
+                bool density       = endsWith(text, "dp");
+                std::string digits = endsWith(text, "px") || density ? text.substr(0, text.size() - 2) : text;
                 size_t used        = 0;
                 number             = std::stof(digits, &used);
                 if (used != digits.size() || !std::isfinite(number))
                     return false;
+                if (density)
+                    number = dp(number);
             }
             *value = StyleValue::of(number);
             return true;

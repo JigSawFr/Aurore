@@ -14,11 +14,13 @@ language picker's: 🇺🇸 🇫🇷 🇨🇦 🇩🇪 🇪🇸 🇲🇽 🇮�
 console's own language a 🌐; the others are there for an app's own lists
 (countries, continents 🌎 🌏 🌍).
 
-To add one, take its 72×72 PNG from the same Twemoji release:
+To add one, name it to `tools/make_emoji.py`, which fetches its 72×72 PNG
+from the same Twemoji release (run without a name, it fetches every one
+again):
 
-    curl -fO https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/72x72/<hex>.png
+    python3 tools/make_emoji.py <hex>
 
-Graphics: [Twemoji](https://github.com/jdecked/twemoji) 15.1.0, © Twitter, Inc
+Graphics: [Twemoji](https://github.com/jdecked/twemoji) 17.0.3, © Twitter, Inc
 and other contributors, licensed under
 [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 

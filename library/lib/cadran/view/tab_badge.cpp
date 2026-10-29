@@ -18,10 +18,10 @@ TabBadge::TabBadge()
 {
     this->setId(TAB_BADGE_ID);
     this->setFocusable(false);
-    this->setWidth(TAB_BADGE_SIZE);
-    this->setHeight(TAB_BADGE_SIZE);
+    this->setWidth(aurore::dp(TAB_BADGE_SIZE));
+    this->setHeight(aurore::dp(TAB_BADGE_SIZE));
     this->setAlignSelf(aurore::AlignSelf::CENTER);
-    this->setMarginRight(16);
+    this->setMarginRight(aurore::dp(16));
     this->setVisibility(aurore::Visibility::GONE);
 }
 
@@ -67,7 +67,7 @@ void TabBadge::draw(NVGcontext* vg, float x, float y, float width, float height,
         const float t         = this->open;
         cx                    = at.getMaxX() - 1 + (cx - at.getMaxX() + 1) * t;
         cy                    = at.getMinY() + 1 + (cy - at.getMinY() - 1) * t;
-        r                     = DOCKED * 0.5f + (r - DOCKED * 0.5f) * t;
+        r                     = aurore::dp(DOCKED * 0.5f) + (r - aurore::dp(DOCKED * 0.5f)) * t;
     }
     nvgSave(vg);
     if (this->pop_since)
@@ -106,7 +106,7 @@ TabBadge* TabBadge::on_row(aurore::Box* row)
     auto* badge = new TabBadge();
     // Last, so it lines up at the right whatever the value (an empty one
     // still takes room).
-    badge->setMarginLeft(12);
+    badge->setMarginLeft(aurore::dp(12));
     badge->setMarginRight(0);
     row->addView(badge);
     return badge;

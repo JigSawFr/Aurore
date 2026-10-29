@@ -9,14 +9,14 @@
 | SDL2 | 2.32.10，子模块 `library/lib/extern/SDL`（`app/jni/SDL` 是指向它的链接）。`app/src/sdl2/java/org/libsdl/app` 中的 Java 代码取自同一标签的 SDL（`SDLActivity` 拒绝其他版本的原生库），只改了一处：`HIDDeviceManager` 以 `RECEIVER_EXPORTED` 注册 USB 广播接收器，这是安卓 14 的要求 |
 | SDL3 | 3.4.18，子模块 `library/lib/extern/SDL3`（`app/jni/SDL3` 是指向它的链接），使用 `-PauroreSdl=3`。其 Java 代码直接从子模块读取（其中的 `android-project/app/src/main/java`） |
 | Aurore 的 Java 代码 | `app/src/main/java/org/libsdl/app`：库所调用的 `PlatformUtils` 和 `AuroreHandler`（亮度、网络、系统语言），两种 SDL 通用 |
-| Android Gradle Plugin、Gradle | 8.1.1（使用 `gradlew`） |
-| JDK | 17，Android Gradle Plugin 8 的要求 |
-| NDK | 22.1.7171670（`app/build.gradle` 中的 `ndkVersion`） |
-| CMake | 3.16 或更高 |
-| SDK | 基于 API 34 编译（SDL3 为 35，其 Java 代码调用安卓 15 的 API）；`minSdkVersion 21`（Android 5.0），`targetSdkVersion 34` |
+| Android Gradle Plugin、Gradle | 9.5.0，Gradle 9.8.2（使用 `gradlew`） |
+| JDK | 17 或更高，Android Gradle Plugin 9 的要求 |
+| NDK | r30，30.0.16248370（`app/build.gradle` 中的 `ndkVersion`）：支持 16 KB 内存页，Google Play 的要求 |
+| CMake | 4.1.2，来自 SDK（`app/build.gradle` 中的 `externalNativeBuild`） |
+| SDK | 基于并面向 API 36（Android 16）编译，这是 Google Play 对新应用和更新的要求；`minSdk 21`（Android 5.0） |
 | ABI | `armeabi-v7a`、`arm64-v8a` |
 
-NDK 决定应用能运行的最低安卓版本：r22 和 r23 支持到 API 16，r24 和 r25 到 19，r26 到 21。在 Google Play 上架的应用需要较新的目标 API：请提高 `app/build.gradle` 中的 `compileSdkVersion` 和 `targetSdkVersion`（必要时一并调整 NDK、`minSdkVersion` 和 `-DANDROID_PLATFORM`）。目标 API 高于 34 还需要更新的 Android Gradle Plugin。CI 使用上表中的版本构建 debug APK。
+NDK 决定应用能运行的最低安卓版本：r30 支持到 API 21。面向 API 36 会开启 Android 16 的预测性返回，系统不再把返回键发给应用：`AndroidManifest.xml` 中的 `android:enableOnBackInvokedCallback="false"` 让返回键继续交给 SDL（作为 B 键）。CI 使用上表中的版本构建 debug APK。
 
 应用数据不进入安卓的备份，也不随设备迁移：`AndroidManifest.xml` 中的 `android:allowBackup="false"`，以及适用于 Android 12 及以后版本的 `res/xml/data_extraction_rules.xml`。需要备份设置的应用可以在其中包含相应文件。
 

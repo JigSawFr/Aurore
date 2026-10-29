@@ -65,8 +65,8 @@ void pill(aurore::Button* button, const aurore::ButtonStyle* style)
 {
     button->setStyle(style);
     button->setFontSize(21);
-    button->setCornerRadius(PILL / 2);
-    button->setHighlightCornerRadius(PILL / 2);
+    button->setCornerRadius(aurore::dp(PILL / 2));
+    button->setHighlightCornerRadius(aurore::dp(PILL / 2));
 }
 
 aurore::Button* button(aurore::Dialog* dialog, const char* id)
@@ -172,7 +172,7 @@ aurore::Box* cadran::dialog_body(const std::string& text)
     auto* body    = new aurore::Box(aurore::Axis::COLUMN);
     body->setId("cadran_dialog_body");
     body->setAlignItems(aurore::AlignItems::STRETCH);
-    body->setPadding(34, 40, 26, 40);
+    body->setPadding(aurore::dp(34), aurore::dp(40), aurore::dp(26), aurore::dp(40));
 
     std::vector<std::string> paragraphs = split(text, "\n\n");
     // The title: the opening question, else a short first line before more.
@@ -228,15 +228,15 @@ aurore::Box* cadran::dialog_body(const std::string& text)
             auto* table = new aurore::Box(aurore::Axis::COLUMN);
             table->setAlignItems(aurore::AlignItems::STRETCH);
             table->setThemeColor("backgroundColor", "cadran/surf2");
-            table->setCornerRadius(kit::RADIUS_ROW);
-            table->setPadding(12, 20, 12, 20);
-            table->setMarginTop(body->getChildren().empty() ? 0 : 18);
+            table->setCornerRadius(aurore::dp(kit::RADIUS_ROW));
+            table->setPadding(aurore::dp(12), aurore::dp(20), aurore::dp(12), aurore::dp(20));
+            table->setMarginTop(body->getChildren().empty() ? 0 : aurore::dp(18));
             for (size_t i = 0; i < rows.size(); i++)
             {
                 auto* row = new aurore::Box(aurore::Axis::ROW);
                 row->setAlignItems(aurore::AlignItems::CENTER);
-                row->setPaddingTop(7);
-                row->setPaddingBottom(7);
+                row->setPaddingTop(aurore::dp(7));
+                row->setPaddingBottom(aurore::dp(7));
                 if (i + 1 < rows.size())
                 {
                     row->setLineBottom(1);
@@ -245,11 +245,11 @@ aurore::Box* cadran::dialog_body(const std::string& text)
                 aurore::Label* key = kit::label(rows[i].first, kit::TEXT_BODY, "cadran/text2");
                 key->setGrow(1.0f);
                 key->setWidth(0);
-                key->setMarginRight(16);
+                key->setMarginRight(aurore::dp(16));
                 row->addView(key);
                 aurore::Label* value = kit::label(rows[i].second, kit::TEXT_BODY, "cadran/text");
                 value->setHorizontalAlign(aurore::HorizontalAlign::RIGHT);
-                value->setMaxWidth(300);
+                value->setMaxWidth(aurore::dp(300));
                 value->setShrink(0);
                 row->addView(value);
                 table->addView(row);
@@ -258,7 +258,7 @@ aurore::Box* cadran::dialog_body(const std::string& text)
             continue;
         }
         aurore::Label* label = kit::label(paragraph, kit::TEXT_LEAD, "cadran/text2");
-        label->setMarginTop(body->getChildren().empty() ? 0 : 14);
+        label->setMarginTop(body->getChildren().empty() ? 0 : aurore::dp(14));
         body->addView(label);
     }
     // A warning first, in an amber card under the title (a game about to be
@@ -274,12 +274,12 @@ aurore::Box* cadran::dialog_body(const std::string& text)
         card->setThemeColor("backgroundColor", "cadran/amber_surf");
         card->setThemeColor("borderColor", "cadran/amber_line");
         card->setBorderThickness(1);
-        card->setCornerRadius(kit::RADIUS_ROW);
-        card->setPadding(12, 18, 12, 16);
-        card->setMarginTop(at > 0 ? 14 : 0);
+        card->setCornerRadius(aurore::dp(kit::RADIUS_ROW));
+        card->setPadding(aurore::dp(12), aurore::dp(18), aurore::dp(12), aurore::dp(16));
+        card->setMarginTop(at > 0 ? aurore::dp(14) : 0);
         CadranIcon* icon = kit::icon(note.icon, 20, "cadran/amber");
-        icon->setMarginTop(2);
-        icon->setMarginRight(12);
+        icon->setMarginTop(aurore::dp(2));
+        icon->setMarginRight(aurore::dp(12));
         icon->setShrink(0);
         card->addView(icon);
         aurore::Label* label = kit::label(note.text, 17, "cadran/amber");
@@ -293,25 +293,25 @@ aurore::Box* cadran::dialog_body(const std::string& text)
         notes.end());
     // What follows the warning, apart from it.
     if (at > 0 && at < body->getChildren().size())
-        body->getChildren()[at]->setMarginTop(14);
+        body->getChildren()[at]->setMarginTop(aurore::dp(14));
     for (size_t i = 0; i < notes.size(); i++)
     {
         auto* row = new aurore::Box(aurore::Axis::ROW);
         row->setAlignItems(aurore::AlignItems::FLEX_START);
         if (i == 0 && !body->getChildren().empty())
         {
-            row->setMarginTop(20);
-            row->setPaddingTop(16);
+            row->setMarginTop(aurore::dp(20));
+            row->setPaddingTop(aurore::dp(16));
             row->setLineTop(1);
             row->setThemeColor("lineColor", "cadran/line");
         }
         else if (i > 0)
         {
-            row->setMarginTop(12);
+            row->setMarginTop(aurore::dp(12));
         }
         CadranIcon* icon = kit::icon(notes[i].icon, 18, notes[i].warn ? "cadran/amber" : "cadran/text3");
-        icon->setMarginTop(2);
-        icon->setMarginRight(12);
+        icon->setMarginTop(aurore::dp(2));
+        icon->setMarginRight(aurore::dp(12));
         icon->setShrink(0);
         row->addView(icon);
         aurore::Label* label = kit::label(notes[i].text, 16, notes[i].warn ? "cadran/amber" : "cadran/text2");
@@ -346,10 +346,10 @@ aurore::Label* cadran::dialog_title(const std::string& text)
 aurore::Box* cadran::dialog_badge(const char* icon, const char* color_key, const char* soft_key)
 {
     auto* badge = new aurore::Box(aurore::Axis::ROW);
-    badge->setWidth(44);
-    badge->setHeight(44);
+    badge->setWidth(aurore::dp(44));
+    badge->setHeight(aurore::dp(44));
     badge->setShrink(0);
-    badge->setCornerRadius(22);
+    badge->setCornerRadius(aurore::dp(22));
     badge->setThemeColor("backgroundColor", soft_key);
     badge->setAlignItems(aurore::AlignItems::CENTER);
     badge->setJustifyContent(aurore::JustifyContent::CENTER);
@@ -362,7 +362,7 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
     if (!dialog || dialog->getView("cadran_dialog"))
         return;
     aurore::AppletFrame* card = dialog->getAppletFrame();
-    card->setCornerRadius(kit::RADIUS_MODAL);
+    card->setCornerRadius(aurore::dp(kit::RADIUS_MODAL));
     card->setThemeColor("backgroundColor", "cadran/surf");
     card->setThemeColor("borderColor", "cadran/line");
     card->setBorderThickness(1);
@@ -378,20 +378,20 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
     if (warns && !head && body)
     {
         head = new aurore::Box(aurore::Axis::ROW);
-        head->setMarginBottom(14);
+        head->setMarginBottom(aurore::dp(14));
         body->addView(head, 0);
     }
     if (warns && head)
     {
         auto* badge = new aurore::Box(aurore::Axis::ROW);
-        badge->setWidth(44);
-        badge->setHeight(44);
+        badge->setWidth(aurore::dp(44));
+        badge->setHeight(aurore::dp(44));
         badge->setShrink(0);
-        badge->setCornerRadius(22);
+        badge->setCornerRadius(aurore::dp(22));
         badge->setThemeColor("backgroundColor", "cadran/coral_soft");
         badge->setAlignItems(aurore::AlignItems::CENTER);
         badge->setJustifyContent(aurore::JustifyContent::CENTER);
-        badge->setMarginRight(16);
+        badge->setMarginRight(aurore::dp(16));
         badge->addView(cadran::kit::icon("alert", 22, "cadran/coral"));
         head->addView(badge, 0);
     }
@@ -421,17 +421,17 @@ void cadran::style_dialog(aurore::Dialog* dialog, Emphasis emphasis)
     hide(dialog, "aurore/dialog/button2/separator");
     hide(dialog, "aurore/dialog/button3/separator");
     if (b2)
-        b2->setMarginLeft(12);
+        b2->setMarginLeft(aurore::dp(12));
     if (b3)
     {
-        b3->setHeight(PILL);
-        b3->setMargins(0, 24, 12, 24);
+        b3->setHeight(aurore::dp(PILL));
+        b3->setMargins(0, aurore::dp(24), aurore::dp(12), aurore::dp(24));
     }
     if (aurore::Box* row = b1 ? b1->getParent() : nullptr)
     {
         row->setLineTop(0);
-        row->setHeight(DIALOG_BUTTONS);
-        row->setPadding(0, 24, DIALOG_BUTTONS - PILL, 24);
+        row->setHeight(aurore::dp(DIALOG_BUTTONS));
+        row->setPadding(0, aurore::dp(24), aurore::dp(DIALOG_BUTTONS - PILL), aurore::dp(24));
     }
 }
 
@@ -440,7 +440,7 @@ void cadran::style_edit_text_dialog(aurore::EditTextDialog* dialog)
     auto* card = dialog ? dynamic_cast<aurore::Box*>(dialog->getView("aurore/dialog/applet")) : nullptr;
     if (!card || dialog->getView("cadran_dialog"))
         return;
-    card->setCornerRadius(kit::RADIUS_MODAL);
+    card->setCornerRadius(aurore::dp(kit::RADIUS_MODAL));
     card->setThemeColor("backgroundColor", "cadran/surf");
     card->setThemeColor("borderColor", "cadran/line");
     card->setBorderThickness(1);
@@ -455,7 +455,7 @@ void cadran::style_edit_text_dialog(aurore::EditTextDialog* dialog)
     {
         card->setMarginTop(YGNodeStyleGetMargin(title->getYGNode(), YGEdgeTop).value);
         above->removeView(title, false);
-        title->setMargins(24, 20, 0, 20);
+        title->setMargins(aurore::dp(24), aurore::dp(20), 0, aurore::dp(20));
         title->setAlignSelf(aurore::AlignSelf::FLEX_START);
         title->setFontSize(kit::TEXT_TITLE);
         title->setThemeColor("textColor", "cadran/text");
@@ -467,22 +467,22 @@ void cadran::style_button(aurore::Button* button, Emphasis emphasis)
 {
     pill(button, emphasis == Emphasis::PRIMARY ? &PRIMARY : emphasis == Emphasis::DANGER ? &DANGER
                                                                                          : &PLAIN);
-    button->setHeight(PILL);
+    button->setHeight(aurore::dp(PILL));
 }
 
 aurore::Box* cadran::wait_body(const std::string& text)
 {
     auto* spinner = new aurore::ProgressSpinner(aurore::ProgressSpinnerSize::LARGE);
-    spinner->setWidth(60);
-    spinner->setHeight(60);
-    spinner->setMarginBottom(24);
+    spinner->setWidth(aurore::dp(60));
+    spinner->setHeight(aurore::dp(60));
+    spinner->setMarginBottom(aurore::dp(24));
     aurore::Label* label = kit::label(text, kit::TEXT_LEAD, "cadran/text");
     label->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
     label->setAlignSelf(aurore::AlignSelf::STRETCH);
     auto* box = new aurore::Box(aurore::Axis::COLUMN);
     box->setAlignItems(aurore::AlignItems::CENTER);
     box->setJustifyContent(aurore::JustifyContent::CENTER);
-    box->setPadding(40, 40, 32, 40);
+    box->setPadding(aurore::dp(40), aurore::dp(40), aurore::dp(32), aurore::dp(40));
     box->addView(spinner);
     box->addView(label);
     return box;
@@ -501,15 +501,15 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
     Progress p;
     p.box = new aurore::Box(aurore::Axis::COLUMN);
     p.box->setAlignItems(aurore::AlignItems::STRETCH);
-    p.box->setPadding(26, 36, 20, 36);
+    p.box->setPadding(aurore::dp(26), aurore::dp(36), aurore::dp(20), aurore::dp(36));
 
     auto* head = new aurore::Box(aurore::Axis::ROW);
     head->setAlignItems(aurore::AlignItems::CENTER);
     p.image = new aurore::Image();
     p.image->setScalingType(aurore::ImageScalingType::FIT);
-    p.image->setWidth(56);
-    p.image->setHeight(56);
-    p.image->setMarginRight(16);
+    p.image->setWidth(aurore::dp(56));
+    p.image->setHeight(aurore::dp(56));
+    p.image->setMarginRight(aurore::dp(16));
     ui::set_visible(p.image, false);
     head->addView(p.image);
     auto* titles = new aurore::Box(aurore::Axis::COLUMN);
@@ -519,20 +519,20 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
     titles->addView(p.heading);
     p.title = kit::label(title, 22, "cadran/text");
     p.title->setSingleLine(true); // a long name is cut, not wrapped over the dialog
-    p.title->setMarginTop(6);
+    p.title->setMarginTop(aurore::dp(6));
     titles->addView(p.title);
     head->addView(titles);
     p.box->addView(head);
 
     p.bar = new kit::Bar();
-    p.bar->setMarginTop(22);
+    p.bar->setMarginTop(aurore::dp(22));
     p.box->addView(p.bar);
     auto* numbers = new aurore::Box(aurore::Axis::ROW);
     numbers->setAlignItems(aurore::AlignItems::CENTER);
-    numbers->setMarginTop(10);
+    numbers->setMarginTop(aurore::dp(10));
     p.percent = kit::label("", 22, "cadran/text");
     p.percent->setSingleLine(true);
-    p.percent->setMarginRight(14);
+    p.percent->setMarginRight(aurore::dp(14));
     numbers->addView(p.percent);
     p.detail = kit::label("", 18, "cadran/text3");
     p.detail->setSingleLine(true);
@@ -545,7 +545,7 @@ cadran::Progress cadran::progress_body(const std::string& heading, const std::st
     if (!note.empty())
     {
         aurore::Label* label = kit::label(note, 18, "cadran/text3");
-        label->setMarginTop(16);
+        label->setMarginTop(aurore::dp(16));
         p.box->addView(label);
     }
     return p;
@@ -564,12 +564,12 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     auto at    = std::make_shared<size_t>(first);
     auto* body = new aurore::Box(aurore::Axis::COLUMN);
     body->setAlignItems(aurore::AlignItems::CENTER);
-    body->setPadding(30, 40, 22, 40);
+    body->setPadding(aurore::dp(30), aurore::dp(40), aurore::dp(22), aurore::dp(40));
     aurore::Label* title = kit::display(header, kit::TEXT_TITLE);
     title->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
     body->addView(title);
     CadranIcon* up = kit::icon("caret-up", 30, "cadran/teal");
-    up->setMarginTop(18);
+    up->setMarginTop(aurore::dp(18));
     body->addView(up);
     auto* value = new CadranDigits();
     value->setFontSize(56);
@@ -584,19 +584,19 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     // choose.
     auto* keys = new aurore::Box(aurore::Axis::ROW);
     keys->setAlignItems(aurore::AlignItems::CENTER);
-    keys->setMarginTop(16);
+    keys->setMarginTop(aurore::dp(16));
     const auto key = [](const char* letter)
     {
         aurore::Box* bubble = kit::key(letter);
-        bubble->setMarginRight(4);
+        bubble->setMarginRight(aurore::dp(4));
         return bubble;
     };
     keys->addView(kit::icon("caret-up", 18, "cadran/text3"));
     keys->addView(kit::icon("caret-down", 18, "cadran/text3"));
     const int step_min       = times.size() > 1 ? std::max(1, times[1] - times[0]) : 15;
     aurore::Label* step_text = kit::label(ui::fmt_minutes((uint32_t)step_min), 16, "cadran/text3");
-    step_text->setMarginLeft(6);
-    step_text->setMarginRight(22);
+    step_text->setMarginLeft(aurore::dp(6));
+    step_text->setMarginRight(aurore::dp(22));
     keys->addView(step_text);
     keys->addView(key("L"));
     keys->addView(key("R"));
@@ -606,7 +606,7 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     {
         other_key = new aurore::Box(aurore::Axis::ROW);
         other_key->setAlignItems(aurore::AlignItems::CENTER);
-        other_key->setMarginLeft(22);
+        other_key->setMarginLeft(aurore::dp(22));
         other_key->addView(key("Y"));
         other_key->addView(kit::label(other.label, 16, "cadran/text3"));
         keys->addView(other_key);
@@ -667,7 +667,7 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
 aurore::View* cadran::toast_icon(bool done)
 {
     CadranIcon* icon = cadran::kit::icon(done ? "check" : "alert", 22, done ? "cadran/teal_fill" : "cadran/amber_fill");
-    icon->setMarginRight(14);
+    icon->setMarginRight(aurore::dp(14));
     icon->setShrink(0);
     return icon;
 }

@@ -63,8 +63,8 @@ CadranIcon* icon(const char* name, float size, const char* color_key)
 {
     auto* view = new CadranIcon();
     view->setIcon(name);
-    view->setWidth(size);
-    view->setHeight(size);
+    view->setWidth(aurore::dp(size));
+    view->setHeight(aurore::dp(size));
     view->setThemeColor("color", color_key);
     return view;
 }
@@ -76,13 +76,13 @@ aurore::Box* card(bool focusable, bool grow)
     box->setThemeColor("backgroundColor", "cadran/surf");
     box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
-    box->setCornerRadius(RADIUS_CARD);
-    box->setPadding(20, 24, 20, 24);
+    box->setCornerRadius(aurore::dp(RADIUS_CARD));
+    box->setPadding(aurore::dp(20), aurore::dp(24), aurore::dp(20), aurore::dp(24));
     if (focusable)
     {
         box->setFocusable(true);
         box->setHideHighlightBackground(true);
-        box->setHighlightCornerRadius(RADIUS_CARD);
+        box->setHighlightCornerRadius(aurore::dp(RADIUS_CARD));
         box->setAccessibilityRole(aurore::AccessibilityRole::CELL);
     }
     if (grow)
@@ -96,9 +96,9 @@ aurore::Box* card(bool focusable, bool grow)
 aurore::Box* top_card(bool grow)
 {
     aurore::Box* box = card(false, grow);
-    box->setCornerRadius(RADIUS_TOP);
-    box->setHighlightCornerRadius(RADIUS_TOP);
-    box->setPadding(22, 26, 22, 26);
+    box->setCornerRadius(aurore::dp(RADIUS_TOP));
+    box->setHighlightCornerRadius(aurore::dp(RADIUS_TOP));
+    box->setPadding(aurore::dp(22), aurore::dp(26), aurore::dp(22), aurore::dp(26));
     return box;
 }
 
@@ -120,7 +120,7 @@ aurore::Box* kicker(const char* icon_name, const std::string& title)
     auto* text = new aurore::Label();
     set_kicker(text, title);
     text->setSingleLine(true);
-    text->setMarginLeft(8);
+    text->setMarginLeft(aurore::dp(8));
     head->addView(text);
     return head;
 }
@@ -188,17 +188,17 @@ aurore::Box* pill(const std::string& text, const char* dot_key)
 {
     auto* box = new aurore::Box(aurore::Axis::ROW);
     box->setAlignItems(aurore::AlignItems::CENTER);
-    box->setHeight(30);
-    box->setPaddingLeft(14);
-    box->setPaddingRight(16);
-    box->setCornerRadius(15);
+    box->setHeight(aurore::dp(30));
+    box->setPaddingLeft(aurore::dp(14));
+    box->setPaddingRight(aurore::dp(16));
+    box->setCornerRadius(aurore::dp(15));
     box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
-    box->setMarginRight(10);
-    box->setMarginBottom(8);
-    box->setHighlightCornerRadius(15);
+    box->setMarginRight(aurore::dp(10));
+    box->setMarginBottom(aurore::dp(8));
+    box->setHighlightCornerRadius(aurore::dp(15));
     auto* mark = new Mark(dot_key);
-    mark->setMarginRight(7);
+    mark->setMarginRight(aurore::dp(7));
     box->addView(mark);
     aurore::Label* l = label(text, TEXT_META, "cadran/text2");
     l->setSingleLine(true);
@@ -209,9 +209,9 @@ aurore::Box* pill(const std::string& text, const char* dot_key)
 aurore::Box* key(const char* letter, float size)
 {
     auto* bubble = new aurore::Box(aurore::Axis::ROW);
-    bubble->setWidth(size);
-    bubble->setHeight(size);
-    bubble->setCornerRadius(size / 2);
+    bubble->setWidth(aurore::dp(size));
+    bubble->setHeight(aurore::dp(size));
+    bubble->setCornerRadius(aurore::dp(size) / 2);
     bubble->setShrink(0);
     bubble->setThemeColor("backgroundColor", "cadran/key_bg");
     bubble->setAlignItems(aurore::AlignItems::CENTER);
@@ -254,16 +254,16 @@ aurore::Box* chip(const std::string& text, float height)
 {
     auto* box = new Chip();
     box->setAlignItems(aurore::AlignItems::CENTER);
-    box->setHeight(height);
-    box->setPaddingLeft(22);
-    box->setPaddingRight(22);
-    box->setCornerRadius(height / 2);
+    box->setHeight(aurore::dp(height));
+    box->setPaddingLeft(aurore::dp(22));
+    box->setPaddingRight(aurore::dp(22));
+    box->setCornerRadius(aurore::dp(height) / 2);
     box->setThemeColor("backgroundColor", "cadran/surf2");
     box->setThemeColor("borderColor", "cadran/line");
     box->setBorderThickness(1);
     box->setFocusable(true);
     box->setHideHighlightBackground(true);
-    box->setHighlightCornerRadius(height / 2);
+    box->setHighlightCornerRadius(aurore::dp(height) / 2);
     auto* digits = new CadranDigits();
     digits->setText(text);
     digits->setFontSize(17);
@@ -277,7 +277,7 @@ aurore::Box* qr(const std::string& payload, float side, const std::string& title
     auto* box = new aurore::Box(aurore::Axis::COLUMN);
     box->setAlignItems(aurore::AlignItems::CENTER);
     if (width > 0)
-        box->setWidth(width);
+        box->setWidth(aurore::dp(width));
     box->addView(new QrView(payload, side));
     for (const auto& [text, size, key] : { std::tuple<const std::string&, float, const char*> { title, 18, "cadran/text" },
              { caption, TEXT_META, "cadran/text3" } })
@@ -287,7 +287,7 @@ aurore::Box* qr(const std::string& payload, float side, const std::string& title
         aurore::Label* l = label(text, size, key);
         l->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
         l->setAlignSelf(aurore::AlignSelf::STRETCH); // wraps at the box's width
-        l->setMarginTop(&text == &title ? 10 : 2);
+        l->setMarginTop(aurore::dp(&text == &title ? 10 : 2));
         box->addView(l);
     }
     return box;
@@ -295,7 +295,7 @@ aurore::Box* qr(const std::string& payload, float side, const std::string& title
 
 Bar::Bar()
 {
-    this->setHeight(12);
+    this->setHeight(aurore::dp(12));
     this->setFocusable(false);
 }
 
@@ -340,11 +340,11 @@ Empty empty(const char* icon_name)
     Empty e;
     e.box = card(false, false);
     e.box->setAlignItems(aurore::AlignItems::CENTER);
-    e.box->setPadding(32, 40, 32, 40);
+    e.box->setPadding(aurore::dp(32), aurore::dp(40), aurore::dp(32), aurore::dp(40));
     auto* circle = new aurore::Box(aurore::Axis::ROW);
-    circle->setWidth(64);
-    circle->setHeight(64);
-    circle->setCornerRadius(32);
+    circle->setWidth(aurore::dp(64));
+    circle->setHeight(aurore::dp(64));
+    circle->setCornerRadius(aurore::dp(32));
     circle->setThemeColor("backgroundColor", "cadran/teal_soft");
     circle->setAlignItems(aurore::AlignItems::CENTER);
     circle->setJustifyContent(aurore::JustifyContent::CENTER);
@@ -353,12 +353,12 @@ Empty empty(const char* icon_name)
     e.title = label("", TEXT_LEAD, "cadran/text");
     e.title->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
     e.title->setAlignSelf(aurore::AlignSelf::STRETCH); // wraps at the card's width
-    e.title->setMarginTop(16);
+    e.title->setMarginTop(aurore::dp(16));
     e.box->addView(e.title);
     e.text = label("", TEXT_META, "cadran/text2");
     e.text->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
     e.text->setAlignSelf(aurore::AlignSelf::STRETCH);
-    e.text->setMarginTop(6);
+    e.text->setMarginTop(aurore::dp(6));
     e.box->addView(e.text);
     return e;
 }
@@ -371,7 +371,7 @@ aurore::Box* empty_around(aurore::Label* label, const char* icon_name)
     Empty e = empty(icon_name);
     e.box->setId("cadran_empty_card");
     const YGValue top = YGNodeStyleGetMargin(label->getYGNode(), YGEdgeTop);
-    e.box->setMargins(top.unit == YGUnitPoint && top.value > 10 ? top.value : 10, 0, 16, 0);
+    e.box->setMargins(top.unit == YGUnitPoint && top.value > aurore::dp(10) ? top.value : aurore::dp(10), 0, aurore::dp(16), 0);
     const auto& children = parent->getChildren();
     const size_t at      = (size_t)(std::find(children.begin(), children.end(), label) - children.begin());
     // The label in the title's place, laid out as it.
@@ -382,7 +382,7 @@ aurore::Box* empty_around(aurore::Label* label, const char* icon_name)
     label->setSingleLine(false);
     label->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
     label->setAlignSelf(aurore::AlignSelf::STRETCH);
-    label->setMargins(16, 0, 0, 0);
+    label->setMargins(aurore::dp(16), 0, 0, 0);
     e.box->addView(label, 1);
     e.box->removeView(e.text); // the screen's label says it all
     parent->addView(e.box, at);
@@ -439,8 +439,8 @@ void fit_head(aurore::Box* row)
     if (!title || !state)
         return;
     wrap(row);
-    YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, 8);
-    YGNodeStyleSetGap(row->getYGNode(), YGGutterRow, 2);
+    YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, aurore::dp(8));
+    YGNodeStyleSetGap(row->getYGNode(), YGGutterRow, aurore::dp(2));
     title->setShrink(0.0f);
     state->setSingleLine(true);
     state->setShrink(0.0f);
@@ -460,13 +460,14 @@ void draw_more_below(NVGcontext* vg, aurore::ScrollingFrame* frame, float x, flo
     const float below = content->getHeight() - frame->getContentOffsetY() - height;
     if (below <= 1.0f)
         return;
-    constexpr float FADE = 32.0f;
-    NVGcolor solid       = aurore::Application::getTheme()[color_key];
+    const float FADE = aurore::dp(32.0f);
+    NVGcolor solid   = aurore::Application::getTheme()[color_key];
     solid.a *= frame->getAlpha();
     NVGcolor clear  = solid;
     clear.a         = 0.0f;
     const float top = y + height - FADE;
     nvgBeginPath(vg);
+    corner = aurore::dp(corner);
     if (corner > 0.0f)
         nvgRoundedRectVarying(vg, x + 1, top, width - 2, FADE - 1, 0, 0, corner - 1, corner - 1);
     else

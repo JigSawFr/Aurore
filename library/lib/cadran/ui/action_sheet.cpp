@@ -39,7 +39,7 @@ aurore::Box* sheet_outside(float width, bool grow)
     if (grow)
         box->setGrow(1);
     else
-        box->setWidth(width);
+        box->setWidth(aurore::dp(width));
     box->setShrink(0);
     box->addGestureRecognizer(new aurore::TapGestureRecognizer(box, []()
         { close_sheet(nullptr); }));
@@ -123,7 +123,7 @@ namespace
 
             auto* panel = new Panel();
             panel->setGrow(1);
-            panel->setCornerRadius(cadran::PICKER_CORNER);
+            panel->setCornerRadius(aurore::dp(cadran::PICKER_CORNER));
             panel->setThemeColor("backgroundColor", "cadran/surf");
             panel->setThemeColor("borderColor", "cadran/line");
             panel->setBorderThickness(1);
@@ -137,7 +137,7 @@ namespace
             frame->setScrollingBehavior(aurore::ScrollingBehavior::CENTERED);
             auto* column = new Column();
             column->setAlignItems(aurore::AlignItems::STRETCH);
-            column->setPadding(18, 28, 22, 28);
+            column->setPadding(aurore::dp(18), aurore::dp(28), aurore::dp(22), aurore::dp(28));
             if (columns > 0)
                 this->grid(column, (size_t)columns);
             else
@@ -154,14 +154,14 @@ namespace
                             auto* kicker = new aurore::Label();
                             kit::set_kicker(kicker, l.group);
                             kicker->setSingleLine(true);
-                            kicker->setMarginLeft(6);
-                            kicker->setMarginTop(card ? CARD_GAP + 4 : 0);
-                            kicker->setMarginBottom(10);
+                            kicker->setMarginLeft(aurore::dp(6));
+                            kicker->setMarginTop(card ? aurore::dp(CARD_GAP + 4) : 0);
+                            kicker->setMarginBottom(aurore::dp(10));
                             column->addView(kicker);
                         }
                         card = new cadran::Card();
                         if (l.group.empty() && !column->getChildren().empty())
-                            card->setMarginTop(CARD_GAP);
+                            card->setMarginTop(aurore::dp(CARD_GAP));
                         column->addView(card);
                     }
                     card->addView(this->line(l, i));
@@ -175,9 +175,9 @@ namespace
             // A first guess, then the lines' own height once laid out.
             const float most = aurore::Application::contentHeight * 0.8f;
             const float body = columns > 0
-                ? (TILE_HEIGHT + TILE_GAP) * (float)((this->lines.size() + columns - 1) / columns)
-                : 60.0f * (float)this->lines.size();
-            panel->setHeight(std::min((subtitle.empty() ? 70.0f : 92.0f) + body + 40, most));
+                ? aurore::dp(TILE_HEIGHT + TILE_GAP) * (float)((this->lines.size() + columns - 1) / columns)
+                : aurore::dp(60.0f) * (float)this->lines.size();
+            panel->setHeight(std::min(aurore::dp(subtitle.empty() ? 70.0f : 92.0f) + body + aurore::dp(40), most));
             column->measured = [panel, head, most](float lines_height)
             {
                 const float want = std::min(head->getHeight() + lines_height + 2, most);
@@ -220,20 +220,20 @@ namespace
         {
             auto* head = new aurore::Box(aurore::Axis::ROW);
             head->setAlignItems(aurore::AlignItems::CENTER);
-            head->setPadding(subtitle.empty() ? 24 : 20, 36, subtitle.empty() ? 20 : 18, image ? 28 : 36);
+            head->setPadding(aurore::dp(subtitle.empty() ? 24 : 20), aurore::dp(36), aurore::dp(subtitle.empty() ? 20 : 18), aurore::dp(image ? 28 : 36));
             head->setThemeColor("lineColor", "cadran/line");
             head->setLineBottom(1);
             head->setShrink(0);
             if (image)
             {
                 auto* icon = new aurore::Image();
-                icon->setWidth(48);
-                icon->setHeight(48);
-                icon->setCornerRadius(10);
+                icon->setWidth(aurore::dp(48));
+                icon->setHeight(aurore::dp(48));
+                icon->setCornerRadius(aurore::dp(10));
                 icon->setScalingType(aurore::ImageScalingType::FIT);
                 icon->innerSetImage(image);
                 icon->setFreeTexture(false); // the list's, or the icon cache's
-                icon->setMarginRight(16);
+                icon->setMarginRight(aurore::dp(16));
                 icon->setShrink(0);
                 head->addView(icon);
             }
@@ -246,7 +246,7 @@ namespace
             if (!subtitle.empty())
             {
                 aurore::Label* line = kit::label(subtitle, kit::TEXT_META, "cadran/text2");
-                line->setMarginTop(5);
+                line->setMarginTop(aurore::dp(5));
                 words->addView(line);
             }
             head->addView(words);
@@ -265,8 +265,8 @@ namespace
                     row = new aurore::Box(aurore::Axis::ROW);
                     row->setAlignItems(aurore::AlignItems::STRETCH);
                     if (i > 0)
-                        row->setMarginTop(TILE_GAP);
-                    YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, TILE_GAP);
+                        row->setMarginTop(aurore::dp(TILE_GAP));
+                    YGNodeStyleSetGap(row->getYGNode(), YGGutterColumn, aurore::dp(TILE_GAP));
                     column->addView(row);
                 }
                 row->addView(this->tile(this->lines[i], i));
@@ -299,13 +299,13 @@ namespace
             cell->setJustifyContent(aurore::JustifyContent::CENTER);
             cell->setGrow(1);
             cell->setWidth(0);
-            cell->setHeight(TILE_HEIGHT);
-            cell->setPadding(14, 6, 14, 6);
+            cell->setHeight(aurore::dp(TILE_HEIGHT));
+            cell->setPadding(aurore::dp(14), aurore::dp(6), aurore::dp(14), aurore::dp(6));
             cell->setMarginRight(0);
             cell->setLineBottom(0);
             cell->setLineTop(0);
-            cell->setCornerRadius(kit::RADIUS_CARD);
-            cell->setHighlightCornerRadius(kit::RADIUS_CARD);
+            cell->setCornerRadius(aurore::dp(kit::RADIUS_CARD));
+            cell->setHighlightCornerRadius(aurore::dp(kit::RADIUS_CARD));
             cell->setThemeColor("backgroundColor", l.checked ? "cadran/teal_soft" : "cadran/surf2");
             cell->setAccessibilitySelected(l.checked);
             cell->title->setGrow(0);
@@ -320,7 +320,7 @@ namespace
             if (!l.icon.empty())
             {
                 CadranIcon* icon = kit::icon(l.icon.c_str(), 32, l.checked ? "cadran/teal" : "cadran/text2");
-                icon->setMarginBottom(12);
+                icon->setMarginBottom(aurore::dp(12));
                 icon->setShrink(0);
                 cell->addView(icon, 0);
             }
@@ -357,7 +357,7 @@ namespace
                 cadran::List::row(cell, l.icon.empty() ? nullptr : l.icon.c_str());
             if (l.toggle < 0)
             {
-                cell->detail->setMaxWidth(340);
+                cell->detail->setMaxWidth(aurore::dp(340));
                 cell->detail->setSingleLine(true);
                 cell->detail->setVisibility(l.detail.empty() ? aurore::Visibility::GONE : aurore::Visibility::VISIBLE);
             }
@@ -389,9 +389,9 @@ namespace
             {
                 cell->setAccessibilitySelected(true);
                 cell->setThemeColor("backgroundColor", "cadran/teal_soft");
-                cell->setCornerRadius(kit::RADIUS_ROW);
+                cell->setCornerRadius(aurore::dp(kit::RADIUS_ROW));
                 CadranIcon* check = kit::icon("check", 22, "cadran/teal");
-                check->setMarginLeft(l.detail.empty() ? 0 : 14);
+                check->setMarginLeft(l.detail.empty() ? 0 : aurore::dp(14));
                 check->setShrink(0);
                 cell->addView(check);
             }
