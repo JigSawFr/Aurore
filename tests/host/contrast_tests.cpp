@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // Host tests for the boards' palettes (ui/cadran_palette.hpp): every pair
 // CONTRAST promises, in both themes, read through KEYS as cadran::install_theme
 // puts them in the themes: an ink at 4.5:1 or more on each surface it is drawn

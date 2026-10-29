@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // What a sheet over the screen (ui::pick() and the others of action_sheet.cpp,
 // the icon sheet of a forwarder) shares: closing it, and the room around its
 // panel, where a touch closes it.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <functional>

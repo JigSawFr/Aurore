@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // The demo's Cadran pieces: the buttons that open Cadran's dialogs, sheets
 // and toasts, its icons and a Markdown text, each built in code for the
 // Components tab (tab/components_tab.cpp).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore.hpp>

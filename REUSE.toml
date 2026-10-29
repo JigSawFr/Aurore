@@ -1,0 +1,181 @@
+# The licences of the files that cannot say theirs in a comment (data, images,
+# fonts, documents) and of the code bundled in library/lib/extern and
+# library/include/aurore/extern (https://reuse.software/spec-3.3/). The source
+# files say theirs in their SPDX tags. resources/THIRD_PARTY_NOTICES.md lists
+# the bundled components with their versions; `reuse lint` checks the whole in
+# CI. Where several annotations name a file, the last one counts.
+version = 1
+
+# Aurore's own data: the build and CI files, the docs, the resources, the
+# demo's and the ports' assets, the reference screenshots, the site
+[[annotations]]
+path = [
+    ".clang-format", ".editorconfig", ".gitattributes", ".gitignore", ".gitmodules", ".git-blame-ignore-revs",
+    ".release-please-manifest.json", "release-please-config.json", "CMakePresets.json",
+    "AUTHORS", "NOTICE", "*.md", ".github/**", "docs/**",
+    "android-project/**", "demo/**", "ps4/**", "psv/**", "ctr/**", "template/**", "web/**",
+    "resources/**", "tests/**", "site/**",
+]
+precedence = "closest"
+SPDX-FileCopyrightText = ["2019-2021 borealis contributors", "2026 JigSawFr"]
+SPDX-License-Identifier = "Apache-2.0"
+
+# Cadran's catalogs (NOTICE)
+[[annotations]]
+path = "resources/i18n/*/cadran.json"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 JigSawFr"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# Fonts and pictures made elsewhere
+[[annotations]]
+path = ["resources/font/aurore_text.ttf", "resources/font/OFL-Inter.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = "2020 The Inter Project Authors"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = ["resources/font/aurore_buttons.ttf", "resources/font/OFL-PromptFont.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2018-2026 Yukari Hafner", "2011-2016 Severin Meyer"]
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = ["resources/font/sora_bold_latin.ttf", "resources/font/OFL-Sora.txt", "site/assets/fonts/sora.woff2", "site/assets/fonts/OFL-sora.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = "2019 The Sora Project Authors"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = ["site/assets/fonts/figtree.woff2", "site/assets/fonts/OFL-figtree.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = "2022 The Figtree Project Authors"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = ["site/assets/fonts/jetbrains-mono.woff2", "site/assets/fonts/OFL-jetbrains.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = "2020 The JetBrains Mono Project Authors"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = ["site/assets/fonts/twemoji-flags.woff2", "site/assets/fonts/LICENSE-twemoji-flags.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = ["2019 Twitter, Inc and other contributors", "2022 TalkJS"]
+SPDX-License-Identifier = "CC-BY-4.0 AND MIT"
+
+[[annotations]]
+path = "resources/material/**"
+precedence = "override"
+SPDX-FileCopyrightText = "Google LLC"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "resources/img/emoji/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2019 Twitter, Inc and other contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The bundled code (resources/THIRD_PARTY_NOTICES.md). A file with tags of its
+# own keeps them; these add what it does not say.
+[[annotations]]
+path = ["library/lib/extern/nanovg/**", "library/include/aurore/extern/nanovg/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2013 Mikko Mononen"
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = ["library/lib/extern/nanovg/deko3d/**", "library/include/aurore/extern/nanovg/dk_renderer.hpp", "library/include/aurore/extern/nanovg/nanovg_dk.h"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2020 Adubbz", "2013 Mikko Mononen"]
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = ["library/lib/extern/nanovg/deko3d/framework/**", "library/include/aurore/extern/nanovg/framework/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2020 fincs"
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = ["library/include/aurore/extern/nanovg/nanovg_gxm*.h"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2024 xfangfang", "2013 Mikko Mononen"]
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = ["library/lib/extern/nanovg/ps4/**", "library/include/aurore/extern/nanovg/nanovg_ps4.h"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2023 xfangfang", "2013 Mikko Mononen"]
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = ["library/lib/extern/nanovg/citro3d/**", "library/include/aurore/extern/nanovg/nanovg_citro3d.h"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2026 JigSawFr", "2013 Mikko Mononen"]
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = ["library/include/aurore/extern/nanovg/stb_*.h"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2017 Sean Barrett"
+SPDX-License-Identifier = "MIT OR Unlicense"
+
+[[annotations]]
+path = ["library/lib/extern/yoga/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Meta Platforms, Inc. and affiliates"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["library/lib/extern/fmt/**", "library/lib/extern/nxfmtwrapper/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2012 - present, Victor Zverovich and {fmt} contributors"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["library/lib/extern/tinyxml2/**", "library/include/aurore/extern/tinyxml2/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Lee Thomason"
+SPDX-License-Identifier = "Zlib"
+
+[[annotations]]
+path = ["library/include/aurore/extern/nlohmann/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2013-2025 Niels Lohmann"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["library/lib/extern/tweeny/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2016-2021 Leonardo Guilherme Lucena de Freitas"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["library/lib/extern/libromfs/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2022 WerWolv"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["library/lib/extern/libretro-common/**", "library/include/aurore/extern/libretro-common/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2010-2020 The RetroArch team"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["library/lib/extern/glad/**", "library/include/aurore/extern/glad/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["David Herberth", "2013-2020 The Khronos Group Inc."]
+SPDX-License-Identifier = "(WTFPL OR CC0-1.0) AND Apache-2.0"
+
+[[annotations]]
+path = ["library/include/aurore/extern/KHR/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2008-2018 The Khronos Group Inc."
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["library/lib/extern/qrcodegen/**", "library/include/aurore/extern/qrcodegen/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Project Nayuki"
+SPDX-License-Identifier = "MIT"

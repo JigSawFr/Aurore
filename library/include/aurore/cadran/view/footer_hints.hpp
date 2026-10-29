@@ -1,10 +1,12 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // FooterHints — Aurore's footer hints (aurore:Hints), fitted to the footer.
 // Aurore gives the hints the width they ask for and the clock what is
 // left: with five hints in French and the Switch's battery and Wi-Fi icons,
 // the clock wrapped onto two lines and every hint ended in "…". Here the
 // clock keeps its one line; the hints first come closer together (less room
 // around each), and only when even that is not enough are their texts cut.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore.hpp>

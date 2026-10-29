@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/driver/d3d11.hpp>
 #define NANOVG_D3D11_IMPLEMENTATION

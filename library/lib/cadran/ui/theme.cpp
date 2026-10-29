@@ -1,5 +1,8 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-FileCopyrightText: 2026 Taylor
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui — the palette's colours by role, and the console's system font (see ui.hpp).
-// Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #include <aurore/cadran/ui/ui.hpp>
 
 #ifdef __SWITCH__

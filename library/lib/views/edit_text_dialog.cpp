@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/touch/tap_gesture.hpp>

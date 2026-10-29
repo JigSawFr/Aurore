@@ -1,7 +1,10 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-FileCopyrightText: 2026 Taylor
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui — Cadran's helpers for dialogs, toasts, pickers, sheets, keyboards,
 // visibility and focus. The app adds its own (background tasks, its
 // settings file, its error codes) in the same namespace.
-// Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <chrono>

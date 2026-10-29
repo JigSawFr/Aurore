@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // guarded — a callback that does nothing once its screen is gone.
 //
 // A screen (a tab, an activity) owns an `alive` token; what finishes later
@@ -6,7 +9,6 @@
 // while the token is held and true. Checked where the callback is called,
 // which is the UI thread: a worker thread hands it to aurore::sync, never calls
 // it itself. No Aurore: host-tested (tests/host/guarded_tests.cpp).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <memory>

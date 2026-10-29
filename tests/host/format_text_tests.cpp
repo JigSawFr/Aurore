@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // Host tests for cadran/ui/format_text.cpp, translated by Cadran's real
 // catalog (resources/i18n/<lang>/cadran.json) through ui/tr.hpp's stand-in
 // for Aurore (catalog.hpp): minutes ("45 min", "2 h", "2 h 05"), a length

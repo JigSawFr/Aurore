@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: borealis contributors
+# SPDX-License-Identifier: Apache-2.0
+
 cmake_minimum_required(VERSION 3.16...3.31)
 
 set(AURORE_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)

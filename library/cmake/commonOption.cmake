@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: borealis contributors
+# SPDX-License-Identifier: Apache-2.0
+
 # Aurore's build options. Include this file before project(), then
 # toolchain.cmake (README.md, "Use it in your project").
 #

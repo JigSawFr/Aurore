@@ -21,8 +21,16 @@ library/lib/core/hot_reload.cpp) and the demo's Cadran pieces
 (demo/include/tab/cadran_tab.hpp, demo/src/tab/cadran_tab.cpp) are
 Copyright 2026 JigSawFr, and Taylor for the files that say so,
 licensed under the GNU General Public License, version 3 or later
-(LICENSE.GPL). A program built with them is covered by the GPL. The other
-files are under the Apache License, Version 2.0, above.
+(LICENSE.GPL). So is the notification manager of the core
+(library/include/aurore/core/notification_manager.hpp,
+library/lib/core/notification_manager.cpp), Copyright 2019 natinusala and
+2024 xfangfang, as it came from upstream. A program built with them is covered
+by the GPL. The other files are under the Apache License, Version 2.0, above.
+
+Each file says its licence and copyright: in SPDX tags at its top, or, for
+the files that cannot hold a comment and for the bundled code, in REUSE.toml.
+The licences' texts are in LICENSES/; `reuse lint` checks the whole
+(https://reuse.software).
 
 Also bundled, each under its own licence: the libraries in library/lib/extern
 and library/include/aurore/extern (nanovg, fontstash, stb, Yoga, {fmt},

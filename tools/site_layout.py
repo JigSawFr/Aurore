@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 """The website's layout on a phone, a tablet and a desktop (site/README.md).
 
 Serves a built site (tools/build_site.py <out-dir>) and opens its pages in

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Which of the components Aurore bundles or builds with have a newer release
 # upstream: the versions tools/stack.py reads from the repository, against

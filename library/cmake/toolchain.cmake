@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: borealis contributors
+# SPDX-License-Identifier: Apache-2.0
+
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 
 function(check_libromfs_generator)

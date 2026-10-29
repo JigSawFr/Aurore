@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // motion — the small movements of the look, each a few lines where it is
 // drawn: a screen or a line that rises into place, a card that bows out, a
 // pill that slides to its new place, a chip that breathes once. All of them
@@ -10,7 +13,6 @@
 // that advances the view's translation and alpha at each frame and goes
 // with the view: nothing to cancel, nothing left dangling when a tab is
 // replaced mid-movement.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <functional>

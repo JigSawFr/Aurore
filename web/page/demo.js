@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // The demo's page in a browser (web/README.md): starts aurore_demo (the
 // Emscripten build of the demo) in the canvas, with the theme and language of
 // the address (?theme=winter&lang=fr), and gives it an on-screen pad.

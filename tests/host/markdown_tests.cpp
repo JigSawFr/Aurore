@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // Host tests for cadran/util/safe_text.cpp and markdown.cpp: what
 // text from GitHub keeps (valid UTF-8, no control, bidi or zero-width character, cut
 // between two characters; notes cut after a whole line), versions, and

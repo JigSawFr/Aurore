@@ -1,10 +1,12 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // QrView — a QR code of a text (a URL), dark modules on white with the
 // four-module quiet zone, whatever the theme: phones read it best that way.
 // Square: the code fills the smaller side, in whole pixels per module.
 // Drawn as one texture, scaled without smoothing: a path per module was a
 // draw call each, and a long link (the bug-report form with a gist link)
 // overflowed the frame's GPU command memory, which aborts the app.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

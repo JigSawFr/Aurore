@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // cadran::kit — the small pieces every Cadran screen builds with: a label, an
 // icon, a card, a pill, a chip, an empty state; a line's value without its
 // "›", a dot for a value's colour, a date in words.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

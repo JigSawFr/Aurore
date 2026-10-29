@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Makes the OpenGL loader the GL drivers use, with glad 2.0.8: OpenGL 4.3
 # (its compatibility profile, which the GL2 driver needs; the GL3 one asks

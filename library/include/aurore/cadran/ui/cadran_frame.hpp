@@ -1,10 +1,12 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Cadran — Aurore's look, after PlayGuard's and PlayShelf's 2026 design
 // boards: the navy and cool-white palettes, an icon rail for a sidebar, the
 // app's mark and a status pill in the header, cards in place of lists, the
 // figures in Sora. These set up the frame every screen shares; an app's tabs
 // draw their own boards, cadran::List dresses the lists, cadran/ui/cadran_kit
 // and cadran/ui/cadran_modal hold the pieces.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <functional>

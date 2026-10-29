@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 """Builds Aurore's website (site/README.md) into <out-dir>: a home page, the
 documentation (docs/*.md), the changelog (CHANGELOG.md) and the page not
 found, in the consoles' 15 languages (LANGUAGES): English at the root, the
