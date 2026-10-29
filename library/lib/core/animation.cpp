@@ -134,7 +134,7 @@ void Animatable::onRewind()
 
 void Animatable::addStep(float targetValue, int32_t duration, EasingFunction easing)
 {
-    duration = std::max(duration, 0);
+    duration = std::max<int32_t>(duration, 0);
     this->steps.push_back({ targetValue, duration, easing });
     this->total += duration;
 }
