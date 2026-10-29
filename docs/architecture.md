@@ -7,7 +7,7 @@ How Aurore is put together: the layers, what happens in a frame, how views are l
 ```mermaid
 flowchart TB
     app["Your app<br/>activities, views, XML, resources"]
-    cadran["Cadran<br/>library/*/cadran: the default look, pickers, dialogs"]
+    cadran["Cadran<br/>library/*/cadran: the look, pickers, dialogs"]
     views["Views<br/>library/*/views: Label, Button, ScrollingFrame, RecyclerFrame, cells…"]
     core["Core<br/>library/*/core: Application, View, Box, Activity, Theme, Style, i18n, threads"]
     platforms["Platforms<br/>library/*/platforms: GLFW, SDL, Switch, PS Vita, PS4, Android"]
@@ -26,11 +26,11 @@ flowchart TB
 | `core/` | The application, the base view and box, activities, actions and gestures, the theme and the style, translations, threads, timers, animations, the logger, the inspector, hot reload, the profiler | `core/`, `views/` (the core builds some views itself: dialogs, hints, notifications), `platforms/` only to pick one (`platform.cpp`) |
 | `views/` | The views of the library: labels, images, buttons, frames, lists, cells, dialogs, widgets | `core/`, `views/` |
 | `platforms/` | One folder per platform, each implementing the core's interfaces | `core/`, `platforms/`; the GLFW and SDL keyboards also show an `EditTextDialog` |
-| `cadran/` | Cadran, the default look (GPLv3, [cadran.md](cadran.md)) | the public API only, through `<aurore.hpp>` |
+| `cadran/` | Cadran, the look (GPLv3, [cadran.md](cadran.md)) | the public API only, through `<aurore.hpp>` |
 | `test/` | The test harness and its headless platform ([testing.md](testing.md)) | `core/`, `platforms/` |
 | `extern/` | Bundled libraries, under their own licences | — |
 
-The core calls Cadran from one file, `application.cpp`: `init()` and `createWindow()` start it (`cadran::start`, `cadran::start_window`) unless `Application::setCadran(false)` was called before, and `getReduceMotion()` asks whether its effects are reduced. Nothing else in the core or the views knows about it (the theme only knows its keys, `cadran/…`, as strings): Cadran restyles screens from the outside, through the theme keys, the XML views it registers and the hooks the core already has.
+The core calls Cadran from one file, `application.cpp`: `init()` and `createWindow()` start it (`cadran::start`, `cadran::start_window`), and `getReduceMotion()` asks whether its effects are reduced. Nothing else in the core or the views knows about it (the theme only knows its keys, `cadran/…`, as strings): Cadran restyles screens from the outside, through the theme keys, the XML views it registers and the hooks the core already has.
 
 `<aurore.hpp>` includes the whole public API; `<aurore/cadran.hpp>` adds Cadran's. Everything is in the `aurore` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
 
@@ -100,7 +100,7 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 
 ## Cadran
 
-[Cadran](cadran.md) is the default look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `aurore:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `aurore::View`s.
+[Cadran](cadran.md) is the look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `aurore:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `aurore::View`s.
 
 ## Platforms and drivers
 

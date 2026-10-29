@@ -187,7 +187,7 @@ if (aurore::Theme::loadFile("my_theme.ini", &variant))
     aurore::Application::getPlatform()->setThemeVariant(variant);
 ```
 
-An app adds its own values with `aurore::Theme::getDarkTheme().addColor("my_app/score", nvgRGB(…))` and `aurore::getStyle().addMetric(…)`, and its XML reads them with `@theme/my_app/score`. With hot reload on, a save of the theme file restyles the screen at once. Aurore draws everything in [Cadran](cadran.md)'s look by default; `aurore::Application::setCadran(false)` before `init()` keeps borealis' own.
+An app adds its own values with `aurore::Theme::getDarkTheme().addColor("my_app/score", nvgRGB(…))` and `aurore::getStyle().addMetric(…)`, and its XML reads them with `@theme/my_app/score`. With hot reload on, a save of the theme file restyles the screen at once. Aurore draws everything in [Cadran](cadran.md)'s look.
 
 ## 6. Ship it on the Switch (4 minutes)
 

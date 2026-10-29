@@ -318,8 +318,6 @@
         "file_lead": "A text file: a few colours, and every key follows from them; pictures and decorations too.",
         "picker": "Cadran's palette picker",
         "contrast": "Each palette is checked: text at 4.5:1, shapes at 3:1.",
-        "look": "The look",
-        "look_lead": "Cadran is Aurore's look; an app may keep borealis' own, chosen before it starts.",
         "default": "Cadran"
     },
     "input": {

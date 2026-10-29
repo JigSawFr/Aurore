@@ -318,8 +318,6 @@
         "file_lead": "Um ficheiro de texto: algumas cores, e todas as chaves derivam delas; também imagens e decorações.",
         "picker": "O seletor de paletas do Cadran",
         "contrast": "Cada paleta é verificada: o texto a 4,5:1, as formas a 3:1.",
-        "look": "O aspeto",
-        "look_lead": "O Cadran é o aspeto do Aurore; uma app pode manter o do borealis, escolhido antes de arrancar.",
         "default": "Cadran"
     },
     "input": {
