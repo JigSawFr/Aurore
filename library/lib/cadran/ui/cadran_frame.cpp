@@ -41,8 +41,18 @@ constexpr float RAIL_ICON     = 22.0f;
 constexpr float MARK_SIZE     = 38.0f;
 // The rail open (aurore/tab_frame/sidebar_width) and on its icons: the items'
 // column inset 16 px on both sides, the icons centred under the header's mark.
-constexpr float RAIL_OPEN      = 232.0f;
-constexpr float RAIL_SHUT      = 16.0f + RAIL_ITEM_PAD * 2 + RAIL_ICON + 16.0f;
+constexpr float RAIL_OPEN = 232.0f;
+
+// The space on each side of the rail's icons (16; 8 on a compact screen),
+// and so the rail on its icons
+float rail_edge()
+{
+    return aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT ? 8.0f : 16.0f;
+}
+float rail_shut()
+{
+    return rail_edge() + RAIL_ITEM_PAD * 2 + RAIL_ICON + rail_edge();
+}
 constexpr float RAIL_SHUT_ITEM = RAIL_ITEM_PAD * 2 + RAIL_ICON;
 // How open the rail is now, 0 (its icons) to 1 (its names): what the active
 // tab's pill and the badges are drawn by (RailFold sets it each frame).
@@ -119,7 +129,7 @@ void cadran::install_theme()
     style.addMetric("aurore/sidebar/padding_top", 6.0f);
     style.addMetric("aurore/sidebar/padding_right", 8.0f);
     style.addMetric("aurore/sidebar/padding_bottom", 10.0f);
-    style.addMetric("aurore/sidebar/padding_left", 16.0f);
+    style.addMetric("aurore/sidebar/padding_left", rail_edge());
     style.addMetric("aurore/sidebar/item_height", 52.0f);
     // The pickers' rows inside their card (cadran_modal), the toasts as
     // cards under the header, and the pills' hairline.
@@ -652,7 +662,7 @@ class RailFold : public aurore::Box
                 this->separators.push_back(v);
         this->spacer = new aurore::Box();
         this->spacer->setFocusable(false);
-        this->spacer->setWidth(aurore::dp(RAIL_SHUT));
+        this->spacer->setWidth(aurore::dp(rail_shut()));
         s_fold = this;
     }
 
@@ -684,11 +694,11 @@ class RailFold : public aurore::Box
         const bool fold = this->mode == RailMode::AUTO, icons = this->mode == RailMode::ICONS;
         this->setPositionType(fold ? aurore::PositionType::ABSOLUTE : aurore::PositionType::RELATIVE);
         // Open, the rail is as wide as its longest name at every density
-        const float width = icons ? aurore::dp(RAIL_SHUT) : RAIL_OPEN;
+        const float width = icons ? aurore::dp(rail_shut()) : RAIL_OPEN;
         this->setWidth(width);
         this->bar->setWidth(width);
         this->spacer->setVisibility(fold ? aurore::Visibility::VISIBLE : aurore::Visibility::GONE);
-        this->column->setPaddingRight(aurore::dp(icons ? 16 : 8));
+        this->column->setPaddingRight(aurore::dp(icons ? rail_edge() : 8));
         for (aurore::SidebarItem* item : this->items)
         {
             if (auto* label = item->getView("aurore/sidebar/item_label"))
@@ -769,7 +779,7 @@ class RailFold : public aurore::Box
         for (aurore::View* v : this->separators)
         {
             const aurore::Rect at = v->getFrame();
-            const float shut      = aurore::dp(RAIL_SHUT - 2 * 16.0f - 2 * SEPARATOR_INSET);
+            const float shut      = aurore::dp(rail_shut() - 2 * rail_edge() - 2 * SEPARATOR_INSET);
             nvgBeginPath(vg);
             nvgRect(vg, at.getMinX(), std::round(at.getMidY()), shut + (at.getWidth() - shut) * t, 1);
             nvgFillColor(vg, line);
@@ -834,7 +844,7 @@ class RailFold : public aurore::Box
 
   private:
     // The rail's width on screen now.
-    float visible() { return this->mode == RailMode::AUTO ? aurore::dp(RAIL_SHUT) + (RAIL_OPEN - aurore::dp(RAIL_SHUT)) * s_rail_open : this->getWidth(); }
+    float visible() { return this->mode == RailMode::AUTO ? aurore::dp(rail_shut()) + (RAIL_OPEN - aurore::dp(rail_shut())) * s_rail_open : this->getWidth(); }
 
     bool focus_on_rail() const
     {

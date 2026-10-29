@@ -189,9 +189,11 @@ namespace
             auto* row = new aurore::Box(aurore::Axis::ROW);
             row->setAlignItems(aurore::AlignItems::STRETCH);
             row->setShrink(0);
-            row->addView(sheet_outside(SIDE, false));
+            // On a compact screen the panel takes the width, its lines whole
+            const float side = aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT ? 12 : SIDE;
+            row->addView(sheet_outside(side, false));
             row->addView(panel);
-            row->addView(sheet_outside(SIDE, false));
+            row->addView(sheet_outside(side, false));
             this->addView(row);
             this->addView(sheet_outside(20, false)); // the gap above the hints
             this->addView(new aurore::BottomBar());

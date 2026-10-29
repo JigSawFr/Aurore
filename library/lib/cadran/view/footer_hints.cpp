@@ -59,24 +59,29 @@ void FooterHints::fit()
     for (aurore::View* v : row->getChildren())
         if (v != this)
             status = v;
-    auto* clock = status ? dynamic_cast<aurore::Label*>(status->getView("aurore/hints/time")) : nullptr;
-    if (!clock)
+    // Left out on a compact screen (Aurore's bottom_bar.cpp): the row is the hints'
+    const bool shown = status && status->getVisibility() == aurore::Visibility::VISIBLE;
+    auto* clock      = shown ? dynamic_cast<aurore::Label*>(status->getView("aurore/hints/time")) : nullptr;
+    if (shown && !clock)
         return;
     // A new screen's clock is set when it is first drawn: until then it has
     // no width of its own. Fitted after that frame.
-    if (clock->getFullText().empty())
+    if (clock && clock->getFullText().empty())
     {
         aurore::sync(ui::guarded(this->alive, [this]()
             { this->fit(); }));
         return;
     }
 
-    clock->setSingleLine(true);
-    status->setShrink(0);
+    if (clock)
+    {
+        clock->setSingleLine(true);
+        status->setShrink(0);
+    }
     this->setShrink(0); // the hints at the width they ask for
 
     // The row has no padding on its sides (Aurore's bottom_bar.cpp).
-    const float room = row->getWidth() - status->getWidth() - aurore::dp(CLOCK_GAP);
+    const float room = row->getWidth() - (shown ? status->getWidth() + aurore::dp(CLOCK_GAP) : 0);
     const float over = this->getWidth() - room;
     if (over <= 0)
         return;

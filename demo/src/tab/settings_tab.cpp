@@ -152,10 +152,12 @@ void SettingsTab::listThemes()
     none.light = none.dark = true;
     files.insert(files.begin(), none);
 
+    // A compact screen: the name alone and three colours, the line whole
+    const bool compact = aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT;
     for (const aurore::ThemeInfo& info : files)
     {
         auto* cell = new aurore::DetailCell();
-        cell->setText(info.author.empty() ? info.name : info.name + "  ·  " + info.author);
+        cell->setText(info.author.empty() || compact ? info.name : info.name + "  ·  " + info.author);
 
         // Its colours, as it draws the variant it shows first
         if (!info.path.empty())
@@ -163,7 +165,11 @@ void SettingsTab::listThemes()
             const aurore::ThemeInfo::Preview& preview = info.dark ? info.darkPreview : info.lightPreview;
             auto* swatches                            = new aurore::Box(aurore::Axis::ROW);
             swatches->setMarginRight(16);
-            for (NVGcolor color : { preview.background, preview.surface, preview.text, preview.accent, preview.highlight })
+            swatches->setShrink(0);
+            std::vector<NVGcolor> colors = { preview.background, preview.surface, preview.text, preview.accent, preview.highlight };
+            if (compact)
+                colors = { preview.background, preview.accent, preview.highlight };
+            for (NVGcolor color : colors)
             {
                 auto* swatch = new aurore::Rectangle(color);
                 swatch->setSize(aurore::Size(22, 22));

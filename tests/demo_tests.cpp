@@ -254,6 +254,61 @@ AURORE_TEST(main_screen_on_a_small_screen)
     AURORE_CHECK(h.matchesReference("main_screen_compact"));
 }
 
+// A small screen's harness: 960x720 pixels for 480x360 units
+aurore::test::Options smallScreenOptions()
+{
+    aurore::test::Options options;
+    options.width  = 960;
+    options.height = 720;
+    return options;
+}
+
+AURORE_TEST(grid_tab_on_a_small_screen)
+{
+    SmallScreen small;
+    DemoHarness h(smallScreenOptions());
+    AURORE_CHECK(h.focusByText("Grid"));
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    // The headers' subtitles under their titles, cut on one line; the
+    // footer's hints whole, the clock left out
+    for (const std::string& cut : h.cutTexts())
+        AURORE_CHECK(cut.find("items") != std::string::npos);
+    AURORE_CHECK(!h.hasText("10:30"));
+    AURORE_CHECK(h.matchesReference("grid_tab_compact"));
+}
+
+AURORE_TEST(theme_list_on_a_small_screen)
+{
+    SmallScreen small;
+    DemoHarness h(smallScreenOptions());
+    AURORE_CHECK(h.focusByText("Settings"));
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    AURORE_CHECK(h.focusByText("Ocean", aurore::BUTTON_DOWN, 60));
+    // Each theme's name whole beside three colours (no author, no empty
+    // detail taking the line's room)
+    for (const std::string& cut : h.cutTexts())
+        AURORE_CHECK(cut.find("presets") != std::string::npos);
+    AURORE_CHECK(h.matchesReference("theme_list_compact"));
+}
+
+AURORE_TEST(action_sheet_on_a_small_screen)
+{
+    SmallScreen small;
+    DemoHarness h(smallScreenOptions());
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    AURORE_CHECK(h.focusByText("Confirm", aurore::BUTTON_DOWN, 30));
+    AURORE_CHECK(h.focusByText("Actions", aurore::BUTTON_RIGHT, 4));
+    h.tap(aurore::BUTTON_A);
+    h.settle();
+    // The panel takes the screen's width: its lines whole
+    AURORE_CHECK(h.hasText("Favourite"));
+    AURORE_CHECK(h.cutTexts().empty());
+    AURORE_CHECK(h.matchesReference("action_sheet_compact"));
+}
+
 AURORE_TEST(cut_texts_found)
 {
     Harness h;

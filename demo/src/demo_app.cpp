@@ -125,9 +125,9 @@ void registerViews()
     }
 
     // Add custom values to the style
-    aurore::getStyle().addMetric("about/padding_top_bottom", 50);
-    aurore::getStyle().addMetric("about/padding_sides", 75);
-    aurore::getStyle().addMetric("about/description_margin", 50);
+    aurore::getStyle().addLength("about/padding_top_bottom", 50);
+    aurore::getStyle().addLength("about/padding_sides", 75);
+    aurore::getStyle().addLength("about/description_margin", 50);
 }
 
 } // namespace demo
