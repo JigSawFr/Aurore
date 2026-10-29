@@ -58,7 +58,7 @@ def versions():
     cmake = search(r"cmake_minimum_required\(VERSION ([\d.]+\.\.\.[\d.]+)\)", library, "CMake's range")
     built = search(r"set_target_properties\(aurore PROPERTIES\s+CXX_STANDARD (\d+)", library, "the library's standard")
     linked = search(r"cxx_std_(\d+)", library, "the C++ standard")
-    language = "C++" + built if built == linked else f"C++{built} (C++{linked} at least for the projects that link it)"
+    language = "C++" + built if built == linked else f"C++{built} (min. C++{linked})"
     rows = [("Language", language),
             ("CMake", cmake.replace("...", "–"))]
     listed = notices()

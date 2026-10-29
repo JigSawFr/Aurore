@@ -218,7 +218,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 <!-- under-the-hood: begin (tools/stack.py writes this) -->
 | | Version |
 | --- | --- |
-| Language | C++23 (C++20 at least for the projects that link it) |
+| Language | C++23 (min. C++20) |
 | CMake | 3.16–3.31 |
 | SDL3 | 3.4.18 |
 | SDL | 2.32.10 |
