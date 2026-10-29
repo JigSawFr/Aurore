@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // The stand-in for Aurore's i18n that ui/tr.hpp asks of a host suite
 // (AURORE_CADRAN_HOST_I18N): aurore::internal::getRawStr and "…"_i18n over
 // Cadran's real catalog, resources/i18n/<lang>/cadran.json. A key the

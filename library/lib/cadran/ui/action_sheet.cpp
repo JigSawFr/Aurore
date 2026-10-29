@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // The sheets of ui.hpp: pick_actions(), pick() and pick_marked() in the
 // Cadran look. A header (an image when there is one, the title, what it is
 // about now), then the lines in cards, a section's kicker above each group;
@@ -7,7 +10,6 @@
 // It sits where Aurore's Dropdown did (880 px wide, above the hints), over
 // the screen it was opened from, as tall as its lines (the rest scrolls);
 // B, or a touch outside it, closes it.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <yoga/Yoga.h>
 #include <algorithm>
 #include <cmath>

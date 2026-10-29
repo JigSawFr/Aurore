@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // The demo's service worker (web/README.md): the headers GitHub Pages cannot
 // send and threads need (Cross-Origin-Opener-Policy and -Embedder-Policy),
 // added to every response of the page's folder, as coi-serviceworker does

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // The API reference (/api/, tools/build_api.py): a signature wider than its
 // box fades at its right edge while there is more to scroll, as the code
 // blocks do (site.js); and the sidebar's theme of the page in view.

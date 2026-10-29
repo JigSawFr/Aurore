@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // HeaderSetting — the language and the theme in the main screen's header,
 // left of the notification bell: the language's code ("FR", "EN", the
 // console's own one for "system") in a rounded frame, and the theme as a
@@ -9,7 +12,6 @@
 // Preferences (ui::pick_language / pick_theme / pick_text_size); not
 // focusable, like an app's bell: − opens them from any tab (ui::quick_settings),
 // as the footer says.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore.hpp>

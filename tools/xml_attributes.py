@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The XML attributes the library's views register (register*XMLAttribute,
 # AURORE_REGISTER_ENUM_XML_ATTRIBUTE), written as docs/xml-attributes.md.
 #

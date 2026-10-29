@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui::hooks — what Cadran asks of the app above it (the main screen, the
 // tabs, its identity, saving the preferences) without knowing it: the app
 // fills this in once at start-up, before any screen opens. Each hook left
 // empty does nothing (or answers nothing).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <functional>

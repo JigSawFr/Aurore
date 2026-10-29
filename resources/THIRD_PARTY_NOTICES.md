@@ -40,7 +40,7 @@ versions that can be read from the sources.
 | QR Code generator | - | `library/lib/extern/qrcodegen`, `library/include/aurore/extern/qrcodegen` | MIT | Project Nayuki |
 | Recycling grid and horizontal recycler | - | `library/include/aurore/views/recycling_grid.hpp`, `library/lib/views/recycling_grid.cpp` (adapted from Switchfin) | Apache 2.0 | 2022 xfangfang, 2023 dragonflylee and the Switchfin contributors |
 | ios-cmake | - | `library/cmake/ios.toolchain.cmake` (build only) | BSD 3-clause | 2014 Bogdan Cristea and LTE Engineering Software, Kitware, Inc., Insight Software Consortium |
-| FindDBus.cmake | - | `library/cmake/FindDBus.cmake` (build only) | BSD 2-clause | 2012 Raphael Kubo da Costa |
+| MinGW cross toolchain | - | `library/cmake/MinGWCross.cmake` (build only) | GPL 2.0 or later | 2018 tech4me |
 
 Used from the system when there, not bundled: D-Bus (Linux), fontconfig
 (Linux, opened at run time), FreeType (`AURORE_USE_FREETYPE`), GNU FriBidi
@@ -111,7 +111,7 @@ subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
-### BSD 3-clause (ios-cmake; FindDBus.cmake: the first two clauses)
+### BSD 3-clause (ios-cmake)
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -136,9 +136,13 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-### Apache 2.0, SIL OFL 1.1, CC BY 4.0
+### Apache 2.0, SIL OFL 1.1, CC BY 4.0, GPL 2.0 or later
 
 Apache 2.0: http://www.apache.org/licenses/LICENSE-2.0 (also `LICENSE` at the
 root of the source and `resources/material/LICENSE.txt`). SIL Open Font
 License 1.1: the `resources/font/OFL-*.txt` files. Creative Commons
-Attribution 4.0: https://creativecommons.org/licenses/by/4.0/legalcode.
+Attribution 4.0: https://creativecommons.org/licenses/by/4.0/legalcode. GNU
+GPL 2.0 or later, for a build file only (the MinGW cross toolchain), not in
+a program built with Aurore: `LICENSES/GPL-2.0-or-later.txt` in the source.
+Every licence named here is in the source's `LICENSES/` folder, and each
+file says its own (SPDX tags, or `REUSE.toml`).

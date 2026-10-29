@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Draws the pictures of the demo's Prism theme (resources/themes/prism): its
 # logo for each variant, its icons (two masks the theme tints, one drawn as

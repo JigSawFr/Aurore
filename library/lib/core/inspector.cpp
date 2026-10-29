@@ -1,6 +1,8 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Inspector — an overlay over the screen showing the view tree, the focus
 // chain, the yoga box and the theme values of a view, and the frame's timings.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #include <yoga/Yoga.h>
 
 #include <algorithm>

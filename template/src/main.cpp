@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // my_app: a starting point for an app built on Aurore.
 
 #include <cstdlib>

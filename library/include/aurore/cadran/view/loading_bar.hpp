@@ -1,10 +1,12 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // LoadingBar — a progress bar that eases: the loading screen's (a rounded navy
 // track, filled in the brand teal up to the start-up step reached), and a
 // screen's while its list loads, in the theme's colours. The fill eases to each
 // new value instead of jumping (the next step's frames show it moving), or,
 // for the intro, fills at a steady pace over a given time. On the loading
 // screen, the brand's colours (cadran/brand/…), the same in both themes.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore.hpp>

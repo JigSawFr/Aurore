@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # aurore_add_tests(), for the tests of an app on the test harness (Aurore::test,
 # docs/testing.md). Included by the library when AURORE_BUILD_TESTS is on, and
 # by the installed package along with Aurore::test.

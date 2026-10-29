@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // Thanks to: https://gist.github.com/john-tornblom/943dc2e995f0fa0c9d2dc2f9d985daeb
 
 #include <signal.h>

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // The language at a first visit: the English home page (the root, marked
 // data-first-visit) sends a visitor to the browser's language when the site
 // has it, unless a language was chosen before. Choosing one in the header's

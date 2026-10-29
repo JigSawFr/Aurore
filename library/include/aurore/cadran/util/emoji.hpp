@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // emoji — telling the emoji in a text: the console's shared font draws none
 // of them, so the change-log and the Markdown views show a picture for the
 // one a line opens on (resources/img/emoji/<hex>.png) and drop the others.
 // Header-only, plain C++.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <cstdint>

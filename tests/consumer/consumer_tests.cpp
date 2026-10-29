@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // The installed harness: Aurore::test and aurore_add_tests()
 #include <aurore/test/harness.hpp>
 

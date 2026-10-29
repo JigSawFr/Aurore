@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // text_size — Preferences › Text size: "auto"
 // (the default: larger while the console is docked, on a TV), "normal",
 // "large" or "largest". Larger draws every label LARGE times its size,
@@ -7,7 +10,6 @@
 // Applied at start-up, then again, live, when the setting changes or the
 // console leaves or joins its dock: every label of every screen is laid
 // out again.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 namespace text_size

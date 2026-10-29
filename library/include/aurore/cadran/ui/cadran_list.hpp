@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // cadran::List — the Cadran look for the list screens (the tabs' lines under
 // their tops, every other screen) without rewriting them: the original
 // tab is built as usual (its XML, its i18n strings, its actions), then its
@@ -12,7 +15,6 @@
 // The tab keeps every view it binds (they move, they are not rebuilt), and
 // its own show / hide logic: a card or a tile row with all its lines hidden
 // draws nothing and takes no room. The restyle adds no words of its own.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

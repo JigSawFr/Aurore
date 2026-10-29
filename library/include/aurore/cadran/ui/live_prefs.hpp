@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // live_prefs — Preferences › Theme and Language applied at once, without
 // restarting. The theme: its variant and its file set, every view of the
 // screens drawn in it from the next frame (View::setThemeColor,
@@ -6,7 +9,6 @@
 // that was shown, the focus on the line it was on (every view takes its
 // words and font when it is made; Chinese has its own font, ui::use_font_for
 // and the default font looked up for each label).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

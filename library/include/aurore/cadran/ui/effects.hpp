@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // effects — Preferences › Visual effects: "auto" (the default: in full on the
 // dock, lighter in hand), "full" (the background glow, the rings' arcs on
 // the move, the screens' and lists' entrances, the small answers to a
@@ -7,7 +10,6 @@
 // handheld or on its stand, charging or not (the console's operation mode);
 // the desktop: AURORE_BATTERY=1 (ui::env_flag) (off by default, so the simulator
 // draws in full as the dock does).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 namespace effects

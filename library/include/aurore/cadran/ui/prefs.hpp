@@ -1,9 +1,11 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui::prefs — what the user chose for Cadran's look: the language, the
 // theme, the text size, the effects and the sidebar. The app keeps them in its own
 // settings and hands them over with use_prefs() at start-up, before the
 // first screen; the pickers (ui::pick_language…) change them there, then
 // save them through ui::hooks::get().save_prefs.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

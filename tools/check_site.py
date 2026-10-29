@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 """Checks the built website (site/README.md):
 
 - the catalogs (site/i18n/*.json) have the same keys as en-US.json;

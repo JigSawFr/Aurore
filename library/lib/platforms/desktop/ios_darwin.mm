@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 #ifdef __SDL2__
 #import <SDL2/SDL.h>
 #import <SDL2/SDL_syswm.h>

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 """Builds the website's API reference (site/README.md) from what Doxygen read
 of Aurore's public headers (docs/Doxyfile, its XML in build_docs/xml): a page
 per namespace and per class or struct, a home page that sorts them by theme,
