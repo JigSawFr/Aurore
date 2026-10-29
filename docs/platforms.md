@@ -148,6 +148,26 @@ Aurore runs on its SDL platform under [Emscripten](https://emscripten.org/), SDL
 - start the threads with the page (`-sPTHREAD_POOL_SIZE`), which then needs the cross-origin isolation headers;
 - a browser has no system font: give Chinese, Japanese and Korean a font of their own (`font/cjk.otf`, [fonts.md](fonts.md)).
 
+## Simulated platforms
+
+The demo shows on the desktop how it looks on a console: its screen at the console's proportions, laid out with the console's preset, the console drawn around it.
+
+```sh
+./aurore_demo --simulate 3ds      # or AURORE_SIMULATE=3ds
+```
+
+| `--simulate` | Screen | Preset | Edge antialiasing |
+|---|---|---|---|
+| `switch` | 1280x720 | standard | yes |
+| `vita` | 960x544 | standard | yes (the console smooths with 4x MSAA instead) |
+| `ps4` | 1920x1080 | standard | yes |
+| `3ds` | 320x240, the top screen above it | small screen (480x360 units, dense) | no (`nanovg_citro3d.h`) |
+| `phone` | 1600x720 | standard | yes |
+
+The Developers tab picks one while the demo runs (*Simulated platform*): the screens are made again for it. The drawings are plain shapes, without a maker's logo, name or colours. The touches and the mouse are read on the screen only, and the window is sized for the console; the New 3DS's top screen shows the app's name and the time until an activity can give a view of its own. The screen is drawn at the window's resolution, not the console's pixels.
+
+An app does the same with `aurore::ScreenFrame` (`aurore/core/screen_frame.hpp`) and `Application::setScreenFrame()`: the frame says where the screen goes in the window and draws itself around it, the app is laid out and drawn in the screen, and its input read there. `tests/demo_tests.cpp` (`simulated_consoles`) checks each console against its picture in `tests/references/`.
+
 ## Options for every platform
 
 | Option | Effect |
