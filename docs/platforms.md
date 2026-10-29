@@ -10,7 +10,7 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 | Nintendo Switch | `SWITCH` | GLFW (default) or SDL2 | deko3d (`DEKO3D`) or OpenGL 4.3 | romfs, in the `.nro` |
 | PS Vita | `PSV` | SDL2, or the system's | GXM (`GXM`) or OpenGL ES 2 | in the `.vpk` |
 | PS4 | `PS4` | SDL2 | OpenGL ES 2 | in the `.pkg` |
-| New 3DS (library and test card) | `3DS` | libctru's (no input read yet) | citro3d | `romfs:/` |
+| New 3DS (library and test card) | `3DS` | libctru's | citro3d | `romfs:/` |
 | Android | `ANDROID` | SDL2 (default) or SDL3 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
 | iOS, tvOS | `IOS`, `TVOS` | SDL2 (default) or SDL3 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
 | Browser | Emscripten (`emcmake`) | SDL2 (default) or SDL3 | OpenGL ES 3 (WebGL 2) | packaged with the page |
@@ -104,14 +104,14 @@ The result is `build/*.pkg`; the demo's `CMakeLists.txt` copies `ps4/` (the pack
 
 ## New 3DS
 
-The library and a test card, drawn by citro3d on the bottom screen (the touch screen): the library lays screens out with the small screen preset (480x360 units on the 320x240 screen), and nanovg's citro3d renderer (`nanovg_citro3d.h`) draws them; the buttons and the touch screen are not read yet. The New models only: the New 3DS, the New 3DS XL and the New 2DS XL, which share the CPU (804 MHz, the L2 cache), the memory (256 MB) and the screens' resolutions; the New 2DS XL has no stereoscopic 3D, which Aurore does not use, and is the console of reference. The platform reads the model (`CtrPlatform::getName()`, in the log and on the test card); the original 3DS, 3DS XL and 2DS run, at a third of the speed, and are not aimed at: the log says so. With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `3ds-dev` group. The CI uses the `devkitpro/devkitarm` image.
+The library and a test card, drawn by citro3d on the bottom screen (the touch screen): the library lays screens out with the small screen preset (480x360 units on the 320x240 screen), and nanovg's citro3d renderer (`nanovg_citro3d.h`) draws them. The buttons are the Switch's, in the same places (A on the right, B at the bottom, L and R, ZL and ZR as LT and RT, SELECT and START as − and +); the D-pad, the Circle Pad and the C-stick move the focus, the Circle Pad is the left stick and the C-stick the right one; the bottom screen's touches are read, one finger. No keyboard yet. The New models only: the New 3DS, the New 3DS XL and the New 2DS XL, which share the CPU (804 MHz, the L2 cache), the memory (256 MB) and the screens' resolutions; the New 2DS XL has no stereoscopic 3D, which Aurore does not use, and is the console of reference. The platform reads the model (`CtrPlatform::getName()`, in the log and on the test card); the original 3DS, 3DS XL and 2DS run, at a third of the speed, and are not aimed at: the log says so. With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `3ds-dev` group. The CI uses the `devkitpro/devkitarm` image.
 
 ```sh
 cmake -B build_3ds -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=3DS
 cmake --build build_3ds -j$(nproc)
 ```
 
-The result is `build_3ds/ctr/aurore_3ds_smoke.3dsx`, the test card of `ctr/` instead of the demo: an XML layout (boxes, labels) and a view drawing each kind of paint and fill the renderer handles (a colour with a stroke, linear, radial and box gradients, a nonzero fill with a hole, an image, a scissor, text), with the library's resources in its romfs. The top screen shows the log (libctru's text console), START quits. It goes to `/3ds/` on the SD card, or to the console with `3dslink`. `AURORE_WINDOW` and `AURORE_GRAPHICS` stop the configuration: the window is libctru's and the renderer citro3d.
+The result is `build_3ds/ctr/aurore_3ds_smoke.3dsx`, the test card of `ctr/` instead of the demo: an XML layout (boxes, labels) and a view drawing each kind of paint and fill the renderer handles (a colour with a stroke, linear, radial and box gradients, a nonzero fill with a hole, an image, a scissor, text), three buttons to move the focus between and click, and a line showing what Aurore reads (the buttons held, the sticks, the touch), with the library's resources in its romfs. The top screen shows the log (libctru's text console), START quits. It goes to `/3ds/` on the SD card, or to the console with `3dslink`. `AURORE_WINDOW` and `AURORE_GRAPHICS` stop the configuration: the window is libctru's and the renderer citro3d.
 
 The renderer has no fragment shader to work with (the PICA200 has none): the paint's coordinates are computed per vertex by its vertex shader (`library/lib/extern/nanovg/citro3d/nanovg_citro3d.v.pica`, assembled by picasso and built into the library), colours are the texture combiners' constants, a linear gradient reads a shared ramp texture, and radial and box gradients read a small alpha texture of their distance field, kept in a cache. Nonzero fills go through the stencil in two passes, the scissor is the hardware's. Not yet: edge antialiasing, the top screen, input. Textures are padded to powers of two, at most 1024 (a larger image is scaled down).
 
