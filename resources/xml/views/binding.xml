@@ -1,0 +1,36 @@
+<!-- The For developers tab's data binding (docs/styles.md): the labels and
+     the swatch follow the "styles" model's observables, which the tab's
+     button changes; nothing else is written to them. -->
+<aurore:Box
+    axis="row"
+    width="auto"
+    height="auto"
+    alignItems="center"
+    gap="24">
+
+    <aurore:Button
+        id="binding/add"
+        text="@i18n/demo/styles/add_one" />
+
+    <!-- text: and color: follow the model's observables -->
+    <aurore:Label
+        bind="text: styles.counter"
+        fontSize="40"
+        width="80"
+        horizontalAlign="center"
+        textColor="@theme/cadran/text" />
+
+    <aurore:Rectangle
+        bind="color: styles.swatch"
+        transition="color 300ms ease-in-out"
+        width="48"
+        height="48"
+        cornerRadius="24" />
+
+    <aurore:Label
+        text="@i18n/demo/styles/even"
+        bind="visible: styles.even"
+        fontSize="17"
+        textColor="@theme/cadran/teal" />
+
+</aurore:Box>

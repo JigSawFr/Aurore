@@ -27,8 +27,18 @@ add_executable(aurore_parser_tests parser_tests.cpp)
 target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
 aurore_add_tests(aurore_parser_tests)
 
-# The SDL2 driver's input, on a virtual controller
-if (USE_SDL2 AND PLATFORM_DESKTOP)
+# The density: the style's lengths, dp in XML
+add_executable(aurore_density_tests density_tests.cpp)
+target_link_libraries(aurore_density_tests PRIVATE Aurore::test)
+aurore_add_tests(aurore_density_tests)
+
+# The classes of width: compact:, medium:, expanded: in XML
+add_executable(aurore_width_tests width_tests.cpp)
+target_link_libraries(aurore_width_tests PRIVATE Aurore::test)
+aurore_add_tests(aurore_width_tests)
+
+# The SDL driver's input (SDL2 or SDL3), on a virtual controller
+if ((USE_SDL2 OR USE_SDL3) AND PLATFORM_DESKTOP)
     add_executable(aurore_sdl_input_tests sdl_input_tests.cpp)
     target_link_libraries(aurore_sdl_input_tests PRIVATE Aurore::test)
     aurore_add_tests(aurore_sdl_input_tests)
@@ -36,7 +46,6 @@ endif ()
 
 # libFuzzer targets, with clang: -DAURORE_BUILD_FUZZERS=ON (docs/testing.md)
 option(AURORE_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
-_aurore_legacy_bool(AURORE_BUILD_FUZZERS BRLS_BUILD_FUZZERS) # legacy-names: line
 if (AURORE_BUILD_FUZZERS)
     set(FUZZ_FLAGS -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
     add_executable(aurore_fuzz_markdown fuzz/markdown_fuzz.cpp
@@ -66,18 +75,6 @@ target_link_libraries(aurore_dev_tools_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_dev_tools_tests PRIVATE ${AURORE_DEV_TOOLS_DEFINITION})
 aurore_add_tests(aurore_dev_tools_tests)
 
-# legacy-names: begin
-# borealis' names (the brls namespace, <borealis/...>, BRLS_ macros...),
-# deprecated; configured with borealis' option names (tools/ci_variant.sh
-# legacy), registered with its function too
-add_executable(aurore_legacy_names_tests legacy_names_tests.cpp)
-target_link_libraries(aurore_legacy_names_tests PRIVATE Aurore::test)
-if (DEFINED BRLS_BUILD_TESTS)
-    brls_add_tests(aurore_legacy_names_tests)
-else ()
-    aurore_add_tests(aurore_legacy_names_tests)
-endif ()
-# legacy-names: end
 
 # The main loop's cost on the demo (Profiler), checked against a baseline
 add_executable(aurore_bench bench.cpp)
@@ -100,3 +97,8 @@ endif()
 
 # Cadran's plain C++ parts, without a window
 add_subdirectory(host)
+
+# The demo's screens drawn to PNGs, to look at them in a language, a theme
+# and a size at once
+add_executable(aurore-tour tour.cpp)
+target_link_libraries(aurore-tour PRIVATE aurore_demo_views Aurore::test)

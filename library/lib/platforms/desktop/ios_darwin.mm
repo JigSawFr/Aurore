@@ -1,5 +1,7 @@
+#ifdef __SDL2__
 #import <SDL2/SDL.h>
 #import <SDL2/SDL_syswm.h>
+#endif
 #import <UIKit/UIKit.h>
 #import <aurore/core/logger.hpp>
 #import <aurore/core/safe_area.hpp>
@@ -34,6 +36,7 @@ uint8_t ios_battery_status()
 #endif
 }
 
+#ifdef __SDL2__
 // The window's safe area, in points (SDL's window size is in points too):
 // the notch, the rounded corners, the home indicator; on a TV, its
 // overscan
@@ -49,6 +52,7 @@ Insets ios_safe_area(SDL_Window* window)
     UIEdgeInsets insets = uiWindow.safeAreaInsets;
     return { (float)insets.top, (float)insets.right, (float)insets.bottom, (float)insets.left };
 }
+#endif
 
 float ios_battery()
 {

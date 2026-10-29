@@ -21,17 +21,7 @@ endif ()
 # working directory). An app sets it before add_subdirectory(); it can be
 # given with -DAURORE_RESOURCES_ROOT=... too (for an AppImage, say).
 if (NOT AURORE_RESOURCES_ROOT)
-    # legacy-names: begin
-    if (BRLS_RESOURCES_DIR)
-        message(DEPRECATION "BRLS_RESOURCES_DIR is deprecated: use -DAURORE_RESOURCES_ROOT=${BRLS_RESOURCES_DIR}")
-        set(AURORE_RESOURCES_ROOT "${BRLS_RESOURCES_DIR}")
-    elseif (CUSTOM_RESOURCES_DIR)
-    # legacy-names: end
-        message(DEPRECATION "CUSTOM_RESOURCES_DIR is deprecated: use -DAURORE_RESOURCES_ROOT=${CUSTOM_RESOURCES_DIR}")
-        set(AURORE_RESOURCES_ROOT "${CUSTOM_RESOURCES_DIR}")
-    else ()
-        set(AURORE_RESOURCES_ROOT ".")
-    endif ()
+    set(AURORE_RESOURCES_ROOT ".")
 endif ()
 
 # The version of library/include/aurore/version.hpp, which release-please updates
@@ -41,10 +31,10 @@ set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
 
 option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
 
-# fmt, tinyxml2, GLFW and SDL2 from the system when find_package() finds
-# them, downloaded at configure time otherwise, instead of the copies in
+# fmt, tinyxml2, GLFW and SDL (2 or 3) from the system when find_package()
+# finds them, downloaded at configure time otherwise, instead of the copies in
 # lib/extern (for packagers). nanovg, yoga and the others stay vendored.
-option(AURORE_FETCH_DEPS "Use fmt, tinyxml2, GLFW and SDL2 from the system or downloaded (CMake 3.24+)" OFF)
+option(AURORE_FETCH_DEPS "Use fmt, tinyxml2, GLFW and SDL from the system or downloaded (CMake 3.24+)" OFF)
 if (AURORE_FETCH_DEPS)
     if (CMAKE_VERSION VERSION_LESS 3.24)
         message(FATAL_ERROR "AURORE_FETCH_DEPS needs CMake 3.24 or later (FIND_PACKAGE_ARGS)")
@@ -72,6 +62,11 @@ if (AURORE_FETCH_DEPS)
             GIT_TAG release-2.32.10
             GIT_SHALLOW TRUE
             FIND_PACKAGE_ARGS)
+    FetchContent_Declare(SDL3
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-3.4.18
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS)
 endif ()
 
 # fmt
@@ -86,11 +81,15 @@ else()
   add_subdirectory(${AURORE_PATH}/lib/extern/fmt ${AURORE_EXTERN_EXCLUDE})
 endif()
 
-# tweeny
+# tweeny 4: its easings, in animation.cpp only (header-only, not in the
+# library's headers, so not a dependency of an app or of the installed
+# package). Its own CMakeLists.txt asks for CMake 3.23: its headers here.
 if (USE_SYSTEM_TWEENY)
-  find_package(Tweeny REQUIRED)
+  find_package(Tweeny 4 REQUIRED)
 else()
-  add_subdirectory(${AURORE_PATH}/lib/extern/tweeny ${AURORE_EXTERN_EXCLUDE})
+  add_library(tweeny INTERFACE)
+  target_include_directories(tweeny SYSTEM INTERFACE ${AURORE_PATH}/lib/extern/tweeny/include)
+  add_library(tweeny::tweeny ALIAS tweeny)
 endif()
 
 # yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
@@ -106,14 +105,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 endif ()
 
 # opencc
-# legacy-names: begin
-foreach (_aurore_name USE_OPENCC OPENCC_INCLUDE)
-    if (DEFINED BRLS_${_aurore_name} AND NOT DEFINED AURORE_${_aurore_name})
-        message(DEPRECATION "BRLS_${_aurore_name} is deprecated: use AURORE_${_aurore_name}")
-        set(AURORE_${_aurore_name} "${BRLS_${_aurore_name}}")
-    endif ()
-endforeach ()
-# legacy-names: end
 if (AURORE_USE_OPENCC)
     list(APPEND AURORE_PLATFORM_LIBS libopencc)
     list(APPEND AURORE_INCLUDE ${AURORE_OPENCC_INCLUDE})
@@ -159,7 +150,7 @@ endif()
 
 # dbus (Linux with GLFW: keeps the screen saver off). An imported target,
 # so the installed package names no path of this machine.
-if (PLATFORM_DESKTOP AND UNIX AND NOT APPLE AND NOT USE_SDL2)
+if (PLATFORM_DESKTOP AND UNIX AND NOT APPLE AND NOT USE_SDL2 AND NOT USE_SDL3)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
     list(APPEND AURORE_PLATFORM_LIBS PkgConfig::DBUS)
@@ -169,7 +160,26 @@ if (PLATFORM_DESKTOP)
     find_package(Threads REQUIRED)
     list(APPEND AURORE_PLATFORM_LIBS Threads::Threads)
 
-    if (USE_SDL2)
+    if (USE_SDL3)
+        if (USE_SYSTEM_SDL3)
+            find_package(SDL3 REQUIRED CONFIG)
+            list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3)
+        elseif (AURORE_FETCH_DEPS)
+            set(BUILD_SHARED_LIBS OFF)
+            set(SDL_TEST_LIBRARY OFF)
+            FetchContent_MakeAvailable(SDL3)
+            list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3)
+        else ()
+            set(BUILD_SHARED_LIBS OFF)
+            set(SDL_TEST_LIBRARY OFF)
+            if (AURORE_INSTALL)
+                set(SDL_INSTALL ON CACHE BOOL "" FORCE)
+            endif ()
+            add_subdirectory(${AURORE_PATH}/lib/extern/SDL3 ${AURORE_EXTERN_EXCLUDE})
+            list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3-static)
+        endif ()
+        list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/sdl)
+    elseif (USE_SDL2)
         if (USE_SYSTEM_SDL2)
             find_package(SDL2 REQUIRED)
             message(STATUS "Find SDL2: ${SDL2_INCLUDE_DIR}, ${SDL2_LIBRARIES}")
@@ -193,7 +203,6 @@ if (PLATFORM_DESKTOP)
             add_subdirectory(${AURORE_PATH}/lib/extern/SDL ${AURORE_EXTERN_EXCLUDE})
             list(APPEND AURORE_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
         endif ()
-        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__)
         list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/sdl)
     else ()
         if (USE_SYSTEM_GLFW)
@@ -315,30 +324,43 @@ elseif(PLATFORM_PS4)
         set(AURORE_PLATFORM_RESOURCES_PATH "\"/app0/resources/\"")
     endif ()
 elseif(PLATFORM_ANDROID)
-    find_library(SDL2 NAMES SDL2 SDL2main)
+    # The app's CMakeLists.txt adds SDL's project (android-project/app/jni):
+    # SDL's Java activity loads the shared library it builds
     list(APPEND AURORE_SOURCE
             ${AURORE_PATH}/lib/platforms/sdl
             ${AURORE_PATH}/lib/platforms/desktop
             ${AURORE_PATH}/lib/platforms/android)
-    list(APPEND AURORE_PLATFORM_LIBS SDL2 SDL2main)
-    list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ ANDROID)
+    if (USE_SDL3)
+        list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3)
+    else ()
+        find_library(SDL2 NAMES SDL2 SDL2main)
+        list(APPEND AURORE_PLATFORM_LIBS SDL2 SDL2main)
+    endif ()
+    list(APPEND AURORE_PUBLIC_DEFINITIONS ANDROID)
     # The NDK's libc++ returns std::string from path::u8string() in C++20,
     # which nlohmann json's path conversion does not build with
     list(APPEND AURORE_PUBLIC_DEFINITIONS JSON_HAS_FILESYSTEM=0 JSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
 elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     set(BUILD_SHARED_LIBS OFF)
-    add_subdirectory(${AURORE_PATH}/lib/extern/SDL)
-    find_library(SDL2 NAMES SDL2-static SDL2main)
+    if (USE_SDL3)
+        set(SDL_TEST_LIBRARY OFF)
+        add_subdirectory(${AURORE_PATH}/lib/extern/SDL3)
+        list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3-static)
+    else ()
+        add_subdirectory(${AURORE_PATH}/lib/extern/SDL)
+        find_library(SDL2 NAMES SDL2-static SDL2main)
+        list(APPEND AURORE_PLATFORM_LIBS SDL2-static SDL2main)
+    endif ()
     list(APPEND AURORE_SOURCE
             ${AURORE_PATH}/lib/platforms/sdl
             ${AURORE_PATH}/lib/platforms/desktop)
-    list(APPEND AURORE_PLATFORM_LIBS SDL2-static SDL2main "-framework CoreText" "-framework CoreFoundation")
+    list(APPEND AURORE_PLATFORM_LIBS "-framework CoreText" "-framework CoreFoundation")
     list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/desktop/ios_darwin.mm)
 
     if(PLATFORM_IOS)
-        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ IOS)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS IOS)
     elseif(PLATFORM_TVOS)
-        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ TVOS)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS TVOS)
     endif()
 elseif(PLATFORM_SWITCH)
     file(GLOB_RECURSE SWITCH_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/switch/*.cpp")
@@ -362,8 +384,21 @@ elseif(PLATFORM_SWITCH)
     endif ()
     set(AURORE_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
     # devkitPro's portlibs (GLFW, SDL2, EGL, curl…) last: it also has a
-    # tinyxml2.h and a glad/glad.h, which must not hide the library's own
+    # tinyxml2.h and a glad/gl.h, which must not hide the library's own
     list(APPEND AURORE_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
+elseif(PLATFORM_3DS)
+    # The New 3DS through libctru (lib/platforms/ctr), drawn with citro3d by
+    # nanovg's citro3d renderer (nanovg_citro3d.h)
+    file(GLOB_RECURSE CTR_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/ctr/*.cpp")
+    list(APPEND AURORE_SRC ${CTR_PLATFORM_SRC})
+    list(APPEND AURORE_PUBLIC_DEFINITIONS STBI_NO_THREAD_LOCALS)
+    # The renderer's vertex shader, assembled by picasso and built into the
+    # library (bin2s writes it as assembly): nanovg_citro3d_shbin.h
+    enable_language(ASM)
+    ctr_add_shader_library(nanovg_citro3d "${AURORE_PATH}/lib/extern/nanovg/citro3d/nanovg_citro3d.v.pica")
+    dkp_add_embedded_binary_library(nanovg_citro3d_shaders nanovg_citro3d)
+    list(APPEND AURORE_PLATFORM_LIBS nanovg_citro3d_shaders citro3d ctru m)
+    set(AURORE_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
 else ()
     message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
 endif ()
@@ -380,7 +415,7 @@ list(APPEND AURORE_SOURCE
         # Cadran, Aurore's look (GPLv3, LICENSE.GPL)
         ${AURORE_PATH}/lib/cadran
         )
-if (PLATFORM_PSV OR PLATFORM_PS4 OR AURORE_USE_D3D11)
+if (PLATFORM_PSV OR PLATFORM_PS4 OR PLATFORM_3DS OR AURORE_USE_D3D11)
         list(REMOVE_ITEM AURORE_SOURCE ${AURORE_PATH}/lib/extern/glad)
 endif ()
 
@@ -463,7 +498,9 @@ endforeach (lib)
 
 # The graphics driver
 set(AURORE_DRIVER AURORE_USE_OPENGL)
-if (AURORE_USE_METAL)
+if (AURORE_USE_CITRO3D)
+    set(AURORE_DRIVER AURORE_USE_CITRO3D)
+elseif (AURORE_USE_METAL)
     set(AURORE_DRIVER AURORE_USE_METAL)
 elseif (AURORE_USE_D3D11)
     set(AURORE_DRIVER AURORE_USE_D3D11)
@@ -524,7 +561,7 @@ if (AURORE_DKSH_INCLUDE)
     target_include_directories(aurore PRIVATE ${AURORE_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
-foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main ${LIBROMFS_LIBRARY})
+foreach (dep fmt yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
     if (TARGET ${dep})
         get_target_property(dep_imported ${dep} IMPORTED)
         get_target_property(dep_include ${dep} INTERFACE_INCLUDE_DIRECTORIES)
@@ -536,8 +573,18 @@ endforeach ()
 # The projects that link the library build with C++20 too, so its headers can use it
 target_compile_features(aurore PUBLIC cxx_std_20)
 target_link_libraries(aurore
-        PUBLIC fmt::fmt tweeny yogacore ${AURORE_PLATFORM_LIBS}
-        PRIVATE ${AURORE_PRIVATE_LIBS})
+        PUBLIC fmt::fmt yogacore ${AURORE_PLATFORM_LIBS}
+        PRIVATE ${AURORE_PRIVATE_LIBS} $<BUILD_INTERFACE:tweeny::tweeny>)
+if (PLATFORM_PSV)
+    # vita-elf-create writes the module's SCE data (module info, exports,
+    # imports: about 3 KB for the demo) right after the text segment, and
+    # fails when the data segment starts there. VitaSDK's linker aligns the
+    # data segment to 64 KiB, so a text segment ending less than that before
+    # a boundary fails at random as the code grows; __sce_headroom (VitaSDK
+    # 2026.08's linker script) keeps room between the two segments. An
+    # older linker ignores the symbol.
+    target_link_options(aurore INTERFACE "LINKER:--defsym=__sce_headroom=0x4000")
+endif ()
 list(REMOVE_DUPLICATES AURORE_PUBLIC_DEFINITIONS)
 target_compile_definitions(aurore
         PUBLIC
@@ -566,8 +613,10 @@ if (AURORE_BUILD_TESTS)
     add_library(Aurore::test ALIAS aurore_test)
     set_target_properties(aurore_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
     target_link_libraries(aurore_test PUBLIC aurore)
-    # stb_image_write, for the screenshots
-    target_include_directories(aurore_test PRIVATE ${AURORE_PATH}/lib/extern/glfw/deps)
+    # stb_image_write, for the screenshots: the file GLFW ships, not its
+    # folder (its glad/gl.h would hide the library's)
+    target_compile_definitions(aurore_test PRIVATE
+            AURORE_STB_IMAGE_WRITE="${AURORE_PATH}/lib/extern/glfw/deps/stb_image_write.h")
     if (UNIX AND NOT APPLE)
         # A context without any window system (Mesa's surfaceless EGL)
         find_package(OpenGL COMPONENTS EGL)

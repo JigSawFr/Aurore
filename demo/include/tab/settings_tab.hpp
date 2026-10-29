@@ -18,12 +18,14 @@
 
 #include <aurore.hpp>
 
+/// borealis' settings cells, as XML lays them out (resources/xml/tabs/
+/// settings.xml): the Components tab opens them on a screen of their own,
+/// which Cadran dresses in cards.
 class SettingsTab : public aurore::Box
 {
   public:
     SettingsTab();
 
-    AURORE_BIND(aurore::RadioCell, radio, "radio");
     AURORE_BIND(aurore::BooleanCell, boolean, "boolean");
     AURORE_BIND(aurore::SelectorCell, selector, "selector");
     AURORE_BIND(aurore::InputCell, input, "input");
@@ -38,14 +40,6 @@ class SettingsTab : public aurore::Box
     AURORE_BIND(aurore::SelectorCell, swapInterval, "swapInterval");
     AURORE_BIND(aurore::SliderCell, slider, "slider");
     AURORE_BIND(aurore::DetailCell, notify, "notify");
-    AURORE_BIND(aurore::BooleanCell, themeDark, "themeDark");
-    AURORE_BIND(aurore::Box, themes, "themes");
 
     static aurore::View* create();
-
-  private:
-    // A line per theme file (Theme::builtinThemes, Theme::listThemes): its
-    // name, a few of its colours, what is wrong with it; A uses it.
-    void listThemes();
-    std::vector<std::pair<aurore::DetailCell*, std::string>> themeCells;
 };

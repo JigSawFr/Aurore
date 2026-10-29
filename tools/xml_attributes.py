@@ -35,6 +35,8 @@ ENUM = re.compile(r'AURORE_REGISTER_ENUM_XML_ATTRIBUTE\(\s*"([^"]+)"\s*,[^{]*\{(
 ENUM_VALUE = re.compile(r'\{\s*"([^"]+)"\s*,')
 FUNCTION = re.compile(r'^(?:[\w:<>*&]+\s+)?((?:\w+::)*\w+)::~?\w+\([^;]*$', re.M)
 VIEW_TAG = re.compile(r'registerXMLView\("([^"]+)",\s*(?:\w+::)*(\w+)::create\)')
+BASE = re.compile(r'^class\s+(\w+)(?:\s+final)?\s*:\s*public\s+(?:\w+::)*(\w+)', re.M)
+HEADERS = os.path.join(ROOT, "library", "include")
 
 
 def owner_at(text, offset):
@@ -72,6 +74,22 @@ def collect():
                 continue
             entry = attributes.setdefault(owner, {}).setdefault(match.group(1), [set(), []])
             entry[1] = sorted(ENUM_VALUE.findall(match.group(2)))
+    # A tag registered by a class that adds no attributes (Cadran's
+    # FooterHints for <aurore:Hints>) is its base's, which has them
+    bases = {}
+    for folder, _, names in os.walk(HEADERS):
+        if os.sep + "extern" in folder:
+            continue
+        for name in names:
+            if name.endswith(".hpp"):
+                with open(os.path.join(folder, name), encoding="utf-8") as f:
+                    bases.update(BASE.findall(f.read()))
+    for owner, tag in list(tags.items()):
+        base = owner
+        while base not in attributes and base in bases:
+            base = bases[base]
+        if base != owner and base in attributes and base not in tags:
+            tags[base] = tag
     return tags, attributes
 
 
@@ -82,6 +100,10 @@ def render(tags, attributes):
         "Every attribute the library's views read from XML, by view: those of `View` are on every view, those of `Box` on every box (most views are boxes). Written by `tools/xml_attributes.py` from the sources; a test checks it is up to date. Styles per state (`focused:…`) are in [styles.md](styles.md), the theme keys (`@theme/…`) in [themes.md](themes.md).",
         "",
         "A misspelt attribute or a value outside the list stops the app with the file, the line and the closest name or the values expected (`View::fatalXML`).",
+        "",
+        "A number is written `16`, `16px` (the same), `16dp` (16 at the density in use: 11.2 when dense, see [styles.md](styles.md#density-of-the-lengths)), `25%` where a percentage is taken, or `@style/<name>` (a length of the style follows the density too).",
+        "",
+        "Any attribute prefixed with `compact:`, `medium:` or `expanded:` applies on a screen of that width only, over the plain one ([styles.md](styles.md#screen-width)).",
     ]
 
     def order(owner):

@@ -16,9 +16,9 @@ limitations under the License.
 
 #pragma once
 
-#include <SDL2/SDL.h>
 #include <aurore/core/event.hpp>
 #include <aurore/core/ime.hpp>
+#include <aurore/platforms/sdl/sdl.hpp>
 
 namespace aurore
 {

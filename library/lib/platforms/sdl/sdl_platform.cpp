@@ -24,14 +24,18 @@
 #include <aurore/core/thread.hpp>
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 
+#include "sdl_compat.hpp"
+
 #if defined(IOS) || defined(TVOS)
 #include <sys/utsname.h>
 
+#ifndef __SDL3__
 namespace aurore
 {
 // ios_darwin.mm
 Insets ios_safe_area(SDL_Window* window);
 }
+#endif
 
 static bool isIPad()
 {
@@ -44,13 +48,27 @@ static bool isIPad()
 namespace aurore
 {
 
+#if defined(__SDL3__) && (defined(IOS) || defined(ANDROID))
+// SDL3 asks for SDL_EVENT_TERMINATING to be handled as it is sent, in an
+// event watcher: the system may end the app before the loop polls it
+static bool sdlTerminatingWatcher(void*, SDL_Event* event)
+{
+    if (event->type == SDL_EVENT_TERMINATING)
+        aurore::Application::quit();
+    return true;
+}
+#endif
+
 SDLPlatform::SDLPlatform()
 {
 #ifdef ANDROID
     // Enable Fullscreen on Android
     VideoContext::FULLSCREEN = true;
     SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+#ifndef __SDL3__
+    // SDL3 has no accelerometer joystick
     SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+#endif
 #elif defined(IOS) || defined(TVOS)
     // Enable Fullscreen on iOS
     VideoContext::FULLSCREEN = true;
@@ -58,10 +76,18 @@ SDLPlatform::SDLPlatform()
     {
         SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
     }
+#ifndef __SDL3__
     SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
+#endif
 #elif defined(__APPLE__)
     // Same behavior as GLFW, change to the app's Resources directory if run in a ".app" bundle
     // Or to the executable's directory if run from other ways
+#ifdef __SDL3__
+    // SDL3 keeps the path: it is not freed
+    const char* base_path = SDL_GetBasePath();
+    if (base_path)
+        chdir(base_path);
+#else
     char* base_path = SDL_GetBasePath();
     if (base_path)
     {
@@ -69,13 +95,22 @@ SDLPlatform::SDLPlatform()
         SDL_free(base_path);
     }
 #endif
+#endif
 
-    // Init sdl
-    if (SDL_Init(SDL_INIT_EVENTS | SDL_INIT_TIMER) < 0)
+    // Init sdl (SDL3 has no timer subsystem to start)
+#ifdef __SDL3__
+    Uint32 initFlags = SDL_INIT_EVENTS;
+#else
+    Uint32 initFlags = SDL_INIT_EVENTS | SDL_INIT_TIMER;
+#endif
+    if (!AURORE_SDL_OK(SDL_Init(initFlags)))
     {
         Logger::error("sdl: failed to initialize");
         return;
     }
+#if defined(__SDL3__) && (defined(IOS) || defined(ANDROID))
+    SDL_AddEventWatch(sdlTerminatingWatcher, nullptr);
+#endif
 
     // Platform impls
     this->audioPlayer = new NullAudioPlayer();
@@ -83,20 +118,27 @@ SDLPlatform::SDLPlatform()
     // The system's language, unless AURORE_LANG gave one
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO && !this->localeFromEnvironment)
     {
-        SDL_Locale* locales = SDL_GetPreferredLocales();
-        if (locales != nullptr && locales->language != nullptr)
+#ifdef __SDL3__
+        // An array of pointers, ending with a null one
+        SDL_Locale** locales    = SDL_GetPreferredLocales(nullptr);
+        const SDL_Locale* first = locales ? locales[0] : nullptr;
+#else
+        SDL_Locale* locales     = SDL_GetPreferredLocales();
+        const SDL_Locale* first = locales;
+#endif
+        if (first != nullptr && first->language != nullptr)
         {
             // Every locale of Aurore (a browser in French gave English:
             // only five were known)
-            std::string lang = std::string { locales->language };
-            if (locales->country)
+            std::string lang = std::string { first->language };
+            if (first->country)
             {
-                lang += "_" + std::string { locales->country };
+                lang += "_" + std::string { first->country };
             }
             this->locale = localeFromSystem(lang);
             aurore::Logger::info("Set app locale: {}", this->locale);
-            SDL_free(locales);
         }
+        SDL_free(locales);
     }
 }
 
@@ -114,7 +156,11 @@ void SDLPlatform::restoreWindow()
 
 void SDLPlatform::setWindowAlwaysOnTop(bool enable)
 {
+#ifdef __SDL3__
+    SDL_SetWindowAlwaysOnTop(this->videoContext->getSDLWindow(), enable);
+#else
     SDL_SetWindowAlwaysOnTop(this->videoContext->getSDLWindow(), enable ? SDL_TRUE : SDL_FALSE);
+#endif
 }
 
 void SDLPlatform::setWindowSize(uint32_t windowWidth, uint32_t windowHeight)
@@ -163,7 +209,7 @@ void SDLPlatform::disableScreenDimming(bool disable, const std::string& reason, 
 
 bool SDLPlatform::isScreenDimmingDisabled()
 {
-    return !SDL_IsScreenSaverEnabled();
+    return !SDL_ScreenSaverEnabled();
 }
 
 void SDLPlatform::pasteToClipboard(const std::string& text)
@@ -188,10 +234,25 @@ std::string SDLPlatform::getName()
 
 bool SDLPlatform::processEvent(SDL_Event* event)
 {
-    if (event->type == SDL_QUIT)
+    if (event->type == SDL_EVENT_QUIT)
     {
         return false;
     }
+#ifdef __SDL3__
+    else if (event->type == SDL_EVENT_WINDOW_MOUSE_LEAVE || event->type == SDL_EVENT_WINDOW_MOUSE_ENTER)
+    {
+        auto* manager = this->inputManager;
+        if (manager)
+            manager->getMouseCusorEntered()->fire(event->type == SDL_EVENT_WINDOW_MOUSE_ENTER);
+    }
+    else if (event->type == SDL_EVENT_WINDOW_SAFE_AREA_CHANGED || event->type == SDL_EVENT_WINDOW_SHOWN
+        || event->type == SDL_EVENT_WINDOW_RESIZED || event->type == SDL_EVENT_WINDOW_MAXIMIZED
+        || event->type == SDL_EVENT_WINDOW_RESTORED || event->type == SDL_EVENT_WINDOW_FOCUS_GAINED
+        || event->type == SDL_EVENT_DISPLAY_ORIENTATION)
+    {
+        this->safeAreaMayHaveChanged();
+    }
+#else
     else if (event->type == SDL_WINDOWEVENT)
     {
         switch (event->window.event)
@@ -223,40 +284,46 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         // A turn of 180 degrees: the same size, the notch on the other side
         this->safeAreaMayHaveChanged();
     }
-    else if (event->type == SDL_KEYDOWN || event->type == SDL_KEYUP)
+#endif
+    else if (event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP)
     {
         auto* manager = this->inputManager;
         if (manager)
             manager->updateKeyboardState(event->key);
     }
-    else if (event->type == SDL_MOUSEMOTION)
+    else if (event->type == SDL_EVENT_MOUSE_MOTION)
     {
         auto* manager = this->inputManager;
         if (manager)
             manager->updateMouseMotion(event->motion);
     }
-    else if (event->type == SDL_MOUSEWHEEL)
+    else if (event->type == SDL_EVENT_MOUSE_WHEEL)
     {
         auto* manager = this->inputManager;
         if (manager)
             manager->updateMouseWheel(event->wheel);
     }
-    else if (event->type == SDL_CONTROLLERSENSORUPDATE)
+    else if (event->type == SDL_EVENT_GAMEPAD_SENSOR_UPDATE)
     {
         auto* manager = this->inputManager;
+#ifdef __SDL3__
+        if (manager)
+            manager->updateControllerSensorsUpdate(event->gsensor);
+#else
         if (manager)
             manager->updateControllerSensorsUpdate(event->csensor);
+#endif
     }
 #if defined(IOS) || defined(ANDROID)
-    else if (event->type == SDL_APP_WILLENTERBACKGROUND)
+    else if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND)
     {
         aurore::Application::getWindowFocusChangedEvent()->fire(false);
     }
-    else if (event->type == SDL_APP_WILLENTERFOREGROUND)
+    else if (event->type == SDL_EVENT_WILL_ENTER_FOREGROUND)
     {
         aurore::Application::getWindowFocusChangedEvent()->fire(true);
     }
-    else if (event->type == SDL_APP_TERMINATING)
+    else if (event->type == SDL_EVENT_TERMINATING)
     {
         // OS 正要杀我们（Android swipe-to-recents / iOS 强杀）。在这个窗口期主动走
         // 清理路径，让 MPVCore::clean() + mpv_terminate_destroy 有机会释放
@@ -265,7 +332,7 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         return false;
     }
 #endif
-    else if (event->type != SDL_POLLSENTINEL)
+    else if (event->type != SDL_EVENT_POLL_SENTINEL)
     {
         // 其它没有处理的事件
         this->otherEvent.fire(event);
@@ -292,7 +359,17 @@ Insets SDLPlatform::getSafeAreaInsets()
 {
     if (!this->videoContext)
         return {};
+#ifdef __SDL3__
+    // The part of the window, in points, nothing covers
+    SDL_Window* window = this->videoContext->getSDLWindow();
+    SDL_Rect safe;
+    int width, height;
+    if (!SDL_GetWindowSafeArea(window, &safe) || !SDL_GetWindowSize(window, &width, &height))
+        return {};
+    return { (float)safe.y, (float)(width - safe.x - safe.w), (float)(height - safe.y - safe.h), (float)safe.x };
+#else
     return ios_safe_area(this->videoContext->getSDLWindow());
+#endif
 }
 #endif
 
@@ -341,6 +418,9 @@ ImeManager* SDLPlatform::getImeManager()
 
 SDLPlatform::~SDLPlatform()
 {
+#if defined(__SDL3__) && (defined(IOS) || defined(ANDROID))
+    SDL_RemoveEventWatch(sdlTerminatingWatcher, nullptr);
+#endif
     delete this->audioPlayer;
     delete this->inputManager;
     delete this->imeManager;

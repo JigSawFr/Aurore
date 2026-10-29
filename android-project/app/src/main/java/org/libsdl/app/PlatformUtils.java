@@ -118,14 +118,14 @@ public class PlatformUtils {
                 Settings.System.SCREEN_BRIGHTNESS, 125) * 1.0f / 255.0f;
     }
 
-    public static BorealisHandler borealisHandler = null;
+    public static AuroreHandler auroreHandler = null;
 
     public static void setAppScreenBrightness(Activity activity, float value) {
         Message message = Message.obtain();
         message.obj = activity;
         message.arg1 = (int)(value * 255);
         message.what = 0;
-        if(borealisHandler != null) borealisHandler.sendMessage(message);
+        if(auroreHandler != null) auroreHandler.sendMessage(message);
     }
 
     public static float getAppScreenBrightness(Activity activity) {

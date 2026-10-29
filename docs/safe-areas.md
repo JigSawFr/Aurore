@@ -7,12 +7,12 @@ A phone's screen has a notch or a punch hole, rounded corners, a status bar and 
 | Platform | The safe area |
 | --- | --- |
 | Android | The system bars, the display cutout and the rounded corners over the SDL surface (`PlatformUtils.getSafeAreaInsets`, through JNI): `WindowInsets` of the bars and the cutout from Android 11, the system window insets and `DisplayCutout` before, nothing before Android 6. A rounded corner of radius *r* keeps *r* (1 − 1/√2) from both its edges (a rectangle's corner set in that far stays inside it). The keyboard is not part of it |
-| iOS, tvOS | `UIWindow.safeAreaInsets`: the notch, the rounded corners, the home indicator; on tvOS, the TV's safe area |
+| iOS, tvOS | `UIWindow.safeAreaInsets` (under SDL3, through `SDL_GetWindowSafeArea`, which reads it): the notch, the rounded corners, the home indicator; on tvOS, the TV's safe area |
 | Desktops, Switch, PS4, PS Vita, a browser | Nothing: zero, unless set (below) |
 
 The platform says it in the unit of the window's size (points on iOS, pixels on Android) through `Platform::getSafeAreaInsets()`. `Application::getSafeArea()` has it in layout units, whole ones, never more than a third of the window from an edge, and never less than the overscan margin.
 
-It is read again when the window changes size, and on Android and iOS when the window is shown or comes back, and when the display turns (a turn of 180 degrees keeps the size and moves the notch to the other side): then once more 300 ms later, when the system has laid the window out. A change lays the views out again and fires `Application::getSafeAreaChangedEvent()` with the new insets. A platform of an app's own calls `Application::updateSafeArea()` when its safe area may have changed.
+It is read again when the window changes size, and on Android and iOS when the window is shown or comes back, and when the display turns (a turn of 180 degrees keeps the size and moves the notch to the other side), and under SDL3 when SDL says it changed: then once more 300 ms later, when the system has laid the window out. A change lays the views out again and fires `Application::getSafeAreaChangedEvent()` with the new insets. A platform of an app's own calls `Application::updateSafeArea()` when its safe area may have changed.
 
 ## On a desktop, and a TV
 

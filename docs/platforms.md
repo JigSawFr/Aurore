@@ -2,21 +2,24 @@
 
 How to build Aurore's demo, and an app on Aurore, for each platform. The configure and build commands are those the CI runs (`.github/workflows/ci.yaml`, where the toolchains are pinned; `site.yml` for a browser); its artifacts are the demo built for each platform. Getting the toolchains themselves is each SDK's business: the links say where.
 
-An app builds the same way as the demo: its `CMakeLists.txt` includes `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, then `add_subdirectory(library/aurore/library)` and links `Aurore::aurore` (see the [README](../README.md#-use-it-in-your-project) and [`template/`](../template/README.md)). The platform is chosen with `-DAURORE_PLATFORM=…` (borealis' `-DPLATFORM_…=ON` still works, with a deprecation warning), and the packaging (an `.nro`, a `.vpk`, a `.pkg`, an app bundle) is the app's own: the demo's `CMakeLists.txt` has each one, to copy. [porting.md](porting.md) has what an app's code should mind on each.
+An app builds the same way as the demo: its `CMakeLists.txt` includes `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, then `add_subdirectory(library/aurore/library)` and links `Aurore::aurore` (see the [README](../README.md#-use-it-in-your-project) and [`template/`](../template/README.md)). The platform is chosen with `-DAURORE_PLATFORM=…`, and the packaging (an `.nro`, a `.vpk`, a `.pkg`, an app bundle) is the app's own: the demo's `CMakeLists.txt` has each one, to copy. [porting.md](porting.md) has what an app's code should mind on each.
 
 | Platform | `AURORE_PLATFORM` | Window and input (`AURORE_WINDOW`) | Drawing (`AURORE_GRAPHICS`) | Resources |
 | --- | --- | --- | --- | --- |
-| Linux, macOS, Windows | `DESKTOP` | GLFW (default) or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
+| Linux, macOS, Windows | `DESKTOP` | GLFW (default), SDL2 or SDL3 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
 | Nintendo Switch | `SWITCH` | GLFW (default) or SDL2 | deko3d (`DEKO3D`) or OpenGL 4.3 | romfs, in the `.nro` |
 | PS Vita | `PSV` | SDL2, or the system's | GXM (`GXM`) or OpenGL ES 2 | in the `.vpk` |
 | PS4 | `PS4` | SDL2 | OpenGL ES 2 | in the `.pkg` |
-| Android | `ANDROID` | SDL2 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
-| iOS, tvOS | `IOS`, `TVOS` | SDL2 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
-| Browser | Emscripten (`emcmake`) | SDL2 | OpenGL ES 3 (WebGL 2) | packaged with the page |
+| New 3DS (library and test card) | `3DS` | libctru's (no input read yet) | citro3d | `romfs:/` |
+| Android | `ANDROID` | SDL2 (default) or SDL3 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
+| iOS, tvOS | `IOS`, `TVOS` | SDL2 (default) or SDL3 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
+| Browser | Emscripten (`emcmake`) | SDL2 (default) or SDL3 | OpenGL ES 3 (WebGL 2) | packaged with the page |
 
-Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 built from the submodule) and a C++20 compiler. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
+Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 or SDL3 built from the submodule) and a C++20 compiler. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
 
 SDL2 is the submodule `library/lib/extern/SDL` (2.32.10) on the desktop, Android, iOS and tvOS, and on the Vita without `USE_SYSTEM_SDL2`. Elsewhere it is the toolchain's: devkitPro's `switch-sdl2` on the Switch, PacBrew's SDL 2.0.18 on the PS4, Emscripten's port in a browser, and the SDL in the Docker image of the Vita's OpenGL ES build (2.28.5 with `psv/scripts/sdl2/ime.patch` in the image the CI pins; `psv/scripts` now makes one with 2.32.10 and the same patch). Aurore's SDL code builds with all of them.
+
+SDL3 takes SDL2's place with `-DAURORE_WINDOW=SDL3` on the desktop, in a browser, on Android, iOS and tvOS: the submodule `library/lib/extern/SDL3` (3.4.18), the system's with `USE_SYSTEM_SDL3=ON` (`find_package(SDL3)`), a download with `AURORE_FETCH_DEPS`, Emscripten's port in a browser. The consoles stay on SDL2 (the option stops the configuration there): devkitPro has no SDL3 for the Switch, nor PacBrew for the PS4, and the Vita's OpenGL ES build would need an SDL3 built with PVR_PSP2 in its Docker image. Under SDL3 as under SDL2, a controller's face buttons are read by their label: A is the button marked A, on a Nintendo controller as on an Xbox one (SDL3 itself numbers them by place). An app's code that means either SDL tests `__SDL__`, defined under both; `__SDL2__` or `__SDL3__` for one only.
 
 ## Linux
 
@@ -30,7 +33,7 @@ cmake --build build
 ./build/aurore_demo
 ```
 
-`-DAURORE_WINDOW=SDL2` builds with SDL2 instead of GLFW; `-DAURORE_GRAPHICS=GL2`, `-DAURORE_GRAPHICS=GLES2` or `-DAURORE_GRAPHICS=GLES3` another OpenGL. Without `AURORE_LIBROMFS`, the `resources/` folder is copied next to the program at each build. The presets do the same in fewer words: `cmake --preset desktop-glfw` (or `desktop-sdl`), then `cmake --build --preset desktop-glfw`.
+`-DAURORE_WINDOW=SDL2` (or `SDL3`) builds with SDL instead of GLFW; `-DAURORE_GRAPHICS=GL2`, `-DAURORE_GRAPHICS=GLES2` or `-DAURORE_GRAPHICS=GLES3` another OpenGL. Without `AURORE_LIBROMFS`, the `resources/` folder is copied next to the program at each build. The presets do the same in fewer words: `cmake --preset desktop-glfw` (or `desktop-sdl`, `desktop-sdl3`), then `cmake --build --preset desktop-glfw`.
 
 The tests need EGL and Mesa as well (`libegl-dev libegl1 libegl-mesa0 libgl1-mesa-dri`), then `-DAURORE_BUILD_TESTS=ON` and `ctest --test-dir build` ([testing.md](testing.md)).
 
@@ -44,7 +47,7 @@ make -C build -j$(sysctl -n hw.ncpu)
 open build/aurore_demo.app
 ```
 
-The build is universal (arm64 and x86_64) and runs from macOS 10.15 (11 on Apple silicon). `-DBUNDLE_MACOS_APP=ON` makes an `.app` with the resources inside; without it, a plain program with `resources/` next to it. `-DAURORE_WINDOW=SDL2` builds with SDL2.
+The build is universal (arm64 and x86_64) and runs from macOS 10.15 (11 on Apple silicon). `-DBUNDLE_MACOS_APP=ON` makes an `.app` with the resources inside; without it, a plain program with `resources/` next to it. `-DAURORE_WINDOW=SDL2` builds with SDL2, `-DAURORE_WINDOW=SDL3` with SDL3.
 
 ## Windows
 
@@ -86,7 +89,7 @@ docker run --rm -v $(pwd):/src/ xfangfang/vitasdk_sdl2_gles2 \
   "cmake -B build -G Ninja -DAURORE_PLATFORM=PSV -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && cmake --build build"
 ```
 
-The result is `build/aurore_demo.vpk`, installed with VitaShell. The OpenGL ES build packs what is in `psv/module/` (empty in the repository: the PVR_PSP2 `.suprx` modules go there, `psv/scripts/Dockerfile` shows where they come from); `-DAURORE_VITA_SHARK=ON` (GXM) compiles the shaders at run time with SceShaccCg. `psv/sce_sys/` holds the LiveArea's pictures. `-DAURORE_SIMPLE_HIGHLIGHT=ON` draws a plainer focus highlight, lighter for the Vita.
+The result is `build/aurore_demo.vpk`, installed with VitaShell. The OpenGL ES build packs what is in `psv/module/` (empty in the repository: the PVR_PSP2 `.suprx` modules go there, `psv/scripts/Dockerfile` shows where they come from); `-DAURORE_VITA_SHARK=ON` (GXM) compiles the shaders at run time with SceShaccCg. `psv/sce_sys/` holds the LiveArea's pictures. `-DAURORE_SIMPLE_HIGHLIGHT=ON` draws a plainer focus highlight, lighter for the Vita. Linking `Aurore::aurore` keeps 16 KiB between the text and data segments (`--defsym=__sce_headroom=0x4000`, read by VitaSDK 2026.08's linker script): `vita-elf-create` writes the module's SCE data there, and fails ("segment 1 overlaps") when the text ends just before the 64 KiB boundary the data starts at.
 
 ## PS4
 
@@ -99,13 +102,26 @@ docker run --rm -v $(pwd):/src/ xfangfang/pacbrew \
 
 The result is `build/*.pkg`; the demo's `CMakeLists.txt` copies `ps4/` (the package's `sce_sys`) and the resources into `build/ps4/`, read at `/app0/` once installed. `-DAURORE_LIBJBC=ON` asks for root access (an app that needs it).
 
+## New 3DS
+
+The library and a test card, drawn by citro3d on the bottom screen (the touch screen): the library lays screens out with the small screen preset (480x360 units on the 320x240 screen), and nanovg's citro3d renderer (`nanovg_citro3d.h`) draws them; the buttons and the touch screen are not read yet. The New models only: the New 3DS, the New 3DS XL and the New 2DS XL, which share the CPU (804 MHz, the L2 cache), the memory (256 MB) and the screens' resolutions; the New 2DS XL has no stereoscopic 3D, which Aurore does not use, and is the console of reference. The platform reads the model (`CtrPlatform::getName()`, in the log and on the test card); the original 3DS, 3DS XL and 2DS run, at a third of the speed, and are not aimed at: the log says so. With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `3ds-dev` group. The CI uses the `devkitpro/devkitarm` image.
+
+```sh
+cmake -B build_3ds -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=3DS
+cmake --build build_3ds -j$(nproc)
+```
+
+The result is `build_3ds/ctr/aurore_3ds_smoke.3dsx`, the test card of `ctr/` instead of the demo: an XML layout (boxes, labels) and a view drawing each kind of paint and fill the renderer handles (a colour with a stroke, linear, radial and box gradients, a nonzero fill with a hole, an image, a scissor, text), with the library's resources in its romfs. The top screen shows the log (libctru's text console), START quits. It goes to `/3ds/` on the SD card, or to the console with `3dslink`. `AURORE_WINDOW` and `AURORE_GRAPHICS` stop the configuration: the window is libctru's and the renderer citro3d.
+
+The renderer has no fragment shader to work with (the PICA200 has none): the paint's coordinates are computed per vertex by its vertex shader (`library/lib/extern/nanovg/citro3d/nanovg_citro3d.v.pica`, assembled by picasso and built into the library), colours are the texture combiners' constants, a linear gradient reads a shared ramp texture, and radial and box gradients read a small alpha texture of their distance field, kept in a cache. Nonzero fills go through the stencil in two passes, the scissor is the hardware's. Not yet: edge antialiasing, the top screen, input. Textures are padded to powers of two, at most 1024 (a larger image is scaled down).
+
 ## Android
 
-The Gradle project in [`android-project/`](../android-project/), on SDL2's Android port:
+The Gradle project in [`android-project/`](../android-project/), on SDL2's Android port, or SDL3's with `-PauroreSdl=3`:
 
 ```sh
 ./build_libromfs_generator.sh
-cd android-project && ./gradlew assembleDebug
+cd android-project && ./gradlew assembleDebug        # or: ./gradlew assembleDebug -PauroreSdl=3
 ```
 
 The APK is in `android-project/app/build/outputs/apk/debug/`. The page in `android-project/` has the SDK and NDK it needs, and how to turn it into an app of your own.
@@ -122,15 +138,15 @@ cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DPLATFORM=OS64 -DDEPLOYMENT_TARGE
 cmake --build build
 ```
 
-The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
+The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `-DAURORE_WINDOW=SDL3` builds on SDL3. `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
 
 The notch, the rounded corners and the home indicator (on tvOS, the TV's safe area) are the [safe area](safe-areas.md), from `UIWindow.safeAreaInsets`.
 
 ## In a browser
 
-Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. The demo builds for it under `emcmake cmake` and runs on the website, <https://aurore.boreale.dev/demo/> ([web/README.md](https://github.com/JigSawFr/Aurore/blob/main/web/README.md) says how); [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is an app's complete example. In short, under `emcmake cmake`:
+Aurore runs on its SDL platform under [Emscripten](https://emscripten.org/), SDL2 or SDL3 (`emcmake cmake -DAURORE_WINDOW=SDL3`): the window stays at 1280×720 (the page scales the canvas), and `aurore_web_button(button, down)`, exported to the page, presses a controller button, for an on-screen pad or keys SDL does not map. The demo builds for it under `emcmake cmake` and runs on the website, <https://aurore.boreale.dev/demo/> ([web/README.md](https://github.com/JigSawFr/Aurore/blob/main/web/README.md) says how); [PlayGuard's web simulator](https://github.com/JigSawFr/playguard/blob/main/web/README.md) is an app's complete example. In short, under `emcmake cmake`:
 
-- set `AURORE_PLATFORM=DESKTOP`, `AURORE_WINDOW=SDL2`, `AURORE_GRAPHICS=GLES3` and `USE_SYSTEM_SDL2` before including `commonOption.cmake`, and compile with `-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions`, SDL2 coming from Emscripten's ports (a `SDL2Config.cmake` that finds nothing to link);
+- set `AURORE_PLATFORM=DESKTOP`, `AURORE_WINDOW=SDL2`, `AURORE_GRAPHICS=GLES3` and `USE_SYSTEM_SDL2` before including `commonOption.cmake`, and compile with `-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions`, SDL2 coming from Emscripten's ports (a `SDL2Config.cmake` that finds nothing to link); for SDL3, `AURORE_WINDOW=SDL3`, `USE_SYSTEM_SDL3`, `-sUSE_SDL=3` and a `SDL3Config.cmake` that makes an empty `SDL3::SDL3` (`web/cmake/` has both);
 - package the resources into the page's file system (`--preload-file`) and set `AURORE_RESOURCES_ROOT` to where they land;
 - run the loop with `emscripten_set_main_loop`, one `mainLoop()` per frame, since a browser needs its thread back between frames;
 - start the threads with the page (`-sPTHREAD_POOL_SIZE`), which then needs the cross-origin isolation headers;
@@ -151,4 +167,4 @@ Aurore runs on its SDL2 platform under [Emscripten](https://emscripten.org/): th
 | `AURORE_STD_THREAD`, `AURORE_BOOST_FILESYSTEM` | `std::thread` instead of pthreads; Boost's filesystem for a toolchain without `std::filesystem` |
 | `AURORE_INSTALL` | Desktop: installs the library for `find_package(Aurore)` |
 
-`library/cmake/commonOption.cmake` lists them all with their defaults. borealis' names (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`, `USE_LIBROMFS`…) still work, with a deprecation warning, and are set as plain variables after `commonOption.cmake` for an app's own tests (`if (PLATFORM_SWITCH)`).
+`library/cmake/commonOption.cmake` lists them all with their defaults. Only the `AURORE_` options are read; `commonOption.cmake` then sets the plain variables `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`, `USE_LIBROMFS`… from them, for an app's own tests (`if (PLATFORM_SWITCH)`).

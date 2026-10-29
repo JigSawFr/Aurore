@@ -1,0 +1,27 @@
+# Boréale's night, the palette of aurore.boreale.dev: the night blue, the
+# snow white, the aurora green for what is chosen, the ice blue and the
+# violet for the charts and the tiles. Both variants, as the website has.
+name = Boréale
+author = Aurore demo
+version = 1.0
+description = The night of aurore.boreale.dev, an aurora green accent.
+icon = moon
+
+[light]
+background = #eef2f8
+surface = #ffffff
+text = #121b2c
+accent = #0a705f
+cadran/blue = #0a5fa8
+cadran/violet = #6a3fd8
+
+[dark]
+background = #0b1424
+surface = #0e1a33
+text = #e8eef7
+accent = #00ffcc
+cadran/blue = #33bbff
+cadran/violet = #b39dff
+cadran/bar = #6a86bd
+cadran/bar_today = #33bbff
+aurore/highlight/color2 = #8a5cff

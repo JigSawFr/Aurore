@@ -233,7 +233,9 @@ void ScrollingFrame::updateScrollingIndicatior()
     scrollingIndicator->setHeight(viewHeight / contentHeight * viewHeight);
 
     const float indicatorWidth = indicatorShowsFocus ? SCROLLING_INDICATOR_WIDTH * 2 : SCROLLING_INDICATOR_WIDTH;
-    scrollingIndicator->setDetachedPosition(getWidth() - 14 - indicatorWidth, scrollViewOffset);
+    // Nearer the edge on a compact screen, clear of the content's narrower margins
+    const float edge = Application::getWidthClass() == WidthClass::COMPACT ? dp(5) : 14;
+    scrollingIndicator->setDetachedPosition(getWidth() - edge - indicatorWidth, scrollViewOffset);
 }
 
 void ScrollingFrame::draw(NVGcontext* vg, float x, float y, float width, float height, Style style, FrameContext* ctx)

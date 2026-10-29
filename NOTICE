@@ -17,7 +17,7 @@ library/lib/cadran, and the resources it reads: resources/i18n/*/cadran.json,
 resources/img/emoji, resources/font/sora_bold_latin.ttf), the inspector and
 hot reload of the core (library/include/aurore/core/inspector.hpp,
 library/lib/core/inspector.cpp, library/include/aurore/core/hot_reload.hpp,
-library/lib/core/hot_reload.cpp) and the demo's Cadran tab
+library/lib/core/hot_reload.cpp) and the demo's Cadran pieces
 (demo/include/tab/cadran_tab.hpp, demo/src/tab/cadran_tab.cpp) are
 Copyright 2026 JigSawFr, and Taylor for the files that say so,
 licensed under the GNU General Public License, version 3 or later
@@ -29,7 +29,7 @@ and library/include/aurore/extern (nanovg, fontstash, stb, Yoga, {fmt},
 TinyXML-2, JSON for Modern C++, Tweeny, libromfs, GLFW, SDL, libretro-common,
 glad, QR Code generator), the fonts Inter, PromptFont (as Aurore Text and
 Aurore Buttons) and Sora (resources/font, SIL Open Font License 1.1), Material
-Icons (resources/material, Apache 2.0) and Twemoji 15.1.0 (resources/img/emoji,
+Icons (resources/material, Apache 2.0) and Twemoji 17.0.3 (resources/img/emoji,
 CC-BY 4.0, Copyright Twitter, Inc and other contributors).
 resources/THIRD_PARTY_NOTICES.md lists them with their versions, copyrights
 and licences, and is part of the resources of every program built with

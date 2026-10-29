@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Checks the built website (site/README.md):
 
-- the catalogs (site/i18n/*.json) have the same keys as en.json;
+- the catalogs (site/i18n/*.json) have the same keys as en-US.json;
 - every link and image of a page that stays on the site reaches a file of it,
-  and every #anchor an id of the page it points to (the API reference and the
-  demo, built apart, are not followed);
+  and every #anchor an id of the page it points to (the API reference's
+  pages, tools/build_api.py's, included; the demo, built apart, is not
+  followed);
 - no page has what its Content-Security-Policy would block: an inline
   script (but schema.org's data), a style attribute or element, an event
   handler, a file from elsewhere;
@@ -61,7 +62,7 @@ class Page(HTMLParser):
 
 def catalogs(root):
     folder = os.path.join(root, "site", "i18n")
-    english = set(json.load(open(os.path.join(folder, "en.json"), encoding="utf-8")))
+    english = set(json.load(open(os.path.join(folder, "en-US.json"), encoding="utf-8")))
     errors = 0
     for name in sorted(os.listdir(folder)):
         keys = set(json.load(open(os.path.join(folder, name), encoding="utf-8")))
@@ -69,7 +70,7 @@ def catalogs(root):
             print(f"site/i18n/{name}: no {key!r}")
             errors += 1
         for key in sorted(keys - english):
-            print(f"site/i18n/{name}: {key!r} is not in en.json")
+            print(f"site/i18n/{name}: {key!r} is not in en-US.json")
             errors += 1
     return errors
 
@@ -83,7 +84,7 @@ def main():
     errors = catalogs(os.path.dirname(HERE))
     pages = {}
     for folder, dirs, files in os.walk(root):
-        if os.path.relpath(folder, root).split(os.sep)[0] in ("api", "demo"):
+        if os.path.relpath(folder, root).split(os.sep)[0] == "demo":
             continue
         for name in files:
             path = os.path.join(folder, name)
@@ -122,7 +123,7 @@ def main():
             if os.path.isdir(file):
                 file = os.path.join(file, "index.html")
             rel = os.path.relpath(file, root)
-            if rel.split(os.sep)[0] in ("api", "demo") or rel.startswith(".."):
+            if rel.split(os.sep)[0] == "demo" or rel.startswith(".."):
                 continue
             if not os.path.exists(file):
                 print(f"{rel_page}: {link}: no {rel}")

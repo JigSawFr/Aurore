@@ -30,7 +30,7 @@
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_STATIC
-#include "stb_image_write.h"
+#include AURORE_STB_IMAGE_WRITE
 
 namespace aurore::test
 {
@@ -141,7 +141,7 @@ std::string viewText(View* view)
     return "";
 }
 
-// AURORE_<name>, or the deprecated name borealis gave it
+// AURORE_<name>, else the fallback
 static std::string fromEnvironment(const char* name, const std::string& fallback)
 {
     const char* value = environmentVariable(name);

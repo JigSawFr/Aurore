@@ -19,9 +19,6 @@
             paddingRight="@style/aurore/tab_frame/content_padding_sides"
             paddingBottom="@style/aurore/tab_frame/content_padding_top_bottom"
             paddingLeft="@style/aurore/tab_frame/content_padding_sides">
-            
-            <aurore:RadioCell
-                id="radio"/>
                 
             <aurore:BooleanCell
                 id="boolean"/>
@@ -67,23 +64,6 @@
             <aurore:DetailCell
                     title="@i18n/demo/settings/notify"
                     id="notify"/>
-
-            <aurore:Header
-                width="auto"
-                height="auto"
-                title="@i18n/demo/settings/themes"
-                subtitle="@i18n/demo/settings/themes_subtitle"
-                marginTop="40"/>
-
-            <aurore:BooleanCell
-                id="themeDark"/>
-
-            <aurore:Box
-                id="themes"
-                width="auto"
-                height="auto"
-                axis="column"
-                alignItems="stretch"/>
 
         </aurore:Box>
 

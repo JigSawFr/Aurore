@@ -21,10 +21,10 @@ concurrency:
 env:
   # Emscripten, pinned: a new one is a pull request of its own (its ports,
   # its threads and its file packager can change).
-  EMSDK_VERSION: 6.0.12
+  EMSDK_VERSION: 6.0.13
   # The emsdk tool itself, at that version's tag, checked against the commit
   # the tag pointed to when pinned: a tag can be moved, a commit cannot.
-  EMSDK_COMMIT: 35ff8a6d150541276abbc6bae512ca90bcfbe220
+  EMSDK_COMMIT: 35659964bc2762fffec0d257997fb61475f765b7
   # Playwright, pinned, for the layout and accessibility check.
   PLAYWRIGHT_VERSION: 1.64.0
   # axe-core, for accessibility (tools/site_layout.py): its npm package,
@@ -99,7 +99,7 @@ jobs:
       - name: Install Python-Markdown and Doxygen
         run: |
           sudo apt-get update -y -q
-          sudo apt-get install -y -q --no-install-recommends python3-markdown doxygen
+          sudo apt-get install -y -q --no-install-recommends python3-markdown python3-yaml doxygen
       # The site's address, as GitHub Pages serves it: its custom domain when
       # it has one, else <owner>.github.io/<repo>/. A pull request's build is
       # kept out of search engines.
@@ -125,12 +125,15 @@ jobs:
         with:
           name: demo
           path: demo
+      # Doxygen reads the headers into XML (fails on a warning, WARN_AS_ERROR
+      # in docs/Doxyfile), which tools/build_api.py makes the site's pages.
       - name: The API reference
-        # Fails on a warning (WARN_AS_ERROR in docs/Doxyfile)
-        run: doxygen docs/Doxyfile
+        run: |
+          doxygen docs/Doxyfile
+          python3 tools/build_api.py build_docs/xml build_api
       - name: The website
         run: |
-          SITE_API=build_docs/html SITE_DEMO=demo python3 tools/build_site.py out .
+          SITE_API=build_api SITE_DEMO=demo python3 tools/build_site.py out .
           # The catalogs, every link and #anchor, what the CSP would block.
           python3 tools/check_site.py out "$SITE_URL"
       # No page wider than the screen on a phone, a tablet or a desktop, no

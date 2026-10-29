@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <aurore/platforms/sdl/sdl.hpp>
 
 #include <aurore/platforms/desktop/desktop_platform.hpp>
 #include <aurore/platforms/sdl/sdl_ime.hpp>

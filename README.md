@@ -6,13 +6,15 @@
 
 **Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch**
 
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](#-use-it-in-your-project)
+[![CI](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml?query=branch%3Amain)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](#-under-the-hood)
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
 [**Website**](https://aurore.boreale.dev/) ·
 [**Try&nbsp;it**](https://aurore.boreale.dev/demo/) ·
 [**What's new**](#-what-aurore-adds) ·
+[**Under&nbsp;the&nbsp;hood**](#-under-the-hood) ·
 [**Use&nbsp;it**](#-use-it-in-your-project) ·
 [**Build&nbsp;the&nbsp;demo**](#-build-the-demo) ·
 [**Upstream&nbsp;wiki**](https://github.com/xfangfang/borealis/wiki)
@@ -25,16 +27,16 @@
 
 Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like the Nintendo Switch's own menus out of the box, and can be restyled into anything else.
 
-It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. Its code has its own names (`aurore::`, `<aurore.hpp>`, `AURORE_`); borealis' (`brls::`, `<borealis.hpp>`, `BRLS_`) still work as deprecated aliases until 1.0, so a borealis app moves to Aurore by changing its submodule ([migrating from borealis](docs/migrating-from-borealis.md)). <!-- legacy-names: line -->
+It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. Its code has its own names (`aurore::`, `<aurore.hpp>`, `AURORE_`), in place of borealis' (`brls::`, `<borealis.hpp>`, `BRLS_`): a borealis app moves to Aurore by changing its submodule and renaming them, a search and replace ([migrating from borealis](docs/migrating-from-borealis.md)).
 
 > [!IMPORTANT]
-> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's default look: an app gets it without a line of code, and `aurore::Application::setCadran(false)` keeps borealis' own. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
+> **[Cadran](docs/cadran.md)**, the look of PlayGuard and PlayShelf (an icon rail, cards, modals, action sheets, vector icons, 15 languages, language and theme switched while the app runs), is Aurore's look: an app gets it without a line of code. Cadran is **GPLv3**: an app built with Aurore is GPLv3.
 
 ## ✨ Features
 
 - 🎮 **Made for controllers** — focus moves on its own with the D-pad, touch and mouse work too.
 - 🧱 **Flexbox layout** — every view is laid out by [Yoga](https://github.com/facebook/yoga), described in XML, code only where it matters.
-- 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM), scaled for a TV.
+- 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM, citro3d), scaled for a TV.
 - 🧩 **Ready-made components** — tabs, lists that recycle their cells, settings cells, dialogs, toasts, sliders, images, all restyled by a theme.
 - 🎨 **Themes** — every colour is a theme key; theme files and folders bring palettes, background pictures, logos, icons and decorations, switched while the app runs ([docs/themes.md](docs/themes.md)). Presets ship with it: high contrast, Ocean, Amethyst, Sand, one per season and feast, and *Seasonal*, which follows the calendar.
 - 🌍 **15 languages** — one JSON catalogue per language, switched while the app runs; colour emoji and right-to-left text as options.
@@ -46,9 +48,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 <br>
 
 <p align="center">
-  <img src=".github/readme/cadran.png" alt="Cadran's pieces" width="49%">
+  <img src=".github/readme/cadran.png" alt="The demo's welcome" width="49%">
   <img src=".github/readme/sheet.png" alt="An action sheet" width="49%">
-  <br><sub><b>Cadran's pieces</b> · <b>An action sheet</b></sub>
+  <br><sub><b>The demo's welcome</b> · <b>An action sheet</b></sub>
 </p>
 
 <p align="center">
@@ -59,8 +61,8 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 <p align="center">
   <img src=".github/readme/markdown.png" alt="Icons and Markdown" width="49%">
-  <img src=".github/readme/components.png" alt="The demo's other tabs in Cadran" width="49%">
-  <br><sub><b>Icons and Markdown</b> · <b>The demo's other tabs in Cadran</b></sub>
+  <img src=".github/readme/components.png" alt="The library: 302 made-up games" width="49%">
+  <br><sub><b>Icons and Markdown</b> · <b>The library: 302 made-up games</b></sub>
 </p>
 
 <p align="center">
@@ -89,12 +91,14 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - ✨ **Styles** — per-state styles (focus, pressed, disabled, hover), transitions, data binding and accessibility labels.
 - 🧩 **Views** — a recycling grid and row, context menus, icon buttons, Markdown.
 - 🧪 **Tools** — test harness, inspector, hot reload, profiler, template.
-- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients.
+- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients; a density for the lengths, `compact:` attributes and presets for a small screen.
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
 - 🎯 **Focus and hints** — no focus lost in hidden or destroyed views; optional and steady footer hints.
-- 🖥️ **Platforms** — controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
+- 🖥️ **Platforms** — SDL3 beside SDL2 (desktop, browser, Android, iOS), controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
 - ⚡ **Speed** — no relayout for an unchanged text or size, XML attributes registered on demand, unused textures freed.
+
+Side by side with borealis, change by change: <https://aurore.boreale.dev/borealis/>.
 
 <details>
 <summary><b>Every change and its API</b></summary>
@@ -135,6 +139,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | Width and height measured with or without padding and border | `boxSizing="borderBox"` (default) or `"contentBox"` · `View::setBoxSizing` |
 | A view whose position offsets are ignored and that absolute children skip to find their reference | `positionType="static"` · `PositionType::STATIC` |
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |
+| A density for the lengths (comfortable, compact, dense), the text untouched; lengths in `dp` | `16dp` (XML) · `Application::setDensity`, `aurore::dp()` · `AURORE_DENSITY` · [docs/styles.md](docs/styles.md#density-of-the-lengths) |
+| Classes of screen width (compact, medium, expanded), and attributes for one of them | `compact:`, `medium:`, `expanded:` (XML) · `Application::getWidthClass` |
+| A small screen's design size, density and text scale in one go | `Application::usePreset(PRESET_SMALL_SCREEN)` · `Platform::getLayoutPreset` · `AURORE_PRESET` |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
 | Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
@@ -182,6 +189,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 | Change | API |
 | --- | --- |
+| SDL3 in place of SDL2 on the desktop, in a browser, on Android, iOS and tvOS; the face buttons read by their label, as under SDL2 | `-DAURORE_WINDOW=SDL3`, `__SDL__` |
 | SDL: the right controller closed when one is unplugged, every controller read after a reconnection | — |
 | SDL in a browser (Emscripten), with an on-screen pad | `aurore_web_button()` |
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
@@ -204,6 +212,34 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 
 </details>
 
+## 🔩 Under the hood
+
+<!-- under-the-hood: begin (tools/stack.py writes this) -->
+| | Version |
+| --- | --- |
+| Language | C++20 |
+| CMake | 3.16–3.31 |
+| SDL3 | 3.4.18 |
+| SDL | 2.32.10 |
+| GLFW | 3.4 |
+| glad | 2.0.8 |
+| Yoga | 3.2.1 |
+| {fmt} | 12.2.0 |
+| TinyXML-2 | 11.0.0 |
+| JSON for Modern C++ | 3.12.0 |
+| stb_image | 2.30 |
+| stb_truetype | 1.26 |
+| Tweeny | 4.2.0 |
+| Twemoji | 17.0.3 |
+| Android Gradle Plugin | 9.5.0 |
+| Gradle | 9.8.2 |
+| Android NDK | r30 |
+| Android API | 36 |
+| Emscripten | 6.0.13 |
+
+Checked on every pull request: 153 test cases in the headless harness, 27 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 40 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 50 of the 50 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+<!-- under-the-hood: end -->
+
 ## 📦 Use it in your project
 
 1. Build your project as **C++20**, without `-fno-rtti` or `-fno-exceptions`.
@@ -217,7 +253,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 3. Copy its `resources` folder to the root of your project.
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
-   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). borealis' names (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`…) still work, with a deprecation warning, and stay set as plain variables for the app's own tests.
+   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`, `SDL3`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
@@ -227,6 +263,18 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 > Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.
 
 ## 🛠️ Build the demo
+
+The demo is a guided tour of Aurore, a tab per subject, each saying what it shows. It runs in a browser too: <https://aurore.boreale.dev/demo/>.
+
+- **Welcome**: Aurore in a sentence over an aurora drawn with nanovg, a dashboard of live cards (a ring, bars, figures), a tile per tab.
+- **Library**: 302 made-up games, their covers drawn in code, in a grid that keeps only the cells on screen; sorted, filtered by genre, a menu on each, a page for each with a row of games like it; the same games by genre in a long recycled list.
+- **Components**: borealis' button styles and Cadran's, cells in cards, bars, chips, pills, keys, every dialog, sheet and toast, images, icons, an empty list, Markdown, and a screen of settings cells.
+- **Motion**: easings drawn and played, state styles and their transitions (XML only), the focus gliding and shaking, reduced motion, the transform lab.
+- **Text and languages**: the 15 languages switched live, the text sizes, scripts and emoji, long texts (scrolling, shrinking, wrapping), the text lab.
+- **Themes**: light or dark, every palette used at once (Cadran's, the demo's files with Boréale's night, Aurore's presets), a theme file in a few lines.
+- **Input**: a controller drawn as the app reads it, with a test mode; touch and mouse traces; the keyboard's keys; the footer's hints.
+- **For developers**: the frame measured live, the inspector, the debug layer, redraw on demand, the layout lab, data binding and what a screen reader would say, how a page is written.
+- **About Aurore**: credits and licences.
 
 On Windows, macOS or Linux:
 
@@ -243,7 +291,7 @@ Aurore builds with CMake only (3.16 or later): upstream's xmake files (`xmake.lu
 With CMake 3.25 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>` (`cmake --list-presets`: also `desktop-debug`, `desktop-asan` and `tests`):
 
 ```sh
-cmake --preset desktop-glfw        # or desktop-sdl
+cmake --preset desktop-glfw        # or desktop-sdl, desktop-sdl3
 cmake --build --preset desktop-glfw
 ./build/desktop-glfw/aurore_demo
 cmake --workflow --preset tests    # configure, build and run the tests
@@ -255,13 +303,13 @@ cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 
 With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-glfw/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
 
-New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme. `doxygen docs/Doxyfile` builds the API reference, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
+New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme. The [API reference](https://aurore.boreale.dev/api/) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
 The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
 
-Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>. The demo runs there in a browser: <https://aurore.boreale.dev/demo/>.
+Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>, in the consoles' 15 languages (these pages in English under each language's header). Its home page shows the demo on a console, a screen's XML and its activity in an editor's window beside the screen they draw, the features, Cadran and the screenshots; the demo runs there in a browser: <https://aurore.boreale.dev/demo/>. How the site is made: [site/README.md](site/README.md).
 
 | Page | |
 | --- | --- |
@@ -273,7 +321,7 @@ Also on the website, with a search and the API reference: <https://aurore.boreal
 | [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
 | [Views](docs/views.md) | Every XML tag, its class and its header |
 | [Themes](docs/themes.md) | Theme files and folders, presets, pictures, decorations, keys |
-| [Cadran](docs/cadran.md) | The default look and its kit |
+| [Cadran](docs/cadran.md) | The look and its kit |
 | [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
 | [Components](docs/components.md) | The views Aurore adds |
 | [XML attributes](docs/xml-attributes.md) | Every attribute of every view, generated from the sources |

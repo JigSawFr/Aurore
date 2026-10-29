@@ -1,6 +1,6 @@
 # Aurore in 15 minutes
 
-From nothing to a screen of your own on the Switch: build the demo, describe a screen in XML, add a view of your own, restyle it with a theme, and ship it as a `.nro`. The API reference is built from the headers (`doxygen docs/Doxyfile`, then `build_docs/html/index.html`).
+From nothing to a screen of your own on the Switch: build the demo, describe a screen in XML, add a view of your own, restyle it with a theme, and ship it as a `.nro`. The API reference, read from the headers, is on the website: <https://aurore.boreale.dev/api/> (built with `doxygen docs/Doxyfile` and `tools/build_api.py`, [site/README.md](../site/README.md)).
 
 ## 1. Build the demo (3 minutes)
 
@@ -23,7 +23,7 @@ cmake --build build
 
 The arrows move the focus, Enter is A, Escape is B, X, Y, L and R are themselves ([the other keys](input.md)), the mouse and a controller work too. `-DAURORE_LIBROMFS=ON` builds the `resources/` folder into the program; without it, the folder is copied next to it. Press **F12**: that is the [inspector](inspector.md), showing the views on screen, the focus and what a frame costs. Press it twice more to close it.
 
-The demo's code is in `demo/`, its screens in `resources/xml/`: they are the examples for what follows.
+The demo is a guided tour of the library: a tab per subject (a game library, every component, motion, text and languages, themes, input, tools for developers), each saying what it shows. Its code is in `demo/` (its tabs in `demo/src/tab/`, the views that draw themselves with nanovg in `demo/src/view/`), its XML in `resources/xml/`: they are the examples for what follows.
 
 ## 2. Your app
 
@@ -166,8 +166,6 @@ aurore::async([this, alive = aliveToken()] {
 });
 ```
 
-`ASYNC_RETAIN`, `ASYNC_TOKEN` and `ASYNC_RELEASE` (from borealis) still work and do the same; they are kept for older code.
-
 ## 5. A theme (2 minutes)
 
 Colours and metrics come from the theme (light or dark, following the system) and can be changed without rebuilding, from a file:
@@ -189,7 +187,7 @@ if (aurore::Theme::loadFile("my_theme.ini", &variant))
     aurore::Application::getPlatform()->setThemeVariant(variant);
 ```
 
-An app adds its own values with `aurore::Theme::getDarkTheme().addColor("my_app/score", nvgRGB(…))` and `aurore::getStyle().addMetric(…)`, and its XML reads them with `@theme/my_app/score`. With hot reload on, a save of the theme file restyles the screen at once. Aurore draws everything in [Cadran](cadran.md)'s look by default; `aurore::Application::setCadran(false)` before `init()` keeps borealis' own.
+An app adds its own values with `aurore::Theme::getDarkTheme().addColor("my_app/score", nvgRGB(…))` and `aurore::getStyle().addMetric(…)`, and its XML reads them with `@theme/my_app/score`. With hot reload on, a save of the theme file restyles the screen at once. Aurore draws everything in [Cadran](cadran.md)'s look.
 
 ## 6. Ship it on the Switch (4 minutes)
 

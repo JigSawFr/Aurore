@@ -85,11 +85,6 @@ bool Application::init()
     Application::inited        = false;
     Application::quitRequested = false;
 
-    if (Application::ORIGINAL_WINDOW_WIDTH == 0)
-        Application::ORIGINAL_WINDOW_WIDTH = 1280;
-    if (Application::ORIGINAL_WINDOW_HEIGHT == 0)
-        Application::ORIGINAL_WINDOW_HEIGHT = 720;
-
     // Init platform
     Application::platform            = Platform::createPlatform();
     Application::notificationManager = new NotificationManager();
@@ -102,11 +97,58 @@ bool Application::init()
 
     Logger::info("Using platform {}", platform->getName());
 
+    // The platform's layout preset, unless the app chose one
+    // (Application::usePreset); AURORE_PRESET over both
+    if (!Application::presetChosen)
+        if (const LayoutPreset* preset = Application::platform->getLayoutPreset())
+        {
+            Application::usePreset(*preset);
+            Application::presetChosen = false; // the platform's: another init() asks it again
+        }
+    if (const char* presetEnv = environmentVariable("PRESET"))
+    {
+        if (std::strcmp(presetEnv, "small") == 0)
+            Application::usePreset(PRESET_SMALL_SCREEN);
+        else if (std::strcmp(presetEnv, "standard") == 0)
+            Application::usePreset(PRESET_STANDARD);
+        else
+            Logger::warning("AURORE_PRESET: \"{}\" is not a preset (small or standard)", presetEnv);
+    }
+
+    // The design size, to try a small screen's on the desktop (480x360)
+    if (const char* design = environmentVariable("DESIGN_SIZE"))
+    {
+        unsigned width = 0, height = 0;
+        char end = 0;
+        if (std::sscanf(design, "%ux%u%c", &width, &height, &end) == 2 && width >= 160 && width <= 7680 && height >= 120
+            && height <= 4320)
+        {
+            Application::ORIGINAL_WINDOW_WIDTH  = width;
+            Application::ORIGINAL_WINDOW_HEIGHT = height;
+        }
+        else
+            Logger::warning("AURORE_DESIGN_SIZE: \"{}\" is not a size such as 480x360", design);
+    }
+    if (Application::ORIGINAL_WINDOW_WIDTH == 0)
+        Application::ORIGINAL_WINDOW_WIDTH = 1280;
+    if (Application::ORIGINAL_WINDOW_HEIGHT == 0)
+        Application::ORIGINAL_WINDOW_HEIGHT = 720;
+
+    // The density, before any screen is made (comfortable, compact, dense or
+    // a number)
+    if (const char* densityEnv = environmentVariable("DENSITY"))
+    {
+        float density;
+        if (parseDensity(densityEnv, &density))
+            Application::setDensity(density);
+        else
+            Logger::warning("AURORE_DENSITY: \"{}\" is not a density", densityEnv);
+    }
+
     // Init i18n
     loadTranslations();
     // Cadran: the preferences' language in place of the console's
-    if (Application::cadran)
-        cadran::start();
+    cadran::start();
 
     Threading::start();
 
@@ -208,8 +250,7 @@ void Application::createWindow(std::string windowTitle)
     Application::registerBuiltInXMLViews();
 
     // Cadran's look, from the first screen on
-    if (Application::cadran)
-        cadran::start_window();
+    cadran::start_window();
 
     Application::getWindowCreationDoneEvent()->fire();
 }
@@ -1588,7 +1629,7 @@ void Application::setReduceMotion(bool reduce)
 
 bool Application::getReduceMotion()
 {
-    return Application::reduceMotion || (Application::cadran && !effects::motion());
+    return Application::reduceMotion || !effects::motion();
 }
 
 // Each label measured again (and what else measures text), and the roots to
@@ -1625,6 +1666,31 @@ void Application::setTextScale(float scale)
 float Application::getTextScale()
 {
     return Label::getFontScale();
+}
+
+WidthClass widthClassOf(float width)
+{
+    if (width < WIDTH_MEDIUM)
+        return WidthClass::COMPACT;
+    if (width < WIDTH_EXPANDED)
+        return WidthClass::MEDIUM;
+    return WidthClass::EXPANDED;
+}
+
+void Application::usePreset(const LayoutPreset& preset)
+{
+    Application::presetChosen           = true;
+    Application::ORIGINAL_WINDOW_WIDTH  = preset.designWidth;
+    Application::ORIGINAL_WINDOW_HEIGHT = preset.designHeight;
+    aurore::setDensity(preset.density);
+    Application::presetTextScale = preset.textScale;
+    Label::setFontScale(preset.textScale);
+}
+
+WidthClass Application::getWidthClass()
+{
+    // Before the window: the design width it will have
+    return widthClassOf(Application::contentWidth > 0 ? Application::contentWidth : (float)ORIGINAL_WINDOW_WIDTH);
 }
 
 void Application::registerModel(const std::string& name, DataModel* model)
@@ -2533,7 +2599,7 @@ int Application::getDefaultFont()
 
 bool Application::XMLViewsRegisterContains(std::string name)
 {
-    return Application::xmlViewsRegister.count(canonicalXMLName(name)) > 0;
+    return Application::xmlViewsRegister.count(name) > 0;
 }
 
 std::vector<std::string> Application::getXMLViewNames()
@@ -2546,7 +2612,7 @@ std::vector<std::string> Application::getXMLViewNames()
 
 XMLViewCreator Application::getXMLViewCreator(std::string name)
 {
-    return Application::xmlViewsRegister[canonicalXMLName(name)];
+    return Application::xmlViewsRegister[name];
 }
 
 void Application::registerBuiltInXMLViews()
@@ -2568,7 +2634,6 @@ void Application::registerBuiltInXMLViews()
     Application::registerXMLView("aurore:Button", Button::create);
     Application::registerXMLView("aurore:IconButton", IconButton::create);
     Application::registerXMLView("aurore:CheckBox", CheckBox::create);
-    Application::registerXMLView("aurore:Hints", Hints::create);
     Application::registerXMLView("aurore:Slider", Slider::create);
     Application::registerXMLView("aurore:BottomBar", BottomBar::create);
     Application::registerXMLView("aurore:ProgressSpinner", ProgressSpinner::create);
@@ -2590,8 +2655,7 @@ void Application::registerBuiltInXMLViews()
 
 void Application::registerXMLView(std::string name, XMLViewCreator creator)
 {
-    // borealis' prefix (deprecated) still registers (and replaces) an aurore: view
-    Application::xmlViewsRegister[canonicalXMLName(name)] = creator;
+    Application::xmlViewsRegister[name] = creator;
 }
 
 } // namespace aurore

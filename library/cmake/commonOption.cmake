@@ -2,15 +2,9 @@
 # toolchain.cmake (README.md, "Use it in your project").
 #
 # The options are prefixed (AURORE_), so they do not clash with a parent
-# project's own. The names borealis used still work for now:
-# legacy-names: begin
-# PLATFORM_DESKTOP, USE_GLFW, USE_LIBROMFS… and the BRLS_ ones (BRLS_BUILD_TESTS,
-# BRLS_DEV_TOOLS, BRLS_INSPECTOR, BRLS_UNITY_BUILD, BRLS_FONTSTASH_STREAM):
-# legacy-names: end
-# given on the command line or set before this file, they are copied to the new
-# options, with a deprecation warning. Either way this file then sets the
-# old names as plain variables, which the build files read: an app can
-# still test PLATFORM_SWITCH or USE_DEKO3D after including it.
+# project's own. This file then sets plain variables from them, which the
+# build files read: an app can test PLATFORM_SWITCH or USE_DEKO3D after
+# including it.
 
 # disable in-source build
 if (PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
@@ -26,13 +20,15 @@ set(_AURORE_OPTIONS_READ ON)
 include(CMakeDependentOption)
 
 # Target platform
-set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, ANDROID, IOS or TVOS")
-set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 ANDROID IOS TVOS)
+set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, 3DS (New 3DS, citro3d), ANDROID, IOS or TVOS")
+set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 3DS ANDROID IOS TVOS)
 
-# Window and input, on desktop and Switch: GLFW (the default) or SDL2. The
-# other platforms choose for themselves.
-set(AURORE_WINDOW "" CACHE STRING "Window and input: GLFW or SDL2 (empty: the platform's default)")
-set_property(CACHE AURORE_WINDOW PROPERTY STRINGS GLFW SDL2)
+# Window and input, on desktop and Switch: GLFW (the default) or SDL2. SDL3
+# in place of SDL2 on desktop, in a browser, on Android, iOS and tvOS (the
+# consoles have no SDL3 yet). The other platforms choose for themselves:
+# SDL2 on Android, iOS and tvOS unless SDL3 is asked for.
+set(AURORE_WINDOW "" CACHE STRING "Window and input: GLFW, SDL2 or SDL3 (empty: the platform's default)")
+set_property(CACHE AURORE_WINDOW PROPERTY STRINGS GLFW SDL2 SDL3)
 
 # Graphics: OpenGL 3.2+ unless one of these. DEKO3D on Switch only, D3D11 on
 # Windows only, GXM on PS Vita only.
@@ -99,94 +95,26 @@ option(AURORE_BUILD_TESTS "Build the test harness" OFF)
 set(IOS_CODE_SIGN_IDENTITY "" CACHE STRING "The code sign identity to use when building the IPA.")
 set(IOS_GUI_IDENTIFIER "" CACHE STRING "Package name.")
 
-# --- The old names -----------------------------------------------------------
-
-# Copies what the old names say (`value`, empty when none is set) to
-# `option`, when it is new or changed since the last run: an option given
-# later under its new name is not overwritten by an old name left in the
-# cache. RESET: an empty value puts the option back to its default.
-function(_aurore_legacy option value names)
-    cmake_parse_arguments(ARG "RESET" "" "" ${ARGN})
-    if (NOT "${value}" STREQUAL "${_AURORE_LEGACY_${option}}")
-        if (NOT "${value}" STREQUAL "" OR ARG_RESET)
-            set_property(CACHE ${option} PROPERTY VALUE "${value}")
-        endif ()
-        set(_AURORE_LEGACY_${option} "${value}" CACHE INTERNAL "")
-    endif ()
-    if (NOT "${value}" STREQUAL "" AND NOT "${value}" STREQUAL "OFF")
-        message(DEPRECATION "${names} is deprecated: use -D${option}=${value} (and -U${names} to forget the old name)")
-    endif ()
-endfunction()
-
-# A boolean option and its old name
-function(_aurore_legacy_bool option old)
-    set(value "")
-    if (DEFINED ${old})
-        if (${old})
-            set(value ON)
-        else ()
-            set(value OFF)
-        endif ()
-    endif ()
-    _aurore_legacy(${option} "${value}" ${old})
-endfunction()
-
-set(_aurore_value "")
-set(_aurore_names "")
-foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH)
-    if (PLATFORM_${_aurore_p})
-        set(_aurore_value ${_aurore_p})
-        set(_aurore_names PLATFORM_${_aurore_p})
-        break()
-    endif ()
-endforeach ()
-_aurore_legacy(AURORE_PLATFORM "${_aurore_value}" "${_aurore_names}" RESET)
 string(TOUPPER "${AURORE_PLATFORM}" AURORE_PLATFORM)
 set_property(CACHE AURORE_PLATFORM PROPERTY VALUE "${AURORE_PLATFORM}")
-if (AURORE_PLATFORM AND NOT AURORE_PLATFORM MATCHES "^(DESKTOP|SWITCH|PSV|PS4|ANDROID|IOS|TVOS)$")
-    message(FATAL_ERROR "AURORE_PLATFORM=${AURORE_PLATFORM}: DESKTOP, SWITCH, PSV, PS4, ANDROID, IOS or TVOS")
+if (AURORE_PLATFORM AND NOT AURORE_PLATFORM MATCHES "^(DESKTOP|SWITCH|PSV|PS4|3DS|ANDROID|IOS|TVOS)$")
+    message(FATAL_ERROR "AURORE_PLATFORM=${AURORE_PLATFORM}: DESKTOP, SWITCH, PSV, PS4, 3DS, ANDROID, IOS or TVOS")
 endif ()
 
-set(_aurore_value "")
-set(_aurore_names "")
-if (USE_SDL2)
-    set(_aurore_value SDL2)
-    set(_aurore_names USE_SDL2)
-elseif (USE_GLFW)
-    set(_aurore_value GLFW)
-    set(_aurore_names USE_GLFW)
-endif ()
-_aurore_legacy(AURORE_WINDOW "${_aurore_value}" "${_aurore_names}" RESET)
 string(TOUPPER "${AURORE_WINDOW}" AURORE_WINDOW)
 set_property(CACHE AURORE_WINDOW PROPERTY VALUE "${AURORE_WINDOW}")
-if (AURORE_WINDOW AND NOT AURORE_WINDOW MATCHES "^(GLFW|SDL2)$")
-    message(FATAL_ERROR "AURORE_WINDOW=${AURORE_WINDOW}: GLFW or SDL2")
+if (AURORE_WINDOW AND NOT AURORE_WINDOW MATCHES "^(GLFW|SDL2|SDL3)$")
+    message(FATAL_ERROR "AURORE_WINDOW=${AURORE_WINDOW}: GLFW, SDL2 or SDL3")
+endif ()
+# The 3DS has its own screens and input (libctru) and a single renderer,
+# citro3d (docs/platforms.md)
+if (AURORE_PLATFORM STREQUAL "3DS" AND (AURORE_WINDOW OR AURORE_GRAPHICS))
+    message(FATAL_ERROR "AURORE_PLATFORM=3DS takes no AURORE_WINDOW nor AURORE_GRAPHICS: its window is libctru's, and its renderer citro3d")
+endif ()
+if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4)$")
+    message(FATAL_ERROR "AURORE_WINDOW=SDL3 is for DESKTOP, ANDROID, IOS and TVOS: ${AURORE_PLATFORM} has no SDL3 yet")
 endif ()
 
-# The drivers of one platform count on that platform only, as before (an app
-# may declare USE_DEKO3D=ON for its Switch build and build for desktop too)
-set(_aurore_value "")
-set(_aurore_names "")
-if (USE_DEKO3D AND AURORE_PLATFORM STREQUAL "SWITCH")
-    set(_aurore_value DEKO3D)
-    set(_aurore_names USE_DEKO3D)
-elseif (USE_D3D11 AND WIN32)
-    set(_aurore_value D3D11)
-    set(_aurore_names USE_D3D11)
-elseif (USE_GXM AND AURORE_PLATFORM STREQUAL "PSV")
-    set(_aurore_value GXM)
-    set(_aurore_names USE_GXM)
-elseif (USE_GL2)
-    set(_aurore_value GL2)
-    set(_aurore_names USE_GL2)
-elseif (USE_GLES2)
-    set(_aurore_value GLES2)
-    set(_aurore_names USE_GLES2)
-elseif (USE_GLES3)
-    set(_aurore_value GLES3)
-    set(_aurore_names USE_GLES3)
-endif ()
-_aurore_legacy(AURORE_GRAPHICS "${_aurore_value}" "${_aurore_names}" RESET)
 string(TOUPPER "${AURORE_GRAPHICS}" AURORE_GRAPHICS)
 set_property(CACHE AURORE_GRAPHICS PROPERTY VALUE "${AURORE_GRAPHICS}")
 if (AURORE_GRAPHICS AND NOT AURORE_GRAPHICS MATCHES "^(GL3|GL2|GLES2|GLES3|DEKO3D|D3D11|GXM)$")
@@ -198,46 +126,17 @@ elseif (AURORE_GRAPHICS STREQUAL "GXM" AND NOT AURORE_PLATFORM STREQUAL "PSV")
     message(FATAL_ERROR "AURORE_GRAPHICS=GXM is for AURORE_PLATFORM=PSV")
 endif ()
 
-_aurore_legacy_bool(AURORE_EGL USE_EGL)
-_aurore_legacy_bool(AURORE_WIN32_TERMINAL WIN32_TERMINAL)
-_aurore_legacy_bool(AURORE_LIBJBC LIBJBC)
-_aurore_legacy_bool(AURORE_VITA_SHARK USE_VITA_SHARK)
-_aurore_legacy_bool(AURORE_BOOST_FILESYSTEM USE_BOOST_FILESYSTEM)
-_aurore_legacy_bool(AURORE_STD_THREAD USE_STD_THREAD)
-_aurore_legacy_bool(AURORE_LIBROMFS USE_LIBROMFS)
-_aurore_legacy_bool(AURORE_SIMPLE_HIGHLIGHT SIMPLE_HIGHLIGHT)
-_aurore_legacy_bool(AURORE_FREETYPE USE_FREETYPE)
-_aurore_legacy_bool(AURORE_FRIBIDI USE_FRIBIDI)
-# legacy-names: begin
-_aurore_legacy_bool(AURORE_UNITY_BUILD BRLS_UNITY_BUILD)
-_aurore_legacy_bool(AURORE_FONTSTASH_STREAM BRLS_FONTSTASH_STREAM)
-_aurore_legacy_bool(AURORE_INSPECTOR BRLS_INSPECTOR)
-_aurore_legacy_bool(AURORE_BUILD_TESTS BRLS_BUILD_TESTS)
-set(_aurore_value "")
-if (DEFINED BRLS_DEV_TOOLS)
-    string(TOUPPER "${BRLS_DEV_TOOLS}" _aurore_value)
-    if (NOT _aurore_value STREQUAL "AUTO")
-        if (BRLS_DEV_TOOLS)
-            set(_aurore_value ON)
-        else ()
-            set(_aurore_value OFF)
-        endif ()
-    endif ()
-endif ()
-_aurore_legacy(AURORE_DEV_TOOLS "${_aurore_value}" BRLS_DEV_TOOLS)
-# legacy-names: end
-
 # The plain variables the build files read. toolchain.cmake changes some of
-# them for the platforms that impose a choice (iOS and Android: SDL2 and
+# them for the platforms that impose a choice (iOS and Android: SDL, and
 # libromfs).
-foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH)
+foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH 3DS)
     if (AURORE_PLATFORM STREQUAL _aurore_p)
         set(PLATFORM_${_aurore_p} ON)
     else ()
         set(PLATFORM_${_aurore_p} OFF)
     endif ()
 endforeach ()
-foreach (_aurore_p GLFW SDL2)
+foreach (_aurore_p GLFW SDL2 SDL3)
     if (AURORE_WINDOW STREQUAL _aurore_p)
         set(USE_${_aurore_p} ON)
     else ()
@@ -274,5 +173,3 @@ set(SIMPLE_HIGHLIGHT ${AURORE_SIMPLE_HIGHLIGHT})
 set(USE_FREETYPE ${AURORE_FREETYPE})
 set(USE_FRIBIDI ${AURORE_FRIBIDI})
 unset(_aurore_p)
-unset(_aurore_value)
-unset(_aurore_names)

@@ -38,6 +38,17 @@
       }
     },
     {
+      "name": "desktop-sdl3",
+      "displayName": "Desktop (SDL3)",
+      "description": "Windows, macOS or Linux, windowing and input with SDL3, resources built in",
+      "inherits": "base",
+      "cacheVariables": {
+        "AURORE_PLATFORM": "DESKTOP",
+        "AURORE_WINDOW": "SDL3",
+        "AURORE_LIBROMFS": "ON"
+      }
+    },
+    {
       "name": "desktop-debug",
       "displayName": "Desktop (GLFW, debug)",
       "description": "desktop-glfw with debug information, no optimisation and the inspector on from the start",
@@ -98,6 +109,10 @@
     {
       "name": "desktop-sdl",
       "configurePreset": "desktop-sdl"
+    },
+    {
+      "name": "desktop-sdl3",
+      "configurePreset": "desktop-sdl3"
     },
     {
       "name": "desktop-debug",

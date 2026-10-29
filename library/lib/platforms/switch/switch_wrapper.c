@@ -26,15 +26,6 @@ static int nxlink_sock = -1;
 // a time blocks in lwIP. Set with -DAURORE_BSD_SESSIONS=… (as an application
 // or system application) and -DAURORE_BSD_SESSIONS_APPLET=… (as an applet,
 // where memory is short).
-// legacy-names: begin
-// The older names, still read (deprecated)
-#if !defined(AURORE_BSD_SESSIONS) && defined(BRLS_BSD_SESSIONS)
-#define AURORE_BSD_SESSIONS BRLS_BSD_SESSIONS
-#endif
-#if !defined(AURORE_BSD_SESSIONS_APPLET) && defined(BRLS_BSD_SESSIONS_APPLET)
-#define AURORE_BSD_SESSIONS_APPLET BRLS_BSD_SESSIONS_APPLET
-#endif
-// legacy-names: end
 #ifndef AURORE_BSD_SESSIONS
 #define AURORE_BSD_SESSIONS 12
 #endif

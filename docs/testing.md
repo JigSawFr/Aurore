@@ -97,7 +97,18 @@ ctest --test-dir build --output-on-failure
 
 They need `AURORE_LIBROMFS=ON`, which configuring says: their reference screenshots are drawn with the resources built in, and from files the desktop build picks other fonts. With CMake 3.25 or later, `cmake --workflow --preset tests` configures, builds and runs them in `build/tests`.
 
-`tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, screenshots against `tests/references/`. CI runs them (`linux (tests)`).
+`tests/demo_tests.cpp`: focus moves through the rail and into a tab, a dialog opens and closes, keyboard and touch, the window resized, redraw on demand and its debug mode, no label cut short on any tab at the largest text size (in German, Russian, French and Japanese), the Welcome, Library and Themes tabs and an action sheet on a small screen (compact width), screenshots against `tests/references/`. CI runs them (`linux (tests)`).
+
+`aurore-tour` (`tests/tour.cpp`) draws every screen of the demo to PNGs the same way, without a window: each tab of the rail and its content a few presses further down, then the screens and dialogs it opens (a game's page, the action sheet, the controller under test…), and prints the labels cut short on each. For looking at the whole demo in one language, theme and size:
+
+```sh
+aurore-tour --lang ja --theme light --size 1280x800 -o shots   # every scene
+aurore-tour --list                                            # their names
+aurore-tour -o shots tab01 library-                           # those starting so
+aurore-tour --small -o shots                                  # a small screen's layout
+```
+
+`--small` lays the demo out on 480x360 units at the dense density (as `AURORE_DESIGN_SIZE=480x360 AURORE_DENSITY=dense` does in a window), the compact width class, drawn on 960x720 pixels.
 
 `tests/async_tests.cpp` covers what crosses threads: a task coming back to a deleted view (`View::aliveToken()`, the `ASYNC_*` macros), the battery and Wi-Fi widgets read on the task thread (`HeadlessPlatform::showStatus` shows them), `delay()`/`cancelDelay()`, `Threading::stop()`/`start()`, events fired from another thread, logging from the task thread. Built with ThreadSanitizer they check the locking too:
 

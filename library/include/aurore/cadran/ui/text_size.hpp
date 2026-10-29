@@ -17,8 +17,9 @@ constexpr float LARGEST = 1.5f;
 
 /// The console on its dock (the desktop: AURORE_DOCKED=1, ui::env_flag).
 bool docked();
-/// What the setting and the console's mode ask for now: the labels' scale,
-/// and whether it is more than 1.
+/// What the setting and the console's mode ask for now: the labels' scale
+/// (times the layout preset's, aurore::Application::getPresetTextScale), and
+/// whether it is more than the preset's.
 float scale();
 bool larger();
 /// aurore::Label's scale from larger(); the screens laid out again when it changed.

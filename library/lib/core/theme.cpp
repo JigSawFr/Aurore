@@ -325,7 +325,7 @@ static bool isSeed(const std::string& key)
 
 // Every key a palette (seeds) changes, from `base` (the variant without a
 // theme file) for the seeds it does not give. Keys the base does not have
-// (Cadran's when it is off) are left out.
+// are left out.
 static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
 {
     ColorMap out;
@@ -506,14 +506,13 @@ ThemeValues::ThemeValues(std::initializer_list<std::pair<std::string, NVGcolor>>
 
 void ThemeValues::addColor(const std::string& key, NVGcolor color)
 {
-    const std::string name = canonicalKey(key);
-    auto it                = this->base.find(name);
+    auto it = this->base.find(key);
     if (it != this->base.end() && sameRgba(it->second, color))
         return;
-    this->base[name] = color;
-    if (this->overlay.count(name) == 0)
+    this->base[key] = color;
+    if (this->overlay.count(key) == 0)
     {
-        this->values[name] = color;
+        this->values[key] = color;
         generation++;
     }
     reapplyTheme();
@@ -522,8 +521,6 @@ void ThemeValues::addColor(const std::string& key, NVGcolor color)
 NVGcolor ThemeValues::getColor(const std::string& name)
 {
     auto it = this->values.find(name);
-    if (it == this->values.end() && isLegacyKey(name))
-        it = this->values.find(canonicalKey(name));
     if (it == this->values.end())
         fatal("Unknown theme value \"" + name + "\" in size: " + std::to_string(this->values.size()));
     if (Inspector::recording)
@@ -533,7 +530,7 @@ NVGcolor ThemeValues::getColor(const std::string& name)
 
 bool ThemeValues::hasColor(const std::string& name) const
 {
-    return this->values.count(name) > 0 || (isLegacyKey(name) && this->values.count(canonicalKey(name)) > 0);
+    return this->values.count(name) > 0;
 }
 
 void ThemeValues::setOverlay(const std::unordered_map<std::string, NVGcolor>& overlay)
@@ -541,7 +538,7 @@ void ThemeValues::setOverlay(const std::unordered_map<std::string, NVGcolor>& ov
     this->overlay = overlay;
     this->values  = this->base;
     for (auto& [name, color] : overlay)
-        this->values[canonicalKey(name)] = color;
+        this->values[name] = color;
     generation++;
 }
 
@@ -1524,8 +1521,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
             report(out, where(number) + ": no '=' in \"" + (line.size() > 40 ? line.substr(0, 40) + "..." : line) + "\"");
             continue;
         }
-        // borealis' keys (deprecated) are read as Aurore's
-        std::string key   = canonicalKey(trim(line.substr(0, equals)));
+        std::string key   = trim(line.substr(0, equals));
         std::string value = trim(line.substr(equals + 1));
 
         if (section == "metrics")

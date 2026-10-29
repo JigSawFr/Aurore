@@ -52,7 +52,7 @@ class GLFWImeManager : public ImeManager
   private:
     GLFWwindow* window;
     inline static bool showIME;
-    inline static std::wstring textBuffer;
+    inline static std::u32string textBuffer;
     inline static std::string preeditTextBuffer;
     inline static int cursor {};
     inline static bool isEditing {};

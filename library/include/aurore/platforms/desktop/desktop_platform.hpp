@@ -20,7 +20,7 @@
 #include <aurore/core/platform.hpp>
 #include <aurore/platforms/desktop/desktop_font.hpp>
 #include <aurore/platforms/desktop/desktop_ime.hpp>
-#if defined(__linux__) and !defined(__SDL2__)
+#if defined(__linux__) and !defined(__SDL__)
 #include <dbus/dbus.h>
 #elif defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
@@ -39,9 +39,8 @@ class DesktopPlatform : public Platform
     DesktopPlatform();
     ~DesktopPlatform() override;
 
-    /// The environment variable `AURORE_` + `name` (environmentVariable(),
-    /// which also reads the deprecated names borealis gave it): nullptr when
-    /// it is not set.
+    /// The environment variable `AURORE_` + `name` (environmentVariable()):
+    /// nullptr when it is not set.
     static const char* environment(const std::string& name);
 
     /// The locale AURORE_LANG asks for: a locale's name as
@@ -105,7 +104,7 @@ class DesktopPlatform : public Platform
     bool screenDimmingDisabled = false;
 #ifdef __linux__
     uint32_t inhibitCookie = 0;
-#ifndef __SDL2__
+#ifndef __SDL__
     std::string inhibitRequestPath;
 #endif
 #elif defined(_WIN32)

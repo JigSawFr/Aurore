@@ -1,13 +1,13 @@
 # Architecture
 
-How Aurore is put together: the layers, what happens in a frame, how views are laid out and drawn, how the focus moves, who owns what, and which thread may touch what. For contributors, and for app authors who want to know why something behaves as it does. The API reference (`doxygen docs/Doxyfile`) has the details of each class.
+How Aurore is put together: the layers, what happens in a frame, how views are laid out and drawn, how the focus moves, who owns what, and which thread may touch what. For contributors, and for app authors who want to know why something behaves as it does. The [API reference](https://aurore.boreale.dev/api/) has the details of each class.
 
 ## Layers
 
 ```mermaid
 flowchart TB
     app["Your app<br/>activities, views, XML, resources"]
-    cadran["Cadran<br/>library/*/cadran: the default look, pickers, dialogs"]
+    cadran["Cadran<br/>library/*/cadran: the look, pickers, dialogs"]
     views["Views<br/>library/*/views: Label, Button, ScrollingFrame, RecyclerFrame, cells…"]
     core["Core<br/>library/*/core: Application, View, Box, Activity, Theme, Style, i18n, threads"]
     platforms["Platforms<br/>library/*/platforms: GLFW, SDL, Switch, PS Vita, PS4, Android"]
@@ -26,17 +26,13 @@ flowchart TB
 | `core/` | The application, the base view and box, activities, actions and gestures, the theme and the style, translations, threads, timers, animations, the logger, the inspector, hot reload, the profiler | `core/`, `views/` (the core builds some views itself: dialogs, hints, notifications), `platforms/` only to pick one (`platform.cpp`) |
 | `views/` | The views of the library: labels, images, buttons, frames, lists, cells, dialogs, widgets | `core/`, `views/` |
 | `platforms/` | One folder per platform, each implementing the core's interfaces | `core/`, `platforms/`; the GLFW and SDL keyboards also show an `EditTextDialog` |
-| `cadran/` | Cadran, the default look (GPLv3, [cadran.md](cadran.md)) | the public API only, through `<aurore.hpp>` |
+| `cadran/` | Cadran, the look (GPLv3, [cadran.md](cadran.md)) | the public API only, through `<aurore.hpp>` |
 | `test/` | The test harness and its headless platform ([testing.md](testing.md)) | `core/`, `platforms/` |
 | `extern/` | Bundled libraries, under their own licences | — |
 
-The core calls Cadran from one file, `application.cpp`: `init()` and `createWindow()` start it (`cadran::start`, `cadran::start_window`) unless `Application::setCadran(false)` was called before, and `getReduceMotion()` asks whether its effects are reduced. Nothing else in the core or the views knows about it (the theme only knows its keys, `cadran/…`, as strings): Cadran restyles screens from the outside, through the theme keys, the XML views it registers and the hooks the core already has.
+The core calls Cadran from one file, `application.cpp`: `init()` and `createWindow()` start it (`cadran::start`, `cadran::start_window`), and `getReduceMotion()` asks whether its effects are reduced. Nothing else in the core or the views knows about it (the theme only knows its keys, `cadran/…`, as strings): Cadran restyles screens from the outside, through the theme keys, the XML views it registers and the hooks the core already has.
 
 `<aurore.hpp>` includes the whole public API; `<aurore/cadran.hpp>` adds Cadran's. Everything is in the `aurore` namespace (Cadran's pieces in `cadran`, `ui` and a few others).
-
-<!-- legacy-names: begin -->
-`include/borealis/` and `<borealis.hpp>` are generated: each includes its new header and `<aurore/legacy.hpp>`, which declares borealis' names (`namespace brls = aurore`, the `BRLS_` macros, the `Brls` types) as deprecated aliases until 1.0 ([migrating-from-borealis.md](migrating-from-borealis.md)). The library's own code uses the new names only.
-<!-- legacy-names: end -->
 
 ## The main loop
 
@@ -92,7 +88,7 @@ Who owns what:
 - An activity owns its content view, and frees it when it is deleted.
 - A box owns its children: `removeView(view)` deletes the view unless asked not to, and a box deletes its children with itself.
 - Deleting is deferred: `freeView()` queues a view, which is deleted at the end of the loop iteration, after the frame and the sync tasks. Code that keeps a pointer to a view across that point holds it with `ptrLock()` / `ptrUnlock()`.
-- A callback that may run after its view is gone (a task on another thread, a timer) checks it is still there: it captures the view's `aliveToken()` and returns if it expired (the older `ASYNC_RETAIN` / `ASYNC_TOKEN` / `ASYNC_RELEASE` wrap the same), or uses Cadran's `ui::Alive` tokens (`cadran/ui/guarded.hpp`).
+- A callback that may run after its view is gone (a task on another thread, a timer) checks it is still there: it captures the view's `aliveToken()` and returns if it expired, or uses Cadran's `ui::Alive` tokens (`cadran/ui/guarded.hpp`).
 
 ## Themes and styles
 
@@ -104,16 +100,16 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 
 ## Cadran
 
-[Cadran](cadran.md) is the default look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `aurore:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `aurore::View`s.
+[Cadran](cadran.md) is the look, built on the public API like an app would be. When the window is made it registers its colours as theme keys, replaces a few XML views (the footer's hints, `aurore:Hints`) and dresses each screen the first time it takes the focus: a main screen (an `AppletFrame` holding a `TabFrame`) gets the rail and the header, every other screen its header and its lists in cards, every dialog its card. It asks the app what it cannot know through `ui::hooks` and keeps the user's choices in a `ui::Prefs` the app stores. Its helpers (`ui::confirm`, `ui::pick`, `ui::notify`…) are free functions in `ui`, its views (`CadranIcon`, `ScrollView`, `MarkdownView`…) ordinary `aurore::View`s.
 
 ## Platforms and drivers
 
-`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, or on the desktop SDL or GLFW (`-DAURORE_WINDOW=SDL2` or `-DAURORE_WINDOW=GLFW`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
+`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, or on the desktop SDL or GLFW (`-DAURORE_WINDOW=SDL2`, `SDL3` or `GLFW`; one SDL platform for SDL2 and SDL3, `platforms/sdl/`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
 
 | Interface | Does |
 | --- | --- |
 | `Platform` | the window, the system's language and theme variant, battery and network, the browser, the clipboard, the loop itself |
-| `VideoContext` | the graphics context and nanovg: OpenGL 3 by default, or OpenGL 2, OpenGL ES 2 or 3, Direct3D 11 (Windows), deko3d (Switch), GXM (PS Vita) |
+| `VideoContext` | the graphics context and nanovg: OpenGL 3 by default, or OpenGL 2, OpenGL ES 2 or 3, Direct3D 11 (Windows), deko3d (Switch), GXM (PS Vita), citro3d (New 3DS) |
 | `InputManager` | controllers, keyboard, mouse and touch, read once per frame |
 | `AudioPlayer` | the interface sounds |
 | `FontLoader` | the fonts ([fonts.md](fonts.md)) |

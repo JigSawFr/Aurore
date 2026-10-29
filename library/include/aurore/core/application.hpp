@@ -59,6 +59,42 @@ class DebugLayer;
 class EditTextDialog;
 struct ThemeImage;
 
+/**
+ * How wide the screen is, in layout units (Application::contentWidth): what a
+ * layout picks its variant from (XML `compact:`, `medium:`, `expanded:`).
+ */
+enum class WidthClass
+{
+    COMPACT, ///< under WIDTH_MEDIUM: a phone, a small console screen (one column)
+    MEDIUM, ///< under WIDTH_EXPANDED
+    EXPANDED, ///< the 1280-unit design width and more
+};
+
+inline constexpr float WIDTH_MEDIUM   = 720.0f; ///< The narrowest MEDIUM width
+inline constexpr float WIDTH_EXPANDED = 1080.0f; ///< The narrowest EXPANDED width
+
+/// The class of a width in layout units.
+WidthClass widthClassOf(float width);
+
+/**
+ * A screen's layout in one go: the design size its screens are laid out on,
+ * the density of their lengths and the scale of their text
+ * (Application::usePreset).
+ */
+struct LayoutPreset
+{
+    uint32_t designWidth; ///< ORIGINAL_WINDOW_WIDTH
+    uint32_t designHeight; ///< ORIGINAL_WINDOW_HEIGHT
+    float density; ///< aurore::setDensity
+    float textScale; ///< Application::setTextScale, the text size settings' base
+};
+
+/// The usual one: 1280x720 at density 1, the text as written.
+inline constexpr LayoutPreset PRESET_STANDARD = { 1280, 720, DENSITY_COMFORTABLE, 1.0f };
+/// A small screen, 320x240 pixels for instance: 480x360 units (a compact
+/// width), dense, the text 1.25 times larger (12 to 17 pixels).
+inline constexpr LayoutPreset PRESET_SMALL_SCREEN = { 480, 360, DENSITY_DENSE, 1.25f };
+
 /// Makes a new view for an XML tag (Application::registerXMLView).
 typedef std::function<View*(void)> XMLViewCreator;
 
@@ -91,15 +127,6 @@ class Application
     static const std::string& getAppId() { return Application::appId; }
 
     /**
-     * Aurore draws every app in Cadran's look (docs/cadran.md): init() and
-     * createWindow() start it. false, before init(), keeps Aurore's own
-     * look instead.
-     */
-    static void setCadran(bool on) { Application::cadran = on; }
-    /// Whether the app is drawn in Cadran's look (see setCadran()).
-    static bool isCadran() { return Application::cadran; }
-
-    /**
      * Creates the application window with the given title.
      * Must be called after calling init().
      */
@@ -126,6 +153,8 @@ class Application
     static NVGcontext* getNVGContext();
     /// The size of the UI in layout units: ORIGINAL_WINDOW_WIDTH wide, as high as the window's ratio gives.
     inline static float contentWidth, contentHeight;
+    inline static float presetTextScale = 1.0f;
+    inline static bool presetChosen     = false; ///< usePreset() called by the app
 
     /// The window's size in pixels.
     inline static unsigned windowWidth, windowHeight;
@@ -255,6 +284,35 @@ class Application
      */
     static void setTextScale(float scale);
     static float getTextScale();
+
+    /**
+     * The density of the lengths (aurore::setDensity): DENSITY_COMFORTABLE
+     * by default, DENSITY_COMPACT, DENSITY_DENSE for a small screen. The text
+     * keeps its size (setTextScale). Read when the views are made: set it
+     * before the first screen; AURORE_DENSITY gives it on the desktop.
+     */
+    static void setDensity(float density) { aurore::setDensity(density); }
+    static float getDensity() { return aurore::getDensity(); }
+
+    /**
+     * The class of the screen's width now (widthClassOf(contentWidth)). XML
+     * reads it when a view is made; a view that lays itself out in code
+     * reads it there too, and the window size changed event says when it may
+     * have changed. ORIGINAL_WINDOW_WIDTH sets it for a small screen (480
+     * on a 320-pixel one); AURORE_DESIGN_SIZE=480x360 tries it on the desktop.
+     */
+    static WidthClass getWidthClass();
+
+    /**
+     * Lays every screen out for `preset` (PRESET_SMALL_SCREEN on a small
+     * screen): its design size, density and text scale. Before init(); a
+     * platform may give one (Platform::getLayoutPreset), the app's wins, and
+     * AURORE_PRESET (small or standard) wins over both on the desktop.
+     */
+    static void usePreset(const LayoutPreset& preset);
+    /// The text scale of the preset in use (1 without one): what Cadran's text
+    /// size setting multiplies.
+    static float getPresetTextScale() { return Application::presetTextScale; }
 
     /**
      * The data models XML bindings read (View::bind, bind="text: name.key"),
@@ -750,7 +808,6 @@ class Application
     inline static View* hoveredView = nullptr;
 
     inline static bool inited               = false;
-    inline static bool cadran               = true;
     inline static bool quitRequested        = false;
     inline static bool debuggingViewEnabled = false;
     inline static bool swapInputKeys        = false;
