@@ -167,14 +167,16 @@
   }
 })();
 
-// The documentation's search, over docs/search.json: each word typed must be
+// The documentation's search, over docs/search.json (the API's over
+// api/search.json): each word typed must be
 // in the section; its name counts more than its text.
 (function () {
   const box = document.querySelector(".doc-search");
   if (!box || !window.fetch) return;
   const input = box.querySelector("input");
   const list = box.querySelector("ol");
-  const base = input.dataset.index.replace(/docs\/search\.json$/, "");
+  // The links' base: the index's language folder, or data-base (the API's).
+  const base = input.dataset.base ?? input.dataset.index.replace(/docs\/search\.json$/, "");
   let index = null;
   box.hidden = false;
   function load() {
