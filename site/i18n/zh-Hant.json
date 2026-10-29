@@ -47,7 +47,7 @@
   "f_layout_title": "Flexbox 排版",
   "f_layout_text": "每個檢視都由 Yoga 排列、以 XML 描述，只在需要的地方寫程式碼。<code>gap</code>、<code>flexWrap</code>、每個角各自的圓角。",
   "f_graphics_title": "向量圖形",
-  "f_graphics_text": "由 nanovg 硬體加速：OpenGL、Direct3D 11、Switch 上的 deko3d、Vita 上的 GXM、New 3DS 上的 citro3d，並依電視尺寸縮放。",
+  "f_graphics_text": "由 nanovg 硬體加速：OpenGL、Direct3D 12、Switch 上的 deko3d、Vita 上的 GXM、New 3DS 上的 citro3d，並依電視尺寸縮放。",
   "f_components_title": "現成的元件",
   "f_components_title_short": "元件",
   "f_components_text": "分頁、重複利用儲存格的清單和格線、設定儲存格、對話框、動作選單、快顯通知、滑桿、Markdown，全部都能由主題重新設計樣式。",

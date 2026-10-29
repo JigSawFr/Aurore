@@ -47,7 +47,7 @@
   "f_layout_title": "Flexbox 布局",
   "f_layout_text": "每个视图都由 Yoga 排布、用 XML 描述，只在需要的地方写代码。<code>gap</code>、<code>flexWrap</code>、每个角单独设置圆角。",
   "f_graphics_title": "矢量图形",
-  "f_graphics_text": "由 nanovg 硬件加速：OpenGL、Direct3D 11、Switch 上的 deko3d、Vita 上的 GXM、New 3DS 上的 citro3d，并按电视尺寸缩放。",
+  "f_graphics_text": "由 nanovg 硬件加速：OpenGL、Direct3D 12、Switch 上的 deko3d、Vita 上的 GXM、New 3DS 上的 citro3d，并按电视尺寸缩放。",
   "f_components_title": "现成的组件",
   "f_components_title_short": "组件",
   "f_components_text": "标签页、复用单元格的列表和网格、设置单元格、对话框、操作菜单、轻提示、滑块、Markdown，全部可由主题重新设计样式。",

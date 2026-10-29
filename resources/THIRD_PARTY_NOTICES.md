@@ -18,7 +18,7 @@ versions that can be read from the sources.
 | fontstash | fork | `library/include/aurore/extern/nanovg/fontstash.h` | zlib | 2009-2013 Mikko Mononen |
 | nanovg's deko3d renderer | fork | `library/lib/extern/nanovg/deko3d`, `library/include/aurore/extern/nanovg/dk_renderer.hpp`, `nanovg_dk.h` | zlib | 2020 Adubbz, Mikko Mononen |
 | deko3d sample framework | - | `library/include/aurore/extern/nanovg/framework`, `library/lib/extern/nanovg/deko3d/framework` | as switchbrew's deko3d examples (fincs) | fincs |
-| nanovg's Direct3D 11 renderer | fork | `library/include/aurore/extern/nanovg/nanovg_d3d11.h` | zlib | 2009-2013 Mikko Mononen |
+| nanovg's SDL_GPU renderer | - | `library/include/aurore/extern/nanovg/nanovg_sdlgpu.h`, `library/include/aurore/extern/nanovg/nvg_shader/sdlgpu` | zlib | 2009-2013 Mikko Mononen, 2026 JigSawFr |
 | nanovg's GXM renderer (PS Vita) | - | `library/include/aurore/extern/nanovg/nanovg_gxm*.h` | zlib | 2024 xfangfang |
 | nanovg's citro3d renderer (New 3DS) | - | `library/include/aurore/extern/nanovg/nanovg_citro3d.h`, `library/lib/extern/nanovg/citro3d` | zlib | 2026 JigSawFr |
 | nanovg's PS4 renderer | - | `library/lib/extern/nanovg/ps4`, `library/include/aurore/extern/nanovg/nanovg_ps4.h` | zlib | 2023 xfangfang |

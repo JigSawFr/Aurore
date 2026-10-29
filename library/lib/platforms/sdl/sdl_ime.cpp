@@ -187,11 +187,7 @@ void SDLImeManager::openInputDialog(
     updateText();
     if (!initialText.empty())
         updateTextCursor();
-#if defined(AURORE_USE_D3D11)
-    float scale = Application::windowScale;
-#else
     float scale = Application::windowScale / Application::getPlatform()->getVideoContext()->getScaleFactor();
-#endif
     // 更新输入法条位置
     dialog->getLayoutEvent()->subscribe([scale](Point p)
         {

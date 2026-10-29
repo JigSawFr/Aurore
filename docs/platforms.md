@@ -6,7 +6,7 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 
 | Platform | `AURORE_PLATFORM` | Window and input (`AURORE_WINDOW`) | Drawing (`AURORE_GRAPHICS`) | Resources |
 | --- | --- | --- | --- | --- |
-| Linux, macOS, Windows | `DESKTOP` | SDL3 (default), GLFW or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
+| Linux, macOS, Windows | `DESKTOP` | SDL3 (default), GLFW or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; SDL_GPU, a prototype: Direct3D 12, Metal or Vulkan (`SDLGPU`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
 | Nintendo Switch | `SWITCH` | GLFW (default) or SDL2 | deko3d (`DEKO3D`) or OpenGL 4.3 | romfs, in the `.nro` |
 | PS Vita | `PSV` | SDL2, or the system's | GXM (`GXM`) or OpenGL ES 2 | in the `.vpk` |
 | PS4 | `PS4` | SDL2 | OpenGL ES 2 | in the `.pkg` |
@@ -61,7 +61,7 @@ cmake --build build
 ./build/aurore_demo.exe
 ```
 
-`-DAURORE_GRAPHICS=D3D11` draws with Direct3D 11 instead of OpenGL. `-DAURORE_WIN32_TERMINAL=OFF` makes a program without a console window (`ON` keeps one, for the logs). The demo links the C and C++ runtimes statically (`-static` in its `CMakeLists.txt`): it runs without MSYS2's DLLs. `library/cmake/MinGWCross.cmake` is a toolchain file for building it from Linux with MinGW-w64 (not built by CI).
+`-DAURORE_GRAPHICS=SDLGPU` draws with Direct3D 12 instead of OpenGL ([below](#sdl_gpu-on-the-desktop-prototype); Direct3D 11 is gone). `-DAURORE_WIN32_TERMINAL=OFF` makes a program without a console window (`ON` keeps one, for the logs). The demo links the C and C++ runtimes statically (`-static` in its `CMakeLists.txt`): it runs without MSYS2's DLLs. `library/cmake/MinGWCross.cmake` is a toolchain file for building it from Linux with MinGW-w64 (not built by CI).
 
 ## Nintendo Switch
 
@@ -173,6 +173,10 @@ The demo shows on the desktop how it looks on a console: its screen at the conso
 The Home tab shows the consoles (*On every screen*, `demo::simulation::drawPreview`) and the Developers tab lists them (*Simulated platform*): choosing one while the demo runs shows it there, the screens made again for it. The consoles are Boréale's, drawn as on its sites (PlayGuard's `site.css`, `.device` and its `DEVICE_GRIPS`, the reference): a body in the night's blues with a glow of aurora under it, dark controls, the sticks' caps ringed in teal; plain shapes, without a maker's logo, name or colours. The touches and the mouse are read on the screen only, and the window is sized for the console; the New 3DS's top screen shows the app's name and the time until an activity can give a view of its own. The screen is drawn at the window's resolution, not the console's pixels.
 
 An app does the same with `aurore::ScreenFrame` (`aurore/core/screen_frame.hpp`) and `Application::setScreenFrame()`: the frame says where the screen goes in the window and draws itself around it, the app is laid out and drawn in the screen, and its input read there. `tests/demo_tests.cpp` (`simulated_consoles`) checks each console against its picture in `tests/references/`.
+
+## SDL_GPU on the desktop (prototype)
+
+`-DAURORE_GRAPHICS=SDLGPU` draws with SDL3's GPU API instead of OpenGL: Direct3D 12 on Windows, Metal on macOS, Vulkan on Linux (and on Windows with `SDL_GPU_DRIVER=vulkan`). It needs the SDL3 window (the default). nanovg's renderer for it is `nanovg_sdlgpu.h`, a port of the OpenGL 3 one with the same shaders and passes; `driver/sdlgpu.cpp` draws each frame into a texture of the window's size, then onto the window, and reads it back for the screenshots. Its shaders are compiled ahead into `nvg_shader/sdlgpu/sdlgpu_shaders.h`, so that building Aurore needs no shader compiler: SPIR-V by glslang, then MSL and DXIL by [SDL_shadercross](https://github.com/libsdl-org/SDL_shadercross), SDL's own translator (`tools/build_shadercross.sh` builds it at pinned versions, `tools/make_sdlgpu_shaders.py` writes the header, and CI checks it is up to date). Not there yet: mobile, and the test harness, which stays on OpenGL. `SDL_GPU_DRIVER` (`direct3d12`, `vulkan`, `metal`) picks the driver, `AURORE_GPU_DEBUG=1` turns its validation on. CI runs the demo on Mesa's software Vulkan (lavapipe) and on Windows' software Direct3D 12 (WARP), and builds it on macOS.
 
 ## Options for every platform
 

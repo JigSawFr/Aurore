@@ -47,7 +47,7 @@
   "f_layout_title": "Maquetación flexbox",
   "f_layout_text": "Yoga coloca cada vista, descrita en XML, con código solo donde importa. <code>gap</code>, <code>flexWrap</code>, un radio por esquina.",
   "f_graphics_title": "Gráficos vectoriales",
-  "f_graphics_text": "Acelerados por hardware con nanovg: OpenGL, Direct3D 11, deko3d en la Switch, GXM en la Vita, citro3d en la New 3DS, a escala de un televisor.",
+  "f_graphics_text": "Acelerados por hardware con nanovg: OpenGL, Direct3D 12, deko3d en la Switch, GXM en la Vita, citro3d en la New 3DS, a escala de un televisor.",
   "f_components_title": "Componentes listos",
   "f_components_title_short": "Componentes",
   "f_components_text": "Pestañas, listas y cuadrículas que reciclan sus celdas, celdas de ajustes, diálogos, hojas de acciones, avisos, controles deslizantes, Markdown, todos con el estilo del tema.",

@@ -47,7 +47,7 @@
   "f_layout_title": "Flexbox レイアウト",
   "f_layout_text": "すべてのビューは Yoga が配置し、XML で記述。コードは必要なところだけ。<code>gap</code>、<code>flexWrap</code>、角ごとの角丸。",
   "f_graphics_title": "ベクターグラフィックス",
-  "f_graphics_text": "nanovg によるハードウェアアクセラレーション：OpenGL、Direct3D 11、Switch の deko3d、Vita の GXM、New 3DS の citro3d。テレビ向けにスケーリング。",
+  "f_graphics_text": "nanovg によるハードウェアアクセラレーション：OpenGL、Direct3D 12、Switch の deko3d、Vita の GXM、New 3DS の citro3d。テレビ向けにスケーリング。",
   "f_components_title": "すぐに使えるコンポーネント",
   "f_components_title_short": "コンポーネント",
   "f_components_text": "タブ、セルを再利用するリストとグリッド、設定セル、ダイアログ、アクションシート、トースト、スライダー、Markdown。すべてテーマでスタイルを変更できます。",

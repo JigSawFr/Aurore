@@ -830,15 +830,9 @@ void SDLInputManager::updateMouseStates(RawMouseState* state)
     state->middleButton = getMouseButtonState(SDL_BUTTON_MIDDLE);
     state->rightButton  = getMouseButtonState(SDL_BUTTON_RIGHT);
 
-#ifdef AURORE_USE_D3D11
-    // d3d11 scaleFactor 不计算在点击事件里
-    state->position.x = x / Application::windowScale;
-    state->position.y = y / Application::windowScale;
-#else
     double scaleFactor = aurore::Application::getPlatform()->getVideoContext()->getScaleFactor();
     state->position.x  = x * scaleFactor / Application::windowScale;
     state->position.y  = y * scaleFactor / Application::windowScale;
-#endif
 
     state->offset = pointerOffset;
 
