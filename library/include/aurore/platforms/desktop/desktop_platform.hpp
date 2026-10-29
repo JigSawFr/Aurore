@@ -53,6 +53,7 @@ class DesktopPlatform : public Platform
 
     ThemeVariant getThemeVariant() override;
     void setThemeVariant(ThemeVariant theme) override;
+    void followSystemTheme() override;
     std::string getLocale() override;
     ImeManager* getImeManager() override;
 
@@ -95,16 +96,22 @@ class DesktopPlatform : public Platform
     inline static std::string GAMEPAD_DB = AURORE_ASSET("gamepad/gamecontrollerdb.txt");
 
   protected:
+    /// The system's variant is now this one: the app's too while it follows
+    /// the system's
+    void systemThemeChanged(ThemeVariant theme);
+
     DesktopFontLoader* fontLoader = nullptr;
     ThemeVariant themeVariant     = ThemeVariant::LIGHT;
-    DesktopImeManager* imeManager = nullptr;
+    /// The system's variant (AURORE_THEME's when set), whatever the app chose
+    ThemeVariant systemThemeVariant = ThemeVariant::LIGHT;
+    DesktopImeManager* imeManager   = nullptr;
     std::string locale;
     /// AURORE_LANG gave the locale: the system's is not looked for
     bool localeFromEnvironment = false;
     /// AURORE_THEME gave the theme: the system's is not looked for
     bool themeFromEnvironment = false;
-    /// The variant is the system's and changes with it, until the app or
-    /// AURORE_THEME gives one (SDL3 tells when the system's changes)
+    /// The variant is the system's and changes with it, until the app gives
+    /// one (SDL3 tells when the system's changes; not with AURORE_THEME)
     bool themeFollowsSystem    = false;
     bool screenDimmingDisabled = false;
 #ifdef __linux__

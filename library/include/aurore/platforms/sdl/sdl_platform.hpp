@@ -62,7 +62,7 @@ class SDLPlatform : public DesktopPlatform
     Event<SDL_Event*> otherEvent;
 
 #ifdef __SDL3__
-    /// The system's light or dark into themeVariant
+    /// The system's light or dark (systemThemeChanged)
     void readSystemTheme();
 #endif
 };

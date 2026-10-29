@@ -38,6 +38,7 @@
 #endif
 #include <aurore/platforms/desktop/desktop_platform.hpp>
 #include <aurore/test/harness.hpp>
+#include <aurore/test/headless_platform.hpp>
 #include <aurore/views/edit_text_dialog.hpp>
 
 #include <algorithm>
@@ -606,6 +607,55 @@ AURORE_TEST(theme_picker_follows_a_one_variant_palette)
     h.settle();
     AURORE_CHECK_EQ(ui::prefs().theme_file, std::string(""));
     AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
+}
+
+// The system's variant followed as it changes, until the app picks one;
+// "system" in Cadran's settings goes back to it and follows it again
+AURORE_TEST(theme_follows_the_system_until_a_variant_is_chosen)
+{
+    DemoHarness h;
+    const ui::Prefs saved              = ui::prefs();
+    aurore::HeadlessPlatform* platform = h.platform();
+    ui::prefs().theme                  = "system";
+    ui::prefs().theme_file             = "";
+    live_prefs::apply_theme();
+    h.settle();
+
+    platform->setSystemTheme(aurore::ThemeVariant::LIGHT);
+    h.settle();
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT);
+    platform->setSystemTheme(aurore::ThemeVariant::DARK);
+    h.settle();
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
+
+    // Light chosen: kept when the system's changes
+    ui::prefs().theme = "light";
+    live_prefs::apply_theme();
+    h.settle();
+    platform->setSystemTheme(aurore::ThemeVariant::DARK);
+    h.settle();
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT);
+
+    // "system" again: the system's now, and its changes
+    ui::prefs().theme = "system";
+    live_prefs::apply_theme();
+    h.settle();
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
+    platform->setSystemTheme(aurore::ThemeVariant::LIGHT);
+    h.settle();
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::LIGHT);
+
+    // A palette with the dark variant only: dark, whatever the system's
+    ui::prefs().theme_file = "builtin:high-contrast-dark";
+    live_prefs::apply_theme();
+    h.settle();
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
+    platform->setSystemTheme(aurore::ThemeVariant::LIGHT);
+    h.settle();
+    AURORE_CHECK(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK);
+
+    ui::prefs() = saved;
+    live_prefs::apply_theme();
 }
 
 AURORE_TEST(theme_icon_is_read_and_inherited)

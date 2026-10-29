@@ -615,6 +615,7 @@ DesktopPlatform::DesktopPlatform()
     {
         this->themeVariant = ThemeVariant::DARK;
     }
+    this->systemThemeVariant = this->themeVariant;
 
     // Locale
     if (Platform::APP_LOCALE_DEFAULT == LOCALE_AUTO)
@@ -1172,6 +1173,20 @@ void DesktopPlatform::setThemeVariant(ThemeVariant theme)
     // The app's choice: the system's changes no longer replace it
     this->themeFollowsSystem = false;
     this->themeVariant       = theme;
+}
+
+void DesktopPlatform::systemThemeChanged(ThemeVariant theme)
+{
+    this->systemThemeVariant = theme;
+    if (this->themeFollowsSystem)
+        this->themeVariant = theme;
+}
+
+void DesktopPlatform::followSystemTheme()
+{
+    this->themeVariant = this->systemThemeVariant;
+    // Under SDL3, its changes from now on (AURORE_THEME's never change)
+    this->themeFollowsSystem = !this->themeFromEnvironment;
 }
 
 std::string DesktopPlatform::getLocale()

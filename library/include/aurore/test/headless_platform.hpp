@@ -130,6 +130,9 @@ class HeadlessPlatform : public DesktopPlatform
     InputManager* getInputManager() override { return &inputManager; }
     ImeManager* getImeManager() override { return &headlessImeManager; }
 
+    /// The system's variant changes, as SDL3 tells it
+    void setSystemTheme(ThemeVariant theme) { this->systemThemeChanged(theme); }
+
     bool canShowBatteryLevel() override { return showStatus; }
     bool canShowWirelessLevel() override { return showStatus; }
     int getBatteryLevel() override { return batteryLevel; }

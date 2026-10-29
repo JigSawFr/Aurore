@@ -424,8 +424,11 @@ HeadlessPlatform::HeadlessPlatform(int width, int height, std::string locale, Th
     , height(height)
 {
     // Not the machine's: the same screens everywhere
-    this->locale       = std::move(locale);
-    this->themeVariant = theme;
+    this->locale             = std::move(locale);
+    this->themeVariant       = theme;
+    this->systemThemeVariant = theme;
+    // As under SDL3, which tells when it changes (setSystemTheme)
+    this->themeFollowsSystem = true;
 }
 
 void HeadlessPlatform::createWindow(std::string title, uint32_t, uint32_t, float, float)

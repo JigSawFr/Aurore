@@ -156,9 +156,9 @@ void SDLPlatform::readSystemTheme()
 {
     SDL_SystemTheme theme = SDL_GetSystemTheme();
     if (theme == SDL_SYSTEM_THEME_DARK)
-        this->themeVariant = ThemeVariant::DARK;
+        this->systemThemeChanged(ThemeVariant::DARK);
     else if (theme == SDL_SYSTEM_THEME_LIGHT)
-        this->themeVariant = ThemeVariant::LIGHT;
+        this->systemThemeChanged(ThemeVariant::LIGHT);
 }
 #endif
 
@@ -260,8 +260,9 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     }
     else if (event->type == SDL_EVENT_SYSTEM_THEME_CHANGED)
     {
-        // The next frame redraws in it (Application::checkThemeChanged)
-        if (this->themeFollowsSystem)
+        // Kept for followSystemTheme when the app chose one; the next frame
+        // redraws in it otherwise (Application::checkThemeChanged)
+        if (!this->themeFromEnvironment)
             this->readSystemTheme();
     }
 #else

@@ -85,6 +85,8 @@ class CtrPlatform : public Platform
     bool mainLoopIteration() override;
     ThemeVariant getThemeVariant() override { return this->themeVariant; }
     void setThemeVariant(ThemeVariant theme) override { this->themeVariant = theme; }
+    // The console has no light or dark of its own: the dark it starts in
+    void followSystemTheme() override { this->themeVariant = ThemeVariant::DARK; }
     std::string getLocale() override;
 
     int getBatteryLevel() override;

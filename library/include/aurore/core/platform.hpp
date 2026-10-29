@@ -204,6 +204,14 @@ class Platform
     virtual void setThemeVariant(ThemeVariant theme) = 0;
 
     /**
+     * Back to the system's variant after setThemeVariant (a "system" choice
+     * in the app's settings): the one read at start, or AURORE_THEME's, and
+     * under SDL3 the system's as it changes from then on. A platform that
+     * reads no system's variant keeps the last one given.
+     */
+    virtual void followSystemTheme() { }
+
+    /**
      * Can be called at anytime to get the current locale
      *
      * For now, the locale is assumed to stay the same during the whole time
