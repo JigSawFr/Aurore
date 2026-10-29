@@ -397,6 +397,44 @@ AURORE_TEST(timers_follow_the_simulated_clock)
     AURORE_CHECK_EQ(value.getValue(), 1.0f);
 }
 
+// An Animatable's steps one after the other, each on its easing (Tweeny's
+// curves), from where the previous one ends; a step of no duration at once
+AURORE_TEST(animatable_steps_follow_their_easings)
+{
+    using E   = aurore::EasingFunction;
+    auto near = [](float a, float b)
+    { return std::abs(a - b) < 0.02f; };
+    AURORE_CHECK(near(aurore::ease(E::linear, 0.25f), 0.25f));
+    AURORE_CHECK(near(aurore::ease(E::quadraticOut, 0.5f), 0.75f));
+    AURORE_CHECK(near(aurore::ease(E::cubicIn, 0.5f), 0.125f));
+    for (E e : { E::linear, E::sinusoidalInOut, E::exponentialOut, E::elasticOut, E::bounceOut, E::backInOut })
+        AURORE_CHECK(near(aurore::ease(e, 0.0f), 0.0f) && near(aurore::ease(e, 1.0f), 1.0f));
+
+    Harness h;
+    aurore::Animatable value;
+    value.reset(0.0f);
+    AURORE_CHECK_EQ(value.getProgress(), 0.0f);
+    value.addStep(10.0f, 200, E::linear);
+    value.addStep(30.0f, 0); // at once
+    value.addStep(20.0f, 200, E::linear);
+    value.start();
+    h.advance(100);
+    AURORE_CHECK(value.getValue() > 3.0f && value.getValue() < 7.0f); // half way to 10
+    AURORE_CHECK(value.getProgress() > 0.15f && value.getProgress() < 0.35f);
+    h.advance(200);
+    AURORE_CHECK(value.getValue() > 22.0f && value.getValue() < 28.0f); // from 30, half way to 20
+    AURORE_CHECK(h.settle());
+    AURORE_CHECK_EQ(value.getValue(), 20.0f);
+    AURORE_CHECK_EQ(value.getProgress(), 1.0f);
+
+    // Rewound, back where the steps start; reset, the steps gone
+    value.rewind();
+    AURORE_CHECK_EQ(value.getValue(), 0.0f);
+    value.reset(5.0f);
+    AURORE_CHECK_EQ(value.getValue(), 5.0f);
+    AURORE_CHECK_EQ(value.getProgress(), 0.0f);
+}
+
 AURORE_TEST(redraw_on_demand_skips_still_frames)
 {
     Harness h;

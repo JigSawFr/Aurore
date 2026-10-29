@@ -46,32 +46,6 @@ float Entrance::at(float delay, float span) const
     return 1.0f - (1.0f - t) * (1.0f - t) * (1.0f - t); // cubic out
 }
 
-float ease(aurore::EasingFunction easing, float t)
-{
-    using E = aurore::EasingFunction;
-    switch (easing)
-    {
-        case E::cubicIn:
-            return tweeny::easing::cubicIn.run(t, 0.0f, 1.0f);
-        case E::cubicOut:
-            return tweeny::easing::cubicOut.run(t, 0.0f, 1.0f);
-        case E::cubicInOut:
-            return tweeny::easing::cubicInOut.run(t, 0.0f, 1.0f);
-        case E::sinusoidalInOut:
-            return tweeny::easing::sinusoidalInOut.run(t, 0.0f, 1.0f);
-        case E::exponentialOut:
-            return tweeny::easing::exponentialOut.run(t, 0.0f, 1.0f);
-        case E::backOut:
-            return tweeny::easing::backOut.run(t, 0.0f, 1.0f);
-        case E::elasticOut:
-            return tweeny::easing::elasticOut.run(t, 0.0f, 1.0f);
-        case E::bounceOut:
-            return tweeny::easing::bounceOut.run(t, 0.0f, 1.0f);
-        default:
-            return t;
-    }
-}
-
 // Ring
 
 RingGauge::RingGauge(float size, float thickness)
@@ -204,7 +178,7 @@ void EasingPlot::draw(NVGcontext* vg, float x, float y, float width, float heigh
     for (int i = 0; i <= steps; i++)
     {
         float t  = (float)i / steps;
-        float px = x + width * t, py = bottom - span * ease(this->easing, t);
+        float px = x + width * t, py = bottom - span * aurore::ease(this->easing, t);
         if (i == 0)
             nvgMoveTo(vg, px, py);
         else
@@ -217,7 +191,7 @@ void EasingPlot::draw(NVGcontext* vg, float x, float y, float width, float heigh
 
     float t = std::clamp(this->progress, 0.0f, 1.0f);
     nvgBeginPath(vg);
-    nvgCircle(vg, x + width * t, bottom - span * ease(this->easing, t), 6);
+    nvgCircle(vg, x + width * t, bottom - span * aurore::ease(this->easing, t), 6);
     nvgFillColor(vg, ctx->theme["cadran/text"]);
     nvgFill(vg);
 }
