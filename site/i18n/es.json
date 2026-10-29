@@ -105,6 +105,7 @@
   "stack_check_deprecated": "Una compilación falla con una API obsoleta: nada de código obsoleto, ningún alias guardado para después.",
   "stack_check_format": "Cada archivo fuente formateado con clang-format 18.",
   "stack_check_notices": "La versión de cada biblioteca incluida comprobada con su código fuente y listada con su licencia.",
+  "stack_check_upstream": "Cada lunes, los componentes incluidos se comparan con la última versión de su proyecto original; un issue lista los que se han quedado atrás.",
   "stack_link": "De dónde salen estas cifras",
   "vs_footer": "Aurore y borealis",
   "vs_page_title": "Aurore y borealis",

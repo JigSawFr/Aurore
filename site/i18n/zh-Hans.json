@@ -105,6 +105,7 @@
   "stack_check_deprecated": "遇到已弃用的 API 构建即失败：没有已弃用的代码，也不留以后再删的别名。",
   "stack_check_format": "每个源文件都经 clang-format 18 格式化。",
   "stack_check_notices": "每个内置库的版本都与其源码核对，并连同许可证一并列出。",
+  "stack_check_upstream": "每周一将内置组件与上游最新版本比对，落后的列在一个 issue 中。",
   "stack_link": "这些数字从何而来",
   "vs_footer": "Aurore 与 borealis",
   "vs_page_title": "Aurore 与 borealis",

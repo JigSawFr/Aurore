@@ -105,6 +105,7 @@
   "stack_check_deprecated": "Ein Build schlägt bei einer veralteten API fehl: kein veralteter Code, kein Alias für später.",
   "stack_check_format": "Jede Quelldatei mit clang-format 18 formatiert.",
   "stack_check_notices": "Die Version jeder mitgelieferten Bibliothek an ihrer Quelle geprüft und mit ihrer Lizenz aufgeführt.",
+  "stack_check_upstream": "Jeden Montag werden die mitgelieferten Komponenten mit der neuesten Version ihres Upstreams verglichen; ein Issue listet die veralteten.",
   "stack_link": "Woher diese Zahlen stammen",
   "vs_footer": "Aurore und borealis",
   "vs_page_title": "Aurore und borealis",
