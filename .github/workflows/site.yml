@@ -25,8 +25,10 @@ env:
   # The emsdk tool itself, at that version's tag, checked against the commit
   # the tag pointed to when pinned: a tag can be moved, a commit cannot.
   EMSDK_COMMIT: 35659964bc2762fffec0d257997fb61475f765b7
-  # Playwright, pinned, for the layout and accessibility check.
+  # Playwright, pinned, for the layout and accessibility check and the
+  # demo's smoke test; Pillow for the latter's screenshots.
   PLAYWRIGHT_VERSION: 1.64.0
+  PILLOW_VERSION: 13.0.0
   # axe-core, for accessibility (tools/site_layout.py): its npm package,
   # checked against the hash it had when pinned.
   AXE_VERSION: 4.13.0
@@ -78,6 +80,22 @@ jobs:
               echo "| \`$f\` | $(du -k "build-web/web/$f" | cut -f1) KB | $(gzip -9c "build-web/web/$f" | wc -c | awk '{print int($1/1024)}') KB |"
             done
           } >> "$GITHUB_STEP_SUMMARY"
+      # The demo started in headless Chromium: its first screen, a key, the
+      # service worker of GitHub Pages, the address' language and theme
+      - name: The demo in Chromium (tools/web_smoke.py)
+        timeout-minutes: 15
+        run: |
+          python3 -m venv "$RUNNER_TEMP/playwright"
+          "$RUNNER_TEMP/playwright/bin/pip" install -q "playwright==$PLAYWRIGHT_VERSION" "pillow==$PILLOW_VERSION"
+          sudo "$RUNNER_TEMP/playwright/bin/python" -m playwright install-deps chromium
+          "$RUNNER_TEMP/playwright/bin/python" -m playwright install chromium
+          "$RUNNER_TEMP/playwright/bin/python" -u tools/web_smoke.py build-web/web build-web/smoke
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: ${{ !cancelled() }}
+        with:
+          name: demo-smoke
+          path: build-web/smoke
+          retention-days: 7
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: demo

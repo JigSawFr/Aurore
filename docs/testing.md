@@ -122,6 +122,10 @@ TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R au
 
 `tests/host/`: Cadran's plain C++ parts without a window, each suite linked only to the sources it tests: the palettes' contrast (every pair of `cadran::palette::CONTRAST`, both themes), safe text and the Markdown parser, `ui::guarded`, and the text helpers (`cadran_text`, `format_text`) over the real `cadran.json` catalogs. `ctest -R host` runs them alone.
 
+## The demo in a browser
+
+`tools/web_smoke.py` starts the demo's build for a browser in headless Chromium: its first screen, a key, the service worker GitHub Pages needs, the address' language and theme ([web/README.md](../web/README.md#testing-it)).
+
 ## The bench
 
 `aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, nanovg draw calls, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, flush, swap, total).
