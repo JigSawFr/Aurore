@@ -6,13 +6,15 @@
 
 **Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch**
 
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](#-use-it-in-your-project)
+[![CI](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml?query=branch%3Amain)
+[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](#-under-the-hood)
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
 [**Website**](https://aurore.boreale.dev/) ·
 [**Try&nbsp;it**](https://aurore.boreale.dev/demo/) ·
 [**What's new**](#-what-aurore-adds) ·
+[**Under&nbsp;the&nbsp;hood**](#-under-the-hood) ·
 [**Use&nbsp;it**](#-use-it-in-your-project) ·
 [**Build&nbsp;the&nbsp;demo**](#-build-the-demo) ·
 [**Upstream&nbsp;wiki**](https://github.com/xfangfang/borealis/wiki)
@@ -209,6 +211,34 @@ Side by side with borealis, change by change: <https://aurore.boreale.dev/boreal
 Each commit says what it changes, why, and where it comes from: `git log 5f08b28..`.
 
 </details>
+
+## 🔩 Under the hood
+
+<!-- under-the-hood: begin (tools/stack.py writes this) -->
+| | Version |
+| --- | --- |
+| Language | C++20 |
+| CMake | 3.16–3.31 |
+| SDL3 | 3.4.18 |
+| SDL | 2.32.10 |
+| GLFW | 3.4 |
+| glad | 2.0.8 |
+| Yoga | 3.2.1 |
+| {fmt} | 12.2.0 |
+| TinyXML-2 | 11.0.0 |
+| JSON for Modern C++ | 3.12.0 |
+| stb_image | 2.30 |
+| stb_truetype | 1.26 |
+| Tweeny | 3.2.1 |
+| Twemoji | 17.0.3 |
+| Android Gradle Plugin | 9.5.0 |
+| Gradle | 9.8.2 |
+| Android NDK | r30 |
+| Android API | 36 |
+| Emscripten | 6.0.12 |
+
+Checked on every pull request: 145 test cases in the headless harness, 25 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 39 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 47 of the 47 GitHub Actions used are pinned to a commit. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+<!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
 

@@ -213,6 +213,11 @@ figure.code figcaption { font-family: var(--mono); font-size: 0.75rem; letter-sp
   mask-composite: exclude; -webkit-mask-composite: xor;
 }
 
+/* Under the hood: the figures (.glance), then the versions beside the checks. */
+#stack .glance { margin-bottom: clamp(28px, 4vw, 44px); }
+.versions { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 28px; border-top: 1px solid var(--night-line); }
+.versions li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-block: 9px; border-bottom: 1px solid var(--night-line); color: var(--mist); font-size: 0.9375rem; }
+.versions code { color: var(--aurora); font-size: 0.875rem; white-space: nowrap; }
 .columns { display: grid; gap: 32px 48px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .columns > div { display: grid; gap: 16px; align-content: start; min-width: 0; }

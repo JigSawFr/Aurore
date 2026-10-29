@@ -502,6 +502,8 @@ jobs:
           # A system font for Chinese, Japanese and Korean, which the library
           # finds with fontconfig (the case cjk_from_the_system_fonts)
           sudo apt install -y --no-install-recommends fontconfig fonts-wqy-microhei
+          # tools/stack.py reads the workflows
+          sudo apt install -y --no-install-recommends python3-yaml
       - name: Compiler cache
         uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
@@ -510,12 +512,19 @@ jobs:
         env:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          # A deprecated API is an error, the vendored code's included: the
+          # README's "Under the hood" says so
+          CFLAGS: -Werror=deprecated-declarations
+          CXXFLAGS: -Werror=deprecated-declarations
         run: |
           cmake --preset tests
           cmake --build --preset tests
       - name: Third-party notices
         # Each vendored component and font listed, the versions they say (needs the submodules)
         run: python3 tools/check_notices.py
+      - name: Under the hood
+        # The README's versions and figures, as the repository has them
+        run: python3 tools/stack.py --check
       - name: Test
         run: ctest --preset tests
       - name: Bench
