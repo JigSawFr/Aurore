@@ -1788,9 +1788,20 @@ View::~View()
     highlightAlpha.stop();
     collapseState.stop();
 
+    if (this->topScreenView)
+        this->topScreenView->freeView();
+
     YGNodeFree(this->ygNode);
 
     alive.reset();
+}
+
+void View::setTopScreenView(View* view)
+{
+    if (this->topScreenView)
+        this->topScreenView->freeView();
+    this->topScreenView = view;
+    Application::requestRedraw();
 }
 
 std::string View::getStringXMLAttributeValue(std::string value)

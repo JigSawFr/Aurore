@@ -2,17 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // A screen to look at, above the app's: the New 3DS's top screen (400x240),
-// over the touch screen where the app's content is. The activity on top
-// gives what it shows (Activity::setTopScreenView(): the item chosen, its
-// details); one that gives nothing shows TopScreenHeader. The platform says
-// the screen is there (TopScreen::setSize()), a simulation of it too, and
-// draws it with TopScreen::draw() (docs/platforms.md).
+// over the touch screen where the app's content is. The app gives what it
+// shows: a view for the focus and what is inside it (View::setTopScreenView(),
+// a list's preview of the item chosen), else one for the activity on top
+// (Activity::setTopScreenView()). With nothing given, TopScreenHeader: the
+// title of the header that moved there (AppletFrame::setHeaderOnTopScreen()).
+// The platform says the screen is there (TopScreen::setSize()), a simulation
+// of it too, and draws it with TopScreen::draw() (docs/platforms.md).
 
 #pragma once
 
 #include <nanovg.h>
 
 #include <aurore/core/box.hpp>
+#include <aurore/core/event.hpp>
 #include <aurore/core/geometry.hpp>
 #include <aurore/views/label.hpp>
 
@@ -29,6 +32,8 @@ class TopScreen
     static bool isAvailable() { return width > 0 && height > 0; }
     static int getWidth() { return width; }
     static int getHeight() { return height; }
+    /// Fired with isAvailable() when it changes
+    static Event<bool>* getAvailabilityChanged() { return &availabilityChanged; }
 
     /// Its size in layout units: its pixels at the app's screen's scale
     /// (Application::windowScale), so that a text is as big on both
@@ -40,6 +45,11 @@ class TopScreen
     /// window in a simulation)
     static void draw(NVGcontext* vg, Rect rect);
 
+    /// What the screen shows, nullptr for TopScreenHeader: the top screen
+    /// view nearest to the focus (View::setTopScreenView()), else the
+    /// activity's on top
+    static View* getShownView();
+
     /// What a header says: the title of the activity on top (its AppletFrame's),
     /// else the app's
     static std::string getTitle();
@@ -47,6 +57,7 @@ class TopScreen
   private:
     inline static int width  = 0;
     inline static int height = 0;
+    inline static Event<bool> availabilityChanged;
 };
 
 /// The top screen of an activity that gives none: the activity's title, the

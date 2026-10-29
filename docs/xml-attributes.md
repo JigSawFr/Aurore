@@ -132,6 +132,7 @@ Any attribute prefixed with `compact:`, `medium:` or `expanded:` applies on a sc
 |---|---|
 | `footerHidden` | `true` / `false` |
 | `headerHidden` | `true` / `false` |
+| `headerOnTopScreen` | `true` / `false` |
 | `style` | `popup` · `regular` |
 
 ## `<aurore:Button>`
