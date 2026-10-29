@@ -455,8 +455,9 @@ class Application
      * threads (Threading::isIdle()), inputs not blocked (a screen opening or
      * closing), and no redraw asked for (a view fading on the clock). What a
      * test waits for before it presses the next button or takes a screenshot.
-     * With AURORE_DEV_TOOLS, AURORE_SETTLE_FILE=<path> writes it to a file on
-     * every loop, for a test driving the app from outside (docs/testing.md).
+     * With AURORE_DEV_TOOLS, AURORE_SETTLE_FILE (a file's path) has it
+     * written there on every loop, for a test driving the app from outside
+     * (docs/testing.md).
      */
     static bool isSettled();
 
