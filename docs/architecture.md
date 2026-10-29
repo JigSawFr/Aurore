@@ -10,7 +10,7 @@ flowchart TB
     cadran["Cadran<br/>library/*/cadran: the look, pickers, dialogs"]
     views["Views<br/>library/*/views: Label, Button, ScrollingFrame, RecyclerFrame, cells…"]
     core["Core<br/>library/*/core: Application, View, Box, Activity, Theme, Style, i18n, threads"]
-    platforms["Platforms<br/>library/*/platforms: GLFW, SDL, Switch, PS Vita, PS4, Android"]
+    platforms["Platforms<br/>library/*/platforms: GLFW, SDL, Switch, PS Vita, PS4, New 3DS, Android"]
     extern["Bundled libraries<br/>library/lib/extern: nanovg, Yoga, tinyxml2, fmt, SDL, GLFW…"]
     app --> cadran
     app --> views
@@ -104,7 +104,7 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 
 ## Platforms and drivers
 
-`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, or on the desktop SDL or GLFW (`-DAURORE_WINDOW=SDL2`, `SDL3` or `GLFW`; one SDL platform for SDL2 and SDL3, `platforms/sdl/`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
+`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, New 3DS (`platforms/ctr/`), or on the desktop SDL or GLFW (`-DAURORE_WINDOW=SDL2`, `SDL3` or `GLFW`; one SDL platform for SDL2 and SDL3, `platforms/sdl/`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
 
 | Interface | Does |
 | --- | --- |
@@ -116,7 +116,7 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 | `FontLoader` | the fonts ([fonts.md](fonts.md)) |
 | `ImeManager` | text input: the system keyboard, or an `EditTextDialog` |
 
-`platforms/desktop/` holds what Windows, macOS, Linux and iOS share under GLFW or SDL (the system's theme and language, fonts, the Steam Deck). Code that differs by platform otherwise uses the compiler's defines (`__SWITCH__`, `__PSV__`, `PS4`, `ANDROID`, `IOS`, `__EMSCRIPTEN__`). Building for each platform is in [platforms.md](platforms.md).
+`platforms/desktop/` holds what Windows, macOS, Linux and iOS share under GLFW or SDL (the system's theme and language, fonts, the Steam Deck). Code that differs by platform otherwise uses the compiler's defines (`__SWITCH__`, `__PSV__`, `PS4`, `__3DS__`, `ANDROID`, `IOS`, `__EMSCRIPTEN__`). Building for each platform is in [platforms.md](platforms.md).
 
 ## Threads
 
