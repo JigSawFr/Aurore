@@ -212,7 +212,8 @@ endif ()
 # The demo in a browser (web/README.md): threads (a pool started with the
 # page: a thread asked for later waits for the browser, which a busy main
 # thread never lets it have), WebGL 2, the resources packaged (aurore_demo.data),
-# then the page around it in <build>/web/.
+# then the page around it in <build>/web/, with the website's fonts and
+# Boréale's marks for its header.
 if (AURORE_WEB)
     target_link_options(${PROJECT_NAME} PRIVATE
         -pthread -fexceptions -sUSE_SDL=${AURORE_WEB_SDL} -sUSE_ZLIB=1
@@ -237,7 +238,10 @@ if (AURORE_WEB)
                 ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/mark.svg
                 ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/sora.woff2
                 ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/figtree.woff2
+                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/twemoji-flags.woff2
+                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/LICENSE-twemoji-flags.txt
                 ${AURORE_WEB_SITE}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/marks ${AURORE_WEB_SITE}/marks
         COMMENT "Assembling the demo's page in ${AURORE_WEB_SITE}")
 endif ()
 

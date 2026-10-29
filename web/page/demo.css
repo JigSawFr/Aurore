@@ -1,121 +1,558 @@
-/* SPDX-FileCopyrightText: 2026 JigSawFr */
-/* SPDX-License-Identifier: Apache-2.0 */
+/* SPDX-FileCopyrightText: 2026 JigSawFr
+   SPDX-License-Identifier: Apache-2.0 */
 
-/* The demo's page in a browser (web/README.md), in the website's look:
-   Boréale's night, Sora for the name, Figtree for the rest. */
-@font-face { font-family: "Sora"; src: url("sora.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
-@font-face { font-family: "Figtree"; src: url("figtree.woff2") format("woff2"); font-weight: 300 900; font-display: swap; }
-
+/* The demo's page in a browser (web/README.md), as PlayGuard's and
+   PlayShelf's simulators, in the website's look (site/assets/site.css): its
+   colours, its header, Sora for the name and Figtree for the rest. The teal
+   of the focus highlight, on a navy that frames the console's screen. */
+/* Light by default; dark when the page says so (data-theme, set before the
+   first paint from the URL, the choice kept or the system's). */
+@font-face {
+  font-family: "Sora";
+  src: url("sora.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Figtree";
+  src: url("figtree.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+}
+/* The language menu's flags, the same everywhere (Windows draws none of its
+   own): the website's 15 cut out of Twemoji's (CC-BY 4.0,
+   LICENSE-twemoji-flags.txt; both copied by CMake from site/assets/fonts/). */
+@font-face {
+  font-family: "Twemoji Flags";
+  src: url("twemoji-flags.woff2") format("woff2");
+  unicode-range: U+1F1E6-1F1FF;
+  font-display: swap;
+}
 :root {
-  --abyss: #0b1424;
-  --night: #0e1a33;
-  --night-2: #12213f;
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --text: #121b2c;
+  --muted: #536079;
+  --line: #dbe2ec;
+  --accent: #0a705f;
+  --accent-text: #ffffff;
+  --warn: #a8720a;
+  --stop: #c62a2f;
+  --frame: #0f1724;
+  --radius: 10px;
+  --display: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0b1424;
+  --surface: #111d31;
+  --surface-2: #17253d;
+  --text: #e8eef7;
+  --muted: #a9b6cc;
   --line: #22324f;
-  --snow: #e8eef7;
-  --mist: #a9b6cc;
-  --aurora: #00ffcc;
-  --ice: #33bbff;
-  --link: #6fd0ff;
-  --violet: #8a5cff;
-  --grad: linear-gradient(100deg, var(--aurora) 0%, var(--ice) 55%, var(--violet) 100%);
+  --accent: #2ec4a6;
+  --accent-text: #05140f;
+  --warn: #f0b429;
+  --stop: #ff7a7e;
+  --frame: #05090f;
   color-scheme: dark;
 }
+
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--abyss); color: var(--snow); }
-body { font: 1rem/1.55 "Figtree", "Segoe UI", system-ui, sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; }
-a { color: var(--link); text-underline-offset: 3px; }
-a:hover { color: var(--aurora); }
-:focus-visible { outline: 2px solid var(--aurora); outline-offset: 2px; border-radius: 6px; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 var(--body);
+  display: flex;
+  flex-direction: column;
+}
+button, input, select { font: inherit; color: inherit; }
 [hidden] { display: none !important; }
 
-.bar {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
-  padding: 10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+.top {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 16px;
+  /* Under an iPhone's notch or status bar (viewport-fit=cover; from the
+     home screen, the status bar over the page): kept clear of them. */
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  /* Boréale's night in either theme, as the website's header: the page's
+     colours, those of its dark theme, redefined for the header alone. */
+  --surface: #0e1a33;
+  --surface-2: #17253d;
+  --text: #e8eef7;
+  --muted: #a9b6cc;
+  --line: #22324f;
+  --accent: #00ffcc;
+  --accent-text: #05140f;
+  color: var(--text);
+  color-scheme: dark;
   border-bottom: 1px solid var(--line);
-  background: radial-gradient(60% 160% at 10% -80%, rgba(0, 255, 204, 0.16), transparent 70%),
-              radial-gradient(50% 160% at 90% -80%, rgba(138, 92, 255, 0.18), transparent 70%), var(--abyss);
+  background: var(--surface);
 }
-.brand { display: flex; align-items: center; gap: 8px; color: var(--snow); text-decoration: none; font: 700 1.2rem "Sora", system-ui, sans-serif; letter-spacing: -0.02em; min-height: 44px; }
-.brand:hover { color: var(--snow); }
-.brand small { font: 500 0.75rem "Figtree", system-ui, sans-serif; color: var(--abyss); background: var(--grad); border-radius: 99px; padding: 2px 8px; letter-spacing: 0; }
-.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.select { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; color: var(--mist); }
-select, .controls button {
-  min-height: 40px; padding: 0 12px; font: 16px "Figtree", system-ui, sans-serif; color: var(--snow);
-  background: var(--night); border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
+.brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font: 700 20px var(--display); letter-spacing: -0.01em; }
+.brand b { color: var(--text); font-weight: 700; }
+.nav { display: flex; gap: 18px; }
+.nav a { color: var(--muted); text-decoration: none; font-weight: 500; font-size: 15px; white-space: nowrap; }
+.nav a:hover { color: var(--text); }
+.brand .tag {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
 }
-.controls button { font-size: 0.9375rem; }
-.controls button[aria-pressed="true"] { border-color: var(--aurora); color: var(--aurora); }
-select:hover, .controls button:hover { border-color: var(--mist); }
+.build { flex: 1; min-width: 0; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.build a { color: inherit; }
+.build code { font-size: 12px; }
 
-.stage { display: grid; gap: 20px; padding: 20px max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left)); max-width: 1320px; margin: 0 auto; }
-.screen-wrap { display: grid; place-items: center; }
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  min-height: 0;
+}
+.layout.no-panel { grid-template-columns: minmax(0, 1fr); }
+.layout.no-panel .panel { display: none; }
+
+.stage { padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; overflow: auto; }
 .screen {
-  position: relative; width: min(100%, calc((100vh - 120px) * 16 / 9)); aspect-ratio: 16 / 9; min-width: 0;
-  border-radius: 14px; overflow: hidden; background: #000;
-  box-shadow: 0 0 0 1px rgba(232, 238, 247, 0.12), 0 0 0 7px rgba(14, 26, 51, 0.8), 0 30px 90px -30px rgba(0, 0, 0, 0.9), 0 0 110px -20px rgba(51, 187, 255, 0.35);
+  position: relative;
+  width: 100%;
+  max-width: calc((100vh - 236px) * 16 / 9);
+  min-width: 0;
+  margin: 0 auto;
+  background: var(--frame);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.18);
 }
-#canvas { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
-.loading, .error {
-  position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; padding: 24px; text-align: center;
-  background: radial-gradient(70% 60% at 50% 0%, rgba(0, 255, 204, 0.12), transparent 70%), var(--abyss);
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  outline: none;
+  touch-action: none;
+  background: #000;
 }
-.loading img { animation: glow 2.4s ease-in-out infinite; }
-@keyframes glow { 50% { filter: drop-shadow(0 0 18px rgba(0, 255, 204, 0.6)); } }
-.progress { width: min(320px, 70vw); height: 6px; border-radius: 99px; background: var(--night-2); overflow: hidden; }
-.progress span { display: block; height: 100%; width: 0; background: var(--grad); transition: width 0.2s; }
-.hint { color: var(--mist); font-size: 0.875rem; }
-.error p { max-width: 52ch; color: var(--mist); }
+canvas:focus-visible { box-shadow: 0 0 0 3px var(--accent); }
 
-/* The on-screen pad: under the screen in portrait, beside it in landscape. */
-.pad { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "sh sh sh" "dpad . face"; gap: 16px; align-items: center; user-select: none; -webkit-user-select: none; touch-action: none; }
+.overlay {
+  position: absolute;
+  inset: 10px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--frame);
+  color: #c9d3e1;
+  text-align: center;
+  padding: 24px;
+}
+.overlay.error .spinner { display: none; }
+.overlay p { margin: 0; max-width: 46ch; }
+.overlay button { margin-top: 4px; }
+.spinner {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgb(255 255 255 / 0.15);
+  border-top-color: #22b39a;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.controls {
+  width: 100%;
+  max-width: calc((100vh - 236px) * 16 / 9);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.keys { margin: 0; color: var(--muted); font-size: 13px; }
+@media (pointer: coarse) { .keys { display: none; } }
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface);
+  font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+}
+.control-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+/* The tools (demo.js' setUpTools()): a row, behind a button on a phone. */
+.tools > summary { display: none; list-style: none; cursor: pointer; }
+.tools > summary::-webkit-details-marker { display: none; }
+.tool-list { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .tools > summary { display: inline-block; }
+  .tools > summary::after { content: " ▾"; }
+  .tools[open] > summary::after { content: " ▴"; }
+  .tools[open] .tool-list { margin-top: 8px; }
+}
+#record[aria-pressed="true"] { border-color: #d1495b; color: #d1495b; }
+#record[aria-pressed="true"]::before { content: "● "; }
+
+.overlay progress { width: min(260px, 70%); accent-color: #22b39a; }
+.overlay .hint { color: #8d9bb2; font-size: 13px; }
+.overlay.error { color: #ffb4b6; }
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: rgb(15 23 36 / 0.9);
+  color: #e6ebf2;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.pad {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+/* The screen and the pad are played with: a long press opens no loupe,
+   selection or menu (iOS), a tap leaves no grey flash. */
+.screen, .pad {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
 .pad button {
-  font: 600 1rem "Sora", system-ui, sans-serif; color: var(--snow); background: var(--night); border: 1px solid var(--line);
-  min-width: 48px; min-height: 48px; border-radius: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 10px;
+  min-width: 48px;
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
 }
-.pad button.held { background: var(--night-2); border-color: var(--aurora); color: var(--aurora); }
-.shoulders { grid-area: sh; display: flex; justify-content: space-between; gap: 8px; }
-.shoulders button { flex: 1; max-width: 72px; }
-.dpad, .face { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 52px); gap: 4px; }
-.dpad { grid-area: dpad; }
-.face { grid-area: face; }
-.dpad .up, .face .x { grid-area: 1 / 2; }
-.dpad .left, .face .y { grid-area: 2 / 1; }
-.dpad .right, .face .a { grid-area: 2 / 3; }
-.dpad .down, .face .b { grid-area: 3 / 2; }
+.pad button.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.pad-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.shoulders button.small { min-width: 40px; border-radius: 999px; }
+.dpad, .face { display: grid; grid-template: repeat(3, 48px) / repeat(3, 48px); gap: 4px; }
+.dpad .up { grid-area: 1 / 2; } .dpad .left { grid-area: 2 / 1; }
+.dpad .right { grid-area: 2 / 3; } .dpad .down { grid-area: 3 / 2; }
 .face button { border-radius: 50%; }
+.face .x { grid-area: 1 / 2; } .face .y { grid-area: 2 / 1; }
+.face .a { grid-area: 2 / 3; } .face .b { grid-area: 3 / 2; }
 
-.help { display: grid; gap: 12px; max-width: 760px; margin: 12px auto 0; color: var(--mist); }
-.help h1 { font: 600 clamp(1.4rem, 3vw, 1.9rem)/1.2 "Sora", system-ui, sans-serif; letter-spacing: -0.02em; color: var(--snow); margin: 0; }
-.help p { margin: 0; }
-.keys { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
-.keys li { display: flex; align-items: center; gap: 6px; }
-kbd { font: 500 0.8125rem "JetBrains Mono", ui-monospace, monospace; color: var(--snow); background: var(--night); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; }
-.links { font-size: 0.9375rem; }
-
-/* Full screen: the screen and the pad only. */
-body.full .bar, body.full .help { display: none; }
-body.full .stage { padding: 0; max-width: none; height: 100vh; align-content: center; }
-body.full .screen { width: min(100vw, calc(100vh * 16 / 9)); border-radius: 0; box-shadow: none; }
-
-@media (orientation: landscape) and (max-height: 560px) {
-  .stage { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; padding-top: 8px; }
-  .screen { width: min(100%, calc((100vh - 70px) * 16 / 9)); }
-  .screen-wrap { grid-column: 2; grid-row: 1; }
-  .pad:not([hidden]) { display: contents; }
-  .pad .shoulders { display: none; }
-  .pad .dpad { grid-column: 1; grid-row: 1; }
-  .pad .face { grid-column: 3; grid-row: 1; }
-  .help { grid-column: 1 / -1; }
+.panel {
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
-@media (prefers-reduced-motion: reduce) { .loading img { animation: none; } }
-
-/* A phone: the header's controls on one line, their labels for screen readers only. */
-@media (max-width: 640px) {
-  .select span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .controls { gap: 6px; }
-  select { max-width: 7.5rem; padding: 0 8px; }
-  .controls button { padding: 0 10px; }
-  #fullscreen { font-size: 0; min-width: 44px; }
-  #fullscreen::after { content: "⛶"; font-size: 1.15rem; }
+.tabs { display: flex; border-bottom: 1px solid var(--line); padding: 0 8px; }
+.tab {
+  border: 0;
+  background: none;
+  padding: 10px 12px;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
 }
+.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-body { flex: 1; overflow: auto; padding: 12px 16px; min-height: 0; }
+
+.field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 10px; }
+.field > span { font-size: 13px; color: var(--muted); }
+.field.check { flex-direction: row; align-items: flex-start; gap: 8px; }
+.field.check > span { color: var(--text); font-size: 14px; }
+.field.check input { margin-top: 3px; accent-color: var(--accent); }
+.field.changed > span { color: var(--accent); font-weight: 600; }
+.help { margin: -2px 0 10px; font-size: 12px; color: var(--muted); }
+.field.check + .help { margin-left: 24px; }
+input:not([type="checkbox"]), select {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.preset { padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+
+.group { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.group summary { cursor: pointer; font-weight: 600; padding: 4px 0; list-style-position: inside; }
+.group summary .count {
+  font-weight: 500;
+  font-size: 12px;
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.group[open] summary { margin-bottom: 8px; }
+
+.log {
+  margin: 0;
+  font: 11.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--muted);
+}
+.log .err { color: #d1495b; }
+
+.panel-actions { display: flex; gap: 8px; padding: 12px 16px 6px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.note { margin: 0; padding: 0 16px 12px; font-size: 12px; color: var(--muted); }
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+.btn.primary.pending { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
+.btn.ghost { background: transparent; }
+.header-settings { display: flex; gap: 8px; margin-left: auto; }
+/* The language button as the website's (site/assets/site.css), the theme's
+   select of the same height and look beside it. */
+.header-settings select { width: auto; height: 40px; padding: 0 8px 0 10px; font-size: 14px; color: var(--text); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; }
+.lang-button {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 10px 0 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2);
+  color: var(--text); font: 500 14px var(--body); cursor: pointer; white-space: nowrap;
+}
+.lang-button .chevron { width: 14px; height: 14px; flex: none; color: var(--muted); transition: transform 0.2s, color 0.2s; }
+.lang-button:hover .chevron { color: var(--text); }
+.lang-button:has(+ .langs:popover-open) .chevron { transform: rotate(180deg); color: var(--accent); }
+.lang-code { display: none; font: 600 14px system-ui, sans-serif; }
+/* A language's flag before its name, in the button and in the menu. */
+.flag { flex: none; font: 18px/1 "Twemoji Flags", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.langs .flag { margin-right: 10px; }
+/* Their menu: a popover under the button, its right edge on the button's
+   (demo.js' setUpLanguages()), in Boréale's night whatever the theme. */
+.langs {
+  position: absolute; inset: auto; top: 64px; right: 16px; margin: 0;
+  width: min(460px, calc(100vw - 24px)); max-height: min(70vh, 520px); overflow: auto; padding: 8px;
+  list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+  border: 1px solid #22324f; border-radius: 16px; color: #e8eef7; background: #0e1a33;
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.8);
+  color-scheme: dark;
+}
+.langs:not(:popover-open) { display: none; }
+.langs::backdrop { background: transparent; }
+.langs a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 10px; color: #e8eef7; text-decoration: none; font-size: 15px; }
+.langs a:hover, .langs a:focus-visible { background: rgb(232 238 247 / 0.06); color: #e8eef7; }
+.langs a:focus-visible { outline: 2px solid #00ffcc; outline-offset: -2px; }
+.langs a[aria-current] { background: rgb(0 255 204 / 0.08); box-shadow: inset 2px 0 0 #00ffcc; font-weight: 600; }
+.picker { position: relative; display: inline-flex; }
+.picker-face { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.notice {
+  width: 100%;
+  max-width: calc((100vh - 236px) * 16 / 9);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 13px;
+}
+.icon-btn { border: 0; background: none; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+.icon-btn:hover { background: var(--surface-2); }
+
+@media (max-width: 900px) {
+  html, body { height: auto; }
+  .layout { display: block; }
+  .stage { padding: 12px 16px; overflow: visible; }
+  .screen, .controls { max-width: none; }
+  .screen { padding: 6px; border-radius: 10px; }
+  .overlay { inset: 6px; }
+  .panel { border-left: 0; border-top: 1px solid var(--line); }
+  .tab-body { max-height: none; overflow: visible; }
+  .build { display: none; }
+  .notice { max-width: none; }
+  .panel-actions { position: sticky; bottom: 0; background: var(--surface); }
+}
+
+/* The header on a tablet or a phone, as the website's: no links (the name
+   leads to it), the language's button with its flag and code only, the
+   theme's menu as a short face (its icon) over the system's list, on the
+   name's row. */
+@media (max-width: 900px) {
+  .nav { display: none; }
+  .top { flex-wrap: nowrap; gap: 10px; }
+  .header-settings { gap: 6px; }
+  .lang-name { display: none; }
+  .lang-code { display: inline; }
+  .lang-button { gap: 6px; padding: 0 8px 0 10px; }
+  .picker-face { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 44px; height: 40px; padding: 0 10px;
+                 border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--text); font: 600 14px system-ui, sans-serif; }
+  .picker-face::before { content: ""; width: 18px; height: 18px; background: currentColor;
+                         -webkit-mask: var(--glyph) center / contain no-repeat; mask: var(--glyph) center / contain no-repeat; }
+  .picker-theme .picker-face { --glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M12 3a9 9 0 0 1 0 18z'/%3E%3C/svg%3E"); }
+  :root[data-theme-choice="light"] .picker-theme .picker-face { --glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'/%3E%3C/svg%3E"); }
+  :root[data-theme-choice="dark"] .picker-theme .picker-face { --glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z'/%3E%3C/svg%3E"); }
+  .picker select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 16px; cursor: pointer; }
+  .picker:focus-within .picker-face { outline: 2px solid var(--accent); outline-offset: 2px; }
+}
+@media (max-width: 480px) {
+  .brand { font-size: 18px; gap: 8px; }
+  .brand img { width: 28px; height: 28px; }
+  .brand .tag { display: none; }
+}
+/* A small phone: the language's flag alone, then (320px) everything a
+   little tighter, so that the name, the menus and the settings' button stay
+   on one row. */
+@media (max-width: 380px) {
+  .top { gap: 8px; }
+  .lang-code { display: none; }
+}
+@media (max-width: 340px) {
+  .brand { font-size: 16px; gap: 6px; }
+  .brand img { width: 26px; height: 26px; }
+  .lang-button { padding: 0 10px; }
+  .lang-button .chevron { display: none; }
+  .picker-face { min-width: 40px; }
+  /* The pad within the screen's width too. */
+  .pad-row { gap: 6px; }
+  .pad button { min-width: 44px; }
+  .shoulders button.small { min-width: 36px; }
+  .dpad, .face { grid-template: repeat(3, 44px) / repeat(3, 44px); }
+}
+
+/* A touch screen (a phone, a tablet). */
+@media (pointer: coarse) {
+  /* 16px: iOS zooms into a smaller field when it is touched. */
+  input:not([type="checkbox"]), select, textarea, .header-settings select { font-size: 16px; }
+  /* The pad right under the screen, the tools after it. */
+  .pad { order: 1; }
+  .controls { order: 3; }
+}
+
+/* A phone in landscape: the screen as high as it can be, the pad on either
+   side of it as on a Switch (the shoulders and − / + above and under its
+   stick and buttons); the rest under it. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  html, body { height: auto; }
+  .top { padding: 4px 12px; flex-wrap: nowrap; }
+  .brand .tag, .build, .nav { display: none; }
+  .layout { display: block; }
+  .stage {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr) 140px;
+    grid-template-areas: "lsh screen rsh" "dpad screen face" "lmid screen rmid";
+    align-items: center;
+    gap: 8px 12px;
+    padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: visible;
+  }
+  .stage:has(> .pad[hidden]) { grid-template-columns: 0 minmax(0, 1fr) 0; column-gap: 0; }
+  .screen { grid-area: screen; width: 100%; max-width: calc((100dvh - 76px) * 16 / 9); padding: 6px; border-radius: 10px; }
+  .overlay { inset: 6px; }
+  .stage > .notice, .stage > .controls { grid-column: 1 / -1; max-width: none; }
+  .pad, .pad-row { display: contents; }
+  .dpad, .face { grid-template: repeat(3, 44px) / repeat(3, 44px); }
+  .dpad { grid-area: dpad; }
+  .face { grid-area: face; }
+  .pad [data-button="0"] { grid-area: lsh; justify-self: start; }
+  .pad [data-button="1"] { grid-area: lsh; justify-self: end; }
+  .pad [data-button="15"] { grid-area: rsh; justify-self: start; }
+  .pad [data-button="16"] { grid-area: rsh; justify-self: end; }
+  .pad [data-button="7"] { grid-area: lmid; justify-self: center; }
+  .pad [data-button="9"] { grid-area: rmid; justify-self: center; }
+}
+
+/* Playing: in full screen (the Fullscreen button, demo.js: html.game),
+   or from the home screen held in landscape. Only the screen and the pad,
+   as on a Switch; turned back upright (or out of full screen), the rest is
+   there again. */
+@media (display-mode: standalone) and (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .top, .panel, .stage > .notice, .stage > .controls { display: none !important; }
+  .stage { min-height: 100dvh; align-content: center; }
+  .screen { max-width: calc((100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 16 / 9); }
+}
+html.game, html.game body { background: #000; }
+html.game .top, html.game .panel, html.game .stage > .notice,
+html.game .stage > .controls { display: none !important; }
+html.game .layout { display: block; }
+html.game .stage { min-height: 100dvh; justify-content: center; align-content: center; }
+html.game .screen { max-width: calc((100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 16 / 9); }
+.fs-exit {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(8px, env(safe-area-inset-right));
+  z-index: 5;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.14);
+  color: #fff;
+  font-size: 18px;
+}
+html:not(.game) .fs-exit { display: none; }
+
+
+/* ---- Boréale's site switcher: the name, a button that opens the menu of
+   the four sites (a popover: the browser closes it on Esc or a click
+   elsewhere), Aurore's leading to the website. The website's block
+   (site/assets/site.css), its marks copied by CMake into marks/. */
+.switcher { display: flex; flex-shrink: 0; align-items: center; }
+.switch {
+  min-height: 44px; margin-left: -8px; padding: 0 8px; border: 0; border-radius: 12px;
+  background: transparent; color: #e8eef7; cursor: pointer; text-align: left;
+}
+.switch .chevron { width: 16px; height: 16px; color: #a9b6cc; transition: transform 0.2s, color 0.2s; }
+.switch:hover { background: rgb(232 238 247 / 0.06); }
+.switch:hover .chevron { color: #e8eef7; }
+.switcher:has(.sites:popover-open) .chevron { transform: rotate(180deg); color: #00ffcc; }
+.sites {
+  position: absolute; inset: auto; top: 64px; left: 16px; margin: 0;
+  width: min(400px, calc(100vw - 24px)); max-height: calc(100vh - 88px); overflow: auto; padding: 8px;
+  border: 1px solid #22324f; border-radius: 16px; color: #e8eef7;
+  background: radial-gradient(120% 80% at 0% 0%, rgb(0 255 204 / 0.08), transparent 60%),
+              radial-gradient(100% 80% at 100% 100%, rgb(138 92 255 / 0.1), transparent 60%), #0e1a33;
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(11 20 36 / 0.6);
+}
+.sites::backdrop { background: transparent; }
+.sites-title { margin: 14px 10px 6px; padding-top: 12px; border-top: 1px solid #22324f; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #a9b6cc; }
+.sites ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.sites a {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  min-height: 56px; padding: 8px 10px; border-radius: 12px; color: #e8eef7; text-decoration: none;
+}
+.sites a:hover, .sites a:focus-visible { color: #e8eef7; background: rgb(232 238 247 / 0.06); }
+.sites a[aria-current] { background: rgb(0 255 204 / 0.08); box-shadow: inset 2px 0 0 #00ffcc; }
+.sites img { display: block; width: 36px; height: 36px; }
+.sites strong { display: block; color: #e8eef7; font: 600 16px/1.3 var(--display); letter-spacing: -0.01em; }
+.sites small { display: block; color: #a9b6cc; font-size: 14px; line-height: 1.35; }
+.sites .soon {
+  font-size: 11px; font-weight: 500; line-height: 1.6; font-style: normal; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+  color: #ffb86b; border: 1px solid rgb(255 184 107 / 0.45); border-radius: 999px; padding: 1px 8px;
+}
+@media (prefers-reduced-motion: reduce) { .switch .chevron, .lang-button .chevron { transition: none; } }
