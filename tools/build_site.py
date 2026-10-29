@@ -357,7 +357,7 @@ def json_ld(data):
 
 
 def page(t, lang, to_root, path, title, body, description=None, home=False, structured=(), indexed=True,
-         markdown_url=None):
+         markdown_url=None, lost=False):
     """A whole page: `path` is its place under the language's folder ('' or 'docs/x/')."""
     code, folder, _, og_locale = next(l for l in LANGUAGES if l[0] == lang)
     other = next(l for l in LANGUAGES if l[0] != lang)
@@ -378,9 +378,12 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     base = f"{to_root}{lang_dir(lang)}"
     api = f'<li><a href="{to_root}api/">{t("nav_api")}</a></li>' if API_DIR else ""
     api += f'<li><a class="nav-try" href="{to_root}demo/{demo_query(lang)}">{t("nav_demo")}</a></li>' if DEMO_DIR else ""
-    sky = '<canvas id="sky" aria-hidden="true"></canvas>' if home else ""
-    hero = body[0] if home else ""
-    main = body[1] if home else body
+    # The aurora behind the home page's hero, and the page not found's (body
+    # a pair, then: what stands under the sky, and the rest).
+    aurora = home or lost
+    sky = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
+    hero = body[0] if aurora else ""
+    main = body[1] if aurora else body
     docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
                          for p, g, n in DOCS if g == "start")
     umami = "" if NOINDEX else (f'<script src="{to_root}assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
@@ -401,6 +404,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <link rel="manifest" href="{to_root}manifest.webmanifest">
 <link rel="alternate" type="application/atom+xml" href="{SITE_URL}releases.atom" title="Aurore releases">
 <link rel="preload" href="{to_root}assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{to_root}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{to_root}assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aurore">
@@ -418,7 +422,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 {umami}</head>
 <body class="{'home' if home else 'inner'}">
 <a class="skip" href="#main">{t("skip")}</a>
-<div class="sky{' sky-home' if home else ''}">
+<div class="sky{' sky-home' if aurora else ''}">
   {sky}
   <header class="wrap top">
     {switcher(t, lang, to_root, base, "aurore", f'<img src="{to_root}assets/mark.svg" alt="" width="34" height="34">Aurore', VERSIONS)}
@@ -1006,7 +1010,7 @@ def main():
                       f'<p class="actions"><a class="button primary" href="{root_path}{f"{folder}/" if folder else ""}">{tl("home")}</a> '
                       f'<a class="button ghost" href="{root_path}{f"{folder}/" if folder else ""}docs/getting-started/">{tl("docs_title")}</a></p></div>')
     write(out, "404.html", page(t, "en", root_path, "", f"{t.plain('not_found_title')} · Aurore",
-                                '  <div class="wrap lost">\n' + "\n".join(blocks) + "\n  </div>", indexed=False))
+                                ('  <div class="wrap lost">\n' + "\n".join(blocks) + "\n  </div>", ""), indexed=False, lost=True))
     write(out, "manifest.webmanifest", json.dumps({
         "name": "Aurore", "short_name": "Aurore", "start_url": "./", "scope": "./", "display": "browser",
         "background_color": "#0b1424", "theme_color": "#0b1424",
