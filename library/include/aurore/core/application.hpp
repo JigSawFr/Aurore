@@ -33,6 +33,7 @@
 #include <aurore/core/notification_manager.hpp>
 #include <aurore/core/observable.hpp>
 #include <aurore/core/platform.hpp>
+#include <aurore/core/screen_frame.hpp>
 #include <aurore/core/style.hpp>
 #include <aurore/core/theme.hpp>
 #include <aurore/core/view.hpp>
@@ -156,8 +157,22 @@ class Application
     inline static float presetTextScale = 1.0f;
     inline static bool presetChosen     = false; ///< usePreset() called by the app
 
-    /// The window's size in pixels.
+    /// The app's screen's size in pixels: the window's, or the screen's in
+    /// it when there is a ScreenFrame.
     inline static unsigned windowWidth, windowHeight;
+    /// The window's whole size in pixels (what is drawn and read back).
+    inline static unsigned framebufferWidth, framebufferHeight;
+
+    /**
+     * A frame drawn around the app's screen (the demo's simulated consoles):
+     * the app laid out and drawn in its screen, the frame over the rest of
+     * the window. Kept by the application (deleted when replaced); nullptr
+     * for none, the window all screen.
+     */
+    static void setScreenFrame(ScreenFrame* frame);
+    static ScreenFrame* getScreenFrame();
+    /// The screen's rectangle in the window, in pixels.
+    static Rect getScreenRect();
 
     /// The window's position on the screen (desktop).
     inline static int windowXPos, windowYPos;
@@ -827,6 +842,8 @@ class Application
     inline static bool redrawDebug         = false;
     inline static uint64_t missedRedraws   = 0;
     static Rect missedRedrawArea;
+    inline static std::unique_ptr<ScreenFrame> screenFrame;
+    inline static Rect screenRect;
     inline static std::vector<unsigned char> presentedPixels;
     inline static int presentedWidth = 0, presentedHeight = 0;
     inline static int deactivatedFPS  = 5; ///< FPS 5
