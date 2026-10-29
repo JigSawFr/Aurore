@@ -40,7 +40,9 @@
 // The caller owns citro3d (C3D_Init, the render target, C3D_FrameBegin and
 // C3D_FrameEnd): nvgEndFrame draws on the target bound with C3D_FrameDrawOn.
 // Call nvgC3DFrameBegin after C3D_FrameBegin: the GPU is then done with the
-// previous frame, and the textures deleted since are freed.
+// previous frame, and the textures deleted since are freed. A frame can
+// draw on several targets (the two screens): a nvgBeginFrame and nvgEndFrame
+// for each, after C3D_FrameDrawOn.
 
 #ifndef NANOVG_CITRO3D_H
 #define NANOVG_CITRO3D_H
@@ -199,8 +201,13 @@ struct Context
     std::vector<Path> paths;
     std::vector<NVGvertex> verts;
 
+    // The frame's vertices, every flush's after the last one's: the GPU
+    // reads them when the frame ends, a screen after another (one flush
+    // each). A buffer outgrown during the frame is freed at the next one.
     NVGvertex* linearVerts = nullptr;
     size_t linearCapacity  = 0;
+    size_t linearUsed      = 0;
+    std::vector<NVGvertex*> pendingLinear;
 };
 
 // PICA200 textures are 8x8 tiles in rows, Morton order inside a tile, the
@@ -730,13 +737,16 @@ inline void renderFlush(void* uptr)
     }
 
     // The vertices in linear memory, where the GPU reads them (citro3d
-    // flushes the linear heap from the cache when the frame ends)
-    if (ctx->linearCapacity < ctx->verts.size())
+    // flushes the linear heap from the cache when the frame ends), after
+    // those of the frame's earlier flushes
+    if (ctx->linearCapacity < ctx->linearUsed + ctx->verts.size())
     {
         if (ctx->linearVerts)
-            linearFree(ctx->linearVerts);
-        ctx->linearCapacity = ctx->verts.size() + ctx->verts.size() / 4;
+            ctx->pendingLinear.push_back(ctx->linearVerts);
+        size_t needed       = ctx->linearUsed + ctx->verts.size();
+        ctx->linearCapacity = needed + needed / 4;
         ctx->linearVerts    = static_cast<NVGvertex*>(linearAlloc(ctx->linearCapacity * sizeof(NVGvertex)));
+        ctx->linearUsed     = 0;
         if (!ctx->linearVerts)
         {
             std::fprintf(stderr, "nanovg citro3d: no linear memory for %zu vertices\n", ctx->verts.size());
@@ -745,7 +755,9 @@ inline void renderFlush(void* uptr)
             return;
         }
     }
-    std::memcpy(ctx->linearVerts, ctx->verts.data(), ctx->verts.size() * sizeof(NVGvertex));
+    NVGvertex* frameVerts = ctx->linearVerts + ctx->linearUsed;
+    std::memcpy(frameVerts, ctx->verts.data(), ctx->verts.size() * sizeof(NVGvertex));
+    ctx->linearUsed += ctx->verts.size();
 
     C3D_BindProgram(&ctx->program);
     C3D_AttrInfo* attr = C3D_GetAttrInfo();
@@ -753,7 +765,7 @@ inline void renderFlush(void* uptr)
     AttrInfo_AddLoader(attr, 0, GPU_FLOAT, 4); // v0 = (x, y, u, v)
     C3D_BufInfo* buf = C3D_GetBufInfo();
     BufInfo_Init(buf);
-    BufInfo_Add(buf, ctx->linearVerts, sizeof(NVGvertex), 1, 0x0);
+    BufInfo_Add(buf, frameVerts, sizeof(NVGvertex), 1, 0x0);
 
     C3D_Mtx proj;
     Mtx_OrthoTilt(&proj, 0.0f, ctx->viewWidth, ctx->viewHeight, 0.0f, -1.0f, 1.0f, false);
@@ -818,11 +830,15 @@ inline void renderFlush(void* uptr)
     resetFrame(ctx);
 }
 
-inline void freeTextures(Context* ctx)
+inline void freeDeferred(Context* ctx)
 {
     for (C3D_Tex& tex : ctx->pendingDeletes)
         C3D_TexDelete(&tex);
     ctx->pendingDeletes.clear();
+    for (NVGvertex* verts : ctx->pendingLinear)
+        linearFree(verts);
+    ctx->pendingLinear.clear();
+    ctx->linearUsed = 0;
 }
 
 inline int renderCreate(void* uptr)
@@ -855,7 +871,7 @@ inline void renderDelete(void* uptr)
     auto* ctx = static_cast<Context*>(uptr);
     if (!ctx)
         return;
-    freeTextures(ctx);
+    freeDeferred(ctx);
     for (auto& [id, t] : ctx->textures)
         C3D_TexDelete(&t.tex);
     for (auto& g : ctx->gradients)
@@ -903,7 +919,7 @@ void nvgDeleteC3D(NVGcontext* ctx)
 
 void nvgC3DFrameBegin(NVGcontext* ctx)
 {
-    nvgc3d::freeTextures(static_cast<nvgc3d::Context*>(nvgInternalParams(ctx)->userPtr));
+    nvgc3d::freeDeferred(static_cast<nvgc3d::Context*>(nvgInternalParams(ctx)->userPtr));
 }
 
 #endif /* NANOVG_CITRO3D_IMPLEMENTATION */

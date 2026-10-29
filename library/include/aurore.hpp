@@ -35,6 +35,7 @@
 #include <aurore/core/thread.hpp>
 #include <aurore/core/time.hpp>
 #include <aurore/core/timer.hpp>
+#include <aurore/core/top_screen.hpp>
 #include <aurore/core/video.hpp>
 #include <aurore/core/view.hpp>
 

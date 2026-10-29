@@ -59,6 +59,14 @@ class VideoContext
      */
     virtual bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) { return false; }
 
+    /**
+     * A second screen (the New 3DS's top one, aurore/core/top_screen.hpp):
+     * cleared to `color` and made the target of the next nanovg frame, after
+     * the app's. Returns false where there is none (a simulation draws it in
+     * the window instead).
+     */
+    virtual bool beginTopScreen(NVGcolor color) { return false; }
+
     virtual void setSwapInterval(int interval) = 0;
 
     virtual int getCurrentMonitorIndex() { return 0; }

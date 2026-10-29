@@ -7,8 +7,10 @@
 // citro3d renderer handles (colour, gradients, image, nonzero fill, hole,
 // strokes, scissor, text). Three buttons and a line for the input: the
 // D-pad, the Circle Pad or the C-stick move the focus, A or a touch clicks,
-// the line shows the buttons held, the sticks and the touch. The log goes to
-// the top screen. START quits (docs/platforms.md).
+// the line shows the buttons held, the sticks and the touch. The top screen
+// is the activity's top screen view (TopScreen, the second citro3d target):
+// the console's model, the sizes, the last button clicked. START quits
+// (docs/platforms.md).
 
 #include <3ds.h>
 
@@ -24,8 +26,6 @@ namespace
 
 const char* const LAYOUT = R"xml(
 <aurore:Box axis="column" width="100%" height="100%" padding="12dp" backgroundColor="#101828">
-    <aurore:Label id="title" fontSize="22" textColor="#F5F7FF" marginBottom="4dp" />
-    <aurore:Label id="details" fontSize="15" textColor="#9AA8C7" marginBottom="8dp" />
     <aurore:Box axis="row" marginBottom="6dp">
         <aurore:Button id="one" text="One" grow="1" marginRight="6dp" style="primary" />
         <aurore:Button id="two" text="Two" grow="1" marginRight="6dp" />
@@ -34,6 +34,19 @@ const char* const LAYOUT = R"xml(
     <aurore:Label id="input" fontSize="13" textColor="#9AA8C7" />
 </aurore:Box>
 )xml";
+
+// The top screen: what the log said, and the last click
+const char* const TOP_LAYOUT = R"xml(
+<aurore:Box axis="column" width="100%" height="100%" padding="24" justifyContent="center" backgroundColor="#0A1428">
+    <aurore:Label id="title" fontSize="40" textColor="#F5F7FF" marginBottom="8" />
+    <aurore:Label id="details" fontSize="22" textColor="#9AA8C7" marginBottom="4" />
+    <aurore:Label id="sizes" fontSize="22" textColor="#9AA8C7" marginBottom="24" />
+    <aurore:Label id="clicked" fontSize="26" textColor="#00FFCC" marginBottom="24" />
+    <aurore:Label id="hint" fontSize="20" textColor="#9AA8C7" />
+</aurore:Box>
+)xml";
+
+aurore::Label* clicked = nullptr;
 
 // Six cells: what the renderer draws, one kind each
 class TestCard : public aurore::Box
@@ -158,11 +171,18 @@ std::string describeInput()
     return line;
 }
 
-// A button clicked (A or a touch), in the log
-bool logClick(aurore::View* view)
+// A button clicked (A or a touch), on the top screen
+bool showClick(aurore::View* view)
 {
-    std::printf("Clicked %s\n", view->getId().c_str());
+    if (clicked)
+        clicked->setText("Clicked: " + view->getId());
     return true;
+}
+
+void setText(aurore::View* root, const char* id, const std::string& text)
+{
+    if (auto* label = dynamic_cast<aurore::Label*>(root->getView(id)))
+        label->setText(text);
 }
 
 } // namespace
@@ -173,23 +193,30 @@ int main(int argc, char** argv)
         return 1;
     aurore::Application::createWindow("Aurore");
     aurore::Application::setGlobalQuit(false);
-    std::printf("Aurore %s on the %s\n", AURORE_VERSION, aurore::Application::getPlatform()->getName().c_str());
-    std::printf("Design size %ux%u, density %.2f\n", aurore::Application::ORIGINAL_WINDOW_WIDTH,
-        aurore::Application::ORIGINAL_WINDOW_HEIGHT, aurore::getDensity());
-    std::printf("START quits.\n\n");
 
-    auto* root = dynamic_cast<aurore::Box*>(aurore::View::createFromXMLString(LAYOUT));
-    if (!root)
+    auto* root        = dynamic_cast<aurore::Box*>(aurore::View::createFromXMLString(LAYOUT));
+    aurore::View* top = aurore::View::createFromXMLString(TOP_LAYOUT);
+    if (!root || !top)
         return 1;
-    if (auto* title = dynamic_cast<aurore::Label*>(root->getView("title")))
-        title->setText("Aurore on citro3d");
-    if (auto* details = dynamic_cast<aurore::Label*>(root->getView("details")))
-        details->setText(aurore::Application::getPlatform()->getName() + ", Aurore " + AURORE_VERSION);
     auto* input = dynamic_cast<aurore::Label*>(root->getView("input"));
     for (const char* id : { "one", "two", "three" })
-        root->getView(id)->registerClickAction(logClick);
+        root->getView(id)->registerClickAction(showClick);
     root->addView(new TestCard());
-    aurore::Application::pushActivity(new aurore::Activity(root));
+
+    char sizes[96];
+    std::snprintf(sizes, sizeof(sizes), "Design %ux%u, density %.2f, top %.0fx%.0f",
+        aurore::Application::ORIGINAL_WINDOW_WIDTH, aurore::Application::ORIGINAL_WINDOW_HEIGHT, aurore::getDensity(),
+        aurore::TopScreen::getContentWidth(), aurore::TopScreen::getContentHeight());
+    setText(top, "title", "Aurore on citro3d");
+    setText(top, "details", aurore::Application::getPlatform()->getName() + ", Aurore " + AURORE_VERSION);
+    setText(top, "sizes", sizes);
+    setText(top, "clicked", "Clicked: nothing yet");
+    setText(top, "hint", "START quits");
+    clicked = dynamic_cast<aurore::Label*>(top->getView("clicked"));
+
+    auto* activity = new aurore::Activity(root);
+    activity->setTopScreenView(top);
+    aurore::Application::pushActivity(activity);
 
     std::string shown;
     while (aurore::Application::mainLoop())

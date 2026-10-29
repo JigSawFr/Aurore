@@ -8,6 +8,7 @@
 
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
+#include <aurore/core/top_screen.hpp>
 #include <aurore/platforms/ctr/ctr_video.hpp>
 
 namespace aurore
@@ -32,8 +33,6 @@ namespace
 CtrVideoContext::CtrVideoContext()
 {
     gfxInitDefault();
-    // The log, on the top screen
-    consoleInit(GFX_TOP, nullptr);
 
     if (!C3D_Init(C3D_DEFAULT_CMDBUF_SIZE * 2))
     {
@@ -49,6 +48,13 @@ CtrVideoContext::CtrVideoContext()
         return;
     }
     C3D_RenderTargetSetOutput(this->target, GFX_BOTTOM, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+    // The top screen, 240 wide and 400 high, its left eye only (no
+    // stereoscopic 3D): the activity's top screen view
+    this->topTarget = C3D_RenderTargetCreate(TOP_HEIGHT, TOP_WIDTH, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
+    if (this->topTarget)
+        C3D_RenderTargetSetOutput(this->topTarget, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
+    else
+        Logger::error("3DS: no render target for the top screen");
 
     this->nvgContext = nvgCreateC3D(0);
     if (!this->nvgContext)
@@ -57,6 +63,8 @@ CtrVideoContext::CtrVideoContext()
         return;
     }
     Application::setWindowSize(WIDTH, HEIGHT);
+    if (this->topTarget)
+        TopScreen::setSize(TOP_WIDTH, TOP_HEIGHT);
 }
 
 CtrVideoContext::~CtrVideoContext()
@@ -67,6 +75,8 @@ CtrVideoContext::~CtrVideoContext()
         nvgDeleteC3D(this->nvgContext);
     if (this->target)
         C3D_RenderTargetDelete(this->target);
+    if (this->topTarget)
+        C3D_RenderTargetDelete(this->topTarget);
     C3D_Fini();
     gfxExit();
 }
@@ -87,6 +97,15 @@ void CtrVideoContext::clear(NVGcolor color)
     C3D_RenderTargetClear(this->target, C3D_CLEAR_ALL, clearColor(color), 0);
     // nanovg draws there at nvgEndFrame
     C3D_FrameDrawOn(this->target);
+}
+
+bool CtrVideoContext::beginTopScreen(NVGcolor color)
+{
+    if (!this->topTarget || !this->inFrame)
+        return false;
+    C3D_RenderTargetClear(this->topTarget, C3D_CLEAR_ALL, clearColor(color), 0);
+    C3D_FrameDrawOn(this->topTarget);
+    return true;
 }
 
 void CtrVideoContext::endFrame()

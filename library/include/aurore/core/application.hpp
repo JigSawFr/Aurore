@@ -92,6 +92,7 @@ class Application
 {
   public:
     friend class EditTextDialog;
+    friend class TopScreen;
 
     static inline uint32_t ORIGINAL_WINDOW_WIDTH  = 1280; ///< The design width, in layout units
     static inline uint32_t ORIGINAL_WINDOW_HEIGHT = 720; ///< The design height

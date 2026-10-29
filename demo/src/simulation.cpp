@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cstring>
-#include <ctime>
 #include <aurore.hpp>
 #include <aurore/cadran/ui/live_prefs.hpp>
 #include <aurore/core/time.hpp>
@@ -276,57 +275,37 @@ namespace
         nvgFill(vg);
     }
 
-    // What the screen's header says: the activity's title, the app's when
-    // it has none
-    std::string headerTitle()
-    {
-        const auto& stack = aurore::Application::getActivitiesStack();
-        if (!stack.empty())
-            if (auto* label = dynamic_cast<aurore::Label*>(stack.back()->getView("aurore/applet_frame/title_label")))
-                if (!label->getFullText().empty())
-                    return label->getFullText();
-        return aurore::Application::getTitle();
-    }
-
-    // The top screen, until an activity gives its own: the activity's title
-    // and the time, as a header would show them
-    void drawTopScreen(NVGcontext* vg, const Map& m)
+    // The top screen: the activity's top screen view (aurore::TopScreen),
+    // as the console's second target draws it; a night with the aurora low
+    // on it in a picture of the console
+    void drawTopScreen(NVGcontext* vg, const Map& m, bool live)
     {
         aurore::Rect top(m.x(-40), m.y(-342), m.s(400), m.s(240));
         float x = top.getMinX(), y = top.getMinY(), w = top.getWidth(), h = top.getHeight();
-        nvgBeginPath(vg);
-        nvgRect(vg, x, y, w, h);
-        nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x, y + h, nvgRGB(0x10, 0x18, 0x2C), nvgRGB(0x0A, 0x0F, 0x1C)));
-        nvgFill(vg);
-        nvgBeginPath(vg);
-        nvgRect(vg, x, y + h * 0.62f, w, h * 0.38f);
-        nvgFillPaint(vg, nvgLinearGradient(vg, x, y + h * 0.62f, x + w, y + h, nvgRGBA(0x00, 0xFF, 0xCC, 0x30), nvgRGBA(0x8A, 0x5C, 0xFF, 0x30)));
-        nvgFill(vg);
-
-        int font = aurore::Application::getFont(aurore::FONT_REGULAR);
-        if (font >= 0)
+        if (live && aurore::TopScreen::isAvailable())
         {
-            char clock[16]  = "";
-            std::time_t now = aurore::getWallTime(); // the harness' own in the tests
-            if (std::tm* local = std::localtime(&now))
-                std::strftime(clock, sizeof(clock), "%H:%M", local);
-            nvgFontFaceId(vg, font);
-            nvgFontSize(vg, m.s(20));
-            nvgFillColor(vg, nvgRGB(0xF5, 0xF7, 0xFF));
-            nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
-            nvgText(vg, x + m.s(16), y + m.s(26), headerTitle().c_str(), nullptr);
-            nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_MIDDLE);
-            nvgText(vg, x + w - m.s(16), y + m.s(26), clock, nullptr);
+            aurore::TopScreen::draw(vg, top);
+        }
+        else
+        {
+            nvgBeginPath(vg);
+            nvgRect(vg, x, y, w, h);
+            nvgFillPaint(vg, nvgLinearGradient(vg, x, y, x, y + h, nvgRGB(0x10, 0x18, 0x2C), nvgRGB(0x0A, 0x0F, 0x1C)));
+            nvgFill(vg);
+            nvgBeginPath(vg);
+            nvgRect(vg, x, y + h * 0.62f, w, h * 0.38f);
+            nvgFillPaint(vg, nvgLinearGradient(vg, x, y + h * 0.62f, x + w, y + h, nvgRGBA(0x00, 0xFF, 0xCC, 0x30), nvgRGBA(0x8A, 0x5C, 0xFF, 0x30)));
+            nvgFill(vg);
         }
         glass(vg, top, m.s(10));
     }
 
-    void drawClamshell(NVGcontext* vg, const Map& m, const aurore::Rect& screen)
+    void drawClamshell(NVGcontext* vg, const Map& m, const aurore::Rect& screen, bool live)
     {
         // The top half, the hinge, the bottom half (the app's screen)
         glow(vg, m, -112, -378, 432, 300, screen);
         body(vg, m, -112, -378, 432, -66, 24, nullptr);
-        drawTopScreen(vg, m);
+        drawTopScreen(vg, m, live);
         nvgBeginPath(vg);
         roundRect(vg, m, -100, -72, 420, -30, 14);
         nvgFillColor(vg, CONTROL);
@@ -371,6 +350,10 @@ namespace
             float k = std::min(width * 0.94f / w, height * 0.94f / h);
             float x = (width - w * k) / 2 + margins.left * k;
             float y = (height - h * k) / 2 + margins.top * k;
+            // The New 3DS's top screen, in the pixels of the app's screen as
+            // the window shows it
+            if (!std::strcmp(device.id, "3ds"))
+                aurore::TopScreen::setSize((int)std::round(400 * k), (int)std::round(240 * k));
             return aurore::Rect(std::round(x), std::round(y), std::round(device.screenWidth * k), std::round(device.screenHeight * k));
         }
 
@@ -383,11 +366,12 @@ namespace
             nvgFill(vg);
 
             Map m { screen.getMinX(), screen.getMinY(), screen.getWidth() / device.screenWidth };
-            drawConsole(vg, m, screen);
+            drawConsole(vg, m, screen, true);
         }
 
-        // The console alone, around `screen`
-        void drawConsole(NVGcontext* vg, const Map& m, const aurore::Rect& screen)
+        // The console alone, around `screen`; `live`, the app's own second
+        // screen on it, else a picture
+        void drawConsole(NVGcontext* vg, const Map& m, const aurore::Rect& screen, bool live = false)
         {
             if (!std::strcmp(device.id, "switch"))
                 drawSwitch(vg, m, screen);
@@ -396,7 +380,7 @@ namespace
             else if (!std::strcmp(device.id, "ps4"))
                 drawTv(vg, m, screen);
             else if (!std::strcmp(device.id, "3ds"))
-                drawClamshell(vg, m, screen);
+                drawClamshell(vg, m, screen, live);
             else
                 drawPhone(vg, m, screen);
         }
@@ -428,6 +412,8 @@ namespace
             params->edgeAntiAlias = d.antialias ? defaultAntialias : 0;
         }
         aurore::Application::setScreenFrame(isDesktop(d) ? nullptr : new DeviceFrame(d));
+        // No top screen, but the New 3DS's (DeviceFrame::layout())
+        aurore::TopScreen::setSize(0, 0);
 
         auto* platform = aurore::Application::getPlatform();
         if (isDesktop(d))

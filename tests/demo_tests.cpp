@@ -3393,3 +3393,47 @@ AURORE_TEST(simulated_consoles)
     AURORE_CHECK_EQ(aurore::Application::contentWidth, 1280.0f);
     AURORE_CHECK_EQ(nvgInternalParams(aurore::Application::getNVGContext())->edgeAntiAlias, 1);
 }
+
+// The New 3DS's top screen: the activity's top screen view, laid out at the
+// screen's size in the app's units, drawn there; the default header for an
+// activity that gives none; no top screen on the desktop
+AURORE_TEST(top_screen_view)
+{
+    aurore::test::Options options;
+    options.width  = 1440;
+    options.height = 860;
+    DemoHarness h(options);
+    demo::simulation::use("3ds");
+    h.settle();
+    AURORE_CHECK(aurore::TopScreen::isAvailable());
+    // 400x240 pixels at the bottom screen's scale (320 pixels for 480
+    // units), to a window's pixel
+    AURORE_CHECK(std::abs(aurore::TopScreen::getContentWidth() - 600.0f) < 2.0f);
+    AURORE_CHECK(std::abs(aurore::TopScreen::getContentHeight() - 360.0f) < 2.0f);
+
+    auto* top = new aurore::Box(aurore::Axis::COLUMN);
+    top->setJustifyContent(aurore::JustifyContent::CENTER);
+    top->setAlignItems(aurore::AlignItems::CENTER);
+    auto* label = new aurore::Label();
+    label->setText("The top of the activity");
+    label->setFontSize(40);
+    top->addView(label);
+    auto* activity = new aurore::Activity(new aurore::Box());
+    activity->setTopScreenView(top);
+    AURORE_CHECK_EQ(activity->getTopScreenView(), (aurore::View*)top);
+    aurore::Application::pushActivity(activity, aurore::TransitionAnimation::NONE);
+    h.settle();
+    AURORE_CHECK(std::abs(top->getWidth() - aurore::TopScreen::getContentWidth()) < 1.0f);
+    AURORE_CHECK(std::abs(top->getHeight() - aurore::TopScreen::getContentHeight()) < 1.0f);
+    AURORE_CHECK(h.matchesReference("top_screen_view"));
+
+    // Popped: the activity below gives none, the header is back
+    aurore::Application::popActivity(aurore::TransitionAnimation::NONE);
+    h.settle();
+    AURORE_CHECK_EQ(h.top()->getTopScreenView(), (aurore::View*)nullptr);
+    AURORE_CHECK(h.matchesReference("top_screen_header"));
+
+    demo::simulation::use("desktop");
+    h.settle();
+    AURORE_CHECK(!aurore::TopScreen::isAvailable());
+}
