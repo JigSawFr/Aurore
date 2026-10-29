@@ -18,7 +18,7 @@ Pin a release rather than following `main`: `git -C library/aurore checkout vX.Y
 
 ## 2. The build
 
-- **C++20.** Aurore and its headers need it: `set(CMAKE_CXX_STANDARD 20)` or `CXX_STANDARD 20` on the app's target. RTTI and exceptions stay on (no `-fno-rtti`, no `-fno-exceptions`).
+- **C++23.** Aurore and its headers need it: `set(CMAKE_CXX_STANDARD 23)` or `CXX_STANDARD 23` on the app's target. RTTI and exceptions stay on (no `-fno-rtti`, no `-fno-exceptions`).
 - **The library's path.** The app's variable for the `library/` folder (`BOREALIS_LIBRARY` in borealis' template, any name will do) moves to the new path, and the two includes stay before `project()`:
 
   ```cmake

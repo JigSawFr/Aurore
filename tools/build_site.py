@@ -979,7 +979,7 @@ def home_body(t, lang, to_root):
 
 UPSTREAM_URL = "https://github.com/xfangfang/borealis/tree/wiliwili"
 # The headline differences: (key, borealis', Aurore's).
-VS_GLANCE = [("languages", "4", "15"), ("cpp", "C++17", "C++20"), ("yoga", "Yoga 2", "Yoga 3"), ("platforms", "7", "8")]
+VS_GLANCE = [("languages", "4", "15"), ("cpp", "C++17", "C++23"), ("yoga", "Yoga 2", "Yoga 3"), ("platforms", "7", "8")]
 # What borealis has nothing of: (key, icon).
 VS_NEW = [("cadran", "cadran"), ("themes", "themes"), ("styles", "styles"), ("a11y", "a11y"),
           ("text", "languages"), ("harness", "test"), ("inspector", "tools"), ("density", "density")]

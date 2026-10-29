@@ -536,10 +536,10 @@ message(STATUS "aurore: driver ${AURORE_DRIVER}")
 add_library(aurore STATIC ${AURORE_SRC})
 add_library(Aurore::aurore ALIAS aurore)
 set_target_properties(aurore PROPERTIES
-        CXX_STANDARD 20
+        CXX_STANDARD 23
         CXX_STANDARD_REQUIRED ON
         UNITY_BUILD ${AURORE_UNITY_BUILD}
-        # No C++20 modules: no dependency scanning step (CMake >= 3.28)
+        # No C++ modules: no dependency scanning step (CMake >= 3.28)
         CXX_SCAN_FOR_MODULES OFF
 )
 set_source_files_properties(${AURORE_PATH}/lib/platforms/desktop/desktop_darwin.mm PROPERTIES
@@ -574,8 +574,8 @@ foreach (dep fmt yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-sh
         endif ()
     endif ()
 endforeach ()
-# The projects that link the library build with C++20 too, so its headers can use it
-target_compile_features(aurore PUBLIC cxx_std_20)
+# The projects that link the library build with C++23 too, so its headers can use it
+target_compile_features(aurore PUBLIC cxx_std_23)
 target_link_libraries(aurore
         PUBLIC fmt::fmt yogacore ${AURORE_PLATFORM_LIBS}
         PRIVATE ${AURORE_PRIVATE_LIBS} $<BUILD_INTERFACE:tweeny::tweeny>)
@@ -615,7 +615,7 @@ if (AURORE_BUILD_TESTS)
             ${AURORE_PATH}/lib/test/headless_platform.cpp
             ${AURORE_PATH}/lib/test/harness.cpp)
     add_library(Aurore::test ALIAS aurore_test)
-    set_target_properties(aurore_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+    set_target_properties(aurore_test PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON)
     target_link_libraries(aurore_test PUBLIC aurore)
     # stb_image_write, for the screenshots: the file GLFW ships, not its
     # folder (its glad/gl.h would hide the library's)

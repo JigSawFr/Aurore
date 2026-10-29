@@ -102,7 +102,7 @@ endif ()
 
 # building target
 program_target(${PROJECT_NAME} "${MAIN_SRC}")
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_SCAN_FOR_MODULES OFF)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON CXX_SCAN_FOR_MODULES OFF)
 if (PLATFORM_DESKTOP)
     aurore_app_link_options(${PROJECT_NAME})
 endif ()
