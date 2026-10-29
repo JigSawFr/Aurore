@@ -28,10 +28,7 @@ class AppletFrame : public Box
     AppletFrame();
     AppletFrame(View* contentView);
 
-    ~AppletFrame()
-    {
-        aurore::Logger::debug("delete AppletFrame {}", this->describe());
-    }
+    ~AppletFrame();
 
     void handleXMLElement(tinyxml2::XMLElement* element) override;
 
@@ -44,6 +41,14 @@ class AppletFrame : public Box
 
     void setHeaderVisibility(Visibility visibility);
     void setFooterVisibility(Visibility visibility);
+
+    /// With a top screen to show it (the New 3DS's, aurore/core/top_screen.hpp),
+    /// the header goes there: TopScreenHeader shows the frame's title, and
+    /// the screen below gets the header's room. Only a regular header that
+    /// shows the title alone moves: one with views added to it (tools, a
+    /// hint view) stays, as does a popup's. True by default; false keeps it
+    /// on the app's screen (XML: headerOnTopScreen).
+    void setHeaderOnTopScreen(bool onTopScreen);
 
     void setHeaderStyle(HeaderStyle style);
     void updateAppletFrameItem();
@@ -65,6 +70,8 @@ class AppletFrame : public Box
 
     static View* create();
 
+    void willAppear(bool resetState = false) override;
+
     /// Edge to edge: the frame keeps clear of the left and right of the safe
     /// area, its header of the top and its footer of the bottom (the content
     /// of either when hidden). Set, the frame keeps clear of what it is told
@@ -81,6 +88,13 @@ class AppletFrame : public Box
     AURORE_BIND(Box, hintBox, "aurore/applet_frame/hint_box");
 
     HeaderStyle style = HeaderStyle::REGULAR;
+
+    // The header's visibility as asked, and whether it is on the top screen
+    // instead (applyHeaderVisibility())
+    Visibility headerVisibility = Visibility::VISIBLE;
+    bool headerOnTopScreen      = true;
+    Event<bool>::Subscription topScreenSubscription;
+    void applyHeaderVisibility();
 
     bool safeAreaManaged = true; // setSafeArea() not called
 

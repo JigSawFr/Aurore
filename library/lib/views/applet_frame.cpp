@@ -6,6 +6,7 @@
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>
+#include <aurore/core/top_screen.hpp>
 #include <aurore/core/util.hpp>
 #include <aurore/views/applet_frame.hpp>
 #include <aurore/views/dialog.hpp>
@@ -108,6 +109,12 @@ AppletFrame::AppletFrame()
     this->registerBoolXMLAttribute("headerHidden", [this](bool value)
         { this->setHeaderVisibility(value ? Visibility::GONE : Visibility::VISIBLE); });
 
+    this->registerBoolXMLAttribute("headerOnTopScreen", [this](bool value)
+        { this->setHeaderOnTopScreen(value); });
+
+    this->topScreenSubscription = TopScreen::getAvailabilityChanged()->subscribe([this](bool)
+        { this->applyHeaderVisibility(); });
+
     this->registerBoolXMLAttribute("footerHidden", [this](bool value)
         {
         if(HIDE_BOTTOM_BAR)
@@ -148,10 +155,43 @@ void AppletFrame::setIcon(std::string path)
     }
 }
 
+AppletFrame::~AppletFrame()
+{
+    TopScreen::getAvailabilityChanged()->unsubscribe(this->topScreenSubscription);
+    aurore::Logger::debug("delete AppletFrame {}", this->describe());
+}
+
 void AppletFrame::setHeaderVisibility(Visibility visibility)
 {
+    this->headerVisibility = visibility;
+    this->applyHeaderVisibility();
+}
+
+void AppletFrame::setHeaderOnTopScreen(bool onTopScreen)
+{
+    this->headerOnTopScreen = onTopScreen;
+    this->applyHeaderVisibility();
+}
+
+void AppletFrame::applyHeaderVisibility()
+{
+    if (!header)
+        return;
+    // The title alone: its box and the hint box, empty
+    bool titleOnly        = header->getChildren().size() == 2 && hintBox && hintBox->getChildren().empty();
+    bool onTop            = this->headerOnTopScreen && this->style == HeaderStyle::REGULAR && TopScreen::isAvailable() && titleOnly;
+    Visibility visibility = onTop ? Visibility::GONE : this->headerVisibility;
+    if (header->getVisibility() == visibility)
+        return;
     header->setVisibility(visibility);
     this->reapplySafeArea();
+}
+
+void AppletFrame::willAppear(bool resetState)
+{
+    // Views added to the header since it was made keep it on this screen
+    this->applyHeaderVisibility();
+    Box::willAppear(resetState);
 }
 
 void AppletFrame::setFooterVisibility(Visibility visibility)
@@ -297,6 +337,7 @@ void AppletFrame::updateAppletFrameItem()
 
     if (contentView->getAppletFrameItem()->getHintView())
         hintBox->addView(contentView->getAppletFrameItem()->getHintView());
+    this->applyHeaderVisibility();
 }
 
 void AppletFrame::setHeaderStyle(HeaderStyle style)
@@ -317,6 +358,7 @@ void AppletFrame::setHeaderStyle(HeaderStyle style)
         default:
             break;
     }
+    this->applyHeaderVisibility();
 }
 
 View* AppletFrame::create()

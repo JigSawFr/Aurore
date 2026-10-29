@@ -3482,8 +3482,48 @@ AURORE_TEST(top_screen_view)
     h.settle();
     AURORE_CHECK_EQ(h.top()->getTopScreenView(), (aurore::View*)nullptr);
     AURORE_CHECK(h.matchesReference("top_screen_header"));
+    // The demo's frame shows its title alone: its header went up there
+    auto* frame = dynamic_cast<aurore::AppletFrame*>(h.top()->getContentView());
+    AURORE_CHECK(frame != nullptr);
+    if (frame)
+        AURORE_CHECK(frame->getHeader()->getVisibility() == aurore::Visibility::GONE);
 
+    // A list at the bottom, the preview of the item chosen at the top: the
+    // focus's top screen view, else its parents', else the activity's
+    auto* list = new aurore::Box(aurore::Axis::COLUMN);
+    auto* one  = new aurore::Button();
+    auto* two  = new aurore::Button();
+    one->setText("One");
+    two->setText("Two");
+    list->addView(one);
+    list->addView(two);
+    auto* preview = new aurore::Label();
+    preview->setText("The preview of One");
+    one->setTopScreenView(preview);
+    auto* activityTop = new aurore::Label();
+    activityTop->setText("The activity's");
+    auto* withList = new aurore::Activity(list);
+    withList->setTopScreenView(activityTop);
+    aurore::Application::pushActivity(withList, aurore::TransitionAnimation::NONE);
+    h.settle();
+    aurore::Application::giveFocus(one);
+    h.settle();
+    AURORE_CHECK_EQ(aurore::TopScreen::getShownView(), (aurore::View*)preview);
+    aurore::Application::giveFocus(two);
+    h.settle();
+    AURORE_CHECK_EQ(aurore::TopScreen::getShownView(), (aurore::View*)activityTop);
+    auto* listPreview = new aurore::Label();
+    listPreview->setText("The list's");
+    list->setTopScreenView(listPreview);
+    AURORE_CHECK_EQ(aurore::TopScreen::getShownView(), (aurore::View*)listPreview);
+    aurore::Application::popActivity(aurore::TransitionAnimation::NONE);
+    h.settle();
+
+    // No top screen: the header is back on the app's screen
     demo::simulation::use("desktop");
     h.settle();
     AURORE_CHECK(!aurore::TopScreen::isAvailable());
+    frame = dynamic_cast<aurore::AppletFrame*>(h.top()->getContentView());
+    if (frame)
+        AURORE_CHECK(frame->getHeader()->getVisibility() == aurore::Visibility::VISIBLE);
 }

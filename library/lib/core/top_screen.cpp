@@ -71,9 +71,12 @@ namespace
 
 void TopScreen::setSize(int width, int height)
 {
+    bool was          = TopScreen::isAvailable();
     TopScreen::width  = std::max(0, width);
     TopScreen::height = std::max(0, height);
     Application::requestRedraw();
+    if (TopScreen::isAvailable() != was)
+        availabilityChanged.fire(TopScreen::isAvailable());
 }
 
 float TopScreen::getContentWidth()
@@ -96,13 +99,28 @@ std::string TopScreen::getTitle()
     return Application::getTitle();
 }
 
+View* TopScreen::getShownView()
+{
+    const auto stack = Application::getActivitiesStack();
+    if (stack.empty())
+        return nullptr;
+    Activity* activity = stack.back();
+    // The focus's, or the nearest of its parents', when it is in the
+    // activity on top
+    View* focus = Application::getCurrentFocus();
+    if (focus && focus->getParentActivity() == activity)
+        for (View* v = focus; v; v = v->hasParent() ? v->getParent() : nullptr)
+            if (v->getTopScreenView())
+                return v->getTopScreenView();
+    return activity->getTopScreenView();
+}
+
 void TopScreen::draw(NVGcontext* vg, Rect rect)
 {
     if (!TopScreen::isAvailable() || rect.getWidth() <= 0 || rect.getHeight() <= 0)
         return;
 
-    const auto stack = Application::getActivitiesStack();
-    View* view       = stack.empty() ? nullptr : stack.back()->getTopScreenView();
+    View* view = TopScreen::getShownView();
     if (!view)
     {
         if (!defaultHeader)

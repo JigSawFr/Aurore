@@ -334,6 +334,7 @@ class View
     std::unordered_map<FocusDirection, View*> customFocusByPtr;
 
     AppletFrameItem appletFrameItem;
+    View* topScreenView = nullptr;
 
     int ptrLockCounter = 0;
 
@@ -1727,6 +1728,14 @@ class View
     }
 
     void updateAppletFrameItem();
+
+    /// What the top screen shows while this view, or one inside it, has the
+    /// focus (the New 3DS's, aurore/core/top_screen.hpp): a list's preview
+    /// of the item chosen, its details. The view owns it, and frees the one
+    /// it replaces. The nearest to the focus wins, then the activity's
+    /// (Activity::setTopScreenView()), then TopScreenHeader.
+    void setTopScreenView(View* view);
+    View* getTopScreenView() { return this->topScreenView; }
 
     /// Whether the children are clipped to the view's frame when drawn.
     bool getClipsToBounds() const
