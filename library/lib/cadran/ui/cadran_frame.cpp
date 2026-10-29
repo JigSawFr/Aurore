@@ -470,12 +470,16 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
         s_main_pill       = pill;
         s_main_pill_label = pill_label;
         s_main_pill_icon  = glyph;
-        auto* date        = new aurore::Label();
-        date->setText(cadran::kit::long_date());
-        chrome(date, 16, DATE_SCALE);
-        date->setThemeColor("textColor", "cadran/text3");
-        date->setMarginLeft(aurore::dp(10));
-        right->addView(date);
+        // The date, where the header has room for it
+        if (aurore::Application::getWidthClass() != aurore::WidthClass::COMPACT)
+        {
+            auto* date = new aurore::Label();
+            date->setText(cadran::kit::long_date());
+            chrome(date, 16, DATE_SCALE);
+            date->setThemeColor("textColor", "cadran/text3");
+            date->setMarginLeft(aurore::dp(10));
+            right->addView(date);
+        }
     }
     right->setMarginRight(aurore::dp(16)); // clear of the header's tools (language, theme, bell) after it
     if (aurore::Box* header = frame->getHeader())
