@@ -19,9 +19,10 @@
 #include <aurore/core/util.hpp>
 #include <aurore/test/headless_platform.hpp>
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 #define NANOVG_GL3 1
 #include <nanovg_gl.h>
+#include <aurore/platforms/driver/gl_loader.hpp>
 #include <aurore/platforms/driver/gl_read_pixels.hpp>
 
 #include <cstdlib>
@@ -94,7 +95,7 @@ bool HeadlessVideoContext::createContext()
             };
             EGLContext context = eglCreateContext(display, configs > 0 ? config : (EGLConfig) nullptr, EGL_NO_CONTEXT, contextAttributes);
             if (context != EGL_NO_CONTEXT && eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, context)
-                && gladLoadGLLoader((GLADloadproc)eglGetProcAddress))
+                && loadGL((GLADloadfunc)eglGetProcAddress, "headless"))
             {
                 this->eglDisplay = display;
                 this->eglContext = context;
@@ -121,7 +122,7 @@ bool HeadlessVideoContext::createContext()
     if (!window)
         return false;
     glfwMakeContextCurrent(window);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    if (!loadGL((GLADloadfunc)glfwGetProcAddress, "headless"))
         return false;
     this->glfwWindow = window;
     return true;
