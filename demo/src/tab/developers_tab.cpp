@@ -83,6 +83,7 @@ CadranDigits* figure(aurore::Box* row, const std::string& caption)
     aurore::Label* label = kit::label(caption, kit::TEXT_NOTE, "cadran/text2");
     label->setSingleLine(true);
     label->setShrinkToFit(true);
+    label->setShrinkToFitMin(11);
     card->addView(label);
     row->addView(show::share(card, 2));
     return digits;
