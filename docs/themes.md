@@ -380,7 +380,7 @@ aurore::Application::getLastInputTime();              // what the particles' pau
 
 ## Every key
 
-Without a theme file, each variant has the core's defaults, then Cadran's palettes over them (`cadran/ui/cadran_palette.hpp`, the single place they are defined) when Cadran is on (the default).
+Without a theme file, each variant has the core's defaults, then Cadran's palettes over them (`cadran/ui/cadran_palette.hpp`, the single place they are defined).
 
 **Core** (`library/lib/core/theme.cpp`):
 
@@ -566,6 +566,6 @@ A palette that styles one variant only decides the variant, and the header's but
 - System keeps the palette, shown in its own variant whatever the system's mode.
 - Preferences saved before this rule (Dark with a light-only palette) show the palette's variant, and `theme` is corrected when they are applied.
 
-Without Cadran, the same in a few lines: list `Theme::builtinThemes()` and `Theme::listThemes(folder)` (the demo's Themes tab does it, `demo/src/tab/themes_tab.cpp`, a tile per theme with a swatch of its colours), call `Theme::loadFile(info.path, &variant)` and `setThemeVariant(variant)` on a click, save `info.path`, and load it again at start-up (after the app's own `addColor` calls).
+Without Cadran's pickers, the same in a few lines: list `Theme::builtinThemes()` and `Theme::listThemes(folder)` (the demo's Themes tab does it, `demo/src/tab/themes_tab.cpp`, a tile per theme with a swatch of its colours), call `Theme::loadFile(info.path, &variant)` and `setThemeVariant(variant)` on a click, save `info.path`, and load it again at start-up (after the app's own `addColor` calls).
 
 Users write their files in the folder, starting from a preset (`inherit = builtin:ocean`) or from nothing; the demo's examples are in `resources/themes` (Mint, Rose, Boréale's night, and the folders Aurora, Prism and Winter). To check files without opening a screen: `aurore_demo --check-themes <folder>` prints each preset's and each file's errors and warnings and exits with 1 when there are some.
