@@ -105,6 +105,7 @@
   "stack_check_deprecated": "더 이상 사용되지 않는 API가 있으면 빌드가 실패합니다. 지원 중단 코드도, 나중을 위한 별칭도 없습니다.",
   "stack_check_format": "모든 소스 파일을 clang-format 18로 정리.",
   "stack_check_notices": "포함된 각 라이브러리의 버전을 소스와 대조하고 라이선스와 함께 기재.",
+  "stack_check_upstream": "매주 월요일, 포함된 구성 요소를 원본 프로젝트의 최신 릴리스와 비교하고 뒤처진 것을 이슈에 기록합니다.",
   "stack_link": "이 수치의 출처",
   "vs_footer": "Aurore와 borealis",
   "vs_page_title": "Aurore와 borealis",

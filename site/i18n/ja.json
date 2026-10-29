@@ -105,6 +105,7 @@
   "stack_check_deprecated": "非推奨 API があるとビルドが失敗します。非推奨のコードも、後回しの別名もありません。",
   "stack_check_format": "すべてのソースファイルを clang-format 18 で整形。",
   "stack_check_notices": "同梱ライブラリのバージョンをソースと照合し、ライセンスとともに記載。",
+  "stack_check_upstream": "毎週月曜日、同梱コンポーネントを上流の最新リリースと比較し、遅れているものを issue に記載。",
   "stack_link": "これらの数字の出どころ",
   "vs_footer": "Aurore と borealis",
   "vs_page_title": "Aurore と borealis",

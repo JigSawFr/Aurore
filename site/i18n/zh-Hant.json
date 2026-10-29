@@ -105,6 +105,7 @@
   "stack_check_deprecated": "遇到已棄用的 API 建置即失敗：沒有已棄用的程式碼，也不留以後再刪的別名。",
   "stack_check_format": "每個原始檔都經 clang-format 18 格式化。",
   "stack_check_notices": "每個內建程式庫的版本都與其原始碼核對，並連同授權一併列出。",
+  "stack_check_upstream": "每週一將內建元件與上游最新版本比對，落後的列在一個 issue 中。",
   "stack_link": "這些數字從何而來",
   "vs_footer": "Aurore 與 borealis",
   "vs_page_title": "Aurore 與 borealis",

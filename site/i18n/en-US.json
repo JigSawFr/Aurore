@@ -105,6 +105,7 @@
   "stack_check_deprecated": "A build fails on a deprecated API: no deprecated code, no alias kept for later.",
   "stack_check_format": "Every source file formatted by clang-format 18.",
   "stack_check_notices": "Each bundled library's version checked against its source and listed with its licence.",
+  "stack_check_upstream": "Every Monday, the bundled components compared with their upstream's latest release; an issue lists those behind.",
   "stack_link": "Where these figures come from",
   "vs_footer": "Aurore and borealis",
   "vs_page_title": "Aurore and borealis",

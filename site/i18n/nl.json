@@ -105,6 +105,7 @@
   "stack_check_deprecated": "Een build faalt op een verouderde API: geen verouderde code, geen alias bewaard voor later.",
   "stack_check_format": "Elk bronbestand opgemaakt met clang-format 18.",
   "stack_check_notices": "De versie van elke meegeleverde bibliotheek gecontroleerd tegen de bron en vermeld met de licentie.",
+  "stack_check_upstream": "Elke maandag worden de meegeleverde onderdelen vergeleken met de nieuwste versie van hun bron; een issue somt de achterlopende op.",
   "stack_link": "Waar deze cijfers vandaan komen",
   "vs_footer": "Aurore en borealis",
   "vs_page_title": "Aurore en borealis",
