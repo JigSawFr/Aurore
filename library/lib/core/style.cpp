@@ -16,6 +16,8 @@
     limitations under the License.
 */
 
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <aurore/core/inspector.hpp>
 #include <aurore/core/style.hpp>
@@ -26,134 +28,179 @@ namespace aurore
 
 static StyleValues styleValues = {
     // Animations
-    { "aurore/animations/show", 200.0f },
-    { "aurore/animations/show_slide", 125.0f },
+    { "aurore/animations/show", 200.0f, MetricKind::OTHER },
+    { "aurore/animations/show_slide", 125.0f, MetricKind::OTHER },
 
-    { "aurore/animations/highlight", 200.0f },
-    { "aurore/animations/highlight_shake", 15.0f },
+    { "aurore/animations/highlight", 200.0f, MetricKind::OTHER },
+    { "aurore/animations/highlight_shake", 15.0f, MetricKind::OTHER },
 
-    { "aurore/animations/label_scrolling_timer", 1500.0f },
-    { "aurore/animations/label_scrolling_speed", 0.05f },
-    { "aurore/animations/notification_timeout", 4000.0f },
-    { "aurore/animations/notification_show", 300.0f },
+    { "aurore/animations/label_scrolling_timer", 1500.0f, MetricKind::OTHER },
+    { "aurore/animations/label_scrolling_speed", 0.05f, MetricKind::OTHER },
+    { "aurore/animations/notification_timeout", 4000.0f, MetricKind::OTHER },
+    { "aurore/animations/notification_show", 300.0f, MetricKind::OTHER },
 
     // Notification
-    { "aurore/notification/width", 280.0f },
-    { "aurore/notification/padding", 16.0f },
-    { "aurore/notification/slide", 40.0f },
-    { "aurore/notification/corner_radius", 0.0f },
-    { "aurore/notification/margin_top", 0.0f },
-    { "aurore/notification/margin_right", 0.0f },
-    { "aurore/notification/spacing", 0.0f },
+    { "aurore/notification/width", 280.0f, MetricKind::LENGTH },
+    { "aurore/notification/padding", 16.0f, MetricKind::LENGTH },
+    { "aurore/notification/slide", 40.0f, MetricKind::LENGTH },
+    { "aurore/notification/corner_radius", 0.0f, MetricKind::LENGTH },
+    { "aurore/notification/margin_top", 0.0f, MetricKind::LENGTH },
+    { "aurore/notification/margin_right", 0.0f, MetricKind::LENGTH },
+    { "aurore/notification/spacing", 0.0f, MetricKind::LENGTH },
 
     // Highlight
-    { "aurore/highlight/stroke_width", 5.0f },
-    { "aurore/highlight/corner_radius", 6.0f },
-    { "aurore/highlight/shadow_width", 2.0f },
-    { "aurore/highlight/shadow_offset", 10.0f },
-    { "aurore/highlight/shadow_feather", 10.0f },
-    { "aurore/highlight/shadow_opacity", 128.0f },
+    { "aurore/highlight/stroke_width", 5.0f, MetricKind::LENGTH },
+    { "aurore/highlight/corner_radius", 6.0f, MetricKind::LENGTH },
+    { "aurore/highlight/shadow_width", 2.0f, MetricKind::LENGTH },
+    { "aurore/highlight/shadow_offset", 10.0f, MetricKind::LENGTH },
+    { "aurore/highlight/shadow_feather", 10.0f, MetricKind::LENGTH },
+    { "aurore/highlight/shadow_opacity", 128.0f, MetricKind::OTHER },
 
     // AppletFrame
-    { "aurore/applet_frame/padding_sides", 30.0f },
+    { "aurore/applet_frame/padding_sides", 30.0f, MetricKind::LENGTH },
 
-    { "aurore/applet_frame/header_height", 88.0f },
-    { "aurore/applet_frame/header_padding_top_bottom", 15.0f },
-    { "aurore/applet_frame/header_padding_sides", 35.0f },
-    { "aurore/applet_frame/header_image_title_spacing", 18.0f },
-    { "aurore/applet_frame/header_title_font_size", 28.0f },
-    { "aurore/applet_frame/header_title_top_offset", 7.0f },
+    { "aurore/applet_frame/header_height", 88.0f, MetricKind::LENGTH },
+    { "aurore/applet_frame/header_padding_top_bottom", 15.0f, MetricKind::LENGTH },
+    { "aurore/applet_frame/header_padding_sides", 35.0f, MetricKind::LENGTH },
+    { "aurore/applet_frame/header_image_title_spacing", 18.0f, MetricKind::LENGTH },
+    { "aurore/applet_frame/header_title_font_size", 28.0f, MetricKind::OTHER },
+    { "aurore/applet_frame/header_title_top_offset", 7.0f, MetricKind::LENGTH },
 
-    { "aurore/applet_frame/footer_height", 73.0f },
-    { "aurore/applet_frame/footer_padding_top_bottom", 20.0f },
-    { "aurore/applet_frame/footer_padding_sides", 25.0f },
+    { "aurore/applet_frame/footer_height", 73.0f, MetricKind::LENGTH },
+    { "aurore/applet_frame/footer_padding_top_bottom", 20.0f, MetricKind::LENGTH },
+    { "aurore/applet_frame/footer_padding_sides", 25.0f, MetricKind::LENGTH },
 
     // TabFrame
-    { "aurore/tab_frame/sidebar_width", 410.0f },
-    { "aurore/tab_frame/content_padding_top_bottom", 42.0f }, // a tab's content, for the apps' XML (Cadran's margins with it)
-    { "aurore/tab_frame/content_padding_sides", 60.0f }, // a tab's content, for the apps' XML
+    { "aurore/tab_frame/sidebar_width", 410.0f, MetricKind::LENGTH },
+    { "aurore/tab_frame/content_padding_top_bottom", 42.0f, MetricKind::LENGTH }, // a tab's content, for the apps' XML (Cadran's margins with it)
+    { "aurore/tab_frame/content_padding_sides", 60.0f, MetricKind::LENGTH }, // a tab's content, for the apps' XML
 
     // Sidebar
-    { "aurore/sidebar/border_height", 16.0f },
-    { "aurore/sidebar/padding_top", 32.0f },
-    { "aurore/sidebar/padding_bottom", 47.0f },
-    { "aurore/sidebar/padding_left", 80.0f },
-    { "aurore/sidebar/padding_right", 40.0f },
-    { "aurore/sidebar/item_height", 70.0f },
-    { "aurore/sidebar/item_accent_margin_top_bottom", 9.0f },
-    { "aurore/sidebar/item_accent_margin_sides", 8.0f },
-    { "aurore/sidebar/item_accent_rect_width", 4.0f },
-    { "aurore/sidebar/item_font_size", 22.0f },
-    { "aurore/sidebar/separator_height", 30.0f },
+    { "aurore/sidebar/border_height", 16.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/padding_top", 32.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/padding_bottom", 47.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/padding_left", 80.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/padding_right", 40.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/item_height", 70.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/item_accent_margin_top_bottom", 9.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/item_accent_margin_sides", 8.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/item_accent_rect_width", 4.0f, MetricKind::LENGTH },
+    { "aurore/sidebar/item_font_size", 22.0f, MetricKind::OTHER },
+    { "aurore/sidebar/separator_height", 30.0f, MetricKind::LENGTH },
 
     // Tab Details
-    { "aurore/tab_details/padding_top", 32.0f },
-    { "aurore/tab_details/padding_bottom", 47.0f },
-    { "aurore/tab_details/padding_left", 60.0f },
-    { "aurore/tab_details/padding_right", 80.0f },
+    { "aurore/tab_details/padding_top", 32.0f, MetricKind::LENGTH },
+    { "aurore/tab_details/padding_bottom", 47.0f, MetricKind::LENGTH },
+    { "aurore/tab_details/padding_left", 60.0f, MetricKind::LENGTH },
+    { "aurore/tab_details/padding_right", 80.0f, MetricKind::LENGTH },
 
     // Label
-    { "aurore/label/default_font_size", 20.0f },
-    { "aurore/label/default_line_height", 1.65f },
-    { "aurore/label/scrolling_animation_spacing", 50.0f },
-    { "aurore/label/highlight_padding", 2.0f },
+    { "aurore/label/default_font_size", 20.0f, MetricKind::OTHER },
+    { "aurore/label/default_line_height", 1.65f, MetricKind::OTHER },
+    { "aurore/label/scrolling_animation_spacing", 50.0f, MetricKind::LENGTH },
+    { "aurore/label/highlight_padding", 2.0f, MetricKind::LENGTH },
 
     // Header
-    { "aurore/header/padding_top_bottom", 11.0f },
-    { "aurore/header/padding_right", 11.0f },
-    { "aurore/header/rectangle_width", 5.0f },
-    { "aurore/header/rectangle_height", 33.0f },
-    { "aurore/header/rectangle_margin", 10.0f },
-    { "aurore/header/font_size", 18.0f },
+    { "aurore/header/padding_top_bottom", 11.0f, MetricKind::LENGTH },
+    { "aurore/header/padding_right", 11.0f, MetricKind::LENGTH },
+    { "aurore/header/rectangle_width", 5.0f, MetricKind::LENGTH },
+    { "aurore/header/rectangle_height", 33.0f, MetricKind::LENGTH },
+    { "aurore/header/rectangle_margin", 10.0f, MetricKind::LENGTH },
+    { "aurore/header/font_size", 18.0f, MetricKind::OTHER },
 
     // Button
-    { "aurore/button/padding_top_bottom", 15.0f },
-    { "aurore/button/padding_sides", 25.0f },
-    { "aurore/button/corner_radius", 5.0f },
-    { "aurore/button/text_size", 18.0f },
-    { "aurore/button/primary_highlight_padding", 2.0f },
-    { "aurore/button/border_thickness", 2.0f },
+    { "aurore/button/padding_top_bottom", 15.0f, MetricKind::LENGTH },
+    { "aurore/button/padding_sides", 25.0f, MetricKind::LENGTH },
+    { "aurore/button/corner_radius", 5.0f, MetricKind::LENGTH },
+    { "aurore/button/text_size", 18.0f, MetricKind::OTHER },
+    { "aurore/button/primary_highlight_padding", 2.0f, MetricKind::LENGTH },
+    { "aurore/button/border_thickness", 2.0f, MetricKind::LENGTH },
 
     // Generic shadow
-    { "aurore/shadow/width", 2.0f },
-    { "aurore/shadow/feather", 10.0f },
-    { "aurore/shadow/opacity", 63.75f },
-    { "aurore/shadow/offset", 10.0f },
+    { "aurore/shadow/width", 2.0f, MetricKind::LENGTH },
+    { "aurore/shadow/feather", 10.0f, MetricKind::LENGTH },
+    { "aurore/shadow/opacity", 63.75f, MetricKind::OTHER },
+    { "aurore/shadow/offset", 10.0f, MetricKind::LENGTH },
 
     // Dropdown
-    { "aurore/dropdown/listPadding", 40.0f },
-    { "aurore/dropdown/listPaddingSides", 232.0f },
-    { "aurore/dropdown/listItemHeight", 60.0f },
-    { "aurore/dropdown/listItemTextSize", 20.0f },
+    { "aurore/dropdown/listPadding", 40.0f, MetricKind::LENGTH },
+    { "aurore/dropdown/listPaddingSides", 232.0f, MetricKind::LENGTH },
+    { "aurore/dropdown/listItemHeight", 60.0f, MetricKind::LENGTH },
+    { "aurore/dropdown/listItemTextSize", 20.0f, MetricKind::OTHER },
 
-    { "aurore/dropdown/header_height", 70.0f },
-    { "aurore/dropdown/header_title_font_size", 24.0f },
+    { "aurore/dropdown/header_height", 70.0f, MetricKind::LENGTH },
+    { "aurore/dropdown/header_title_font_size", 24.0f, MetricKind::OTHER },
 
     // ListItem
-    { "aurore/listitem/descriptionIndent", 16.0f },
-    { "aurore/listitem/indent", 40.0f },
-    { "aurore/listitem/selectRadius", 15.0f },
+    { "aurore/listitem/descriptionIndent", 16.0f, MetricKind::LENGTH },
+    { "aurore/listitem/indent", 40.0f, MetricKind::LENGTH },
+    { "aurore/listitem/selectRadius", 15.0f, MetricKind::LENGTH },
 
     // Hints
-    { "aurore/hints/footer_margin_sides", 30.0f },
-    { "aurore/hints/footer_padding_sides", 25.0f },
-    { "aurore/hints/footer_padding_top_bottom", 8.0f },
+    { "aurore/hints/footer_margin_sides", 30.0f, MetricKind::LENGTH },
+    { "aurore/hints/footer_padding_sides", 25.0f, MetricKind::LENGTH },
+    { "aurore/hints/footer_padding_top_bottom", 8.0f, MetricKind::LENGTH },
 
     // Spinner
-    { "aurore/spinner/center_gap_multiplier_large", 0.207f },
-    { "aurore/spinner/bar_width_multiplier_large", 0.034f },
-    { "aurore/spinner/center_gap_multiplier", 0.2f },
-    { "aurore/spinner/bar_width_multiplier", 0.06f },
-    { "aurore/spinner/animation_duration", 1000 },
+    { "aurore/spinner/center_gap_multiplier_large", 0.207f, MetricKind::OTHER },
+    { "aurore/spinner/bar_width_multiplier_large", 0.034f, MetricKind::OTHER },
+    { "aurore/spinner/center_gap_multiplier", 0.2f, MetricKind::OTHER },
+    { "aurore/spinner/bar_width_multiplier", 0.06f, MetricKind::OTHER },
+    { "aurore/spinner/animation_duration", 1000, MetricKind::OTHER },
 
     // Dialog
-    { "aurore/dialog/paddingTopBottom", 65 },
-    { "aurore/dialog/paddingLeftRight", 115 },
+    { "aurore/dialog/paddingTopBottom", 65, MetricKind::LENGTH },
+    { "aurore/dialog/paddingLeftRight", 115, MetricKind::LENGTH },
 
-    { "aurore/dialog/fontSize", 24 },
+    { "aurore/dialog/fontSize", 24, MetricKind::OTHER },
 };
 
 static Style style(&styleValues);
+
+static float density = DENSITY_COMFORTABLE;
+
+void setDensity(float value)
+{
+    if (std::isnan(value))
+        return;
+    density = std::clamp(value, DENSITY_MIN, DENSITY_MAX);
+}
+
+float getDensity()
+{
+    return density;
+}
+
+float dp(float length)
+{
+    return length * density;
+}
+
+bool parseDensity(const std::string& text, float* value)
+{
+    if (text == "comfortable")
+        *value = DENSITY_COMFORTABLE;
+    else if (text == "compact")
+        *value = DENSITY_COMPACT;
+    else if (text == "dense")
+        *value = DENSITY_DENSE;
+    else
+    {
+        try
+        {
+            size_t used  = 0;
+            float number = std::stof(text, &used);
+            if (used != text.size() || std::isnan(number))
+                return false;
+            *value = number;
+        }
+        catch (const std::exception&)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 
 Style getStyle()
 {
@@ -167,11 +214,34 @@ StyleValues::StyleValues(std::initializer_list<std::pair<std::string, float>> li
     this->values = this->base;
 }
 
+StyleValues::StyleValues(std::initializer_list<StyleMetric> list)
+{
+    for (const StyleMetric& metric : list)
+    {
+        this->base[metric.name] = metric.value;
+        if (metric.kind == MetricKind::LENGTH)
+            this->kinds[metric.name] = MetricKind::LENGTH;
+    }
+    this->values = this->base;
+}
+
 void StyleValues::addMetric(const std::string& key, float metric)
 {
     this->base[key] = metric;
     if (this->overlay.count(key) == 0)
         this->values[key] = metric;
+}
+
+void StyleValues::addLength(const std::string& key, float metric)
+{
+    this->kinds[key] = MetricKind::LENGTH;
+    this->addMetric(key, metric);
+}
+
+MetricKind StyleValues::getKind(const std::string& name) const
+{
+    auto it = this->kinds.find(name);
+    return it == this->kinds.end() ? MetricKind::OTHER : it->second;
 }
 
 bool StyleValues::hasMetric(const std::string& name) const
@@ -187,7 +257,7 @@ void StyleValues::setOverlay(const std::unordered_map<std::string, float>& overl
         this->values[name] = metric;
 }
 
-float StyleValues::getMetric(const std::string& name)
+float StyleValues::getRawMetric(const std::string& name)
 {
     auto it = this->values.find(name);
     if (it == this->values.end())
@@ -200,6 +270,12 @@ float StyleValues::getMetric(const std::string& name)
     if (Inspector::recording)
         Inspector::recordMetric(it->first, metric);
     return metric;
+}
+
+float StyleValues::getMetric(const std::string& name)
+{
+    float metric = this->getRawMetric(name);
+    return this->getKind(name) == MetricKind::LENGTH ? dp(metric) : metric;
 }
 
 Style::Style(StyleValues* values)
@@ -220,6 +296,11 @@ bool Style::hasMetric(const std::string& name)
 void Style::addMetric(const std::string& name, float metric)
 {
     return this->values->addMetric(name, metric);
+}
+
+void Style::addLength(const std::string& name, float metric)
+{
+    return this->values->addLength(name, metric);
 }
 
 float Style::operator[](const std::string& name)

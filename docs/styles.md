@@ -25,7 +25,7 @@ An attribute prefixed with a state applies while the view is in that state, and 
 
 When several states style the same property, the later one in this table wins.
 
-Values are written as for the property itself: colours as `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(…)`, `rgba(…)` or `@theme/<name>`; numbers as `4`, `4px` or `@style/<name>`. A `@theme/` value is read each time the state comes on, and again when the theme changes, so it follows a theme loaded or switched since; a plain `textColor="@theme/…"` attribute does too (`View::setThemeColor`, docs/themes.md).
+Values are written as for the property itself: colours as `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(…)`, `rgba(…)` or `@theme/<name>`; numbers as `4`, `4px`, `4dp` (at the [density](#density) in use) or `@style/<name>`. A `@theme/` value is read each time the state comes on, and again when the theme changes, so it follows a theme loaded or switched since; a plain `textColor="@theme/…"` attribute does too (`View::setThemeColor`, docs/themes.md).
 
 The properties are those that are drawn, never laid out (a size or a margin would move the screen around):
 
@@ -149,6 +149,29 @@ Aurore does not talk to a platform's accessibility API (AT-SPI, UI Automation, T
 A focusable view with no label and no value (an `IconButton` without text, a picture) says its role at most, so it cannot be told apart from the next one: the first time each kind takes the focus, a warning names it (in a debug build, or whenever an announcer is set). The [inspector](inspector.md) shows each view's description and flags those; the test harness lists them (`Harness::silentFocusables()`, docs/testing.md).
 
 `View::getAccessibilityDescription()` can be overridden for a view that says more.
+
+## Density
+
+The density shrinks or widens the lengths of a screen (margins, paddings, heights, radii, the sidebar's width) without touching the text, for a small screen or a user who wants more on it:
+
+| Density | Factor | For |
+|---|---|---|
+| `aurore::DENSITY_COMFORTABLE` | 1 | the default: the screens as designed |
+| `aurore::DENSITY_COMPACT` | 0.85 | more lines on the screen |
+| `aurore::DENSITY_DENSE` | 0.7 | a small screen |
+
+```cpp
+aurore::Application::setDensity(aurore::DENSITY_COMPACT); // before the first screen
+```
+
+What follows it:
+
+- the metrics of kind length (`aurore::MetricKind::LENGTH`): those of `library/lib/core/style.cpp` but the durations, the font sizes, the opacities and the ratios, Cadran's corners (`cadran/radius/*`), and those an app adds with `Style::addLength`. A metric added with `addMetric` keeps the kind of the name it replaces, and is not a length when the name is new; a theme file's `[metrics]` are written at density 1 and follow it too. `StyleValues::getRawMetric` reads one as written;
+- a number in `dp` in XML (`paddingLeft="16dp"`), state styles included, and `aurore::dp(16)` in code.
+
+What does not: the text (its scale is `Application::setTextScale`, below), a plain number or one in `px`, durations. A screen whose sizes are all plain numbers looks the same at every density: the density reaches a screen through `dp` and the style, as it moves to them.
+
+The views read their sizes when they are made: set the density before the first screen, or make the screens again after changing it. The value is kept between `DENSITY_MIN` (0.5) and `DENSITY_MAX` (1.5). On the desktop, `AURORE_DENSITY=compact` (or `dense`, or a number) sets it at start, to try a screen at another density.
 
 ## Reduced motion and text scale
 

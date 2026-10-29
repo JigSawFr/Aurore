@@ -102,6 +102,17 @@ bool Application::init()
 
     Logger::info("Using platform {}", platform->getName());
 
+    // The density, before any screen is made (comfortable, compact, dense or
+    // a number)
+    if (const char* densityEnv = environmentVariable("DENSITY"))
+    {
+        float density;
+        if (parseDensity(densityEnv, &density))
+            Application::setDensity(density);
+        else
+            Logger::warning("AURORE_DENSITY: \"{}\" is not a density", densityEnv);
+    }
+
     // Init i18n
     loadTranslations();
     // Cadran: the preferences' language in place of the console's
