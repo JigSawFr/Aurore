@@ -20,7 +20,7 @@ set(_AURORE_OPTIONS_READ ON)
 include(CMakeDependentOption)
 
 # Target platform
-set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, 3DS (New 3DS; no renderer yet), ANDROID, IOS or TVOS")
+set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, 3DS (New 3DS, citro3d), ANDROID, IOS or TVOS")
 set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 3DS ANDROID IOS TVOS)
 
 # Window and input, on desktop and Switch: GLFW (the default) or SDL2. SDL3
@@ -106,10 +106,10 @@ set_property(CACHE AURORE_WINDOW PROPERTY VALUE "${AURORE_WINDOW}")
 if (AURORE_WINDOW AND NOT AURORE_WINDOW MATCHES "^(GLFW|SDL2|SDL3)$")
     message(FATAL_ERROR "AURORE_WINDOW=${AURORE_WINDOW}: GLFW, SDL2 or SDL3")
 endif ()
-# The 3DS has its own screens and input (libctru), and no renderer yet: the
-# library and a smoke test are built, nothing is drawn (docs/platforms.md)
+# The 3DS has its own screens and input (libctru) and a single renderer,
+# citro3d (docs/platforms.md)
 if (AURORE_PLATFORM STREQUAL "3DS" AND (AURORE_WINDOW OR AURORE_GRAPHICS))
-    message(FATAL_ERROR "AURORE_PLATFORM=3DS takes no AURORE_WINDOW nor AURORE_GRAPHICS: its window is libctru's, and its renderer (citro3d) is not written yet")
+    message(FATAL_ERROR "AURORE_PLATFORM=3DS takes no AURORE_WINDOW nor AURORE_GRAPHICS: its window is libctru's, and its renderer citro3d")
 endif ()
 if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4)$")
     message(FATAL_ERROR "AURORE_WINDOW=SDL3 is for DESKTOP, ANDROID, IOS and TVOS: ${AURORE_PLATFORM} has no SDL3 yet")

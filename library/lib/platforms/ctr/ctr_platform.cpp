@@ -49,14 +49,20 @@ void CtrFontLoader::loadFonts()
 
 CtrPlatform::CtrPlatform()
 {
-    // The system's settings (language) and the power controller (battery)
+    // 804 MHz and the L2 cache
+    osSetSpeedupEnable(true);
+    // The system's settings (language), the power controller (battery), the
+    // app's resources
     cfguInit();
     ptmuInit();
+    if (R_FAILED(romfsInit()))
+        Logger::warning("3DS: no romfs, the resources are missing");
 }
 
 CtrPlatform::~CtrPlatform()
 {
     delete this->videoContext;
+    romfsExit();
     ptmuExit();
     cfguExit();
 }
@@ -74,7 +80,12 @@ const LayoutPreset* CtrPlatform::getLayoutPreset()
 bool CtrPlatform::mainLoopIteration()
 {
     // HOME or the power button ask the app to close
-    return aptMainLoop();
+    if (!aptMainLoop())
+        return false;
+    // The buttons and the touch screen, read once per frame (hidKeysDown,
+    // hidKeysHeld… then hold this frame's)
+    hidScanInput();
+    return true;
 }
 
 std::string CtrPlatform::getLocale()

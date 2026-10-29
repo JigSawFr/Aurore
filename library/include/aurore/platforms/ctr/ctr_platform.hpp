@@ -14,10 +14,10 @@
     limitations under the License.
 */
 
-// The New 3DS, through libctru: its system's language and battery, and the
-// small screen preset (480x360 layout units on the 320x240 screen). No
-// renderer, input nor keyboard yet: the library builds and lays screens out,
-// nothing is drawn nor read (docs/platforms.md).
+// The New 3DS, through libctru: its system's language and battery, the
+// small screen preset (480x360 layout units on the 320x240 screen), and
+// citro3d on the bottom screen. No input nor keyboard yet: the buttons are
+// scanned each frame but not passed to Aurore (docs/platforms.md).
 
 #pragma once
 

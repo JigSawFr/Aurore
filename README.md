@@ -36,7 +36,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 - 🎮 **Made for controllers** — focus moves on its own with the D-pad, touch and mouse work too.
 - 🧱 **Flexbox layout** — every view is laid out by [Yoga](https://github.com/facebook/yoga), described in XML, code only where it matters.
-- 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM), scaled for a TV.
+- 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM, citro3d), scaled for a TV.
 - 🧩 **Ready-made components** — tabs, lists that recycle their cells, settings cells, dialogs, toasts, sliders, images, all restyled by a theme.
 - 🎨 **Themes** — every colour is a theme key; theme files and folders bring palettes, background pictures, logos, icons and decorations, switched while the app runs ([docs/themes.md](docs/themes.md)). Presets ship with it: high contrast, Ocean, Amethyst, Sand, one per season and feast, and *Seasonal*, which follows the calendar.
 - 🌍 **15 languages** — one JSON catalogue per language, switched while the app runs; colour emoji and right-to-left text as options.

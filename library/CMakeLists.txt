@@ -383,12 +383,17 @@ elseif(PLATFORM_SWITCH)
     # tinyxml2.h and a glad/gl.h, which must not hide the library's own
     list(APPEND AURORE_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
 elseif(PLATFORM_3DS)
-    # The New 3DS through libctru: a platform without a renderer yet
-    # (lib/platforms/ctr), its video context drawing nothing
+    # The New 3DS through libctru (lib/platforms/ctr), drawn with citro3d by
+    # nanovg's citro3d renderer (nanovg_citro3d.h)
     file(GLOB_RECURSE CTR_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/ctr/*.cpp")
     list(APPEND AURORE_SRC ${CTR_PLATFORM_SRC})
     list(APPEND AURORE_PUBLIC_DEFINITIONS STBI_NO_THREAD_LOCALS)
-    list(APPEND AURORE_PLATFORM_LIBS ctru m)
+    # The renderer's vertex shader, assembled by picasso and built into the
+    # library (bin2s writes it as assembly): nanovg_citro3d_shbin.h
+    enable_language(ASM)
+    ctr_add_shader_library(nanovg_citro3d "${AURORE_PATH}/lib/extern/nanovg/citro3d/nanovg_citro3d.v.pica")
+    dkp_add_embedded_binary_library(nanovg_citro3d_shaders nanovg_citro3d)
+    list(APPEND AURORE_PLATFORM_LIBS nanovg_citro3d_shaders citro3d ctru m)
     set(AURORE_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
 else ()
     message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
@@ -489,8 +494,8 @@ endforeach (lib)
 
 # The graphics driver
 set(AURORE_DRIVER AURORE_USE_OPENGL)
-if (AURORE_USE_NULL_VIDEO)
-    set(AURORE_DRIVER AURORE_USE_NULL_VIDEO)
+if (AURORE_USE_CITRO3D)
+    set(AURORE_DRIVER AURORE_USE_CITRO3D)
 elseif (AURORE_USE_METAL)
     set(AURORE_DRIVER AURORE_USE_METAL)
 elseif (AURORE_USE_D3D11)
