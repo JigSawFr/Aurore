@@ -139,7 +139,7 @@ TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R au
 
 ## The demo in a browser
 
-`tools/web_smoke.py` starts the demo's build for a browser in headless Chromium: its first screen, a key, the service worker GitHub Pages needs, the address' language and theme ([web/README.md](../web/README.md#testing-it)).
+`tools/web_smoke.py` starts the demo's build for a browser in headless Chromium: its first screen, a key, the service worker GitHub Pages needs, the address' language, theme and console, the header's menus ([web/README.md](../web/README.md#testing-it)).
 
 ## Fuzzing
 

@@ -1,118 +1,195 @@
 <!doctype html>
+<!-- SPDX-FileCopyrightText: 2026 JigSawFr -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- The demo's page in a browser (web/README.md), as PlayGuard's and
+     PlayShelf's simulators: the website's header in Boréale's night, the
+     screen, the pad and the tools under it, the settings beside it. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
-<title>Aurore demo · in your browser</title>
-<meta name="description" content="Aurore's demo, compiled with Emscripten: the real library in your browser, with a controller on screen.">
-<meta name="theme-color" content="#0b1424">
+<!-- Only the page's own files: 'wasm-unsafe-eval' compiles the demo, blob:
+     workers are Emscripten's threads, connect-src its texts (i18n/). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; media-src blob:; base-uri 'none'; form-action 'none'">
+<title>Aurore · Demo</title>
+<meta name="description" content="Aurore's demo, compiled with Emscripten: the real library in your browser, on each console it runs on, with a controller on screen.">
+<meta name="theme-color" content="#0e1a33">
 <link rel="icon" href="mark.svg" type="image/svg+xml">
+<link rel="preload" href="sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="figtree.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="demo.css">
-<script src="demo.js" defer></script>
+<!-- The page's theme before the first paint (theme.js). -->
+<script src="theme.js"></script>
 </head>
 <body>
-<header class="bar">
-  <a class="brand" href="../" data-i18n="home"><img src="mark.svg" alt="" width="28" height="28"><span>Aurore</span><small>demo</small></a>
-  <div class="controls">
-    <label class="select"><span data-i18n="theme">Theme</span>
-      <select id="theme">
-        <option value="" data-i18n="theme_default">Default (Cadran)</option>
-        <optgroup label="Theme folders" data-i18n-label="theme_folders">
-          <option value="winter" data-file="themes/winter/theme.theme">Winter</option>
-          <option value="aurora" data-file="themes/aurora/theme.theme">Aurora</option>
-          <option value="prism" data-file="themes/prism/theme.theme">Prism</option>
-        </optgroup>
-        <optgroup label="Theme files" data-i18n-label="theme_files">
-          <option value="mint" data-file="themes/mint.theme">Mint</option>
-          <option value="rose" data-file="themes/rose.theme">Rose</option>
-          <option value="boreale" data-file="themes/boreale.theme">Boréale</option>
-        </optgroup>
-        <optgroup label="Presets" data-i18n-label="theme_presets">
-          <option value="builtin:seasonal">Seasonal</option>
-          <option value="builtin:ocean">Ocean</option>
-          <option value="builtin:amethyst">Amethyst</option>
-          <option value="builtin:sand">Sand</option>
-          <option value="builtin:high-contrast-dark">High contrast</option>
-          <option value="builtin:halloween">Halloween</option>
-          <option value="builtin:christmas">Christmas</option>
-        </optgroup>
-      </select>
-    </label>
-    <label class="select"><span data-i18n="language">Language</span>
-      <select id="lang">
-        <option value="" data-i18n="lang_auto">Browser's</option>
-        <option value="en-US">English</option>
-        <option value="fr">Français (France)</option>
-        <option value="fr-CA">Français (Canada)</option>
-        <option value="de">Deutsch</option>
-        <option value="es">Español (España)</option>
-        <option value="es-419">Español (Latinoamérica)</option>
-        <option value="it">Italiano</option>
-        <option value="nl">Nederlands</option>
-        <option value="pt">Português (Portugal)</option>
-        <option value="pt-BR">Português (Brasil)</option>
-        <option value="ru">Русский</option>
-        <option value="ja">日本語</option>
-        <option value="ko">한국어</option>
-        <option value="zh-Hans">简体中文</option>
-        <option value="zh-Hant">繁體中文</option>
-      </select>
-    </label>
-    <button type="button" id="pad-toggle" aria-pressed="false" data-i18n="pad">Pad</button>
-    <button type="button" id="fullscreen" data-i18n="fullscreen">Full screen</button>
-  </div>
-</header>
-
-<main class="stage">
-  <div class="screen-wrap">
-    <div class="screen">
-      <canvas id="canvas" width="1280" height="720" tabindex="0" aria-label="Aurore's demo" data-i18n-aria="screen"></canvas>
-      <div class="loading" id="loading" role="status">
-        <img src="mark.svg" alt="" width="64" height="64">
-        <p id="loading-text" data-i18n="loading">Loading Aurore…</p>
-        <div class="progress"><span id="progress"></span></div>
-        <p class="hint" id="loading-size"></p>
-      </div>
-      <div class="error" id="error" hidden role="alert">
-        <p id="error-text"></p>
+  <header class="top">
+    <!-- As the website's header (site/assets/site.css): the name opens the
+         menu of Boréale's sites (its "site switcher" block); on the website
+         the demo is in demo/, its home one level up. -->
+    <div class="switcher">
+      <button class="brand switch" type="button" popovertarget="sites" aria-label="Aurore · Boréale's projects" id="sites-button">
+        <img src="mark.svg" alt="" width="30" height="30">
+        <span class="name">Aurore</span>
+        <span class="tag" data-i18n="title">Demo</span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div id="sites" class="sites" popover data-i18n-label="sites_label" aria-label="Boréale's projects">
+        <ul>
+          <li><a href="https://boreale.dev/" data-site="https://boreale.dev/"><img src="marks/boreale.svg" alt="" width="36" height="36"><span><strong>Boréale</strong><small data-i18n="sites_boreale">Homebrew for the long nights</small></span></a></li>
+        </ul>
+        <p class="sites-title" data-i18n="sites_homebrew">Switch homebrew</p>
+        <ul>
+          <li><a href="https://guard.boreale.dev/" data-site="https://guard.boreale.dev/"><img src="marks/playguard.svg" alt="" width="36" height="36"><span><strong>PlayGuard</strong><small data-i18n="sites_playguard">Parental controls, on the console</small></span></a></li>
+          <li><a href="https://shelf.boreale.dev/" data-site="https://shelf.boreale.dev/"><img src="marks/playshelf.svg" alt="" width="36" height="36"><span><strong>PlayShelf</strong><small data-i18n="sites_playshelf">Your game library, on the console</small></span><em class="soon" data-i18n="sites_soon">Coming soon</em></a></li>
+        </ul>
+        <p class="sites-title" data-i18n="sites_libraries">Libraries</p>
+        <ul>
+          <li><a href="../" id="home-link" aria-current="true"><img src="marks/aurore.svg" alt="" width="36" height="36"><span><strong>Aurore</strong><small data-i18n="sites_aurore">The interface library behind them</small></span></a></li>
+        </ul>
       </div>
     </div>
-  </div>
+    <nav class="nav" aria-label="Aurore">
+      <a id="nav-features" href="../#features" data-i18n="nav_features">Features</a>
+      <a id="nav-docs" href="../docs/getting-started/" data-i18n="nav_docs">Documentation</a>
+      <a id="nav-api" href="../api/" data-i18n="nav_api">API</a>
+      <a href="https://github.com/JigSawFr/Aurore">GitHub</a>
+    </nav>
+    <div class="build" id="build"></div>
+    <div class="header-settings">
+      <!-- The languages as on the website (tools/build_site.py): a button with
+           the language's flag and name (its code on a phone), and under it
+           their menu, a popover, each with its flag (demo.js'
+           setUpLanguages()). -->
+      <button class="lang-button" id="language-button" type="button" popovertarget="languages">
+        <span class="flag" id="language-flag" aria-hidden="true"></span>
+        <span class="lang-name" id="language-name"></span><span class="lang-code" id="language-code"></span>
+        <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <ul id="languages" class="langs" popover data-i18n-label="language" aria-label="Language"></ul>
+      <!-- The theme: on a phone a short face (its icon), the select over it,
+           unseen, opening the system's list. -->
+      <span class="picker picker-theme"><span class="picker-face" aria-hidden="true"></span>
+        <select id="variant-select" data-i18n-label="variant"></select></span>
+    </div>
+    <button class="icon-btn panel-toggle" id="panel-toggle" type="button" aria-controls="panel" aria-expanded="true"
+            data-i18n-title="settings" title="Settings">⚙</button>
+  </header>
 
-  <div class="pad" id="pad" hidden>
-    <div class="shoulders">
-      <button type="button" data-button="0">ZL</button><button type="button" data-button="1">L</button>
-      <button type="button" data-button="7">−</button><button type="button" data-button="9">+</button>
-      <button type="button" data-button="15">R</button><button type="button" data-button="16">ZR</button>
-    </div>
-    <div class="dpad" role="group" aria-label="D-pad">
-      <button type="button" class="up" data-button="3" aria-label="Up">▲</button>
-      <button type="button" class="left" data-button="6" aria-label="Left">◀</button>
-      <button type="button" class="right" data-button="4" aria-label="Right">▶</button>
-      <button type="button" class="down" data-button="5" aria-label="Down">▼</button>
-    </div>
-    <div class="face" role="group" aria-label="A B X Y">
-      <button type="button" class="x" data-button="14">X</button>
-      <button type="button" class="y" data-button="11">Y</button>
-      <button type="button" class="a" data-button="13">A</button>
-      <button type="button" class="b" data-button="12">B</button>
-    </div>
-  </div>
+  <main class="layout">
+    <section class="stage">
+      <div class="screen" id="screen">
+        <canvas id="canvas" width="1280" height="720" tabindex="0" oncontextmenu="event.preventDefault()"
+                aria-label="Aurore's demo" data-i18n-label="screen"></canvas>
+        <div class="overlay" id="overlay">
+          <div class="spinner" aria-hidden="true"></div>
+          <p id="status" data-i18n="loading">Loading…</p>
+          <progress id="progress" hidden></progress>
+          <p class="hint" id="loading-size"></p>
+        </div>
+        <div class="toast" id="toast" role="status" hidden></div>
+      </div>
+      <button type="button" class="fs-exit" id="fs-exit" data-i18n-label="fullscreen_exit" aria-label="Exit full screen">✕</button>
 
-  <section class="help">
-    <h1 data-i18n="title">Aurore's demo, in your browser</h1>
-    <p data-i18n="intro">The real library, compiled with Emscripten: the same code as on a Switch, drawn with WebGL 2. Click the screen, then:</p>
-    <ul class="keys">
-      <li><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd> <span data-i18n="key_move">move the focus</span></li>
-      <li><kbd>Enter</kbd> <span>Ⓐ</span></li>
-      <li><kbd>Esc</kbd> <span>Ⓑ</span></li>
-      <li><kbd>X</kbd> <kbd>Y</kbd> <kbd>L</kbd> <kbd>R</kbd> <span data-i18n="key_buttons">the buttons of the same name</span></li>
-      <li><kbd>F12</kbd> <span data-i18n="key_inspector">the inspector</span></li>
-    </ul>
-    <p data-i18n="touch">A click is a touch; the pad (on a touch screen, shown at once) has the controller's buttons.</p>
-    <p class="links"><a href="../" data-i18n="link_site">The website</a> · <a href="../docs/getting-started/" data-i18n="link_start">Aurore in 15 minutes</a> · <a href="https://github.com/JigSawFr/Aurore">GitHub</a></p>
-  </section>
-</main>
+      <div class="notice" id="variant-notice" role="status" hidden>
+        <span data-i18n="variant_changed"></span>
+        <button type="button" class="btn" id="variant-restart" data-i18n="restart">Restart</button>
+      </div>
+
+      <div class="controls">
+        <p class="keys" data-i18n-html="keys"></p>
+        <div class="control-actions">
+          <button type="button" class="btn ghost" id="pad-toggle" aria-pressed="false" data-i18n="pad">Pad</button>
+          <!-- Where the browser allows it (not an iPhone's Safari). -->
+          <button type="button" class="btn ghost" id="fullscreen" data-i18n="fullscreen" hidden>Full screen</button>
+          <!-- The tools: in a row on a large screen, behind a button on a phone
+               (demo.js opens it where there is room). -->
+          <details class="tools" id="tools">
+            <summary class="btn ghost" data-i18n="tools">Tools</summary>
+            <div class="tool-list">
+              <button type="button" class="btn ghost" id="shot" data-i18n="screenshot">Screenshot</button>
+              <button type="button" class="btn ghost" id="record" aria-pressed="false" data-i18n="record" hidden>Record</button>
+              <button type="button" class="btn ghost" id="report" data-i18n="report">Report a problem</button>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="pad" id="pad" hidden>
+        <div class="pad-row shoulders">
+          <button type="button" data-button="0">ZL</button><button type="button" data-button="1">L</button>
+          <button type="button" data-button="7" class="small">−</button><button type="button" data-button="9" class="small">+</button>
+          <button type="button" data-button="15">R</button><button type="button" data-button="16">ZR</button>
+        </div>
+        <div class="pad-row">
+          <div class="dpad">
+            <button type="button" data-button="3" class="up" aria-label="Up">▲</button>
+            <button type="button" data-button="6" class="left" aria-label="Left">◀</button>
+            <button type="button" data-button="4" class="right" aria-label="Right">▶</button>
+            <button type="button" data-button="5" class="down" aria-label="Down">▼</button>
+          </div>
+          <div class="face">
+            <button type="button" data-button="14" class="x">X</button>
+            <button type="button" data-button="11" class="y">Y</button>
+            <button type="button" data-button="13" class="a">A</button>
+            <button type="button" data-button="12" class="b">B</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel" id="panel">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" class="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="true" data-tab="settings" data-i18n="settings">Settings</button>
+        <button type="button" role="tab" class="tab" id="tab-log" aria-controls="panel-log" aria-selected="false" tabindex="-1" data-tab="log" data-i18n="log">Log</button>
+      </div>
+
+      <div class="tab-body" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-body="settings">
+        <!-- The demo's settings, each in the address (demo.js' FIELDS):
+             ?simulate=3ds&theme=winter. -->
+        <label class="field" id="field-simulate">
+          <span data-i18n="simulate">Console</span>
+          <select id="simulate" name="simulate"></select>
+        </label>
+        <p class="help" data-i18n="simulate_help"></p>
+        <label class="field" id="field-theme">
+          <span data-i18n="theme">Aurore's theme</span>
+          <select id="theme" name="theme">
+            <option value="" data-i18n="theme_default">Default (Cadran)</option>
+            <optgroup label="Theme folders" data-i18n-group="theme_folders">
+              <option value="winter" data-file="themes/winter/theme.theme">Winter</option>
+              <option value="aurora" data-file="themes/aurora/theme.theme">Aurora</option>
+              <option value="prism" data-file="themes/prism/theme.theme">Prism</option>
+            </optgroup>
+            <optgroup label="Theme files" data-i18n-group="theme_files">
+              <option value="mint" data-file="themes/mint.theme">Mint</option>
+              <option value="rose" data-file="themes/rose.theme">Rose</option>
+              <option value="boreale" data-file="themes/boreale.theme">Boréale</option>
+            </optgroup>
+            <optgroup label="Presets" data-i18n-group="theme_presets">
+              <option value="builtin:seasonal">Seasonal</option>
+              <option value="builtin:ocean">Ocean</option>
+              <option value="builtin:amethyst">Amethyst</option>
+              <option value="builtin:sand">Sand</option>
+              <option value="builtin:high-contrast-dark">High contrast</option>
+              <option value="builtin:halloween">Halloween</option>
+              <option value="builtin:christmas">Christmas</option>
+            </optgroup>
+          </select>
+        </label>
+        <p class="help" data-i18n="theme_help"></p>
+      </div>
+
+      <div class="tab-body" id="panel-log" role="tabpanel" aria-labelledby="tab-log" data-body="log" hidden>
+        <pre class="log" id="log"></pre>
+      </div>
+
+      <div class="panel-actions">
+        <button type="button" class="btn primary" id="apply" data-i18n="apply">Apply</button>
+        <button type="button" class="btn" id="copy" data-i18n="copy">Copy link</button>
+        <button type="button" class="btn ghost" id="reset" data-i18n="reset">Reset</button>
+      </div>
+      <p class="note" data-i18n="note"></p>
+    </aside>
+  </main>
+
+  <script src="demo.js"></script>
 </body>
 </html>
