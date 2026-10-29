@@ -257,6 +257,15 @@ class Application
     static float getTextScale();
 
     /**
+     * The density of the lengths (aurore::setDensity): DENSITY_COMFORTABLE
+     * by default, DENSITY_COMPACT, DENSITY_DENSE for a small screen. The text
+     * keeps its size (setTextScale). Read when the views are made: set it
+     * before the first screen; AURORE_DENSITY gives it on the desktop.
+     */
+    static void setDensity(float density) { aurore::setDensity(density); }
+    static float getDensity() { return aurore::getDensity(); }
+
+    /**
      * The data models XML bindings read (View::bind, bind="text: name.key"),
      * by name, for every screen. An Activity's own (Activity::registerModel)
      * come first. The model must outlive its registration.

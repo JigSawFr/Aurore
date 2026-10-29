@@ -27,6 +27,11 @@ add_executable(aurore_parser_tests parser_tests.cpp)
 target_link_libraries(aurore_parser_tests PRIVATE Aurore::test)
 aurore_add_tests(aurore_parser_tests)
 
+# The density: the style's lengths, dp in XML
+add_executable(aurore_density_tests density_tests.cpp)
+target_link_libraries(aurore_density_tests PRIVATE Aurore::test)
+aurore_add_tests(aurore_density_tests)
+
 # The SDL2 driver's input, on a virtual controller
 if (USE_SDL2 AND PLATFORM_DESKTOP)
     add_executable(aurore_sdl_input_tests sdl_input_tests.cpp)
