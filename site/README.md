@@ -3,6 +3,8 @@
 Aurore's website, on GitHub Pages: <https://aurore.boreale.dev/>. English at the root, French in `/fr/`; one dark look, Boréale's (the night, the aurora: [boreale/branding](https://github.com/JigSawFr/boreale/tree/main/branding)).
 
 - **The home page**: what Aurore is, a screen in XML and its activity, the features, Cadran, the screenshots, what Aurore adds to borealis, how to use it in a project and build the demo, the apps made with it, the documentation, the licence.
+- **Reading the documentation**: once the header is scrolled away, a slim bar at the top (the way home, the page's name, the search, the light reading); *Light reading* puts the documentation's pages on a light ground (kept as `aurore-reading`, `reading.js` setting it before the first paint); the search's field shows its key, `/`.
+- **The footer** has a Boréale column (boreale.dev, PlayGuard, PlayShelf, the privacy and legal notice, `contact@boreale.dev`), and the menu of Boréale's sites shows the projects' versions, read from boreale.dev's `versions.json` at the build. The page not found stands under the aurora, as the home page's hero.
 - **The documentation**: `docs/*.md`, converted at each build. It is written in English; the French site shows the same pages under its own header, saying so. Links between the docs and to the README become the site's pages, any other file of the repository links to GitHub, GitHub's `> [!NOTE]` blocks become callouts, headings keep GitHub's anchors. A search box above the pages searches `docs/search.json`; `/` goes to it.
 - **The API reference**, Doxygen's (`docs/Doxyfile`), in `/api/`.
 - **The demo in a browser** ([web/README.md](../web/README.md)) in `/demo/`, which the home page and the header offer to try.

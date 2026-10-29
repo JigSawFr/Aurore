@@ -52,7 +52,7 @@ Used from the system when there, not bundled: D-Bus (Linux), fontconfig
 | PromptFont (as "Aurore Buttons": its button glyphs at other code points, made by `tools/make_fonts.py`) | 1.15.0 | `resources/font/aurore_buttons.ttf` | SIL OFL 1.1 (`resources/font/OFL-PromptFont.txt`) | 2018-2026 Yukari Hafner; 2011-2016 Severin Meyer (Xolonium) |
 | Sora | - | `resources/font/sora_bold_latin.ttf` | SIL OFL 1.1 (`resources/font/OFL-Sora.txt`) | 2019 The Sora Project Authors |
 | Material Icons | - | `resources/material` | Apache 2.0 (`resources/material/LICENSE.txt`) | Google |
-| Twemoji | 15.1.0 | `resources/img/emoji` | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) | 2019 Twitter, Inc and other contributors; graphics by jdecked |
+| Twemoji | 17.0.3 (fetched by `tools/make_emoji.py`) | `resources/img/emoji` | CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) | 2019 Twitter, Inc and other contributors; graphics by jdecked |
 
 PromptFont by Shinmera (Yukari Hafner), available at https://shinmera.com/promptfont.
 

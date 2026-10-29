@@ -432,7 +432,7 @@ Without a theme file, each variant has the core's defaults, then Cadran's palett
 
 Not colour keys, on purpose: the app's logo (`CadranIcon` "mark", the app's own drawing through `ui::hooks`' `mark`; a theme replaces it with a picture, `logo`, below), the debug layer and the layout wireframe (`-v`), and a `Rectangle`'s default colour before the app sets one.
 
-**Metrics** (`[metrics]`): numbers from -10000 to 10000 (`nan`, `inf` and larger ones are errors), any of `library/lib/core/style.cpp` and Cadran's (`cadran/radius/*`, `aurore/tab_frame/sidebar_width`…). The focus highlight's look is there: `aurore/highlight/stroke_width`, `corner_radius`, `shadow_width`, `shadow_offset`, `shadow_feather`, `shadow_opacity`. Metrics read when drawing (the highlight's) change at once; the ones read when a view is made (paddings, sizes) apply to the views made afterwards.
+**Metrics** (`[metrics]`): numbers from -10000 to 10000 (`nan`, `inf` and larger ones are errors), any of `library/lib/core/style.cpp` and Cadran's (`cadran/radius/*`, `aurore/tab_frame/sidebar_width`…). The focus highlight's look is there: `aurore/highlight/stroke_width`, `corner_radius`, `shadow_width`, `shadow_offset`, `shadow_feather`, `shadow_opacity`. Lengths are written at density 1 and follow the [density](styles.md#density-of-the-lengths). Metrics read when drawing (the highlight's) change at once; the ones read when a view is made (paddings, sizes) apply to the views made afterwards.
 
 ## Presets
 

@@ -95,13 +95,13 @@ void cadran::install_theme()
     aurore::setHintsFontScaleMax(HINTS_SCALE);
     aurore::Style style = aurore::getStyle();
     // The corners of the kit, for the XML (@style/cadran/radius/card…).
-    style.addMetric("cadran/radius/row", kit::RADIUS_ROW);
-    style.addMetric("cadran/radius/icon", kit::RADIUS_ICON);
-    style.addMetric("cadran/radius/card", kit::RADIUS_CARD);
-    style.addMetric("cadran/radius/top", kit::RADIUS_TOP);
-    style.addMetric("cadran/radius/modal", kit::RADIUS_MODAL);
+    style.addLength("cadran/radius/row", kit::RADIUS_ROW);
+    style.addLength("cadran/radius/icon", kit::RADIUS_ICON);
+    style.addLength("cadran/radius/card", kit::RADIUS_CARD);
+    style.addLength("cadran/radius/top", kit::RADIUS_TOP);
+    style.addLength("cadran/radius/modal", kit::RADIUS_MODAL);
     // The gap between a filled button and the focus ring around it
-    style.addMetric("cadran/ring_gap", 4.0f);
+    style.addLength("cadran/ring_gap", 4.0f);
     style.addMetric("aurore/applet_frame/header_height", 84.0f);
     // 232 px, not the boards' 196: the console's font is wider than the
     // boards' (Nunito Sans), and the longest names must stay whole
