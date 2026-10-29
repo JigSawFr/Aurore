@@ -218,7 +218,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 <!-- under-the-hood: begin (tools/stack.py writes this) -->
 | | Version |
 | --- | --- |
-| Language | C++23 |
+| Language | C++23 (C++20 at least for the projects that link it) |
 | CMake | 3.16–3.31 |
 | SDL3 | 3.4.18 |
 | SDL | 2.32.10 |
@@ -243,7 +243,7 @@ Checked on every pull request: 156 test cases in the headless harness, 32 refere
 
 ## 📦 Use it in your project
 
-1. Build your project as **C++23**, without `-fno-rtti` or `-fno-exceptions`.
+1. Build your project as **C++20** or later (C++23 recommended), without `-fno-rtti` or `-fno-exceptions`.
 2. Add Aurore as a submodule:
 
    ```sh
