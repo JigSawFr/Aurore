@@ -14,6 +14,10 @@
     limitations under the License.
 */
 
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/core/thread.hpp>
@@ -89,6 +93,29 @@ static bool sdlOnADisplay(int x, int y, int w, int h)
     }
     SDL_free(displays);
     return inside;
+}
+
+// A first window (no size saved yet) at the main screen's density where
+// SDL3 sizes windows in pixels, Windows and X11: the app's size is the one
+// it has at 100 %, as macOS and Wayland, which size them in points, show
+// it. Kept within the screen's free area.
+static void sdlScaleFirstWindow(uint32_t& width, uint32_t& height)
+{
+    const char* driver = SDL_GetCurrentVideoDriver();
+    if (!driver || (strcmp(driver, "windows") != 0 && strcmp(driver, "x11") != 0))
+        return;
+    SDL_DisplayID display = SDL_GetPrimaryDisplay();
+    float scale           = SDL_GetDisplayContentScale(display);
+    if (scale <= 1.0f)
+        return;
+    SDL_Rect usable;
+    if (SDL_GetDisplayUsableBounds(display, &usable) && usable.w > 0 && usable.h > 0)
+        scale = std::min(scale, std::min(usable.w * 0.9f / width, usable.h * 0.9f / height));
+    if (scale <= 1.0f)
+        return;
+    Logger::info("sdl: first window at the screen's density, x{}", scale);
+    width  = (uint32_t)std::lround(width * scale);
+    height = (uint32_t)std::lround(height * scale);
 }
 #endif
 
@@ -385,6 +412,10 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
         // Under SDL3, full screen on the desktop's mode unless a mode is set
         windowFlags |= fullscreen;
     }
+#if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+    if (VideoContext::sizeW == 0 || VideoContext::sizeH == 0)
+        sdlScaleFirstWindow(windowWidth, windowHeight);
+#endif
 #ifdef __SDL3__
     // SDL3 leaves the system's input method to show its own window
     // (SDL_HINT_IME_IMPLEMENTED_UI unset), as this hint did
