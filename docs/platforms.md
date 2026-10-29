@@ -126,6 +126,8 @@ cd android-project && ./gradlew assembleDebug        # or: ./gradlew assembleDeb
 
 The APK is in `android-project/app/build/outputs/apk/debug/`. The page in `android-project/` has the SDK and NDK it needs, and how to turn it into an app of your own.
 
+The window is fullscreen; the system bars, the display cutout and the rounded corners are the [safe area](safe-areas.md), read through `PlatformUtils.getSafeAreaInsets` (an app's own copy of `android-project/` keeps that method).
+
 ## iOS and tvOS
 
 On macOS with Xcode:
@@ -137,6 +139,8 @@ cmake --build build
 ```
 
 The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `-DAURORE_WINDOW=SDL3` builds on SDL3. `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
+
+The notch, the rounded corners and the home indicator (on tvOS, the TV's safe area) are the [safe area](safe-areas.md), from `UIWindow.safeAreaInsets`.
 
 ## In a browser
 

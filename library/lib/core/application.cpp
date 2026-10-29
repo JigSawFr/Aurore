@@ -166,6 +166,15 @@ bool Application::init()
         if (std::strcmp(hotReload, "0") != 0)
             HotReload::setEnabled(true, std::strcmp(hotReload, "1") != 0 ? hotReload : "");
     }
+    // A notch or a TV's overscan seen on a desktop
+    if (const char* safeAreaEnv = environmentVariable("SAFE_AREA"))
+    {
+        Insets insets;
+        if (Insets::parse(safeAreaEnv, &insets))
+            Application::setSafeAreaOverride(&insets);
+        else
+            Logger::warning("AURORE_SAFE_AREA: \"{}\" is not \"top,right,bottom,left\"", safeAreaEnv);
+    }
 #endif
 
 #if defined(AURORE_DEV_TOOLS) && !defined(__SWITCH__) && !defined(__EMSCRIPTEN__)
@@ -198,6 +207,9 @@ void Application::createWindow(std::string windowTitle)
         Application::getPlatform()->createWindow(windowTitle, VideoContext::sizeW, VideoContext::sizeH,
             VideoContext::posX, VideoContext::posY);
     }
+
+    // The safe area again, now that the window is there to convert it
+    Application::updateSafeArea();
 
     // Load most commonly used sounds
     AudioPlayer* audioPlayer = Application::getAudioPlayer();
@@ -2225,10 +2237,102 @@ void Application::setWindowSize(int width, int height)
     Application::contentWidth  = uiScaleIsCapped ? std::ceil((float)width / Application::windowScale) : (float)ORIGINAL_WINDOW_WIDTH;
     Application::contentHeight = std::ceil((float)height / Application::windowScale);
 
+    // In layout units: the scale changed
+    bool safeAreaChanged = Application::computeSafeArea();
+
     for (Activity* activity : Application::activitiesStack)
         activity->onWindowSizeChanged();
 
+    if (safeAreaChanged)
+        Application::safeAreaChangedEvent.fire(Application::safeArea);
+
     aurore::Application::setActiveEvent(true);
+}
+
+bool Application::computeSafeArea()
+{
+    Insets points;
+    if (Application::hasSafeAreaOverride)
+        points = Application::safeAreaOverride;
+    else if (Application::platform)
+        points = Application::platform->getSafeAreaInsets();
+
+    // Window points to layout units, as a touch's position
+    double factor = 1.0;
+    if (Application::platform && Application::platform->getVideoContext())
+        factor = Application::platform->getVideoContext()->getScaleFactor();
+    if (Application::windowScale > 0)
+        factor /= Application::windowScale;
+
+    const float width = Application::contentWidth, height = Application::contentHeight;
+    // At most a third of the window from each edge: a platform's nonsense
+    // never leaves the content without room
+    auto edge = [factor](float value, float margin, float size)
+    {
+        float units = std::isfinite(value) && value > 0 ? (float)(value * factor) : 0.0f;
+        units       = std::max(units, margin);
+        // Whole units, without a rounding error's extra one
+        units = std::ceil(units - 0.01f);
+        return std::clamp(units, 0.0f, std::max(0.0f, (float)std::floor(size / 3)));
+    };
+    const float overscanX = Application::overscan * width, overscanY = Application::overscan * height;
+    Insets units {
+        edge(points.top, overscanY, height),
+        edge(points.right, overscanX, width),
+        edge(points.bottom, overscanY, height),
+        edge(points.left, overscanX, width),
+    };
+
+    if (units == Application::safeArea)
+        return false;
+    Logger::info("Safe area: top {}, right {}, bottom {}, left {}", units.top, units.right, units.bottom,
+        units.left);
+    Application::safeArea = units;
+    if (!units.empty())
+        Application::safeAreaInUse = true;
+    return true;
+}
+
+Insets Application::getSafeArea()
+{
+    return Application::safeArea;
+}
+
+void Application::updateSafeArea()
+{
+    if (!Application::computeSafeArea())
+        return;
+    for (Activity* activity : Application::activitiesStack)
+        activity->applySafeArea();
+    Application::requestRedraw();
+    Application::setActiveEvent(true);
+    Application::safeAreaChangedEvent.fire(Application::safeArea);
+}
+
+Event<Insets>* Application::getSafeAreaChangedEvent()
+{
+    return &Application::safeAreaChangedEvent;
+}
+
+void Application::setSafeAreaOverride(const Insets* insets)
+{
+    Application::hasSafeAreaOverride = insets != nullptr;
+    if (insets)
+        Application::safeAreaOverride = *insets;
+    Application::updateSafeArea();
+}
+
+void Application::setOverscan(float fraction)
+{
+    if (!std::isfinite(fraction))
+        fraction = 0.0f;
+    Application::overscan = std::clamp(fraction, 0.0f, 0.25f);
+    Application::updateSafeArea();
+}
+
+float Application::getOverscan()
+{
+    return Application::overscan;
 }
 
 void Application::setScreenFrame(ScreenFrame* frame)

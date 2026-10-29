@@ -37,6 +37,7 @@ class AndroidPlatform : public SDLPlatform
     float getBacklightBrightness() override;
     void setBacklightBrightness(float brightness) override;
     bool canSetBacklightBrightness() override;
+    Insets getSafeAreaInsets() override;
 };
 
 } // namespace aurore

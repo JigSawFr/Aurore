@@ -21,12 +21,21 @@
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>
+#include <aurore/core/thread.hpp>
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 
 #include "sdl_compat.hpp"
 
 #if defined(IOS) || defined(TVOS)
 #include <sys/utsname.h>
+
+#ifndef __SDL3__
+namespace aurore
+{
+// ios_darwin.mm
+Insets ios_safe_area(SDL_Window* window);
+}
+#endif
 
 static bool isIPad()
 {
@@ -236,9 +245,28 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         if (manager)
             manager->getMouseCusorEntered()->fire(event->type == SDL_EVENT_WINDOW_MOUSE_ENTER);
     }
+    else if (event->type == SDL_EVENT_WINDOW_SAFE_AREA_CHANGED || event->type == SDL_EVENT_WINDOW_SHOWN
+        || event->type == SDL_EVENT_WINDOW_RESIZED || event->type == SDL_EVENT_WINDOW_MAXIMIZED
+        || event->type == SDL_EVENT_WINDOW_RESTORED || event->type == SDL_EVENT_WINDOW_FOCUS_GAINED
+        || event->type == SDL_EVENT_DISPLAY_ORIENTATION)
+    {
+        this->safeAreaMayHaveChanged();
+    }
 #else
     else if (event->type == SDL_WINDOWEVENT)
     {
+        switch (event->window.event)
+        {
+            case SDL_WINDOWEVENT_SHOWN:
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+            case SDL_WINDOWEVENT_MAXIMIZED:
+            case SDL_WINDOWEVENT_RESTORED:
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
+                this->safeAreaMayHaveChanged();
+                break;
+            default:
+                break;
+        }
         auto* manager = this->inputManager;
         if (event->window.event == SDL_WINDOWEVENT_LEAVE)
         {
@@ -250,6 +278,11 @@ bool SDLPlatform::processEvent(SDL_Event* event)
             if (manager)
                 manager->getMouseCusorEntered()->fire(true);
         }
+    }
+    else if (event->type == SDL_DISPLAYEVENT)
+    {
+        // A turn of 180 degrees: the same size, the notch on the other side
+        this->safeAreaMayHaveChanged();
     }
 #endif
     else if (event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP)
@@ -307,6 +340,38 @@ bool SDLPlatform::processEvent(SDL_Event* event)
     aurore::Application::setActiveEvent(true);
     return true;
 }
+
+void SDLPlatform::safeAreaMayHaveChanged()
+{
+#if defined(IOS) || defined(TVOS) || defined(ANDROID)
+    if (!this->videoContext)
+        return;
+    Application::updateSafeArea();
+    // The system lays the window out again after telling us
+    aurore::cancelDelay(this->safeAreaCheck);
+    this->safeAreaCheck = aurore::delay(300, []()
+        { Application::updateSafeArea(); });
+#endif
+}
+
+#if defined(IOS) || defined(TVOS)
+Insets SDLPlatform::getSafeAreaInsets()
+{
+    if (!this->videoContext)
+        return {};
+#ifdef __SDL3__
+    // The part of the window, in points, nothing covers
+    SDL_Window* window = this->videoContext->getSDLWindow();
+    SDL_Rect safe;
+    int width, height;
+    if (!SDL_GetWindowSafeArea(window, &safe) || !SDL_GetWindowSize(window, &width, &height))
+        return {};
+    return { (float)safe.y, (float)(width - safe.x - safe.w), (float)(height - safe.y - safe.h), (float)safe.x };
+#else
+    return ios_safe_area(this->videoContext->getSDLWindow());
+#endif
+}
+#endif
 
 bool SDLPlatform::mainLoopIteration()
 {

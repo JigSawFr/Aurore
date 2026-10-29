@@ -33,6 +33,7 @@
 #include <aurore/core/activity.hpp>
 #include <aurore/core/geometry.hpp>
 #include <aurore/core/input.hpp>
+#include <aurore/core/safe_area.hpp>
 #include <aurore/core/theme.hpp>
 #include <aurore/core/time.hpp>
 
@@ -236,6 +237,9 @@ class Harness
 
     // A new window size, then settles
     void resize(int width, int height);
+    // The platform reports this safe area (framebuffer pixels: a notch, the
+    // system's bars), then settles
+    void setSafeArea(const Insets& insets);
 
   private:
     void walkShown(const std::function<void(View*)>& visit);
