@@ -237,7 +237,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | Android API | 36 |
 | Emscripten | 6.0.13 |
 
-Checked on every pull request: 146 test cases in the headless harness, 25 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 40 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 50 of the 50 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: 147 test cases in the headless harness, 25 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 40 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 50 of the 50 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 <!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
