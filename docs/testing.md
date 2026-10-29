@@ -123,6 +123,24 @@ TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R au
 
 `tests/host/`: Cadran's plain C++ parts without a window, each suite linked only to the sources it tests: the palettes' contrast (every pair of `cadran::palette::CONTRAST`, both themes), safe text and the Markdown parser, `ui::guarded`, and the text helpers (`cadran_text`, `format_text`) over the real `cadran.json` catalogs. `ctest -R host` runs them alone.
 
+## Fuzzing
+
+`-DAURORE_BUILD_FUZZERS=ON`, with the tests and clang (and its runtimes, `libclang-rt-18-dev` on Ubuntu), builds the libFuzzer targets of `tests/fuzz`, under AddressSanitizer and UndefinedBehaviorSanitizer:
+
+| Target | What it reads |
+| --- | --- |
+| `aurore_fuzz_markdown` | Cadran's Markdown and `safe_text`, on any bytes: the bounds `markdown.hpp` promises, every string valid UTF-8, `clean()` stable |
+| `aurore_fuzz_theme` | A theme file (`Theme::load`), as an app reads one from a folder its user fills, from an empty folder of its own: nothing it includes or inherits is read; and `Theme::parseColor`. The library is built for the fuzzer too, so that it follows the paths inside it: a build of its own |
+
+```sh
+CC=clang CXX=clang++ cmake -B build-fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAURORE_PLATFORM=DESKTOP \
+    -DAURORE_LIBROMFS=ON -DAURORE_BUILD_TESTS=ON -DAURORE_BUILD_FUZZERS=ON
+cmake --build build-fuzz --target aurore_fuzz_markdown aurore_fuzz_theme
+mkdir -p corpus/theme && build-fuzz/tests/aurore_fuzz_theme -max_total_time=60 corpus/theme resources/themes
+```
+
+CI's `linux (fuzz)` runs each for two minutes on every pull request, from the corpus the runs before it grew (and the repository's docs and themes); an input that crashes one goes up as the `fuzz-crashes` artifact, to run again with `aurore_fuzz_theme <file>`.
+
 ## The bench
 
 `aurore_bench` (`tests/bench.cpp`) runs the demo's main screen under the harness with the `Profiler` on, over three scenarios (still, every frame drawn; moving through the rail; still with redraw on demand), and prints per frame: frames drawn, layout passes, views laid out, nanovg draw calls, allocations (a replaced `operator new`), and microseconds per phase (input, update, layout, draw, flush, swap, total).
