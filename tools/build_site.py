@@ -135,6 +135,14 @@ ICONS = {
     "languages": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18"/>',
     "tools": '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
     "toolbox": '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V5h6v3M3 13h18"/>',
+    # The page on borealis' (vs_body()): Cadran's dial, the styles' sliders,
+    # accessibility's figure, the harness' flask, the density's lines.
+    "cadran": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    "styles": '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/>'
+              '<circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+    "a11y": '<circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5 12 10l7-1.5M12 10v5M12 15l-3.5 6M12 15l3.5 6"/>',
+    "test": '<path d="M9 3h6M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3M7.5 15h9"/>',
+    "density": '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7.5 8h9M7.5 12h9M7.5 16h9"/>',
 }
 
 # The README's sections (GitHub's anchors) and the home page's that say the same.
@@ -445,7 +453,7 @@ def json_ld(data):
 
 
 def page(t, lang, to_root, path, title, body, description=None, home=False, structured=(), indexed=True,
-         markdown_url=None, lost=False):
+         markdown_url=None, lost=False, night=False):
     """A whole page: `path` is its place under the language's folder ('' or 'docs/x/')."""
     code, folder, _, hl = next(l for l in LANGUAGES if l[0] == lang)
     description = description or t.plain("meta_description")
@@ -467,7 +475,9 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     api += f'<li><a class="nav-try" href="{to_root}demo/{demo_query(lang)}">{t("nav_demo")}</a></li>' if DEMO_DIR else ""
     # The aurora behind the home page's hero, and the page not found's (body
     # a pair, then: what stands under the sky, and the rest).
-    aurora = home or lost
+    # The page on borealis (night) stands under it too, the night going on
+    # down the page as the home page's.
+    aurora = home or lost or night
     sky = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
     hero = body[0] if aurora else ""
     main = body[1] if aurora else body
@@ -522,7 +532,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 {"".join(json_ld(d) for d in structured)}<script src="{to_root}assets/lang.js"></script>
 <script src="{to_root}assets/site.js" defer></script>
 {umami}</head>
-<body class="{'home' if home else 'inner'}" data-copy="{t.plain('copy')}" data-copied="{t.plain('copied')}">
+<body class="{'home' if home or night else 'inner'}" data-copy="{t.plain('copy')}" data-copied="{t.plain('copied')}">
 <a class="skip" href="#main">{t("skip")}</a>
 {doc_bar}<div class="sky{' sky-home' if aurora else ''}">
   {sky}
@@ -532,6 +542,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
       <ul>
         <li><a href="{base}#features">{t("nav_features")}</a></li>
         <li><a href="{base}docs/getting-started/">{t("nav_docs")}</a></li>
+        <li class="nav-vs"><a href="{base}borealis/"{' aria-current="page"' if path == "borealis/" else ""}>{t("nav_borealis")}</a></li>
         {api}
         <li class="nav-gh"><a href="{REPO_URL}">GitHub</a></li>
       </ul>
@@ -565,6 +576,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     <div>
       <h2>{t("footer_project")}</h2>
       <ul><li><a href="{REPO_URL}">GitHub</a></li><li><a href="{base}changelog/">{t("changelog")}</a></li>
+        <li><a href="{base}borealis/">{t("vs_footer")}</a></li>
         <li><a href="{REPO_URL}/blob/main/CONTRIBUTING.md">{t("footer_contributing")}</a></li>
         <li><a href="{REPO_URL}/issues/new">{t("footer_issues")}</a></li>
         <li><a href="https://github.com/xfangfang/borealis">{t("footer_upstream")}</a></li></ul>
@@ -803,6 +815,7 @@ def home_body(t, lang, to_root):
         <h2>{t("adds_title")}</h2>
         <p>{t("adds_text")}</p>
         <p><a href="{REPO_URL}#-what-aurore-adds">{t("adds_link")} →</a></p>
+        <p><a href="{base}borealis/">{t("vs_home_link")} →</a></p>
       </div>
       <ul class="checks">
 {adds}
@@ -856,6 +869,212 @@ def home_body(t, lang, to_root):
     <div class="promise">
       <h2>{t("license_title")}</h2>
       <p>{t("license_text")}</p>
+    </div>
+  </section>"""
+    return hero, main
+
+
+# ---- Aurore and borealis -----------------------------------------------------
+# What Aurore adds to or changes from xfangfang/borealis' wiliwili branch, the
+# commit it starts from (vs_body()). Only what the code, its history and its
+# documentation show; the speed figures are the README's, not here.
+
+UPSTREAM_URL = "https://github.com/xfangfang/borealis/tree/wiliwili"
+# The headline differences: (key, borealis', Aurore's).
+VS_GLANCE = [("languages", "4", "15"), ("cpp", "C++17", "C++20"), ("yoga", "Yoga 2", "Yoga 3"), ("platforms", "7", "8")]
+# What borealis has nothing of: (key, icon).
+VS_NEW = [("cadran", "cadran"), ("themes", "themes"), ("styles", "styles"), ("a11y", "a11y"),
+          ("text", "languages"), ("harness", "test"), ("inspector", "tools"), ("density", "density")]
+# What both have, side by side, by theme: (key, borealis', Aurore's); None is
+# the catalogue's vs_<key>_was / vs_<key>_now, a string the same in every language.
+VS_SIDES = [
+    ("look", [("look", None, None), ("colours", None, None), ("layout", "Yoga 2.0.0", None),
+              ("corners", None, None), ("highlight", None, None), ("images", None, None)]),
+    ("text", [("catalogues", None, None), ("switch", None, None), ("lookups", None, None),
+              ("fonts", None, None), ("keyboard", None, None), ("focus", None, None)]),
+    ("build", [("cpp", "C++17", None), ("target", "<code>borealis</code>", "<code>Aurore::aurore</code>, <code>Aurore::test</code>"),
+               ("options", "<code>PLATFORM_*</code>, <code>USE_*</code>, <code>BRLS_*</code>", None),
+               ("systems", None, None), ("platforms", None, None),
+               ("libraries", "Yoga 2.0.0, SDL 2.28.5, tinyxml2 9.0.0, nlohmann/json 3.11, glad 0.1.27",
+                "Yoga 3.2.1, SDL 2.32.10, tinyxml2 11.0.0, nlohmann/json 3.12.0, glad 2.0.8"),
+               ("sounds", None, None), ("links", None, None), ("licence", "Apache 2.0", None)]),
+]
+VS_FIXES = ["counter", "destroyed", "hidden", "controllers", "recycler", "fonts", "logger", "disabled"]
+# The authors of the commits picked from other forks, by their GitHub
+# handle (those with an account linked to the commit).
+VS_PICKERS = ["Nika0000", "XITRIX", "carlchina", "xlanor", "dragonflylee", "kawaii-flesh", "PalindromicBreadLoaf",
+              "AMSNX", "eliasrosa", "youngzyl", "FayeSpica", "Jackiechen259", "Kiriox94"]
+# The names an app changes: borealis' line, then Aurore's.
+VS_RENAMES = [
+    ("cpp", "#include <borealis.hpp>", "#include <aurore.hpp>"),
+    ("cpp", "brls::Application::init();", "aurore::Application::init();"),
+    ("cpp", 'BRLS_BIND(brls::Button, button, "go");', 'AURORE_BIND(aurore::Button, button, "go");'),
+    ("xml", '<brls:Box axis="column">', '<aurore:Box axis="column">'),
+    ("xml", 'textColor="@theme/brls/text"', 'textColor="@theme/aurore/text"'),
+    ("sh", "target_link_libraries(app borealis)", "target_link_libraries(app PRIVATE Aurore::aurore)"),
+    ("sh", "cmake -DPLATFORM_DESKTOP=ON -DUSE_SDL2=ON", "cmake -DAURORE_PLATFORM=DESKTOP -DAURORE_WINDOW=SDL2"),
+    ("sh", "BRLS_LANG=fr ./app", "AURORE_LANG=fr ./app"),
+]
+VS_MOVE = ["names", "cpp", "licence"]
+VS_PROJECT = ["docs", "ci", "releases", "security", "template", "notices"]
+
+
+def vs_rename_editor(t):
+    """The names an app changes, as a diff in the editor's window."""
+    lines = []
+    for lang, old, new in VS_RENAMES:
+        lines.append(f'<span class="del"><span class="sign" aria-hidden="true">−</span>{highlight(old, lang)}</span>')
+        lines.append(f'<span class="add"><span class="sign" aria-hidden="true">+</span>{highlight(new, lang)}</span>')
+    return (f'<figure class="vs-diff">\n'
+            f'        <div class="editor-bar"><span class="editor-dots" aria-hidden="true"><i></i><i></i><i></i></span>'
+            f'<span class="vs-diff-name">{t("vs_move_file")}</span></div>\n'
+            f'        <pre class="no-copy" tabindex="0"><code>{"".join(lines)}</code></pre>\n'
+            f'      </figure>')
+
+
+def vs_body(t, lang, to_root):
+    """The page on what Aurore adds to borealis: (what stands under the sky, the rest)."""
+    base = f"{to_root}{lang_dir(lang)}"
+    migrate = f"{base}docs/migrating-from-borealis/"
+    jumps = "".join(f'<li><a href="#{k}">{t(f"vs_jump_{k}")}</a></li>' for k in ("new", "sides", "fixes", "move", "project"))
+    lineage = "\n".join(
+        f'        <li class="{cls}"><strong>{name}</strong><span>{t(f"vs_line_{key}")}</span></li>'
+        for cls, key, name in (("node", "origin", "natinusala/borealis"), ("node", "wiliwili", "xfangfang/borealis · wiliwili"),
+                               ("pick", "forks", t("vs_line_forks_name")), ("pick", "playguard", t("vs_line_playguard_name")),
+                               ("node now", "aurore", "JigSawFr/Aurore")))
+    glance = "\n".join(
+        f'      <li class="stat"><p class="stat-figure"><span class="sr-only">borealis: </span><span class="was">{was}</span>'
+        f'<span class="to" aria-hidden="true">→</span><span class="sr-only">, Aurore: </span><span class="now">{now}</span></p>'
+        f'<p class="stat-text">{t(f"vs_glance_{k}")}</p></li>'
+        for k, was, now in VS_GLANCE)
+    new = "\n".join(
+        f'      <li class="card">{icon(i)}<h3>{t(f"vs_new_{k}_title")}</h3><p>{t(f"vs_new_{k}_text")}</p></li>'
+        for k, i in VS_NEW)
+    tables = []
+    for group, rows in VS_SIDES:
+        body = "\n".join(
+            f'          <tr><th scope="row">{t(f"vs_{group}_{k}")}</th>'
+            f'<td class="was" data-side="borealis">{was if was is not None else t(f"vs_{group}_{k}_was")}</td>'
+            f'<td class="now" data-side="Aurore">{now if now is not None else t(f"vs_{group}_{k}_now")}</td></tr>'
+            for k, was, now in rows)
+        tables.append(f"""      <div class="sides">
+        <h3 id="sides-{group}">{t(f"vs_group_{group}")}</h3>
+        <table aria-labelledby="sides-{group}">
+          <thead><tr><td></td><th scope="col">borealis <small>wiliwili</small></th><th scope="col"><span class="now-mark">Aurore</span></th></tr></thead>
+          <tbody>
+{body}
+          </tbody>
+        </table>
+      </div>""")
+    fixes = "\n".join(f"        <li>{t(f'vs_fix_{k}')}</li>" for k in VS_FIXES)
+    pickers = "".join(f'<li><a href="https://github.com/{h}">{h}</a></li>' for h in VS_PICKERS)
+    move = "\n".join(f"          <li>{t(f'vs_move_{k}')}</li>" for k in VS_MOVE)
+    project = "\n".join(f'      <li><h3>{t(f"vs_project_{k}_title")}</h3><p>{t(f"vs_project_{k}_text")}</p></li>'
+                        for k in VS_PROJECT)
+    hero = f"""  <section class="wrap hero vs-hero">
+    <div class="hero-text">
+      <p class="eyebrow">{t("vs_eyebrow")}</p>
+      <h1>{t("vs_title")}</h1>
+      <p class="lede">{t("vs_lede")}</p>
+      <div class="actions">
+        <a class="button primary" href="{migrate}">{t("vs_cta_migrate")}</a>
+        <a class="button ghost" href="{UPSTREAM_URL}">{t("vs_cta_upstream")}</a>
+      </div>
+      <p class="release">{t("vs_compared")}</p>
+    </div>
+    <figure class="lineage">
+      <figcaption class="editor-bar"><span class="editor-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>{t("vs_line_caption")}</span></figcaption>
+      <ol>
+{lineage}
+      </ol>
+    </figure>
+    <nav class="platforms vs-jump" aria-label="{t.plain("vs_jump_label")}">
+      <h2>{t("vs_jump_label")}</h2>
+      <ul>{jumps}</ul>
+    </nav>
+  </section>"""
+    main = f"""  <section class="wrap" id="glance">
+    <h2 class="sr-only">{t("vs_glance_title")}</h2>
+    <ul class="glance">
+{glance}
+    </ul>
+  </section>
+
+  <section class="wrap" id="new">
+    <div class="section-head">
+      <p class="eyebrow">{t("vs_new_eyebrow")}</p>
+      <h2>{t("vs_new_title")}</h2>
+      <p>{t("vs_new_text")}</p>
+    </div>
+    <ul class="cards">
+{new}
+    </ul>
+  </section>
+
+  <section class="wrap" id="sides">
+    <div class="section-head">
+      <p class="eyebrow">{t("vs_sides_eyebrow")}</p>
+      <h2>{t("vs_sides_title")}</h2>
+      <p>{t("vs_sides_text")}</p>
+    </div>
+{chr(10).join(tables)}
+  </section>
+
+  <section class="wrap" id="fixes">
+    <div class="adds">
+      <div class="section-head">
+        <p class="eyebrow">{t("vs_fixes_eyebrow")}</p>
+        <h2>{t("vs_fixes_title")}</h2>
+        <p>{t("vs_fixes_text")}</p>
+      </div>
+      <div class="vs-fixes">
+        <ul class="checks">
+{fixes}
+        </ul>
+        <div class="pickers">
+          <h3>{t("vs_pickers_title")}</h3>
+          <p>{t("vs_pickers_text")}</p>
+          <ul>{pickers}</ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="move">
+    <div class="vs-move">
+      <div class="section-head">
+        <p class="eyebrow">{t("vs_move_eyebrow")}</p>
+        <h2>{t("vs_move_title")}</h2>
+        <p>{t("vs_move_text")}</p>
+        <ul class="checks">
+{move}
+        </ul>
+        <p><a href="{migrate}">{t("vs_move_link")} →</a></p>
+      </div>
+      {vs_rename_editor(t)}
+    </div>
+  </section>
+
+  <section class="wrap" id="project">
+    <div class="section-head">
+      <p class="eyebrow">{t("vs_project_eyebrow")}</p>
+      <h2>{t("vs_project_title")}</h2>
+    </div>
+    <ul class="facts">
+{project}
+    </ul>
+  </section>
+
+  <section class="wrap closing">
+    <div class="band">
+      <div>
+        <h2>{t("vs_band_title")}</h2>
+        <p>{t("vs_band_text")}</p>
+      </div>
+      <div class="actions">
+        <a class="button primary" href="{migrate}">{t("vs_cta_migrate")}</a>
+        <a class="button ghost" href="{REPO_URL}#-what-aurore-adds">{t("adds_link")}</a>
+      </div>
     </div>
   </section>"""
     return hero, main
@@ -1021,6 +1240,7 @@ def llms_txt(t, descriptions, full=None):
         lines += [f"- [{name}]({SITE_URL}docs/{p}.md): {descriptions[p]}" for p, g, name in DOCS if g == group]
         lines.append("")
     lines += ["## Optional", "", f"- [Changelog]({SITE_URL}changelog/)",
+              f"- [{t.plain('vs_page_title')}]({SITE_URL}borealis/): {t.plain('vs_description')}",
               f"- [Contributing]({REPO_URL}/blob/main/CONTRIBUTING.md)"]
     if API_DIR:
         lines.append(f"- [API reference (Doxygen)]({SITE_URL}api/)")
@@ -1133,11 +1353,14 @@ def main():
         write(out, f"{base}changelog/index.html",
               page(t, lang, to_root + "../", "changelog/", f"{t.plain('changelog_title')} · Aurore",
                    changelog_body(t, lang)))
-        count += 2
+        write(out, f"{base}borealis/index.html",
+              page(t, lang, to_root + "../", "borealis/", f"{t.plain('vs_page_title')} · Aurore",
+                   vs_body(t, lang, to_root + "../"), description=t.plain("vs_description"), night=True))
+        count += 3
     t = Texts("en-US")
     write(out, "llms.txt", llms_txt(t, descriptions))
     write(out, "llms-full.txt", llms_txt(t, descriptions, full))
-    write(out, "sitemap.xml", sitemap([""] + [f"docs/{p}/" for p, _, _ in DOCS] + ["changelog/"]))
+    write(out, "sitemap.xml", sitemap([""] + ["borealis/"] + [f"docs/{p}/" for p, _, _ in DOCS] + ["changelog/"]))
     write(out, "releases.atom", releases_atom())
     at_root = urlsplit(SITE_URL).path == "/"
     if at_root:

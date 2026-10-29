@@ -71,6 +71,13 @@
             "auto": "自動：選擇分頁時展開",
             "open": "始終展開",
             "icons": "僅圖示"
+        },
+        "density": "密度",
+        "densities": {
+            "auto": "自動：小螢幕上更緊湊",
+            "comfortable": "寬鬆",
+            "compact": "緊湊",
+            "dense": "密集"
         }
     },
     "quick": {

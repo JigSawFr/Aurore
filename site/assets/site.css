@@ -46,7 +46,7 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.15; margin: 0; text
    between phrases, never inside a word (headings and short lines; the
    browsers without it break as before), Korean between words as its spaces
    say, Chinese without a punctuation mark opening a line. */
-:lang(ja) :is(h1, h2, h3, h4, .eyebrow, .lede, .button, figcaption, .made span, .preview-screen p, .pane-name, .lang-button, .langs a, .sites small, .lost p, .band p) { word-break: auto-phrase; }
+:lang(ja) :is(h1, h2, h3, h4, .eyebrow, .lede, .button, figcaption, .made span, .preview-screen p, .pane-name, .lang-button, .langs a, .sites small, .lost p, .band p, .section-head p, .stat-text, .lineage li > span, .sides th, .pickers p) { word-break: auto-phrase; }
 :lang(ko) body { word-break: keep-all; }
 :lang(zh-Hans) body, :lang(zh-Hant) body { line-break: strict; }
 /* Chinese titles kept whole between their spaces and punctuation, broken
@@ -459,13 +459,13 @@ footer.site a:hover { color: var(--aurora); }
 /* A phone: the name and the languages on a row, the links under them. */
 @media (max-width: 560px) {
   /* The name and its menu on a row with the languages, the links on one
-     row under them (GitHub is in the footer). */
+     row under them (GitHub and the page on borealis are in the footer). */
   .top { padding-block: 10px 6px; row-gap: 2px; }
   .top nav { flex-basis: 100%; order: 3; margin-left: 0; }
   .top nav ul { flex-wrap: nowrap; margin-left: -8px; }
   .brand { font-size: 1.15rem; }
   .brand img { width: 30px; height: 30px; }
-  .top nav li:first-child, .top nav .nav-gh { display: none; }
+  .top nav li:first-child, .top nav .nav-gh, .top nav .nav-vs { display: none; }
   .top nav a { padding: 0 8px; font-size: 0.875rem; }
   .langs { grid-template-columns: minmax(0, 1fr); }
 }
@@ -729,6 +729,170 @@ figure.editor-pane figcaption { grid-column: 1; grid-row: 1; margin: 0; padding:
   .editor.tabbed .editor-panes { display: block; }
   .editor.tabbed .pane-name { display: inline; }
 }
+
+/* ---- Aurore and borealis (borealis/, vs_body() in build_site.py): under the
+   same night as the home page, where Aurore comes from beside the title, the
+   headline differences, the new features on cards, what both have side by
+   side (a table, cards on a phone), the fixes, the names an app changes. */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.top nav a[aria-current="page"] { color: var(--snow); background: rgb(232 238 247 / 0.06); }
+
+/* The title kept whole (no hyphen in "borealis"), the text a little wider. */
+.vs-hero h1 { hyphens: manual; }
+@media (min-width: 960px) { .vs-hero { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); } }
+
+/* Where Aurore comes from: a trunk from borealis to Aurore, the commits
+   picked elsewhere joining it, in the editor's window. */
+.lineage {
+  margin: 0; min-width: 0; overflow: hidden; border: 1px solid var(--night-line); border-radius: 14px; background: #081020;
+  box-shadow: 0 30px 70px -40px rgb(0 0 0 / 0.9), 0 0 110px -40px rgb(51 187 255 / 0.4);
+}
+.lineage .editor-bar { font: 400 0.75rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--dusk); }
+.lineage ol { position: relative; list-style: none; margin: 0; padding: 28px 24px 30px; display: grid; gap: 22px; }
+.lineage ol::before {
+  content: ""; position: absolute; left: 35px; top: 40px; bottom: 30px; width: 2px; border-radius: 2px;
+  background: linear-gradient(to bottom, #3a4d72, var(--ice) 70%, var(--aurora));
+}
+.lineage li { position: relative; display: grid; gap: 2px; padding-left: 40px; min-width: 0; }
+.lineage strong { font: 500 0.9375rem/1.6 var(--mono); color: var(--snow); overflow-wrap: anywhere; }
+.lineage li > span { color: var(--mist); font-size: 0.9375rem; line-height: 1.45; }
+.lineage li::before {
+  content: ""; position: absolute; left: 4px; top: 4px; width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box;
+  background: #081020; border: 2px solid #5a6d92;
+}
+.lineage li.pick { padding-left: 62px; }
+.lineage li.pick strong { font: 600 0.9375rem/1.6 var(--display); letter-spacing: -0.005em; }
+.lineage li.pick::before { left: 30px; top: 7px; width: 10px; height: 10px; border: 2px solid var(--violet); }
+.lineage li.pick::after {
+  content: ""; position: absolute; left: 14px; top: 11px; width: 16px; height: 0; border-top: 2px dotted rgb(138 92 255 / 0.7);
+}
+.lineage li.now::before {
+  left: 2px; top: 2px; width: 20px; height: 20px; border: 0; background: var(--aurora-grad);
+  box-shadow: 0 0 0 4px rgb(0 255 204 / 0.12), 0 0 22px -2px rgb(0 255 204 / 0.7);
+}
+/* Below the last node, no trunk. */
+.lineage li.now::after { content: ""; position: absolute; left: 10px; top: 22px; bottom: -30px; width: 6px; background: #081020; }
+.lineage li.now strong { background: var(--aurora-grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; }
+
+/* The page's sections, under the title. */
+.vs-jump li { padding: 0; }
+.vs-jump a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; color: var(--mist); text-decoration: none; border-radius: 99px; }
+.vs-jump a:hover { color: var(--snow); }
+
+/* The headline differences: borealis' struck through, Aurore's in the aurora. */
+main > section#glance { padding-block: 0 clamp(20px, 4vw, 40px); }
+.glance { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 600px) { .glance { gap: 16px; } }
+@media (min-width: 1000px) { .glance { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat {
+  position: relative; overflow: hidden; display: grid; gap: 6px; align-content: start; padding: 20px 22px 22px;
+  border: 1px solid var(--night-line); border-radius: var(--radius);
+  background: linear-gradient(180deg, rgb(14 26 51 / 0.95), rgb(14 26 51 / 0.45));
+}
+.stat::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; background: var(--aurora-grad); opacity: 0.75; }
+@supports (grid-template-rows: subgrid) {
+  .glance > .stat { grid-row: span 2; grid-template-rows: subgrid; row-gap: 6px; }
+}
+/* On a phone, two by two: borealis' figure over Aurore's. */
+@media (max-width: 599px) {
+  .stat { padding: 16px 16px 18px; }
+  .stat-figure .now { font-size: 1.75rem; }
+  .stat-text { font-size: 0.875rem; }
+}
+.stat-figure { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-family: var(--display); line-height: 1.15; }
+.stat-figure .was { color: var(--dusk); font-size: 1.125rem; text-decoration: line-through; text-decoration-color: rgb(133 147 174 / 0.7); }
+.stat-figure .to { color: var(--dusk); font-size: 1.125rem; }
+.stat-figure .now {
+  font-size: clamp(1.875rem, 3.2vw, 2.375rem); font-weight: 600; letter-spacing: -0.02em;
+  background: var(--aurora-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.stat-text { color: var(--mist); font-size: 0.9375rem; hyphens: auto; overflow-wrap: break-word; }
+/* A small phone: one under the other. */
+@media (max-width: 399px) { .glance { grid-template-columns: minmax(0, 1fr); } }
+
+/* What both have: a table on a wide screen, Aurore's column lit. */
+.sides + .sides { margin-top: clamp(36px, 5vw, 56px); }
+.sides h3 { font-family: var(--mono); font-weight: 400; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--aurora); margin-bottom: 14px; }
+.sides table {
+  width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; overflow: hidden;
+  border: 1px solid var(--night-line); border-radius: var(--radius); background: var(--night); font-size: 0.975rem;
+}
+.sides th, .sides td { text-align: left; vertical-align: top; padding: 15px 22px; border-bottom: 1px solid var(--night-line); }
+.sides tbody tr:last-child > * { border-bottom: 0; }
+.sides thead > tr > * { padding-block: 12px; background: #081020; font: 400 0.75rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dusk); }
+.sides thead td { width: 22%; }
+.sides thead th:nth-child(2) { width: 34%; }
+.sides thead small { font-size: inherit; color: #6b7a96; text-transform: none; letter-spacing: 0; margin-left: 4px; }
+.sides .now-mark { display: inline-flex; align-items: center; gap: 8px; color: var(--aurora); }
+.sides .now-mark::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--aurora-grad); box-shadow: 0 0 10px rgb(0 255 204 / 0.6); }
+.sides tbody th { font: 600 1rem/1.45 var(--display); letter-spacing: -0.01em; color: var(--snow); }
+.sides td.was { color: var(--mist); }
+.sides td.now, .sides thead th:last-child { border-left: 1px solid rgb(0 255 204 / 0.16); }
+.sides td.now { color: var(--snow); background: linear-gradient(90deg, rgb(0 255 204 / 0.06), rgb(138 92 255 / 0.04)); }
+.sides tbody tr { transition: background-color 0.2s; }
+@media (hover: hover) { .sides tbody tr:hover { background: rgb(232 238 247 / 0.025); } }
+/* On a phone: each line a card, borealis' over Aurore's, each named. */
+@media (max-width: 719px) {
+  .sides table, .sides tbody, .sides tr, .sides th, .sides td { display: block; width: auto; }
+  .sides table { border: 0; background: none; overflow: visible; }
+  .sides thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .sides tbody { display: grid; gap: 12px; }
+  .sides tbody tr { display: grid; gap: 8px; padding: 16px; border: 1px solid var(--night-line); border-radius: 14px; background: var(--night); }
+  .sides tbody th, .sides tbody td { padding: 0; border: 0; }
+  .sides tbody th { padding-bottom: 2px; }
+  .sides td { padding: 10px 12px !important; border-radius: 10px; }
+  .sides td.was { background: rgb(232 238 247 / 0.035); }
+  .sides td.now { border-left: 0; box-shadow: inset 2px 0 0 var(--aurora); border-radius: 4px 10px 10px 4px; }
+  .sides td::before { content: attr(data-side); display: block; margin-bottom: 2px; font: 400 0.6875rem/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dusk); }
+  .sides td.now::before { color: var(--aurora); }
+}
+
+/* The fixes, and who they come from. */
+@media (min-width: 900px) { #fixes .section-head { position: sticky; top: 32px; align-self: start; } }
+.vs-fixes { display: grid; gap: 32px; align-content: start; min-width: 0; }
+.pickers { display: grid; gap: 10px; padding: 22px; border: 1px solid var(--night-line); border-radius: var(--radius); background: var(--night); }
+.pickers h3 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
+.pickers p { color: var(--mist); font-size: 0.9375rem; }
+.pickers ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.pickers a {
+  display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 99px;
+  border: 1px solid var(--night-line); background: #081020; color: var(--mist); text-decoration: none; font: 500 0.8125rem var(--mono);
+}
+.pickers a:hover { color: var(--aurora); border-color: rgb(0 255 204 / 0.4); }
+
+/* What an app changes: the guide's gist beside the names, as a diff. */
+.vs-move { display: grid; gap: 28px 56px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 900px) { .vs-move { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); } .vs-move .section-head { margin-bottom: 0; } }
+.vs-move .checks { margin-top: 6px; }
+.vs-diff {
+  margin: 0; min-width: 0; overflow: hidden; border: 1px solid var(--night-line); border-radius: 14px; background: #081020;
+  box-shadow: 0 30px 70px -40px rgb(0 0 0 / 0.9);
+}
+.vs-diff-name { font: 500 0.8125rem var(--mono); color: var(--mist); }
+.vs-diff pre { border: 0; border-radius: 0; background: transparent; padding: 14px 0; font-size: 0.8125rem; }
+.vs-diff code { display: grid; width: max-content; min-width: 100%; }
+.vs-diff code > span { display: block; padding-right: 18px; }
+@media (max-width: 599px) { .vs-diff pre { font-size: 0.75rem; } }
+.vs-diff .sign { display: inline-block; width: 2.6em; text-align: center; user-select: none; }
+.vs-diff .del { background: rgb(255 122 133 / 0.07); }
+.vs-diff .del .sign { color: #ff8f99; }
+.vs-diff .add { background: rgb(0 255 204 / 0.06); margin-bottom: 8px; }
+.vs-diff .add:last-child { margin-bottom: 0; }
+.vs-diff .add .sign { color: var(--aurora); }
+
+/* The project: facts under a line, the aurora at its start. */
+.facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 32px 40px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 600px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.facts li { position: relative; display: grid; gap: 6px; align-content: start; padding-top: 18px; border-top: 1px solid var(--night-line); }
+.facts li::before { content: ""; position: absolute; top: -1px; left: 0; width: 48px; height: 2px; background: var(--aurora-grad); }
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 600px) { .facts > li { grid-row: span 2; grid-template-rows: subgrid; } }
+}
+.facts h3 { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; }
+.facts p { color: var(--mist); font-size: 0.9375rem; }
+.band > .actions { display: flex; max-width: none; }
+@media (prefers-reduced-motion: reduce) { .sides tbody tr { transition: none; } }
 
 /* ---- Boréale's site switcher: the name, a button that opens the menu of
    the four sites (a popover: the browser closes it on Esc or a click

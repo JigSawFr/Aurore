@@ -112,6 +112,10 @@ aurore::Box* dialogs()
               { ui::notify(aurore::getStr("demo/cadran/typed", text)); }); }));
     buttons->addView(show::button("demo/cadran/quick"_i18n, []
         { ui::quick_settings(); }));
+    buttons->addView(show::button("cadran/prefs/rail"_i18n, []
+        { ui::pick_rail(); }));
+    buttons->addView(show::button("cadran/prefs/density"_i18n, []
+        { ui::pick_density(); }));
     return buttons;
 }
 

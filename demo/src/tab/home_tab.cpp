@@ -61,18 +61,18 @@ aurore::View* hero(aurore::View* tab)
     head->setGap(16);
     auto* mark = new aurore::Image();
     mark->setImageFromRes("img/aurore_96.png");
-    mark->setWidth(56);
-    mark->setHeight(56);
+    mark->setWidth(compact ? 40 : aurore::dp(56));
+    mark->setHeight(compact ? 40 : aurore::dp(56));
     mark->setCornerRadius(14);
     head->addView(mark);
-    aurore::Label* name = kit::display("Aurore", 48);
+    aurore::Label* name = kit::display("Aurore", compact ? 36 : 48);
     name->setTextColor(AuroraView::SNOW);
     head->addView(name);
     night->addView(head);
 
-    aurore::Label* pitch = kit::label("demo/home/pitch"_i18n, compact ? 20 : 24);
+    aurore::Label* pitch = kit::label("demo/home/pitch"_i18n, compact ? 18 : 24);
     pitch->setTextColor(AuroraView::SNOW);
-    pitch->setMarginTop(18);
+    pitch->setMarginTop(aurore::dp(compact ? 12 : 18));
     pitch->setMaxWidth(720);
     night->addView(pitch);
     aurore::Label* more = kit::label("demo/home/more"_i18n, kit::TEXT_BODY);
@@ -94,7 +94,7 @@ aurore::View* hero(aurore::View* tab)
         platforms->setVisibility(aurore::Visibility::GONE);
 
     aurore::Box* actions = show::row(true, 12);
-    actions->setMarginTop(24);
+    actions->setMarginTop(aurore::dp(compact ? 16 : 24));
     actions->addView(show::button("demo/home/explore"_i18n, [tab]
         { demo::openTab(tab, demo::TAB_LIBRARY); }, true));
     actions->addView(show::button("demo/home/components"_i18n, [tab]

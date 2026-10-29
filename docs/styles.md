@@ -179,6 +179,8 @@ A screen is compact, medium or expanded by its width in layout units (`Applicati
 
 The design width sets it: `Application::ORIGINAL_WINDOW_WIDTH = 480` (before `init()`) lays a 320-pixel screen out on 480 units, a compact one, its text 0.67 times as large as written. On the desktop, `AURORE_DESIGN_SIZE=480x360` does the same at start, to try a small screen's layout in a window.
 
+A layout preset sets the design size, the density and the text scale in one go: `Application::usePreset(aurore::PRESET_SMALL_SCREEN)` (before `init()`) lays a small screen out on 480x360 units, dense, its text 1.25 times larger, 12 to 17 pixels on a 320x240 one; `PRESET_STANDARD` is the usual 1280x720. A platform whose screen is small gives its own (`Platform::getLayoutPreset`), the app's wins over it, and `AURORE_PRESET=small` (or `standard`) wins over both on the desktop. Cadran's text size setting multiplies the preset's text scale (`Application::getPresetTextScale`).
+
 In XML, an attribute prefixed with a class applies on such a screen only, over the plain one whatever their order; on the other screens its name is checked, its value is not read:
 
 ```xml

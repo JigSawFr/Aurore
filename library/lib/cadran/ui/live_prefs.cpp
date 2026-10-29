@@ -15,6 +15,7 @@ namespace
     aurore::ThemeVariant s_system_theme = aurore::ThemeVariant::DARK;
     std::string s_system_locale; // the console's language
     std::string s_locale; // the strings' language now
+    float s_app_density = aurore::DENSITY_COMFORTABLE; // the app's (or AURORE_DENSITY's)
 
     // The tab shown, as a sidebar position (ui::hooks::tab_position), the
     // settings' tab when none is known.
@@ -94,6 +95,7 @@ void start()
     // The platform read the console's language (the app leaves Aurore's
     // locale on auto), and the strings are in it: the preferences' instead.
     s_system_theme            = aurore::Application::getPlatform()->getThemeVariant();
+    s_app_density             = aurore::getDensity();
     s_system_locale           = aurore::Application::getLocale();
     const std::string& chosen = ui::prefs().language;
     s_locale                  = chosen == "system" ? s_system_locale : chosen;
@@ -132,6 +134,28 @@ void language_changed()
     s_locale                  = chosen == "system" ? s_system_locale : chosen;
     aurore::loadTranslations(s_locale);
     ui::use_font_for(s_locale); // Chinese has its own (made again with the screens)
+    rebuild();
+}
+
+void apply_density()
+{
+    const std::string& chosen = ui::prefs().density;
+    float density             = s_app_density;
+    if (chosen == "comfortable")
+        density = aurore::DENSITY_COMFORTABLE;
+    else if (chosen == "compact")
+        density = aurore::DENSITY_COMPACT;
+    else if (chosen == "dense")
+        density = aurore::DENSITY_DENSE;
+    else if (s_app_density == aurore::DENSITY_COMFORTABLE
+        && aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT)
+        density = aurore::DENSITY_DENSE; // "auto" on a small screen
+    aurore::setDensity(density);
+}
+
+void density_changed()
+{
+    apply_density();
     rebuild();
 }
 } // namespace live_prefs

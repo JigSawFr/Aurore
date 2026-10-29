@@ -31,6 +31,8 @@
 namespace aurore
 {
 
+struct LayoutPreset; // application.hpp
+
 // Interface to provide everything platform specific required to run Aurore: graphics context, inputs, audio...
 // The best platform is automatically selected when the application starts, and cannot be changed by the user at the moment
 class Platform
@@ -86,6 +88,13 @@ class Platform
      * Returns the human-readable name of the platform.
      */
     virtual std::string getName() = 0;
+
+    /**
+     * The layout this platform's screen asks for (a small console screen:
+     * PRESET_SMALL_SCREEN), nullptr for the usual one. Read by
+     * Application::init() unless the app chose its own (Application::usePreset).
+     */
+    virtual const LayoutPreset* getLayoutPreset() { return nullptr; }
 
     /**
      * Returns true if device has wireless connection.

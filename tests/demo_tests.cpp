@@ -309,6 +309,56 @@ AURORE_TEST(action_sheet_on_a_small_screen)
     AURORE_CHECK(h.matchesReference("action_sheet_compact"));
 }
 
+// The small screen preset for the length of a test, the standard one after it
+struct SmallPreset
+{
+    SmallPreset() { aurore::Application::usePreset(aurore::PRESET_SMALL_SCREEN); }
+    ~SmallPreset()
+    {
+        aurore::Application::usePreset(aurore::PRESET_STANDARD);
+        aurore::Application::presetChosen = false;
+    }
+};
+
+AURORE_TEST(small_screen_preset)
+{
+    SmallPreset preset;
+    aurore::test::Options options;
+    options.width  = 960;
+    options.height = 720;
+    DemoHarness h(options);
+    AURORE_CHECK_EQ(aurore::Application::contentWidth, 480.0f);
+    AURORE_CHECK(aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT);
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_DENSE);
+    // The text 1.25 times larger, Cadran's text size setting over it
+    AURORE_CHECK_EQ(aurore::Application::getTextScale(), 1.25f);
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    AURORE_CHECK(h.matchesReference("main_screen_small_preset"));
+}
+
+AURORE_TEST(density_preference_builds_the_screens_again)
+{
+    DemoHarness h;
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_COMFORTABLE);
+    float before = h.findText("Components")->getFrame().getMinY();
+
+    ui::prefs().density = "dense";
+    live_prefs::density_changed();
+    h.settle();
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_DENSE);
+    // The main screen made again, its rail's rows closer together
+    aurore::View* item = h.findText("Components");
+    AURORE_CHECK(item != nullptr);
+    if (item)
+        AURORE_CHECK(item->getFrame().getMinY() < before);
+
+    ui::prefs().density = "auto";
+    live_prefs::density_changed();
+    h.settle();
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_COMFORTABLE);
+}
+
 AURORE_TEST(cut_texts_found)
 {
     Harness h;

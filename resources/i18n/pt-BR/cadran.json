@@ -71,6 +71,13 @@
             "auto": "Automático: aberta ao escolher uma aba",
             "open": "Sempre aberta",
             "icons": "Só ícones"
+        },
+        "density": "Densidade",
+        "densities": {
+            "auto": "Automática: mais compacta em telas pequenas",
+            "comfortable": "Confortável",
+            "compact": "Compacta",
+            "dense": "Densa"
         }
     },
     "quick": {
