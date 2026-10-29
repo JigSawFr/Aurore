@@ -86,7 +86,7 @@ docker run --rm -v $(pwd):/src/ xfangfang/vitasdk_sdl2_gles2 \
   "cmake -B build -G Ninja -DAURORE_PLATFORM=PSV -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && cmake --build build"
 ```
 
-The result is `build/aurore_demo.vpk`, installed with VitaShell. The OpenGL ES build packs what is in `psv/module/` (empty in the repository: the PVR_PSP2 `.suprx` modules go there, `psv/scripts/Dockerfile` shows where they come from); `-DAURORE_VITA_SHARK=ON` (GXM) compiles the shaders at run time with SceShaccCg. `psv/sce_sys/` holds the LiveArea's pictures. `-DAURORE_SIMPLE_HIGHLIGHT=ON` draws a plainer focus highlight, lighter for the Vita.
+The result is `build/aurore_demo.vpk`, installed with VitaShell. The OpenGL ES build packs what is in `psv/module/` (empty in the repository: the PVR_PSP2 `.suprx` modules go there, `psv/scripts/Dockerfile` shows where they come from); `-DAURORE_VITA_SHARK=ON` (GXM) compiles the shaders at run time with SceShaccCg. `psv/sce_sys/` holds the LiveArea's pictures. `-DAURORE_SIMPLE_HIGHLIGHT=ON` draws a plainer focus highlight, lighter for the Vita. Linking `Aurore::aurore` keeps 16 KiB between the text and data segments (`--defsym=__sce_headroom=0x4000`, read by VitaSDK 2026.08's linker script): `vita-elf-create` writes the module's SCE data there, and fails ("segment 1 overlaps") when the text ends just before the 64 KiB boundary the data starts at.
 
 ## PS4
 
