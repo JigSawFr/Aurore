@@ -40,6 +40,7 @@ const std::string dialogXML = R"xml(
         <aurore:AppletFrame
             id="aurore/dialog/applet"
             width="720"
+            compact:width="94%"
             height="auto"
             headerHidden="true"
             footerHidden="true"

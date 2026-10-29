@@ -112,6 +112,26 @@ AURORE_TEST(width_attributes_are_checked_on_every_screen)
     }
 }
 
+AURORE_TEST(dialogs_fit_a_compact_screen)
+{
+    DesignWidth small(480, 360);
+    Harness harness;
+    harness.push(new aurore::Activity(new aurore::Box()));
+    auto* dialog = new aurore::Dialog("A question asked on a small screen, long enough to wrap");
+    dialog->addButton("OK", []() {});
+    dialog->open();
+    harness.settle();
+    aurore::View* card = dialog->getView("aurore/dialog/applet");
+    AURORE_CHECK(card != nullptr);
+    if (card)
+    {
+        aurore::Rect frame = card->getFrame();
+        // 94% of the screen, not the 720 units of a wide one
+        AURORE_CHECK(frame.size.width <= 460);
+        AURORE_CHECK(frame.getMinX() >= 0 && frame.getMaxX() <= 480);
+    }
+}
+
 int main(int argc, char** argv)
 {
     return aurore::test::runTests(argc, argv);
