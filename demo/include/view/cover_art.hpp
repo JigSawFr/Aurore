@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 #include <aurore.hpp>
@@ -47,8 +48,8 @@ const char* genreIcon(Genre genre);
 std::string playtime(int minutes);
 } // namespace library
 
-/// A game's cover, drawn with nanovg: a gradient of its colours, a motif of
-/// its genre (mountains, a road at dusk, blocks, a planet…), its title in
+/// A game's cover: one of its genre's pictures (resources/img/covers, key art
+/// made up by tools/make_covers.py), mirrored for half the games, its title in
 /// the display face over a shade at the foot. Rounded at Cadran's icon
 /// radius (or `setRadius`); nothing it draws leaves the rounded shape.
 class CoverArt : public aurore::View
@@ -70,6 +71,7 @@ class CoverArt : public aurore::View
 
   private:
     const library::Game* game = nullptr;
-    float radius              = 12;
-    bool titleShown           = true;
+    std::shared_ptr<aurore::ThemeImage> picture;
+    float radius    = 12;
+    bool titleShown = true;
 };

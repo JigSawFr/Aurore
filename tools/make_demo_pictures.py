@@ -4,7 +4,7 @@
 #
 # Draws the tiles of the demo's image views (resources/img/tiles.png). Made
 # here so that the demo ships no third-party picture; the Library's covers
-# are drawn by the demo itself (demo/src/view/cover_art.cpp).
+# are key art made by tools/make_covers.py (resources/img/covers).
 #
 #     python3 tools/make_demo_pictures.py resources/img
 #
