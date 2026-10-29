@@ -20,8 +20,8 @@ set(_AURORE_OPTIONS_READ ON)
 include(CMakeDependentOption)
 
 # Target platform
-set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, ANDROID, IOS or TVOS")
-set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 ANDROID IOS TVOS)
+set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, 3DS (New 3DS; no renderer yet), ANDROID, IOS or TVOS")
+set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 3DS ANDROID IOS TVOS)
 
 # Window and input, on desktop and Switch: GLFW (the default) or SDL2. SDL3
 # in place of SDL2 on desktop, in a browser, on Android, iOS and tvOS (the
@@ -97,14 +97,19 @@ set(IOS_GUI_IDENTIFIER "" CACHE STRING "Package name.")
 
 string(TOUPPER "${AURORE_PLATFORM}" AURORE_PLATFORM)
 set_property(CACHE AURORE_PLATFORM PROPERTY VALUE "${AURORE_PLATFORM}")
-if (AURORE_PLATFORM AND NOT AURORE_PLATFORM MATCHES "^(DESKTOP|SWITCH|PSV|PS4|ANDROID|IOS|TVOS)$")
-    message(FATAL_ERROR "AURORE_PLATFORM=${AURORE_PLATFORM}: DESKTOP, SWITCH, PSV, PS4, ANDROID, IOS or TVOS")
+if (AURORE_PLATFORM AND NOT AURORE_PLATFORM MATCHES "^(DESKTOP|SWITCH|PSV|PS4|3DS|ANDROID|IOS|TVOS)$")
+    message(FATAL_ERROR "AURORE_PLATFORM=${AURORE_PLATFORM}: DESKTOP, SWITCH, PSV, PS4, 3DS, ANDROID, IOS or TVOS")
 endif ()
 
 string(TOUPPER "${AURORE_WINDOW}" AURORE_WINDOW)
 set_property(CACHE AURORE_WINDOW PROPERTY VALUE "${AURORE_WINDOW}")
 if (AURORE_WINDOW AND NOT AURORE_WINDOW MATCHES "^(GLFW|SDL2|SDL3)$")
     message(FATAL_ERROR "AURORE_WINDOW=${AURORE_WINDOW}: GLFW, SDL2 or SDL3")
+endif ()
+# The 3DS has its own screens and input (libctru), and no renderer yet: the
+# library and a smoke test are built, nothing is drawn (docs/platforms.md)
+if (AURORE_PLATFORM STREQUAL "3DS" AND (AURORE_WINDOW OR AURORE_GRAPHICS))
+    message(FATAL_ERROR "AURORE_PLATFORM=3DS takes no AURORE_WINDOW nor AURORE_GRAPHICS: its window is libctru's, and its renderer (citro3d) is not written yet")
 endif ()
 if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4)$")
     message(FATAL_ERROR "AURORE_WINDOW=SDL3 is for DESKTOP, ANDROID, IOS and TVOS: ${AURORE_PLATFORM} has no SDL3 yet")
@@ -124,7 +129,7 @@ endif ()
 # The plain variables the build files read. toolchain.cmake changes some of
 # them for the platforms that impose a choice (iOS and Android: SDL, and
 # libromfs).
-foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH)
+foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH 3DS)
     if (AURORE_PLATFORM STREQUAL _aurore_p)
         set(PLATFORM_${_aurore_p} ON)
     else ()

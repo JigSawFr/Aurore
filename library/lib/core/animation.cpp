@@ -44,7 +44,8 @@ void Animatable::reset()
 
 void Animatable::onRewind()
 {
-    this->currentValue = this->tween.seek(0);
+    // int32_t: newlib's is a long (devkitARM), where a plain 0 fits no overload better
+    this->currentValue = this->tween.seek(static_cast<int32_t>(0));
 }
 
 void Animatable::addStep(float targetValue, int32_t duration, EasingFunction easing)
