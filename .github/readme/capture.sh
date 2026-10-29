@@ -31,6 +31,10 @@ shot french --lang fr readme-cadran
 shot winter --theme @res/themes/winter/theme.theme readme-cadran
 shot prism --theme @res/themes/prism/theme.theme readme-cadran
 shot aurora --variant light --theme @res/themes/aurora/theme.theme readme-cadran
+# The demo on each simulated console (the website's "On every screen")
+for console in switch vita ps4 3ds phone; do
+    shot "console-$console" "readme-console-$console"
+done
 
 # The tour: through the tabs, into a game and back, at 12 pictures a second
 "$TOUR" -o "$TMP/tour" --film "$TMP/film" readme-tour > /dev/null

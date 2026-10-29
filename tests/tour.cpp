@@ -45,6 +45,7 @@
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
+#include "simulation.hpp"
 
 namespace
 {
@@ -355,6 +356,18 @@ std::vector<Scene> scenes()
     }
     for (const Scene& scene : extraScenes())
         list.push_back(scene);
+    // The demo on each simulated console, the console drawn around it (the
+    // website's "On every screen"); last: the window stays the console's
+    for (const auto& device : demo::simulation::devices())
+    {
+        std::string id = device.id;
+        if (id == "desktop")
+            continue;
+        list.push_back({ "readme-console-" + id, [id](Harness& h)
+            {
+            demo::simulation::use(id);
+            h.settle(); } });
+    }
     return list;
 }
 } // namespace
