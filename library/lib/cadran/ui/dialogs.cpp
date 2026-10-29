@@ -88,7 +88,11 @@ namespace
 
 aurore::Dialog* box_dialog(aurore::Box* body)
 {
-    YGNodeCalculateLayout(body->getYGNode(), 720, YGUndefined, YGDirectionLTR);
+    // As wide as the dialog's card (aurore::Dialog): 720, 94% of a compact screen
+    const float width = aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT
+        ? aurore::Application::contentWidth * 0.94f
+        : 720.0f;
+    YGNodeCalculateLayout(body->getYGNode(), width, YGUndefined, YGDirectionLTR);
     const float room = content_height();
     if (YGNodeLayoutGetHeight(body->getYGNode()) <= room)
         return new aurore::Dialog(body);
