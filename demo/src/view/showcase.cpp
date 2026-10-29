@@ -1,0 +1,166 @@
+/*
+    Copyright 2026 JigSawFr
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
+#include "view/showcase.hpp"
+
+#include <aurore/cadran/ui/cadran_modal.hpp>
+
+namespace kit = cadran::kit;
+
+namespace show
+{
+
+aurore::Box* page(ScrollView* scroll)
+{
+    auto* column = new aurore::Box(aurore::Axis::COLUMN);
+    column->setPadding(PAGE_TOP, PAGE_SIDES, PAGE_BOTTOM, PAGE_SIDES);
+    scroll->setContentView(column);
+    return column;
+}
+
+aurore::Box* section(aurore::Box* page, const char* icon, const std::string& title, const std::string& lead)
+{
+    aurore::Box* head = kit::kicker(icon, title);
+    head->setMarginTop(page->getChildren().empty() ? 0 : SECTION_GAP);
+    head->setMarginBottom(lead.empty() ? HEAD_GAP : 6);
+    page->addView(head);
+    if (!lead.empty())
+    {
+        aurore::Label* line = kit::label(lead, kit::TEXT_NOTE, "cadran/text2");
+        line->setMarginBottom(HEAD_GAP);
+        page->addView(line);
+    }
+    aurore::Box* content = column();
+    page->addView(content);
+    return content;
+}
+
+aurore::Box* row(bool wrap, float gap)
+{
+    auto* box = new aurore::Box(aurore::Axis::ROW);
+    box->setGap(gap);
+    if (wrap)
+        box->setWrap(aurore::Wrap::WRAP);
+    return box;
+}
+
+aurore::Box* column(float gap)
+{
+    auto* box = new aurore::Box(aurore::Axis::COLUMN);
+    box->setGap(gap);
+    return box;
+}
+
+aurore::Box* card(bool focusable, bool grow)
+{
+    aurore::Box* box = kit::card(focusable, grow);
+    box->setAxis(aurore::Axis::COLUMN);
+    box->setPadding(PAD_V, PAD_H, PAD_V, PAD_H);
+    if (grow)
+        box->setWidth(0); // the row shares its width, whatever the texts
+    return box;
+}
+
+aurore::Label* title(const std::string& text)
+{
+    return kit::label(text, kit::TEXT_LEAD, "cadran/text");
+}
+
+aurore::Label* note(const std::string& text)
+{
+    aurore::Label* label = kit::label(text, kit::TEXT_NOTE, "cadran/text2");
+    label->setMarginTop(4);
+    return label;
+}
+
+aurore::Button* button(const std::string& text, std::function<void()> run, bool primary)
+{
+    auto* button = new aurore::Button();
+    button->setText(text);
+    button->registerClickAction([run](aurore::View*)
+        {
+        run();
+        return true; });
+    cadran::style_button(button, primary ? cadran::Emphasis::PRIMARY : cadran::Emphasis::NONE);
+    kit::fit_button(button);
+    return button;
+}
+
+aurore::IconButton* iconButton(const char* icon, const std::string& text, std::function<void()> run)
+{
+    auto* button = new aurore::IconButton();
+    button->setIconView(kit::icon(icon, 22, "cadran/text"));
+    button->setIconSize(22);
+    button->setText(text);
+    button->registerClickAction([run](aurore::View*)
+        {
+        run();
+        return true; });
+    cadran::style_button(button, cadran::Emphasis::NONE);
+    kit::fit_button(button);
+    return button;
+}
+
+aurore::Box* choice(const char* icon, const std::string& name, std::function<void()> run)
+{
+    aurore::Box* tile = kit::card(true, false);
+    tile->setAxis(aurore::Axis::ROW);
+    tile->setAlignItems(aurore::AlignItems::CENTER);
+    tile->setPadding(12, 18, 12, 16);
+    tile->setGap(12);
+    tile->setHeight(60);
+    if (icon)
+        tile->addView(kit::icon(icon, 24, "cadran/teal"));
+    aurore::Label* label = kit::label(name, kit::TEXT_BODY, "cadran/text");
+    label->setSingleLine(true);
+    tile->addView(label);
+    tile->registerClickAction([run](aurore::View*)
+        {
+        run();
+        return true; });
+    tile->addGestureRecognizer(new aurore::TapGestureRecognizer(tile));
+    return tile;
+}
+
+void markChoice(aurore::Box* tile, bool chosen)
+{
+    tile->setThemeColor("borderColor", chosen ? "cadran/teal" : "cadran/line");
+    tile->setBorderThickness(chosen ? 2 : 1);
+    tile->setAccessibilitySelected(chosen);
+}
+
+aurore::Box* code(const std::string& text)
+{
+    auto* box = new aurore::Box(aurore::Axis::COLUMN);
+    box->setPadding(14, 18, 14, 18);
+    box->setCornerRadius(kit::RADIUS_ROW);
+    box->setThemeColor("backgroundColor", "cadran/surf2");
+    box->setBorderThickness(1);
+    box->setThemeColor("borderColor", "cadran/line");
+    aurore::Label* label = kit::label(text, kit::TEXT_META, "cadran/text2");
+    label->setLineHeight(1.45f);
+    box->addView(label);
+    return box;
+}
+
+aurore::Label* centred(aurore::Label* label)
+{
+    label->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
+    label->setWidthPercentage(100);
+    return label;
+}
+
+} // namespace show

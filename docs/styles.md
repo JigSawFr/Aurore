@@ -1,6 +1,6 @@
 # Styles, transitions, data binding and accessibility
 
-What a view can do beyond its own attributes: change its look while it has the focus, is pressed, disabled or under the mouse; animate those changes; follow values of the app's data; say what it is to a screen reader. A view that uses none of it keeps nothing more than a null pointer. The demo's *Styles and data* tab (`resources/xml/tabs/styles.xml`, `demo/src/tab/styles_tab.cpp`) shows all of it.
+What a view can do beyond its own attributes: change its look while it has the focus, is pressed, disabled or under the mouse; animate those changes; follow values of the app's data; say what it is to a screen reader. A view that uses none of it keeps nothing more than a null pointer. The demo shows all of it: its *Motion* tab the state styles and their transitions (`resources/xml/views/states.xml`), its *For developers* tab the data binding and what a screen reader would be told (`resources/xml/views/binding.xml`, `demo/src/tab/developers_tab.cpp`).
 
 ## State styles
 

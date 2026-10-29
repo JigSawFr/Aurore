@@ -168,7 +168,7 @@ accent = #3ee8a5
 background_image = night.jpg
 ```
 
-To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`AURORE_THEME=LIGHT` for the dawn), or the demo's Settings tab.
+To see it: `aurore_demo -t @res/themes/aurora/theme.theme` (`AURORE_THEME=LIGHT` for the dawn), or the demo's Themes tab.
 
 ### Pictures in memory
 
@@ -279,7 +279,7 @@ accent = #b48cff
 logo = logo-dark.png
 ```
 
-The demo declares its slot in `demo/src/demo_app.cpp` (`Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512)`), and the About tab's image follows it (`themeImage="demo/about/art"`, `resources/xml/activity/main.xml`). To see it: `aurore_demo -t @res/themes/prism/theme.theme`, or the palette picker.
+The demo declares its slot in `demo/src/demo_app.cpp` (`Theme::addImageSlot("demo/about/art", "@res/img/aurore_256.png", 512)`), and the picture of its About tab follows it (`image->setThemeImage("demo/about/art")`, `demo/src/tab/about_tab.cpp`; `themeImage="demo/about/art"` in XML). To see it: `aurore_demo -t @res/themes/prism/theme.theme`, or the palette picker.
 
 <a id="decorations"></a>
 ## Decorations
@@ -566,6 +566,6 @@ A palette that styles one variant only decides the variant, and the header's but
 - System keeps the palette, shown in its own variant whatever the system's mode.
 - Preferences saved before this rule (Dark with a light-only palette) show the palette's variant, and `theme` is corrected when they are applied.
 
-Without Cadran, the same in a few lines: list `Theme::builtinThemes()` and `Theme::listThemes(folder)` in cells (the demo's Settings tab does it, `demo/src/tab/settings_tab.cpp`, with each theme's colours as swatches), call `Theme::loadFile(info.path, &variant)` and `setThemeVariant(variant)` on a click, save `info.path`, and load it again at start-up (after the app's own `addColor` calls).
+Without Cadran, the same in a few lines: list `Theme::builtinThemes()` and `Theme::listThemes(folder)` (the demo's Themes tab does it, `demo/src/tab/themes_tab.cpp`, a tile per theme with a swatch of its colours), call `Theme::loadFile(info.path, &variant)` and `setThemeVariant(variant)` on a click, save `info.path`, and load it again at start-up (after the app's own `addColor` calls).
 
-Users write their files in the folder, starting from a preset (`inherit = builtin:ocean`) or from nothing; the demo's examples are in `resources/themes`. To check files without opening a screen: `aurore_demo --check-themes <folder>` prints each preset's and each file's errors and warnings and exits with 1 when there are some.
+Users write their files in the folder, starting from a preset (`inherit = builtin:ocean`) or from nothing; the demo's examples are in `resources/themes` (Mint, Rose, Boréale's night, and the folders Aurora, Prism and Winter). To check files without opening a screen: `aurore_demo --check-themes <folder>` prints each preset's and each file's errors and warnings and exits with 1 when there are some.

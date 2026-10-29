@@ -1,5 +1,6 @@
 /*
     Copyright 2021 natinusala
+    Copyright 2026 JigSawFr
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,16 +18,15 @@
 #pragma once
 
 #include <aurore.hpp>
+#include <aurore/cadran/view/scroll_view.hpp>
 
-class ComponentsTab : public aurore::Box
+/// Every control, grouped: buttons, toggles and values, progress, chips and
+/// pills, dialogs and sheets, toasts, images, icons, Markdown, and a screen
+/// of borealis' settings cells as Cadran dresses them.
+class ComponentsTab : public ScrollView
 {
   public:
     ComponentsTab();
 
     static aurore::View* create();
-
-  private:
-    AURORE_BIND(aurore::Label, progress, "progress");
-    AURORE_BIND(aurore::Slider, slider, "slider");
-    bool onPrimaryButtonClicked(aurore::View* view);
 };

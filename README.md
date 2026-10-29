@@ -228,6 +228,18 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 
 ## 🛠️ Build the demo
 
+The demo is a guided tour of Aurore, a tab per subject, each saying what it shows. It runs in a browser too: <https://aurore.boreale.dev/demo/>.
+
+- **Welcome**: Aurore in a sentence over an aurora drawn with nanovg, a dashboard of live cards (a ring, bars, figures), a tile per tab.
+- **Library**: 302 made-up games, their covers drawn in code, in a grid that keeps only the cells on screen; sorted, filtered by genre, a menu on each, a page for each with a row of games like it; the same games by genre in a long recycled list.
+- **Components**: borealis' button styles and Cadran's, cells in cards, bars, chips, pills, keys, every dialog, sheet and toast, images, icons, an empty list, Markdown, and a screen of settings cells.
+- **Motion**: easings drawn and played, state styles and their transitions (XML only), the focus gliding and shaking, reduced motion, the transform lab.
+- **Text and languages**: the 15 languages switched live, the text sizes, scripts and emoji, long texts (scrolling, shrinking, wrapping), the text lab.
+- **Themes**: light or dark, every palette used at once (Cadran's, the demo's files with Boréale's night, Aurore's presets), a theme file in a few lines.
+- **Input**: a controller drawn as the app reads it, with a test mode; touch and mouse traces; the keyboard's keys; the footer's hints.
+- **For developers**: the frame measured live, the inspector, the debug layer, redraw on demand, the layout lab, data binding and what a screen reader would say, how a page is written.
+- **About Aurore**: credits and licences.
+
 On Windows, macOS or Linux:
 
 ```sh

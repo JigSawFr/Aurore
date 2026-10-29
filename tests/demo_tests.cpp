@@ -130,8 +130,9 @@ aurore::Box* screenOf(std::initializer_list<aurore::View*> views)
 AURORE_TEST(main_screen)
 {
     DemoHarness h;
-    AURORE_CHECK_EQ(h.focusText(), std::string("Cadran"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Welcome"));
     AURORE_CHECK(h.hasText("Aurore Demo"));
+    AURORE_CHECK(h.hasText("Aurore")); // the hero's title
     AURORE_CHECK(h.hasText("Monday, January 5")); // the harness' wall clock
     AURORE_CHECK(h.matchesReference("main_screen"));
 }
@@ -156,12 +157,12 @@ AURORE_TEST(rail_focus_moves)
     DemoHarness h;
     h.clearFocusLog();
     h.tap(aurore::BUTTON_DOWN, 2);
-    AURORE_CHECK_EQ(h.focusText(), std::string("Layout and alignment"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Components"));
     h.tap(aurore::BUTTON_UP);
-    AURORE_CHECK_EQ(h.focusText(), std::string("Basic components"));
-    std::vector<std::string> expected = { "Basic components", "Layout and alignment", "Basic components" };
+    AURORE_CHECK_EQ(h.focusText(), std::string("Library"));
+    std::vector<std::string> expected = { "Library", "Components", "Library" };
     AURORE_CHECK(h.focusLog() == expected);
-    AURORE_CHECK(h.focusByText("Settings"));
+    AURORE_CHECK(h.focusByText("For developers"));
     AURORE_CHECK(!h.focusByText("No such tab", aurore::BUTTON_DOWN, 3));
 }
 
@@ -169,17 +170,17 @@ AURORE_TEST(keyboard_moves_focus)
 {
     DemoHarness h;
     h.tapKey(aurore::AURORE_KBD_KEY_DOWN);
-    AURORE_CHECK_EQ(h.focusText(), std::string("Basic components"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Library"));
     h.tapKey(aurore::AURORE_KBD_KEY_UP);
-    AURORE_CHECK_EQ(h.focusText(), std::string("Cadran"));
+    AURORE_CHECK_EQ(h.focusText(), std::string("Welcome"));
 }
 
 AURORE_TEST(confirm_dialog_opens_and_closes)
 {
     DemoHarness h;
+    AURORE_CHECK(h.focusByText("Components"));
     h.tap(aurore::BUTTON_RIGHT); // into the tab
-    h.tap(aurore::BUTTON_DOWN);
-    AURORE_CHECK_EQ(h.focusText(), std::string("Confirm"));
+    AURORE_CHECK(h.focusByText("Confirm", aurore::BUTTON_DOWN, 20));
     size_t screens = aurore::Application::getActivitiesStack().size();
 
     h.tap(aurore::BUTTON_A);
@@ -195,10 +196,10 @@ AURORE_TEST(confirm_dialog_opens_and_closes)
 AURORE_TEST(touch_opens_a_tab)
 {
     DemoHarness h;
-    AURORE_CHECK(h.tapView(h.findText("Layout and alignment")));
-    AURORE_CHECK(h.hasText("alignItems: center"));
+    AURORE_CHECK(h.tapView(h.findText("Themes")));
+    AURORE_CHECK(h.hasText("Boréale"));
     AURORE_CHECK(aurore::Application::getInputType() == aurore::InputType::TOUCH);
-    AURORE_CHECK(h.matchesReference("layout_tab"));
+    AURORE_CHECK(h.matchesReference("themes_tab"));
 }
 
 AURORE_TEST(window_resized)
@@ -1329,8 +1330,8 @@ AURORE_TEST(theme_icons_are_tinted_or_drawn_as_they_are)
 }
 
 // The demo's Prism theme (resources/themes/prism): its logo in the header,
-// its icons on the rail (Settings focused: a tinted icon in the focus's
-// colours, the gamepad as it is)
+// its icons on the rail (Input focused: its gamepad in the focus's colours,
+// the info icon as it is)
 static void prismScreen(aurore::ThemeVariant variant, const char* reference)
 {
     DemoHarness h;
@@ -1340,12 +1341,12 @@ static void prismScreen(aurore::ThemeVariant variant, const char* reference)
     settlePictures(h);
     AURORE_CHECK(aurore::Theme::logo() && aurore::Theme::logo()->ready());
     AURORE_CHECK(aurore::Theme::checkContrast(variant).empty());
-    AURORE_CHECK(h.focusByText("Settings"));
+    AURORE_CHECK(h.focusByText("Input"));
     settlePictures(h);
     AURORE_CHECK(h.matchesReference(reference));
 
     // Back to no theme, live: the screen as it was
-    AURORE_CHECK(h.focusByText("Cadran", aurore::BUTTON_UP));
+    AURORE_CHECK(h.focusByText("Welcome", aurore::BUTTON_UP));
     aurore::Theme::reset();
     aurore::Application::getPlatform()->setThemeVariant(aurore::ThemeVariant::DARK);
     h.settle();
@@ -1754,9 +1755,9 @@ AURORE_TEST(theme_decor_dialog_over_a_picture)
     h.step();
     AURORE_CHECK(themeImagesDecoded());
     h.settle();
+    AURORE_CHECK(h.focusByText("Components"));
     h.tap(aurore::BUTTON_RIGHT);
-    h.tap(aurore::BUTTON_DOWN);
-    AURORE_CHECK_EQ(h.focusText(), std::string("Confirm"));
+    AURORE_CHECK(h.focusByText("Confirm", aurore::BUTTON_DOWN, 20));
     h.tap(aurore::BUTTON_A);
     h.settle();
     AURORE_CHECK(h.matchesReference("theme_decor_dialog"));
@@ -2153,7 +2154,7 @@ AURORE_TEST(cadran_picker_says_its_title_and_the_choice)
 AURORE_TEST(every_focusable_demo_view_says_something)
 {
     DemoHarness h;
-    AURORE_CHECK(announced().rfind("Cadran, tab, selected, 1 of ", 0) == 0);
+    AURORE_CHECK(announced().rfind("Welcome, tab, selected, 1 of ", 0) == 0);
     // Each tab of the rail in turn (focusing its item shows it)
     std::vector<std::string> silent;
     std::vector<std::string> seen;
@@ -2276,14 +2277,14 @@ AURORE_TEST(rail_names_are_not_cut)
 {
     DemoHarness h;
     for (const std::string& text : h.cutTexts())
-        AURORE_CHECK(text != "Basic components" && text != "Layout and alignment");
+        AURORE_CHECK(text != "Text and languages" && text != "For developers");
 }
 
 AURORE_TEST(hold_to_confirm_says_it_once)
 {
     DemoHarness h;
     // Opened by a finger: no A key bubble
-    AURORE_CHECK(h.tapView(h.findText("Cadran")));
+    AURORE_CHECK(h.tapView(h.findText("Components")));
     ui::hold_confirm(cadran::dialog_body(aurore::getStr("demo/cadran/hold_text")), aurore::getStr("demo/cadran/hold"), [] {});
     h.settle();
     AURORE_CHECK(!h.hasText("A"));
@@ -2320,33 +2321,37 @@ AURORE_TEST(cut_text_file_written_with_cadran)
     std::filesystem::remove_all(dir);
 }
 
-AURORE_TEST(settings_tab_keeps_the_cards_margins)
+// borealis' settings cells on a screen of their own, dressed by Cadran in
+// cards: within the margins of its pages, the focus ring off the edges
+AURORE_TEST(settings_screen_keeps_the_cards_margins)
 {
     DemoHarness h;
-    AURORE_CHECK(h.focusByText("Settings"));
+    AURORE_CHECK(h.focusByText("Components"));
     h.tap(aurore::BUTTON_RIGHT);
+    AURORE_CHECK(h.focusByText("A settings screen", aurore::BUTTON_DOWN, 20));
+    h.tap(aurore::BUTTON_A);
     h.settle();
     aurore::View* line = h.focus();
     AURORE_CHECK(line != nullptr);
     if (line)
     {
         aurore::Rect frame = line->getFrame();
-        // Within the margins of Cadran's pages, the focus ring off the window's edge
+        AURORE_CHECK(frame.getMinX() >= 40 - 1);
         AURORE_CHECK(frame.getMaxX() <= 1280 - 40 + 1);
         AURORE_CHECK(frame.getMinY() >= 84 + 28 - 1);
     }
-    AURORE_CHECK(h.matchesReference("settings_tab"));
+    AURORE_CHECK(h.matchesReference("settings_screen"));
 }
 
 AURORE_TEST(mouse_quick_click_is_not_lost)
 {
     // Pressed and let go between two frames: a touchpad tap, a quick click
     DemoHarness h;
-    aurore::View* tab = h.findText("Layout and alignment");
+    aurore::View* tab = h.findText("Themes");
     AURORE_CHECK(tab != nullptr);
     aurore::Rect frame = tab->getFrame();
     h.mouseQuickClick(frame.getMidX(), frame.getMidY());
-    AURORE_CHECK(h.hasText("alignItems: center"));
+    AURORE_CHECK(h.hasText("Boréale"));
 }
 
 namespace
@@ -2449,10 +2454,28 @@ AURORE_TEST(keyboard_keys_type_text_in_a_text_field)
     AURORE_CHECK(dynamic_cast<aurore::EditTextDialog*>(h.top()->getContentView()) != nullptr);
 }
 
+// A row that scrolls sideways, first in a tab: left from its first item
+// goes back to the rail
 AURORE_TEST(horizontal_carousel_lets_left_out)
 {
-    DemoHarness h;
-    AURORE_CHECK(h.focusByText("Basic components"));
+    Harness h;
+    auto* tabs = new aurore::TabFrame();
+    tabs->addTab("Carousel", []
+        {
+        auto* frame = new aurore::HScrollingFrame();
+        auto* row   = new aurore::Box(aurore::Axis::ROW);
+        for (int i = 0; i < 12; i++)
+        {
+            auto* button = new aurore::Button();
+            button->setText("Item " + std::to_string(i + 1));
+            button->setWidth(200);
+            button->setMarginRight(16);
+            row->addView(button);
+        }
+        frame->setContentView(row);
+        return frame; });
+    h.push(new aurore::Activity(new aurore::AppletFrame(tabs)));
+    h.settle();
     h.tap(aurore::BUTTON_RIGHT);
     aurore::View* first = h.focus();
     AURORE_CHECK(first != nullptr);
@@ -2467,9 +2490,12 @@ AURORE_TEST(horizontal_carousel_lets_left_out)
 AURORE_TEST(focus_on_a_scrolling_frame_shows_its_place)
 {
     DemoHarness h;
-    AURORE_CHECK(h.focusByText("Layout and alignment"));
+    AURORE_CHECK(h.focusByText("For developers"));
     h.tap(aurore::BUTTON_RIGHT);
-    // Down through the tab until the focus waits on the frame itself
+    AURORE_CHECK(h.focusByText("Layout lab", aurore::BUTTON_DOWN, 20));
+    h.tap(aurore::BUTTON_A); // a screen of plain boxes: the frame takes the focus
+    h.settle();
+    // Down through it until the focus waits on the frame itself
     aurore::ScrollingFrame* frame = nullptr;
     for (int i = 0; i < 30 && !frame; i++)
     {
@@ -2746,8 +2772,10 @@ size_t eachDemoTab(H& h, F visit)
     return seen.size();
 }
 
-// The texts cut on the Cadran and Settings tabs at the very large text size
-std::vector<std::string> cutAtTheLargestSize(const std::string& locale)
+// The texts cut on every tab at the very large text size, but the one meant
+// to scroll by while its tile has the focus
+// (`half`: the first four tabs or the last four, each case within its time)
+std::vector<std::string> cutAtTheLargestSize(const std::string& locale, int half)
 {
     LocaleHarness h(locale);
     ui::prefs().text_size = "largest";
@@ -2755,16 +2783,19 @@ std::vector<std::string> cutAtTheLargestSize(const std::string& locale)
     h.settle();
     AURORE_CHECK_EQ(aurore::Application::getTextScale(), text_size::LARGEST);
     std::vector<std::string> cut;
-    for (const char* tab : { "demo/tabs/cadran", "demo/tabs/settings" })
+    const std::string marquee      = aurore::getStr("demo/text/marquee_text");
+    const char* const halves[2][4] = { { "demo/tabs/home", "demo/tabs/components", "demo/tabs/motion", "demo/tabs/text" },
+        { "demo/tabs/themes", "demo/tabs/input", "demo/tabs/developers", "demo/tabs/about" } };
+    for (const char* tab : halves[half])
     {
         if (!h.focusByText(aurore::getStr(tab), aurore::BUTTON_DOWN, 20))
             continue;
         h.tap(aurore::BUTTON_RIGHT);
         // Down the tab, its texts as they scroll into view
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < 12; i++)
         {
             for (const std::string& text : h.cutTexts())
-                if (std::find(cut.begin(), cut.end(), text) == cut.end())
+                if (text != marquee && std::find(cut.begin(), cut.end(), text) == cut.end())
                     cut.push_back(text);
             h.tap(aurore::BUTTON_DOWN);
         }
@@ -2806,22 +2837,42 @@ AURORE_TEST(every_demo_screen_reachable_by_keyboard)
 
 AURORE_TEST(no_cut_text_in_de_largest)
 {
-    AURORE_CHECK(cutAtTheLargestSize("de").empty());
+    AURORE_CHECK(cutAtTheLargestSize("de", 0).empty());
+}
+
+AURORE_TEST(no_cut_text_in_de_largest_2)
+{
+    AURORE_CHECK(cutAtTheLargestSize("de", 1).empty());
 }
 
 AURORE_TEST(no_cut_text_in_ru_largest)
 {
-    AURORE_CHECK(cutAtTheLargestSize("ru").empty());
+    AURORE_CHECK(cutAtTheLargestSize("ru", 0).empty());
+}
+
+AURORE_TEST(no_cut_text_in_ru_largest_2)
+{
+    AURORE_CHECK(cutAtTheLargestSize("ru", 1).empty());
 }
 
 AURORE_TEST(no_cut_text_in_fr_largest)
 {
-    AURORE_CHECK(cutAtTheLargestSize("fr").empty());
+    AURORE_CHECK(cutAtTheLargestSize("fr", 0).empty());
+}
+
+AURORE_TEST(no_cut_text_in_fr_largest_2)
+{
+    AURORE_CHECK(cutAtTheLargestSize("fr", 1).empty());
 }
 
 AURORE_TEST(no_cut_text_in_ja_largest)
 {
-    AURORE_CHECK(cutAtTheLargestSize("ja").empty());
+    AURORE_CHECK(cutAtTheLargestSize("ja", 0).empty());
+}
+
+AURORE_TEST(no_cut_text_in_ja_largest_2)
+{
+    AURORE_CHECK(cutAtTheLargestSize("ja", 1).empty());
 }
 
 // The rows of cells grow with the text: none cut at the very large size

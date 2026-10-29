@@ -16,13 +16,7 @@
 
 #include "tab/settings_tab.hpp"
 
-#include <aurore/cadran/ui/live_prefs.hpp>
-#include <aurore/cadran/ui/prefs.hpp>
-#include <aurore/cadran/ui/ui.hpp>
-
 using namespace aurore::literals; // for _i18n
-
-bool radioSelected = false;
 
 // "Option 1" to "Option <count>"
 static std::vector<std::string> options(int count)
@@ -33,30 +27,10 @@ static std::vector<std::string> options(int count)
     return names;
 }
 
-static std::vector<std::string> NOTIFICATIONS = {
-    "You have cool hair",
-    "I like your shoes",
-    "Aurore is powered by nanovg",
-    "The Triforce is an inside job",
-    "Pozznx will trigger in one day and twelve hours",
-    "Aurora Borealis? At this time of day, at this time of year, in this part of the gaming market, located entirely within your Switch?!",
-    "May I see it?",
-    "Hmm, Steamed Hams!",
-    "Hello\nWorld!"
-};
-
 SettingsTab::SettingsTab()
 {
     // Inflate the tab from the XML file
     this->inflateFromXMLRes("xml/tabs/settings.xml");
-
-    radio->title->setText("demo/settings/radio"_i18n);
-    radio->setSelected(radioSelected);
-    radio->registerClickAction([this](aurore::View* view)
-        {
-        radioSelected = !radioSelected;
-        this->radio->setSelected(radioSelected);
-        return true; });
 
     boolean->title->setText("demo/settings/switch"_i18n);
 
@@ -127,74 +101,8 @@ SettingsTab::SettingsTab()
 
     notify->registerClickAction([](...)
         {
-        std::string notification = NOTIFICATIONS[std::rand() % NOTIFICATIONS.size()];
-        aurore::Application::notify(notification);
+        aurore::Application::notify("demo/cadran/notification_text"_i18n);
         return true; });
-
-    // The variant and the theme file go through Cadran's preferences, as
-    // its own pickers do (the header's theme button): the screens are drawn
-    // in them from the next frame, nothing is built again.
-    themeDark->init("demo/settings/dark"_i18n, ui::prefs().theme != "light", [](bool dark)
-        {
-        ui::prefs().theme = dark ? "dark" : "light";
-        live_prefs::apply_theme(); });
-    this->listThemes();
-}
-
-void SettingsTab::listThemes()
-{
-    std::vector<aurore::ThemeInfo> files = aurore::Theme::builtinThemes();
-    for (aurore::ThemeInfo& info : aurore::Theme::listThemes("@res/themes"))
-        files.push_back(std::move(info));
-
-    aurore::ThemeInfo none;
-    none.name  = "demo/settings/default_theme"_i18n;
-    none.light = none.dark = true;
-    files.insert(files.begin(), none);
-
-    for (const aurore::ThemeInfo& info : files)
-    {
-        auto* cell = new aurore::DetailCell();
-        cell->setText(info.author.empty() ? info.name : info.name + "  ·  " + info.author);
-
-        // Its colours, as it draws the variant it shows first
-        if (!info.path.empty())
-        {
-            const aurore::ThemeInfo::Preview& preview = info.dark ? info.darkPreview : info.lightPreview;
-            auto* swatches                            = new aurore::Box(aurore::Axis::ROW);
-            swatches->setMarginRight(16);
-            for (NVGcolor color : { preview.background, preview.surface, preview.text, preview.accent, preview.highlight })
-            {
-                auto* swatch = new aurore::Rectangle(color);
-                swatch->setSize(aurore::Size(22, 22));
-                swatch->setCornerRadius(11);
-                swatch->setMarginLeft(6);
-                swatch->setBorderThickness(1);
-                swatch->setThemeColor("borderColor", "aurore/header/border");
-                swatches->addView(swatch);
-            }
-            cell->addView(swatches, (int)cell->getChildren().size() - 1);
-        }
-
-        if (!info.ok())
-            cell->setDetailText(aurore::getStr("demo/settings/errors", info.errors.size(), info.errors.front()));
-        else if (!info.warnings.empty())
-            cell->setDetailText(aurore::getStr("demo/settings/warnings", info.warnings.size()));
-
-        std::string path = info.path;
-        cell->registerClickAction([this, path](aurore::View*)
-            {
-            ui::prefs().theme_file = path;
-            live_prefs::apply_theme();
-            for (auto& [line, file] : this->themeCells)
-                line->setDetailText(file == path ? "demo/settings/active"_i18n : "");
-            this->themeDark->setOn(aurore::Application::getThemeVariant() == aurore::ThemeVariant::DARK, false);
-            return true; });
-        if (info.path == ui::prefs().theme_file)
-            cell->setDetailText("demo/settings/active"_i18n);
-        this->themeCells.emplace_back(cell, path);
-        this->themes->addView(cell);
-    }
 }
 
 aurore::View* SettingsTab::create()

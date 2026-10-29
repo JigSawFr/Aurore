@@ -92,3 +92,8 @@ endif()
 
 # Cadran's plain C++ parts, without a window
 add_subdirectory(host)
+
+# The demo's screens drawn to PNGs, to look at them in a language, a theme
+# and a size at once
+add_executable(aurore-tour tour.cpp)
+target_link_libraries(aurore-tour PRIVATE aurore_demo_views Aurore::test)

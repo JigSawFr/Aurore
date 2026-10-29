@@ -1,3 +1,6 @@
+<!-- The demo's main screen: a rail of tabs, each a guided page. The tabs are
+     views of the demo's (demo/src/tab), registered for XML in demo_app.cpp;
+     their places in the rail are demo::Tab's. -->
 <aurore:AppletFrame
     iconInterpolation="linear"
     footerHidden="false">
@@ -6,137 +9,44 @@
         title="@i18n/demo/title"
         icon="@res/img/aurore_96.png">
 
-        <!-- Built in code: Cadran, Aurore's look -->
-        <aurore:Tab label="@i18n/demo/tabs/cadran" >
-            <CadranTab />
+        <aurore:Tab label="@i18n/demo/tabs/home">
+            <HomeTab />
         </aurore:Tab>
 
-        <!-- Dynamic tab - required to get references to the views in the code -->
-        <aurore:Tab label="@i18n/demo/tabs/components" >
+        <aurore:Tab label="@i18n/demo/tabs/library">
+            <LibraryTab />
+        </aurore:Tab>
+
+        <aurore:Tab label="@i18n/demo/tabs/components">
             <ComponentsTab />
         </aurore:Tab>
 
-        <!-- Static tab linking to another XML -->
-        <aurore:Tab label="@i18n/demo/tabs/layout" >
-            <aurore:View xml="@res/xml/tabs/layout.xml" />
+        <aurore:Tab label="@i18n/demo/tabs/motion">
+            <MotionTab />
         </aurore:Tab>
 
-        <aurore:Tab label="@i18n/demo/tabs/transform" >
-            <TransformTab />
+        <aurore:Tab label="@i18n/demo/tabs/text">
+            <TextTab />
         </aurore:Tab>
 
-        <aurore:Tab label="@i18n/demo/tabs/text" >
-            <TextTestTab />
+        <aurore:Tab label="@i18n/demo/tabs/themes">
+            <ThemesTab />
         </aurore:Tab>
 
-        <aurore:Tab label="@i18n/demo/tabs/styles" >
-            <StylesTab />
-        </aurore:Tab>
-
-        <aurore:Tab label="@i18n/demo/tabs/scripts" >
-            <aurore:View xml="@res/xml/tabs/scripts.xml" />
+        <aurore:Tab label="@i18n/demo/tabs/input">
+            <InputTab />
         </aurore:Tab>
 
         <aurore:Separator />
 
-        <aurore:Tab label="@i18n/demo/tabs/scroll" >
-            <aurore:View xml="@res/xml/tabs/scroll_test.xml" />
-        </aurore:Tab>
-
-        <aurore:Tab label="@i18n/demo/tabs/list">
-            <RecyclingListTab />
-        </aurore:Tab>
-
-        <aurore:Tab label="@i18n/demo/tabs/grid">
-            <GridTab />
+        <aurore:Tab label="@i18n/demo/tabs/developers">
+            <DevelopersTab />
         </aurore:Tab>
 
         <aurore:Separator />
 
-        <aurore:Tab label="@i18n/demo/tabs/settings">
-            <SettingsTab />
-        </aurore:Tab>
-
-<!--        <aurore:Separator />-->
-
-<!--        <aurore:Tab label="@i18n/demo/tabs/popups" />-->
-<!--        <aurore:Tab label="@i18n/demo/tabs/hos_layout" />-->
-
-<!--        <aurore:Separator />-->
-
-<!--        <aurore:Tab label="@i18n/demo/tabs/misc_layouts" />-->
-<!--        <aurore:Tab label="@i18n/demo/tabs/misc_components" />-->
-<!--        <aurore:Tab label="@i18n/demo/tabs/misc_tools" />-->
-
-        <aurore:Separator />
-
-        <!-- Static tab with inline XML -->
-        <aurore:Tab label="@i18n/demo/tabs/about" >
-
-            <aurore:Box
-                width="auto"
-                height="auto"
-                axis="column"
-                paddingTop="@style/about/padding_top_bottom"
-                paddingBottom="@style/about/padding_top_bottom"
-                paddingLeft="@style/about/padding_sides"
-                paddingRight="@style/about/padding_sides" >
-
-                <aurore:Image
-                    width="auto"
-                    height="33%"
-                    themeImage="demo/about/art"
-                    marginBottom="@style/about/description_margin"/>
-
-                <aurore:Box
-                    width="auto"
-                    height="auto"
-                    axis="row"
-                    marginBottom="@style/about/description_margin">
-
-                    <aurore:Label
-                        width="40%"
-                        height="auto"
-                        text="@i18n/demo/about/title"
-                        fontSize="36"
-                        horizontalAlign="right"
-                        verticalAlign="top" />
-
-                    <aurore:Label
-                        width="auto"
-                        height="auto"
-                        text="@i18n/demo/about/description"
-                        marginLeft="@style/about/description_margin" />
-
-                </aurore:Box>
-
-                <aurore:Box
-                    width="auto"
-                    height="auto"
-                    axis="column"
-                    alignItems="center"
-                    justifyContent="spaceEvenly"
-                    grow="1.0" >
-
-                    <aurore:Label
-                        width="auto"
-                        height="auto"
-                        text="@i18n/demo/about/github" />
-
-                    <aurore:Label
-                        width="auto"
-                        height="auto"
-                        text="@i18n/demo/about/licence" />
-
-                    <aurore:Label
-                        width="auto"
-                        height="auto"
-                        text="@i18n/demo/about/logo_credit" />
-
-                </aurore:Box>
-
-            </aurore:Box>
-
+        <aurore:Tab label="@i18n/demo/tabs/about">
+            <AboutTab />
         </aurore:Tab>
 
     </aurore:TabFrame>

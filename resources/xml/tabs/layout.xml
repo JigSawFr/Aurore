@@ -12,193 +12,193 @@
             height="auto">
 
         <aurore:Box
-                backgroundColor="@theme/aurore/backdrop"
+                backgroundColor="@theme/cadran/surf"
                 justifyContent="center"
                 margin="10"
                 width="90%"
-                cornerRadius="4"
+                cornerRadius="10"
                 height="70">
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
         </aurore:Box>
         <aurore:Label
                 width="auto"
                 height="auto"
-                text="alignItems: center"
+                text="justifyContent: center"
                 marginBottom="10px" />
 
         <aurore:Box
-                backgroundColor="@theme/aurore/backdrop"
+                backgroundColor="@theme/cadran/surf"
                 justifyContent="spaceBetween"
                 margin="10"
                 width="90%"
-                cornerRadius="4"
+                cornerRadius="10"
                 height="70">
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
         </aurore:Box>
         <aurore:Label
                 width="auto"
                 height="auto"
-                text="alignItems: spaceBetween"
+                text="justifyContent: spaceBetween"
                 marginBottom="10px" />
         <aurore:Box
-                backgroundColor="@theme/aurore/backdrop"
+                backgroundColor="@theme/cadran/surf"
                 justifyContent="flexStart"
                 margin="10"
                 width="90%"
-                cornerRadius="4"
+                cornerRadius="10"
                 height="70">
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#FF0000"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/coral"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#00FF00"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#0000FF"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/blue"/>
         </aurore:Box>
         <aurore:Label
                 width="auto"
                 height="auto"
-                text="alignItems: flexStart"
+                text="justifyContent: flexStart"
                 marginBottom="10px" />
 
         <aurore:Box
-                backgroundColor="@theme/aurore/backdrop"
+                backgroundColor="@theme/cadran/surf"
                 justifyContent="flexEnd"
                 margin="10"
                 width="90%"
-                cornerRadius="4"
+                cornerRadius="10"
                 height="70">
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#FF0000"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/coral"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#00FF00"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#0000FF"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/blue"/>
         </aurore:Box>
         <aurore:Label
                 width="auto"
                 height="auto"
-                text="alignItems: flexEnd"
+                text="justifyContent: flexEnd"
                 marginBottom="10px" />
 
         <aurore:Box
-                backgroundColor="@theme/aurore/backdrop"
+                backgroundColor="@theme/cadran/surf"
                 justifyContent="flexEnd"
                 direction="rightToLeft"
                 margin="10"
                 width="90%"
-                cornerRadius="4"
+                cornerRadius="10"
                 height="70">
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#FF0000"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/coral"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#00FF00"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
-                    cornerRadius="4"
-                    color="#0000FF"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/blue"/>
         </aurore:Box>
         <aurore:Label
                 width="auto"
                 height="auto"
-                text="alignItems: flexEnd; direction: rightToLeft"
+                text="justifyContent: flexEnd; direction: rightToLeft"
                 marginBottom="10px" />
 
         <aurore:Box
-                backgroundColor="@theme/aurore/backdrop"
+                backgroundColor="@theme/cadran/surf"
                 justifyContent="center"
                 margin="10"
                 width="90%"
-                cornerRadius="4"
+                cornerRadius="10"
                 height="70">
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
                     grow="1"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
                     grow="2"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
                     grow="1"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
         </aurore:Box>
         <aurore:Label
                 width="auto"
@@ -207,34 +207,34 @@
                 marginBottom="10px" />
 
         <aurore:Box
-                backgroundColor="@theme/aurore/backdrop"
+                backgroundColor="@theme/cadran/surf"
                 wireframe="true"
                 axis="column"
                 margin="10"
                 width="90%"
-                cornerRadius="4"
+                cornerRadius="10"
                 height="210">
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
                     grow="1"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
                     grow="2"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
             <aurore:Rectangle
                     width="50"
                     height="50"
                     margin="10"
                     grow="1"
-                    cornerRadius="4"
-                    color="#50FFDD"/>
+                    cornerRadius="10"
+                    color="@theme/cadran/teal_fill"/>
         </aurore:Box>
         <aurore:Label
                 width="auto"

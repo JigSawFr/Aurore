@@ -17,7 +17,7 @@ library/lib/cadran, and the resources it reads: resources/i18n/*/cadran.json,
 resources/img/emoji, resources/font/sora_bold_latin.ttf), the inspector and
 hot reload of the core (library/include/aurore/core/inspector.hpp,
 library/lib/core/inspector.cpp, library/include/aurore/core/hot_reload.hpp,
-library/lib/core/hot_reload.cpp) and the demo's Cadran tab
+library/lib/core/hot_reload.cpp) and the demo's Cadran pieces
 (demo/include/tab/cadran_tab.hpp, demo/src/tab/cadran_tab.cpp) are
 Copyright 2026 JigSawFr, and Taylor for the files that say so,
 licensed under the GNU General Public License, version 3 or later

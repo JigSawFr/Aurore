@@ -129,7 +129,7 @@ AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
 {
     namespace fs  = std::filesystem;
     fs::path root = fs::temp_directory_path() / ("aurore-custom-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
-    writeFile(root / "xml/cells/cell.xml", "<aurore:Box><aurore:Unknown/></aurore:Box>");
+    writeFile(root / "xml/views/binding.xml", "<aurore:Box><aurore:Unknown/></aurore:Box>");
 
     Harness harness;
     std::string before                  = aurore::View::CUSTOM_RESOURCES_PATH;
@@ -137,7 +137,7 @@ AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
     aurore::View* view                  = nullptr;
     try
     {
-        view = aurore::View::createFromXMLResource("cells/cell.xml");
+        view = aurore::View::createFromXMLResource("views/binding.xml");
     }
     catch (const std::exception& e)
     {
@@ -146,9 +146,9 @@ AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
     aurore::View* invalid = nullptr;
     try
     {
-        writeFile(root / "xml/cells/cell.xml", "<aurore:Box><unclosed></aurore:Box>");
-        aurore::View::forgetXMLCache((root / "xml/cells/cell.xml").string());
-        invalid = aurore::View::createFromXMLResource("cells/cell.xml");
+        writeFile(root / "xml/views/binding.xml", "<aurore:Box><unclosed></aurore:Box>");
+        aurore::View::forgetXMLCache((root / "xml/views/binding.xml").string());
+        invalid = aurore::View::createFromXMLResource("views/binding.xml");
     }
     catch (const std::exception& e)
     {
@@ -156,13 +156,13 @@ AURORE_TEST(xml_custom_resource_in_error_falls_back_to_the_built_in_one)
     }
     aurore::View::CUSTOM_RESOURCES_PATH = before;
 
-    // The built-in ones: an image and a label each
+    // The built-in ones: a button, two labels and a swatch each
     for (aurore::View* built : { view, invalid })
     {
         aurore::Box* box = dynamic_cast<aurore::Box*>(built);
         AURORE_CHECK(box != nullptr);
         if (box)
-            AURORE_CHECK_EQ(box->getChildren().size(), (size_t)2);
+            AURORE_CHECK_EQ(box->getChildren().size(), (size_t)4);
         delete built;
     }
     fs::remove_all(root);
