@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Builds SDL_shadercross, SDL's official shader translator, which
 # tools/make_sdlgpu_shaders.py runs to turn nanovg's SPIR-V shaders into the

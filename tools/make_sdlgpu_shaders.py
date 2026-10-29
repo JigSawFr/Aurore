@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Compiles nanovg's SDL_GPU shaders (AURORE_GRAPHICS=SDLGPU) into the header
 # nanovg_sdlgpu.h includes, so that building Aurore needs no shader compiler:
