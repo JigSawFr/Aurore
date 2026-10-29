@@ -46,9 +46,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 <br>
 
 <p align="center">
-  <img src=".github/readme/cadran.png" alt="Cadran's pieces" width="49%">
+  <img src=".github/readme/cadran.png" alt="The demo's welcome" width="49%">
   <img src=".github/readme/sheet.png" alt="An action sheet" width="49%">
-  <br><sub><b>Cadran's pieces</b> · <b>An action sheet</b></sub>
+  <br><sub><b>The demo's welcome</b> · <b>An action sheet</b></sub>
 </p>
 
 <p align="center">
@@ -59,8 +59,8 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 <p align="center">
   <img src=".github/readme/markdown.png" alt="Icons and Markdown" width="49%">
-  <img src=".github/readme/components.png" alt="The demo's other tabs in Cadran" width="49%">
-  <br><sub><b>Icons and Markdown</b> · <b>The demo's other tabs in Cadran</b></sub>
+  <img src=".github/readme/components.png" alt="The library: 302 made-up games" width="49%">
+  <br><sub><b>Icons and Markdown</b> · <b>The library: 302 made-up games</b></sub>
 </p>
 
 <p align="center">
@@ -89,12 +89,14 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - ✨ **Styles** — per-state styles (focus, pressed, disabled, hover), transitions, data binding and accessibility labels.
 - 🧩 **Views** — a recycling grid and row, context menus, icon buttons, Markdown.
 - 🧪 **Tools** — test harness, inspector, hot reload, profiler, template.
-- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients.
+- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients; a density for the lengths, `compact:` attributes and presets for a small screen.
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
 - 🎯 **Focus and hints** — no focus lost in hidden or destroyed views; optional and steady footer hints.
 - 🖥️ **Platforms** — controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
 - ⚡ **Speed** — no relayout for an unchanged text or size, XML attributes registered on demand, unused textures freed.
+
+Side by side with borealis, change by change: <https://aurore.boreale.dev/borealis/>.
 
 <details>
 <summary><b>Every change and its API</b></summary>
@@ -135,6 +137,9 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 | Width and height measured with or without padding and border | `boxSizing="borderBox"` (default) or `"contentBox"` · `View::setBoxSizing` |
 | A view whose position offsets are ignored and that absolute children skip to find their reference | `positionType="static"` · `PositionType::STATIC` |
 | A radius for each corner | `cornerTopLeftRadius`… (XML) · `View::setCornerRadius(tl, tr, br, bl)` |
+| A density for the lengths (comfortable, compact, dense), the text untouched; lengths in `dp` | `16dp` (XML) · `Application::setDensity`, `aurore::dp()` · `AURORE_DENSITY` · [docs/styles.md](docs/styles.md#density-of-the-lengths) |
+| Classes of screen width (compact, medium, expanded), and attributes for one of them | `compact:`, `medium:`, `expanded:` (XML) · `Application::getWidthClass` |
+| A small screen's design size, density and text scale in one go | `Application::usePreset(PRESET_SMALL_SCREEN)` · `Platform::getLayoutPreset` · `AURORE_PRESET` |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
 | Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
