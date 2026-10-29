@@ -205,17 +205,17 @@ def boreale_versions():
 
 def switcher(t, lang, to_root, home, here, name, versions):
     """The header's name (`name`), a button that opens the menu of Boréale's
-    sites, `here` marked and leading to `home`, each in French where the page
-    is (the four sites have it), with its latest release (`versions`). A
+    sites, `here` marked and leading to `home`, each in the page's language
+    (the four sites have the same 15 folders), with its latest release (`versions`). A
     popover: the browser closes it on Esc or a click elsewhere; site.css's
     and site.js's "site switcher" blocks."""
     label = t("sites_label")
-    french = lang.lower().startswith("fr")
+    folder = lang_dir(lang)   # the same folder on each of Boréale's sites
     groups = []
     for title, sites in SITES:
         items = []
         for key, site, url in sites:
-            href = home if key == here else url + ("fr/" if french else "")
+            href = home if key == here else url + folder
             soon = f'<em class="soon">{t("sites_soon")}</em>' if key == "playshelf" else ""
             version = f' <span class="sites-version">{html.escape(versions[key])}</span>' if key in versions else ""
             current = ' aria-current="true"' if key == here else ""
@@ -484,7 +484,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
                    f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
                    f'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
                    f'{reading_toggle(t)}</div></div>\n')
-    french = code.startswith("fr")   # Boréale's other sites: in French where the page is
+    sites_dir = lang_dir(lang)   # Boréale's other sites, in the page's language (the same folders)
     docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
                          for p, g, n in DOCS if g == "start")
     umami = "" if NOINDEX else (f'<script src="{to_root}assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
@@ -548,7 +548,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     <div>
       <p class="footer-brand"><img src="{to_root}assets/mark.svg" alt="" width="24" height="24"> <strong>Aurore</strong></p>
       <p>{t("footer_license")}</p>
-      <p><a href="https://boreale.dev/">{t("footer_boreale")}</a></p>
+      <p><a href="https://boreale.dev/{sites_dir}">{t("footer_boreale")}</a></p>
     </div>
     <div>
       <h2>{t("docs_title")}</h2>
@@ -556,10 +556,10 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     </div>
     <div>
       <h2>Boréale</h2>
-      <ul><li><a href="https://boreale.dev/{"fr/" if french else ""}">boreale.dev</a></li>
-        <li><a href="https://guard.boreale.dev/{"fr/" if french else ""}">PlayGuard</a></li>
-        <li><a href="https://shelf.boreale.dev/{"fr/" if french else ""}">PlayShelf</a></li>
-        <li><a href="https://boreale.dev/{"fr/" if french else ""}legal/">{t("sites_legal")}</a></li>
+      <ul><li><a href="https://boreale.dev/{sites_dir}">boreale.dev</a></li>
+        <li><a href="https://guard.boreale.dev/{sites_dir}">PlayGuard</a></li>
+        <li><a href="https://shelf.boreale.dev/{sites_dir}">PlayShelf</a></li>
+        <li><a href="https://boreale.dev/{sites_dir}legal/">{t("sites_legal")}</a></li>
         <li><a href="mailto:contact@boreale.dev">contact@boreale.dev</a></li></ul>
     </div>
     <div>
