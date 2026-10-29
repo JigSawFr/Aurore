@@ -288,6 +288,13 @@ std::string text_size_name(bool tile = false);
 void pick_rail(std::function<void()> after = nullptr);
 std::string rail_name();
 /// @}
+/// How close the screens' pieces stand (ui::Prefs::density): automatic,
+/// comfortable, compact or dense; the screens built again at once
+/// (live_prefs::density_changed). density_name: the choice saved, as text.
+/// @{
+void pick_density(std::function<void()> after = nullptr);
+std::string density_name();
+/// @}
 /// The language and the theme saved, as text (shorter on a tile).
 /// @{
 std::string language_name(bool tile = false);

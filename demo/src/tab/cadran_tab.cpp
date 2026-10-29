@@ -183,6 +183,8 @@ CadranTab::CadranTab()
         { ui::quick_settings(); }, E));
     buttons->addView(action("cadran/prefs/rail"_i18n, []
         { ui::pick_rail(); }, E));
+    buttons->addView(action("cadran/prefs/density"_i18n, []
+        { ui::pick_density(); }, E));
     dialogs->addView(buttons);
 
     // The icons.

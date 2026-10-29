@@ -71,6 +71,13 @@
             "auto": "Automatique : ouverte pour choisir un onglet",
             "open": "Toujours ouverte",
             "icons": "Icônes seules"
+        },
+        "density": "Densité",
+        "densities": {
+            "auto": "Automatique : plus serrée sur un petit écran",
+            "comfortable": "Confortable",
+            "compact": "Compacte",
+            "dense": "Dense"
         }
     },
     "quick": {

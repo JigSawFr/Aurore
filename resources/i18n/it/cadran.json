@@ -71,6 +71,13 @@
             "auto": "Automatico: aperta per scegliere una scheda",
             "open": "Sempre aperta",
             "icons": "Solo icone"
+        },
+        "density": "Densità",
+        "densities": {
+            "auto": "Automatica: più compatta su schermi piccoli",
+            "comfortable": "Comoda",
+            "compact": "Compatta",
+            "dense": "Densa"
         }
     },
     "quick": {

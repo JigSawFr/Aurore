@@ -71,6 +71,13 @@
             "auto": "自动：选择标签页时展开",
             "open": "始终展开",
             "icons": "仅图标"
+        },
+        "density": "密度",
+        "densities": {
+            "auto": "自动：小屏幕上更紧凑",
+            "comfortable": "宽松",
+            "compact": "紧凑",
+            "dense": "密集"
         }
     },
     "quick": {

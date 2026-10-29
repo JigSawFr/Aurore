@@ -309,6 +309,28 @@ AURORE_TEST(action_sheet_on_a_small_screen)
     AURORE_CHECK(h.matchesReference("action_sheet_compact"));
 }
 
+AURORE_TEST(density_preference_builds_the_screens_again)
+{
+    DemoHarness h;
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_COMFORTABLE);
+    float before = h.findText("Basic components")->getFrame().getMinY();
+
+    ui::prefs().density = "dense";
+    live_prefs::density_changed();
+    h.settle();
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_DENSE);
+    // The main screen made again, its rail's rows closer together
+    aurore::View* item = h.findText("Basic components");
+    AURORE_CHECK(item != nullptr);
+    if (item)
+        AURORE_CHECK(item->getFrame().getMinY() < before);
+
+    ui::prefs().density = "auto";
+    live_prefs::density_changed();
+    h.settle();
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_COMFORTABLE);
+}
+
 AURORE_TEST(cut_texts_found)
 {
     Harness h;

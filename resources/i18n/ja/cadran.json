@@ -71,6 +71,13 @@
             "auto": "自動：タブを選ぶときに開く",
             "open": "常に開く",
             "icons": "アイコンのみ"
+        },
+        "density": "表示密度",
+        "densities": {
+            "auto": "自動：小さな画面では詰めて表示",
+            "comfortable": "ゆったり",
+            "compact": "コンパクト",
+            "dense": "高密度"
         }
     },
     "quick": {

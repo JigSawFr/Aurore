@@ -71,6 +71,13 @@
             "auto": "Automatisch: offen zur Tab-Auswahl",
             "open": "Immer offen",
             "icons": "Nur Symbole"
+        },
+        "density": "Dichte",
+        "densities": {
+            "auto": "Automatisch: enger auf kleinem Bildschirm",
+            "comfortable": "Komfortabel",
+            "compact": "Kompakt",
+            "dense": "Dicht"
         }
     },
     "quick": {
