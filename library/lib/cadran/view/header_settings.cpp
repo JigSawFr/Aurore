@@ -209,6 +209,9 @@ static void settings_screen_of(aurore::View* focus)
     auto* frame = dynamic_cast<aurore::AppletFrame*>(focus);
     if (!frame || !cadran::is_main_frame(frame))
         return;
+    // No room in a compact screen's header: Preferences has them
+    if (aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT)
+        return;
     auto* tools = VersionBadge::header_tools(frame);
     if (!tools || tools->getView(LANGUAGE_ID))
         return;

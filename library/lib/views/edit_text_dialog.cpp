@@ -42,6 +42,7 @@ const std::string editTextDialogXML = R"xml(
         <aurore:Box
             id="aurore/dialog/applet"
             width="720"
+            compact:width="94%"
             cornerRadius="4"
             alignItems="flexEnd"
             axis="column"

@@ -18,8 +18,8 @@ in the pages (width, height), and the check takes seconds, not minutes.
 
 With SITE_AXE set to axe-core's axe.min.js, also what axe finds against WCAG
 2.2 A and AA (contrast, names, labels, landmarks, keyboard), on an iPhone:
-every English page, and the French home page (its texts, not its layout nor
-its colours, differ).
+every English page, and each other language's home page (their texts, not
+their layout nor their colours, differ).
 
 Usage: tools/site_layout.py <site-dir>   (needs Playwright for Python with
 Chromium, PLAYWRIGHT_CHROMIUM=<path> for a browser of its own; SITE_LAYOUT_JOBS

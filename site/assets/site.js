@@ -125,9 +125,9 @@
 
 // A copy button on each block of code.
 (function () {
-  const prose = document.querySelector("[data-copy]");
-  const label = prose ? prose.dataset.copy : document.documentElement.lang === "fr" ? "Copier" : "Copy";
-  const done = prose ? prose.dataset.copied : document.documentElement.lang === "fr" ? "Copié" : "Copied";
+  const texts = document.querySelector("[data-copy]");   // the body: the page's language
+  const label = texts ? texts.dataset.copy : "Copy";
+  const done = texts ? texts.dataset.copied : "Copied";
   if (!navigator.clipboard) return;
   for (const pre of document.querySelectorAll("pre")) {
     const wrap = document.createElement("div");
@@ -238,18 +238,19 @@
 })();
 
 // The page not found, served at any address: in the address' language
-// (/fr/…), else the visitor's.
+// (/fr/…, /zh-hant/…), else the visitor's (lang.js).
 (function () {
   const blocks = document.querySelectorAll(".not-found[data-lang]");
-  if (blocks.length < 2) return;
-  let lang = /\/fr(\/|$)/.test(location.pathname) ? "fr" : null;
-  if (!lang) {
-    try { lang = localStorage.getItem("aurore-lang"); } catch (e) { /* storage refused */ }
-  }
-  if (!lang) lang = (navigator.language || "en").toLowerCase().split("-")[0];
-  if (!Array.from(blocks).some((b) => b.dataset.lang === lang)) return;
-  for (const b of blocks) b.hidden = b.dataset.lang !== lang;
-  document.documentElement.lang = lang;
+  const languages = window.auroreLanguages;
+  if (blocks.length < 2 || !languages) return;
+  const first = location.pathname.toLowerCase().split("/").filter(Boolean)[0] || "";
+  const lang = Object.keys(languages.folders).find((c) => languages.folders[c] && languages.folders[c] === first)
+    || languages.visitor();
+  const block = Array.from(blocks).find((b) => b.dataset.lang === lang);
+  if (!block) return;
+  for (const b of blocks) b.hidden = b !== block;
+  document.documentElement.lang = block.lang;
+  document.title = `${block.querySelector("h1").textContent} · Aurore`;
 })();
 
 // On a phone, the documentation's list of pages starts folded, under the
@@ -274,6 +275,22 @@
     const width = Math.min(400, screen - 24); // site.css's width
     menu.style.top = `${box.bottom + window.scrollY + 6}px`;
     menu.style.left = `${Math.max(12, Math.min(box.left, screen - width - 12)) + window.scrollX}px`;
+  });
+})();
+
+// The header's languages: their menu opens under its button, its right edge
+// on the button's (PlayGuard's block); the language in use in view.
+(function () {
+  const menu = document.getElementById("languages");
+  const button = document.querySelector(".lang-button");
+  if (!menu || !button || !menu.showPopover) return;
+  menu.addEventListener("beforetoggle", (event) => {
+    if (event.newState !== "open") return;
+    const box = button.getBoundingClientRect();
+    const screen = document.documentElement.clientWidth;
+    menu.style.top = `${box.bottom + window.scrollY + 6}px`;
+    menu.style.right = `${Math.max(12, screen - box.right)}px`;
+    requestAnimationFrame(() => menu.querySelector("[aria-current]")?.scrollIntoView({ block: "nearest" }));
   });
 })();
 

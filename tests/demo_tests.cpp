@@ -69,10 +69,29 @@ struct Demo
     Demo() { demo::installHooks(); }
 };
 
+// A small screen's design size (a 320-pixel one's, 480x360) and the dense
+// density, for the length of a test
+struct SmallScreen
+{
+    SmallScreen()
+    {
+        aurore::Application::ORIGINAL_WINDOW_WIDTH  = 480;
+        aurore::Application::ORIGINAL_WINDOW_HEIGHT = 360;
+        aurore::setDensity(aurore::DENSITY_DENSE);
+    }
+    ~SmallScreen()
+    {
+        aurore::Application::ORIGINAL_WINDOW_WIDTH  = 1280;
+        aurore::Application::ORIGINAL_WINDOW_HEIGHT = 720;
+        aurore::setDensity(aurore::DENSITY_COMFORTABLE);
+    }
+};
+
 // The harness, on the demo's main screen
 struct DemoHarness : Demo, Harness
 {
-    DemoHarness()
+    explicit DemoHarness(aurore::test::Options options = aurore::test::Options())
+        : Harness(options)
     {
         demo::registerViews();
         push(new MainActivity());
@@ -210,6 +229,29 @@ AURORE_TEST(window_resized)
     AURORE_CHECK_EQ(shot.height, 1080);
     AURORE_CHECK_EQ(aurore::Application::contentWidth, 1280.0f);
     AURORE_CHECK(h.matchesReference("main_screen_1080p"));
+}
+
+AURORE_TEST(main_screen_on_a_small_screen)
+{
+    SmallScreen small;
+    aurore::test::Options options;
+    options.width  = 960;
+    options.height = 720;
+    DemoHarness h(options);
+    AURORE_CHECK_EQ(aurore::Application::contentWidth, 480.0f);
+    AURORE_CHECK(aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT);
+    // No room for the date; the figures one under the other, as wide as the
+    // column, the rail on its icons once the focus is in the tab
+    AURORE_CHECK(!h.hasText("Monday, January 5"));
+    // Nor for the language, theme and text size (Preferences has them), and
+    // a lower header
+    AURORE_CHECK(h.top()->getContentView()->getView("header_language") == nullptr);
+    AURORE_CHECK(aurore::getStyle()["aurore/applet_frame/header_height"] < 84 * aurore::DENSITY_DENSE);
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    aurore::View* games = h.findText("games");
+    AURORE_CHECK(games != nullptr);
+    AURORE_CHECK(h.matchesReference("main_screen_compact"));
 }
 
 AURORE_TEST(cut_texts_found)
