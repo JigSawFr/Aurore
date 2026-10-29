@@ -49,14 +49,53 @@ void CtrFontLoader::loadFonts()
 
 CtrPlatform::CtrPlatform()
 {
-    // The system's settings (language) and the power controller (battery)
+    // 804 MHz and the L2 cache
+    osSetSpeedupEnable(true);
+    // The system's settings (language), the power controller (battery), the
+    // app's resources
     cfguInit();
     ptmuInit();
+    if (R_FAILED(romfsInit()))
+        Logger::warning("3DS: no romfs, the resources are missing");
+
+    // The three New models have the same CPU, memory and screens; the New
+    // 2DS XL has no stereoscopic 3D, which nothing here uses
+    u8 model = CFG_MODEL_N3DS;
+    CFGU_GetSystemModel(&model);
+    switch (model)
+    {
+        case CFG_MODEL_N3DS:
+            this->modelName = "New 3DS";
+            break;
+        case CFG_MODEL_N3DSXL:
+            this->modelName = "New 3DS XL";
+            break;
+        case CFG_MODEL_N2DSXL:
+            this->modelName = "New 2DS XL";
+            break;
+        case CFG_MODEL_3DSXL:
+            this->modelName = "3DS XL";
+            break;
+        case CFG_MODEL_2DS:
+            this->modelName = "2DS";
+            break;
+        default:
+            this->modelName = "3DS";
+            break;
+    }
+    bool isNew = false;
+    APT_CheckNew3DS(&isNew);
+    this->newModel = isNew;
+    if (!this->newModel)
+        Logger::warning("3DS: the {} is not supported, only the New 3DS, New 3DS XL and New 2DS XL are (it runs "
+                        "at 268 MHz, without the L2 cache)",
+            this->modelName);
 }
 
 CtrPlatform::~CtrPlatform()
 {
     delete this->videoContext;
+    romfsExit();
     ptmuExit();
     cfguExit();
 }
@@ -74,7 +113,12 @@ const LayoutPreset* CtrPlatform::getLayoutPreset()
 bool CtrPlatform::mainLoopIteration()
 {
     // HOME or the power button ask the app to close
-    return aptMainLoop();
+    if (!aptMainLoop())
+        return false;
+    // The buttons and the touch screen, read once per frame (hidKeysDown,
+    // hidKeysHeld… then hold this frame's)
+    hidScanInput();
+    return true;
 }
 
 std::string CtrPlatform::getLocale()

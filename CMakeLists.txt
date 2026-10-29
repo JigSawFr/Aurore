@@ -71,7 +71,7 @@ endif ()
 
 add_subdirectory(library)
 
-# The New 3DS has no renderer yet: a smoke test in place of the demo
+# The New 3DS: a test card in place of the demo, until the demo takes input there
 if (PLATFORM_3DS)
     add_subdirectory(ctr)
     return()

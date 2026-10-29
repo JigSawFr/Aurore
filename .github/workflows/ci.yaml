@@ -452,8 +452,8 @@ jobs:
     timeout-minutes: 40
     env:
       # The site's Emscripten (.github/workflows/site.yml), checked the same way
-      EMSDK_VERSION: 6.0.12
-      EMSDK_COMMIT: 35ff8a6d150541276abbc6bae512ca90bcfbe220
+      EMSDK_VERSION: 6.0.13
+      EMSDK_COMMIT: 35659964bc2762fffec0d257997fb61475f765b7
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0

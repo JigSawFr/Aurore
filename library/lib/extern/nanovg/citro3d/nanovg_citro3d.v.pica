@@ -1,0 +1,62 @@
+; nanovg's citro3d renderer (New 3DS): its only vertex shader.
+;
+; Copyright (c) 2026 JigSawFr
+;
+; This software is provided 'as-is', without any express or implied
+; warranty.  In no event will the authors be held liable for any damages
+; arising from the use of this software.
+; Permission is granted to anyone to use this software for any purpose,
+; including commercial applications, and to alter it and redistribute it
+; freely, subject to the following restrictions:
+; 1. The origin of this software must not be misrepresented; you must not
+;    claim that you wrote the original software. If you use this software
+;    in a product, an acknowledgment in the product documentation would be
+;    appreciated but is not required.
+; 2. Altered source versions must be plainly marked as such, and must not be
+;    misrepresented as being the original software.
+; 3. This notice may not be removed or altered from any source distribution.
+;
+; The vertex is nanovg's (x, y, u, v). The texture coordinate is an affine
+; function of the four, set per draw call: the atlas coordinates for text,
+; the paint's inverse transform for images and gradients (the PICA200 has no
+; fragment shader: what nanovg's GL shader computes per pixel is computed
+; here per vertex, exact since it is affine).
+
+; uniforms
+.fvec proj[4]      ; screen projection (rotated: the screens are portrait)
+.fvec texRow[2]    ; s = texRow[0] . (x, y, u, v) + texOff.x, t likewise
+.fvec texOff
+
+; constants
+.constf ones(1.0, 0.0, 0.0, 0.0)
+
+; outputs
+.out outPos   position
+.out outTc    texcoord0
+.out outColor color
+
+; inputs
+.alias inVert v0
+
+.proc main
+	; position (x, y, 0, 1)
+	mov r0.xy, inVert.xy
+	mov r0.zw, ones.yx
+
+	dp4 outPos.x, proj[0], r0
+	dp4 outPos.y, proj[1], r0
+	dp4 outPos.z, proj[2], r0
+	dp4 outPos.w, proj[3], r0
+
+	; texture coordinate
+	dp4 r1.x, texRow[0], inVert
+	dp4 r1.y, texRow[1], inVert
+	add r1.xy, texOff.xy, r1.xy
+	mov r1.zw, ones.yy
+	mov outTc, r1
+
+	; the colours come from the combiners' constants
+	mov outColor, ones.xxxx
+
+	end
+.end

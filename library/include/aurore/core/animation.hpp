@@ -17,14 +17,55 @@
 #pragma once
 
 #include <stdint.h>
-#include <tweeny.h>
 
+#include <vector>
 #include <aurore/core/time.hpp>
 
 namespace aurore
 {
 
-using EasingFunction = tweeny::easing::enumerated;
+// The easings of Robert Penner's set, as Tweeny names them (animation.cpp
+// draws them with Tweeny's)
+enum class EasingFunction
+{
+    def,
+    linear,
+    stepped,
+    quadraticIn,
+    quadraticOut,
+    quadraticInOut,
+    cubicIn,
+    cubicOut,
+    cubicInOut,
+    quarticIn,
+    quarticOut,
+    quarticInOut,
+    quinticIn,
+    quinticOut,
+    quinticInOut,
+    sinusoidalIn,
+    sinusoidalOut,
+    sinusoidalInOut,
+    exponentialIn,
+    exponentialOut,
+    exponentialInOut,
+    circularIn,
+    circularOut,
+    circularInOut,
+    bounceIn,
+    bounceOut,
+    bounceInOut,
+    elasticIn,
+    elasticOut,
+    elasticInOut,
+    backIn,
+    backOut,
+    backInOut,
+};
+
+/// `easing`'s curve at `position` (0 to 1), from 0 to 1: what an Animatable
+/// moves by, for a view that draws its own motion
+float ease(EasingFunction easing, float position);
 
 // An animatable is a float which value can be animated from an initial value to a target value,
 // during a given amount of time. An easing function can also be specified.
@@ -95,8 +136,22 @@ class Animatable : public FiniteTicking
     void onRewind() override;
 
   private:
+    struct Step
+    {
+        float target;
+        int32_t duration; // ms
+        EasingFunction easing;
+    };
+
+    // The value where the steps start (reset()), the steps, the time spent
+    // in them and their total
     float currentValue = 0.0f;
-    tweeny::tween<float> tween;
+    float startValue   = 0.0f;
+    std::vector<Step> steps;
+    int64_t elapsed = 0;
+    int64_t total   = 0;
+
+    float valueAt(int64_t time) const;
 };
 
 void updateHighlightAnimation();
