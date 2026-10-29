@@ -155,6 +155,29 @@ jobs:
           name: aurore-switch-${{ matrix.ext }}
           path: build/aurore_demo.nro
 
+  # The New 3DS before its renderer: the library and a smoke test on the console
+  # (docs/platforms.md)
+  3ds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    container:
+      image: devkitpro/devkitarm:20260610@sha256:15b79ce75822c289538d8153da5fa7aafe5e6adc32ad8a575a197beca0f0761b
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Build
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=3DS
+          cmake --build build -j$(nproc)
+      - name: Upload dist
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: aurore-3ds-smoke
+          path: build/ctr/aurore_3ds_smoke.3dsx
+
   gradle-wrapper:
     name: android (Gradle wrapper)
     runs-on: ubuntu-24.04
