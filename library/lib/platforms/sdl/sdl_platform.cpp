@@ -145,14 +145,22 @@ void SDLPlatform::createWindow(std::string windowTitle, uint32_t windowWidth, ui
     // started first.
     if (!this->themeFromEnvironment)
     {
-        SDL_SystemTheme theme = SDL_GetSystemTheme();
-        if (theme == SDL_SYSTEM_THEME_DARK)
-            this->themeVariant = ThemeVariant::DARK;
-        else if (theme == SDL_SYSTEM_THEME_LIGHT)
-            this->themeVariant = ThemeVariant::LIGHT;
+        this->themeFollowsSystem = true;
+        this->readSystemTheme();
     }
 #endif
 }
+
+#ifdef __SDL3__
+void SDLPlatform::readSystemTheme()
+{
+    SDL_SystemTheme theme = SDL_GetSystemTheme();
+    if (theme == SDL_SYSTEM_THEME_DARK)
+        this->themeVariant = ThemeVariant::DARK;
+    else if (theme == SDL_SYSTEM_THEME_LIGHT)
+        this->themeVariant = ThemeVariant::LIGHT;
+}
+#endif
 
 void SDLPlatform::restoreWindow()
 {
@@ -249,6 +257,12 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         auto* manager = this->inputManager;
         if (manager)
             manager->getMouseCusorEntered()->fire(event->type == SDL_EVENT_WINDOW_MOUSE_ENTER);
+    }
+    else if (event->type == SDL_EVENT_SYSTEM_THEME_CHANGED)
+    {
+        // The next frame redraws in it (Application::checkThemeChanged)
+        if (this->themeFollowsSystem)
+            this->readSystemTheme();
     }
 #else
     else if (event->type == SDL_WINDOWEVENT)

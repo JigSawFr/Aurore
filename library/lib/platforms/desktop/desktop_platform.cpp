@@ -1169,7 +1169,9 @@ ThemeVariant DesktopPlatform::getThemeVariant()
 
 void DesktopPlatform::setThemeVariant(ThemeVariant theme)
 {
-    this->themeVariant = theme;
+    // The app's choice: the system's changes no longer replace it
+    this->themeFollowsSystem = false;
+    this->themeVariant       = theme;
 }
 
 std::string DesktopPlatform::getLocale()

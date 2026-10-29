@@ -102,7 +102,10 @@ class DesktopPlatform : public Platform
     /// AURORE_LANG gave the locale: the system's is not looked for
     bool localeFromEnvironment = false;
     /// AURORE_THEME gave the theme: the system's is not looked for
-    bool themeFromEnvironment  = false;
+    bool themeFromEnvironment = false;
+    /// The variant is the system's and changes with it, until the app or
+    /// AURORE_THEME gives one (SDL3 tells when the system's changes)
+    bool themeFollowsSystem    = false;
     bool screenDimmingDisabled = false;
 #ifdef __linux__
     uint32_t inhibitCookie = 0;

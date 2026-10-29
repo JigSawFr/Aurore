@@ -60,6 +60,11 @@ class SDLPlatform : public DesktopPlatform
     SDLInputManager* inputManager = nullptr;
     SDLImeManager* imeManager     = nullptr;
     Event<SDL_Event*> otherEvent;
+
+#ifdef __SDL3__
+    /// The system's light or dark into themeVariant
+    void readSystemTheme();
+#endif
 };
 
 } // namespace aurore

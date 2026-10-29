@@ -188,17 +188,18 @@ class Platform
     virtual bool runLoop(const std::function<bool()>& runLoopImpl) { return runLoopImpl(); }
 
     /**
-     * Can be called at anytime to get the current system theme variant.
+     * Can be called at anytime to get the current theme variant: the
+     * system's until setThemeVariant gives one.
      *
-     * For now, the variant is assumed to stay the same during the whole time
-     * the app is running (no variant hot swap).
-     *
-     * As such, the result should be cached by the platform code.
+     * Under SDL3 it follows the system's when that changes (AURORE_THEME or
+     * a setThemeVariant call stops it); elsewhere it is read once, at start.
+     * The result should be cached by the platform code.
      */
     virtual ThemeVariant getThemeVariant() = 0;
 
     /**
-     * Overwrite current theme settings
+     * Overwrite current theme settings: the app's choice, kept whatever the
+     * system's becomes
      */
     virtual void setThemeVariant(ThemeVariant theme) = 0;
 
