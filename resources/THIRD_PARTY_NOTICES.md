@@ -31,7 +31,7 @@ versions that can be read from the sources.
 | JSON for Modern C++ | 3.12.0 | `library/include/aurore/extern/nlohmann` | MIT | 2013-2025 Niels Lohmann |
 | Tweeny | 4.2.0 (its headers) | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
 | libromfs | - | `library/lib/extern/libromfs` | MIT | 2022 WerWolv |
-| GLFW | 3.4 (xfangfang's fork, 892256c) | `library/lib/extern/glfw` | zlib | 2002-2006 Marcus Geelnard, 2006-2019 Camilla Löwy |
+| GLFW | 3.5.1 (xfangfang's fixes, JigSawFr/glfw `aurore`, fd16225) | `library/lib/extern/glfw` | zlib | 2002-2006 Marcus Geelnard, 2006-2019 Camilla Löwy |
 | SDL | 2.32.10 | `library/lib/extern/SDL`, `android-project/app/src/sdl2/java/org/libsdl` | zlib | 1997-2025 Sam Lantinga |
 | SDL3 | 3.4.18 | `library/lib/extern/SDL3` (its Java code, `android-project/app/src/main/java` in it, for Android) | zlib | 1997-2026 Sam Lantinga |
 | libretro-common | - | `library/lib/extern/libretro-common`, `library/include/aurore/extern/libretro-common` | MIT | 2010-2020 The RetroArch team |

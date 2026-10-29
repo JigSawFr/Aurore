@@ -30,6 +30,10 @@ jobs:
             | xargs clang-format-18 --dry-run --Werror
   ios:
     runs-on: macos-14
+    # Not required: GitHub's macOS runners sometimes leave the job without a
+    # machine until it is cancelled. A failure here is still shown, and
+    # looked at, but does not make the run fail (CONTRIBUTING.md).
+    continue-on-error: true
     timeout-minutes: 40
     name: ios (${{ matrix.window }})
     strategy:
@@ -222,6 +226,10 @@ jobs:
 
   macos:
     runs-on: macos-14
+    # Not required: GitHub's macOS runners sometimes leave the job without a
+    # machine until it is cancelled. A failure here is still shown, and
+    # looked at, but does not make the run fail (CONTRIBUTING.md).
+    continue-on-error: true
     timeout-minutes: 30
     name: macos (${{ matrix.window.name }})
     strategy:
