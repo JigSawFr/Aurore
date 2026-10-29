@@ -13,8 +13,8 @@ found, in English at the root and in French in /fr/.
   Each page is published in Markdown next to it too, listed in llms.txt.
 - The screenshots are the README's (.github/readme/), the preview image and
   the icon Aurore's own (.github/branding/).
-- SITE_API names a folder holding the API reference Doxygen built
-  (docs/Doxyfile, build_docs/html): it is published in /api/, and the pages
+- SITE_API names a folder holding the API reference tools/build_api.py
+  built (from Doxygen's XML): it is published in /api/, and the pages
   link to it. Without it, they do not.
 - SITE_DEMO names the folder of the demo built for a browser (web/README.md,
   <build>/web/): it is published in /demo/, and the pages offer to try it.

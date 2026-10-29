@@ -371,18 +371,18 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           persist-credentials: false
-      - name: Install Doxygen
+      - name: Install Doxygen and Python-Markdown
         run: |
           sudo apt update -y
-          sudo apt install -y --no-install-recommends doxygen
+          sudo apt install -y --no-install-recommends doxygen python3-markdown
+      # Doxygen fails on a warning (WARN_AS_ERROR in docs/Doxyfile); the
+      # pages fail on a name of the home page the headers lost, or on a
+      # comment's markup they cannot show. The website (site.yml) publishes
+      # them.
       - name: Build the reference
-        # Fails on a warning (WARN_AS_ERROR in docs/Doxyfile)
-        run: doxygen docs/Doxyfile
-      - name: Upload the reference
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: aurore-api-reference
-          path: build_docs/html
+        run: |
+          doxygen docs/Doxyfile
+          python3 tools/build_api.py build_docs/xml build_api
 
   linux-tests:
     name: linux (tests)

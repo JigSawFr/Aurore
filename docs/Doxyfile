@@ -1,26 +1,25 @@
-# The API reference of Aurore's public headers. From the repository's root:
+# Aurore's public headers, read by Doxygen into XML (build_docs/xml), which
+# tools/build_api.py turns into the API reference of the website (/api/,
+# site/README.md). From the repository's root:
 #
 #     doxygen docs/Doxyfile
+#     python3 tools/build_api.py build_docs/xml build_api
 #
-# then open build_docs/html/index.html. Only the settings that differ from
-# doxygen's defaults are here (`doxygen -x docs/Doxyfile` lists them).
+# Only the settings that differ from doxygen's defaults are here
+# (`doxygen -x docs/Doxyfile` lists them).
 
 PROJECT_NAME           = Aurore
 PROJECT_BRIEF          = "A Switch-like interface for your app, on every screen"
 OUTPUT_DIRECTORY       = build_docs
 
-# Every guide in docs/, the changelog and the template they link to, and the headers
-INPUT                  = docs \
-                         CHANGELOG.md \
-                         template/README.md \
-                         library/include/aurore.hpp \
+# The public headers only: the guides are the website's own pages
+INPUT                  = library/include/aurore.hpp \
                          library/include/aurore
-FILE_PATTERNS          = *.hpp *.h *.md
+FILE_PATTERNS          = *.hpp *.h
 RECURSIVE              = YES
 # Bundled libraries and the platforms' internals are not Aurore's API
 EXCLUDE                = library/include/aurore/extern \
                          library/include/aurore/platforms
-USE_MDFILE_AS_MAINPAGE = docs/getting-started.md
 STRIP_FROM_PATH        = library/include
 STRIP_FROM_INC_PATH    = library/include
 
@@ -47,7 +46,9 @@ EXPAND_AS_DEFINED      = AURORE_BIND \
                          CONTENT_FROM_XML_FILE \
                          CONTENT_FROM_XML_STR
 
+# XML only: the pages are the website's (tools/build_api.py)
+GENERATE_HTML          = NO
 GENERATE_LATEX         = NO
-GENERATE_TREEVIEW      = YES
+GENERATE_XML           = YES
+XML_PROGRAMLISTING     = NO
 HAVE_DOT               = NO
-SEARCHENGINE           = YES

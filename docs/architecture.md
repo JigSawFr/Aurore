@@ -1,6 +1,6 @@
 # Architecture
 
-How Aurore is put together: the layers, what happens in a frame, how views are laid out and drawn, how the focus moves, who owns what, and which thread may touch what. For contributors, and for app authors who want to know why something behaves as it does. The API reference (`doxygen docs/Doxyfile`) has the details of each class.
+How Aurore is put together: the layers, what happens in a frame, how views are laid out and drawn, how the focus moves, who owns what, and which thread may touch what. For contributors, and for app authors who want to know why something behaves as it does. The [API reference](https://aurore.boreale.dev/api/) has the details of each class.
 
 ## Layers
 

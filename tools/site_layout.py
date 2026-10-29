@@ -9,8 +9,9 @@ headless Chromium (Playwright), failing when one:
 - throws (site.js);
 - has a field under 16px on a phone (iOS zooms into it when it is touched).
 
-Every page on an iPhone (402x874); the pages most likely to be too wide (the
-home page, the documentation's widest, the changelog) in each language also
+Every page on an iPhone (402x874), the API reference's included; the pages
+most likely to be too wide (the home page, the documentation's widest, the
+changelog, and the API's widest) in each language also
 on a small phone (320), a phone in landscape (874x402), a tablet (1024) and
 a desktop (1440). The images are not loaded: their boxes are
 in the pages (width, height), and the check takes seconds, not minutes.
@@ -45,6 +46,8 @@ OTHERS = [("small phone", 320, 640, True), ("phone in landscape", 874, 402, True
           ("tablet", 1024, 768, False), ("desktop", 1440, 900, False)]
 # The pages every screen sees, under each language's folder.
 WIDEST = ["", "docs/xml-attributes/", "docs/platforms/", "docs/themes/", "changelog/"]
+# The API reference's widest (tools/build_api.py), in English only.
+API_WIDEST = ["api/", "api/aurore/", "api/aurore/View/", "api/aurore/Application/", "api/ui/"]
 
 # What a page reports: how wide it is, what is wider than the screen (its
 # width: on a phone, the page's viewport widens to the page), the fields
@@ -78,12 +81,13 @@ def pages():
                             if os.path.isfile(os.path.join(SITE, d, "index.html")) and d not in ("api", "demo", "changelog", "docs"))
     every = []
     for root, dirs, files in os.walk(SITE):
-        dirs[:] = [d for d in dirs if d not in ("api", "demo", "assets")]
+        dirs[:] = [d for d in dirs if d not in ("demo", "assets")]
         # Not a page that sends its visitor on (docs/: the guide's first page).
         if "index.html" in files and 'http-equiv="refresh"' not in open(os.path.join(root, "index.html"), encoding="utf-8").read():
             every.append(os.path.relpath(root, SITE).replace(os.sep, "/").removeprefix(".") + "/")
     every = sorted(p.lstrip("/") for p in every)
     widest = [f + p for f in folders for p in WIDEST if os.path.isfile(os.path.join(SITE, f + p, "index.html"))]
+    widest += [p for p in API_WIDEST if os.path.isfile(os.path.join(SITE, p, "index.html"))]
     english = [p for p in every if p.split("/", 1)[0] + "/" not in folders[1:]]
     return every, widest, english
 
