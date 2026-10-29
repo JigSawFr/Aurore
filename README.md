@@ -221,7 +221,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | CMake | 3.16–3.31 |
 | SDL3 | 3.4.18 |
 | SDL | 2.32.10 |
-| GLFW | 3.4 |
+| GLFW | 3.5.1 |
 | glad | 2.0.8 |
 | Yoga | 3.2.1 |
 | {fmt} | 12.2.0 |
