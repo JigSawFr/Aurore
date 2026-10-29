@@ -98,10 +98,10 @@ aurore::Box* VersionBadge::header_tools(aurore::AppletFrame* frame)
     tools->setAlignSelf(aurore::AlignSelf::CENTER);
     // 8 px more above and below, given back by the margins: the header's
     // settings take a touch that far from their drawing (HeaderSetting::hitTest)
-    tools->setPaddingTop(aurore::dp(8));
-    tools->setPaddingBottom(aurore::dp(8));
-    tools->setMarginTop(aurore::dp(-8));
-    tools->setMarginBottom(aurore::dp(-8));
+    tools->setPaddingTop(8);
+    tools->setPaddingBottom(8);
+    tools->setMarginTop(-8);
+    tools->setMarginBottom(-8);
     header->addView(tools);
     return tools;
 }
