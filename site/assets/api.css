@@ -35,13 +35,16 @@
   background: #0e1a33; border-bottom: 1px solid #22324f;
 }
 .api-decl-tab {
-  display: inline-flex; align-items: center; align-self: stretch; min-width: 0; margin-bottom: -1px; padding: 0 14px;
+  /* The header's path on one line, shortened with an ellipsis when the bar
+     is narrow: the copy button keeps its place at the bar's end. */
+  display: block; flex: 0 1 auto; align-self: stretch; min-width: 0; margin-bottom: -1px; padding: 0 14px;
   border-bottom: 2px solid #00ffcc; background: #081020; color: #e8eef7; text-decoration: none;
-  font: 500 0.8125rem/1.3 var(--mono); overflow-wrap: anywhere;
+  font: 500 0.8125rem/43px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .api-decl-tab:hover { color: #00ffcc; }
-.api-decl .code-wrap { position: static; }
-.api-decl .copy { top: 6px; right: 8px; opacity: 1; }   /* in the window's bar */
+.api-decl .code-wrap { position: relative; }
+/* The copy button in the window's bar, above its code (whose fade stays on the code). */
+.api-decl .copy { top: -39px; right: 8px; opacity: 1; }
 .api-decl pre { border: 0; border-radius: 0; background: transparent; }
 .api-decl .code-wrap.more::after { border-radius: 0; }
 /* A name in code that links: underlined, faintly (not by its colour alone). */
@@ -75,7 +78,8 @@ code.sig {
   white-space: pre; font-size: 0.8125rem; line-height: 1.7; color: #d6deeb; background: none; border: 0; border-radius: 0;
   overflow-wrap: normal; scrollbar-width: thin; scrollbar-color: #22324f transparent;
 }
-code.sig::after { content: ""; display: inline-block; width: 16px; }   /* the right margin, once scrolled */
+.sig-line { display: block; width: max-content; padding-right: 16px; }   /* the right margin, once scrolled */
+.sig-arg { padding-left: 4ch; }
 code.sig:focus-visible { outline-offset: -2px; }
 .sig-name { color: #e8eef7; font-weight: 600; }
 .sig-param { color: #a9b6cc; }
@@ -210,3 +214,13 @@ code.sig:focus-visible { outline-offset: -2px; }
 :root[data-reading="light"] main:has(.api) .api-lineage code,
 :root[data-reading="light"] main:has(.api) .api-inherited code,
 :root[data-reading="light"] main:has(.api) .api-eyebrow code { background: none; border: 0; }
+
+/* A phone: the signatures wrap rather than scroll, at spaces and after
+   commas (never inside a name), each line of a declaration hanging under
+   its start; a parameter a line stays so. Code blocks and the declaration's
+   window keep their scroll and fade. */
+@media (max-width: 599px) {
+  code.sig { white-space: pre-wrap; overflow-wrap: normal; word-break: normal; padding-right: 12px; }
+  .sig-line { width: auto; padding: 0 0 0 2ch; text-indent: -2ch; }
+  .sig-arg { padding-left: 6ch; }
+}

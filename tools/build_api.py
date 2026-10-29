@@ -457,13 +457,17 @@ class Render:
             tail = html.escape(after_parens(args)).strip()
             tail = re.sub(r"\b(const|override|final|noexcept|delete|default|volatile)\b",
                           r'<span class="tok-keyword">\1</span>', tail)
-            head = f'{prefix}{type_ + " " if type_ else ""}<span class="sig-name">{name}</span>('
+            # <wbr>: on a phone, where a signature wraps, the parameters may
+            # start a line of their own.
+            head = f'{prefix}{type_ + " " if type_ else ""}<span class="sig-name">{name}</span>(<wbr>'
             plain_len = len(re.sub(r"<[^>]+>", "", head)) + sum(len(html.unescape(re.sub(r"<[^>]+>", "", p))) + 2 for p in params)
+            end = ")" + (" " + tail if tail else "")
             if params and plain_len > 72:
-                body = head + ",".join(f"\n    {p}" for p in params) + ")"
+                # One parameter a line, under the name (a line each: sig-line).
+                lines.append(head)
+                lines += [f'\x00arg{p}{"," if i < len(params) - 1 else end}' for i, p in enumerate(params)]
             else:
-                body = head + ", ".join(params) + ")"
-            lines.append(body + (" " + tail if tail else ""))
+                lines.append(head + ", ".join(params) + end)
         elif kind == "variable":
             type_ = self.code(m.find("type"))
             init = self.code(m.find("initializer"))
@@ -492,7 +496,10 @@ class Render:
             lines.append(f'<span class="tok-keyword">friend</span> {type_} <span class="sig-name">{name}</span>{args}')
         else:
             lines.append(html.escape(m.findtext("definition") or name))
-        return "\n".join(lines)
+        # Each line of the declaration a block of its own: on a phone, each
+        # wraps under itself (api.css's hanging indent).
+        return "".join(f'<span class="sig-line sig-arg">{line[4:]}</span>' if line.startswith("\x00arg")
+                       else f'<span class="sig-line">{line}</span>' for line in lines)
 
     def param(self, p):
         type_ = self.code(p.find("type"))
@@ -881,7 +888,7 @@ class Builder:
             (f" : {', '.join(bases)}" if bases else "")
         source = f"{site.REPO_URL}/blob/main/library/include/{file}" + (f"#L{location.get('line')}" if location is not None else "")
         window = (f'<figure class="api-decl"><figcaption class="api-decl-bar"><span class="editor-dots" aria-hidden="true"><i></i><i></i><i></i></span>'
-                  f'<a class="api-decl-tab" href="{source}">{html.escape(file).replace("/", "/<wbr>")}</a></figcaption>'
+                  f'<a class="api-decl-tab" href="{source}">{html.escape(file)}</a></figcaption>'
                   f'<pre tabindex="0"><code class="language-cpp"><span class="tok-pre">#include &lt;{html.escape(include)}&gt;</span>\n\n{decl}</code></pre></figure>')
         # The line of its bases, up to the first, and the classes that derive from it.
         chain, at = [], cd
