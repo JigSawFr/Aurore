@@ -309,6 +309,34 @@ AURORE_TEST(action_sheet_on_a_small_screen)
     AURORE_CHECK(h.matchesReference("action_sheet_compact"));
 }
 
+// The small screen preset for the length of a test, the standard one after it
+struct SmallPreset
+{
+    SmallPreset() { aurore::Application::usePreset(aurore::PRESET_SMALL_SCREEN); }
+    ~SmallPreset()
+    {
+        aurore::Application::usePreset(aurore::PRESET_STANDARD);
+        aurore::Application::presetChosen = false;
+    }
+};
+
+AURORE_TEST(small_screen_preset)
+{
+    SmallPreset preset;
+    aurore::test::Options options;
+    options.width  = 960;
+    options.height = 720;
+    DemoHarness h(options);
+    AURORE_CHECK_EQ(aurore::Application::contentWidth, 480.0f);
+    AURORE_CHECK(aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT);
+    AURORE_CHECK_EQ(aurore::getDensity(), aurore::DENSITY_DENSE);
+    // The text 1.25 times larger, Cadran's text size setting over it
+    AURORE_CHECK_EQ(aurore::Application::getTextScale(), 1.25f);
+    h.tap(aurore::BUTTON_RIGHT);
+    h.settle();
+    AURORE_CHECK(h.matchesReference("main_screen_small_preset"));
+}
+
 AURORE_TEST(density_preference_builds_the_screens_again)
 {
     DemoHarness h;
