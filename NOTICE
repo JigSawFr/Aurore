@@ -29,7 +29,7 @@ and library/include/aurore/extern (nanovg, fontstash, stb, Yoga, {fmt},
 TinyXML-2, JSON for Modern C++, Tweeny, libromfs, GLFW, SDL, libretro-common,
 glad, QR Code generator), the fonts Inter, PromptFont (as Aurore Text and
 Aurore Buttons) and Sora (resources/font, SIL Open Font License 1.1), Material
-Icons (resources/material, Apache 2.0) and Twemoji 15.1.0 (resources/img/emoji,
+Icons (resources/material, Apache 2.0) and Twemoji 17.0.3 (resources/img/emoji,
 CC-BY 4.0, Copyright Twitter, Inc and other contributors).
 resources/THIRD_PARTY_NOTICES.md lists them with their versions, copyrights
 and licences, and is part of the resources of every program built with
