@@ -38,7 +38,7 @@ install(DIRECTORY ${AURORE_PATH}/lib/extern/yoga/yoga DESTINATION ${CMAKE_INSTAL
 install(EXPORT AuroreTargets NAMESPACE Aurore:: DESTINATION ${AURORE_CMAKE_DIR})
 
 # What AuroreConfig.cmake looks for before it loads the targets: the
-# vendored fmt, tweeny, GLFW and SDL2 install their own packages
+# vendored fmt, tweeny, GLFW and SDL install their own packages
 set(AURORE_DEPENDENCIES "find_dependency(Threads)\nfind_dependency(fmt)\nfind_dependency(Tweeny)\n")
 if (USE_SYSTEM_TINYXML2 OR AURORE_FETCH_DEPS)
     string(APPEND AURORE_DEPENDENCIES "find_dependency(tinyxml2)\n")
@@ -46,7 +46,9 @@ endif ()
 if (USE_BOOST_FILESYSTEM)
     string(APPEND AURORE_DEPENDENCIES "find_dependency(Boost 1.44 COMPONENTS filesystem)\n")
 endif ()
-if (USE_SDL2)
+if (USE_SDL3)
+    string(APPEND AURORE_DEPENDENCIES "find_dependency(SDL3)\n")
+elseif (USE_SDL2)
     string(APPEND AURORE_DEPENDENCIES "find_dependency(SDL2)\n")
 else ()
     string(APPEND AURORE_DEPENDENCIES "find_dependency(glfw3)\n")

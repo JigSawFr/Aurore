@@ -93,7 +93,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
 - 🎯 **Focus and hints** — no focus lost in hidden or destroyed views; optional and steady footer hints.
-- 🖥️ **Platforms** — controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
+- 🖥️ **Platforms** — SDL3 beside SDL2 (desktop, browser, Android, iOS), controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
 - ⚡ **Speed** — no relayout for an unchanged text or size, XML attributes registered on demand, unused textures freed.
 
 <details>
@@ -182,6 +182,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 | Change | API |
 | --- | --- |
+| SDL3 in place of SDL2 on the desktop, in a browser, on Android, iOS and tvOS; the face buttons read by their label, as under SDL2 | `-DAURORE_WINDOW=SDL3`, `__SDL__` |
 | SDL: the right controller closed when one is unplugged, every controller read after a reconnection | — |
 | SDL in a browser (Emscripten), with an on-screen pad | `aurore_web_button()` |
 | GLFW: Wayland `app_id` and X11 `WM_CLASS`, for the taskbar's icon | `Application::setAppId`, before `createWindow()` |
@@ -217,7 +218,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 3. Copy its `resources` folder to the root of your project.
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
-   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). borealis' names (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`…) still work, with a deprecation warning, and stay set as plain variables for the app's own tests.
+   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`, `SDL3`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). borealis' names (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`…) still work, with a deprecation warning, and stay set as plain variables for the app's own tests.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
@@ -243,7 +244,7 @@ Aurore builds with CMake only (3.16 or later): upstream's xmake files (`xmake.lu
 With CMake 3.25 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>` (`cmake --list-presets`: also `desktop-debug`, `desktop-asan` and `tests`):
 
 ```sh
-cmake --preset desktop-glfw        # or desktop-sdl
+cmake --preset desktop-glfw        # or desktop-sdl, desktop-sdl3
 cmake --build --preset desktop-glfw
 ./build/desktop-glfw/aurore_demo
 cmake --workflow --preset tests    # configure, build and run the tests

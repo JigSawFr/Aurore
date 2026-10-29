@@ -33,9 +33,10 @@ public class DemoActivity extends SDLActivity
 
     @Override
     protected String[] getLibraries() {
-        // Load SDL2 and the Aurore demo app
+        // Load SDL (SDL2 or SDL3, app/build.gradle's auroreSdl) and the
+        // Aurore demo app
         return new String[] {
-                "SDL2",
+                BuildConfig.SDL_LIBRARY,
                 "aurore_demo"
         };
     }

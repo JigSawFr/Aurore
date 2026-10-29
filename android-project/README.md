@@ -2,16 +2,18 @@
 
 [中文](./README_ZH.md)
 
-The Gradle project that builds Aurore's demo as an Android app. It follows SDL's Android port ([SDL 2.32's documentation](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md)): SDL's Java activity starts the app, which Aurore builds as a shared library with the SDL2 platform and OpenGL ES 2, its resources inside it (libromfs).
+The Gradle project that builds Aurore's demo as an Android app. It follows SDL's Android port ([SDL 2.32's documentation](https://github.com/libsdl-org/SDL/blob/release-2.32.x/docs/README-android.md), [SDL 3.4's](https://github.com/libsdl-org/SDL/blob/release-3.4.x/docs/README-android.md)): SDL's Java activity starts the app, which Aurore builds as a shared library with the SDL platform and OpenGL ES 2, its resources inside it (libromfs). It is built on SDL2, or on SDL3 with `-PauroreSdl=3` (or `auroreSdl=3` in `gradle.properties`).
 
 | | |
 | --- | --- |
-| SDL | 2.32.10, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it). The Java code in `app/src/main/java/org/libsdl/app` is SDL's from the same tag (`SDLActivity` refuses a native library of another version), with one change: `HIDDeviceManager` registers its USB receiver with `RECEIVER_EXPORTED`, which Android 14 requires |
+| SDL2 | 2.32.10, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it). The Java code in `app/src/sdl2/java/org/libsdl/app` is SDL's from the same tag (`SDLActivity` refuses a native library of another version), with one change: `HIDDeviceManager` registers its USB receiver with `RECEIVER_EXPORTED`, which Android 14 requires |
+| SDL3 | 3.4.18, the submodule `library/lib/extern/SDL3` (`app/jni/SDL3` links to it), with `-PauroreSdl=3`. Its Java code is read from the submodule as it is (`android-project/app/src/main/java` there) |
+| Aurore's Java | `app/src/main/java/org/libsdl/app`: `PlatformUtils` and `BorealisHandler`, which the library calls (brightness, network, the system's language), for either SDL |
 | Android Gradle Plugin, Gradle | 8.1.1 (the wrapper, `gradlew`) |
 | JDK | 17, as the Android Gradle Plugin 8 needs |
 | NDK | 22.1.7171670 (`ndkVersion` in `app/build.gradle`) |
 | CMake | 3.16 or later |
-| SDK | compiled against API 34; `minSdkVersion 21` (Android 5.0), `targetSdkVersion 34` |
+| SDK | compiled against API 34 (35 with SDL3, whose Java code calls Android 15's API); `minSdkVersion 21` (Android 5.0), `targetSdkVersion 34` |
 | ABIs | `armeabi-v7a`, `arm64-v8a` |
 
 The NDK sets the oldest Android the app runs on: r22 and r23 go down to API 16, r24 and r25 to 19, r26 to 21. An app published on Google Play has to target a recent API: raise `compileSdkVersion` and `targetSdkVersion` in `app/build.gradle` (and the NDK, `minSdkVersion` and `-DANDROID_PLATFORM` with it if needed; a target above 34 also needs a newer Android Gradle Plugin). The CI builds the debug APK with the versions above.
@@ -32,6 +34,7 @@ It leaves `libromfs-generator` at the root of the repository, where `app/jni/CMa
 cd android-project
 export ANDROID_SDK_ROOT=~/Android/Sdk          # macOS: ~/Library/Android/sdk
 ./gradlew assembleDebug                        # app/build/outputs/apk/debug/*.apk
+./gradlew assembleDebug -PauroreSdl=3          # the same on SDL3
 ./gradlew installDebug                         # onto a device or emulator connected with adb
 ```
 
@@ -45,11 +48,11 @@ A release build (`./gradlew assembleRelease`) is signed with `app/borealis.jks`,
 2. In `app/jni/CMakeLists.txt`, `add_subdirectory` your project in place of `borealis`, and point `LIBROMFS_PREBUILT_GENERATOR` at the `libromfs-generator` your build made.
 3. In your `CMakeLists.txt`, make the program with `program_target()` (a shared library on Android) and give it your resources with `add_libromfs()`, as Aurore's root `CMakeLists.txt` does for the demo.
 4. In `app/build.gradle`, set `namespace` and `applicationId` to your package name.
-5. In `app/src/main/java/`, copy `com/borealis/demo/DemoActivity.java` under your package, and change `getLibraries()` to load `SDL2` and your library (your CMake target's name, in place of `aurore_demo`).
+5. In `app/src/main/java/`, copy `com/borealis/demo/DemoActivity.java` under your package, and change `getLibraries()` to load SDL (`BuildConfig.SDL_LIBRARY`: `SDL2` or `SDL3`) and your library (your CMake target's name, in place of `aurore_demo`).
 6. In `app/src/main/AndroidManifest.xml`, name your activity in place of `DemoActivity`.
 7. Set the app's name in `app/src/main/res/values/strings.xml` and its icon in `app/src/main/res/mipmap-*/ic_launcher.png`.
 
-The activity calls `System.exit(0)` when it is destroyed: Aurore keeps its state in static variables, which SDL2 would otherwise reuse when Android creates the activity again.
+The activity calls `System.exit(0)` when it is destroyed: Aurore keeps its state in static variables, which SDL would otherwise reuse when Android creates the activity again.
 
 ## Known issues
 

@@ -31,7 +31,8 @@ versions that can be read from the sources.
 | Tweeny | 3.2.1 | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
 | libromfs | - | `library/lib/extern/libromfs` | MIT | 2022 WerWolv |
 | GLFW | 3.4 (xfangfang's fork, 892256c) | `library/lib/extern/glfw` | zlib | 2002-2006 Marcus Geelnard, 2006-2019 Camilla Löwy |
-| SDL | 2.32.10 | `library/lib/extern/SDL`, `android-project/app/src/main/java/org/libsdl` | zlib | 1997-2025 Sam Lantinga |
+| SDL | 2.32.10 | `library/lib/extern/SDL`, `android-project/app/src/sdl2/java/org/libsdl` | zlib | 1997-2025 Sam Lantinga |
+| SDL3 | 3.4.18 | `library/lib/extern/SDL3` (its Java code, `android-project/app/src/main/java` in it, for Android) | zlib | 1997-2026 Sam Lantinga |
 | libretro-common | - | `library/lib/extern/libretro-common`, `library/include/aurore/extern/libretro-common` | MIT | 2010-2020 The RetroArch team |
 | glad | 0.1.27 (generated: OpenGL 4.3 core) | `library/lib/extern/glad`, `library/include/aurore/extern/glad` | MIT (the generator); the code it writes is derived from the Khronos OpenGL registry | 2013-2018 David Herberth; The Khronos Group Inc. |
 | QR Code generator | - | `library/lib/extern/qrcodegen`, `library/include/aurore/extern/qrcodegen` | MIT | Project Nayuki |

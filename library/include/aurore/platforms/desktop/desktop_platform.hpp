@@ -20,7 +20,7 @@
 #include <aurore/core/platform.hpp>
 #include <aurore/platforms/desktop/desktop_font.hpp>
 #include <aurore/platforms/desktop/desktop_ime.hpp>
-#if defined(__linux__) and !defined(__SDL2__)
+#if defined(__linux__) and !defined(__SDL__)
 #include <dbus/dbus.h>
 #elif defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
@@ -105,7 +105,7 @@ class DesktopPlatform : public Platform
     bool screenDimmingDisabled = false;
 #ifdef __linux__
     uint32_t inhibitCookie = 0;
-#ifndef __SDL2__
+#ifndef __SDL__
     std::string inhibitRequestPath;
 #endif
 #elif defined(_WIN32)

@@ -29,10 +29,12 @@ include(CMakeDependentOption)
 set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, ANDROID, IOS or TVOS")
 set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 ANDROID IOS TVOS)
 
-# Window and input, on desktop and Switch: GLFW (the default) or SDL2. The
-# other platforms choose for themselves.
-set(AURORE_WINDOW "" CACHE STRING "Window and input: GLFW or SDL2 (empty: the platform's default)")
-set_property(CACHE AURORE_WINDOW PROPERTY STRINGS GLFW SDL2)
+# Window and input, on desktop and Switch: GLFW (the default) or SDL2. SDL3
+# in place of SDL2 on desktop, in a browser, on Android, iOS and tvOS (the
+# consoles have no SDL3 yet). The other platforms choose for themselves:
+# SDL2 on Android, iOS and tvOS unless SDL3 is asked for.
+set(AURORE_WINDOW "" CACHE STRING "Window and input: GLFW, SDL2 or SDL3 (empty: the platform's default)")
+set_property(CACHE AURORE_WINDOW PROPERTY STRINGS GLFW SDL2 SDL3)
 
 # Graphics: OpenGL 3.2+ unless one of these. DEKO3D on Switch only, D3D11 on
 # Windows only, GXM on PS Vita only.
@@ -159,8 +161,11 @@ endif ()
 _aurore_legacy(AURORE_WINDOW "${_aurore_value}" "${_aurore_names}" RESET)
 string(TOUPPER "${AURORE_WINDOW}" AURORE_WINDOW)
 set_property(CACHE AURORE_WINDOW PROPERTY VALUE "${AURORE_WINDOW}")
-if (AURORE_WINDOW AND NOT AURORE_WINDOW MATCHES "^(GLFW|SDL2)$")
-    message(FATAL_ERROR "AURORE_WINDOW=${AURORE_WINDOW}: GLFW or SDL2")
+if (AURORE_WINDOW AND NOT AURORE_WINDOW MATCHES "^(GLFW|SDL2|SDL3)$")
+    message(FATAL_ERROR "AURORE_WINDOW=${AURORE_WINDOW}: GLFW, SDL2 or SDL3")
+endif ()
+if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4)$")
+    message(FATAL_ERROR "AURORE_WINDOW=SDL3 is for DESKTOP, ANDROID, IOS and TVOS: ${AURORE_PLATFORM} has no SDL3 yet")
 endif ()
 
 # The drivers of one platform count on that platform only, as before (an app
@@ -228,7 +233,7 @@ _aurore_legacy(AURORE_DEV_TOOLS "${_aurore_value}" BRLS_DEV_TOOLS)
 # legacy-names: end
 
 # The plain variables the build files read. toolchain.cmake changes some of
-# them for the platforms that impose a choice (iOS and Android: SDL2 and
+# them for the platforms that impose a choice (iOS and Android: SDL, and
 # libromfs).
 foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH)
     if (AURORE_PLATFORM STREQUAL _aurore_p)
@@ -237,7 +242,7 @@ foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH)
         set(PLATFORM_${_aurore_p} OFF)
     endif ()
 endforeach ()
-foreach (_aurore_p GLFW SDL2)
+foreach (_aurore_p GLFW SDL2 SDL3)
     if (AURORE_WINDOW STREQUAL _aurore_p)
         set(USE_${_aurore_p} ON)
     else ()

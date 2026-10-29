@@ -2,7 +2,7 @@
 
 #include <aurore/core/input.hpp>
 
-#include <SDL2/SDL.h>
+#include <aurore/platforms/sdl/sdl.hpp>
 
 namespace aurore
 {
@@ -37,7 +37,7 @@ class SDLInputManager : public InputManager
 
     void updateMouseWheel(SDL_MouseWheelEvent event);
 
-    void updateControllerSensorsUpdate(SDL_ControllerSensorEvent event);
+    void updateControllerSensorsUpdate(SDLGamepadSensorEvent event);
 
     void updateKeyboardState(SDL_KeyboardEvent event);
 

@@ -108,7 +108,7 @@ A theme file may also bring pictures: a background, a logo, icons, image slots, 
 
 ## Platforms and drivers
 
-`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, or on the desktop SDL or GLFW (`-DAURORE_WINDOW=SDL2` or `-DAURORE_WINDOW=GLFW`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
+`Platform::createPlatform()` picks one platform at build time: Switch, Android, PS Vita, PS4, or on the desktop SDL or GLFW (`-DAURORE_WINDOW=SDL2`, `SDL3` or `GLFW`; one SDL platform for SDL2 and SDL3, `platforms/sdl/`); the test harness puts its own in its place (`Platform::factory`). A platform gives the core:
 
 | Interface | Does |
 | --- | --- |

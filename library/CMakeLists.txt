@@ -41,10 +41,10 @@ set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
 
 option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
 
-# fmt, tinyxml2, GLFW and SDL2 from the system when find_package() finds
-# them, downloaded at configure time otherwise, instead of the copies in
+# fmt, tinyxml2, GLFW and SDL (2 or 3) from the system when find_package()
+# finds them, downloaded at configure time otherwise, instead of the copies in
 # lib/extern (for packagers). nanovg, yoga and the others stay vendored.
-option(AURORE_FETCH_DEPS "Use fmt, tinyxml2, GLFW and SDL2 from the system or downloaded (CMake 3.24+)" OFF)
+option(AURORE_FETCH_DEPS "Use fmt, tinyxml2, GLFW and SDL from the system or downloaded (CMake 3.24+)" OFF)
 if (AURORE_FETCH_DEPS)
     if (CMAKE_VERSION VERSION_LESS 3.24)
         message(FATAL_ERROR "AURORE_FETCH_DEPS needs CMake 3.24 or later (FIND_PACKAGE_ARGS)")
@@ -70,6 +70,11 @@ if (AURORE_FETCH_DEPS)
     FetchContent_Declare(SDL2
             GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
             GIT_TAG release-2.32.10
+            GIT_SHALLOW TRUE
+            FIND_PACKAGE_ARGS)
+    FetchContent_Declare(SDL3
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-3.4.18
             GIT_SHALLOW TRUE
             FIND_PACKAGE_ARGS)
 endif ()
@@ -159,7 +164,7 @@ endif()
 
 # dbus (Linux with GLFW: keeps the screen saver off). An imported target,
 # so the installed package names no path of this machine.
-if (PLATFORM_DESKTOP AND UNIX AND NOT APPLE AND NOT USE_SDL2)
+if (PLATFORM_DESKTOP AND UNIX AND NOT APPLE AND NOT USE_SDL2 AND NOT USE_SDL3)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(DBUS REQUIRED IMPORTED_TARGET dbus-1)
     list(APPEND AURORE_PLATFORM_LIBS PkgConfig::DBUS)
@@ -169,7 +174,26 @@ if (PLATFORM_DESKTOP)
     find_package(Threads REQUIRED)
     list(APPEND AURORE_PLATFORM_LIBS Threads::Threads)
 
-    if (USE_SDL2)
+    if (USE_SDL3)
+        if (USE_SYSTEM_SDL3)
+            find_package(SDL3 REQUIRED CONFIG)
+            list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3)
+        elseif (AURORE_FETCH_DEPS)
+            set(BUILD_SHARED_LIBS OFF)
+            set(SDL_TEST_LIBRARY OFF)
+            FetchContent_MakeAvailable(SDL3)
+            list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3)
+        else ()
+            set(BUILD_SHARED_LIBS OFF)
+            set(SDL_TEST_LIBRARY OFF)
+            if (AURORE_INSTALL)
+                set(SDL_INSTALL ON CACHE BOOL "" FORCE)
+            endif ()
+            add_subdirectory(${AURORE_PATH}/lib/extern/SDL3 ${AURORE_EXTERN_EXCLUDE})
+            list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3-static)
+        endif ()
+        list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/sdl)
+    elseif (USE_SDL2)
         if (USE_SYSTEM_SDL2)
             find_package(SDL2 REQUIRED)
             message(STATUS "Find SDL2: ${SDL2_INCLUDE_DIR}, ${SDL2_LIBRARIES}")
@@ -193,7 +217,6 @@ if (PLATFORM_DESKTOP)
             add_subdirectory(${AURORE_PATH}/lib/extern/SDL ${AURORE_EXTERN_EXCLUDE})
             list(APPEND AURORE_PLATFORM_LIBS SDL2::SDL2-static SDL2::SDL2main)
         endif ()
-        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__)
         list(APPEND AURORE_SOURCE ${AURORE_PATH}/lib/platforms/sdl)
     else ()
         if (USE_SYSTEM_GLFW)
@@ -315,30 +338,43 @@ elseif(PLATFORM_PS4)
         set(AURORE_PLATFORM_RESOURCES_PATH "\"/app0/resources/\"")
     endif ()
 elseif(PLATFORM_ANDROID)
-    find_library(SDL2 NAMES SDL2 SDL2main)
+    # The app's CMakeLists.txt adds SDL's project (android-project/app/jni):
+    # SDL's Java activity loads the shared library it builds
     list(APPEND AURORE_SOURCE
             ${AURORE_PATH}/lib/platforms/sdl
             ${AURORE_PATH}/lib/platforms/desktop
             ${AURORE_PATH}/lib/platforms/android)
-    list(APPEND AURORE_PLATFORM_LIBS SDL2 SDL2main)
-    list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ ANDROID)
+    if (USE_SDL3)
+        list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3)
+    else ()
+        find_library(SDL2 NAMES SDL2 SDL2main)
+        list(APPEND AURORE_PLATFORM_LIBS SDL2 SDL2main)
+    endif ()
+    list(APPEND AURORE_PUBLIC_DEFINITIONS ANDROID)
     # The NDK's libc++ returns std::string from path::u8string() in C++20,
     # which nlohmann json's path conversion does not build with
     list(APPEND AURORE_PUBLIC_DEFINITIONS JSON_HAS_FILESYSTEM=0 JSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
 elseif(PLATFORM_IOS OR PLATFORM_TVOS)
     set(BUILD_SHARED_LIBS OFF)
-    add_subdirectory(${AURORE_PATH}/lib/extern/SDL)
-    find_library(SDL2 NAMES SDL2-static SDL2main)
+    if (USE_SDL3)
+        set(SDL_TEST_LIBRARY OFF)
+        add_subdirectory(${AURORE_PATH}/lib/extern/SDL3)
+        list(APPEND AURORE_PLATFORM_LIBS SDL3::SDL3-static)
+    else ()
+        add_subdirectory(${AURORE_PATH}/lib/extern/SDL)
+        find_library(SDL2 NAMES SDL2-static SDL2main)
+        list(APPEND AURORE_PLATFORM_LIBS SDL2-static SDL2main)
+    endif ()
     list(APPEND AURORE_SOURCE
             ${AURORE_PATH}/lib/platforms/sdl
             ${AURORE_PATH}/lib/platforms/desktop)
-    list(APPEND AURORE_PLATFORM_LIBS SDL2-static SDL2main "-framework CoreText" "-framework CoreFoundation")
+    list(APPEND AURORE_PLATFORM_LIBS "-framework CoreText" "-framework CoreFoundation")
     list(APPEND AURORE_SRC ${AURORE_PATH}/lib/platforms/desktop/ios_darwin.mm)
 
     if(PLATFORM_IOS)
-        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ IOS)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS IOS)
     elseif(PLATFORM_TVOS)
-        list(APPEND AURORE_PUBLIC_DEFINITIONS __SDL2__ TVOS)
+        list(APPEND AURORE_PUBLIC_DEFINITIONS TVOS)
     endif()
 elseif(PLATFORM_SWITCH)
     file(GLOB_RECURSE SWITCH_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/switch/*.cpp")
@@ -524,7 +560,7 @@ if (AURORE_DKSH_INCLUDE)
     target_include_directories(aurore PRIVATE ${AURORE_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
-foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main ${LIBROMFS_LIBRARY})
+foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
     if (TARGET ${dep})
         get_target_property(dep_imported ${dep} IMPORTED)
         get_target_property(dep_include ${dep} INTERFACE_INCLUDE_DIRECTORIES)

@@ -2,15 +2,27 @@ plugins {
     id 'com.android.application'
 }
 
+// The SDL the app is built on: 2 (the default) or 3, with -PauroreSdl=3 on
+// gradlew's command line or auroreSdl=3 in gradle.properties. Each has its
+// Java code: SDL2's in src/sdl2/java, SDL3's from its submodule.
+def auroreSdl = (project.findProperty('auroreSdl') ?: '2').toString()
+if (!(auroreSdl in ['2', '3'])) {
+    throw new GradleException("auroreSdl=${auroreSdl}: 2 or 3")
+}
+
 android {
     namespace = "com.borealis.demo"
-    compileSdkVersion 34
+    // SDL3's Java code calls Android 15's API (its versions are checked at
+    // run time): it compiles against it
+    compileSdkVersion auroreSdl == '3' ? 35 : 34
     defaultConfig {
         // Android 5.0 and later; Google Play asks for a recent target
         minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
+        // The native library DemoActivity loads first
+        buildConfigField "String", "SDL_LIBRARY", "\"SDL${auroreSdl}\""
         // borealis need at least ndk r22 (r21 don't have std::filesystem support)
         // The newer NDK library will cause lower versions of Android failed to run.
         // r26: support api21 and later
@@ -19,7 +31,8 @@ android {
         ndkVersion "22.1.7171670"
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_shared", "-DCMAKE_WARN_DEPRECATED=FALSE"
+                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_shared", "-DCMAKE_WARN_DEPRECATED=FALSE",
+                        "-DAURORE_WINDOW=SDL${auroreSdl}"
                 // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 abiFilters 'armeabi-v7a', 'arm64-v8a'
                 version = '3.16.0+'
@@ -45,6 +58,12 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    buildFeatures {
+        buildConfig true
+    }
+    sourceSets.main.java.srcDirs += auroreSdl == '3'
+            ? '../../library/lib/extern/SDL3/android-project/app/src/main/java'
+            : 'src/sdl2/java'
     applicationVariants.all { variant ->
         tasks["merge${variant.name.capitalize()}Assets"]
             .dependsOn("externalNativeBuild${variant.name.capitalize()}")

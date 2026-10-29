@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Checks that AURORE_FETCH_DEPS downloads the versions vendored in library/lib/extern.
 
-library/CMakeLists.txt declares fmt, tinyxml2, GLFW and SDL2 with FetchContent
-for packagers; the copies in library/lib/extern (and the GLFW and SDL
-submodules) are what every other build uses. The two must name the same
+library/CMakeLists.txt declares fmt, tinyxml2, GLFW, SDL2 and SDL3 with
+FetchContent for packagers; the copies in library/lib/extern (and the GLFW, SDL
+and SDL3 submodules) are what every other build uses. The two must name the same
 version. Run from anywhere: python3 tools/check_extern_versions.py
 """
 
@@ -46,12 +46,15 @@ def vendored():
     fmt = define(LIBRARY / "lib/extern/fmt/include/fmt/base.h", "FMT_VERSION")
     xml = LIBRARY / "include/aurore/extern/tinyxml2/tinyxml2.h"
     sdl = LIBRARY / "lib/extern/SDL/include/SDL_version.h"
+    sdl3 = LIBRARY / "lib/extern/SDL3/include/SDL3/SDL_version.h"
     return {
         "fmt": f"{fmt // 10000}.{fmt // 100 % 100}.{fmt % 100}",
         "tinyxml2": ".".join(str(define(xml, f"TINYXML2_{part}_VERSION")) for part in ("MAJOR", "MINOR", "PATCH")),
         "glfw": submodule_commit("library/lib/extern/glfw"),
         "SDL2": "release-"
         + ".".join(str(define(sdl, name)) for name in ("SDL_MAJOR_VERSION", "SDL_MINOR_VERSION", "SDL_PATCHLEVEL")),
+        "SDL3": "release-"
+        + ".".join(str(define(sdl3, name)) for name in ("SDL_MAJOR_VERSION", "SDL_MINOR_VERSION", "SDL_MICRO_VERSION")),
     }
 
 
