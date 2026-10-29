@@ -148,7 +148,7 @@ void TabFrame::addSeparator()
 
 void TabFrame::handleXMLElement(tinyxml2::XMLElement* element)
 {
-    std::string name = canonicalXMLName(element->Name());
+    std::string name = element->Name();
 
     if (name == "aurore:Tab")
     {

@@ -52,7 +52,7 @@ set(VERSION_MINOR "0")
 set(VERSION_ALTER "0")
 set(VERSION_BUILD "0")
 set(PACKAGE_NAME "com.aurore.demo")
-set(PSN_TITLE_ID  "BRLS00000")
+set(PSN_TITLE_ID  "AURO00000")
 set(PSN_VERSION  "01.00")
 set(PROJECT_AUTHOR "Aurore")
 # Switch: the .nro's title id, none by default

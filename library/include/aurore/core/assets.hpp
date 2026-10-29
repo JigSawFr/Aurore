@@ -17,12 +17,6 @@
 
 #pragma once
 
-// legacy-names: begin
-// borealis' name, still read (deprecated)
-#if !defined(AURORE_RESOURCES) && defined(BRLS_RESOURCES)
-#define AURORE_RESOURCES BRLS_RESOURCES
-#endif
-// legacy-names: end
 #ifndef AURORE_RESOURCES
 #error AURORE_RESOURCES define missing
 #endif

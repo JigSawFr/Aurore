@@ -18,10 +18,8 @@ limitations under the License.
 
 #include <libretro-common/encodings/utf.h>
 
-#include <codecvt>
 #include <cstring>
 #include <iostream>
-#include <locale>
 #include <aurore/core/box.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/core/thread.hpp>
@@ -30,8 +28,6 @@ limitations under the License.
 #include <aurore/views/dialog.hpp>
 #include <aurore/views/edit_text_dialog.hpp>
 #include <aurore/views/label.hpp>
-
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 namespace aurore
 {
@@ -63,6 +59,24 @@ static size_t encode_utf8(char* s, unsigned int ch)
     }
 
     return count;
+}
+
+// The dialog's text as UTF-8, one code point per character of the buffer
+static std::string toUtf8(const std::u32string& text)
+{
+    std::string out;
+    char encoded[4];
+    for (char32_t c : text)
+        out.append(encoded, encode_utf8(encoded, c));
+    return out;
+}
+
+// UTF-8 as code points, up to the first byte that starts none
+static std::u32string fromUtf8(const std::string& text)
+{
+    std::u32string out(text.size(), U'\0');
+    out.resize(utf8_conv_utf32((uint32_t*)out.data(), out.size(), text.data(), text.size()));
+    return out;
 }
 
 void GLFWImeManager::ime_callback(GLFWwindow* window)
@@ -112,7 +126,7 @@ void GLFWImeManager::char_callback(GLFWwindow* window, unsigned int codepoint)
         return;
     if (cursor < 0 || cursor > (int)textBuffer.size())
         cursor = textBuffer.size();
-    textBuffer.insert(textBuffer.begin() + cursor, (wchar_t)codepoint);
+    textBuffer.insert(textBuffer.begin() + cursor, (char32_t)codepoint);
     cursor++;
 }
 
@@ -140,7 +154,7 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
     preeditTextBuffer.clear();
     glfwSetInputMode(window, GLFW_IME, GLFW_TRUE);
     showIME     = true;
-    textBuffer  = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(initialText);
+    textBuffer  = fromUtf8(initialText);
     auto dialog = new EditTextDialog();
     dialog->setText(initialText);
     cursor = -1;
@@ -160,22 +174,22 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
         {
             if(isEditing || str.empty()) return;
             if (cursor < 0 || cursor > (int)textBuffer.size()) cursor = textBuffer.size();
-            auto left = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(textBuffer.substr(0, cursor));
-            auto right = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(textBuffer.substr(cursor, textBuffer.size()));
-            auto clipboard = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
+            auto left = toUtf8(textBuffer.substr(0, cursor));
+            auto right = toUtf8(textBuffer.substr(cursor, textBuffer.size()));
+            auto clipboard = fromUtf8(str);
             textBuffer.insert(textBuffer.begin() + cursor, clipboard.begin(), clipboard.end());
             cursor += clipboard.size();
             if (textBuffer.size() > maxStringLength) {
                 textBuffer = textBuffer.substr(0, maxStringLength);
             }
             if (cursor < 0 || cursor > (int)textBuffer.size()) cursor = textBuffer.size();
-            dialog->setText(std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(textBuffer));
+            dialog->setText(toUtf8(textBuffer));
             dialog->setCursor(cursor); });
 
     // update
     auto eventID = Application::getRunLoopEvent()->subscribe([dialog, maxStringLength]()
         {
-            static std::wstring lastText = textBuffer;
+            static std::u32string lastText = textBuffer;
             static std::string lastPreeditText = preeditTextBuffer;
             if(lastText != textBuffer){
                 if(textBuffer.size() > maxStringLength)
@@ -201,8 +215,8 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
                 }
                 isEditing = true;
                 if (cursor < 0 || cursor > (int)textBuffer.size()) cursor = textBuffer.size();
-                auto left = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(textBuffer.substr(0, cursor));
-                auto right = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(textBuffer.substr(cursor, textBuffer.size()));
+                auto left = toUtf8(textBuffer.substr(0, cursor));
+                auto right = toUtf8(textBuffer.substr(cursor, textBuffer.size()));
                 dialog->setText(left + preeditTextBuffer + right);
                 dialog->setCursor(cursor + preeditTextBuffer.size());
             } });
@@ -270,7 +284,7 @@ void GLFWImeManager::openInputDialog(std::function<void(std::string)> cb, std::s
 
 std::string GLFWImeManager::getInputText()
 {
-    return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(textBuffer);
+    return toUtf8(textBuffer);
 }
 
 bool GLFWImeManager::openForText(std::function<void(std::string)> f, std::string headerText,

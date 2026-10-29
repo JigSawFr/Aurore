@@ -93,7 +93,7 @@
   "start_3": "Dans votre <code>CMakeLists.txt</code>, incluez <code>commonOption.cmake</code> et <code>toolchain.cmake</code> avant <code>project()</code>, ajoutez la bibliothèque après, et liez <code>Aurore::aurore</code>.",
   "start_4": "Choisissez la plateforme avec <code>-DAURORE_PLATFORM=…</code> : <code>DESKTOP</code>, <code>SWITCH</code>, <code>PSV</code>, <code>PS4</code>, <code>ANDROID</code>, <code>IOS</code>.",
   "start_template": "Vous partez de zéro ? <a href=\"{{repo}}/tree/main/template\"><code>template/</code></a> est une app minimale qui se compile pour l'ordinateur et la Switch.",
-  "start_borealis": "Vous venez de borealis ? <code>brls::</code>, <code>&lt;borealis.hpp&gt;</code> et <code>BRLS_</code> marchent encore jusqu'à la 1.0 : changer le sous-module suffit.",
+  "start_borealis": "Vous venez de borealis ? Changez le sous-module, puis renommez <code>brls::</code>, <code>&lt;borealis.hpp&gt;</code> et <code>BRLS_</code> en noms d'Aurore : un chercher-remplacer.",
   "demo_title": "Compiler la démo",
   "demo_text": "Sous Linux, macOS ou Windows ; les commandes des autres plateformes sont celles de la CI.",
   "made_eyebrow": "Faites avec borealis",

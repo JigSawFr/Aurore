@@ -18,8 +18,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
-#include <mutex>
-#include <set>
 #include <aurore/core/util.hpp>
 #ifdef USE_BOOST_FILESYSTEM
 #include <boost/filesystem.hpp>
@@ -148,41 +146,9 @@ std::string escapeControlChars(const std::string& text)
     return out;
 }
 
-// legacy-names: begin
 const char* environmentVariable(const std::string& name)
 {
-    if (const char* value = std::getenv(("AURORE_" + name).c_str()))
-        return value;
-    for (const char* prefix : { "BRLS_", "BOREALIS_" })
-    {
-        std::string old = prefix + name;
-        if (const char* value = std::getenv(old.c_str()))
-        {
-            static std::mutex mutex;
-            static std::set<std::string> told;
-            std::lock_guard<std::mutex> lock(mutex);
-            if (told.insert(old).second)
-                Logger::warning("{} is deprecated: use AURORE_{}", old, name);
-            return value;
-        }
-    }
-    return nullptr;
+    return std::getenv(("AURORE_" + name).c_str());
 }
-
-bool isLegacyKey(const std::string& key)
-{
-    return key.compare(0, 5, "brls/") == 0;
-}
-
-std::string canonicalKey(const std::string& key)
-{
-    return isLegacyKey(key) ? "aurore/" + key.substr(5) : key;
-}
-
-std::string canonicalXMLName(const std::string& name)
-{
-    return name.compare(0, 5, "brls:") == 0 ? "aurore:" + name.substr(5) : name;
-}
-// legacy-names: end
 
 } // namespace aurore

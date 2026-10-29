@@ -57,20 +57,6 @@
 #define AURORE_REGISTER_CLICK_BY_ID(id, method) \
     this->getView(id)->registerClickAction([this](aurore::View* view) { return method(view); })
 
-/// Deprecated: capture View::aliveToken() instead. Kept for older code: they
-/// now wrap it, with no counter to keep balanced, so a callback run twice, or
-/// after the view is deleted, does nothing. ASYNC_RELEASE is to be used on the
-/// UI thread (in aurore::sync()), where views are deleted.
-#define ASYNC_RETAIN auto token = this->aliveToken();
-
-/// See ASYNC_RETAIN.
-#define ASYNC_RELEASE    \
-    if (token.expired()) \
-        return;
-
-/// See ASYNC_RETAIN.
-#define ASYNC_TOKEN this, token
-
 // Avoid conflicts with macro definitions in windows.h
 #undef RGB
 #undef TRANSPARENT

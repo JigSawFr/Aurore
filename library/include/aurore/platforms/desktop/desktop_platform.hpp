@@ -39,9 +39,8 @@ class DesktopPlatform : public Platform
     DesktopPlatform();
     ~DesktopPlatform() override;
 
-    /// The environment variable `AURORE_` + `name` (environmentVariable(),
-    /// which also reads the deprecated names borealis gave it): nullptr when
-    /// it is not set.
+    /// The environment variable `AURORE_` + `name` (environmentVariable()):
+    /// nullptr when it is not set.
     static const char* environment(const std::string& name);
 
     /// The locale AURORE_LANG asks for: a locale's name as

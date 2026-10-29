@@ -8,7 +8,7 @@ The Gradle project that builds Aurore's demo as an Android app. It follows SDL's
 | --- | --- |
 | SDL2 | 2.32.10, the submodule `library/lib/extern/SDL` (`app/jni/SDL` links to it). The Java code in `app/src/sdl2/java/org/libsdl/app` is SDL's from the same tag (`SDLActivity` refuses a native library of another version), with one change: `HIDDeviceManager` registers its USB receiver with `RECEIVER_EXPORTED`, which Android 14 requires |
 | SDL3 | 3.4.18, the submodule `library/lib/extern/SDL3` (`app/jni/SDL3` links to it), with `-PauroreSdl=3`. Its Java code is read from the submodule as it is (`android-project/app/src/main/java` there) |
-| Aurore's Java | `app/src/main/java/org/libsdl/app`: `PlatformUtils` and `BorealisHandler`, which the library calls (brightness, network, the system's language), for either SDL |
+| Aurore's Java | `app/src/main/java/org/libsdl/app`: `PlatformUtils` and `AuroreHandler`, which the library calls (brightness, network, the system's language), for either SDL |
 | Android Gradle Plugin, Gradle | 8.1.1 (the wrapper, `gradlew`) |
 | JDK | 17, as the Android Gradle Plugin 8 needs |
 | NDK | 22.1.7171670 (`ndkVersion` in `app/build.gradle`) |
@@ -28,7 +28,7 @@ From the repository's root, the resources generator first: libromfs turns the re
 ./build_libromfs_generator.sh
 ```
 
-It leaves `libromfs-generator` at the root of the repository, where `app/jni/CMakeLists.txt` finds it (`app/jni/borealis` is a link to the root). Then, with the Android SDK and NDK installed (Android Studio's SDK Manager, or `sdkmanager`):
+It leaves `libromfs-generator` at the root of the repository, where `app/jni/CMakeLists.txt` finds it (`app/jni/aurore` is a link to the root). Then, with the Android SDK and NDK installed (Android Studio's SDK Manager, or `sdkmanager`):
 
 ```sh
 cd android-project
@@ -40,15 +40,15 @@ export ANDROID_SDK_ROOT=~/Android/Sdk          # macOS: ~/Library/Android/sdk
 
 Android Studio opens `android-project/` as it is. On macOS, its own JDK works: `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
 
-A release build (`./gradlew assembleRelease`) is signed with `app/borealis.jks`, which is not in the repository: make one (the `keytool` line in `app/build.gradle`), or point `signingConfigs.release` at your own key.
+A release build (`./gradlew assembleRelease`) is signed with `app/aurore.jks`, which is not in the repository: make one (the `keytool` line in `app/build.gradle`), or point `signingConfigs.release` at your own key.
 
 ## Your app on Android
 
-1. Put your project in `app/jni/` (or make `app/jni/borealis` a link to your project's root instead of Aurore's), with Aurore as its submodule.
-2. In `app/jni/CMakeLists.txt`, `add_subdirectory` your project in place of `borealis`, and point `LIBROMFS_PREBUILT_GENERATOR` at the `libromfs-generator` your build made.
+1. Put your project in `app/jni/` (or make `app/jni/aurore` a link to your project's root instead of Aurore's), with Aurore as its submodule.
+2. In `app/jni/CMakeLists.txt`, `add_subdirectory` your project in place of `aurore`, and point `LIBROMFS_PREBUILT_GENERATOR` at the `libromfs-generator` your build made.
 3. In your `CMakeLists.txt`, make the program with `program_target()` (a shared library on Android) and give it your resources with `add_libromfs()`, as Aurore's root `CMakeLists.txt` does for the demo.
 4. In `app/build.gradle`, set `namespace` and `applicationId` to your package name.
-5. In `app/src/main/java/`, copy `com/borealis/demo/DemoActivity.java` under your package, and change `getLibraries()` to load SDL (`BuildConfig.SDL_LIBRARY`: `SDL2` or `SDL3`) and your library (your CMake target's name, in place of `aurore_demo`).
+5. In `app/src/main/java/`, copy `com/aurore/demo/DemoActivity.java` under your package, and change `getLibraries()` to load SDL (`BuildConfig.SDL_LIBRARY`: `SDL2` or `SDL3`) and your library (your CMake target's name, in place of `aurore_demo`).
 6. In `app/src/main/AndroidManifest.xml`, name your activity in place of `DemoActivity`.
 7. Set the app's name in `app/src/main/res/values/strings.xml` and its icon in `app/src/main/res/mipmap-*/ic_launcher.png`.
 

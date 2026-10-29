@@ -2,7 +2,7 @@
 
 How to build Aurore's demo, and an app on Aurore, for each platform. The configure and build commands are those the CI runs (`.github/workflows/ci.yaml`, where the toolchains are pinned; `site.yml` for a browser); its artifacts are the demo built for each platform. Getting the toolchains themselves is each SDK's business: the links say where.
 
-An app builds the same way as the demo: its `CMakeLists.txt` includes `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, then `add_subdirectory(library/aurore/library)` and links `Aurore::aurore` (see the [README](../README.md#-use-it-in-your-project) and [`template/`](../template/README.md)). The platform is chosen with `-DAURORE_PLATFORM=…` (borealis' `-DPLATFORM_…=ON` still works, with a deprecation warning), and the packaging (an `.nro`, a `.vpk`, a `.pkg`, an app bundle) is the app's own: the demo's `CMakeLists.txt` has each one, to copy. [porting.md](porting.md) has what an app's code should mind on each.
+An app builds the same way as the demo: its `CMakeLists.txt` includes `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, then `add_subdirectory(library/aurore/library)` and links `Aurore::aurore` (see the [README](../README.md#-use-it-in-your-project) and [`template/`](../template/README.md)). The platform is chosen with `-DAURORE_PLATFORM=…`, and the packaging (an `.nro`, a `.vpk`, a `.pkg`, an app bundle) is the app's own: the demo's `CMakeLists.txt` has each one, to copy. [porting.md](porting.md) has what an app's code should mind on each.
 
 | Platform | `AURORE_PLATFORM` | Window and input (`AURORE_WINDOW`) | Drawing (`AURORE_GRAPHICS`) | Resources |
 | --- | --- | --- | --- | --- |
@@ -149,4 +149,4 @@ Aurore runs on its SDL platform under [Emscripten](https://emscripten.org/), SDL
 | `AURORE_STD_THREAD`, `AURORE_BOOST_FILESYSTEM` | `std::thread` instead of pthreads; Boost's filesystem for a toolchain without `std::filesystem` |
 | `AURORE_INSTALL` | Desktop: installs the library for `find_package(Aurore)` |
 
-`library/cmake/commonOption.cmake` lists them all with their defaults. borealis' names (`PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`, `USE_LIBROMFS`…) still work, with a deprecation warning, and are set as plain variables after `commonOption.cmake` for an app's own tests (`if (PLATFORM_SWITCH)`).
+`library/cmake/commonOption.cmake` lists them all with their defaults. Only the `AURORE_` options are read; `commonOption.cmake` then sets the plain variables `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`, `USE_LIBROMFS`… from them, for an app's own tests (`if (PLATFORM_SWITCH)`).

@@ -11,7 +11,7 @@ if (!(auroreSdl in ['2', '3'])) {
 }
 
 android {
-    namespace = "com.borealis.demo"
+    namespace = "com.aurore.demo"
     // SDL3's Java code calls Android 15's API (its versions are checked at
     // run time): it compiles against it
     compileSdkVersion auroreSdl == '3' ? 35 : 34
@@ -23,7 +23,7 @@ android {
         versionName "1.0"
         // The native library DemoActivity loads first
         buildConfigField "String", "SDL_LIBRARY", "\"SDL${auroreSdl}\""
-        // borealis need at least ndk r22 (r21 don't have std::filesystem support)
+        // Aurore needs at least NDK r22 (r21 don't have std::filesystem support)
         // The newer NDK library will cause lower versions of Android failed to run.
         // r26: support api21 and later
         // r24/r25: support api19 and later
@@ -31,7 +31,7 @@ android {
         ndkVersion "22.1.7171670"
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_shared", "-DCMAKE_WARN_DEPRECATED=FALSE",
+                arguments "-DANDROID_PLATFORM=android-21", "-DANDROID_STL=c++_shared",
                         "-DAURORE_WINDOW=SDL${auroreSdl}"
                 // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 abiFilters 'armeabi-v7a', 'arm64-v8a'
@@ -41,10 +41,10 @@ android {
     }
     signingConfigs {
         release {
-            // keytool -genkey -alias borealis -keyalg RSA -keypass password -keystore borealis.jks -storepass password -validity 100000
-            storeFile file("borealis.jks")
+            // keytool -genkey -alias aurore -keyalg RSA -keypass password -keystore aurore.jks -storepass password -validity 100000
+            storeFile file("aurore.jks")
             storePassword 'password'
-            keyAlias 'borealis'
+            keyAlias 'aurore'
             keyPassword 'password'
             // Optional, specify signing versions used
             v1SigningEnabled true

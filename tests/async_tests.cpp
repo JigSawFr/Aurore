@@ -44,30 +44,6 @@ std::string readFile(const std::string& path)
     return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 }
 
-// Uses the older macros, which now wrap aliveToken()
-class LegacyAsyncView : public aurore::View
-{
-  public:
-    explicit LegacyAsyncView(bool* ran)
-        : ran(ran)
-    {
-    }
-
-    void queue()
-    {
-        ASYNC_RETAIN
-        aurore::sync([ASYNC_TOKEN]()
-            {
-                ASYNC_RELEASE
-                *this->ran = true; });
-    }
-
-    void draw(NVGcontext*, float, float, float, float, aurore::Style, aurore::FrameContext*) override { }
-
-  private:
-    bool* ran;
-};
-
 // The width a view is given (its layout may wait for the next frame)
 float styleWidth(aurore::View* view)
 {
@@ -141,22 +117,6 @@ AURORE_TEST(async_image_callback_twice_or_after_the_image_is_gone)
     done(png, png.size());
     done(std::string(), 0);
     harness.settle();
-}
-
-AURORE_TEST(legacy_async_macros_skip_a_deleted_view)
-{
-    Harness harness;
-    bool keptRan = false, deletedRan = false;
-    LegacyAsyncView* kept    = new LegacyAsyncView(&keptRan);
-    LegacyAsyncView* deleted = new LegacyAsyncView(&deletedRan);
-    kept->queue();
-    kept->queue();
-    deleted->queue();
-    delete deleted;
-    harness.settle();
-    AURORE_CHECK(keptRan);
-    AURORE_CHECK(!deletedRan);
-    delete kept;
 }
 
 AURORE_TEST(cancel_delay_ignores_an_index_not_given_yet)

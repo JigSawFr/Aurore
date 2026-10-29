@@ -36,7 +36,6 @@ endif ()
 
 # libFuzzer targets, with clang: -DAURORE_BUILD_FUZZERS=ON (docs/testing.md)
 option(AURORE_BUILD_FUZZERS "Build the libFuzzer targets of tests/fuzz (clang)" OFF)
-_aurore_legacy_bool(AURORE_BUILD_FUZZERS BRLS_BUILD_FUZZERS) # legacy-names: line
 if (AURORE_BUILD_FUZZERS)
     set(FUZZ_FLAGS -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
     add_executable(aurore_fuzz_markdown fuzz/markdown_fuzz.cpp
@@ -66,18 +65,6 @@ target_link_libraries(aurore_dev_tools_tests PRIVATE Aurore::test)
 target_compile_definitions(aurore_dev_tools_tests PRIVATE ${AURORE_DEV_TOOLS_DEFINITION})
 aurore_add_tests(aurore_dev_tools_tests)
 
-# legacy-names: begin
-# borealis' names (the brls namespace, <borealis/...>, BRLS_ macros...),
-# deprecated; configured with borealis' option names (tools/ci_variant.sh
-# legacy), registered with its function too
-add_executable(aurore_legacy_names_tests legacy_names_tests.cpp)
-target_link_libraries(aurore_legacy_names_tests PRIVATE Aurore::test)
-if (DEFINED BRLS_BUILD_TESTS)
-    brls_add_tests(aurore_legacy_names_tests)
-else ()
-    aurore_add_tests(aurore_legacy_names_tests)
-endif ()
-# legacy-names: end
 
 # The main loop's cost on the demo (Profiler), checked against a baseline
 add_executable(aurore_bench bench.cpp)
