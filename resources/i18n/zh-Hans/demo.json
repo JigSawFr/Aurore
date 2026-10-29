@@ -318,8 +318,6 @@
         "file_lead": "一个文本文件：写几种颜色，所有的键都由此推导；图片和装饰也可以。",
         "picker": "Cadran 的调色板选择",
         "contrast": "每个调色板都经过检查：文字 4.5:1，图形 3:1。",
-        "look": "外观",
-        "look_lead": "Cadran 是 Aurore 的外观；应用也可以在启动前选择保留 borealis 的外观。",
         "default": "Cadran"
     },
     "input": {

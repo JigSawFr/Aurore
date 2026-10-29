@@ -158,6 +158,7 @@ void FooterHints::install()
     if (done)
         return;
     done = true;
+    // The only aurore:Hints: the core registers none
     aurore::Application::registerXMLView("aurore:Hints", FooterHints::create);
 }
 

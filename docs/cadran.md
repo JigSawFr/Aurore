@@ -27,8 +27,6 @@ aurore::Application::init();
 aurore::Application::createWindow("my_app/title"_i18n);
 ```
 
-`aurore::Application::setCadran(false)`, before `init()`, keeps borealis' own look.
-
 ## What the app tells it
 
 `ui::hooks::get()` (`cadran/ui/hooks.hpp`) holds what Cadran asks of the app: the main screen and its tabs (to go back to a tab, re-read it, title a screen opened from it), the rail's icons, the app's version, commit and logo, whether it writes nothing for now and a mode of its own the header's pill says over every screen (`pill`, with what a tap opens), the icons of its own screens' lines, which screens stand on their own (`standalone_screen`: no crumb, no version badge; or a view with the id `cadran/standalone` in the screen), saving the preferences, sending a report, today's date by the app's own clock, and its test flags. Each one left empty does nothing.

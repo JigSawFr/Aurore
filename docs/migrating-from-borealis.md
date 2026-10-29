@@ -45,12 +45,11 @@ Aurore's `resources/` has more than borealis': the library's and Cadran's string
 
 ## 4. The look: Cadran
 
-Aurore draws every app in [Cadran](cadran.md)'s look, the look of PlayGuard and PlayShelf, without a line of code: an icon rail for the sidebar, cards for the lists, its dialogs and pickers, its palettes. Two choices:
+Aurore draws every app in [Cadran](cadran.md)'s look, the look of PlayGuard and PlayShelf, without a line of code: an icon rail for the sidebar, cards for the lists, its dialogs and pickers, its palettes. borealis' own look is gone: the screens of a borealis app come up in Cadran's.
 
-- **Keep borealis' look**: `aurore::Application::setCadran(false)` before `init()`. The screens look as before, with Aurore's fixes and features.
-- **Take Cadran's**: fill in what it asks of the app (`ui::hooks`: the main screen and its tabs, the rail's icons, the version) and keep the user's choices (`ui::Prefs`), as [cadran.md](cadran.md) says. Each hook left empty does nothing, so it can be done screen by screen.
+What Cadran asks of the app (`ui::hooks`: the main screen and its tabs, the rail's icons, the version) and the user's choices it keeps (`ui::Prefs`) are in [cadran.md](cadran.md). Each hook left empty does nothing, so it can be filled in screen by screen.
 
-**Licence.** borealis is Apache 2.0; Cadran is GPLv3, and is linked into every app built with Aurore, whichever look it shows: an app built with Aurore is GPLv3 ([`NOTICE`](../NOTICE)).
+**Licence.** borealis is Apache 2.0; Cadran is GPLv3, and is linked into every app built with Aurore: an app built with Aurore is GPLv3 ([`NOTICE`](../NOTICE)).
 
 ## 5. What changes on screen
 
