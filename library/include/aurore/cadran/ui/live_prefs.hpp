@@ -29,4 +29,11 @@ std::string locale();
 /// After the preferences' language changed: applied, and the screens built
 /// again (ui::hooks' push_main; without it, the screen shown is read again).
 void language_changed();
+
+/// The density in the preferences (ui::Prefs::density) given to Aurore
+/// (aurore::setDensity), before the first screen.
+void apply_density();
+/// After the preferences' density changed: applied, and the screens built
+/// again as for the language (their sizes are read when they are made).
+void density_changed();
 } // namespace live_prefs

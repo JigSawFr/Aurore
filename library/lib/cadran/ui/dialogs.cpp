@@ -715,6 +715,20 @@ void pick_rail(std::function<void()> after)
         if (after) after(); }, true, {}, icons);
 }
 
+void pick_density(std::function<void()> after)
+{
+    std::vector<std::string> labels;
+    for (const char* d : ui::DENSITIES)
+        labels.push_back(aurore::getStr(std::string("cadran/prefs/densities/") + d));
+    pick("cadran/prefs/density"_i18n, labels, index_of(ui::DENSITIES, ui::prefs().density), [after](int i)
+        { choose(ui::prefs().density, ui::DENSITIES[i], after, live_prefs::density_changed); }, true);
+}
+
+std::string density_name()
+{
+    return aurore::getStr("cadran/prefs/densities/" + std::string(ui::DENSITIES[index_of(ui::DENSITIES, ui::prefs().density)]));
+}
+
 std::string rail_name()
 {
     return aurore::getStr("cadran/prefs/rail_values/" + std::string(ui::RAILS[index_of(ui::RAILS, ui::prefs().rail)]));
@@ -755,14 +769,16 @@ void quick_settings(std::function<void()> after)
 {
     const std::vector<std::string> labels = { "cadran/tools/language"_i18n + " · " + language_name(),
         "cadran/tools/theme"_i18n + " · " + theme_name(),
-        "cadran/prefs/text_size"_i18n + " · " + text_size_name() };
+        "cadran/prefs/text_size"_i18n + " · " + text_size_name(),
+        "cadran/prefs/density"_i18n + " · " + density_name() };
     // As an app's Preferences tiles draw them.
-    const std::vector<std::string> icons = { "language", "contrast", "eye" };
+    const std::vector<std::string> icons = { "language", "contrast", "eye", "list" };
     pick("cadran/quick/title_text"_i18n, labels, 0, [after](int i)
         {
         if (i == 0) pick_language(after);
         else if (i == 1) pick_theme(after);
-        else pick_text_size(after); }, false, {}, icons);
+        else if (i == 2) pick_text_size(after);
+        else pick_density(after); }, false, {}, icons);
 }
 
 } // namespace ui

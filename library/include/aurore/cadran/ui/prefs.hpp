@@ -24,7 +24,10 @@ struct Prefs
     std::string theme_file;
     std::string text_size = "auto"; ///< one of TEXT_SIZES: "auto", larger on a TV
     std::string effects   = "auto"; ///< one of EFFECTS: "auto", lighter on battery
-    bool glow             = true; ///< the Cadran screens' background glow
+    /// One of DENSITIES: how close the screens' pieces stand (the text keeps
+    /// its size). "auto": dense on a compact screen, the app's own elsewhere.
+    std::string density = "auto";
+    bool glow           = true; ///< the Cadran screens' background glow
     /// The main screen's sidebar: "auto" (on its icons while a tab has the
     /// focus, open over the tab while the focus is on it), "open" (always)
     /// or "icons" (always on its icons). cadran::apply_rail() after a change.
@@ -37,6 +40,7 @@ constexpr const char* THEMES[]     = { "system", "light", "dark" };
 constexpr const char* TEXT_SIZES[] = { "auto", "normal", "large", "largest" };
 constexpr const char* EFFECTS[]    = { "auto", "full", "reduced" };
 constexpr const char* RAILS[]      = { "auto", "open", "icons" };
+constexpr const char* DENSITIES[]  = { "auto", "comfortable", "compact", "dense" };
 
 /// The ones in use: the app's (use_prefs), else defaults of their own.
 Prefs& prefs();
