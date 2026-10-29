@@ -37,7 +37,7 @@
 #if defined(AURORE_USE_DEKO3D)
 #elif defined(__GLFW__)
 #include <aurore/platforms/glfw/glfw_platform.hpp>
-#elif defined(__SDL2__)
+#elif defined(__SDL__)
 #include <aurore/platforms/sdl/sdl_platform.hpp>
 #endif
 
@@ -57,7 +57,7 @@ Platform* Platform::createPlatform()
     return new PsvPlatform();
 #elif defined(PS4)
     return new Ps4Platform();
-#elif defined(__SDL2__)
+#elif defined(__SDL__)
     return new SDLPlatform();
 #elif defined(__GLFW__)
     return new GLFWPlatform();

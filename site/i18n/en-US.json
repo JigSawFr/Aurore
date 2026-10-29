@@ -86,7 +86,7 @@
   "add_layout": "<strong>Layout</strong>: Yoga 3, <code>gap</code>, <code>flexWrap</code> with focus across the lines, a radius per corner, gradients.",
   "add_text": "<strong>Text</strong>: a font scale for every label, shrink-to-fit, clean line breaks.",
   "add_focus": "<strong>Focus and hints</strong>: no focus lost in hidden or destroyed views; steady footer hints.",
-  "add_platforms": "<strong>Platforms</strong>: controllers reconnected under SDL, the browser (Emscripten), deko3d's command memory on the Switch.",
+  "add_platforms": "<strong>Platforms</strong>: SDL3 beside SDL2 (desktop, browser, Android, iOS), controllers reconnected under SDL, the browser (Emscripten), deko3d's command memory on the Switch.",
   "add_speed": "<strong>Speed</strong>: no relayout for an unchanged text or size, XML attributes registered on demand, unused textures freed.",
   "adds_link": "Every change and its API",
   "nav_borealis": "vs. borealis",

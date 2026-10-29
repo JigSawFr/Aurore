@@ -14,7 +14,6 @@
     limitations under the License.
 */
 
-#include <SDL2/SDL.h>
 #include <arpa/inet.h>
 #include <jni.h>
 #include <net/if.h>
@@ -27,9 +26,29 @@
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/android/android_platform.hpp>
+#include <aurore/platforms/sdl/sdl.hpp>
 
 namespace aurore
 {
+
+// SDL's JNI environment and Java activity, named otherwise by SDL3
+static void* sdlJNIEnv()
+{
+#ifdef __SDL3__
+    return SDL_GetAndroidJNIEnv();
+#else
+    return SDL_AndroidGetJNIEnv();
+#endif
+}
+
+static void* sdlActivity()
+{
+#ifdef __SDL3__
+    return SDL_GetAndroidActivity();
+#else
+    return SDL_AndroidGetActivity();
+#endif
+}
 
 // A Java exception left pending makes the next JNI call abort: logged and
 // cleared. True when there was one.
@@ -91,7 +110,7 @@ static jstring javaString(JNIEnv* env, const std::string& text)
 
 bool static getPlatformBool(const std::string& method, bool defaultValue = false)
 {
-    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    auto env = static_cast<JNIEnv*>(sdlJNIEnv());
     jclass utilsClass;
     jmethodID jmethod;
     if (!findUtilsMethod(env, method.c_str(), "()Z", &utilsClass, &jmethod))
@@ -105,7 +124,7 @@ bool static getPlatformBool(const std::string& method, bool defaultValue = false
 
 int static getPlatformInt(const std::string& method, int defaultValue = 100)
 {
-    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    auto env = static_cast<JNIEnv*>(sdlJNIEnv());
     jclass utilsClass;
     jmethodID jmethod;
     if (!findUtilsMethod(env, method.c_str(), "()I", &utilsClass, &jmethod))
@@ -220,7 +239,7 @@ void AndroidPlatform::openBrowser(std::string url)
         Logger::warning("open url: refused, not an http(s) link");
         return;
     }
-    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    auto env = static_cast<JNIEnv*>(sdlJNIEnv());
     jclass utilsClass;
     jmethodID openBrowserMethod;
     if (!findUtilsMethod(env, "openBrowser", "(Ljava/lang/String;)V", &utilsClass, &openBrowserMethod))
@@ -237,12 +256,12 @@ void AndroidPlatform::openBrowser(std::string url)
 
 float AndroidPlatform::getBacklightBrightness()
 {
-    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    auto env = static_cast<JNIEnv*>(sdlJNIEnv());
     jclass utilsClass;
     jmethodID jmethod;
     if (!findUtilsMethod(env, "getAppScreenBrightness", "(Landroid/app/Activity;)F", &utilsClass, &jmethod))
         return 0.0f;
-    auto activity = (jobject)SDL_AndroidGetActivity();
+    auto activity = (jobject)sdlActivity();
     if (activity == nullptr)
     {
         env->DeleteLocalRef(utilsClass);
@@ -258,12 +277,12 @@ float AndroidPlatform::getBacklightBrightness()
 
 void AndroidPlatform::setBacklightBrightness(float brightness)
 {
-    auto env = static_cast<JNIEnv*>(SDL_AndroidGetJNIEnv());
+    auto env = static_cast<JNIEnv*>(sdlJNIEnv());
     jclass utilsClass;
     jmethodID method;
     if (!findUtilsMethod(env, "setAppScreenBrightness", "(Landroid/app/Activity;F)V", &utilsClass, &method))
         return;
-    auto activity = (jobject)SDL_AndroidGetActivity();
+    auto activity = (jobject)sdlActivity();
     if (activity == nullptr)
     {
         env->DeleteLocalRef(utilsClass);

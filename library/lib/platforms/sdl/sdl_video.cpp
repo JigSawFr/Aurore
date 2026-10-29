@@ -18,6 +18,8 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/core/thread.hpp>
 #include <aurore/platforms/sdl/sdl_video.hpp>
+
+#include "sdl_compat.hpp"
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -61,6 +63,16 @@ namespace aurore
 
 static double scaleFactor = 1.0;
 
+// The size of the window's framebuffer, in pixels
+static void sdlDrawableSize(SDL_Window* window, int* width, int* height)
+{
+#ifdef __SDL3__
+    SDL_GetWindowSizeInPixels(window, width, height);
+#else
+    SDL_GL_GetDrawableSize(window, width, height);
+#endif
+}
+
 static void sdlWindowFramebufferSizeCallback(SDL_Window* window, int width, int height)
 {
     if (!width || !height)
@@ -68,7 +80,7 @@ static void sdlWindowFramebufferSizeCallback(SDL_Window* window, int width, int 
 
     int fWidth, fHeight;
 #ifdef AURORE_USE_OPENGL
-    SDL_GL_GetDrawableSize(window, &fWidth, &fHeight);
+    sdlDrawableSize(window, &fWidth, &fHeight);
     scaleFactor = fWidth * 1.0 / width;
 #if defined(ANDROID)
     // On Android, doing this is to ensure that glViewport is called from the main thread
@@ -104,8 +116,29 @@ static void sdlWindowPositionCallback(SDL_Window* window, int windowXPos, int wi
     }
 }
 
-static int sdlWindowEventWatcher(void* data, SDL_Event* event)
+static SDLFilterResult sdlWindowEventWatcher(void* data, SDL_Event* event)
 {
+#ifdef __SDL3__
+    // Each window event is an event of its own. The framebuffer's size can
+    // change without the window's (moved to a screen of another density).
+    if (event->type == SDL_EVENT_WINDOW_RESIZED || event->type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
+    {
+        SDL_Window* win = SDL_GetWindowFromID(event->window.windowID);
+        if (win == (SDL_Window*)data)
+        {
+            int width, height;
+            SDL_GetWindowSize(win, &width, &height);
+            sdlWindowFramebufferSizeCallback(win, width, height);
+        }
+    }
+    else if (event->type == SDL_EVENT_WINDOW_MOVED)
+    {
+        SDL_Window* win = SDL_GetWindowFromID(event->window.windowID);
+        if (win == (SDL_Window*)data)
+            sdlWindowPositionCallback(win, event->window.data1, event->window.data2);
+    }
+    return true;
+#else
     if (event->type == SDL_WINDOWEVENT)
     {
         SDL_Window* win = SDL_GetWindowFromID(event->window.windowID);
@@ -130,6 +163,7 @@ static int sdlWindowEventWatcher(void* data, SDL_Event* event)
         }
     }
     return 0;
+#endif
 }
 
 SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, uint32_t windowHeight, float windowXPos, float windowYPos)
@@ -169,7 +203,8 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     PVRSRVCreateVirtualAppHint(&hint);
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__SDL3__)
+    // SDL3 is aware of each screen's density by itself
     if (!SDL_GetHint(SDL_HINT_WINDOWS_DPI_AWARENESS))
     {
         SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
@@ -180,19 +215,35 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     }
 #endif
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (!AURORE_SDL_OK(SDL_Init(SDL_INIT_VIDEO)))
     {
         Logger::error("sdl: failed to initialize");
         return;
     }
 
-    // Create window
+    // Create window. SDL3's windows are shown unless hidden, and drawn at
+    // the screen's density when asked for.
+#ifdef __SDL3__
+    using WindowFlags                          = SDL_WindowFlags;
+    const WindowFlags shownFlag                = 0;
+    [[maybe_unused]] const WindowFlags highDpi = SDL_WINDOW_HIGH_PIXEL_DENSITY;
+    const WindowFlags fullscreen               = SDL_WINDOW_FULLSCREEN;
+#else
+    using WindowFlags                          = Uint32;
+    const WindowFlags shownFlag                = SDL_WINDOW_SHOWN;
+    [[maybe_unused]] const WindowFlags highDpi = SDL_WINDOW_ALLOW_HIGHDPI;
+#ifdef __WINRT__
+    const WindowFlags fullscreen = SDL_WINDOW_FULLSCREEN;
+#else
+    const WindowFlags fullscreen = SDL_WINDOW_FULLSCREEN_DESKTOP;
+#endif
+#endif
 #ifdef __EMSCRIPTEN__
     // In a browser the page scales the canvas with CSS: the window keeps the
     // console's 1280x720, which a resizable one would follow the page out of.
-    Uint32 windowFlags = SDL_WINDOW_SHOWN;
+    WindowFlags windowFlags = shownFlag;
 #else
-    Uint32 windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+    WindowFlags windowFlags = SDL_WINDOW_RESIZABLE | shownFlag | highDpi;
 #endif
 #ifdef AURORE_USE_OPENGL
 #ifdef __SWITCH__
@@ -253,19 +304,34 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 #endif
-#if defined(USE_EGL)
+#if defined(USE_EGL) && defined(__SDL3__)
+    SDL_SetHint(SDL_HINT_VIDEO_FORCE_EGL, "1");
+#elif defined(USE_EGL)
     SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
 #endif
     windowFlags |= SDL_WINDOW_OPENGL;
 #endif
     if (VideoContext::FULLSCREEN)
     {
-#ifdef __WINRT__
-        windowFlags |= SDL_WINDOW_FULLSCREEN;
-#else
-        windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-#endif
+        // Under SDL3, full screen on the desktop's mode unless a mode is set
+        windowFlags |= fullscreen;
     }
+#ifdef __SDL3__
+    // SDL3 leaves the system's input method to show its own window
+    // (SDL_HINT_IME_IMPLEMENTED_UI unset), as this hint did
+    SDL_PropertiesID windowProps = SDL_CreateProperties();
+    SDL_SetStringProperty(windowProps, SDL_PROP_WINDOW_CREATE_TITLE_STRING, windowTitle.c_str());
+    SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, windowWidth);
+    SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, windowHeight);
+    SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
+    bool placed = !std::isnan(windowXPos) && !std::isnan(windowYPos);
+    SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_X_NUMBER,
+        placed && windowXPos > 0 ? (Sint64)windowXPos : SDL_WINDOWPOS_UNDEFINED);
+    SDL_SetNumberProperty(windowProps, SDL_PROP_WINDOW_CREATE_Y_NUMBER,
+        placed && windowYPos > 0 ? (Sint64)windowYPos : SDL_WINDOWPOS_UNDEFINED);
+    this->window = SDL_CreateWindowWithProperties(windowProps);
+    SDL_DestroyProperties(windowProps);
+#else
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
     if (std::isnan(windowXPos) || std::isnan(windowYPos))
@@ -286,6 +352,7 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
             windowHeight,
             windowFlags);
     }
+#endif
 
     if (!this->window)
     {
@@ -340,7 +407,7 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 
     int fWidth, fHeight;
 #ifdef AURORE_USE_OPENGL
-    SDL_GL_GetDrawableSize(window, &fWidth, &fHeight);
+    sdlDrawableSize(window, &fWidth, &fHeight);
     scaleFactor = fWidth * 1.0 / width;
     Application::setWindowSize(fWidth, fHeight);
     glViewport(0, 0, fWidth, fHeight);
@@ -479,6 +546,10 @@ SDL_Window* SDLVideoContext::getSDLWindow()
 
 void SDLVideoContext::fullScreen(bool fs)
 {
+#ifdef __SDL3__
+    // On the desktop's mode: no mode was set with SDL_SetWindowFullscreenMode
+    SDL_SetWindowFullscreen(this->window, fs);
+#else
 #ifdef __WINRT__
     // win32 会很模糊，而且点击事件貌似也错位了，只给 winrt 使用。
     static unsigned int flag = SDL_WINDOW_FULLSCREEN;
@@ -486,6 +557,7 @@ void SDLVideoContext::fullScreen(bool fs)
     static unsigned int flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
 #endif
     SDL_SetWindowFullscreen(this->window, fs ? flag : 0);
+#endif
 }
 
 } // namespace aurore

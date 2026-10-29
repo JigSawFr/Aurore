@@ -86,7 +86,7 @@
   "add_layout": "<strong>Mise en page</strong> : Yoga 3, <code>gap</code>, <code>flexWrap</code> avec le focus d'une ligne à l'autre, un arrondi par coin, des dégradés.",
   "add_text": "<strong>Texte</strong> : une échelle de police pour chaque libellé, réduction pour tenir, des retours à la ligne propres.",
   "add_focus": "<strong>Focus et indications</strong> : plus de focus perdu dans une vue cachée ou détruite ; des indications de pied de page stables.",
-  "add_platforms": "<strong>Plateformes</strong> : manettes reconnectées sous SDL, le navigateur (Emscripten), la mémoire de commandes de deko3d sur la Switch.",
+  "add_platforms": "<strong>Plateformes</strong> : SDL3 à côté de SDL2 (ordinateur, navigateur, Android, iOS), manettes reconnectées sous SDL, le navigateur (Emscripten), la mémoire de commandes de deko3d sur la Switch.",
   "add_speed": "<strong>Vitesse</strong> : pas de remise en page pour un texte ou une taille inchangés, attributs XML enregistrés à la demande, textures inutilisées libérées.",
   "adds_link": "Chaque changement et son API",
   "nav_borealis": "Et borealis",

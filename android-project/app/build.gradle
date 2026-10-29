@@ -2,6 +2,14 @@ plugins {
     id 'com.android.application'
 }
 
+// The SDL the app is built on: 2 (the default) or 3, with -PauroreSdl=3 on
+// gradlew's command line or auroreSdl=3 in gradle.properties. Each has its
+// Java code: SDL2's in src/sdl2/java, SDL3's from its submodule.
+def auroreSdl = (project.findProperty('auroreSdl') ?: '2').toString()
+if (!(auroreSdl in ['2', '3'])) {
+    throw new GradleException("auroreSdl=${auroreSdl}: 2 or 3")
+}
+
 android {
     namespace = 'com.aurore.demo'
     // Google Play takes new apps and updates that target Android 16 (API 36)
@@ -16,9 +24,11 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = '1.0'
+        // The native library DemoActivity loads first
+        buildConfigField 'String', 'SDL_LIBRARY', "\"SDL${auroreSdl}\""
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_STL=c++_shared'
+                arguments '-DANDROID_STL=c++_shared', "-DAURORE_WINDOW=SDL${auroreSdl}"
                 abiFilters 'armeabi-v7a', 'arm64-v8a'
             }
         }
@@ -40,6 +50,16 @@ android {
             minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.release
+        }
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+    sourceSets {
+        main {
+            java.srcDir(auroreSdl == '3'
+                    ? '../../library/lib/extern/SDL3/android-project/app/src/main/java'
+                    : 'src/sdl2/java')
         }
     }
     externalNativeBuild {

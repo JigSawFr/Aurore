@@ -25,7 +25,9 @@
 #include <aurore/platforms/desktop/desktop_platform.hpp>
 #include <aurore/platforms/desktop/steam_deck.hpp>
 
-#ifdef __SDL2__
+#ifdef __SDL3__
+#include <SDL3/SDL_misc.h>
+#elif defined(__SDL2__)
 #include <SDL2/SDL_misc.h>
 #endif
 
@@ -200,7 +202,7 @@ int darwin_get_powerstate()
     CFRelease(blob);
     return capacity;
 }
-#elif __SDL2__
+#elif defined(__SDL__)
 #elif defined(__linux__)
 // Thanks to: https://github.com/videolan/vlc/blob/master/modules/misc/inhibit/dbus.c
 enum INHIBIT_TYPE
@@ -600,7 +602,7 @@ DesktopPlatform::DesktopPlatform()
             }
             FreeLibrary(hUxtheme);
         }
-#elif defined(__linux__) && !defined(__SDL2__)
+#elif defined(__linux__) && !defined(__SDL__)
         if (portalPrefersDark(dbus_conn.get()))
         {
             this->themeVariant = ThemeVariant::DARK;
@@ -634,7 +636,7 @@ DesktopPlatform::DesktopPlatform()
     this->fontLoader = new DesktopFontLoader();
     this->imeManager = new DesktopImeManager();
 
-#if defined(__linux__) && !defined(__SDL2__)
+#if defined(__linux__) && !defined(__SDL__)
     probeInhibitor(dbus_conn.get());
 #endif
 }
@@ -817,7 +819,7 @@ void DesktopPlatform::disableScreenDimming(bool disable, const std::string& reas
 
     if (disable)
     {
-#ifdef __SDL2__
+#ifdef __SDL__
 #elif defined(__linux__)
         inhibitCookie = dbusInhibit(dbus_conn.get(), app, reason);
         if (inhibitCookie == 0)
@@ -835,7 +837,7 @@ void DesktopPlatform::disableScreenDimming(bool disable, const std::string& reas
     }
     else
     {
-#ifdef __SDL2__
+#ifdef __SDL__
 #elif defined(__linux__)
         if (inhibitCookie != 0)
         {
@@ -1087,7 +1089,7 @@ void DesktopPlatform::openBrowser(std::string url)
         return;
     }
     aurore::Logger::debug("open url: {}", url);
-#if __SDL2__
+#ifdef __SDL__
     SDL_OpenURL(url.c_str());
 #elif defined(__APPLE__) || defined(__linux__)
 #ifdef __linux__

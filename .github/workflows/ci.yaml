@@ -31,6 +31,11 @@ jobs:
   ios:
     runs-on: macos-14
     timeout-minutes: 40
+    name: ios (${{ matrix.window }})
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [ sdl2, sdl3 ]
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -39,17 +44,17 @@ jobs:
           submodules: recursive
       - name: cache
         id: cache-key
-        run: echo "IOS_CACHE_KEY=ios-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "IOS_CACHE_KEY=ios-${{ matrix.window }}-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}-${{ github.sha }}" >> $GITHUB_OUTPUT
       - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         id: ios-cache
         with:
           path: build
           key: ${{ steps.cache-key.outputs.IOS_CACHE_KEY }}
-          restore-keys: ios-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}-
+          restore-keys: ios-${{ matrix.window }}-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}-
       - name: Build
         run: |
           ./build_libromfs_generator.sh
-          cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0
+          cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DAURORE_WINDOW=${{ matrix.window }} -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0
           cmake --build build
           ditto -ck --rsrc --sequesterRsrc --keepParent build/Debug-iphoneos/aurore_demo.app aurore_demo.zip
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
@@ -60,7 +65,7 @@ jobs:
       - name: Upload dist
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: aurore-ios
+          name: aurore-ios-${{ matrix.window }}
           path: aurore_demo.zip
 
   ps4:
@@ -166,6 +171,11 @@ jobs:
   android:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    name: android (sdl${{ matrix.sdl }})
+    strategy:
+      fail-fast: false
+      matrix:
+        sdl: [ 2, 3 ]
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -179,11 +189,11 @@ jobs:
         id: build
         run: |
           ./build_libromfs_generator.sh
-          cd android-project && ./gradlew assembleDebug
+          cd android-project && ./gradlew assembleDebug -PauroreSdl=${{ matrix.sdl }}
       - name: Upload dist
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: aurore-android
+          name: aurore-android-sdl${{ matrix.sdl }}
           path: android-project/app/build/outputs/apk/debug/*.apk
 
   macos:
@@ -195,6 +205,7 @@ jobs:
         window:
           - { name: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
           - { name: sdl2, cmake: "-DAURORE_WINDOW=SDL2" }
+          - { name: sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -227,9 +238,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        driver: [gl, d3d11]
+        driver: [gl, d3d11, gl-sdl3, d3d11-sdl3]
         include:
           - { driver: d3d11, cmake: "-DAURORE_GRAPHICS=D3D11" }
+          - { driver: gl-sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
+          - { driver: d3d11-sdl3, cmake: "-DAURORE_GRAPHICS=D3D11 -DAURORE_WINDOW=SDL3" }
     defaults:
       run:
         shell: msys2 {0}
@@ -275,6 +288,8 @@ jobs:
           - { driver: gles3, cmake: "-DAURORE_GRAPHICS=GLES3" }
           - { driver: gl3, cmake: "-DAURORE_WINDOW=GLFW", ext: "-glfw" }
           - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL2", ext: "-sdl2" }
+          - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL3", ext: "-sdl3" }
+          - { driver: gles3, cmake: "-DAURORE_GRAPHICS=GLES3 -DAURORE_WINDOW=SDL3", ext: "-sdl3" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -310,9 +325,15 @@ jobs:
           name: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
           path: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}.tar.gz
   linux-run:
-    name: linux (demo run, ASan + UBSan)
+    name: linux (demo run, ${{ matrix.window }}, ASan + UBSan)
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { window: glfw, cmake: "" }
+          - { window: sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -333,7 +354,7 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
-          cmake --preset desktop-asan
+          cmake --preset desktop-asan ${{ matrix.cmake }}
           cmake --build --preset desktop-asan
       - name: Run the demo
         env:
@@ -361,6 +382,83 @@ jobs:
       - name: Demo log
         if: always()
         run: cat demo.log || true
+
+  # The SDL driver's input on a virtual controller (tests/sdl_input_tests.cpp),
+  # under SDL2 and SDL3: no display needed
+  linux-sdl-tests:
+    name: linux (SDL input tests, ${{ matrix.window }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        window: [ SDL2, SDL3 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y --no-install-recommends libdbus-1-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols xorg-dev ninja-build libegl-dev
+      - name: Compiler cache
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
+        with:
+          key: ${{ github.job }}-${{ strategy.job-index }}
+      - name: Build
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+        run: |
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DAURORE_PLATFORM=DESKTOP \
+            -DAURORE_WINDOW=${{ matrix.window }} -DAURORE_LIBROMFS=ON -DAURORE_BUILD_TESTS=ON
+          cmake --build build --target aurore_sdl_input_tests
+      - name: Run
+        run: ctest --test-dir build -R aurore_sdl_input_tests --output-on-failure
+
+  # The demo in a browser on SDL3 (-DAURORE_WINDOW=SDL3: Emscripten's SDL3
+  # port). The site's workflow builds and publishes the SDL2 one.
+  web-sdl3:
+    name: web (sdl3)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      # The site's Emscripten (.github/workflows/site.yml), checked the same way
+      EMSDK_VERSION: 6.0.12
+      EMSDK_COMMIT: 35ff8a6d150541276abbc6bae512ca90bcfbe220
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.emscripten_cache
+          key: emscripten-sdl3-${{ env.EMSDK_VERSION }}
+      - name: Emscripten ${{ env.EMSDK_VERSION }}
+        run: |
+          git clone --depth 1 --branch "$EMSDK_VERSION" https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          test "$(git -C "$RUNNER_TEMP/emsdk" rev-parse HEAD)" = "$EMSDK_COMMIT" \
+            || { echo "::error::emsdk's $EMSDK_VERSION tag is not $EMSDK_COMMIT any more"; exit 1; }
+          "$RUNNER_TEMP/emsdk/emsdk" install "$EMSDK_VERSION"
+          "$RUNNER_TEMP/emsdk/emsdk" activate "$EMSDK_VERSION"
+      - name: Build
+        run: |
+          sudo apt-get update -y -q
+          sudo apt-get install -y -q --no-install-recommends ninja-build
+          # After emsdk_env.sh, which unsets EM_CACHE
+          source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
+          export EM_CACHE="$HOME/.emscripten_cache"
+          emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WINDOW=SDL3
+          cmake --build build-web
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: aurore-web-sdl3
+          path: build-web/web
+          retention-days: 7
 
   docs:
     name: API reference (Doxygen)

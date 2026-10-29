@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <aurore/platforms/sdl/sdl.hpp>
 
 #include <aurore/core/video.hpp>
 

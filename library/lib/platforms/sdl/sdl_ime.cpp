@@ -18,7 +18,10 @@ limitations under the License.
 #include <aurore/core/event.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/sdl/sdl_ime.hpp>
+#include <aurore/platforms/sdl/sdl_video.hpp>
 #include <aurore/views/edit_text_dialog.hpp>
+
+#include "sdl_compat.hpp"
 
 #ifdef __PSV__
 extern "C" uint8_t* vita_ime_init_text;
@@ -33,6 +36,35 @@ __attribute__((weak)) uint32_t vita_ime_type = 0;
 
 namespace aurore
 {
+
+#ifdef __SDL3__
+// SDL3 starts and places the text input of one window
+static SDL_Window* sdlImeWindow()
+{
+    return ((SDLVideoContext*)Application::getPlatform()->getVideoContext())->getSDLWindow();
+}
+
+static void sdlStartTextInput()
+{
+    SDL_StartTextInput(sdlImeWindow());
+}
+
+static void sdlStopTextInput()
+{
+    SDL_StopTextInput(sdlImeWindow());
+}
+#else
+static void sdlStartTextInput()
+{
+    SDL_StartTextInput();
+}
+
+static void sdlStopTextInput()
+{
+    SDL_StopTextInput();
+}
+#endif
+
 SDLImeManager::SDLImeManager(Event<SDL_Event*>* event)
     : event(event)
     , cursor(-1)
@@ -176,7 +208,11 @@ void SDLImeManager::openInputDialog(
     // 更新输入法条位置
     dialog->getLayoutEvent()->subscribe([scale](Point p)
         {
-#ifndef PS4
+#ifdef __SDL3__
+            // The cursor at the start of the area
+            const SDL_Rect rect = { (int)(p.x * scale), (int)(p.y * scale), 100, 20 };
+            SDL_SetTextInputArea(sdlImeWindow(), &rect, 0);
+#elif !defined(PS4)
             const SDL_Rect rect = { (int)(p.x * scale), (int)(p.y * scale), 100, 20 };
             SDL_SetTextInputRect(&rect);
 #endif
@@ -190,11 +226,11 @@ void SDLImeManager::openInputDialog(
     auto eventID1 = event->subscribe([this, updateTextAndCursor, updateText, updateTextCursor](SDL_Event* e)
         {
             switch (e->type) {
-            case SDL_TEXTINPUT:
+            case SDL_EVENT_TEXT_INPUT:
                 this->isEditing = false;
                 updateTextAndCursor(e->text.text);
                 break;
-            case SDL_TEXTEDITING:
+            case SDL_EVENT_TEXT_EDITING:
                 if (strlen(e->edit.text) == 0) {
                     this->isEditing = false;
                 } else {
@@ -260,18 +296,18 @@ void SDLImeManager::openInputDialog(
     // cancel
     dialog->getCancelEvent()->subscribe([this, eventID1]()
         {
-            SDL_StopTextInput();
+            sdlStopTextInput();
             event->unsubscribe(eventID1); });
 
     // submit
     dialog->getSubmitEvent()->subscribe([this, eventID1, cb]()
         {
-            SDL_StopTextInput();
+            sdlStopTextInput();
             event->unsubscribe(eventID1);
             cb(this->inputBuffer);
             return true; });
 
-    SDL_StartTextInput();
+    sdlStartTextInput();
     dialog->open();
 }
 

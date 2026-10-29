@@ -8,8 +8,14 @@ project(AURORE_DEMO)
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "")
 
-# SDL sources are in a subfolder named "SDL"
-add_subdirectory(SDL)
+# SDL2's sources are in a subfolder named "SDL", SDL3's in "SDL3" (the
+# Gradle project gives AURORE_WINDOW: SDL2 or SDL3)
+if (AURORE_WINDOW STREQUAL "SDL3")
+    set(SDL_TEST_LIBRARY OFF)
+    add_subdirectory(SDL3)
+else ()
+    add_subdirectory(SDL)
+endif ()
 
 # Compilation of companion libraries
 #add_subdirectory(SDL_image)

@@ -3,19 +3,25 @@ cmake_minimum_required(VERSION 3.16...3.31)
 set(AURORE_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)
 
 # The demo in a browser (web/README.md): the desktop build, compiled by
-# Emscripten (emcmake), with SDL2 and OpenGL ES 3 (WebGL 2) from Emscripten's
-# own ports. Its toolchain file is only read by project(), below.
+# Emscripten (emcmake), with SDL2 (or SDL3: -DAURORE_WINDOW=SDL3) and
+# OpenGL ES 3 (WebGL 2) from Emscripten's own ports. Its toolchain file is
+# only read by project(), below.
 set(AURORE_WEB OFF)
 if (CMAKE_TOOLCHAIN_FILE MATCHES "Emscripten\\.cmake$")
     set(AURORE_WEB ON)
     set(AURORE_PLATFORM DESKTOP CACHE STRING "" FORCE)
-    set(AURORE_WINDOW SDL2 CACHE STRING "" FORCE)
+    string(TOUPPER "${AURORE_WINDOW}" AURORE_WINDOW)
+    if (NOT AURORE_WINDOW STREQUAL "SDL3")
+        set(AURORE_WINDOW SDL2)
+    endif ()
+    set(AURORE_WINDOW ${AURORE_WINDOW} CACHE STRING "" FORCE)
+    string(REPLACE "SDL" "" AURORE_WEB_SDL ${AURORE_WINDOW})
     set(AURORE_GRAPHICS GLES3 CACHE STRING "" FORCE)
-    set(USE_SYSTEM_SDL2 ON CACHE BOOL "" FORCE)
-    set(SDL2_DIR ${CMAKE_CURRENT_SOURCE_DIR}/web/cmake)
+    set(USE_SYSTEM_${AURORE_WINDOW} ON CACHE BOOL "" FORCE)
+    set(${AURORE_WINDOW}_DIR ${CMAKE_CURRENT_SOURCE_DIR}/web/cmake)
     # Packaged into the page's file system at /app/resources (below)
     set(AURORE_RESOURCES_ROOT /app CACHE STRING "" FORCE)
-    add_compile_options(-pthread -sUSE_SDL=2 -sUSE_ZLIB=1 -fexceptions)
+    add_compile_options(-pthread -sUSE_SDL=${AURORE_WEB_SDL} -sUSE_ZLIB=1 -fexceptions)
 endif ()
 
 # build options
@@ -200,7 +206,7 @@ endif ()
 # then the page around it in <build>/web/.
 if (AURORE_WEB)
     target_link_options(${PROJECT_NAME} PRIVATE
-        -pthread -fexceptions -sUSE_SDL=2 -sUSE_ZLIB=1
+        -pthread -fexceptions -sUSE_SDL=${AURORE_WEB_SDL} -sUSE_ZLIB=1
         -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES3
         -sALLOW_MEMORY_GROWTH -sINITIAL_MEMORY=128MB -sSTACK_SIZE=1MB -sDEFAULT_PTHREAD_STACK_SIZE=1MB
         -sPTHREAD_POOL_SIZE=8 -sEXIT_RUNTIME=0

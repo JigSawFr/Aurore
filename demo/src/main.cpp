@@ -15,7 +15,10 @@
     limitations under the License.
 */
 
-#if defined(ANDROID) || defined(IOS)
+// Android and iOS start the app through SDL, which renames main()
+#if (defined(ANDROID) || defined(IOS)) && defined(__SDL3__)
+#include <SDL3/SDL_main.h>
+#elif defined(ANDROID) || defined(IOS)
 #include <SDL2/SDL_main.h>
 #endif
 
