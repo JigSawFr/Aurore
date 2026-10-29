@@ -427,7 +427,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
         <li><a href="{base}#features">{t("nav_features")}</a></li>
         <li><a href="{base}docs/getting-started/">{t("nav_docs")}</a></li>
         {api}
-        <li><a href="{REPO_URL}">GitHub</a></li>
+        <li class="nav-gh"><a href="{REPO_URL}">GitHub</a></li>
         <li><a href="{to_root}{lang_dir(other[0])}{path}" lang="{other[0]}" hreflang="{other[0]}">{t("other_label")}</a></li>
       </ul>
     </nav>

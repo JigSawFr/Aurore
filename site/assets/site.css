@@ -351,10 +351,15 @@ footer.site a:hover { color: var(--aurora); }
 
 /* A phone: the header on one line, the language as its code. */
 @media (max-width: 560px) {
-  .top { flex-wrap: nowrap; }
+  /* The name and its menu on a row, the links on one row under it
+     (GitHub is in the footer). */
+  .top { padding-block: 10px 6px; row-gap: 2px; }
+  .top nav { flex-basis: 100%; }
+  .top nav ul { flex-wrap: nowrap; margin-left: -8px; }
   .brand { font-size: 1.15rem; }
   .brand img { width: 30px; height: 30px; }
-  .top nav li:first-child { display: none; }
+  .top nav li:first-child, .top nav .nav-gh { display: none; }
+  .top nav li:last-child { margin-left: auto; }
   .top nav a { padding: 0 8px; font-size: 0.875rem; }
   .top nav a[lang] { font-size: 0; padding: 0 10px; }
   .top nav a[lang]::after { content: attr(lang); font-size: 0.8125rem; text-transform: uppercase; }
