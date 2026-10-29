@@ -3,6 +3,8 @@
 
 #include <3ds.h>
 
+#include <algorithm>
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>
@@ -14,14 +16,87 @@
 namespace aurore
 {
 
+// libctru's keys for each of Aurore's buttons, the Switch's layout (A on the
+// right, B at the bottom); ZL, ZR and the C-stick are the New models'
+static const u32 CTR_BUTTONS_MAPPING[_BUTTON_MAX] = {
+    KEY_ZL, // BUTTON_LT
+    KEY_L, // BUTTON_LB
+
+    0, // BUTTON_LSB
+
+    KEY_DUP, // BUTTON_UP
+    KEY_DRIGHT, // BUTTON_RIGHT
+    KEY_DDOWN, // BUTTON_DOWN
+    KEY_DLEFT, // BUTTON_LEFT
+
+    KEY_SELECT, // BUTTON_BACK
+    0, // BUTTON_GUIDE
+    KEY_START, // BUTTON_START
+
+    0, // BUTTON_RSB
+
+    KEY_Y, // BUTTON_Y
+    KEY_B, // BUTTON_B
+    KEY_A, // BUTTON_A
+    KEY_X, // BUTTON_X
+
+    KEY_R, // BUTTON_RB
+    KEY_ZR, // BUTTON_RT
+
+    // The D-pad, the Circle Pad (libctru's KEY_UP…) or the C-stick
+    KEY_UP | KEY_CSTICK_UP, // BUTTON_NAV_UP
+    KEY_RIGHT | KEY_CSTICK_RIGHT, // BUTTON_NAV_RIGHT
+    KEY_DOWN | KEY_CSTICK_DOWN, // BUTTON_NAV_DOWN
+    KEY_LEFT | KEY_CSTICK_LEFT, // BUTTON_NAV_LEFT
+};
+
+// The Circle Pad's and the C-stick's reach, about ±156 at the edge (clamped:
+// it varies from a console to another); a stick's y grows upwards, Aurore's
+// downwards
+static constexpr float CTR_STICK_RANGE = 156.0f;
+
+static float stickAxis(s16 value)
+{
+    return std::clamp(value / CTR_STICK_RANGE, -1.0f, 1.0f);
+}
+
 void CtrInputManager::updateUnifiedControllerState(ControllerState* state)
 {
-    *state = {};
+    this->updateControllerState(state, 0);
 }
 
 void CtrInputManager::updateControllerState(ControllerState* state, int controller)
 {
-    *state = {};
+    // hidScanInput() ran in mainLoopIteration()
+    u32 keys = hidKeysHeld();
+    for (size_t i = 0; i < _BUTTON_MAX; i++)
+        state->buttons[i] = keys & CTR_BUTTONS_MAPPING[i];
+
+    circlePosition pad, cstick;
+    hidCircleRead(&pad);
+    hidCstickRead(&cstick);
+    state->axes[LEFT_X]  = stickAxis(pad.dx);
+    state->axes[LEFT_Y]  = -stickAxis(pad.dy);
+    state->axes[RIGHT_X] = stickAxis(cstick.dx);
+    state->axes[RIGHT_Y] = -stickAxis(cstick.dy);
+    // ZL and ZR are buttons, not triggers
+    state->axes[LEFT_Z]  = state->buttons[BUTTON_LT] ? 1.0f : 0.0f;
+    state->axes[RIGHT_Z] = state->buttons[BUTTON_RT] ? 1.0f : 0.0f;
+}
+
+void CtrInputManager::updateTouchStates(std::vector<RawTouchState>* states)
+{
+    // The bottom screen, one finger, in its pixels (320x240): the window's
+    if (!(hidKeysHeld() & KEY_TOUCH))
+        return;
+    touchPosition touch;
+    hidTouchRead(&touch);
+    RawTouchState state;
+    state.pressed    = true;
+    state.fingerId   = 0;
+    state.position.x = touch.px / Application::windowScale;
+    state.position.y = touch.py / Application::windowScale;
+    states->push_back(state);
 }
 
 void CtrFontLoader::loadFonts()

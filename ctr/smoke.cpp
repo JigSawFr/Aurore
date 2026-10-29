@@ -5,14 +5,17 @@
 // the bottom screen: a layout made from XML (boxes, labels) with the small
 // screen preset, and a view that draws every kind of paint and fill nanovg's
 // citro3d renderer handles (colour, gradients, image, nonzero fill, hole,
-// strokes, scissor, text). The log goes to the top screen. START quits
-// (docs/platforms.md).
+// strokes, scissor, text). Three buttons and a line for the input: the
+// D-pad, the Circle Pad or the C-stick move the focus, A or a touch clicks,
+// the line shows the buttons held, the sticks and the touch. The log goes to
+// the top screen. START quits (docs/platforms.md).
 
 #include <3ds.h>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <string>
 #include <aurore.hpp>
 #include <aurore/version.hpp>
 
@@ -23,6 +26,12 @@ const char* const LAYOUT = R"xml(
 <aurore:Box axis="column" width="100%" height="100%" padding="12dp" backgroundColor="#101828">
     <aurore:Label id="title" fontSize="22" textColor="#F5F7FF" marginBottom="4dp" />
     <aurore:Label id="details" fontSize="15" textColor="#9AA8C7" marginBottom="8dp" />
+    <aurore:Box axis="row" marginBottom="6dp">
+        <aurore:Button id="one" text="One" grow="1" marginRight="6dp" style="primary" />
+        <aurore:Button id="two" text="Two" grow="1" marginRight="6dp" />
+        <aurore:Button id="three" text="Three" grow="1" />
+    </aurore:Box>
+    <aurore:Label id="input" fontSize="13" textColor="#9AA8C7" />
 </aurore:Box>
 )xml";
 
@@ -126,6 +135,36 @@ class TestCard : public aurore::Box
     int image = 0;
 };
 
+// What Aurore reads this frame, in a line
+std::string describeInput()
+{
+    static const char* const NAMES[aurore::_BUTTON_MAX] = { "ZL", "L", nullptr, "Up", "Right", "Down", "Left",
+        "SELECT", nullptr, "START", nullptr, "Y", "B", "A", "X", "R", "ZR", nullptr, nullptr, nullptr, nullptr };
+    const aurore::ControllerState& state                = aurore::Application::getControllerState();
+    std::string line;
+    for (int i = 0; i < aurore::_BUTTON_MAX; i++)
+        if (NAMES[i] && state.buttons[i])
+            line += std::string(NAMES[i]) + " ";
+    char sticks[64];
+    std::snprintf(sticks, sizeof(sticks), "pad %+.2f %+.2f  C %+.2f %+.2f", state.axes[aurore::LEFT_X],
+        state.axes[aurore::LEFT_Y], state.axes[aurore::RIGHT_X], state.axes[aurore::RIGHT_Y]);
+    line += sticks;
+    if (hidKeysHeld() & KEY_TOUCH)
+    {
+        touchPosition touch;
+        hidTouchRead(&touch);
+        line += "  touch " + std::to_string(touch.px) + "," + std::to_string(touch.py);
+    }
+    return line;
+}
+
+// A button clicked (A or a touch), in the log
+bool logClick(aurore::View* view)
+{
+    std::printf("Clicked %s\n", view->getId().c_str());
+    return true;
+}
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -146,14 +185,24 @@ int main(int argc, char** argv)
         title->setText("Aurore on citro3d");
     if (auto* details = dynamic_cast<aurore::Label*>(root->getView("details")))
         details->setText(aurore::Application::getPlatform()->getName() + ", Aurore " + AURORE_VERSION);
+    auto* input = dynamic_cast<aurore::Label*>(root->getView("input"));
+    for (const char* id : { "one", "two", "three" })
+        root->getView(id)->registerClickAction(logClick);
     root->addView(new TestCard());
     aurore::Application::pushActivity(new aurore::Activity(root));
 
+    std::string shown;
     while (aurore::Application::mainLoop())
     {
         // The platform scans the buttons each frame
         if (hidKeysDown() & KEY_START)
             break;
+        std::string line = describeInput();
+        if (input && line != shown)
+        {
+            input->setText(line);
+            shown = line;
+        }
     }
     return 0;
 }
