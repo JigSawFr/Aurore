@@ -42,6 +42,7 @@ AURORE_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
     setenv("AURORE_REDRAW_DEBUG", "1", 1);
     setenv("AURORE_PROFILE", "1", 1);
     setenv("AURORE_STILL_FOCUS", "1", 1);
+    setenv("AURORE_SAFE_AREA", "10,20", 1);
 
     Harness harness;
     harness.step(2);
@@ -50,6 +51,7 @@ AURORE_TEST(environment_turns_the_debugging_aids_on_only_when_built_in)
     AURORE_CHECK_EQ(aurore::Application::isRedrawDebug(), BUILT_IN);
     AURORE_CHECK_EQ(aurore::Profiler::isEnabled(), BUILT_IN);
     AURORE_CHECK_EQ(ui::env_flag("STILL_FOCUS"), BUILT_IN);
+    AURORE_CHECK_EQ(aurore::Application::getSafeArea() == (aurore::Insets { 10, 20, 10, 20 }), BUILT_IN);
 }
 
 AURORE_TEST(the_debugging_aids_functions_work_in_every_build)
@@ -64,6 +66,11 @@ AURORE_TEST(the_debugging_aids_functions_work_in_every_build)
     aurore::Application::setRedrawDebug(true);
     AURORE_CHECK(aurore::Application::isRedrawDebug());
     aurore::Application::setRedrawDebug(false);
+    const aurore::Insets notch = { 0, 48, 0, 48 };
+    aurore::Application::setSafeAreaOverride(&notch);
+    AURORE_CHECK(aurore::Application::getSafeArea() == notch);
+    aurore::Application::setSafeAreaOverride(nullptr);
+    AURORE_CHECK(aurore::Application::getSafeArea().empty());
 }
 
 int main(int argc, char** argv)

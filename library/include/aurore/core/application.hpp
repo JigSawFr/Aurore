@@ -33,6 +33,7 @@
 #include <aurore/core/notification_manager.hpp>
 #include <aurore/core/observable.hpp>
 #include <aurore/core/platform.hpp>
+#include <aurore/core/screen_frame.hpp>
 #include <aurore/core/style.hpp>
 #include <aurore/core/theme.hpp>
 #include <aurore/core/view.hpp>
@@ -156,8 +157,22 @@ class Application
     inline static float presetTextScale = 1.0f;
     inline static bool presetChosen     = false; ///< usePreset() called by the app
 
-    /// The window's size in pixels.
+    /// The app's screen's size in pixels: the window's, or the screen's in
+    /// it when there is a ScreenFrame.
     inline static unsigned windowWidth, windowHeight;
+    /// The window's whole size in pixels (what is drawn and read back).
+    inline static unsigned framebufferWidth, framebufferHeight;
+
+    /**
+     * A frame drawn around the app's screen (the demo's simulated consoles):
+     * the app laid out and drawn in its screen, the frame over the rest of
+     * the window. Kept by the application (deleted when replaced); nullptr
+     * for none, the window all screen.
+     */
+    static void setScreenFrame(ScreenFrame* frame);
+    static ScreenFrame* getScreenFrame();
+    /// The screen's rectangle in the window, in pixels.
+    static Rect getScreenRect();
 
     /// The window's position on the screen (desktop).
     inline static int windowXPos, windowYPos;
@@ -465,6 +480,48 @@ class Application
      */
     static void setMaximumUIScale(float scale);
     static float getMaximumUIScale();
+
+    /**
+     * The safe area, in layout units (docs/safe-areas.md): how far from each
+     * edge of the window content keeps clear of the display cutouts, rounded
+     * corners and system bars the platform reports (Platform::getSafeAreaInsets),
+     * or of the overscan margin, whichever is larger. Zero on desktops and
+     * consoles, unless set with setSafeAreaOverride() or setOverscan().
+     */
+    static Insets getSafeArea();
+
+    /**
+     * Reads the platform's safe area again; when it changed, the activities'
+     * views take it (Box::setSafeArea) and getSafeAreaChangedEvent() fires.
+     * The platforms call it when it may have changed (a rotation); a resize
+     * reads it too.
+     */
+    static void updateSafeArea();
+
+    /// Fired with the new safe area (layout units) when it changed.
+    static Event<Insets>* getSafeAreaChangedEvent();
+
+    /// True once a safe area other than zero was set: until then the views
+    /// do no work for it.
+    static bool isSafeAreaInUse() { return Application::safeAreaInUse; }
+
+    /**
+     * In place of what the platform reports, these insets, in the unit of the
+     * window's size: a notch or a TV seen on a desktop, a test. nullptr goes
+     * back to the platform's. In a build with AURORE_DEV_TOOLS, the
+     * environment variable AURORE_SAFE_AREA sets it at init ("t,r,b,l", as a
+     * CSS padding).
+     */
+    static void setSafeAreaOverride(const Insets* insets);
+
+    /**
+     * A TV's overscan: a margin at each edge, as a fraction of the window's
+     * size (0.05: 5 %, a TV's title safe area; 0 by default, at most 0.25),
+     * that the safe area is never smaller than. For a setting of the app on
+     * consoles and TV boxes plugged into a set that crops the picture.
+     */
+    static void setOverscan(float fraction);
+    static float getOverscan();
 
     /**
      * Sets whether BUTTON_START will globally be used to close the application.
@@ -827,6 +884,8 @@ class Application
     inline static bool redrawDebug         = false;
     inline static uint64_t missedRedraws   = 0;
     static Rect missedRedrawArea;
+    inline static std::unique_ptr<ScreenFrame> screenFrame;
+    inline static Rect screenRect;
     inline static std::vector<unsigned char> presentedPixels;
     inline static int presentedWidth = 0, presentedHeight = 0;
     inline static int deactivatedFPS  = 5; ///< FPS 5
@@ -842,6 +901,17 @@ class Application
     inline static VoidEvent exitEvent;
     inline static VoidEvent exitDoneEvent;
     inline static VoidEvent windowSizeChangedEvent;
+    inline static Event<Insets> safeAreaChangedEvent;
+    inline static Insets safeArea;
+    inline static Insets safeAreaOverride;
+    inline static bool hasSafeAreaOverride = false;
+    inline static float overscan           = 0.0f;
+    // A safe area other than zero was ever set: the views take it as they
+    // are added (none of that work until then)
+    inline static bool safeAreaInUse = false;
+    // The safe area from the platform's, the override and the overscan, in
+    // layout units: true when it changed
+    static bool computeSafeArea();
     inline static VoidEvent windowCreationDoneEvent;
     inline static VoidEvent windowShouldCloseEvent;
     inline static Event<bool> windowFocusChangedEvent;

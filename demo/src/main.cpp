@@ -31,6 +31,7 @@
 
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
+#include "simulation.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -87,6 +88,7 @@ int main(int argc, char* argv[])
     // We recommend to use INFO for real apps
     std::string themeFile;
     const char* checkThemes = nullptr;
+    const char* simulate    = nullptr;
     for (int i = 1; i < argc; i++)
     {
         if (std::strcmp(argv[i], "-d") == 0)
@@ -110,6 +112,10 @@ int main(int argc, char* argv[])
         { // Check the presets and a folder, then quit
             checkThemes = (i + 1 < argc) ? argv[++i] : "@res/themes";
         }
+        else if (std::strcmp(argv[i], "--simulate") == 0 && i + 1 < argc)
+        { // A console's screen, drawn around it (switch, vita, ps4, 3ds, phone)
+            simulate = argv[++i];
+        }
         else if (std::strcmp(argv[i], "-r") == 0)
         { // Redraw on demand
             aurore::Application::setRedrawOnDemand(true);
@@ -120,6 +126,8 @@ int main(int argc, char* argv[])
 
     // Before init(): Cadran reads its preferences from it on
     demo::installHooks();
+    // Before init() too: the simulated console's layout preset
+    demo::simulation::choose(simulate);
 
     // Init the app and i18n
     if (!aurore::Application::init())
@@ -129,6 +137,7 @@ int main(int argc, char* argv[])
     }
 
     aurore::Application::createWindow("demo/title"_i18n);
+    demo::simulation::start();
 
     // Out at once: nothing of the app to close
     if (checkThemes)

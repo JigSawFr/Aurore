@@ -147,6 +147,7 @@ class HeadlessPlatform : public DesktopPlatform
     void openBrowser(std::string url) override { openedUrls.push_back(url); }
     void pasteToClipboard(const std::string& text) override { clipboard = text; }
     std::string pasteFromClipboard() override { return clipboard; }
+    Insets getSafeAreaInsets() override { return safeAreaInsets; }
 
     HeadlessInputManager* getHeadlessInput() { return &inputManager; }
     HeadlessImeManager* getHeadlessIme() { return &headlessImeManager; }
@@ -162,6 +163,8 @@ class HeadlessPlatform : public DesktopPlatform
     bool showStatus = false;
     // What getBatteryLevel() says (read on the task thread)
     std::atomic<int> batteryLevel { 100 };
+    // What getSafeAreaInsets() says: a phone's notch (Harness::setSafeArea)
+    Insets safeAreaInsets;
 
   private:
     int width, height;

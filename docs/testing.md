@@ -48,6 +48,7 @@ What it gives:
 | `screenshot()` | the last frame drawn, as an `Image` (RGBA, `savePng`, `loadPng`, `crop`) |
 | `matchesReference(name, tolerance, maxRatio)`, also with an area | the screenshot (or a part) against `<references>/<name>.png`, see below |
 | `resize(w, h)` | a new window size |
+| `setSafeArea(insets)` | the platform reports this safe area (a notch, the system's bars: [safe-areas.md](safe-areas.md)), the screen laid out again |
 | `platform()` | the `HeadlessPlatform`: `openedUrls` (what `openBrowser` was asked), the clipboard, `requestClose()` |
 
 `compareImages(actual, expected, tolerance)` compares two images on its own: a pixel differs when a channel is off by more than `tolerance`, and the result has the count, the ratio, the largest difference and a map of the differences.
@@ -121,6 +122,24 @@ TSAN_OPTIONS=suppressions=$PWD/tests/tsan.supp ctest --test-dir build-tsan -R au
 `tests/tsan.supp` leaves out what Mesa's software renderer, which draws the tests and is not built with the sanitizer, does in its own threads.
 
 `tests/host/`: Cadran's plain C++ parts without a window, each suite linked only to the sources it tests: the palettes' contrast (every pair of `cadran::palette::CONTRAST`, both themes), safe text and the Markdown parser, `ui::guarded`, and the text helpers (`cadran_text`, `format_text`) over the real `cadran.json` catalogs. `ctest -R host` runs them alone.
+
+## Fuzzing
+
+`-DAURORE_BUILD_FUZZERS=ON`, with the tests and clang (and its runtimes, `libclang-rt-18-dev` on Ubuntu), builds the libFuzzer targets of `tests/fuzz`, under AddressSanitizer and UndefinedBehaviorSanitizer:
+
+| Target | What it reads |
+| --- | --- |
+| `aurore_fuzz_markdown` | Cadran's Markdown and `safe_text`, on any bytes: the bounds `markdown.hpp` promises, every string valid UTF-8, `clean()` stable |
+| `aurore_fuzz_theme` | A theme file (`Theme::load`), as an app reads one from a folder its user fills, from an empty folder of its own: nothing it includes or inherits is read; and `Theme::parseColor`. The library is built for the fuzzer too, so that it follows the paths inside it: a build of its own |
+
+```sh
+CC=clang CXX=clang++ cmake -B build-fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAURORE_PLATFORM=DESKTOP \
+    -DAURORE_LIBROMFS=ON -DAURORE_BUILD_TESTS=ON -DAURORE_BUILD_FUZZERS=ON
+cmake --build build-fuzz --target aurore_fuzz_markdown aurore_fuzz_theme
+mkdir -p corpus/theme && build-fuzz/tests/aurore_fuzz_theme -max_total_time=60 corpus/theme resources/themes
+```
+
+CI's `linux (fuzz)` runs each for two minutes on every pull request, from the corpus the runs before it grew (and the repository's docs and themes); an input that crashes one goes up as the `fuzz-crashes` artifact, to run again with `aurore_fuzz_theme <file>`.
 
 ## The bench
 

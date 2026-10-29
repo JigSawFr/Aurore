@@ -39,6 +39,7 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/core/platform.hpp>
 #include <aurore/core/profiler.hpp>
+#include <aurore/core/safe_area.hpp>
 #include <aurore/core/style.hpp>
 #include <aurore/core/task.hpp>
 #include <aurore/core/theme.hpp>

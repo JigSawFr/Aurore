@@ -613,8 +613,8 @@ double SDLVideoContext::getScaleFactor()
 bool SDLVideoContext::readPixels(std::vector<unsigned char>* rgba, int* width, int* height)
 {
 #ifdef AURORE_USE_OPENGL
-    *width  = (int)Application::windowWidth;
-    *height = (int)Application::windowHeight;
+    *width  = (int)Application::framebufferWidth;
+    *height = (int)Application::framebufferHeight;
     return glReadPixelsTopDown(*width, *height, rgba);
 #else
     return false;

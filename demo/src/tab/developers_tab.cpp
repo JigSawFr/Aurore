@@ -23,6 +23,7 @@
 #include <cmath>
 
 #include "demo_app.hpp"
+#include "simulation.hpp"
 #include "view/showcase.hpp"
 
 using namespace aurore::literals; // for _i18n
@@ -148,6 +149,24 @@ DevelopersTab::DevelopersTab()
         return true; });
     cadran::List::row(layout, "lines");
     rows->addView(layout);
+    // A console's screen, the console drawn around it (demo/src/simulation.cpp)
+    auto* simulate = new aurore::DetailCell();
+    simulate->setText("demo/developers/simulate"_i18n);
+    simulate->setDetailText(demo::simulation::displayName(demo::simulation::current()) + "  ›");
+    simulate->registerClickAction([](aurore::View*)
+        {
+        std::vector<ui::Choice> choices;
+        for (const auto& device : demo::simulation::devices())
+        {
+            std::string id = device.id;
+            bool shown     = &device == &demo::simulation::current();
+            choices.emplace_back(demo::simulation::displayName(device), [id]()
+                { demo::simulation::use(id); }, nullptr, "", "", shown ? ui::Choice::Tone::ON : ui::Choice::Tone::PLAIN);
+        }
+        ui::pick_actions("demo/developers/simulate"_i18n, choices);
+        return true; });
+    cadran::List::row(simulate, "gamepad");
+    rows->addView(simulate);
 
     // Data binding and what a screen reader would say
     aurore::Box* binding = show::section(page, "refresh", "demo/styles/binding"_i18n, "demo/developers/binding_lead"_i18n);

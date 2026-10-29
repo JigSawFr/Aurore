@@ -48,7 +48,8 @@ def versions():
                                           define(sdl3, "SDL_MICRO_VERSION"))
     glfw = lib / "glfw" / "include" / "GLFW" / "glfw3.h"
     if glfw.exists():
-        found["GLFW"] = "{}.{}".format(define(glfw, "GLFW_VERSION_MAJOR"), define(glfw, "GLFW_VERSION_MINOR"))
+        found["GLFW"] = "{}.{}.{}".format(define(glfw, "GLFW_VERSION_MAJOR"), define(glfw, "GLFW_VERSION_MINOR"),
+                                          define(glfw, "GLFW_VERSION_REVISION"))
     fmt = define(lib / "fmt" / "include" / "fmt" / "base.h", "FMT_VERSION")
     found["{fmt}"] = "{}.{}.{}".format(fmt // 10000, fmt // 100 % 100, fmt % 100)
     xml = read(inc / "tinyxml2" / "tinyxml2.h")
