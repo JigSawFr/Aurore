@@ -66,6 +66,7 @@ SwitchPlatform::SwitchPlatform()
         this->themeVariant = ThemeVariant::DARK;
     else
         this->themeVariant = ThemeVariant::LIGHT;
+    this->systemThemeVariant = this->themeVariant;
 
     Logger::info("switch system theme: {}", colorSetId ? "Dark" : "Light");
 
@@ -293,6 +294,11 @@ void SwitchPlatform::setThemeVariant(ThemeVariant theme)
 #ifdef AURORE_USE_DEKO3D
     this->videoContext->recordStaticCommands();
 #endif
+}
+
+void SwitchPlatform::followSystemTheme()
+{
+    this->setThemeVariant(this->systemThemeVariant);
 }
 
 SwitchPlatform::~SwitchPlatform()

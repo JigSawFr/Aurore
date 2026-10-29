@@ -134,7 +134,29 @@ void SDLPlatform::createWindow(std::string windowTitle, uint32_t windowWidth, ui
     this->videoContext = new SDLVideoContext(windowTitle, windowWidth, windowHeight, windowXPos, windowYPos);
     this->inputManager = new SDLInputManager(this->videoContext->getSDLWindow());
     this->imeManager   = new SDLImeManager(&this->otherEvent);
+
+#ifdef __SDL3__
+    // The system's light or dark, which SDL3 reads everywhere (Linux's
+    // desktop portal too), unless AURORE_THEME gave one. Its video must be
+    // started first.
+    if (!this->themeFromEnvironment)
+    {
+        this->themeFollowsSystem = true;
+        this->readSystemTheme();
+    }
+#endif
 }
+
+#ifdef __SDL3__
+void SDLPlatform::readSystemTheme()
+{
+    SDL_SystemTheme theme = SDL_GetSystemTheme();
+    if (theme == SDL_SYSTEM_THEME_DARK)
+        this->systemThemeChanged(ThemeVariant::DARK);
+    else if (theme == SDL_SYSTEM_THEME_LIGHT)
+        this->systemThemeChanged(ThemeVariant::LIGHT);
+}
+#endif
 
 void SDLPlatform::restoreWindow()
 {
@@ -231,6 +253,18 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         auto* manager = this->inputManager;
         if (manager)
             manager->getMouseCusorEntered()->fire(event->type == SDL_EVENT_WINDOW_MOUSE_ENTER);
+    }
+    else if (event->type == SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED)
+    {
+        if (this->videoContext)
+            this->videoContext->displayScaleChanged();
+    }
+    else if (event->type == SDL_EVENT_SYSTEM_THEME_CHANGED)
+    {
+        // Kept for followSystemTheme when the app chose one; the next frame
+        // redraws in it otherwise (Application::checkThemeChanged)
+        if (!this->themeFromEnvironment)
+            this->readSystemTheme();
     }
     else if (event->type == SDL_EVENT_WINDOW_SAFE_AREA_CHANGED || event->type == SDL_EVENT_WINDOW_SHOWN
         || event->type == SDL_EVENT_WINDOW_RESIZED || event->type == SDL_EVENT_WINDOW_MAXIMIZED

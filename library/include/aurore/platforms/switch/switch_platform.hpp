@@ -33,6 +33,7 @@ class SwitchPlatform : public Platform
     bool mainLoopIteration() override;
     ThemeVariant getThemeVariant() override;
     void setThemeVariant(ThemeVariant theme) override;
+    void followSystemTheme() override;
     std::string getLocale() override;
     ImeManager* getImeManager() override;
 
@@ -62,6 +63,7 @@ class SwitchPlatform : public Platform
 
   private:
     ThemeVariant themeVariant;
+    ThemeVariant systemThemeVariant; // the console's, read at start
     std::string locale;
 
     AudioPlayer* audioPlayer;

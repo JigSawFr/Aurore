@@ -8,7 +8,7 @@ A phone's screen has a notch or a punch hole, rounded corners, a status bar and 
 | --- | --- |
 | Android | The system bars, the display cutout and the rounded corners over the SDL surface (`PlatformUtils.getSafeAreaInsets`, through JNI): `WindowInsets` of the bars and the cutout from Android 11, the system window insets and `DisplayCutout` before, nothing before Android 6. A rounded corner of radius *r* keeps *r* (1 − 1/√2) from both its edges (a rectangle's corner set in that far stays inside it). The keyboard is not part of it |
 | iOS, tvOS | `UIWindow.safeAreaInsets` (under SDL3, through `SDL_GetWindowSafeArea`, which reads it): the notch, the rounded corners, the home indicator; on tvOS, the TV's safe area |
-| Desktops, Switch, PS4, PS Vita, a browser | Nothing: zero, unless set (below) |
+| Desktops, Switch, PS4, PS Vita, New 3DS, a browser | Nothing: zero, unless set (below) |
 
 The platform says it in the unit of the window's size (points on iOS, pixels on Android) through `Platform::getSafeAreaInsets()`. `Application::getSafeArea()` has it in layout units, whole ones, never more than a third of the window from an edge, and never less than the overscan margin.
 

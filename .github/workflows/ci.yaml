@@ -289,11 +289,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        driver: [gl, d3d11, gl-sdl3, d3d11-sdl3]
+        # SDL3 by default; GLFW kept
+        driver: [gl, d3d11, gl-glfw, d3d11-glfw]
         include:
           - { driver: d3d11, cmake: "-DAURORE_GRAPHICS=D3D11" }
-          - { driver: gl-sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
-          - { driver: d3d11-sdl3, cmake: "-DAURORE_GRAPHICS=D3D11 -DAURORE_WINDOW=SDL3" }
+          - { driver: gl-glfw, cmake: "-DAURORE_WINDOW=GLFW" }
+          - { driver: d3d11-glfw, cmake: "-DAURORE_GRAPHICS=D3D11 -DAURORE_WINDOW=GLFW" }
     defaults:
       run:
         shell: msys2 {0}
@@ -340,7 +341,6 @@ jobs:
           - { driver: gl3, cmake: "-DAURORE_WINDOW=GLFW", ext: "-glfw" }
           - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL2", ext: "-sdl2" }
           - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL3", ext: "-sdl3" }
-          - { driver: gles3, cmake: "-DAURORE_GRAPHICS=GLES3 -DAURORE_WINDOW=SDL3", ext: "-sdl3" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -383,8 +383,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { window: glfw, cmake: "" }
-          - { window: sdl3, cmake: "-DAURORE_WINDOW=SDL3" }
+          - { window: sdl3, cmake: "" }
+          - { window: glfw, cmake: "-DAURORE_WINDOW=GLFW" }
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -470,10 +470,11 @@ jobs:
       - name: Run
         run: ctest --test-dir build -R aurore_sdl_input_tests --output-on-failure
 
-  # The demo in a browser on SDL3 (-DAURORE_WINDOW=SDL3: Emscripten's SDL3
-  # port). The site's workflow builds and publishes the SDL2 one.
-  web-sdl3:
-    name: web (sdl3)
+  # The demo in a browser on SDL2 (-DAURORE_WINDOW=SDL2: Emscripten's SDL2
+  # port), still an option. The site's workflow builds and publishes the SDL3
+  # one, the default.
+  web-sdl2:
+    name: web (sdl2)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
@@ -491,7 +492,7 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.emscripten_cache
-          key: emscripten-sdl3-${{ env.EMSDK_VERSION }}
+          key: emscripten-sdl2-${{ env.EMSDK_VERSION }}
       - name: Emscripten ${{ env.EMSDK_VERSION }}
         run: |
           git clone --depth 1 --branch "$EMSDK_VERSION" https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
@@ -506,7 +507,7 @@ jobs:
           # After emsdk_env.sh, which unsets EM_CACHE
           source "$RUNNER_TEMP/emsdk/emsdk_env.sh"
           export EM_CACHE="$HOME/.emscripten_cache"
-          emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WINDOW=SDL3
+          emcmake cmake -B build-web -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_WINDOW=SDL2
           cmake --build build-web
       # The demo started in headless Chromium: its first screen, a key, the
       # service worker of GitHub Pages, the address' language and theme
@@ -526,7 +527,7 @@ jobs:
           retention-days: 7
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: aurore-web-sdl3
+          name: aurore-web-sdl2
           path: build-web/web
           retention-days: 7
 

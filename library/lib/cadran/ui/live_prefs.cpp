@@ -14,7 +14,6 @@ namespace live_prefs
 {
 namespace
 {
-    aurore::ThemeVariant s_system_theme = aurore::ThemeVariant::DARK;
     std::string s_system_locale; // the console's language
     std::string s_locale; // the strings' language now
     float s_app_density = aurore::DENSITY_COMFORTABLE; // the app's (or AURORE_DENSITY's)
@@ -96,7 +95,6 @@ void start()
     done = true;
     // The platform read the console's language (the app leaves Aurore's
     // locale on auto), and the strings are in it: the preferences' instead.
-    s_system_theme            = aurore::Application::getPlatform()->getThemeVariant();
     s_app_density             = aurore::getDensity();
     s_system_locale           = aurore::Application::getLocale();
     const std::string& chosen = ui::prefs().language;
@@ -107,10 +105,15 @@ void start()
 
 void apply_theme()
 {
-    ui::Prefs& p                 = ui::prefs();
+    ui::Prefs& p               = ui::prefs();
+    aurore::Platform* platform = aurore::Application::getPlatform();
+    // "system": the system's, followed as it changes where the platform can
+    const bool system = p.theme != "dark" && p.theme != "light";
+    if (system)
+        platform->followSystemTheme();
     aurore::ThemeVariant variant = p.theme == "dark" ? aurore::ThemeVariant::DARK
         : p.theme == "light"                         ? aurore::ThemeVariant::LIGHT
-                                                     : s_system_theme;
+                                                     : platform->getThemeVariant();
     if (p.theme_file.empty() || !aurore::Theme::loadFile(p.theme_file))
         aurore::Theme::reset();
     // A file for one variant only: that one, which the header's button and
@@ -122,7 +125,11 @@ void apply_theme()
         if (p.theme != "system")
             p.theme = variant == aurore::ThemeVariant::DARK ? "dark" : "light";
     }
-    aurore::Application::getPlatform()->setThemeVariant(variant);
+    // The system's kept, it stays followed, unless the file has only this
+    // variant: the system's other would then be drawn unstyled
+    const aurore::ThemeVariant other = variant == aurore::ThemeVariant::DARK ? aurore::ThemeVariant::LIGHT : aurore::ThemeVariant::DARK;
+    if (!system || variant != platform->getThemeVariant() || !aurore::Theme::styles(other))
+        platform->setThemeVariant(variant);
 }
 
 std::string locale()

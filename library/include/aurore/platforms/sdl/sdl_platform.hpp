@@ -51,6 +51,11 @@ class SDLPlatform : public DesktopPlatform
     SDLImeManager* imeManager     = nullptr;
     Event<SDL_Event*> otherEvent;
 
+#ifdef __SDL3__
+    /// The system's light or dark (systemThemeChanged)
+    void readSystemTheme();
+#endif
+
   private:
     // The safe area read again now and once the system settled (a rotation)
     void safeAreaMayHaveChanged();

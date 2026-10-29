@@ -27,6 +27,9 @@ class SDLVideoContext : public VideoContext
     void fullScreen(bool fs) override;
 
     SDL_Window* getSDLWindow();
+    /// SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED: the window keeps its size in
+    /// points where SDL3 sizes it in pixels (Windows, X11)
+    void displayScaleChanged();
 
     double getScaleFactor() override;
     bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) override;
@@ -34,6 +37,7 @@ class SDLVideoContext : public VideoContext
   private:
     SDL_Window* window     = nullptr;
     NVGcontext* nvgContext = nullptr;
+    float displayScale     = 0.0f; // SDL_GetWindowDisplayScale, last seen
 };
 
 } // namespace aurore

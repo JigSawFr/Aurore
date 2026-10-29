@@ -30,7 +30,7 @@ bench.
   purpose updates it with `aurore_bench --write-baseline tests/bench_baseline.json` and says why.
 - **Format**: `clang-format-18 -i <files>` on what you touch (`.clang-format`); CI checks every file outside `extern/`.
   Reformatting commits are listed in `.git-blame-ignore-revs` (`git config blame.ignoreRevsFile .git-blame-ignore-revs`).
-- **Other platforms** (Switch, PS Vita, PS4, Android, iOS, Windows, macOS) are built by CI on every pull request. The macOS and iOS jobs are not required: GitHub's macOS runners sometimes leave them without a machine until they are cancelled, so their failure does not fail the run; a failure that comes from the change is still fixed.
+- **Other platforms** (Switch, PS Vita, PS4, New 3DS, Android, iOS, Windows, macOS, a browser) are built by CI on every pull request. The macOS and iOS jobs are not required: GitHub's macOS runners sometimes leave them without a machine until they are cancelled, so their failure does not fail the run; a failure that comes from the change is still fixed.
 
 ## Pull requests
 
