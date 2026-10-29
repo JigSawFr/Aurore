@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Makes the two fonts the library draws with where the system gives none
 # (every platform but the Switch, whose shared fonts are used):

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The New 3DS: a test card drawn by citro3d, built by the root
 # CMakeLists.txt with -DAURORE_PLATFORM=3DS instead of the demo
 # (docs/platforms.md). The library's resources (fonts, pictures) go in its

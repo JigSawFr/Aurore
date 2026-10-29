@@ -1,5 +1,8 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-FileCopyrightText: 2026 Taylor
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui — dialogs, confirmations, a web page's QR code, the dropdown, and keyboard prompts.
-// Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #include <aurore/cadran/ui/ui.hpp>
 
 #include <aurore/cadran/ui/cadran_frame.hpp>

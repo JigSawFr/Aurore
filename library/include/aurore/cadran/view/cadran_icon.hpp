@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // CadranIcon — Cadran's icons, drawn as nanovg paths from
 // the design boards' 24-unit SVG strokes (no SVG loader in Aurore):
 // today, timer, activity, shield, lock, globe, settings, tools, info, plus,
@@ -12,7 +15,6 @@
 // A theme replaces "mark" with its `logo`, and any other icon with its
 // `icon.<name>` picture, drawn as is or as a mask in the icon's colour
 // (docs/themes.md, "Logos and images").
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <memory>

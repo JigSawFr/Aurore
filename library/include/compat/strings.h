@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef _STRINGS_H
 #define _STRINGS_H
 #include <string.h>

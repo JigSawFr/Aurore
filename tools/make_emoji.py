@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Fetches the emoji of resources/img/emoji (README.md there) from one
 # Twemoji release, VERSION below: its 72x72 PNGs, as they are.

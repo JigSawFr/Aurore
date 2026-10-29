@@ -24,3 +24,7 @@ Under `emcmake`, the top `CMakeLists.txt` builds the desktop platform with SDL3 
 - **Controls**: the keyboard reaches SDL (the arrows, Enter for Ⓐ, Esc for Ⓑ, X, Y, L, R, F12 for the inspector), a click is a touch, and **Pad** shows the controller on screen (at once on a touch screen; the choice is remembered): under the screen in portrait, beside it in landscape. **Full screen** shows the screen and the pad only.
 - The page is in English, in French for a French browser; it follows the website's look (`site/assets/`).
 - Its Content-Security-Policy allows only its own files, WebAssembly and the workers Emscripten starts.
+
+## Testing it
+
+`tools/web_smoke.py build-web/web build-web/smoke` starts the demo in headless Chromium (Playwright for Python, and Pillow) three ways: served with the headers threads need, served without them as GitHub Pages does (the service worker adds them), and with `?lang=fr&theme=winter`. Each fails when the page throws or says the demo cannot start or has stopped, when the first screen is blank, or when the down arrow changes nothing on screen; each canvas is written to `build-web/smoke/<name>.png`, with what the demo logged. CI runs it on the SDL2 build the site publishes (`site.yml`) and on the SDL3 one (`ci.yaml`, `web (sdl3)`).

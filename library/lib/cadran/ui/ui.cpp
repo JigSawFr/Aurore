@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-FileCopyrightText: 2026 Taylor
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui — toasts, the failures said in a dialog and screen changes. The other
 // cadran/ui/*.cpp hold the rest of ui.hpp by concern.
-// Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #include <aurore/cadran/ui/ui.hpp>
 
 #include <aurore/cadran/ui/cadran_modal.hpp>

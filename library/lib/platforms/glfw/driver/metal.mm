@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 #import <Metal/Metal.h>
 #import <QuartzCore/QuartzCore.h>
 #include <aurore/platforms/glfw/driver/metal.hpp>

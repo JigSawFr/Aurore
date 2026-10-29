@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-FileCopyrightText: 2026 Taylor
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ui — durations, days and short answers as text: the formatting helpers
 // that only translate (ui.hpp includes this header). Plain C++ over
 // ui/tr.hpp, so a host suite can run them against a catalog of its own
 // (tests/host/format_text_tests.cpp).
-// Copyright (C) 2026 JigSawFr, (C) 2026 Taylor.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <cstdint>

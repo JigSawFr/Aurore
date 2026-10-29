@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: borealis contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package org.libsdl.app;
 
 import android.annotation.TargetApi;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Draws the decorations of the demo's Winter theme (resources/themes/winter):
 # icicles along the top of the screen, a snowdrift along its bottom, and a

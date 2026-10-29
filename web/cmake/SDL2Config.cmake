@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The demo in a browser (web/README.md): SDL2 is Emscripten's port
 # (-sUSE_SDL=2, set by the CMakeLists.txt), so there is nothing to find or link.
 set(SDL2_FOUND TRUE)

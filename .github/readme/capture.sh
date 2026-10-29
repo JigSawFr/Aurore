@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The README's screenshots (the website's gallery too) and tour.gif, drawn by
 # the test harness without a window or a display (aurore-tour, tests/tour.cpp):
 #   cmake --preset tests && cmake --build --preset tests

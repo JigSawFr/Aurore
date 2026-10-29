@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # Host suites: Cadran's plain C++ parts (palettes, Markdown, text helpers),
 # each built without a window and linked only to the sources it tests.
 # ctest -R host runs them.

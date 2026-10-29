@@ -1,6 +1,8 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Cadran — Aurore's look (docs/cadran.md): every header of aurore/cadran
 // at once, and its start-up, which aurore::Application runs itself.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore/cadran/ui/action_sheet.hpp>

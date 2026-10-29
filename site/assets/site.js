@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // Aurore's website (site/README.md). The aurora behind the home page's header
 // and hero (canvas#sky), Boréale's own (boreale/site/assets/site.js): three
 // soft curtains under a few stars, moving only while the page is visible and

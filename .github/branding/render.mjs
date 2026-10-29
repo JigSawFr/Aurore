@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 // Renders Aurore's branding (.github/branding/*.svg) to PNG:
 //   icon.png (256x256), social-preview.png (1280x640, the repository's social
 //   preview, uploaded by hand in Settings › General) and the README's banner,

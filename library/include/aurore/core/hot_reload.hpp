@@ -1,6 +1,8 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // Hot reload — the XML and theme files of the screen shown, watched on a
 // desktop, and the activity built again when one changes.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

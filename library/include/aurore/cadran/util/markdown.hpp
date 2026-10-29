@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // markdown — GitHub-flavoured Markdown (a pull request's description, a
 // release's notes) as blocks the console can draw (view/markdown_view.hpp):
 // headings (ATX and setext), paragraphs (a line break inside one is kept, as
@@ -14,7 +17,6 @@
 // most MAX_BLOCKS blocks, MAX_CODE_LINES lines of a code block, MAX_COLUMNS
 // columns and MAX_ROWS rows of a table, MAX_DEPTH levels of nesting. Plain
 // C++ for the host tests (tests/host/markdown_tests.cpp).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <string>

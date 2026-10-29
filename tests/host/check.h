@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+
 /* Checks shared by the host suites (tests/host): Cadran's plain C++ parts,
  * built without a window, linked only to the sources they test.
  *

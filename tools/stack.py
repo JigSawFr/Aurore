@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # What Aurore is built with and how it is checked, read from the repository:
 # the versions from the build files and resources/THIRD_PARTY_NOTICES.md
@@ -139,7 +139,7 @@ def readme_section(data):
 | --- | --- |
 {rows}
 
-Checked on every pull request: {f["tests"]} test cases in the headless harness, {f["references"]} reference screenshots compared pixel by pixel, and {f["host_checks"]} checks of Cadran's text code; {f["ci_jobs"]} CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and Markdown and theme files are fuzzed; a build fails on a deprecated API; {f["actions_pinned"]} of the {f["actions"]} GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: {f["tests"]} test cases in the headless harness, {f["references"]} reference screenshots compared pixel by pixel, and {f["host_checks"]} checks of Cadran's text code; {f["ci_jobs"]} CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); {f["actions_pinned"]} of the {f["actions"]} GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 {END}"""
 
 

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 1997-2025 Sam Lantinga <slouken@libsdl.org>
+// SPDX-License-Identifier: Zlib
+
 package org.libsdl.app;
 
 

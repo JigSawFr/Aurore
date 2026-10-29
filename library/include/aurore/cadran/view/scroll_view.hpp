@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ScrollView — the scrolling frame of every Cadran screen (<ScrollView> in
 // the XML, with aurore:ScrollingFrame's attributes).
 //
@@ -10,7 +13,6 @@
 // (the header above, the notes below, the top or the end of the screen), and a
 // text taller than the screen is scrolled half a screen per press before the
 // focus moves on.
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore.hpp>

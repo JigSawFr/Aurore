@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: borealis contributors
+# SPDX-License-Identifier: Apache-2.0
+
 cmake_minimum_required(VERSION 3.16...4.1)
 
 project(AURORE_DEMO)

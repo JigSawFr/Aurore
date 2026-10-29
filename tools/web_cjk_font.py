@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 """The demo's CJK font in a browser (web/README.md): the characters the
 Japanese, Korean and Chinese catalogs use (resources/i18n/), cut out of Noto
 Sans CJK (SIL Open Font License 1.1). A browser has no system font Aurore can

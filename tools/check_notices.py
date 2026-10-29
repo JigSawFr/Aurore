@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# Copyright 2026 JigSawFr
-# Licensed under the Apache License, Version 2.0.
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
 #
 # Checks resources/THIRD_PARTY_NOTICES.md against the source: each folder of
 # library/lib/extern and library/include/aurore/extern and each font has an

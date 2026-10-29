@@ -128,6 +128,8 @@ The APK is in `android-project/app/build/outputs/apk/debug/`. The page in `andro
 
 The window is fullscreen; the system bars, the display cutout and the rounded corners are the [safe area](safe-areas.md), read through `PlatformUtils.getSafeAreaInsets` (an app's own copy of `android-project/` keeps that method).
 
+**Controllers**: a controller paired with the phone over Bluetooth (an Xbox, DualSense or Switch Pro controller, an 8BitDo…) or plugged in over USB reaches SDL through Android's input, with no permission. The two Bluetooth permissions left commented out in `AndroidManifest.xml` are for one thing only: SDL's own driver for the Steam Controller over Bluetooth LE (HIDAPI), which runs when the app sets `SDL_HINT_JOYSTICK_HIDAPI_STEAM`. An app that wants it uncomments them, and from Android 12 also asks the user for `BLUETOOTH_CONNECT` ("Nearby devices") at run time, which SDL does not do.
+
 ## iOS and tvOS
 
 On macOS with Xcode:

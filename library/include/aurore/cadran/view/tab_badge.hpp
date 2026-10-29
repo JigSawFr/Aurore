@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // TabBadge — the number of entries to do of a tab, at the right of its name
 // in the main screen's sidebar: an amber disc, as a notification bell's, so
 // what needs the user shows where it is fixed (PlayGuard's notices). The
@@ -5,7 +8,6 @@
 // while there is nothing to do: the name keeps the whole row. With the rail
 // on its icons (ui::Prefs::rail), a smaller disc on the icon's corner
 // instead (dock).
-// Copyright (C) 2026 JigSawFr.  GPLv3-or-later (see LICENSE.GPL).
 #pragma once
 
 #include <aurore.hpp>

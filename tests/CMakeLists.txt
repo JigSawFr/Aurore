@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # The demo's views, without its main(): what the tests, the bench and
 # aurore-preview show
 file(GLOB_RECURSE DEMO_VIEWS_SRC CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/demo/src/*.cpp)

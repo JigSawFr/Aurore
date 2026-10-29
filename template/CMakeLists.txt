@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 JigSawFr
+# SPDX-License-Identifier: Apache-2.0
+
 # An app built on Aurore: a desktop binary (SDL3, or GLFW or SDL2) and a Switch .nro.
 #
 #   cmake -B build -DAURORE_PLATFORM=DESKTOP && cmake --build build
