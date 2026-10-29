@@ -522,6 +522,15 @@ footer.site::after {
 @media (min-width: 600px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
+/* In a row of cards, the icons, titles and texts start at the same height
+   (one card's title over two lines moves its row's texts down together),
+   where the browser has subgrid; four or two in a row. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 600px) {
+    .cards > .card { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; }
+  }
+}
+
 /* The sections rise into view once (site.js; not with less motion asked). */
 @media (prefers-reduced-motion: no-preference) {
   .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
