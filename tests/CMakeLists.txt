@@ -55,7 +55,7 @@ if (AURORE_BUILD_FUZZERS)
             ${PROJECT_SOURCE_DIR}/library/lib/cadran/util/markdown.cpp
             ${PROJECT_SOURCE_DIR}/library/lib/cadran/util/safe_text.cpp)
     target_include_directories(aurore_fuzz_markdown PRIVATE ${PROJECT_SOURCE_DIR}/library/include)
-    target_compile_features(aurore_fuzz_markdown PRIVATE cxx_std_20)
+    target_compile_features(aurore_fuzz_markdown PRIVATE cxx_std_23)
     target_compile_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
     target_link_options(aurore_fuzz_markdown PRIVATE ${FUZZ_FLAGS})
 

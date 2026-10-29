@@ -29,7 +29,7 @@ Inside Aurore's own repository the template finds Aurore around it (`..`) and bu
 
 ## Desktop
 
-Linux needs a compiler with C++20, CMake 3.16 or later, Ninja, and the X11/Wayland and OpenGL development packages GLFW asks for (`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl-dev`, and `pkg-config libdbus-1-dev`, on Debian or Ubuntu).
+Linux needs a compiler with C++23, CMake 3.16 or later, Ninja, and the X11/Wayland and OpenGL development packages GLFW asks for (`libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl-dev`, and `pkg-config libdbus-1-dev`, on Debian or Ubuntu).
 
 ```sh
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=DESKTOP

@@ -531,11 +531,13 @@ message(STATUS "aurore: driver ${AURORE_DRIVER}")
 # The library: target aurore, Aurore::aurore for the apps
 add_library(aurore STATIC ${AURORE_SRC})
 add_library(Aurore::aurore ALIAS aurore)
+# C++23 where the compiler has it. The Vita's GLES2 toolchain (GCC 10.3) has no
+# C++23 mode and falls back to C++20; the PS4's clang 12 gets -std=gnu++2b
 set_target_properties(aurore PROPERTIES
-        CXX_STANDARD 20
-        CXX_STANDARD_REQUIRED ON
+        CXX_STANDARD 23
+        CXX_STANDARD_REQUIRED OFF
         UNITY_BUILD ${AURORE_UNITY_BUILD}
-        # No C++20 modules: no dependency scanning step (CMake >= 3.28)
+        # No C++ modules: no dependency scanning step (CMake >= 3.28)
         CXX_SCAN_FOR_MODULES OFF
 )
 set_source_files_properties(${AURORE_PATH}/lib/platforms/desktop/desktop_darwin.mm PROPERTIES
@@ -570,7 +572,8 @@ foreach (dep fmt yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-sh
         endif ()
     endif ()
 endforeach ()
-# The projects that link the library build with C++20 too, so its headers can use it
+# The projects that link the library build with C++20 at least, so its headers
+# can use it (and no more, for the toolchains above)
 target_compile_features(aurore PUBLIC cxx_std_20)
 target_link_libraries(aurore
         PUBLIC fmt::fmt yogacore ${AURORE_PLATFORM_LIBS}
@@ -611,7 +614,7 @@ if (AURORE_BUILD_TESTS)
             ${AURORE_PATH}/lib/test/headless_platform.cpp
             ${AURORE_PATH}/lib/test/harness.cpp)
     add_library(Aurore::test ALIAS aurore_test)
-    set_target_properties(aurore_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+    set_target_properties(aurore_test PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON)
     target_link_libraries(aurore_test PUBLIC aurore)
     # stb_image_write, for the screenshots: the file GLFW ships, not its
     # folder (its glad/gl.h would hide the library's)

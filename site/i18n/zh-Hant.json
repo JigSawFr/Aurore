@@ -1,5 +1,5 @@
 {
-  "meta_description": "Aurore 是一套為控制器、電視和觸控螢幕打造的 C++20 介面函式庫：開箱即是 Nintendo Switch 的外觀，可在 Android、iOS、Windows、macOS、Linux、PS4、PS Vita、Switch 和瀏覽器上執行。",
+  "meta_description": "Aurore 是一套為控制器、電視和觸控螢幕打造的 C++23 介面函式庫：開箱即是 Nintendo Switch 的外觀，可在 Android、iOS、Windows、macOS、Linux、PS4、PS Vita、Switch 和瀏覽器上執行。",
   "skip": "跳到內容",
   "nav_label": "Aurore",
   "sites_label": "Boréale 的專案",

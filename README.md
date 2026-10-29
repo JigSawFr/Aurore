@@ -7,7 +7,7 @@
 **Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch**
 
 [![CI](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml?query=branch%3Amain)
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](#-under-the-hood)
+[![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](#-under-the-hood)
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
@@ -218,7 +218,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 <!-- under-the-hood: begin (tools/stack.py writes this) -->
 | | Version |
 | --- | --- |
-| Language | C++20 |
+| Language | C++23 (min. C++20) |
 | CMake | 3.16–3.31 |
 | SDL3 | 3.4.18 |
 | SDL | 2.32.10 |
@@ -243,7 +243,7 @@ Checked on every pull request: 156 test cases in the headless harness, 32 refere
 
 ## 📦 Use it in your project
 
-1. Build your project as **C++20**, without `-fno-rtti` or `-fno-exceptions`.
+1. Build your project as **C++20** or later (C++23 recommended), without `-fno-rtti` or `-fno-exceptions`.
 2. Add Aurore as a submodule:
 
    ```sh

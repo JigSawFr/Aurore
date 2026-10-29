@@ -1,5 +1,5 @@
 {
-  "meta_description": "Aurore は、コントローラー・テレビ・タッチスクリーン向けの C++20 UI ライブラリです。最初から Nintendo Switch のような見た目で、Android、iOS、Windows、macOS、Linux、PS4、PS Vita、Switch、ブラウザーで動きます。",
+  "meta_description": "Aurore は、コントローラー・テレビ・タッチスクリーン向けの C++23 UI ライブラリです。最初から Nintendo Switch のような見た目で、Android、iOS、Windows、macOS、Linux、PS4、PS Vita、Switch、ブラウザーで動きます。",
   "skip": "本文へ移動",
   "nav_label": "Aurore",
   "sites_label": "Boréale のプロジェクト",

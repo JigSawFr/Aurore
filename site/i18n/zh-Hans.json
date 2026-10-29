@@ -1,5 +1,5 @@
 {
-  "meta_description": "Aurore 是一个面向手柄、电视和触摸屏的 C++20 界面库：开箱即是 Nintendo Switch 的外观，可运行于 Android、iOS、Windows、macOS、Linux、PS4、PS Vita、Switch 和浏览器。",
+  "meta_description": "Aurore 是一个面向手柄、电视和触摸屏的 C++23 界面库：开箱即是 Nintendo Switch 的外观，可运行于 Android、iOS、Windows、macOS、Linux、PS4、PS Vita、Switch 和浏览器。",
   "skip": "跳到正文",
   "nav_label": "Aurore",
   "sites_label": "Boréale 的项目",

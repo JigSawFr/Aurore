@@ -7,7 +7,7 @@
 # romfs.
 
 add_executable(aurore_3ds_smoke smoke.cpp)
-set_target_properties(aurore_3ds_smoke PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_SCAN_FOR_MODULES OFF)
+set_target_properties(aurore_3ds_smoke PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON CXX_SCAN_FOR_MODULES OFF)
 target_link_libraries(aurore_3ds_smoke PRIVATE aurore)
 
 ctr_generate_smdh(aurore_3ds_smoke.smdh

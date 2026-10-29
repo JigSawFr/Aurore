@@ -56,7 +56,10 @@ def versions():
     """[(name, version)]: the language and build, the libraries, the toolchains"""
     library = read("library", "CMakeLists.txt")
     cmake = search(r"cmake_minimum_required\(VERSION ([\d.]+\.\.\.[\d.]+)\)", library, "CMake's range")
-    rows = [("Language", "C++" + search(r"cxx_std_(\d+)", library, "the C++ standard")),
+    built = search(r"set_target_properties\(aurore PROPERTIES\s+CXX_STANDARD (\d+)", library, "the library's standard")
+    linked = search(r"cxx_std_(\d+)", library, "the C++ standard")
+    language = "C++" + built if built == linked else f"C++{built} (min. C++{linked})"
+    rows = [("Language", language),
             ("CMake", cmake.replace("...", "–"))]
     listed = notices()
     for name in COMPONENTS:
