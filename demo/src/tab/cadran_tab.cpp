@@ -85,9 +85,13 @@ const char* const MARKDOWN = "## Markdown\n"
 
 CadranTab::CadranTab()
 {
-    auto* column = new aurore::Box(aurore::Axis::COLUMN);
-    column->setPadding(aurore::dp(28), aurore::dp(40), aurore::dp(40), aurore::dp(40));
+    auto* column       = new aurore::Box(aurore::Axis::COLUMN);
     const bool compact = aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT;
+    // The tab's margins (@style/aurore/tab_frame/content_padding_*)
+    aurore::Style style = aurore::getStyle();
+    const float sides   = style["aurore/tab_frame/content_padding_sides"];
+    const float top     = style["aurore/tab_frame/content_padding_top_bottom"];
+    column->setPadding(top, sides, sides, sides);
     this->setContentView(column);
 
     // The figures, as a dashboard's top cards.

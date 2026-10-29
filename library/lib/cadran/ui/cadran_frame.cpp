@@ -102,15 +102,20 @@ void cadran::install_theme()
     style.addLength("cadran/radius/modal", kit::RADIUS_MODAL);
     // The gap between a filled button and the focus ring around it
     style.addLength("cadran/ring_gap", 4.0f);
-    style.addMetric("aurore/applet_frame/header_height", 84.0f);
+    // A compact screen keeps its room for the content: a lower header and
+    // footer (the footer's 73 as it is on a wider one)
+    const bool compact = aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT;
+    style.addMetric("aurore/applet_frame/header_height", compact ? 60.0f : 84.0f);
+    if (compact)
+        style.addMetric("aurore/applet_frame/footer_height", 56.0f);
     // 232 px, not the boards' 196: the console's font is wider than the
     // boards' (Nunito Sans), and the longest names must stay whole
     // (PlayGuard's "Tiempo de juego", "Einschränkungen" and their badges).
     style.addMetric("aurore/tab_frame/sidebar_width", RAIL_OPEN);
     // A tab's own content (@style/aurore/tab_frame/content_padding_*): the
     // margins of Cadran's pages, the cards' edges
-    style.addMetric("aurore/tab_frame/content_padding_sides", 40.0f);
-    style.addMetric("aurore/tab_frame/content_padding_top_bottom", 28.0f);
+    style.addMetric("aurore/tab_frame/content_padding_sides", compact ? 20.0f : 40.0f);
+    style.addMetric("aurore/tab_frame/content_padding_top_bottom", compact ? 16.0f : 28.0f);
     style.addMetric("aurore/sidebar/padding_top", 6.0f);
     style.addMetric("aurore/sidebar/padding_right", 8.0f);
     style.addMetric("aurore/sidebar/padding_bottom", 10.0f);
@@ -430,7 +435,7 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
     }
     if (auto* title = dynamic_cast<aurore::Label*>(frame->getView("aurore/applet_frame/title_label")))
     {
-        chrome(title, 24, TITLE_SCALE);
+        chrome(title, aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT ? 20 : 24, TITLE_SCALE);
         title->setMarginTop(0);
     }
     if (!pill_icon)

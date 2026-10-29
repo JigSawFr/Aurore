@@ -243,6 +243,10 @@ AURORE_TEST(main_screen_on_a_small_screen)
     // No room for the date; the figures one under the other, as wide as the
     // column, the rail on its icons once the focus is in the tab
     AURORE_CHECK(!h.hasText("Monday, January 5"));
+    // Nor for the language, theme and text size (Preferences has them), and
+    // a lower header
+    AURORE_CHECK(h.top()->getContentView()->getView("header_language") == nullptr);
+    AURORE_CHECK(aurore::getStyle()["aurore/applet_frame/header_height"] < 84 * aurore::DENSITY_DENSE);
     h.tap(aurore::BUTTON_RIGHT);
     h.settle();
     aurore::View* games = h.findText("games");
