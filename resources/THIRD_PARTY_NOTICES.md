@@ -20,6 +20,7 @@ versions that can be read from the sources.
 | deko3d sample framework | - | `library/include/aurore/extern/nanovg/framework`, `library/lib/extern/nanovg/deko3d/framework` | as switchbrew's deko3d examples (fincs) | fincs |
 | nanovg's Direct3D 11 renderer | fork | `library/include/aurore/extern/nanovg/nanovg_d3d11.h` | zlib | 2009-2013 Mikko Mononen |
 | nanovg's GXM renderer (PS Vita) | - | `library/include/aurore/extern/nanovg/nanovg_gxm*.h` | zlib | 2024 xfangfang |
+| nanovg's citro3d renderer (New 3DS) | - | `library/include/aurore/extern/nanovg/nanovg_citro3d.h`, `library/lib/extern/nanovg/citro3d` | zlib | 2026 JigSawFr |
 | nanovg's PS4 renderer | - | `library/lib/extern/nanovg/ps4`, `library/include/aurore/extern/nanovg/nanovg_ps4.h` | zlib | 2023 xfangfang |
 | stb_image | 2.30 | `library/include/aurore/extern/nanovg/stb_image.h` | MIT or public domain | 2017 Sean Barrett |
 | stb_truetype | 1.26 (and the htcw fork) | `library/include/aurore/extern/nanovg/stb_truetype*.h` | MIT or public domain | 2017 Sean Barrett |
@@ -28,7 +29,7 @@ versions that can be read from the sources.
 | {fmt} | 12.2.0 | `library/lib/extern/fmt`, `library/lib/extern/nxfmtwrapper` (Aurore's build of it) | MIT | 2012 - present, Victor Zverovich and {fmt} contributors |
 | TinyXML-2 | 11.0.0 | `library/lib/extern/tinyxml2`, `library/include/aurore/extern/tinyxml2` | zlib | Lee Thomason |
 | JSON for Modern C++ | 3.12.0 | `library/include/aurore/extern/nlohmann` | MIT | 2013-2025 Niels Lohmann |
-| Tweeny | 3.2.1 | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
+| Tweeny | 4.2.0 (its headers) | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
 | libromfs | - | `library/lib/extern/libromfs` | MIT | 2022 WerWolv |
 | GLFW | 3.5.1 (xfangfang's fixes, JigSawFr/glfw `aurore`, fd16225) | `library/lib/extern/glfw` | zlib | 2002-2006 Marcus Geelnard, 2006-2019 Camilla Löwy |
 | SDL | 2.32.10 | `library/lib/extern/SDL`, `android-project/app/src/sdl2/java/org/libsdl` | zlib | 1997-2025 Sam Lantinga |

@@ -82,11 +82,15 @@ else()
   add_subdirectory(${AURORE_PATH}/lib/extern/fmt ${AURORE_EXTERN_EXCLUDE})
 endif()
 
-# tweeny
+# tweeny 4: its easings, in animation.cpp only (header-only, not in the
+# library's headers, so not a dependency of an app or of the installed
+# package). Its own CMakeLists.txt asks for CMake 3.23: its headers here.
 if (USE_SYSTEM_TWEENY)
-  find_package(Tweeny REQUIRED)
+  find_package(Tweeny 4 REQUIRED)
 else()
-  add_subdirectory(${AURORE_PATH}/lib/extern/tweeny ${AURORE_EXTERN_EXCLUDE})
+  add_library(tweeny INTERFACE)
+  target_include_directories(tweeny SYSTEM INTERFACE ${AURORE_PATH}/lib/extern/tweeny/include)
+  add_library(tweeny::tweeny ALIAS tweeny)
 endif()
 
 # yoga 3.2.1 (facebook/yoga tag v3.2.1, 042f501, MIT), library sources only
@@ -384,12 +388,17 @@ elseif(PLATFORM_SWITCH)
     # tinyxml2.h and a glad/gl.h, which must not hide the library's own
     list(APPEND AURORE_INCLUDE ${DEVKITPRO}/portlibs/switch/include)
 elseif(PLATFORM_3DS)
-    # The New 3DS through libctru: a platform without a renderer yet
-    # (lib/platforms/ctr), its video context drawing nothing
+    # The New 3DS through libctru (lib/platforms/ctr), drawn with citro3d by
+    # nanovg's citro3d renderer (nanovg_citro3d.h)
     file(GLOB_RECURSE CTR_PLATFORM_SRC CONFIGURE_DEPENDS "${AURORE_PATH}/lib/platforms/ctr/*.cpp")
     list(APPEND AURORE_SRC ${CTR_PLATFORM_SRC})
     list(APPEND AURORE_PUBLIC_DEFINITIONS STBI_NO_THREAD_LOCALS)
-    list(APPEND AURORE_PLATFORM_LIBS ctru m)
+    # The renderer's vertex shader, assembled by picasso and built into the
+    # library (bin2s writes it as assembly): nanovg_citro3d_shbin.h
+    enable_language(ASM)
+    ctr_add_shader_library(nanovg_citro3d "${AURORE_PATH}/lib/extern/nanovg/citro3d/nanovg_citro3d.v.pica")
+    dkp_add_embedded_binary_library(nanovg_citro3d_shaders nanovg_citro3d)
+    list(APPEND AURORE_PLATFORM_LIBS nanovg_citro3d_shaders citro3d ctru m)
     set(AURORE_PLATFORM_RESOURCES_PATH "\"romfs:/\"")
 else ()
     message(FATAL_ERROR "Please set the platform to build for. Example: -DAURORE_PLATFORM=DESKTOP or -DAURORE_PLATFORM=SWITCH")
@@ -490,8 +499,8 @@ endforeach (lib)
 
 # The graphics driver
 set(AURORE_DRIVER AURORE_USE_OPENGL)
-if (AURORE_USE_NULL_VIDEO)
-    set(AURORE_DRIVER AURORE_USE_NULL_VIDEO)
+if (AURORE_USE_CITRO3D)
+    set(AURORE_DRIVER AURORE_USE_CITRO3D)
 elseif (AURORE_USE_METAL)
     set(AURORE_DRIVER AURORE_USE_METAL)
 elseif (AURORE_USE_D3D11)
@@ -553,7 +562,7 @@ if (AURORE_DKSH_INCLUDE)
     target_include_directories(aurore PRIVATE ${AURORE_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
-foreach (dep fmt tweeny yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
+foreach (dep fmt yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
     if (TARGET ${dep})
         get_target_property(dep_imported ${dep} IMPORTED)
         get_target_property(dep_include ${dep} INTERFACE_INCLUDE_DIRECTORIES)
@@ -565,8 +574,8 @@ endforeach ()
 # The projects that link the library build with C++20 too, so its headers can use it
 target_compile_features(aurore PUBLIC cxx_std_20)
 target_link_libraries(aurore
-        PUBLIC fmt::fmt tweeny yogacore ${AURORE_PLATFORM_LIBS}
-        PRIVATE ${AURORE_PRIVATE_LIBS})
+        PUBLIC fmt::fmt yogacore ${AURORE_PLATFORM_LIBS}
+        PRIVATE ${AURORE_PRIVATE_LIBS} $<BUILD_INTERFACE:tweeny::tweeny>)
 if (PLATFORM_PSV)
     # vita-elf-create writes the module's SCE data (module info, exports,
     # imports: about 3 KB for the demo) right after the text segment, and
