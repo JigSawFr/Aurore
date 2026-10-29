@@ -76,7 +76,7 @@ void FooterHints::fit()
     this->setShrink(0); // the hints at the width they ask for
 
     // The row has no padding on its sides (Aurore's bottom_bar.cpp).
-    const float room = row->getWidth() - status->getWidth() - CLOCK_GAP;
+    const float room = row->getWidth() - status->getWidth() - aurore::dp(CLOCK_GAP);
     const float over = this->getWidth() - room;
     if (over <= 0)
         return;
@@ -85,18 +85,18 @@ void FooterHints::fit()
     // first, then between button and text. Refilled hints are new views, so
     // each starts from Aurore's spacing again.
     float need              = std::ceil(over / this->getChildren().size()); // per hint
-    const float padding_cut = std::min<float>(std::ceil(need / 2), HINT_PADDING - HINT_PADDING_MIN);
+    const float padding_cut = std::min<float>(std::ceil(need / 2), aurore::dp(HINT_PADDING - HINT_PADDING_MIN));
     need                    = std::max(0.0f, need - 2 * padding_cut);
-    const float gap_cut     = std::min(need, HINT_GAP - HINT_GAP_MIN);
+    const float gap_cut     = std::min(need, aurore::dp(HINT_GAP - HINT_GAP_MIN));
     for (aurore::View* v : this->getChildren())
     {
         auto* hint = dynamic_cast<aurore::Box*>(v);
         if (!hint)
             continue;
-        hint->setPaddingLeft(HINT_PADDING - padding_cut);
-        hint->setPaddingRight(HINT_PADDING - padding_cut);
+        hint->setPaddingLeft(aurore::dp(HINT_PADDING) - padding_cut);
+        hint->setPaddingRight(aurore::dp(HINT_PADDING) - padding_cut);
         if (aurore::View* text = hint->getView("hint"))
-            text->setMarginLeft(HINT_GAP - gap_cut);
+            text->setMarginLeft(aurore::dp(HINT_GAP) - gap_cut);
         // The button's glyph whole: only the text is cut below.
         if (aurore::View* icon = hint->getView("icon"))
             icon->setShrink(0);

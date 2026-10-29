@@ -17,8 +17,8 @@ constexpr float POP_US = 380000.0f;
 CadranIcon::CadranIcon()
 {
     this->setThemeColor("color", "aurore/text");
-    this->setWidth(22);
-    this->setHeight(22);
+    this->setWidth(aurore::dp(22));
+    this->setHeight(aurore::dp(22));
     this->setFocusable(false);
     this->registerStringXMLAttribute("icon", [this](std::string value)
         { this->setIcon(value); });
@@ -1223,8 +1223,8 @@ const std::vector<std::string>& CadranIcon::names()
 CadranSwatch::CadranSwatch(Colors value)
     : colors(std::move(value))
 {
-    this->setWidth(36);
-    this->setHeight(36);
+    this->setWidth(aurore::dp(36));
+    this->setHeight(aurore::dp(36));
     this->setFocusable(false);
     if (!this->colors.picture.empty())
     {

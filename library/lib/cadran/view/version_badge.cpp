@@ -17,12 +17,12 @@ VersionBadge::VersionBadge()
     this->setFocusable(false);
     this->setAlignItems(aurore::AlignItems::CENTER);
     this->setAlignSelf(aurore::AlignSelf::CENTER);
-    this->setMarginLeft(16);
+    this->setMarginLeft(aurore::dp(16));
     // Level with the title, which Aurore moves down by this much, less 8:
     // centred like the title's box, the tag and the commit sat 4 px below
     // the middle of its capitals (the larger font has more room under them),
     // and a centred box moves by half its margin.
-    this->setMarginTop(aurore::getStyle()["aurore/applet_frame/header_title_top_offset"] - 8);
+    this->setMarginTop(aurore::getStyle()["aurore/applet_frame/header_title_top_offset"] - aurore::dp(8));
 
     // The app's (ui::hooks): its version, its commit, a release or not.
     const auto& h             = ui::hooks::get();
@@ -34,8 +34,8 @@ VersionBadge::VersionBadge()
     const char* ink = release ? "cadran/text3" : "cadran/amber";
     auto* tag       = new aurore::Box(aurore::Axis::ROW);
     tag->setThemeColor("backgroundColor", ink);
-    tag->setCornerRadius(4);
-    tag->setPadding(2, 8, 2, 8);
+    tag->setCornerRadius(aurore::dp(4));
+    tag->setPadding(aurore::dp(2), aurore::dp(8), aurore::dp(2), aurore::dp(8));
     auto* number = new aurore::Label();
     number->setText(version);
     number->setFontSize(18);
@@ -50,7 +50,7 @@ VersionBadge::VersionBadge()
     text->setFontSize(18);
     text->setFontScaled(false);
     text->setSingleLine(true);
-    text->setMarginLeft(10);
+    text->setMarginLeft(aurore::dp(10));
     text->setText(commit);
     text->setThemeColor("textColor", ink);
     this->addView(text);
@@ -98,10 +98,10 @@ aurore::Box* VersionBadge::header_tools(aurore::AppletFrame* frame)
     tools->setAlignSelf(aurore::AlignSelf::CENTER);
     // 8 px more above and below, given back by the margins: the header's
     // settings take a touch that far from their drawing (HeaderSetting::hitTest)
-    tools->setPaddingTop(8);
-    tools->setPaddingBottom(8);
-    tools->setMarginTop(-8);
-    tools->setMarginBottom(-8);
+    tools->setPaddingTop(aurore::dp(8));
+    tools->setPaddingBottom(aurore::dp(8));
+    tools->setMarginTop(aurore::dp(-8));
+    tools->setMarginBottom(aurore::dp(-8));
     header->addView(tools);
     return tools;
 }

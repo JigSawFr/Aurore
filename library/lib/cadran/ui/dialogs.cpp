@@ -48,7 +48,7 @@ void add_cancel(aurore::Dialog* dialog, std::function<void()> cancel)
 // margin from the screen's top and bottom).
 static float content_height()
 {
-    return aurore::Application::contentHeight - cadran::DIALOG_BUTTONS - 2 * cadran::DIALOG_MARGIN;
+    return aurore::Application::contentHeight - aurore::dp(cadran::DIALOG_BUTTONS + 2 * cadran::DIALOG_MARGIN);
 }
 
 static void scroll_with(aurore::Dialog* dialog, aurore::ScrollingFrame* frame, aurore::View* text)
@@ -125,7 +125,7 @@ static aurore::Dialog* body_dialog(const std::string& text, aurore::View* below 
     if (below)
     {
         if (!body->getChildren().empty())
-            below->setMarginTop(18);
+            below->setMarginTop(aurore::dp(18));
         body->addView(below);
     }
     return box_dialog(body);
@@ -179,7 +179,7 @@ void show_failure(const cadran_text::Failure& f)
         if (auto* box = dynamic_cast<aurore::Box*>(dialog->getView("cadran_dialog_body")))
         {
             aurore::Label* small = cadran::kit::label(code, 15, "cadran/text3");
-            small->setMarginTop(10);
+            small->setMarginTop(aurore::dp(10));
             box->addView(small);
         }
     }
@@ -226,7 +226,7 @@ aurore::Box* check_row(const CheckLine& line, float size)
                                                 : "cadran/text3";
     auto* mark        = new kit::Mark(color);
     mark->setMarginTop(size * 0.3f);
-    mark->setMarginRight(14);
+    mark->setMarginRight(aurore::dp(14));
     mark->setShrink(0);
     row->addView(mark);
     aurore::Label* text = kit::label(line.text, size, line.state == Check::Info ? "cadran/text2" : "cadran/text");
@@ -244,8 +244,8 @@ namespace
         auto* panel = new aurore::Box(aurore::Axis::COLUMN);
         panel->setAlignItems(aurore::AlignItems::STRETCH);
         panel->setThemeColor("backgroundColor", "cadran/surf2");
-        panel->setCornerRadius(14);
-        panel->setPadding(12, 18, 14, 18);
+        panel->setCornerRadius(aurore::dp(14));
+        panel->setPadding(aurore::dp(12), aurore::dp(18), aurore::dp(14), aurore::dp(18));
         return panel;
     }
 } // namespace
@@ -256,12 +256,12 @@ aurore::Box* checklist_body(const std::string& title, const std::vector<CheckLin
     namespace kit = cadran::kit;
     auto* body    = new aurore::Box(aurore::Axis::COLUMN);
     body->setAlignItems(aurore::AlignItems::STRETCH);
-    body->setPadding(30, 40, 20, 40);
+    body->setPadding(aurore::dp(30), aurore::dp(40), aurore::dp(20), aurore::dp(40));
     body->addView(cadran::dialog_title(title));
     if (!subtitle.empty())
     {
         aurore::Label* sub = kit::label(subtitle, 17, "cadran/text2");
-        sub->setMarginTop(6);
+        sub->setMarginTop(aurore::dp(6));
         body->addView(sub);
     }
     // A Header line starts a panel of its own, its name small above it.
@@ -271,9 +271,9 @@ aurore::Box* checklist_body(const std::string& title, const std::vector<CheckLin
         if (line.state == Check::Header)
         {
             aurore::Label* head = kit::label(cadran::upper(line.text), 13, "cadran/text3");
-            head->setMarginTop(16);
-            head->setMarginBottom(6);
-            head->setMarginLeft(4);
+            head->setMarginTop(aurore::dp(16));
+            head->setMarginBottom(aurore::dp(6));
+            head->setMarginLeft(aurore::dp(4));
             body->addView(head);
             panel = check_panel();
             body->addView(panel);
@@ -282,21 +282,21 @@ aurore::Box* checklist_body(const std::string& title, const std::vector<CheckLin
         if (!panel)
         {
             panel = check_panel();
-            panel->setMarginTop(16);
+            panel->setMarginTop(aurore::dp(16));
             body->addView(panel);
         }
         aurore::Box* row = check_row(line, 16.5f);
-        row->setMarginTop(panel->getChildren().empty() ? 0 : 8);
+        row->setMarginTop(panel->getChildren().empty() ? 0 : aurore::dp(8));
         panel->addView(row);
     }
     if (!note.empty())
     {
         auto* foot = new aurore::Box(aurore::Axis::ROW);
         foot->setAlignItems(aurore::AlignItems::FLEX_START);
-        foot->setMarginTop(14);
+        foot->setMarginTop(aurore::dp(14));
         CadranIcon* icon = kit::icon("info", 16, "cadran/text3");
-        icon->setMarginTop(2);
-        icon->setMarginRight(10);
+        icon->setMarginTop(aurore::dp(2));
+        icon->setMarginRight(aurore::dp(10));
         icon->setShrink(0);
         foot->addView(icon);
         aurore::Label* small = kit::label(note, 15, "cadran/text3");
@@ -319,11 +319,11 @@ void notice(const char* icon, Check tone, const std::string& title, const std::s
                                                                                     : "cadran/surf2";
     auto* body        = new aurore::Box(aurore::Axis::COLUMN);
     body->setAlignItems(aurore::AlignItems::STRETCH);
-    body->setPadding(30, 40, 22, 40);
+    body->setPadding(aurore::dp(30), aurore::dp(40), aurore::dp(22), aurore::dp(40));
     auto* head = new aurore::Box(aurore::Axis::ROW);
     head->setAlignItems(aurore::AlignItems::CENTER);
     aurore::Box* badge = cadran::dialog_badge(icon, color, soft);
-    badge->setMarginRight(16);
+    badge->setMarginRight(aurore::dp(16));
     head->addView(badge);
     aurore::Label* label = cadran::dialog_title(title);
     label->setGrow(1.0f);
@@ -331,7 +331,7 @@ void notice(const char* icon, Check tone, const std::string& title, const std::s
     head->addView(label);
     body->addView(head);
     aurore::Label* words = kit::label(text, 18, "cadran/text2");
-    words->setMarginTop(14);
+    words->setMarginTop(aurore::dp(14));
     body->addView(words);
     auto* dialog = box_dialog(body);
     dialog->addButton("hints/ok"_i18n, []() {});
@@ -422,11 +422,11 @@ void hold_confirm(aurore::Box* body, const std::string& hold_label, std::functio
     auto* how = new aurore::Box(aurore::Axis::ROW);
     how->setAlignItems(aurore::AlignItems::CENTER);
     how->setJustifyContent(aurore::JustifyContent::CENTER);
-    how->setMarginTop(16);
+    how->setMarginTop(aurore::dp(16));
     if (aurore::Application::getInputType() == aurore::InputType::GAMEPAD)
     {
         aurore::Box* a = kit::key("A", 22);
-        a->setMarginRight(8);
+        a->setMarginRight(aurore::dp(8));
         how->addView(a);
     }
     how->addView(kit::label(aurore::getStr("cadran/common/hold_hint", hold_label), 15, "cadran/text2"));
