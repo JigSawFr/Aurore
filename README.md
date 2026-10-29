@@ -91,7 +91,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - ✨ **Styles** — per-state styles (focus, pressed, disabled, hover), transitions, data binding and accessibility labels.
 - 🧩 **Views** — a recycling grid and row, context menus, icon buttons, Markdown.
 - 🧪 **Tools** — test harness, inspector, hot reload, profiler, template.
-- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients; a density for the lengths, `compact:` attributes and presets for a small screen.
+- 📐 **Layout** — Yoga 3; `gap`, `rowGap`, `columnGap`; `flexWrap` with focus across the lines; `boxSizing`, `positionType="static"`; a radius per corner; horizontal gradients; a density for the lengths, `compact:` attributes and presets for a small screen; safe areas, edge to edge (a notch, rounded corners, system bars, a TV's overscan).
 - 🔤 **Text** — a font scale for every label, shrink-to-fit, `isTruncated()`, clean line breaks.
 - 🌍 **Languages** — switch language while the app runs, with lookups safe from any thread.
 - 🎯 **Focus and hints** — no focus lost in hidden or destroyed views; optional and steady footer hints.
@@ -142,6 +142,7 @@ Side by side with borealis, change by change: <https://aurore.boreale.dev/boreal
 | A density for the lengths (comfortable, compact, dense), the text untouched; lengths in `dp` | `16dp` (XML) · `Application::setDensity`, `aurore::dp()` · `AURORE_DENSITY` · [docs/styles.md](docs/styles.md#density-of-the-lengths) |
 | Classes of screen width (compact, medium, expanded), and attributes for one of them | `compact:`, `medium:`, `expanded:` (XML) · `Application::getWidthClass` |
 | A small screen's design size, density and text scale in one go | `Application::usePreset(PRESET_SMALL_SCREEN)` · `Platform::getLayoutPreset` · `AURORE_PRESET` |
+| Safe areas: notches, rounded corners and system bars (Android, iOS), a TV's overscan kept clear, backgrounds still edge to edge | `safeArea="…"` (XML) · `Box::setSafeArea`, `Application::getSafeArea`, `Application::setOverscan` · `AURORE_SAFE_AREA` · [docs/safe-areas.md](docs/safe-areas.md) |
 | Horizontal gradient background, gradients from code | `background="horizontal_linear"` · `View::setBackgroundLinearGradient` |
 | `imageAlign` honoured for `FIT` and `FILL` | — |
 | Pictures larger than 4096×4096 pixels (or 16384 on a side) refused from their header, before decoding; PNG and JPEG only | `NVG_MAX_IMAGE_PIXELS`, `nvgDecodeImage`, `nvgDecodeImageMem` |
@@ -253,7 +254,7 @@ Checked on every pull request: 154 test cases in the headless harness, 32 refere
 3. Copy its `resources` folder to the root of your project.
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
-   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`, `SDL3`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
+   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `3DS`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`GLFW`, `SDL2`, `SDL3`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
@@ -305,7 +306,7 @@ With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes th
 
 New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme, and `--simulate 3ds` (or `switch`, `vita`, `ps4`, `phone`) on a console's screen, the console drawn around it ([platforms.md](docs/platforms.md#simulated-platforms)). The [API reference](https://aurore.boreale.dev/api/) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
-The other platforms (Windows, macOS, the Switch, PS Vita, PS4, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
+The other platforms (Windows, macOS, the Switch, PS Vita, PS4, the New 3DS, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
 
@@ -315,7 +316,7 @@ Also on the website, with a search and the API reference: <https://aurore.boreal
 | --- | --- |
 | [Aurore in 15 minutes](docs/getting-started.md) | From the demo to a screen of your own on the Switch |
 | [Migrating from borealis](docs/migrating-from-borealis.md) | The submodule, the CMake target, the resources, Cadran, what changes on screen |
-| [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, Android, iOS and in a browser |
+| [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, the New 3DS, Android, iOS and in a browser; the consoles simulated on the desktop |
 | [Porting an app](docs/porting.md) | What an app's code and resources should mind on each platform |
 | [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
 | [Views](docs/views.md) | Every XML tag, its class and its header |
@@ -323,6 +324,7 @@ Also on the website, with a search and the API reference: <https://aurore.boreal
 | [Cadran](docs/cadran.md) | The look and its kit |
 | [Styles](docs/styles.md) | State styles, transitions, data binding, accessibility |
 | [Components](docs/components.md) | The views Aurore adds |
+| [Safe areas](docs/safe-areas.md) | Notches, rounded corners, system bars and a TV's overscan kept clear, edge to edge |
 | [XML attributes](docs/xml-attributes.md) | Every attribute of every view, generated from the sources |
 | [Keyboard and mouse](docs/input.md) | The keys for the controller's buttons, the mouse |
 | [Testing](docs/testing.md) | The test harness |

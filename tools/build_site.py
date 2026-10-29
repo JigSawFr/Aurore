@@ -97,6 +97,7 @@ DOCS = [
     ("themes", "guides", "Themes"),
     ("cadran", "guides", "Cadran"),
     ("styles", "guides", "Styles"),
+    ("safe-areas", "guides", "Safe areas"),
     ("components", "guides", "Components"),
     ("xml-attributes", "reference", "XML attributes"),
     ("input", "reference", "Keyboard and mouse"),
@@ -745,7 +746,7 @@ def demo_band(t, lang, to_root):
 # The figures of "Under the hood" (tools/stack.py's), in this order
 STACK_FIGURES = [("ci", "{ci_jobs}"), ("tests", "{tests}"), ("refs", "{references}"),
                  ("actions", "{actions_pinned}/{actions}")]
-STACK_CHECKS = ["sanitizers", "deprecated", "format", "notices", "upstream"]
+STACK_CHECKS = ["sanitizers", "fuzz", "deprecated", "format", "notices", "upstream"]
 STACK = {}  # tools/stack.py's facts, read once (stack_facts())
 
 

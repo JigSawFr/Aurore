@@ -32,7 +32,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 
 ## Screens
 
-- The UI is laid out 1280 units wide, whatever the screen: 720 units high on the Switch and a 16:9 window, less on a wider phone, more on a 16:10 or 4:3 screen (`Application::contentHeight`). Lay screens out with `grow`, percentages and scrolling frames rather than a fixed 720, and try the app in a window of another shape on the desktop.
+- The UI is laid out 1280 units wide, whatever the screen's pixels (a layout preset changes that: a small screen's is 480x360 units, [styles.md](styles.md#screen-width)): 720 units high on the Switch and a 16:9 window, less on a wider phone, more on a 16:10 or 4:3 screen (`Application::contentHeight`). Lay screens out with `grow`, percentages and scrolling frames rather than a fixed 720, and try the app in a window of another shape on the desktop.
 - A large desktop window makes everything large; `Application::setMaximumUIScale()` caps it, and the rest of the window is given to the layout.
 - The window can change size on the desktop, and the Switch changes resolution when docked: views are told (`View::onWindowSizeChanged`, `Application::getWindowSizeChangedEvent()`), activities are resized for them.
 - A phone's notch, rounded corners and system bars, a TV's overscan: the [safe area](safe-areas.md). `AppletFrame` and Cadran's frames keep clear of it; a screen of its own keeps clear of every edge by default, or of those its views say (`safeArea="top|bottom"`). Try it on the desktop with `AURORE_SAFE_AREA=0,48`.
