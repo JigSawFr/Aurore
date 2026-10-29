@@ -235,9 +235,9 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | Gradle | 9.8.2 |
 | Android NDK | r30 |
 | Android API | 36 |
-| Emscripten | 6.0.12 |
+| Emscripten | 6.0.13 |
 
-Checked on every pull request: 145 test cases in the headless harness, 25 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 39 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 47 of the 47 GitHub Actions used are pinned to a commit. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: 145 test cases in the headless harness, 25 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 40 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer; a build fails on a deprecated API; 49 of the 49 GitHub Actions used are pinned to a commit. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 <!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
