@@ -43,7 +43,7 @@ extern "C"
 {
 #endif
 
-// As the GL and D3D11 renderers have them
+// As the GL renderer has them
 #ifndef NVG_ANTIALIAS
 // Geometry based anti-aliasing
 #define NVG_ANTIALIAS 1

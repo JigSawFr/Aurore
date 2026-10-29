@@ -33,11 +33,11 @@ set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 3DS A
 set(AURORE_WINDOW "" CACHE STRING "Window and input: GLFW, SDL2 or SDL3 (empty: the platform's default)")
 set_property(CACHE AURORE_WINDOW PROPERTY STRINGS GLFW SDL2 SDL3)
 
-# Graphics: OpenGL 3.2+ unless one of these. DEKO3D on Switch only, D3D11 on
-# Windows only, GXM on PS Vita only, SDLGPU (SDL3's GPU API: Vulkan, Metal; a
+# Graphics: OpenGL 3.2+ unless one of these. DEKO3D on Switch only, GXM on
+# PS Vita only, SDLGPU (SDL3's GPU API: Direct3D 12, Metal, Vulkan; a
 # prototype) on the desktop with SDL3.
-set(AURORE_GRAPHICS "" CACHE STRING "Graphics: GL3, GL2, GLES2, GLES3, DEKO3D, D3D11, GXM or SDLGPU (empty: the platform's default)")
-set_property(CACHE AURORE_GRAPHICS PROPERTY STRINGS GL3 GL2 GLES2 GLES3 DEKO3D D3D11 GXM SDLGPU)
+set(AURORE_GRAPHICS "" CACHE STRING "Graphics: GL3, GL2, GLES2, GLES3, DEKO3D, GXM or SDLGPU (empty: the platform's default)")
+set_property(CACHE AURORE_GRAPHICS PROPERTY STRINGS GL3 GL2 GLES2 GLES3 DEKO3D GXM SDLGPU)
 
 option(AURORE_EGL "Use EGL instead of the native GL context" OFF)
 
@@ -121,8 +121,10 @@ endif ()
 
 string(TOUPPER "${AURORE_GRAPHICS}" AURORE_GRAPHICS)
 set_property(CACHE AURORE_GRAPHICS PROPERTY VALUE "${AURORE_GRAPHICS}")
-if (AURORE_GRAPHICS AND NOT AURORE_GRAPHICS MATCHES "^(GL3|GL2|GLES2|GLES3|DEKO3D|D3D11|GXM|SDLGPU)$")
-    message(FATAL_ERROR "AURORE_GRAPHICS=${AURORE_GRAPHICS}: GL3, GL2, GLES2, GLES3, DEKO3D, D3D11, GXM or SDLGPU")
+if (AURORE_GRAPHICS STREQUAL "D3D11")
+    message(FATAL_ERROR "AURORE_GRAPHICS=D3D11 is gone: AURORE_GRAPHICS=SDLGPU draws with Direct3D 12 on Windows")
+elseif (AURORE_GRAPHICS AND NOT AURORE_GRAPHICS MATCHES "^(GL3|GL2|GLES2|GLES3|DEKO3D|GXM|SDLGPU)$")
+    message(FATAL_ERROR "AURORE_GRAPHICS=${AURORE_GRAPHICS}: GL3, GL2, GLES2, GLES3, DEKO3D, GXM or SDLGPU")
 endif ()
 if (AURORE_GRAPHICS STREQUAL "DEKO3D" AND NOT AURORE_PLATFORM STREQUAL "SWITCH")
     message(FATAL_ERROR "AURORE_GRAPHICS=DEKO3D is for AURORE_PLATFORM=SWITCH")
@@ -149,7 +151,7 @@ foreach (_aurore_p GLFW SDL2 SDL3)
         set(USE_${_aurore_p} OFF)
     endif ()
 endforeach ()
-foreach (_aurore_p DEKO3D D3D11 GXM SDLGPU GL2 GLES2 GLES3)
+foreach (_aurore_p DEKO3D GXM SDLGPU GL2 GLES2 GLES3)
     if (AURORE_GRAPHICS STREQUAL _aurore_p)
         set(USE_${_aurore_p} ON)
     else ()

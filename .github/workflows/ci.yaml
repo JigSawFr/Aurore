@@ -292,13 +292,11 @@ jobs:
       fail-fast: false
       matrix:
         # SDL3 by default; GLFW kept
-        driver: [gl, d3d11, gl-glfw, d3d11-glfw, sdlgpu]
+        driver: [gl, gl-glfw, sdlgpu]
         include:
-          - { driver: d3d11, cmake: "-DAURORE_GRAPHICS=D3D11" }
           # SDL_GPU on Direct3D 12
           - { driver: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
           - { driver: gl-glfw, cmake: "-DAURORE_WINDOW=GLFW" }
-          - { driver: d3d11-glfw, cmake: "-DAURORE_GRAPHICS=D3D11 -DAURORE_WINDOW=GLFW" }
     defaults:
       run:
         shell: msys2 {0}

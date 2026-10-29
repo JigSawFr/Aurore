@@ -88,11 +88,7 @@ static inline int getTouchState()
 
 static void glfwTouchCallback(GLFWwindow* window, int touch, int action, double xpos, double ypos)
 {
-#if defined(AURORE_USE_D3D11)
-    float scaleFactor = 1.0f / Application::windowScale;
-#else
-    double scaleFactor = Application::getPlatform()->getVideoContext()->getScaleFactor() / Application::windowScale;
-#endif
+    double scaleFactor    = Application::getPlatform()->getVideoContext()->getScaleFactor() / Application::windowScale;
     touchState.fingerId   = 0;
     touchState.pressed    = action != GLFW_RELEASE;
     touchState.position.x = (float)(xpos * scaleFactor);
@@ -349,8 +345,8 @@ void GLFWInputManager::updateMouseStates(RawMouseState* state)
     state->middleButton = mouseButtons[GLFW_MOUSE_BUTTON_MIDDLE];
     state->rightButton  = mouseButtons[GLFW_MOUSE_BUTTON_RIGHT];
 
-#if defined(AURORE_USE_METAL) || defined(AURORE_USE_D3D11)
-    // 使用 metal, d3d11 的 cocoa 窗口鼠标事件不需要进行 dpi 缩放。
+#if defined(AURORE_USE_METAL)
+    // 使用 metal 的 cocoa 窗口鼠标事件不需要进行 dpi 缩放。
     state->position.x = x / Application::windowScale;
     state->position.y = y / Application::windowScale;
 #else

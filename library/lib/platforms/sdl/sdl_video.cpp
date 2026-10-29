@@ -52,11 +52,6 @@ extern "C"
 #endif
 #include <nanovg_gl.h>
 #include <aurore/platforms/driver/gl_read_pixels.hpp>
-#elif defined(AURORE_USE_D3D11)
-#include <nanovg_d3d11.h>
-
-#include <aurore/platforms/driver/d3d11.hpp>
-std::unique_ptr<aurore::D3D11Context> D3D11_CONTEXT;
 #elif defined(AURORE_USE_SDLGPU)
 #include <aurore/platforms/driver/sdlgpu.hpp>
 static std::unique_ptr<aurore::SDLGPUContext> SDLGPU_CONTEXT;
@@ -175,11 +170,6 @@ static void sdlWindowFramebufferSizeCallback(SDL_Window* window, int width, int 
 #else
     glViewport(0, 0, fWidth, fHeight);
 #endif
-#elif defined(AURORE_USE_D3D11)
-    fWidth      = width;
-    fHeight     = height;
-    scaleFactor = D3D11_CONTEXT->getScaleFactor();
-    D3D11_CONTEXT->onFramebufferSize(fWidth, fHeight);
 #elif defined(AURORE_USE_SDLGPU)
     sdlDrawableSize(window, &fWidth, &fHeight);
     scaleFactor = fWidth * 1.0 / width;
@@ -501,10 +491,6 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 #else
     this->nvgContext = nvgCreateGL3(NVG_STENCIL_STROKES | NVG_ANTIALIAS);
 #endif
-#elif defined(AURORE_USE_D3D11)
-    Logger::info("sdl: USE_D3D11");
-    D3D11_CONTEXT    = std::make_unique<D3D11Context>(this->window, windowWidth, windowHeight);
-    this->nvgContext = nvgCreateD3D11(D3D11_CONTEXT->getDevice(), NVG_ANTIALIAS | NVG_STENCIL_STROKES);
 #elif defined(AURORE_USE_SDLGPU)
     SDLGPU_CONTEXT   = std::make_unique<SDLGPUContext>(this->window);
     this->nvgContext = SDLGPU_CONTEXT->getNVGContext();
@@ -526,12 +512,6 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
     scaleFactor = fWidth * 1.0 / width;
     Application::setWindowSize(fWidth, fHeight);
     glViewport(0, 0, fWidth, fHeight);
-#elif defined(AURORE_USE_D3D11)
-    scaleFactor = D3D11_CONTEXT->getScaleFactor();
-    fWidth      = width;
-    fHeight     = height;
-    Application::setWindowSize(fWidth, fHeight);
-    D3D11_CONTEXT->onFramebufferSize(fWidth, fHeight);
 #elif defined(AURORE_USE_SDLGPU)
     sdlDrawableSize(window, &fWidth, &fHeight);
     scaleFactor = fWidth * 1.0 / width;
@@ -554,9 +534,7 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 
 void SDLVideoContext::beginFrame()
 {
-#if defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->beginFrame();
-#elif defined(AURORE_USE_SDLGPU)
+#if defined(AURORE_USE_SDLGPU)
     SDLGPU_CONTEXT->beginFrame();
 #endif
 }
@@ -565,8 +543,6 @@ void SDLVideoContext::endFrame()
 {
 #ifdef AURORE_USE_OPENGL
     SDL_GL_SwapWindow(this->window);
-#elif defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->endFrame();
 #elif defined(AURORE_USE_SDLGPU)
     SDLGPU_CONTEXT->endFrame();
 #endif
@@ -577,8 +553,6 @@ void SDLVideoContext::setSwapInterval(int interval)
     VideoContext::swapInterval = interval;
 #ifdef AURORE_USE_OPENGL
     SDL_GL_SetSwapInterval(interval);
-#elif defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->setSwapInterval(interval);
 #elif defined(AURORE_USE_SDLGPU)
     SDLGPU_CONTEXT->setSwapInterval(interval);
 #endif
@@ -594,12 +568,6 @@ void SDLVideoContext::clear(NVGcolor color)
         color.a);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-#elif defined(AURORE_USE_D3D11)
-    D3D11_CONTEXT->clear(nvgRGBAf(
-        color.r,
-        color.g,
-        color.b,
-        color.a));
 #elif defined(AURORE_USE_SDLGPU)
     SDLGPU_CONTEXT->clear(color);
 #endif
@@ -651,9 +619,6 @@ SDLVideoContext::~SDLVideoContext()
 #else
             nvgDeleteGL3(this->nvgContext);
 #endif
-#elif defined(AURORE_USE_D3D11)
-            nvgDeleteD3D11(this->nvgContext);
-            D3D11_CONTEXT = nullptr;
 #endif
         }
 #ifdef AURORE_USE_SDLGPU

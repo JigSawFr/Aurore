@@ -47,7 +47,7 @@
   "f_layout_title": "Flexbox 레이아웃",
   "f_layout_text": "모든 뷰는 Yoga가 배치하고 XML로 기술하며, 코드는 필요한 곳에만. <code>gap</code>, <code>flexWrap</code>, 모서리별 반경.",
   "f_graphics_title": "벡터 그래픽",
-  "f_graphics_text": "nanovg의 하드웨어 가속: OpenGL, Direct3D 11, Switch의 deko3d, Vita의 GXM, New 3DS의 citro3d, TV에 맞춘 배율.",
+  "f_graphics_text": "nanovg의 하드웨어 가속: OpenGL, Direct3D 12, Switch의 deko3d, Vita의 GXM, New 3DS의 citro3d, TV에 맞춘 배율.",
   "f_components_title": "바로 쓰는 컴포넌트",
   "f_components_title_short": "컴포넌트",
   "f_components_text": "탭, 셀을 재사용하는 목록과 그리드, 설정 셀, 대화 상자, 액션 시트, 토스트, 슬라이더, Markdown. 모두 테마로 스타일을 바꿀 수 있습니다.",

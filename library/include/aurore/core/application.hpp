@@ -546,7 +546,6 @@ class Application
      * Linux Wayland/GL3.2/GLFW
      *
      * ## Platforms that not support disable vsync (interval: 1,2,3,4):
-     * Windows11/D3D11/GLFW
      * Switch/DEKO3D
      *
      * ## Platforms that support arbitrary values (interval: 0,1,2,3,4):

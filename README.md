@@ -36,7 +36,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 
 - 🎮 **Made for controllers** — focus moves on its own with the D-pad, touch and mouse work too.
 - 🧱 **Flexbox layout** — every view is laid out by [Yoga](https://github.com/facebook/yoga), described in XML, code only where it matters.
-- 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, Direct3D 11, deko3d, GXM, citro3d), scaled for a TV.
+- 🖌️ **Vector graphics** — hardware-accelerated by [nanovg](https://github.com/memononen/nanovg) (OpenGL, SDL_GPU's Direct3D 12, Metal and Vulkan, deko3d, GXM, citro3d), scaled for a TV.
 - 🧩 **Ready-made components** — tabs, lists that recycle their cells, settings cells, dialogs, toasts, sliders, images, all restyled by a theme.
 - 🎨 **Themes** — every colour is a theme key; theme files and folders bring palettes, background pictures, logos, icons and decorations, switched while the app runs ([docs/themes.md](docs/themes.md)). Presets ship with it: high contrast, Ocean, Amethyst, Sand, one per season and feast, and *Seasonal*, which follows the calendar.
 - 🌍 **15 languages** — one JSON catalogue per language, switched while the app runs; colour emoji and right-to-left text as options.
@@ -238,7 +238,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | Android API | 36 |
 | Emscripten | 6.0.13 |
 
-Checked on every pull request: 155 test cases in the headless harness, 32 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 44 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 57 of the 57 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: 155 test cases in the headless harness, 32 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 42 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 57 of the 57 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 <!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
@@ -254,7 +254,7 @@ Checked on every pull request: 155 test cases in the headless harness, 32 refere
 3. Copy its `resources` folder to the root of your project.
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
-   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `3DS`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`SDL3`, `GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `D3D11`, `GXM`, `SDLGPU`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
+   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `3DS`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`SDL3`, `GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `GXM`, `SDLGPU`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 

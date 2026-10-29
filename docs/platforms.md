@@ -6,7 +6,7 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 
 | Platform | `AURORE_PLATFORM` | Window and input (`AURORE_WINDOW`) | Drawing (`AURORE_GRAPHICS`) | Resources |
 | --- | --- | --- | --- | --- |
-| Linux, macOS, Windows | `DESKTOP` | SDL3 (default), GLFW or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; Direct3D 11 on Windows (`D3D11`); SDL_GPU, a prototype (`SDLGPU`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
+| Linux, macOS, Windows | `DESKTOP` | SDL3 (default), GLFW or SDL2 | OpenGL 3.2; or `GL2`, `GLES2`, `GLES3`; SDL_GPU, a prototype: Direct3D 12, Metal or Vulkan (`SDLGPU`) | files next to the program, or built in (`AURORE_LIBROMFS`) |
 | Nintendo Switch | `SWITCH` | GLFW (default) or SDL2 | deko3d (`DEKO3D`) or OpenGL 4.3 | romfs, in the `.nro` |
 | PS Vita | `PSV` | SDL2, or the system's | GXM (`GXM`) or OpenGL ES 2 | in the `.vpk` |
 | PS4 | `PS4` | SDL2 | OpenGL ES 2 | in the `.pkg` |
@@ -61,7 +61,7 @@ cmake --build build
 ./build/aurore_demo.exe
 ```
 
-`-DAURORE_GRAPHICS=D3D11` draws with Direct3D 11 instead of OpenGL. `-DAURORE_WIN32_TERMINAL=OFF` makes a program without a console window (`ON` keeps one, for the logs). The demo links the C and C++ runtimes statically (`-static` in its `CMakeLists.txt`): it runs without MSYS2's DLLs. `library/cmake/MinGWCross.cmake` is a toolchain file for building it from Linux with MinGW-w64 (not built by CI).
+`-DAURORE_GRAPHICS=SDLGPU` draws with Direct3D 12 instead of OpenGL ([below](#sdl_gpu-on-the-desktop-prototype); Direct3D 11 is gone). `-DAURORE_WIN32_TERMINAL=OFF` makes a program without a console window (`ON` keeps one, for the logs). The demo links the C and C++ runtimes statically (`-static` in its `CMakeLists.txt`): it runs without MSYS2's DLLs. `library/cmake/MinGWCross.cmake` is a toolchain file for building it from Linux with MinGW-w64 (not built by CI).
 
 ## Nintendo Switch
 
