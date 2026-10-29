@@ -258,6 +258,11 @@ bool SDLPlatform::processEvent(SDL_Event* event)
         if (manager)
             manager->getMouseCusorEntered()->fire(event->type == SDL_EVENT_WINDOW_MOUSE_ENTER);
     }
+    else if (event->type == SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED)
+    {
+        if (this->videoContext)
+            this->videoContext->displayScaleChanged();
+    }
     else if (event->type == SDL_EVENT_SYSTEM_THEME_CHANGED)
     {
         // Kept for followSystemTheme when the app chose one; the next frame

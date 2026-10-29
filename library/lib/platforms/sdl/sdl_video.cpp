@@ -95,14 +95,21 @@ static bool sdlOnADisplay(int x, int y, int w, int h)
     return inside;
 }
 
-// A first window (no size saved yet) at the main screen's density where
-// SDL3 sizes windows in pixels, Windows and X11: the app's size is the one
-// it has at 100 %, as macOS and Wayland, which size them in points, show
-// it. Kept within the screen's free area.
-static void sdlScaleFirstWindow(uint32_t& width, uint32_t& height)
+#if !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+// SDL3 sizes windows in pixels on Windows and X11, in points on macOS and
+// Wayland, which follow the screen's density themselves
+static bool sdlSizesInPixels()
 {
     const char* driver = SDL_GetCurrentVideoDriver();
-    if (!driver || (strcmp(driver, "windows") != 0 && strcmp(driver, "x11") != 0))
+    return driver && (strcmp(driver, "windows") == 0 || strcmp(driver, "x11") == 0);
+}
+
+// A first window (no size saved yet) at the main screen's density where
+// windows are sized in pixels: the app's size is the one it has at 100 %,
+// as macOS and Wayland show it. Kept within the screen's free area.
+static void sdlScaleFirstWindow(uint32_t& width, uint32_t& height)
+{
+    if (!sdlSizesInPixels())
         return;
     SDL_DisplayID display = SDL_GetPrimaryDisplay();
     float scale           = SDL_GetDisplayContentScale(display);
@@ -117,6 +124,7 @@ static void sdlScaleFirstWindow(uint32_t& width, uint32_t& height)
     width  = (uint32_t)std::lround(width * scale);
     height = (uint32_t)std::lround(height * scale);
 }
+#endif
 #endif
 
 #ifdef AURORE_SDL_WINDOW_ICON
@@ -464,6 +472,9 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 #ifdef AURORE_SDL_WINDOW_ICON
     sdlSetWindowIcon(this->window);
 #endif
+#if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+    this->displayScale = SDL_GetWindowDisplayScale(this->window);
+#endif
 #ifdef AURORE_USE_OPENGL
     // Configure window
     SDL_GLContext context = SDL_GL_CreateContext(window);
@@ -648,6 +659,44 @@ NVGcontext* SDLVideoContext::getNVGContext()
 SDL_Window* SDLVideoContext::getSDLWindow()
 {
     return this->window;
+}
+
+void SDLVideoContext::displayScaleChanged()
+{
+#if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
+    // Moved to a screen of another density (Windows), or the density
+    // changed (X11's Xft.dpi): where windows are sized in pixels, the same
+    // size in points, kept within that screen's free area. Not when it fills
+    // the screen, which the system sizes.
+    float previous     = this->displayScale;
+    float scale        = SDL_GetWindowDisplayScale(this->window);
+    this->displayScale = scale;
+    if (previous <= 0.0f || scale <= 0.0f || scale == previous || !sdlSizesInPixels())
+        return;
+    if (SDL_GetWindowFlags(this->window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_MAXIMIZED))
+        return;
+    int width = 0, height = 0;
+    SDL_GetWindowSize(this->window, &width, &height);
+    float ratio = scale / previous;
+    SDL_Rect usable;
+    bool bounded = SDL_GetDisplayUsableBounds(SDL_GetDisplayForWindow(this->window), &usable) && usable.w > 0
+        && usable.h > 0;
+    if (bounded && ratio > 1.0f)
+        ratio = std::max(1.0f, std::min(ratio, std::min(usable.w * 0.9f / width, usable.h * 0.9f / height)));
+    Logger::info("sdl: the screen's density went from x{} to x{}", previous, scale);
+    width  = (int)std::lround(width * ratio);
+    height = (int)std::lround(height * ratio);
+    SDL_SetWindowSize(this->window, width, height);
+    // Grown past the screen's edge: back inside it
+    int x = 0, y = 0;
+    if (bounded && SDL_GetWindowPosition(this->window, &x, &y))
+    {
+        int inX = std::max(usable.x, std::min(x, usable.x + usable.w - width));
+        int inY = std::max(usable.y, std::min(y, usable.y + usable.h - height));
+        if (inX != x || inY != y)
+            SDL_SetWindowPosition(this->window, inX, inY);
+    }
+#endif
 }
 
 void SDLVideoContext::fullScreen(bool fs)
