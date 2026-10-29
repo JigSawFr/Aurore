@@ -202,6 +202,21 @@ figure.code figcaption { font-family: var(--mono); font-size: 0.75rem; letter-sp
 .gallery a:hover img { transform: translateY(-2px); border-color: #3a4d72; }
 .gallery figcaption { color: var(--mist); font-size: 0.9375rem; }
 
+/* The demo on each console (the simulated platforms): side by side, their
+   feet on the same line; three, then two, then one a row as it narrows. */
+.consoles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 16px; align-items: end; }
+.consoles li { display: grid; gap: 10px; }
+.consoles a { display: block; border-radius: 14px; }
+.consoles img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--night-line); transition: transform 0.2s, border-color 0.2s; }
+.consoles a:hover img { transform: translateY(-2px); border-color: #3a4d72; }
+.consoles p { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; color: var(--mist); font-size: 0.9375rem; }
+.consoles strong { color: var(--snow); font: 600 1rem var(--display); }
+.consoles span { font: 0.8125rem var(--mono); color: var(--dusk); }
+@media (max-width: 1099px) { .consoles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .consoles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .consoles { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .consoles img { transition: none; } .consoles a:hover img { transform: none; } }
+
 .adds { display: grid; gap: 24px 56px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .adds { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); } .adds .section-head { margin-bottom: 0; } }
 .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }

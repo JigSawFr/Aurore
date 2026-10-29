@@ -289,8 +289,20 @@ namespace
         nvgFill(vg);
     }
 
-    // The top screen, until an activity gives its own: the app's name and
-    // the time, as a header would show them
+    // What the screen's header says: the activity's title, the app's when
+    // it has none
+    std::string headerTitle()
+    {
+        const auto& stack = aurore::Application::getActivitiesStack();
+        if (!stack.empty())
+            if (auto* label = dynamic_cast<aurore::Label*>(stack.back()->getView("aurore/applet_frame/title_label")))
+                if (!label->getFullText().empty())
+                    return label->getFullText();
+        return aurore::Application::getTitle();
+    }
+
+    // The top screen, until an activity gives its own: the activity's title
+    // and the time, as a header would show them
     void drawTopScreen(NVGcontext* vg, const Map& m)
     {
         aurore::Rect top(m.x(-40), m.y(-342), m.s(400), m.s(240));
@@ -315,7 +327,7 @@ namespace
             nvgFontSize(vg, m.s(20));
             nvgFillColor(vg, nvgRGB(0xF5, 0xF7, 0xFF));
             nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
-            nvgText(vg, x + m.s(16), y + m.s(26), aurore::Application::getTitle().c_str(), nullptr);
+            nvgText(vg, x + m.s(16), y + m.s(26), headerTitle().c_str(), nullptr);
             nvgTextAlign(vg, NVG_ALIGN_RIGHT | NVG_ALIGN_MIDDLE);
             nvgText(vg, x + w - m.s(16), y + m.s(26), clock, nullptr);
         }
