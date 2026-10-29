@@ -286,7 +286,8 @@ class RailPill : public aurore::View
             this->tint(1.0f);
         }
         // On the icon alone while the rail is folded, as wide as the name as it opens.
-        const float width = std::min(at.getWidth(), RAIL_SHUT_ITEM + (at.getWidth() - RAIL_SHUT_ITEM) * s_rail_open);
+        const float shut  = aurore::dp(RAIL_SHUT_ITEM);
+        const float width = std::min(at.getWidth(), shut + (at.getWidth() - shut) * s_rail_open);
         nvgBeginPath(vg);
         nvgRoundedRect(vg, at.getMinX(), at.getMinY(), width, at.getHeight(), this->to->getCornerRadius());
         NVGcolor fill = cadran::kit::color("cadran/rail_active");
@@ -415,14 +416,14 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
         left->setGrow(1.0f);
         CadranIcon* mark = kit::icon("mark", MARK_SIZE, "cadran/text");
         mark->setId("cadran_mark");
-        mark->setMarginRight(14);
+        mark->setMarginRight(aurore::dp(14));
         if (with_date)
         {
             // The main screen: the mark centred over the rail's icons.
             aurore::Style style = aurore::getStyle();
-            const float icons   = style["aurore/sidebar/padding_left"] + RAIL_ITEM_PAD + RAIL_ICON / 2;
+            const float icons   = style["aurore/sidebar/padding_left"] + aurore::dp(RAIL_ITEM_PAD + RAIL_ICON / 2);
             const float start   = style["aurore/applet_frame/padding_sides"] + style["aurore/applet_frame/header_padding_sides"];
-            mark->setMarginLeft(icons - MARK_SIZE / 2 - start);
+            mark->setMarginLeft(icons - aurore::dp(MARK_SIZE / 2) - start);
             mark->setCulled(false); // left of its box, which Aurore would take for off-screen
         }
         left->addView(mark, 0);
@@ -439,10 +440,10 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
     const char* ink = filled ? "cadran/pill_ok_ink" : "cadran/text2";
     auto* pill      = new HeaderPill();
     pill->setAlignItems(aurore::AlignItems::CENTER);
-    pill->setHeight(32);
-    pill->setPaddingLeft(14);
-    pill->setPaddingRight(14);
-    pill->setCornerRadius(16);
+    pill->setHeight(aurore::dp(32));
+    pill->setPaddingLeft(aurore::dp(14));
+    pill->setPaddingRight(aurore::dp(14));
+    pill->setCornerRadius(aurore::dp(16));
     if (filled)
     {
         pill->setThemeColor("backgroundColor", "cadran/pill_ok");
@@ -453,7 +454,7 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
         pill->setBorderThickness(1);
     }
     CadranIcon* glyph = kit::icon(pill_icon, 14, ink);
-    glyph->setMarginRight(8);
+    glyph->setMarginRight(aurore::dp(8));
     pill->addView(glyph);
     auto* pill_label = new aurore::Label();
     pill_label->setText(pill_text);
@@ -473,10 +474,10 @@ void cadran::style_header(aurore::AppletFrame* frame, const char* pill_icon, con
         date->setText(cadran::kit::long_date());
         chrome(date, 16, DATE_SCALE);
         date->setThemeColor("textColor", "cadran/text3");
-        date->setMarginLeft(10);
+        date->setMarginLeft(aurore::dp(10));
         right->addView(date);
     }
-    right->setMarginRight(16); // clear of the header's tools (language, theme, bell) after it
+    right->setMarginRight(aurore::dp(16)); // clear of the header's tools (language, theme, bell) after it
     if (aurore::Box* header = frame->getHeader())
         header->addView(right, 1);
 }
@@ -532,7 +533,7 @@ void add_crumb(aurore::AppletFrame* frame)
         return;
     aurore::Label* label = cadran::kit::label(crumb + "  ›", cadran::kit::TEXT_LEAD, "cadran/text3");
     label->setSingleLine(true);
-    label->setMarginRight(10);
+    label->setMarginRight(aurore::dp(10));
     const auto& views = row->getChildren();
     row->addView(label, std::find(views.begin(), views.end(), title) - views.begin());
 }
@@ -642,7 +643,7 @@ class RailFold : public aurore::Box
                 this->separators.push_back(v);
         this->spacer = new aurore::Box();
         this->spacer->setFocusable(false);
-        this->spacer->setWidth(RAIL_SHUT);
+        this->spacer->setWidth(aurore::dp(RAIL_SHUT));
         s_fold = this;
     }
 
@@ -673,11 +674,12 @@ class RailFold : public aurore::Box
         this->mode      = rail_mode();
         const bool fold = this->mode == RailMode::AUTO, icons = this->mode == RailMode::ICONS;
         this->setPositionType(fold ? aurore::PositionType::ABSOLUTE : aurore::PositionType::RELATIVE);
-        const float width = icons ? RAIL_SHUT : RAIL_OPEN;
+        // Open, the rail is as wide as its longest name at every density
+        const float width = icons ? aurore::dp(RAIL_SHUT) : RAIL_OPEN;
         this->setWidth(width);
         this->bar->setWidth(width);
         this->spacer->setVisibility(fold ? aurore::Visibility::VISIBLE : aurore::Visibility::GONE);
-        this->column->setPaddingRight(icons ? 16 : 8);
+        this->column->setPaddingRight(aurore::dp(icons ? 16 : 8));
         for (aurore::SidebarItem* item : this->items)
         {
             if (auto* label = item->getView("aurore/sidebar/item_label"))
@@ -758,7 +760,7 @@ class RailFold : public aurore::Box
         for (aurore::View* v : this->separators)
         {
             const aurore::Rect at = v->getFrame();
-            const float shut      = RAIL_SHUT - 2 * 16.0f - 2 * SEPARATOR_INSET;
+            const float shut      = aurore::dp(RAIL_SHUT - 2 * 16.0f - 2 * SEPARATOR_INSET);
             nvgBeginPath(vg);
             nvgRect(vg, at.getMinX(), std::round(at.getMidY()), shut + (at.getWidth() - shut) * t, 1);
             nvgFillColor(vg, line);
@@ -783,8 +785,8 @@ class RailFold : public aurore::Box
             NVGcolor clear        = dark;
             clear.a               = 0.0f;
             nvgBeginPath(ctx->vg);
-            nvgRect(ctx->vg, edge, at.getMinY(), SHADOW, at.getHeight());
-            nvgFillPaint(ctx->vg, nvgLinearGradient(ctx->vg, edge, 0, edge + SHADOW, 0, dark, clear));
+            nvgRect(ctx->vg, edge, at.getMinY(), aurore::dp(SHADOW), at.getHeight());
+            nvgFillPaint(ctx->vg, nvgLinearGradient(ctx->vg, edge, 0, edge + aurore::dp(SHADOW), 0, dark, clear));
             nvgFill(ctx->vg);
         }
         this->layer_pass = true;
@@ -823,7 +825,7 @@ class RailFold : public aurore::Box
 
   private:
     // The rail's width on screen now.
-    float visible() { return this->mode == RailMode::AUTO ? RAIL_SHUT + (RAIL_OPEN - RAIL_SHUT) * s_rail_open : this->getWidth(); }
+    float visible() { return this->mode == RailMode::AUTO ? aurore::dp(RAIL_SHUT) + (RAIL_OPEN - aurore::dp(RAIL_SHUT)) * s_rail_open : this->getWidth(); }
 
     bool focus_on_rail() const
     {
@@ -926,7 +928,7 @@ void cadran::style_rail(aurore::View* tab_frame)
     aurore::Box* list          = first ? first->getParent() : nullptr;
     if (!list)
         return;
-    list->setPadding(6, 8, 10, 16);
+    list->setPadding(aurore::dp(6), aurore::dp(8), aurore::dp(10), aurore::dp(16));
     // The app's, in main.xml's order ("" for a separator).
     const auto& rail_icons               = ui::hooks::get().rail_icons;
     const std::vector<std::string> icons = rail_icons ? rail_icons() : std::vector<std::string> {};
@@ -942,16 +944,16 @@ void cadran::style_rail(aurore::View* tab_frame)
             // 13 px: up to ten items and three separators fit between the
             // header and the footer (559 of 563 px), so the rail never
             // scrolls, nor moves from one tab to the next.
-            v->setHeight(13);
-            v->setMarginLeft(14);
-            v->setMarginRight(14);
+            v->setHeight(aurore::dp(13));
+            v->setMarginLeft(aurore::dp(14));
+            v->setMarginRight(aurore::dp(14));
             continue;
         }
-        item->setHeight(52);
-        item->setCornerRadius(14);
-        item->setPaddingLeft(RAIL_ITEM_PAD);
-        item->setPaddingRight(RAIL_ITEM_PAD);
-        item->setMarginBottom(4);
+        item->setHeight(aurore::dp(52));
+        item->setCornerRadius(aurore::dp(14));
+        item->setPaddingLeft(aurore::dp(RAIL_ITEM_PAD));
+        item->setPaddingRight(aurore::dp(RAIL_ITEM_PAD));
+        item->setMarginBottom(aurore::dp(4));
         item->setAlignItems(aurore::AlignItems::CENTER);
         // The library shows its accent again on each change of tab: without
         // a size or a colour, that moves nothing (the pill says it instead).
@@ -968,7 +970,7 @@ void cadran::style_rail(aurore::View* tab_frame)
             label->setMarginTop(0);
             label->setMarginBottom(0);
             label->setMarginRight(0);
-            label->setMarginLeft(name.empty() ? 4 : 10);
+            label->setMarginLeft(aurore::dp(name.empty() ? 4 : 10));
             label->setSingleLine(true);
             // A long tab name down to 80 % of its size rather than cut and
             // scrolling
