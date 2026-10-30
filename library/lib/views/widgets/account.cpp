@@ -3,6 +3,8 @@
 
 #include "aurore/views/widgets/account.hpp"
 
+#include <cstring>
+
 #ifdef __SWITCH__
 #include <switch.h>
 #endif
