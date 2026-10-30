@@ -33,8 +33,9 @@
 // - the scissor is the hardware's, the box around nanovg's (Aurore only
 //   clips to axis-aligned rectangles).
 //
-// Not yet: edge antialiasing (the context is made without it), stencil
-// strokes, mipmaps. Textures are padded to powers of two, at most 1024; a
+// Edge antialiasing with NVG_ANTIALIAS: the coverage nanovg's GL shader
+// computes per pixel is read from a texture (nanovg_citro3d_aa.h), times the
+// paint in a third combiner. Not yet: stencil strokes, mipmaps. Textures are padded to powers of two, at most 1024; a
 // larger image is scaled down when uploaded.
 //
 // The caller owns citro3d (C3D_Init, the render target, C3D_FrameBegin and
@@ -54,7 +55,13 @@ extern "C"
 {
 #endif
 
-    // Makes the context: flags are nanovg_gl.h's (none is read yet)
+    // Create flags, as nanovg_gl.h's (the only one read)
+    enum NVGcreateFlags
+    {
+        // The edges antialiased (nanovg_citro3d_aa.h)
+        NVG_ANTIALIAS = 1 << 0,
+    };
+
     NVGcontext* nvgCreateC3D(int flags);
     void nvgDeleteC3D(NVGcontext* ctx);
 
@@ -81,6 +88,7 @@ extern "C"
 #include <vector>
 
 // Made by library/CMakeLists.txt from nanovg_citro3d.v.pica (picasso)
+#include "nanovg_citro3d_aa.h"
 #include "nanovg_citro3d_shbin.h"
 
 namespace nvgc3d
@@ -138,6 +146,8 @@ struct Call
     int triangleOffset; // the cover quad for FILL, the vertices for TRIANGLES
     int triangleCount;
     GPU_BLENDFACTOR blend[4]; // src RGB, dst RGB, src alpha, dst alpha
+    bool antialias; // the edges' coverage applied (not to text: its u is the atlas')
+    float aaRow; // the coverage texture's row, for the call's strokeMult
     bool scissor;
     uint32_t scissorBox[4]; // left, top, right, bottom in the framebuffer's (portrait) coordinates
 };
@@ -184,6 +194,10 @@ struct Context
     int projLocation   = -1;
     int texRowLocation = -1;
     int texOffLocation = -1;
+    int aaRowLocation  = -1;
+
+    bool antialias   = false; // NVG_ANTIALIAS
+    C3D_Tex coverage = {}; // the edges' coverage (nanovg_citro3d_aa.h)
 
     std::unordered_map<int, Texture> textures;
     int nextTexture = 1;
@@ -579,17 +593,19 @@ inline bool convertScissor(Context* ctx, const NVGscissor* s, uint32_t box[4])
 }
 
 inline Call& newCall(Context* ctx, CallType type, NVGpaint* paint, NVGcompositeOperationState op, NVGscissor* scissor,
-    bool triangles)
+    bool triangles, float strokeMult = 1.0f)
 {
     ctx->calls.push_back({});
-    Call& call    = ctx->calls.back();
-    call.type     = type;
-    call.paint    = convertPaint(ctx, paint, triangles);
-    call.blend[0] = blendFactor(op.srcRGB);
-    call.blend[1] = blendFactor(op.dstRGB);
-    call.blend[2] = blendFactor(op.srcAlpha);
-    call.blend[3] = blendFactor(op.dstAlpha);
-    call.scissor  = convertScissor(ctx, scissor, call.scissorBox);
+    Call& call     = ctx->calls.back();
+    call.type      = type;
+    call.paint     = convertPaint(ctx, paint, triangles);
+    call.blend[0]  = blendFactor(op.srcRGB);
+    call.blend[1]  = blendFactor(op.dstRGB);
+    call.blend[2]  = blendFactor(op.srcAlpha);
+    call.blend[3]  = blendFactor(op.dstAlpha);
+    call.scissor   = convertScissor(ctx, scissor, call.scissorBox);
+    call.antialias = ctx->antialias && !triangles;
+    call.aaRow     = aa::rowT(aa::rowOf(strokeMult));
     return call;
 }
 
@@ -638,13 +654,14 @@ inline void renderFill(void* uptr, NVGpaint* paint, NVGcompositeOperationState o
     }
 }
 
-inline void renderStroke(void* uptr, NVGpaint* paint, NVGcompositeOperationState op, NVGscissor* scissor, float, float,
-    const NVGpath* paths, int npaths)
+inline void renderStroke(void* uptr, NVGpaint* paint, NVGcompositeOperationState op, NVGscissor* scissor, float fringe,
+    float strokeWidth, const NVGpath* paths, int npaths)
 {
-    auto* ctx       = static_cast<Context*>(uptr);
-    Call& call      = newCall(ctx, CallType::STROKE, paint, op, scissor, false);
-    call.pathOffset = (int)ctx->paths.size();
-    call.pathCount  = npaths;
+    auto* ctx        = static_cast<Context*>(uptr);
+    float strokeMult = fringe > 0 ? (strokeWidth * 0.5f + fringe * 0.5f) / fringe : 1.0f;
+    Call& call       = newCall(ctx, CallType::STROKE, paint, op, scissor, false, strokeMult);
+    call.pathOffset  = (int)ctx->paths.size();
+    call.pathCount   = npaths;
     for (int i = 0; i < npaths; i++)
     {
         Path path = {};
@@ -666,12 +683,24 @@ inline void renderTriangles(void* uptr, NVGpaint* paint, NVGcompositeOperationSt
     call.triangleCount  = nverts;
 }
 
-inline void setPaint(Context* ctx, Paint& p)
+inline void setPaint(Context* ctx, const Call& call, Paint& p)
 {
     C3D_TexEnv* env = C3D_GetTexEnv(0);
     C3D_TexEnvInit(env);
     C3D_TexEnv* mix = C3D_GetTexEnv(1);
     C3D_TexEnvInit(mix);
+    // The edges' coverage: the colour so far times texture 1's alpha (its
+    // coordinates are u and the call's row, nanovg_citro3d.v.pica)
+    C3D_TexEnv* edge = C3D_GetTexEnv(2);
+    C3D_TexEnvInit(edge);
+    if (call.antialias)
+    {
+        C3D_TexBind(1, &ctx->coverage);
+        C3D_TexEnvSrc(edge, C3D_Both, GPU_PREVIOUS, GPU_TEXTURE1);
+        C3D_TexEnvOpRgb(edge, GPU_TEVOP_RGB_SRC_COLOR, GPU_TEVOP_RGB_SRC_ALPHA);
+        C3D_TexEnvFunc(edge, C3D_Both, GPU_MODULATE);
+        C3D_FVUnifSet(GPU_VERTEX_SHADER, ctx->aaRowLocation, call.aaRow, 0.0f, 0.0f, 0.0f);
+    }
     switch (p.kind)
     {
         case PaintKind::SOLID:
@@ -789,7 +818,7 @@ inline void renderFlush(void* uptr)
         switch (call.type)
         {
             case CallType::CONVEX_FILL:
-                setPaint(ctx, call.paint);
+                setPaint(ctx, call, call.paint);
                 drawFans(ctx, call);
                 drawStrips(ctx, call); // the fringes, when there are
                 break;
@@ -805,9 +834,13 @@ inline void renderFlush(void* uptr)
                 C3D_StencilOp(GPU_STENCIL_KEEP, GPU_STENCIL_KEEP, GPU_STENCIL_DECR_WRAP);
                 drawFans(ctx, call);
                 C3D_CullFace(GPU_CULL_NONE);
-                // The cover: where the winding is not zero, which it clears
+                // The fringes, outside the shape only (where the winding is
+                // zero: not blended twice with the cover), then the cover:
+                // where the winding is not zero, which it clears
                 C3D_DepthTest(false, GPU_ALWAYS, GPU_WRITE_COLOR);
-                setPaint(ctx, call.paint);
+                setPaint(ctx, call, call.paint);
+                C3D_StencilTest(true, GPU_EQUAL, 0, 0xFF, 0xFF);
+                C3D_StencilOp(GPU_STENCIL_KEEP, GPU_STENCIL_KEEP, GPU_STENCIL_KEEP);
                 drawStrips(ctx, call);
                 C3D_StencilTest(true, GPU_NOTEQUAL, 0, 0xFF, 0xFF);
                 C3D_StencilOp(GPU_STENCIL_ZERO, GPU_STENCIL_ZERO, GPU_STENCIL_ZERO);
@@ -815,11 +848,11 @@ inline void renderFlush(void* uptr)
                 C3D_StencilTest(false, GPU_ALWAYS, 0, 0xFF, 0xFF);
                 break;
             case CallType::STROKE:
-                setPaint(ctx, call.paint);
+                setPaint(ctx, call, call.paint);
                 drawStrips(ctx, call);
                 break;
             case CallType::TRIANGLES:
-                setPaint(ctx, call.paint);
+                setPaint(ctx, call, call.paint);
                 C3D_DrawArrays(GPU_TRIANGLES, call.triangleOffset, call.triangleCount);
                 break;
         }
@@ -827,6 +860,7 @@ inline void renderFlush(void* uptr)
     C3D_SetScissor(GPU_SCISSOR_DISABLE, 0, 0, 0, 0);
     // The calls' copies go with them
     C3D_TexBind(0, nullptr);
+    C3D_TexBind(1, nullptr);
     resetFrame(ctx);
 }
 
@@ -852,6 +886,7 @@ inline int renderCreate(void* uptr)
     ctx->projLocation   = shaderInstanceGetUniformLocation(ctx->program.vertexShader, "proj");
     ctx->texRowLocation = shaderInstanceGetUniformLocation(ctx->program.vertexShader, "texRow");
     ctx->texOffLocation = shaderInstanceGetUniformLocation(ctx->program.vertexShader, "texOff");
+    ctx->aaRowLocation  = shaderInstanceGetUniformLocation(ctx->program.vertexShader, "aaRow");
 
     // The linear gradients' ramp: 0 to 1 across, clamped
     if (!C3D_TexInit(&ctx->ramp, RAMP_WIDTH, 8, GPU_A8))
@@ -863,6 +898,20 @@ inline int renderCreate(void* uptr)
         for (int x = 0; x < RAMP_WIDTH; x++)
             out[tiledOffset(x, y, RAMP_WIDTH)] = (uint8_t)(x * 255 / (RAMP_WIDTH - 1));
     C3D_TexFlush(&ctx->ramp);
+
+    // The edges' coverage (nanovg_citro3d_aa.h): u across, strokeMult down
+    if (ctx->antialias)
+    {
+        if (!C3D_TexInit(&ctx->coverage, aa::WIDTH, aa::ROWS, GPU_A8))
+            return 0;
+        C3D_TexSetFilter(&ctx->coverage, GPU_LINEAR, GPU_LINEAR);
+        C3D_TexSetWrap(&ctx->coverage, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
+        auto* cov = static_cast<uint8_t*>(ctx->coverage.data);
+        for (int row = 0; row < aa::ROWS; row++)
+            for (int x = 0; x < aa::WIDTH; x++)
+                cov[tiledOffset(x, row, aa::WIDTH)] = aa::texel(x, row);
+        C3D_TexFlush(&ctx->coverage);
+    }
     return 1;
 }
 
@@ -878,6 +927,8 @@ inline void renderDelete(void* uptr)
         C3D_TexDelete(&g.tex);
     if (ctx->ramp.data)
         C3D_TexDelete(&ctx->ramp);
+    if (ctx->coverage.data)
+        C3D_TexDelete(&ctx->coverage);
     if (ctx->linearVerts)
         linearFree(ctx->linearVerts);
     if (ctx->dvlb)
@@ -892,10 +943,11 @@ inline void renderDelete(void* uptr)
 
 NVGcontext* nvgCreateC3D(int flags)
 {
-    (void)flags;
+    auto* ctx                   = new nvgc3d::Context();
+    ctx->antialias              = (flags & NVG_ANTIALIAS) != 0;
     NVGparams params            = {};
-    params.userPtr              = new nvgc3d::Context();
-    params.edgeAntiAlias        = 0;
+    params.userPtr              = ctx;
+    params.edgeAntiAlias        = ctx->antialias ? 1 : 0;
     params.renderCreate         = nvgc3d::renderCreate;
     params.renderCreateTexture  = nvgc3d::renderCreateTexture;
     params.renderDeleteTexture  = nvgc3d::renderDeleteTexture;
