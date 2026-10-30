@@ -100,9 +100,21 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
+      # The image from its recipe: PacBrew's OpenOrbis with LLVM 23. Building it
+      # takes 5 minutes; GitHub's cache keeps it while ps4/scripts/ stays the same
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Toolchain image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ps4/scripts
+          tags: aurore-ps4
+          load: true
+          cache-from: type=gha,scope=ps4
+          cache-to: type=gha,scope=ps4,mode=max
       - name: Build
         run: |
-          docker run --rm -v $(pwd):/src/ xfangfang/pacbrew@sha256:4774ccb28f5e05cd848a7c9204532ea409d1af63e9689d2dbb3e4cec925439d2 \
+          docker run --rm -v $(pwd):/src/ aurore-ps4 \
             "cmake -B build -DAURORE_PLATFORM=PS4 \
                 -DCMAKE_BUILD_TYPE=Release && \
                 make -C build -j$(nproc)"

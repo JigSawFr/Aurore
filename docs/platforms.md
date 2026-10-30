@@ -15,11 +15,11 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 | iOS, tvOS | `IOS`, `TVOS` | SDL3 (default) or SDL2 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
 | Browser | Emscripten (`emcmake`) | SDL3 (default) or SDL2 | OpenGL ES 3 (WebGL 2) | packaged with the page |
 
-Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 or SDL3 built from the submodule) and a C++23 compiler. One toolchain has less: the PS4's OpenOrbis clang 12 builds in its `-std=gnu++2b` mode, without C++23's library, so C++20 stays the minimum for the projects that link Aurore. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
+Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 or SDL3 built from the submodule) and a C++23 compiler; the projects that link Aurore need C++20 or later. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
 
 SDL3 is the window and input everywhere it runs: the desktop, a browser, Android, iOS and tvOS. It is the submodule `library/lib/extern/SDL3` (3.4.18), the system's with `USE_SYSTEM_SDL3=ON` (`find_package(SDL3)`), a download with `AURORE_FETCH_DEPS`, Emscripten's port in a browser. On the desktop it gives what GLFW gave: the app's ID for the taskbar (`Application::setAppId`), the window's icon (`icon/icon.png`), a saved position kept only while it is on a screen, the app's controller mappings (`gamepad/gamecontrollerdb.txt`), and the system's light or dark theme on every system, Linux's desktop portal too, followed while the app runs until it picks one (`Platform::setThemeVariant`; `Platform::followSystemTheme` goes back to it) or `AURORE_THEME` gives it. Windows and X11 size windows in pixels: a first window, before any size is saved, is opened at the main screen's density (1280x720 is 2560x1440 at 200 %), and a window keeps its size in points when the density changes under it (moved to another screen on Windows, `Xft.dpi` changed on X11), each time within the screen's free area. Under SDL3 as under SDL2, a controller's face buttons are read by their label: A is the button marked A, on a Nintendo controller as on an Xbox one (SDL3 itself numbers them by place). An app's code that means either SDL tests `__SDL__`, defined under both; `__SDL2__` or `__SDL3__` for one only.
 
-SDL2 stays for the consoles, which have no SDL3: devkitPro has none for the Switch, nor PacBrew for the PS4, and the Vita's OpenGL ES build would need an SDL3 built with PVR_PSP2 in its Docker image (`AURORE_WINDOW=SDL3` stops the configuration there). Elsewhere it is an option, `-DAURORE_WINDOW=SDL2` (`-PauroreSdl=2` on Android). SDL2 is the submodule `library/lib/extern/SDL` (2.32.10) on the desktop, Android, iOS and tvOS, and on the Vita without `USE_SYSTEM_SDL2`. Elsewhere it is the toolchain's: devkitPro's `switch-sdl2` on the Switch, PacBrew's SDL 2.0.18 on the PS4, Emscripten's port in a browser, and the SDL in the Docker image of the Vita's OpenGL ES build (2.28.5 with `psv/scripts/sdl2/ime.patch` in the image the CI pins; `psv/scripts` now makes one with 2.32.10 and the same patch). Aurore's SDL code builds with all of them.
+SDL2 stays for the consoles, which have no SDL3: devkitPro has none for the Switch, nor PacBrew for the PS4, and the Vita's OpenGL ES build would need an SDL3 built with PVR_PSP2 in its Docker image (`AURORE_WINDOW=SDL3` stops the configuration there). Elsewhere it is an option, `-DAURORE_WINDOW=SDL2` (`-PauroreSdl=2` on Android). SDL2 is the submodule `library/lib/extern/SDL` (2.32.10) on the desktop, Android, iOS and tvOS, and on the Vita without `USE_SYSTEM_SDL2`. Elsewhere it is the toolchain's: devkitPro's `switch-sdl2` on the Switch, PacBrew's SDL 2.0.18 on the PS4, Emscripten's port in a browser, and the SDL in the Docker image of the Vita's OpenGL ES build (2.32.10 with `psv/scripts/sdl2/ime.patch`). Aurore's SDL code builds with all of them.
 
 ## Linux
 
@@ -94,10 +94,11 @@ The result is `build/aurore_demo.vpk`, installed with VitaShell. The OpenGL ES b
 
 ## PS4
 
-With the [OpenOrbis](https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain) toolchain (`OPENORBIS` set), through pacbrew's Docker image, which has its `add_self` and packaging (Linux only):
+With the [OpenOrbis](https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain) toolchain (`OPENORBIS` set), as [PacBrew](https://github.com/PacBrew/ps4-openorbis) packages it, with its `add_self` and packaging (Linux only). PacBrew's clang and libc++ are LLVM 12's: the image built from `ps4/scripts/Dockerfile` replaces them with LLVM 23's clang and the runtimes built from its sources (libc++, libc++abi, libunwind, compiler-rt's builtins), with `libcxx-ps4.patch` for OpenOrbis' musl, so the PS4 has C++23 and its library:
 
 ```sh
-docker run --rm -v $(pwd):/src/ xfangfang/pacbrew \
+docker build -t aurore-ps4 ps4/scripts
+docker run --rm -v $(pwd):/src/ aurore-ps4 \
   "cmake -B build -DAURORE_PLATFORM=PS4 -DCMAKE_BUILD_TYPE=Release && make -C build -j$(nproc)"
 ```
 
