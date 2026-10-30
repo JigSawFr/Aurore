@@ -131,7 +131,9 @@ jobs:
       - name: Build GLES2
         if: ${{ matrix.driver == 'gles2' }}
         run: |
-          docker run --rm -v $(pwd):/src/ xfangfang/vitasdk_sdl2_gles2@sha256:53befdff3313d57040658d9f32d973c4f6419b126cfcaa602cca81848e0260b2 \
+          # The image from its recipe: VitaSDK (GCC 15.2), PVR_PSP2 and SDL2
+          docker build -t aurore-vita-gles2 psv/scripts
+          docker run --rm -v $(pwd):/src/ aurore-vita-gles2 \
             "cmake -B build -G Ninja -DAURORE_PLATFORM=PSV -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && \
              cmake --build build"
 
@@ -201,6 +203,11 @@ jobs:
         with:
           name: aurore-3ds-smoke
           path: build/ctr/aurore_3ds_smoke.3dsx
+      - name: Upload the demo
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: aurore-3ds-demo
+          path: build/aurore_demo.3dsx
 
   gradle-wrapper:
     name: android (Gradle wrapper)
