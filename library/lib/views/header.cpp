@@ -7,7 +7,7 @@
 namespace aurore
 {
 
-const std::string headerXML = R"xml(
+constexpr std::string_view headerXML = R"xml(
     <aurore:Box
         width="auto"
         height="auto"

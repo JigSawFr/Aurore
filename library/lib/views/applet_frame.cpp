@@ -17,10 +17,10 @@ using namespace aurore::literals;
 namespace aurore
 {
 
-static const char* HEADER_ID = "aurore/applet_frame/header";
-static const char* FOOTER_ID = "aurore/applet_frame/footer";
+static constexpr const char* HEADER_ID = "aurore/applet_frame/header";
+static constexpr const char* FOOTER_ID = "aurore/applet_frame/footer";
 
-const std::string appletFrameXML = R"xml(
+constexpr std::string_view appletFrameXML = R"xml(
     <aurore:Box
         width="auto"
         height="auto"
