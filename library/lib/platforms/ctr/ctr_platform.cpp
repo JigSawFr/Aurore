@@ -2,8 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include <3ds.h>
+#include <arpa/inet.h>
+#include <malloc.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <exception>
+#include <vector>
 
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
@@ -99,6 +104,108 @@ void CtrInputManager::updateTouchStates(std::vector<RawTouchState>* states)
     states->push_back(state);
 }
 
+// The keyboard
+
+// What swkbd writes back: maxStringLength characters in UTF-8 (4 bytes at
+// most each) and the NUL
+static size_t textBufferSize(int maxStringLength)
+{
+    size_t characters = maxStringLength > 0 ? (size_t)maxStringLength : 256;
+    return characters * 4 + 1;
+}
+
+// Aurore's keys not to type, as swkbd filters them (it has no filter for a
+// space or a slash)
+static u32 filterFlags(int disabled)
+{
+    u32 flags = 0;
+    if (disabled & (KEYBOARD_DISABLE_AT | KEYBOARD_DISABLE_USERNAME))
+        flags |= SWKBD_FILTER_AT;
+    if (disabled & (KEYBOARD_DISABLE_PERCENT | KEYBOARD_DISABLE_USERNAME))
+        flags |= SWKBD_FILTER_PERCENT;
+    if (disabled & (KEYBOARD_DISABLE_BACKSLASH | KEYBOARD_DISABLE_USERNAME))
+        flags |= SWKBD_FILTER_BACKSLASH;
+    if (disabled & KEYBOARD_DISABLE_NUMBERS)
+        flags |= SWKBD_FILTER_DIGITS;
+    return flags;
+}
+
+// The keyboard shown, what was typed in `text`: false when it was cancelled
+static bool showKeyboard(SwkbdType type, const std::string& headerText, const std::string& subText,
+    int maxStringLength, const std::string& initialText, int disabled, bool password, std::string* text,
+    int leftKey = 0, int rightKey = 0)
+{
+    SwkbdState swkbd;
+    swkbdInit(&swkbd, type, 2, maxStringLength > 0 ? maxStringLength : -1);
+    // The hint shows in the empty field: what to type
+    std::string hint = headerText.empty() ? subText : headerText;
+    if (!hint.empty())
+        swkbdSetHintText(&swkbd, hint.c_str());
+    if (!initialText.empty())
+        swkbdSetInitialText(&swkbd, initialText.c_str());
+    swkbdSetValidation(&swkbd, SWKBD_ANYTHING, filterFlags(disabled), 0);
+    if (password)
+        swkbdSetPasswordMode(&swkbd, SWKBD_PASSWORD_HIDE_DELAY);
+    if (type == SWKBD_TYPE_NUMPAD)
+        swkbdSetNumpadKeys(&swkbd, leftKey, rightKey);
+
+    std::vector<char> buffer(textBufferSize(maxStringLength), 0);
+    SwkbdButton button = swkbdInputText(&swkbd, buffer.data(), buffer.size());
+    if (button != SWKBD_BUTTON_CONFIRM)
+        return false;
+    *text = buffer.data();
+    return true;
+}
+
+bool CtrImeManager::openForText(std::function<void(std::string)> f, std::string headerText, std::string subText,
+    int maxStringLength, std::string initialText, int kbdDisableBitmask)
+{
+    std::string text;
+    if (!showKeyboard(SWKBD_TYPE_NORMAL, headerText, subText, maxStringLength, initialText, kbdDisableBitmask, false, &text))
+        return false;
+    f(text);
+    return true;
+}
+
+bool CtrImeManager::openForPassword(std::function<void(std::string)> f, std::string headerText, std::string subText,
+    int maxStringLength, std::string initialText, int kbdDisableBitmask)
+{
+    std::string text;
+    if (!showKeyboard(SWKBD_TYPE_NORMAL, headerText, subText, maxStringLength, initialText, kbdDisableBitmask, true, &text))
+        return false;
+    f(text);
+    return true;
+}
+
+bool CtrImeManager::openForNumber(std::function<void(long)> f, std::string headerText, std::string subText,
+    int maxStringLength, std::string initialText, std::string leftButton, std::string rightButton,
+    int kbdDisableBitmask)
+{
+    // The number pad's two keys left and right of 0: one character each
+    // (ASCII: swkbd takes a UTF-16 unit)
+    auto key = [](const std::string& label)
+    { return label.size() == 1 ? (int)(unsigned char)label[0] : 0; };
+    std::string text;
+    if (!showKeyboard(SWKBD_TYPE_NUMPAD, headerText, subText, maxStringLength, initialText, kbdDisableBitmask, false,
+            &text, key(leftButton), key(rightButton))
+        || text.empty())
+        return false;
+    // The optional keys can leave a text that is not a number ("-", "."),
+    // or one too large for a long
+    long value;
+    try
+    {
+        value = std::stol(text);
+    }
+    catch (const std::exception& e)
+    {
+        Logger::warning("3DS keyboard: \"{}\" is not a number: {}", text, e.what());
+        return false;
+    }
+    f(value);
+    return true;
+}
+
 void CtrFontLoader::loadFonts()
 {
     NVGcontext* vg = Application::getNVGContext();
@@ -119,6 +226,18 @@ CtrPlatform::CtrPlatform()
     ptmuInit();
     if (R_FAILED(romfsInit()))
         Logger::warning("3DS: no romfs, the resources are missing");
+
+    // The Wi-Fi (ac) and the sockets (soc: the IP address, and 3dslink),
+    // which take a megabyte of their own
+    acInit();
+    this->socBuffer = static_cast<u32*>(memalign(0x1000, 0x100000));
+    this->socReady  = this->socBuffer && R_SUCCEEDED(socInit(this->socBuffer, 0x100000));
+    // The log: on the terminal of 3dslink when it started the app, else in
+    // a file on the SD card (the top screen is the app's)
+    if (this->socReady && __3dslink_host.s_addr != 0)
+        link3dsStdio();
+    else if (std::FILE* log = std::fopen("sdmc:/3ds/aurore.log", "w"))
+        Logger::setLogOutput(log);
 
     // The three New models have the same CPU, memory and screens; the New
     // 2DS XL has no stereoscopic 3D, which nothing here uses
@@ -157,6 +276,10 @@ CtrPlatform::CtrPlatform()
 CtrPlatform::~CtrPlatform()
 {
     delete this->videoContext;
+    if (this->socReady)
+        socExit();
+    std::free(this->socBuffer);
+    acExit();
     romfsExit();
     ptmuExit();
     cfguExit();
@@ -224,6 +347,29 @@ int CtrPlatform::getBatteryLevel()
     if (R_FAILED(PTMU_GetBatteryLevel(&level)))
         return 100;
     return level * 20;
+}
+
+bool CtrPlatform::hasWirelessConnection()
+{
+    u32 status = 0;
+    return R_SUCCEEDED(ACU_GetWifiStatus(&status)) && status != 0;
+}
+
+int CtrPlatform::getWirelessLevel()
+{
+    return this->hasWirelessConnection() ? osGetWifiStrength() : 0;
+}
+
+std::string CtrPlatform::getIpAddress()
+{
+    if (!this->socReady)
+        return "-";
+    // In the network's order: the first byte is the first number
+    long ip = gethostid();
+    if (ip == 0 || ip == -1)
+        return "-";
+    u32 a = (u32)ip;
+    return fmt::format("{}.{}.{}.{}", a & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff, (a >> 24) & 0xff);
 }
 
 bool CtrPlatform::isBatteryCharging()
