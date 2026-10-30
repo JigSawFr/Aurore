@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: borealis contributors
 # SPDX-License-Identifier: Apache-2.0
 
-cmake_minimum_required(VERSION 3.16...3.31)
+cmake_minimum_required(VERSION 3.20...3.31)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 include(GNUInstallDirs)
 set(AURORE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
@@ -530,10 +530,10 @@ message(STATUS "aurore: driver ${AURORE_DRIVER}")
 # The library: target aurore, Aurore::aurore for the apps
 add_library(aurore STATIC ${AURORE_SRC})
 add_library(Aurore::aurore ALIAS aurore)
-# C++23; the projects that link Aurore can stay in C++20 (cxx_std_20 below)
+# C++23, which every toolchain has, the PS4's and the Vita's included
 set_target_properties(aurore PROPERTIES
         CXX_STANDARD 23
-        CXX_STANDARD_REQUIRED OFF
+        CXX_STANDARD_REQUIRED ON
         UNITY_BUILD ${AURORE_UNITY_BUILD}
         # No C++ modules: no dependency scanning step (CMake >= 3.28)
         CXX_SCAN_FOR_MODULES OFF
@@ -570,9 +570,9 @@ foreach (dep fmt yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-sh
         endif ()
     endif ()
 endforeach ()
-# The projects that link the library build with C++20 at least, so its headers
-# can use it (and no more, for the toolchains above)
-target_compile_features(aurore PUBLIC cxx_std_20)
+# The projects that link the library build with C++23 at least, so its headers
+# can use it
+target_compile_features(aurore PUBLIC cxx_std_23)
 target_link_libraries(aurore
         PUBLIC fmt::fmt yogacore ${AURORE_PLATFORM_LIBS}
         PRIVATE ${AURORE_PRIVATE_LIBS} $<BUILD_INTERFACE:tweeny::tweeny>)

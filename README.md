@@ -218,8 +218,8 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 <!-- under-the-hood: begin (tools/stack.py writes this) -->
 | | Version |
 | --- | --- |
-| Language | C++23 (min. C++20) |
-| CMake | 3.16–3.31 |
+| Language | C++23 |
+| CMake | 3.20–3.31 |
 | SDL3 | 3.4.18 |
 | SDL | 2.32.10 |
 | GLFW | 3.5.1 |
@@ -243,7 +243,7 @@ Checked on every pull request: 159 test cases in the headless harness, 36 refere
 
 ## 📦 Use it in your project
 
-1. Build your project as **C++20** or later (C++23 recommended), without `-fno-rtti` or `-fno-exceptions`.
+1. Build your project as **C++23** or later, with CMake 3.20 or later, without `-fno-rtti` or `-fno-exceptions`.
 2. Add Aurore as a submodule:
 
    ```sh
@@ -287,7 +287,7 @@ cmake --build build_pc
 ./build_pc/aurore_demo
 ```
 
-Aurore builds with CMake only (3.16 or later): upstream's xmake files (`xmake.lua`, `uwp.lua`), untested and behind the CMake build, are gone.
+Aurore builds with CMake only (3.20 or later): upstream's xmake files (`xmake.lua`, `uwp.lua`), untested and behind the CMake build, are gone.
 
 With CMake 3.25 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>` (`cmake --list-presets`: also `desktop-debug`, `desktop-asan` and `tests`):
 
