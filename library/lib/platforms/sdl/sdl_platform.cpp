@@ -216,7 +216,7 @@ void SDLPlatform::disableScreenDimming(bool disable, const std::string& reason, 
     }
 }
 
-#if !defined(IOS) && !defined(TVOS)
+#if !defined(IOS) && !defined(TVOS) && !defined(__EMSCRIPTEN__)
 // A battery SDL can read: one on battery, charging or charged (not none,
 // unknown, nor SDL3's error)
 static bool sdlHasBattery(SDL_PowerState state)

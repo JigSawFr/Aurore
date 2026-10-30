@@ -460,6 +460,11 @@ SDLVideoContext::SDLVideoContext(std::string windowTitle, uint32_t windowWidth, 
 #if defined(__SDL3__) && !defined(ANDROID) && !defined(IOS) && !defined(__EMSCRIPTEN__)
     this->displayScale = SDL_GetWindowDisplayScale(this->window);
 #endif
+#if defined(__SDL3__) && defined(__EMSCRIPTEN__)
+    // SDL3 sizes the window like the canvas when the page sizes it with CSS:
+    // back to the console's size, which the page then scales
+    SDL_SetWindowSize(this->window, (int)windowWidth, (int)windowHeight);
+#endif
 #ifdef AURORE_USE_OPENGL
     // Configure window
     SDL_GLContext context = SDL_GL_CreateContext(window);
