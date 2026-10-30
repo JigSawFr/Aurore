@@ -2,8 +2,8 @@
 // SPDX-FileCopyrightText: 2019 p-sam
 // SPDX-License-Identifier: Apache-2.0
 
-#include <fmt/format.h>
 #include <stdio.h>
+#include <format>
 
 #include <aurore/core/logger.hpp>
 

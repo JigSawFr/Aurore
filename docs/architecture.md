@@ -11,7 +11,7 @@ flowchart TB
     views["Views<br/>library/*/views: Label, Button, ScrollingFrame, RecyclerFrame, cells…"]
     core["Core<br/>library/*/core: Application, View, Box, Activity, Theme, Style, i18n, threads"]
     platforms["Platforms<br/>library/*/platforms: GLFW, SDL, Switch, PS Vita, PS4, New 3DS, Android"]
-    extern["Bundled libraries<br/>library/lib/extern: nanovg, Yoga, tinyxml2, fmt, SDL, GLFW…"]
+    extern["Bundled libraries<br/>library/lib/extern: nanovg, Yoga, tinyxml2, SDL, GLFW…"]
     app --> cadran
     app --> views
     cadran --> views

@@ -17,10 +17,9 @@
 #include <aurore/platforms/ps4/ps4_sysmodule.hpp>
 #endif
 
-#include <fmt/chrono.h>
-#include <fmt/format.h>
-
+#include <cstdio>
 #include <ctime>
+#include <format>
 #include <mutex>
 #include <string>
 #include <aurore/core/event.hpp>
@@ -75,7 +74,7 @@ class Logger
     static void setThreadSafeLogging(bool threadSafeLogging);
 
     template <typename... Args>
-    inline static void log(LogLevel level, std::string prefix, std::string color, fmt::format_string<Args...> format, Args&&... args)
+    inline static void log(LogLevel level, std::string prefix, std::string color, std::format_string<Args...> format, Args&&... args)
     {
         if (Logger::logLevel < level)
             return;
@@ -101,30 +100,33 @@ class Logger
 
         try
         {
-            // In C++17 fmt checks the format string when the line is
-            // written, not when it is compiled: a wrong one throws here,
-            // caught below rather than ending the program.
-            std::string log = fmt::format(format, std::forward<Args>(args)...);
+            // The format string is checked when compiled (std::format_string);
+            // what may still throw here (no memory) is caught below rather
+            // than ending the program.
+            std::string log = std::format(format, std::forward<Args>(args)...);
 
 #ifdef IOS
             if (out)
-                fmt::print(out, "{:%H:%M:%S}.{:03d} {} {}\n", time_tm, (int)ms, color, log);
+                std::fputs(std::format("{:02d}:{:02d}:{:02d}.{:03d} {} {}\n", time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec, (int)ms, color, log).c_str(), out);
 #elif defined(ANDROID)
             __android_log_print(6 - (int)level, "aurore", "%02d:%02d:%02d.%03d %s\n", time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec, (int)ms, log.c_str());
 #elif defined(__PSV__)
             sceClibPrintf("%02d:%02d:%02d.%03d\033%s[%s]\033[0m %s\n", time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec, (int)ms, color.c_str(), prefix.c_str(), log.c_str());
 #elif defined(PS4)
-            sceKernelDebugOutText(0, fmt::format("{:02d}:{:02d}:{:02d}.{:03d}\033{}[{}]\033[0m {}\n", lt.hour, lt.minute, lt.second, (int)ms, color, prefix, log).c_str());
+            sceKernelDebugOutText(0, std::format("{:02d}:{:02d}:{:02d}.{:03d}\033{}[{}]\033[0m {}\n", lt.hour, lt.minute, lt.second, (int)ms, color, prefix, log).c_str());
 #else
             if (out)
-                fmt::print(out, "{:%H:%M:%S}.{:03d}\033{}[{}]\033[0m {}\n", time_tm, (int)ms, color, prefix, log);
+            {
+                const std::string line = std::format("{:02d}:{:02d}:{:02d}.{:03d}\033{}[{}]\033[0m {}\n", time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec, (int)ms, color, prefix, log);
+                std::fputs(line.c_str(), out);
+            }
 #endif
 
             logEvent.fire(now, level, log);
         }
         catch (const std::exception& e)
         {
-            // will be printed after the first fmt::print (so after the log tag)
+            // will be printed after the first line written (so after the log tag)
             printf("! Invalid log format string: \"%s\": %s\n", format.get().data(), e.what());
         }
 
@@ -136,31 +138,31 @@ class Logger
     }
 
     template <typename... Args>
-    inline static void error(fmt::format_string<Args...> format, Args&&... args)
+    inline static void error(std::format_string<Args...> format, Args&&... args)
     {
         Logger::log(LogLevel::LOG_ERROR, "ERROR", AURORE_ERROR_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    inline static void warning(fmt::format_string<Args...> format, Args&&... args)
+    inline static void warning(std::format_string<Args...> format, Args&&... args)
     {
         Logger::log(LogLevel::LOG_WARNING, "WARNING", AURORE_WARNING_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    inline static void info(fmt::format_string<Args...> format, Args&&... args)
+    inline static void info(std::format_string<Args...> format, Args&&... args)
     {
         Logger::log(LogLevel::LOG_INFO, "INFO", AURORE_INFO_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    inline static void debug(fmt::format_string<Args...> format, Args&&... args)
+    inline static void debug(std::format_string<Args...> format, Args&&... args)
     {
         Logger::log(LogLevel::LOG_DEBUG, "DEBUG", AURORE_DEBUG_COLOR, format, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    inline static void verbose(fmt::format_string<Args...> format, Args&&... args)
+    inline static void verbose(std::format_string<Args...> format, Args&&... args)
     {
         Logger::log(LogLevel::LOG_VERBOSE, "VERBOSE", AURORE_VERBOSE_COLOR, format, std::forward<Args>(args)...);
     }

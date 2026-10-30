@@ -8,9 +8,9 @@
 #pragma once
 
 #ifdef AURORE_CADRAN_HOST_I18N
-#include <fmt/format.h>
 #include <cstddef>
 #include <exception>
+#include <format>
 #include <string>
 
 namespace aurore
@@ -28,7 +28,7 @@ std::string getStr(std::string stringName, Args&&... args)
     const std::string raw = internal::getRawStr(stringName);
     try
     {
-        return fmt::format(fmt::runtime(raw), args...);
+        return std::vformat(raw, std::make_format_args(args...));
     }
     catch (const std::exception&)
     {

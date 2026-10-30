@@ -83,8 +83,8 @@ SettingsTab::SettingsTab()
     slider->init("demo/settings/brightness"_i18n, brightness, [this](float value)
         {
         aurore::Application::getPlatform()->setBacklightBrightness(value);
-        slider->setDetailText(fmt::format("{:.2f}", value)); });
-    slider->setDetailText(fmt::format("{:.2f}", brightness));
+        slider->setDetailText(std::format("{:.2f}", value)); });
+    slider->setDetailText(std::format("{:.2f}", brightness));
 
     notify->registerClickAction([](...)
         {

@@ -50,8 +50,6 @@ def versions():
     if glfw.exists():
         found["GLFW"] = "{}.{}.{}".format(define(glfw, "GLFW_VERSION_MAJOR"), define(glfw, "GLFW_VERSION_MINOR"),
                                           define(glfw, "GLFW_VERSION_REVISION"))
-    fmt = define(lib / "fmt" / "include" / "fmt" / "base.h", "FMT_VERSION")
-    found["{fmt}"] = "{}.{}.{}".format(fmt // 10000, fmt // 100 % 100, fmt % 100)
     xml = read(inc / "tinyxml2" / "tinyxml2.h")
     found["TinyXML-2"] = ".".join(re.search(r"TIXML2_%s_VERSION = (\d+)" % part, xml).group(1)
                                   for part in ("MAJOR", "MINOR", "PATCH"))
@@ -113,9 +111,6 @@ def main():
     sdl3 = re.search(r"FetchContent_Declare\(SDL3[^)]*GIT_TAG release-([\d.]+)", cmake)
     if sdl3 and sdl3.group(1) != versions().get("SDL3"):
         errors.append(f"library/CMakeLists.txt fetches SDL3 {sdl3.group(1)}, the vendored copy is {versions().get('SDL3')}")
-    fmt = re.search(r"FetchContent_Declare\(fmt[^)]*GIT_TAG ([\d.]+)", cmake)
-    if fmt and fmt.group(1) != versions()["{fmt}"]:
-        errors.append(f"library/CMakeLists.txt fetches fmt {fmt.group(1)}, the vendored copy is {versions()['{fmt}']}")
     xml = re.search(r"FetchContent_Declare\(tinyxml2[^)]*GIT_TAG ([\d.]+)", cmake)
     if xml and xml.group(1) != versions()["TinyXML-2"]:
         errors.append(f"library/CMakeLists.txt fetches tinyxml2 {xml.group(1)}, the vendored copy is {versions()['TinyXML-2']}")

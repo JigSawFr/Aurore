@@ -118,10 +118,10 @@ TransformTab::TransformTab()
 
 void TransformTab::registerCell(aurore::SliderCell* cell, float init, const std::string& title, const std::function<float(float)>& cb)
 {
-    cell->setDetailText(fmt::format("{:.2f}", cb(init)));
+    cell->setDetailText(std::format("{:.2f}", cb(init)));
     cell->slider->setPointerSize(POINTER_SIZE);
     cell->init(title, init, [cb, cell](float value)
-        { cell->setDetailText(fmt::format("{:.2f}", cb(value))); });
+        { cell->setDetailText(std::format("{:.2f}", cb(value))); });
 }
 
 aurore::View* TransformTab::create()

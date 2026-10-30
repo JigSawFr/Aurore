@@ -27,7 +27,7 @@ BEGIN = "<!-- under-the-hood: begin (tools/stack.py writes this) -->"
 END = "<!-- under-the-hood: end -->"
 
 # The components shown, as the notices name them, in this order
-COMPONENTS = ["SDL3", "SDL", "GLFW", "glad", "Yoga", "{fmt}", "TinyXML-2", "JSON for Modern C++",
+COMPONENTS = ["SDL3", "SDL", "GLFW", "glad", "Yoga", "TinyXML-2", "JSON for Modern C++",
               "stb_image", "stb_truetype", "Tweeny", "Twemoji"]
 
 

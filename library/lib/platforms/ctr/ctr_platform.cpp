@@ -369,7 +369,7 @@ std::string CtrPlatform::getIpAddress()
     if (ip == 0 || ip == -1)
         return "-";
     u32 a = (u32)ip;
-    return fmt::format("{}.{}.{}.{}", a & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff, (a >> 24) & 0xff);
+    return std::format("{}.{}.{}.{}", a & 0xff, (a >> 8) & 0xff, (a >> 16) & 0xff, (a >> 24) & 0xff);
 }
 
 bool CtrPlatform::isBatteryCharging()

@@ -43,11 +43,11 @@ DebugLayer::DebugLayer()
             OrbisDateTime lt{};
             if (sceRtcGetCurrentClockLocalTime)
                 sceRtcGetCurrentClockLocalTime(&lt);
-            std::string timeBase = fmt::format("{:02d}:{:02d}:{:02d}.{:03d}", lt.hour, lt.minute, lt.second, (int)ms);
+            std::string timeBase = std::format("{:02d}:{:02d}:{:02d}.{:03d}", lt.hour, lt.minute, lt.second, (int)ms);
 #else
             std::time_t tt = std::chrono::system_clock::to_time_t(now);
             std::tm time_tm = localTime(tt);
-            std::string timeBase = fmt::format("{:%H:%M:%S}.{:03d}", time_tm, (int)ms);
+            std::string timeBase = std::format("{:02d}:{:02d}:{:02d}.{:03d}", time_tm.tm_hour, time_tm.tm_min, time_tm.tm_sec, (int)ms);
 #endif
 
             auto box = new Box(Axis::ROW);

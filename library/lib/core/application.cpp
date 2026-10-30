@@ -1305,7 +1305,7 @@ void Application::checkSkippedFrame()
     for (size_t i = 0; i < views.size() && i < 4; i++)
         described += (i ? ", " : "") + views[i]->describe();
     if (views.size() > 4)
-        described += fmt::format(" and {} more", views.size() - 4);
+        described += std::format(" and {} more", views.size() - 4);
     Logger::warning("redraw debug: a skipped frame differs from the last one presented ({} pixels in {:.0f},{:.0f} {:.0f}x{:.0f}): no redraw asked for {}",
         differing, area.getMinX(), area.getMinY(), area.getWidth(), area.getHeight(), described.empty() ? "?" : described);
 }

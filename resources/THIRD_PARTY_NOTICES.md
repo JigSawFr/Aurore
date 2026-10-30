@@ -26,7 +26,6 @@ versions that can be read from the sources.
 | stb_truetype | 1.26 (and the htcw fork) | `library/include/aurore/extern/nanovg/stb_truetype*.h` | MIT or public domain | 2017 Sean Barrett |
 | stb_dxt | 1.12 | `library/include/aurore/extern/nanovg/stb_dxt.h` | MIT or public domain | 2017 Sean Barrett |
 | Yoga | 3.2.1 | `library/lib/extern/yoga` | MIT | Facebook, Inc. and its affiliates |
-| {fmt} | 12.2.0 | `library/lib/extern/fmt`, `library/lib/extern/nxfmtwrapper` (Aurore's build of it) | MIT | 2012 - present, Victor Zverovich and {fmt} contributors |
 | TinyXML-2 | 11.0.0 | `library/lib/extern/tinyxml2`, `library/include/aurore/extern/tinyxml2` | zlib | Lee Thomason |
 | JSON for Modern C++ | 3.12.0 | `library/include/aurore/extern/nlohmann` | MIT | 2013-2025 Niels Lohmann |
 | Tweeny | 4.2.0 (its headers) | `library/lib/extern/tweeny` | MIT | 2016-2021 Leonardo Guilherme Lucena de Freitas |
@@ -85,11 +84,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-{fmt} adds: as an exception, if, as a result of your compiling your source
-code, portions of this Software are embedded into a machine-executable object
-form of such source code, you may redistribute such embedded portions in such
-object form without including the above copyright and permission notices.
 
 ### zlib
 

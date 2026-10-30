@@ -6,11 +6,11 @@
 
 #include <aurore/cadran/ui/hooks.hpp>
 
-#include <fmt/format.h>
 #include <yoga/Yoga.h>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <format>
 #include <tuple>
 
 #include <aurore/cadran/ui/cadran_list.hpp>
@@ -507,9 +507,9 @@ namespace
     // {0} the day's name, {1} the same in lower case, {2} the day, {3} the month.
     std::string date_text(int weekday, int day, int month)
     {
-        return aurore::getStr("cadran/date", aurore::getStr(fmt::format("cadran/days/{}", weekday)),
-            aurore::getStr(fmt::format("cadran/days_lower/{}", weekday)), day,
-            aurore::getStr(fmt::format("cadran/months/{}", month)));
+        return aurore::getStr("cadran/date", aurore::getStr(std::format("cadran/days/{}", weekday)),
+            aurore::getStr(std::format("cadran/days_lower/{}", weekday)), day,
+            aurore::getStr(std::format("cadran/months/{}", month)));
     }
 } // namespace
 

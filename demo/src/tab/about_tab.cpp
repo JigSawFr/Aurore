@@ -119,7 +119,7 @@ AboutTab::AboutTab()
     card->setPadding(10, 22, 10, 22);
     card->addView(licence("demo/about/licence_core"_i18n, "Apache 2.0"));
     card->addView(licence("demo/about/licence_cadran"_i18n, "GPLv3"));
-    card->addView(licence("nanovg · Yoga · {fmt} · TinyXML-2 · JSON for Modern C++ · Tweeny · stb", "zlib · MIT"));
+    card->addView(licence("nanovg · Yoga · TinyXML-2 · JSON for Modern C++ · Tweeny · stb", "zlib · MIT"));
     card->addView(licence("GLFW · SDL · libromfs · QR Code generator", "zlib · MIT"));
     card->addView(licence("Inter · PromptFont · Sora", "OFL 1.1"));
     card->addView(licence("Material Icons", "Apache 2.0"));

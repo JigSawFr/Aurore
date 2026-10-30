@@ -134,12 +134,6 @@ SPDX-FileCopyrightText = "Meta Platforms, Inc. and affiliates"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = ["library/lib/extern/fmt/**", "library/lib/extern/nxfmtwrapper/**"]
-precedence = "aggregate"
-SPDX-FileCopyrightText = "2012 - present, Victor Zverovich and {fmt} contributors"
-SPDX-License-Identifier = "MIT"
-
-[[annotations]]
 path = ["library/lib/extern/tinyxml2/**", "library/include/aurore/extern/tinyxml2/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Lee Thomason"

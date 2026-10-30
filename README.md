@@ -225,7 +225,6 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | GLFW | 3.5.1 |
 | glad | 2.0.8 |
 | Yoga | 3.2.1 |
-| {fmt} | 12.2.0 |
 | TinyXML-2 | 11.0.0 |
 | JSON for Modern C++ | 3.12.0 |
 | stb_image | 2.30 |
@@ -359,7 +358,7 @@ borealis' code is **Apache 2.0** ([`LICENSE`](LICENSE)); Cadran is **GPLv3** ([`
 
 - borealis was created by [natinusala](https://github.com/natinusala/borealis) and its [contributors](AUTHORS); carried on by [xfangfang](https://github.com/xfangfang/borealis) and [dragonflylee](https://github.com/dragonflylee).
 - Changes picked from the forks of Nika0000, Kelvin Wong, kawaii-flesh, Alexander Kiselev, youngzyl, Elias da Rosa, XITRIX, CostelaBR, PalindromicBreadLoaf and xlanor, each commit keeping its author.
-- Built on [nanovg](https://github.com/memononen/nanovg), [Yoga](https://github.com/facebook/yoga), [GLFW](https://www.glfw.org/), [SDL](https://www.libsdl.org/), [tinyxml2](https://github.com/leethomason/tinyxml2), [fmt](https://github.com/fmtlib/fmt), [nlohmann/json](https://github.com/nlohmann/json), [tweeny](https://github.com/mobius3/tweeny) and the others in `library/lib/extern`, under their own licences.
+- Built on [nanovg](https://github.com/memononen/nanovg), [Yoga](https://github.com/facebook/yoga), [GLFW](https://www.glfw.org/), [SDL](https://www.libsdl.org/), [tinyxml2](https://github.com/leethomason/tinyxml2), [nlohmann/json](https://github.com/nlohmann/json), [tweeny](https://github.com/mobius3/tweeny) and the others in `library/lib/extern`, under their own licences.
 - The text font is [Inter](https://rsms.me/inter/) and the controller buttons come from [PromptFont](https://shinmera.com/promptfont) by Shinmera (Yukari Hafner), both under the SIL Open Font License.
 - The demo's logo by @MeganRoshelle; Aurore's icon and banner in [`.github/branding`](.github/branding).
 

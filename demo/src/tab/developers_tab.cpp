@@ -262,7 +262,7 @@ void DevelopersTab::frameMeasured()
         return;
     float perFrame = (float)this->interval / this->frames;
     this->fps->setText(std::to_string((int)std::lround(1000000.0f / std::max(perFrame, 1.0f))));
-    this->cpu->setText(fmt::format("{:.1f} ms", this->work / 1000.0f / this->frames));
+    this->cpu->setText(std::format("{:.1f} ms", this->work / 1000.0f / this->frames));
     this->calls->setText(std::to_string(this->drawCalls / this->frames));
     this->laidOut->setText(std::to_string(this->views));
     this->frames   = 0;
