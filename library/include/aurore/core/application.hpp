@@ -102,7 +102,7 @@ class Application
      * Inits the Aurore application.
      * Returns true if it succeeded, false otherwise.
      */
-    static bool init();
+    [[nodiscard]] static bool init();
 
     /**
      * Sets the application ID reported to the windowing system
@@ -383,18 +383,18 @@ class Application
      * into the program when they are (USE_LIBROMFS).
      * Returns true if the operation succeeded.
      */
-    static bool loadFontFromFile(std::string fontName, std::string filePath);
+    [[nodiscard]] static bool loadFontFromFile(std::string fontName, std::string filePath);
 
     /**
      * Loads a font from a given memory buffer and stores it in the font stash.
      * Returns true if the operation succeeded.
      */
-    static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData);
+    [[nodiscard]] static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData);
 
     /**
      * The same, with the face at `faceIndex` of a font collection (.ttc).
      */
-    static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData, int faceIndex);
+    [[nodiscard]] static bool loadFontFromMemory(std::string fontName, void* data, size_t size, bool freeData, int faceIndex);
 
     /**
      * Returns the nanovg handle to the given font name, or FONT_INVALID if

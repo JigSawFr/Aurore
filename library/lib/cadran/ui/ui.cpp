@@ -75,7 +75,10 @@ void replace_screen(aurore::Activity* next)
 
 bool save_prefs()
 {
-    return !hooks::get().save_prefs || hooks::get().save_prefs();
+    if (!hooks::get().save_prefs || hooks::get().save_prefs())
+        return true;
+    aurore::Logger::warning("ui: the preferences could not be saved");
+    return false;
 }
 
 } // namespace ui

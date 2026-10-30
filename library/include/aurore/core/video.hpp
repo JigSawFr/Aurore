@@ -57,7 +57,7 @@ class VideoContext
      * top-down rows of opaque RGBA pixels, at the drawable's size. Returns
      * false where the driver cannot (only the OpenGL ones do for now).
      */
-    virtual bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) { return false; }
+    [[nodiscard]] virtual bool readPixels(std::vector<unsigned char>* rgba, int* width, int* height) { return false; }
 
     /**
      * A second screen (the New 3DS's top one, aurore/core/top_screen.hpp):

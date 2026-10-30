@@ -80,7 +80,7 @@ struct Image
     // The part of the picture in `x, y, w, h` (clipped to it)
     Image crop(int x, int y, int w, int h) const;
 
-    bool savePng(const std::string& path) const;
+    [[nodiscard]] bool savePng(const std::string& path) const;
     static Image loadPng(const std::string& path);
 };
 
