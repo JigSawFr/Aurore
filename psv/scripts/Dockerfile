@@ -1,54 +1,54 @@
-FROM vitasdk/vitasdk:latest
+# The Vita's OpenGL ES 2 toolchain: VitaSDK, PVR_PSP2 and SDL2 built with
+# VIDEO_VITA_PVR. Built by the CI's `psv (gles2)` job; by hand:
+#   docker build -t aurore-vita-gles2 psv/scripts
+# The same VitaSDK as the GXM job (Ubuntu 24.04, GCC 15.2).
+FROM vitasdk/vitasdk@sha256:61c173463b3d10d71464b6fc591f1fe1018736bf2e321e6852db06612eb05b07
 
-MAINTAINER xfangfang <xfangfang@126.com>
+# git, wget and bsdtar (for the zips) come with the image
+RUN git config --global --add safe.directory '*'
 
-RUN apk update && \
-    apk add cmake ninja meson pkgconf bash git zstd tar patch && \
-    git config --global --add safe.directory $(pwd)
-
-# Copy PVR_PSP2 (GLES) to vita toolchain dir
-RUN mkdir -p /vita/dependencies/include && \
-    mkdir -p /vita/dependencies/lib && \
-    mkdir -p /vita/dependencies/suprx && \
-    pvr_psp2_version=3.9 && \
-    wget https://github.com/GrapheneCt/PVR_PSP2/archive/refs/tags/v$pvr_psp2_version.zip -P/tmp && \
-    unzip /tmp/v$pvr_psp2_version.zip -d/tmp && \
-    cp -r /tmp/PVR_PSP2-$pvr_psp2_version/include/* /vita/dependencies/include && \
-    sed -i -e s/__drvkhrplatform_h_/__khrplatform_h_/ /vita/dependencies/include/KHR/khrplatform.h && \
-    wget https://github.com/GrapheneCt/PVR_PSP2/releases/download/v$pvr_psp2_version/vitasdk_stubs.zip -P/tmp && \
-    unzip /tmp/vitasdk_stubs.zip -d/tmp/pvr_psp2_stubs && \
-    find /tmp/pvr_psp2_stubs -type f -name "*.a" -exec cp {} /vita/dependencies/lib \; && \
-    wget https://github.com/GrapheneCt/PVR_PSP2/releases/download/v$pvr_psp2_version/PSVita_Release.zip -P/tmp && \
-    unzip /tmp/PSVita_Release.zip -d/tmp/PSVita_Release && \
-    rm /tmp/PSVita_Release/libGLESv1_CM.suprx && \
-    rm /tmp/PSVita_Release/libpvr2d.suprx && \
-    mv /tmp/PSVita_Release/*.suprx /vita/dependencies/suprx/ && \
-    cp -rv /vita/dependencies/* ${VITASDK}/arm-vita-eabi && \
-    rm -rf /vita && \
+# PVR_PSP2 (GLES): its headers at the tag's commit, its stubs and modules
+# checked against their hashes
+ARG PVR_PSP2_VERSION=3.9
+ARG PVR_PSP2_COMMIT=bb441056082bc7d51085c98b8c99e74d9c94de4f
+RUN set -e && \
+    cd /tmp && \
+    git clone --depth 1 --branch v$PVR_PSP2_VERSION https://github.com/GrapheneCt/PVR_PSP2 pvr && \
+    test "$(git -C pvr rev-parse HEAD)" = "$PVR_PSP2_COMMIT" && \
+    release=https://github.com/GrapheneCt/PVR_PSP2/releases/download/v$PVR_PSP2_VERSION && \
+    wget -q $release/vitasdk_stubs.zip $release/PSVita_Release.zip && \
+    echo "7ee2498b58cb97871fcb0e3e134ce1045acf2c22ce4873b1844a391b5da4fe47  vitasdk_stubs.zip" | sha256sum -c - && \
+    echo "ed69be89f21c4894e8009a8c3567c89b1778c8db0beb3c2f4ea134adab4c494f  PSVita_Release.zip" | sha256sum -c - && \
+    target=$VITASDK/arm-vita-eabi && \
+    mkdir -p $target/include $target/lib $target/suprx && \
+    cp -r pvr/include/* $target/include && \
+    sed -i -e s/__drvkhrplatform_h_/__khrplatform_h_/ $target/include/KHR/khrplatform.h && \
+    mkdir pvr_stubs && bsdtar -xf vitasdk_stubs.zip -C pvr_stubs && \
+    find pvr_stubs -type f -name "*.a" -exec cp {} $target/lib \; && \
+    mkdir pvr_modules && bsdtar -xf PSVita_Release.zip -C pvr_modules && \
+    rm pvr_modules/libGLESv1_CM.suprx pvr_modules/libpvr2d.suprx && \
+    mv pvr_modules/*.suprx $target/suprx/ && \
     rm -rf /tmp/*
 
-# Build SDL2 with OpenGL ES2 support
-ADD . /vdpm
-RUN adduser --gecos '' --disabled-password builder && \
-    echo 'builder ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/builder && \
+# SDL2 with OpenGL ES 2 in place of VitaSDK's (sdl2_vitagl, which its other SDL
+# packages keep depending on); makepkg refuses root
+ADD sdl2 /vdpm/sdl2
+RUN useradd --create-home builder && \
     chown -R builder:builder /vdpm && \
-    su - builder -c "cd /vdpm/sdl2 && vita-makepkg" && \
-    vdpm /vdpm/sdl2/*-arm.tar.xz && \
-    touch /tmp/vdpm_install_sdl2 && \
+    su builder -c "cd /vdpm/sdl2 && VITASDK=$VITASDK PATH=$PATH vita-makepkg" && \
+    vdpm pacman -- --remove --nodeps --nodeps --noconfirm sdl2_vitagl && \
+    vdpm pacman -- --upgrade --noconfirm /vdpm/sdl2/sdl2-*-vita.pkg.tar.xz && \
     rm -rf /vdpm
 
-RUN mkdir /src/ &&\
-    echo \#\!/bin/bash -i >> /entrypoint.sh &&\
-    echo >> /entrypoint.sh &&\
-    echo "set -e" >> /entrypoint.sh &&\
-    echo "mkdir -p /src/scripts/psv/module/" >> /entrypoint.sh &&\
-    echo "cp ${VITASDK}/arm-vita-eabi/suprx/*.suprx /src/psv/module/" >> /entrypoint.sh &&\
-    echo "cd /src" >> /entrypoint.sh &&\
-    echo "echo \"\$@\"" >> /entrypoint.sh &&\
-    echo "bash -c \"\$@\"" >> /entrypoint.sh &&\
+# Runs its arguments in /src, after copying the PVR_PSP2 modules to
+# psv/module/, which the GLES2 .vpk packs
+RUN mkdir /src/ && \
+    printf '%s\n' '#!/bin/bash' 'set -e' \
+        'mkdir -p /src/psv/module/' \
+        "cp ${VITASDK}/arm-vita-eabi/suprx/*.suprx /src/psv/module/" \
+        'cd /src' 'echo "$@"' 'bash -c "$@"' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 VOLUME /src/
 WORKDIR /src/
-SHELL ["/bin/bash", "-i", "-c"]
 ENTRYPOINT ["/entrypoint.sh"]
