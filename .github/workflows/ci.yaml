@@ -16,30 +16,35 @@ permissions:
 jobs:
   format:
     name: format
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
+    env:
+      # The version .clang-format is written for, from PyPI: the same on any
+      # runner, whichever clang-format its Ubuntu ships
+      CLANG_FORMAT_VERSION: 18.1.8
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: clang-format
         run: |
-          # Ubuntu 24.04 ships clang-format 18, the version .clang-format is written for
+          python3 -m venv "$RUNNER_TEMP/clang-format"
+          "$RUNNER_TEMP/clang-format/bin/pip" install -q "clang-format==$CLANG_FORMAT_VERSION"
           git ls-files '*.c' '*.cc' '*.cpp' '*.h' '*.hpp' '*.m' '*.mm' ':!:**/extern/**' \
-            | xargs clang-format-18 --dry-run --Werror
+            | xargs "$RUNNER_TEMP/clang-format/bin/clang-format" --dry-run --Werror
 
   # Each file says its licence and copyright, in SPDX tags or REUSE.toml, and
   # each licence named has its text in LICENSES/ (CONTRIBUTING.md)
   licenses:
     name: licences (REUSE)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     env:
       REUSE_VERSION: 6.2.0
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: reuse lint
@@ -62,14 +67,14 @@ jobs:
         window: [ sdl2, sdl3 ]
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
       - name: cache
         id: cache-key
         run: echo "IOS_CACHE_KEY=ios-${{ matrix.window }}-cmake-build-dir-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '.github/workflows/ci.yaml') }}-${{ github.sha }}" >> $GITHUB_OUTPUT
-      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: ios-cache
         with:
           path: build
@@ -81,23 +86,23 @@ jobs:
           cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DAURORE_WINDOW=${{ matrix.window }} -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=27.0
           cmake --build build
           ditto -ck --rsrc --sequesterRsrc --keepParent build/Debug-iphoneos/aurore_demo.app aurore_demo.zip
-      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: ${{ !steps.ios-cache.outputs.cache-hit }}
         with:
           path: build
           key: ${{ steps.cache-key.outputs.IOS_CACHE_KEY }}
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-ios-${{ matrix.window }}
           path: aurore_demo.zip
 
   ps4:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -120,13 +125,13 @@ jobs:
                 -DCMAKE_BUILD_TYPE=Release && \
                 make -C build -j$(nproc)"
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-ps4
           path: build/*.pkg
 
   psv:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -136,16 +141,28 @@ jobs:
           - { driver: gles2 }
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
 
+      # The image from its recipe: VitaSDK (GCC 15.2), PVR_PSP2 and SDL2.
+      # GitHub's cache keeps it while psv/scripts/ stays the same, as the PS4's
+      - name: Set up Buildx
+        if: ${{ matrix.driver == 'gles2' }}
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: GLES2 toolchain image
+        if: ${{ matrix.driver == 'gles2' }}
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: psv/scripts
+          tags: aurore-vita-gles2
+          load: true
+          cache-from: type=gha,scope=psv-gles2
+          cache-to: type=gha,scope=psv-gles2,mode=max
       - name: Build GLES2
         if: ${{ matrix.driver == 'gles2' }}
         run: |
-          # The image from its recipe: VitaSDK (GCC 15.2), PVR_PSP2 and SDL2
-          docker build -t aurore-vita-gles2 psv/scripts
           docker run --rm -v $(pwd):/src/ aurore-vita-gles2 \
             "cmake -B build -G Ninja -DAURORE_PLATFORM=PSV -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && \
              cmake --build build"
@@ -159,13 +176,13 @@ jobs:
           docker run --rm -v $(pwd):/src/ vitasdk/vitasdk@sha256:61c173463b3d10d71464b6fc591f1fe1018736bf2e321e6852db06612eb05b07 sh -C /src/build_gxm.sh
 
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-psv-${{ matrix.driver }}
           path: build/*.vpk
 
   switch:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     container:
       image: devkitpro/devkita64:20260219@sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f876a187fd705de14b4440c00282
@@ -179,7 +196,7 @@ jobs:
           - { driver: deko3d, cmake: "-DAURORE_GRAPHICS=DEKO3D", ext: "deko3d" }
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -188,7 +205,7 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=SWITCH ${{ matrix.cmake }}
           make -C build aurore_demo.nro -j$(nproc)
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-switch-${{ matrix.ext }}
           path: build/aurore_demo.nro
@@ -197,13 +214,13 @@ jobs:
   # (docs/platforms.md)
   ctr:
     name: 3ds
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     container:
       image: devkitpro/devkitarm:20260610@sha256:15b79ce75822c289538d8153da5fa7aafe5e6adc32ad8a575a197beca0f0761b
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -212,31 +229,31 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=3DS
           cmake --build build -j$(nproc)
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-3ds-smoke
           path: build/ctr/aurore_3ds_smoke.3dsx
       - name: Upload the demo
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-3ds-demo
           path: build/aurore_demo.3dsx
 
   gradle-wrapper:
     name: android (Gradle wrapper)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       # Without the submodules: SDL's own Android project carries an old wrapper Aurore does not run
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Check the Gradle wrapper
-        uses: gradle/actions/wrapper-validation@b9bee63ef481cc545e4517ec730544a4d8b1dfa0 # v6.4.0
+        uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
   android:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     name: android (sdl${{ matrix.sdl }})
     strategy:
@@ -244,7 +261,7 @@ jobs:
       matrix:
         sdl: [ 2, 3 ]
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -258,7 +275,7 @@ jobs:
           ./build_libromfs_generator.sh
           cd android-project && ./gradlew assembleDebug -PauroreSdl=${{ matrix.sdl }}
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-android-sdl${{ matrix.sdl }}
           path: android-project/app/build/outputs/apk/debug/*.apk
@@ -282,7 +299,7 @@ jobs:
           - { name: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -301,13 +318,13 @@ jobs:
           mv build/aurore_demo.app aurore-macos-${{ matrix.window.name }}/
           tar -czvf aurore-macos-${{ matrix.window.name }}.tar.gz aurore-macos-${{ matrix.window.name }}
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-macos-${{ matrix.window.name }}
           path: aurore-macos-${{ matrix.window.name }}.tar.gz
 
   windows:
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -322,7 +339,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: mingw64
           cache: false
@@ -332,7 +349,7 @@ jobs:
             mingw-w64-x86_64-ninja
             mingw-w64-x86_64-cc
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -358,14 +375,14 @@ jobs:
           kill $pid || true
           grep -q 'sdlgpu: direct3d12 driver' demo.log
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-windows-x86_64-${{ matrix.driver }}
           path: build/aurore_demo.exe
 
   linux:
     name: linux (${{ matrix.driver }}${{ matrix.ext }})
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     strategy:
       matrix:
@@ -378,7 +395,7 @@ jobs:
           - { driver: gl3, cmake: "-DAURORE_WINDOW=SDL3", ext: "-sdl3" }
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -406,13 +423,13 @@ jobs:
           mv build/aurore_demo ${output_dir}
           tar -czvf ${output_dir}.tar.gz ${output_dir}
       - name: Upload dist
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}
           path: aurore-linux-x86_64-${{ matrix.driver }}${{ matrix.ext }}.tar.gz
   linux-run:
     name: linux (demo run, ${{ matrix.window }}, ASan + UBSan)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -424,7 +441,7 @@ jobs:
           - { window: sdlgpu, cmake: "-DAURORE_GRAPHICS=SDLGPU" }
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -441,7 +458,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/shadercross/bin
-          key: shadercross-${{ hashFiles('tools/build_shadercross.sh') }}
+          key: shadercross-ubuntu-26.04-${{ hashFiles('tools/build_shadercross.sh') }}
       - name: Check the SDL_GPU shaders
         if: ${{ matrix.window == 'sdlgpu' }}
         run: |
@@ -493,7 +510,7 @@ jobs:
   # under SDL2 and SDL3: no display needed
   linux-sdl-tests:
     name: linux (SDL input tests, ${{ matrix.window }})
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -501,7 +518,7 @@ jobs:
         window: [ SDL2, SDL3 ]
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -530,7 +547,7 @@ jobs:
   # one, the default.
   web-sdl2:
     name: web (sdl2)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     env:
       # The site's Emscripten (.github/workflows/site.yml), checked the same way
@@ -541,7 +558,7 @@ jobs:
       PILLOW_VERSION: 13.0.0
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -574,13 +591,13 @@ jobs:
           sudo "$RUNNER_TEMP/playwright/bin/python" -m playwright install-deps chromium
           "$RUNNER_TEMP/playwright/bin/python" -m playwright install chromium
           "$RUNNER_TEMP/playwright/bin/python" -u tools/web_smoke.py build-web/web build-web/smoke
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: aurore-web-sdl3-smoke
           path: build-web/smoke
           retention-days: 7
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-web-sdl2
           path: build-web/web
@@ -588,11 +605,11 @@ jobs:
 
   docs:
     name: API reference (Doxygen)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Install Doxygen and Python-Markdown
@@ -614,18 +631,18 @@ jobs:
   # the next; an input that crashes goes up as an artifact.
   fuzz:
     name: linux (fuzz)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
       - name: Install dependencies
         run: |
           sudo apt update -y
-          sudo apt install -y --no-install-recommends clang-18 libclang-rt-18-dev ninja-build \
+          sudo apt install -y --no-install-recommends clang-22 libclang-rt-22-dev ninja-build \
             libdbus-1-dev libxkbcommon-dev libwayland-dev wayland-protocols xorg-dev
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -634,8 +651,8 @@ jobs:
           restore-keys: fuzz-corpus-
       - name: Build
         env:
-          CC: clang-18
-          CXX: clang++-18
+          CC: clang-22
+          CXX: clang++-22
         run: |
           cmake -B build-fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DAURORE_PLATFORM=DESKTOP \
             -DAURORE_WINDOW=GLFW -DAURORE_LIBROMFS=ON -DAURORE_BUILD_TESTS=ON -DAURORE_BUILD_FUZZERS=ON
@@ -648,7 +665,7 @@ jobs:
             -artifact_prefix=fuzz-crashes/markdown- fuzz-corpus/markdown docs
           build-fuzz/tests/aurore_fuzz_theme -max_total_time=120 -max_len=8192 -timeout=10 \
             -artifact_prefix=fuzz-crashes/theme- fuzz-corpus/theme resources/themes
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: fuzz-crashes
@@ -657,11 +674,11 @@ jobs:
 
   linux-tests:
     name: linux (tests)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
@@ -705,14 +722,14 @@ jobs:
         run: ./build/tests/tests/aurore_bench --json bench.json
       - name: Upload screenshots
         if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: aurore-test-output
           path: build/tests/tests/test-output
 
   linux-variants:
     name: linux (variants, ${{ matrix.variant }})
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -721,7 +738,7 @@ jobs:
         variant: [ presets, install, fetch, fonts, unity, template ]
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive

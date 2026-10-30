@@ -37,11 +37,11 @@ env:
 jobs:
   # The demo compiled with Emscripten, and the page around it (<build>/web/).
   demo:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       # Emscripten's cache: its system libraries and ports (SDL3, zlib),
@@ -96,13 +96,13 @@ jobs:
           sudo "$RUNNER_TEMP/playwright/bin/python" -m playwright install-deps chromium
           "$RUNNER_TEMP/playwright/bin/python" -m playwright install chromium
           "$RUNNER_TEMP/playwright/bin/python" -u tools/web_smoke.py build-web/web build-web/smoke
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: demo-smoke
           path: build-web/smoke
           retention-days: 7
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: demo
           path: build-web/web
@@ -110,14 +110,14 @@ jobs:
 
   build:
     needs: demo
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
       pages: read   # the site's address (a custom domain, once it has one)
     steps:
       - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Install Python-Markdown and Doxygen
@@ -145,7 +145,7 @@ jobs:
             echo "SITE_URL=${pages%/}/"
             echo "SITE_NOINDEX=${PR:+1}"
           } | tee -a "$GITHUB_ENV"
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: demo
           path: demo
@@ -181,7 +181,7 @@ jobs:
           path: out
       - name: Upload the site for the pull request
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: site
           path: out
@@ -191,7 +191,7 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       pages: write
