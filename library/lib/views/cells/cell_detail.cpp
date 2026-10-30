@@ -6,7 +6,7 @@
 namespace aurore
 {
 
-const std::string detailCellXML = R"xml(
+constexpr std::string_view detailCellXML = R"xml(
     <aurore:Box
         width="auto"
         height="@style/aurore/sidebar/item_height"

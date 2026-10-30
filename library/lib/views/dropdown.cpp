@@ -16,7 +16,7 @@
 namespace aurore
 {
 
-const std::string dropdownFrameXML = R"xml(
+constexpr std::string_view dropdownFrameXML = R"xml(
 <aurore:Box
     width="1280"
     height="auto"

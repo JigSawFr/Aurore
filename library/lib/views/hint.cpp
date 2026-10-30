@@ -15,7 +15,7 @@ using namespace aurore::literals;
 namespace aurore
 {
 
-const std::string hintXML = R"xml(
+constexpr std::string_view hintXML = R"xml(
     <aurore:Box
         width="auto"
         height="auto"

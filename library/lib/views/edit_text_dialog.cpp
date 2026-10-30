@@ -21,7 +21,7 @@
 namespace aurore
 {
 
-const std::string editTextDialogXML = R"xml(
+constexpr std::string_view editTextDialogXML = R"xml(
     <aurore:Box
         id="aurore/container"
         width="auto"
@@ -37,11 +37,11 @@ const std::string editTextDialogXML = R"xml(
             id="aurore/dialog/header"
             fontSize="24")xml"
 #ifdef __PSV__
-                                      R"xml(marginTop="30")xml"
+                                               R"xml(marginTop="30")xml"
 #else
-                                      R"xml(marginTop="50")xml"
+                                               R"xml(marginTop="50")xml"
 #endif
-                                      R"xml(marginBottom="30"
+                                               R"xml(marginBottom="30"
             textColor="#FFFFFF"/>
 
         <aurore:Box

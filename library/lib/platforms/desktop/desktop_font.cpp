@@ -43,7 +43,7 @@ namespace
     struct CjkLanguage
     {
         const char* language;
-        const std::string& fontName;
+        const char* fontName;
         uint32_t sample; // a character only a font of this language is sure to have
     };
 
