@@ -22,7 +22,7 @@ RUN set -e && \
     cd /tmp/r30 && \
     dkp-pacman -Sy && \
     dkp-pacman -Sw --noconfirm --cachedir /tmp/r30 devkitA64 devkita64-gcc devkita64-binutils && \
-    sha256sum *.pkg.tar.* && \
+    sha256sum *.pkg.tar.zst && \
     sha256sum -c SHA256SUMS && \
     test "$(ls *.pkg.tar.zst | wc -l)" = "$(wc -l < SHA256SUMS)" && \
     dkp-pacman -U --noconfirm $(cut -d' ' -f3 SHA256SUMS) && \
