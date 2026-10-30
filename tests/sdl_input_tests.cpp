@@ -207,6 +207,46 @@ AURORE_TEST(sdl_wheel_gives_its_fractions)
     AURORE_CHECK(got.y == 0.25f);
 }
 
+// The mouse as GLFW gives it: the middle button is Ⓧ, the right one Ⓑ (Ⓐ
+// with the keys swapped); a click between two frames counts once, whatever
+// the pointer's own state read of it first
+AURORE_TEST(sdl_mouse_buttons_press_x_and_b)
+{
+    initControllers();
+    SDLInputManager manager(nullptr);
+    auto click = [](Uint8 button)
+    {
+        SDL_Event event {};
+#ifdef __SDL3__
+        event.type = SDL_EVENT_MOUSE_BUTTON_DOWN;
+#else
+        event.type = SDL_MOUSEBUTTONDOWN;
+#endif
+        event.button.button = button;
+        SDL_PushEvent(&event);
+#ifdef __SDL3__
+        event.type = SDL_EVENT_MOUSE_BUTTON_UP;
+#else
+        event.type = SDL_MOUSEBUTTONUP;
+#endif
+        SDL_PushEvent(&event);
+    };
+
+    ControllerState state {};
+    click(SDL_BUTTON_MIDDLE);
+    manager.updateUnifiedControllerState(&state);
+    AURORE_CHECK(state.buttons[aurore::BUTTON_X]);
+    manager.updateUnifiedControllerState(&state);
+    AURORE_CHECK(!state.buttons[aurore::BUTTON_X]);
+
+    click(SDL_BUTTON_RIGHT);
+    manager.updateUnifiedControllerState(&state);
+    AURORE_CHECK(state.buttons[aurore::BUTTON_B]);
+    AURORE_CHECK(!state.buttons[aurore::BUTTON_A]);
+    manager.updateUnifiedControllerState(&state);
+    AURORE_CHECK(!state.buttons[aurore::BUTTON_B]);
+}
+
 // SDL calls the event watcher with its joystick lock held (Android sends a
 // pad's events from its UI thread): the frame reading the controllers at the
 // same time must not wait on it while it waits on the frame
