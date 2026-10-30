@@ -29,6 +29,14 @@ class SDLPlatform : public DesktopPlatform
     void setWindowState(uint32_t windowWidth, uint32_t windowHeight, int windowXPos, int windowYPos) override;
     void disableScreenDimming(bool disable, const std::string& reason, const std::string& app) override;
     bool isScreenDimmingDisabled() override;
+#if !defined(IOS) && !defined(TVOS)
+    // The battery as SDL reads it (SDL_GetPowerInfo): Linux's too, which the
+    // desktop platform does not read. Not on iOS, where SDL would read
+    // UIDevice off the main thread (BatteryWidget reads it on a task)
+    bool canShowBatteryLevel() override;
+    int getBatteryLevel() override;
+    bool isBatteryCharging() override;
+#endif
 
     void setWindowAlwaysOnTop(bool enable) override;
     void pasteToClipboard(const std::string& text) override;
