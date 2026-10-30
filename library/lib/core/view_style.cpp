@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <utility>
 #include <aurore/core/activity.hpp>
 #include <aurore/core/application.hpp>
 #include <aurore/core/box.hpp>
@@ -189,7 +190,7 @@ View::Extras& View::getExtras()
     {
         this->extras.reset(new Extras());
         if (this->focused)
-            this->extras->states |= (uint8_t)StyleState::FOCUS;
+            this->extras->states |= std::to_underlying(StyleState::FOCUS);
     }
     return *this->extras;
 }
@@ -325,7 +326,7 @@ void View::setStyleState(StyleState state, bool on)
     if (!on && !this->extras)
         return;
     Extras& extras = this->getExtras();
-    uint8_t states = on ? (extras.states | (uint8_t)state) : (extras.states & ~(uint8_t)state);
+    uint8_t states = on ? (extras.states | std::to_underlying(state)) : (extras.states & ~std::to_underlying(state));
     if (states == extras.states)
         return;
     extras.states      = states;
@@ -337,7 +338,7 @@ bool View::hasStyleState(StyleState state)
 {
     if (state == StyleState::FOCUS)
         return this->focused;
-    return this->extras && (this->extras->states & (uint8_t)state);
+    return this->extras && (this->extras->states & std::to_underlying(state));
 }
 
 bool View::hasStateStyle(StyleState state)
@@ -389,16 +390,16 @@ void View::updateStateStyles()
     Extras& extras = *this->extras;
     uint8_t states = extras.states;
     if (this->focused)
-        states |= (uint8_t)StyleState::FOCUS;
+        states |= std::to_underlying(StyleState::FOCUS);
     else
-        states &= ~(uint8_t)StyleState::FOCUS;
+        states &= ~std::to_underlying(StyleState::FOCUS);
 
     for (auto& styled : extras.styled)
     {
         const std::string* value = nullptr;
         for (StyleState state : STATE_PRIORITY)
         {
-            if (!(states & (uint8_t)state))
+            if (!(states & std::to_underlying(state)))
                 continue;
             for (auto& style : extras.stateStyles)
                 if (style.state == state && style.property == styled.property)

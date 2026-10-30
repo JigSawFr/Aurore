@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: 2026 JigSawFr
 // SPDX-License-Identifier: Apache-2.0
 
+#include <utility>
 #include <aurore/core/application.hpp>
 #include <aurore/core/assets.hpp>
 #include <aurore/core/hot_reload.hpp>
@@ -1287,7 +1288,7 @@ static bool parseDecorLine(const std::string& key, const std::string& value, con
             continue;
         DecorPictureSpec& picture  = decor->pictures[i];
         const std::string property = key.substr(prefix.size());
-        bool strip                 = i >= (int)ThemeArea::TOP - 1;
+        bool strip                 = i >= std::to_underlying(ThemeArea::TOP) - 1;
         if (property.empty())
         {
             std::string path;
