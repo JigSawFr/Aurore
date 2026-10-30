@@ -145,6 +145,18 @@ An app's resources (XML, pictures, translations, fonts, themes) live in its `res
 
 Aurore's own resources (`resources/` in this repository: Cadran's strings, icons, fonts and emoji, the themes, the shaders) are merged with the app's: an app starts from a copy of them.
 
+## What libc++ lacks
+
+Aurore and its apps are C++23, but libc++ (the web, Android, Apple, the PS4) still has no `std::move_only_function`, `std::generator` nor `std::stacktrace`, and libstdc++ has no `std::generator` before GCC 14. `aurore/compat/` gives the standard one where the library has it, else a bundled one, under one name:
+
+| Header | Gives | Without the standard one |
+| --- | --- | --- |
+| `aurore/compat/functional.hpp` | `aurore::move_only_function` | nontype_functional's, the reference implementation of P0288 |
+| `aurore/compat/generator.hpp` | `aurore::generator`, `aurore::elements_of(range)` (`co_yield` all of it) | P2168's reference implementation, in `aurore::compat` |
+| `aurore/compat/stacktrace.hpp` | `aurore::stacktrace`, `AURORE_HAS_STACKTRACE` | nothing: `AURORE_HAS_STACKTRACE` is 0, since reading a stack needs files and debug data the consoles do not have. With GCC 13 and 14, a program that calls it links `-lstdc++exp` |
+
+`AURORE_COMPAT_FALLBACK` takes the bundled ones everywhere; `tests/host/compat_tests.cpp` runs both ways.
+
 ## Where to look
 
 | To find | Look at |
@@ -153,5 +165,6 @@ Aurore's own resources (`resources/` in this repository: Cadran's strings, icons
 | Layout, drawing, XML attributes of every view | `library/lib/core/view.cpp`, `box.cpp` |
 | Theme files, presets, pictures | `library/lib/core/theme*.cpp` |
 | Threads | `library/lib/core/thread.cpp` |
+| What libc++ lacks | `library/include/aurore/compat/` |
 | A platform | `library/lib/platforms/<name>/` |
 | Cadran | `library/lib/cadran/`, [cadran.md](cadran.md) |
