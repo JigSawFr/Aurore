@@ -24,6 +24,12 @@ With SITE_AXE set to axe-core's axe.min.js, also what axe finds against WCAG
 every English page, and each other language's home page (their texts, not
 their layout nor their colours, differ).
 
+Aurore's own rather than boreale-site's tools/site_layout.py, which opens
+every page on every screen and with axe (some 750 pages here: too long for
+the workflow), runs one page at a time, cannot step over the pages that
+send their visitor on (docs/, Doxygen's old addresses: the measure fails on
+the navigation) and does not look at the fields' size.
+
 Usage: tools/site_layout.py <site-dir>   (needs Playwright for Python with
 Chromium, PLAYWRIGHT_CHROMIUM=<path> for a browser of its own; SITE_LAYOUT_JOBS
 pages at once, 6 by default)

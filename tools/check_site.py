@@ -4,156 +4,78 @@
 
 """Checks the built website (site/README.md):
 
-- the catalogs (site/i18n/*.json) have the same keys as en-US.json;
-- every link and image of a page that stays on the site reaches a file of it,
-  and every #anchor an id of the page it points to (the API reference's
-  pages, tools/build_api.py's, included; the demo, built apart, is not
-  followed);
-- no page has what its Content-Security-Policy would block: an inline
-  script (but schema.org's data), a style attribute or element, an event
-  handler, a file from elsewhere;
-- the schema.org data, search.json and the manifest are JSON;
-- links out follow the rule "liens sortants anonymes": every page sends no
-  referrer (<meta name="referrer" content="no-referrer">), a link to a third
-  party has rel="noreferrer", one to boreale.dev, *.boreale.dev or a
-  repository of github.com/JigSawFr/ has referrerpolicy="strict-origin" (the
-  origin alone, for GitHub's traffic insights) and no noreferrer.
+- what every one of Boréale's sites passes (library/boreale-site,
+  boreale_site.check): no {{key}} left, every link and image to the site
+  leads to a file and every #anchor to an id of its page, links out by the
+  rule "liens sortants anonymes" and their UTM tags, nothing the
+  Content-Security-Policy blocks (an inline script but schema.org's data, a
+  style attribute or element, a file from elsewhere), Umami's tracker, no
+  e-mail address, the schema.org data read as JSON; the API reference's
+  pages (tools/build_api.py's) included, the demo, built apart, left out;
+- the catalogs of site/i18n/ and boreale-site's: the same keys as
+  en-US.json, none empty (but English's notes that a page is in English),
+  the same {placeholders} and <em> as English's, no
+  common text repeated here;
+- Aurore's own: no event handler attribute (the CSP blocks it), no
+  stylesheet from elsewhere, search.json and the manifest are JSON, a
+  link's #anchor in another page of the site is there, and so is a page an
+  absolute link to the site itself leads to (site-url).
+
+A pull request's preview (SITE_NOINDEX=1) has no tracker, and a page that
+only sends its visitor on (docs/, Doxygen's old addresses) has neither
+tracker nor policy: boreale_site.check asks both of every page, so their
+absence is not counted there.
 
 Usage: tools/check_site.py <site-dir> [site-url]
 (site-url: the site's own address, whose absolute links are checked too)
 """
 import json
 import os
-import re
 import sys
 from html.parser import HTMLParser
-from urllib.parse import parse_qsl, unquote, urlparse, urlsplit
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "library" / "boreale-site"))
+import boreale_site as boreale  # noqa: E402
+from boreale_site import check  # noqa: E402
 
-
-
-
-# No real e-mail address on the site, ours or anyone's: contact goes through
-# the repository's issues, a security flaw through a private advisory.
-EMAIL = re.compile(r"[\w.+-]+@(?:[\w-]+\.)+[a-z]{2,}", re.IGNORECASE)
-RESERVED = re.compile(r"@(?:[\w-]+\.)*(?:example\.(?:org|com|net)|[\w-]+\.example)$", re.IGNORECASE)
-
-
-def emails(text: str) -> list:
-    return [f"an e-mail address ({m.group(0)}), contact goes through GitHub"
-            for m in EMAIL.finditer(text) if not RESERVED.search(m.group(0))]
-
-
-def own_site(url: str) -> bool:
-    """boreale.dev, its subdomains, and the repositories of github.com/JigSawFr/
-    (that account's alone: another owner, a gist or GitHub's own pages are
-    third parties)."""
-    u = urlparse(url)
-    host = (u.hostname or "").lower()
-    return u.scheme == "https" and (host == "boreale.dev" or host.endswith(".boreale.dev") or
-                                    (host == "github.com" and u.path.lower().startswith("/jigsawfr/")))
-
-
-def check_own_site() -> None:
-    """own_site() against look-alikes, at each run (the site has no unit tests)."""
-    for url in ("https://boreale.dev/", "https://shelf.boreale.dev/fr/", "https://github.com/JigSawFr/PlayShelf",
-                "https://github.com/jigsawfr/boreale/releases"):
-        assert own_site(url), url
-    for url in ("https://store.example.com/app/1", "https://github.com/JigSawFr", "https://github.com/jigsawfrx/x",
-                "https://github.com/someone/JigSawFr", "https://gist.github.com/JigSawFr/1",
-                "https://boreale.dev.example.com/", "https://notboreale.dev/", "http://boreale.dev/"):
-        assert not own_site(url), url
-
-
-# This site's address (build_site.py's SITE_URL) and its name in the UTM tags
-# of its links to our other sites.
-SITE_HOST = (urlparse(os.environ.get("SITE_URL", "https://aurore.boreale.dev/")).hostname or "").lower()
-UTM_SOURCE = "aurore"
-
-
-def link_problem(attrs: dict) -> str:
-    """What a link out does wrong by the rule "liens sortants anonymes": a
-    third party gets rel="noreferrer"; *.boreale.dev and github.com/JigSawFr
-    keep the origin alone (referrerpolicy="strict-origin", no noreferrer)."""
-    href = attrs.get("href") or ""
-    if urlparse(href).scheme not in ("http", "https"):
-        return ""
-    rel = (attrs.get("rel") or "").split()
-    if own_site(href):
-        if "noreferrer" in rel or attrs.get("referrerpolicy") != "strict-origin":
-            return f'link to {href} needs referrerpolicy="strict-origin" and no noreferrer'
-    elif "noreferrer" not in rel:
-        return f'link to {href} without rel="noreferrer"'
-    # UTM tags (workbench's "Mesure d'audience"): a link to another of our
-    # sites (*.boreale.dev) says where it comes from, utm_source='aurore' and
-    # a utm_medium; one to this site itself or to anyone else carries none.
-    u = urlparse(href)
-    host = (u.hostname or "").lower()
-    query = dict(parse_qsl(u.query))
-    if u.scheme == "https" and (host == "boreale.dev" or host.endswith(".boreale.dev")) and host != SITE_HOST:
-        if query.get("utm_source") != UTM_SOURCE or not query.get("utm_medium"):
-            return f"link to {href} without utm_source={UTM_SOURCE} and a utm_medium"
-    elif any(k.startswith("utm_") for k in query):
-        return f"link to {href} with utm_ parameters: only a link to another of our sites has them"
-    return ""
+NOINDEX = os.environ.get("SITE_NOINDEX") == "1"
+NO_TRACKER = "no Umami tracker (assets/umami.js)"
+NO_POLICY = "no Content-Security-Policy"
+# English's texts left empty on purpose: the note that a page is in
+# English, shown in the other languages alone. boreale_site.check_catalogs()
+# finds every empty text; until it takes such keys, they are let be here.
+EMPTY = {f"i18n/en-US.json: {key} is empty" for key in ("doc_untranslated", "changelog_english")}
 
 
 class Page(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.links, self.ids, self.blocked, self.data, self.links_out = [], set(), [], [], []
-        self.in_script = None
-        self.no_referrer = False
+        self.links, self.ids, self.blocked = [], set(), []
+        self.redirect = False
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
         if "id" in a:
             self.ids.add(a["id"])
-        if tag == "meta" and a.get("name") == "referrer" and a.get("content") == "no-referrer":
-            self.no_referrer = True
-        if tag == "a" and link_problem(a):
-            self.links_out.append(link_problem(a))
+        if tag == "meta" and (a.get("http-equiv") or "").lower() == "refresh":
+            self.redirect = True
         for key in ("href", "src"):
             if a.get(key):
-                self.links.append((tag, a[key]))
-        if "style" in a or tag == "style":
-            self.blocked.append(f"<{tag} style>")
+                self.links.append(a[key])
         self.blocked += [f"<{tag} {k}>" for k in a if k.startswith("on")]
-        if tag == "script":
-            if a.get("type") == "application/ld+json":
-                self.in_script = "ld"
-            elif "src" not in a:
-                self.blocked.append("an inline <script>")
-            elif urlsplit(a["src"]).scheme:
-                self.blocked.append(f"a script from elsewhere: {a['src']}")
         if tag == "link" and a.get("rel") == "stylesheet" and urlsplit(a.get("href", "")).scheme:
             self.blocked.append(f"a stylesheet from elsewhere: {a['href']}")
-        if tag == "img" and urlsplit(a.get("src", "")).scheme in ("http", "https"):
-            self.blocked.append(f"an image from elsewhere: {a['src']}")
-
-    def handle_endtag(self, tag):
-        if tag == "script":
-            self.in_script = None
-
-    def handle_data(self, data):
-        if self.in_script == "ld":
-            self.data.append(data)
 
 
-def catalogs(root):
-    folder = os.path.join(root, "site", "i18n")
-    english = set(json.load(open(os.path.join(folder, "en-US.json"), encoding="utf-8")))
-    errors = 0
-    for name in sorted(os.listdir(folder)):
-        keys = set(json.load(open(os.path.join(folder, name), encoding="utf-8")))
-        for key in sorted(english - keys):
-            print(f"site/i18n/{name}: no {key!r}")
-            errors += 1
-        for key in sorted(keys - english):
-            print(f"site/i18n/{name}: {key!r} is not in en-US.json")
-            errors += 1
-    return errors
+def expected(error: str, redirects: set) -> bool:
+    """A problem boreale_site.check finds that this site has on purpose."""
+    name, _, problem = error.partition(": ")
+    if problem == NO_TRACKER and (NOINDEX or name in redirects):
+        return True
+    return problem == NO_POLICY and name in redirects
 
 
 def main():
@@ -162,45 +84,34 @@ def main():
         return 2
     root = os.path.abspath(sys.argv[1])
     site = sys.argv[2].rstrip("/") + "/" if len(sys.argv) > 2 else None
-    errors = catalogs(os.path.dirname(HERE))
+    problems = [e for e in boreale.check_catalogs(ROOT / "site" / "i18n") if e not in EMPTY]
     pages = {}
     for folder, dirs, files in os.walk(root):
-        if os.path.relpath(folder, root).split(os.sep)[0] == "demo":
+        if os.path.relpath(folder, root).split(os.sep)[0] in ("demo", "assets"):
             continue
         for name in files:
             path = os.path.join(folder, name)
             if name.endswith(".html"):
                 page = Page()
-                html = open(path, encoding="utf-8").read()
-                page.feed(html)
-                page.links_out += emails(html)
+                page.feed(open(path, encoding="utf-8").read())
                 pages[path] = page
             elif name.endswith((".json", ".webmanifest")):
                 try:
                     json.load(open(path, encoding="utf-8"))
                 except ValueError as e:
-                    print(f"{os.path.relpath(path, root)}: {e}")
-                    errors += 1
+                    problems.append(f"{os.path.relpath(path, root)}: {e}")
+    redirects = {os.path.relpath(p, root).replace(os.sep, "/") for p, page in pages.items() if page.redirect}
+    found, _ = check.pages(Path(root), boreale.Site("aurore", os.environ.get("SITE_URL")), skip=("assets", "demo"))
+    problems += [e for e in found if not expected(e, redirects)]
 
-    check_own_site()
     for path, page in sorted(pages.items()):
         rel_page = os.path.relpath(path, root)
-        for problem in page.links_out + ([] if page.no_referrer else ['no <meta name="referrer" content="no-referrer">']):
-            print(f"{rel_page}: {problem}")
-            errors += 1
-        for what in page.blocked:
-            print(f"{rel_page}: {what} (the Content-Security-Policy blocks it)")
-            errors += 1
-        for block in page.data:
-            try:
-                json.loads(block)
-            except ValueError as e:
-                print(f"{rel_page}: schema.org data: {e}")
-                errors += 1
+        problems += [f"{rel_page}: {what} (the Content-Security-Policy blocks it)" for what in page.blocked]
         if os.path.basename(path) == "404.html":
-            continue   # served at any path: its links start from the site's root
-        for _, link in page.links:
-            if site and link.startswith(site):
+            continue   # served at any path: boreale_site.check follows its links from the site's root
+        for link in page.links:
+            absolute = bool(site and link.startswith(site))
+            if absolute:
                 link = os.path.relpath(os.path.join(root, link[len(site):]), os.path.dirname(path)) + \
                        ("/" if link.endswith("/") else "")
             parts = urlsplit(link)
@@ -212,14 +123,15 @@ def main():
             rel = os.path.relpath(file, root)
             if rel.split(os.sep)[0] == "demo" or rel.startswith(".."):
                 continue
-            if not os.path.exists(file):
-                print(f"{rel_page}: {link}: no {rel}")
-                errors += 1
-            elif parts.fragment and file.endswith(".html") and unquote(parts.fragment) not in pages[file].ids:
-                print(f"{rel_page}: {link}: no #{unquote(parts.fragment)} in {rel}")
-                errors += 1
-    print(f"site: {len(pages)} pages checked, {errors} problem(s)")
-    return 1 if errors else 0
+            # A relative link to a file that is not there: boreale_site.check says so.
+            if absolute and not os.path.exists(file):
+                problems.append(f"{rel_page}: {link}: no {rel}")
+            elif parts.fragment and file != path and file in pages and unquote(parts.fragment) not in pages[file].ids:
+                problems.append(f"{rel_page}: {link}: no #{unquote(parts.fragment)} in {rel}")
+    for problem in problems:
+        print(problem)
+    print(f"site: {len(pages)} pages checked, {len(boreale.CODES)} catalogs, {len(problems)} problem(s)")
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":

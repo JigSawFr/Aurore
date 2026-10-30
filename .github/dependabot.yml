@@ -16,3 +16,14 @@ updates:
       interval: monthly
     commit-message:
       prefix: build
+  # library/boreale-site: what Boréale's sites share, followed on its main.
+  # Only it: the other submodules (glfw, SDL) are moved by hand.
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: daily
+    allow:
+      - dependency-name: library/boreale-site
+    commit-message:
+      prefix: chore
+      include: scope

@@ -44,6 +44,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          submodules: true   # library/boreale-site: the fonts and marks of the demo's page
       # Emscripten's cache: its system libraries and ports (SDL3, zlib),
       # built for threads and exceptions on first use, which takes minutes.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -120,6 +121,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          submodules: true   # library/boreale-site, what Boréale's sites share
       - name: Install Python-Markdown and Doxygen
         run: |
           sudo apt-get update -y -q
@@ -158,7 +160,8 @@ jobs:
       - name: The website
         run: |
           SITE_API=build_api SITE_DEMO=demo python3 tools/build_site.py out .
-          # The catalogs, every link and #anchor, what the CSP would block.
+          # The catalogs (boreale-site's too), every link and #anchor, links
+          # out and their UTM tags, what the CSP would block.
           python3 tools/check_site.py out "$SITE_URL"
       # No page wider than the screen on a phone, a tablet or a desktop, no
       # script that throws, nothing axe finds against WCAG 2.2 AA. Seconds.
