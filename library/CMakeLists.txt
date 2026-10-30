@@ -233,7 +233,6 @@ if (PLATFORM_DESKTOP)
         endif ()
         list(APPEND AURORE_PLATFORM_LIBS wlanapi iphlpapi ws2_32)
     elseif (APPLE)
-        # C++20 needs macOS 10.15, which has them all
         list(APPEND AURORE_PLATFORM_LIBS "-framework CoreWLAN" "-framework CoreGraphics")
         list(APPEND AURORE_PLATFORM_LIBS "-framework SystemConfiguration" "-framework Cocoa")
         list(APPEND AURORE_PLATFORM_LIBS "-framework IOKit" "-framework CoreFoundation")

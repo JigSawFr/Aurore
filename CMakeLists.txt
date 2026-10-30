@@ -38,10 +38,10 @@ cmake_dependent_option(USE_SYSTEM_TWEENY "" OFF "NOT USE_SHARED_LIB" ON)
 
 if (APPLE AND PLATFORM_DESKTOP)
     option(BUNDLE_MACOS_APP "Bundle a app for macOS" OFF)
-    # Defaults: -DCMAKE_OSX_ARCHITECTURES=arm64 builds for one only
-    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "")
-    set(CMAKE_XCODE_ATTRIBUTE_MACOSX_DEPLOYMENT_TARGET[arch=arm64] "11.0" CACHE STRING "")
+    # macOS 27, which runs on Apple silicon only: its libc++ has all of C++23's
+    # library that libc++ has (std::format on floats, std::expected, the tzdb)
+    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "27.0" CACHE STRING "")
     message(STATUS "CMAKE_OSX_ARCHITECTURES: ${CMAKE_OSX_ARCHITECTURES}")
 endif ()
 
