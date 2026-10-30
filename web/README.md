@@ -30,6 +30,7 @@ As PlayGuard's and PlayShelf's simulators, in the website's look (`site/assets/s
 - **Threads** need a cross-origin isolated page, which GitHub Pages cannot make with headers: `sw.js`, a service worker, adds them (as coi-serviceworker does), and the page loads once more under it. A browser without service workers (or a private window that refuses them) is told why the demo cannot start.
 - `<body data-demo>` says where the demo is: `loading`, `running`, `ready` (its first frame drawn) or `error`.
 - Its Content-Security-Policy allows only its own files, WebAssembly and the workers Emscripten starts.
+- Published on the site (not in a pull request's preview), it carries Umami's tracker, the site's own copy (`../assets/umami.js`, added by `tools/build_site.py`'s `demo_audience()`), which counts each visit on aurore.boreale.dev alone, without cookie; its policy then lets it send to `gateway.umami.is`. Its sites menu links to boreale.dev's privacy and legal notice.
 
 ## Testing it
 

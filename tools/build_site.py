@@ -752,6 +752,22 @@ def release_line(t, base):
             f'· <time datetime="{date}">{date}</time></p>')
 
 
+def demo_audience(page):
+    """The published demo counted as the site's pages are (UMAMI_WEBSITE): the
+    site's copy of the tracker, and Umami's address in the page's connect-src.
+    Not in a preview (NOINDEX), as the pages' tracker isn't."""
+    with open(page, encoding="utf-8") as f:
+        text = f.read()
+    csp = "connect-src 'self';"
+    if text.count(csp) != 1 or text.count("</head>") != 1:
+        sys.exit(f"build_site: {page} has not the one connect-src and </head> expected")
+    tag = (f'<script src="../assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
+           f'data-domains="{UMAMI_DOMAIN}"></script>\n</head>')
+    text = text.replace(csp, "connect-src 'self' https://gateway.umami.is;").replace("</head>", tag)
+    with open(page, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
 def demo_query(lang):
     """The demo in the page's language (the browser's for English)."""
     return "" if lang == "en-US" else f"?lang={lang}"
@@ -1539,6 +1555,8 @@ def main():
         shutil.copytree(API_DIR, os.path.join(out, "api"), dirs_exist_ok=True)
     if DEMO_DIR:
         shutil.copytree(DEMO_DIR, os.path.join(out, "demo"), dirs_exist_ok=True)
+        if not NOINDEX:
+            demo_audience(os.path.join(out, "demo", "index.html"))
     open(os.path.join(out, ".nojekyll"), "w").close()
     print(f"site: {count} pages in {len(LANGUAGES)} languages, {len(assets)} images"
           f"{', the API reference' if API_DIR else ''}{', the demo' if DEMO_DIR else ''}, in {out}")
