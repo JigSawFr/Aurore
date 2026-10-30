@@ -832,8 +832,10 @@ def demo_audience(page):
     csp = "connect-src 'self';"
     if text.count(csp) != 1 or text.count("</head>") != 1:
         sys.exit(f"build_site: {page} has not the one connect-src and </head> expected")
+    # data-before-send: demo.js leaves out the first load of a first visit,
+    # which loads the page again under its service worker (auroreAudience).
     tag = (f'<script src="../assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
-           f'data-domains="{UMAMI_DOMAIN}"></script>\n</head>')
+           f'data-domains="{UMAMI_DOMAIN}" data-before-send="auroreAudience"></script>\n</head>')
     text = text.replace(csp, "connect-src 'self' https://gateway.umami.is;").replace("</head>", tag)
     with open(page, "w", encoding="utf-8") as f:
         f.write(text)
