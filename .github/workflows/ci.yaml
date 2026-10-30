@@ -671,6 +671,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          submodules: true   # library/boreale-site: build_api.py builds on build_site.py
       - name: Install Doxygen and Python-Markdown
         run: |
           sudo apt update -y
