@@ -5,6 +5,8 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/glfw/glfw_video.hpp>
 
+#include <cmath>
+
 // nanovg implementation
 #ifdef AURORE_USE_OPENGL
 #include <glad/gl.h>

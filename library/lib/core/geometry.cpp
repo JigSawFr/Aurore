@@ -3,6 +3,8 @@
 
 #include <aurore/core/geometry.hpp>
 
+#include <cmath>
+
 namespace aurore
 {
 

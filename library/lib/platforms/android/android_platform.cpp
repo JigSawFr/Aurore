@@ -9,6 +9,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cstring>
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>

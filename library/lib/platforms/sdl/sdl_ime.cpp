@@ -8,6 +8,8 @@
 #include <aurore/platforms/sdl/sdl_video.hpp>
 #include <aurore/views/edit_text_dialog.hpp>
 
+#include <cstring>
+
 #include "sdl_compat.hpp"
 
 #ifdef __PSV__

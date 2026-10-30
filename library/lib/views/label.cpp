@@ -4,6 +4,8 @@
 
 #include <yoga/Yoga.h>
 
+#include <cmath>
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/bidi.hpp>
 #include <aurore/core/font.hpp>

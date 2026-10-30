@@ -6,6 +6,8 @@
 #include <aurore/core/application.hpp>
 #include <aurore/platforms/switch/switch_video.hpp>
 
+#include <cmath>
+
 // nanovg implementation
 #include <nanovg_dk.h>
 
