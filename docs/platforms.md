@@ -47,7 +47,7 @@ make -C build -j$(sysctl -n hw.ncpu)
 open build/aurore_demo.app
 ```
 
-The build is universal (arm64 and x86_64) and runs from macOS 10.15 (11 on Apple silicon). `-DBUNDLE_MACOS_APP=ON` makes an `.app` with the resources inside; without it, a plain program with `resources/` next to it. `-DAURORE_WINDOW=GLFW` builds with GLFW, `-DAURORE_WINDOW=SDL2` with SDL2.
+The build is for Apple silicon and runs from macOS 27, which needs Xcode 27; `-DCMAKE_OSX_DEPLOYMENT_TARGET` and `-DCMAKE_OSX_ARCHITECTURES` change both, down to what the C++23 code compiles for. `-DBUNDLE_MACOS_APP=ON` makes an `.app` with the resources inside; without it, a plain program with `resources/` next to it. `-DAURORE_WINDOW=GLFW` builds with GLFW, `-DAURORE_WINDOW=SDL2` with SDL2.
 
 ## Windows
 
@@ -140,11 +140,11 @@ On macOS with Xcode:
 
 ```sh
 ./build_libromfs_generator.sh
-cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=13.0
+cmake -B build -G Xcode -DAURORE_PLATFORM=IOS -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=27.0
 cmake --build build
 ```
 
-The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `-DAURORE_WINDOW=SDL2` builds on SDL2. `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
+With Xcode 27, for iOS 27 (`DEPLOYMENT_TARGET`; Xcode 27 goes down to iOS 15). The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `-DAURORE_WINDOW=SDL2` builds on SDL2. `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
 
 The notch, the rounded corners and the home indicator (on tvOS, the TV's safe area) are the [safe area](safe-areas.md), from `UIWindow.safeAreaInsets`.
 
