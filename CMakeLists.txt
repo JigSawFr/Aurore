@@ -74,10 +74,9 @@ endif ()
 
 add_subdirectory(library)
 
-# The New 3DS: a test card in place of the demo, until the demo takes input there
+# The New 3DS: its test card (ctr/), next to the demo
 if (PLATFORM_3DS)
     add_subdirectory(ctr)
-    return()
 endif ()
 
 find_package(Threads REQUIRED)
@@ -193,6 +192,15 @@ elseif (PLATFORM_SWITCH)
                 ${CMAKE_BINARY_DIR}/resources/font/aurore_buttons.ttf
         COMMAND ${NX_ELF2NRO_EXE} ${PROJECT_NAME}.elf ${PROJECT_NAME}.nro --icon=${PROJECT_ICON} --nacp=${PROJECT_NAME}.nacp --romfsdir=${CMAKE_BINARY_DIR}/resources
     )
+elseif (PLATFORM_3DS)
+    # A .3dsx for the Homebrew Launcher, the resources in its romfs
+    ctr_generate_smdh(${PROJECT_NAME}.smdh
+            NAME "Aurore demo"
+            DESCRIPTION "Aurore on the New 3DS"
+            AUTHOR "${PROJECT_AUTHOR}")
+    ctr_create_3dsx(${PROJECT_NAME}
+            SMDH ${PROJECT_NAME}.smdh
+            ROMFS ${PROJECT_RESOURCES})
 elseif (PLATFORM_IOS)
     ios_bundle(
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/iphoneos/Splash.storyboard"

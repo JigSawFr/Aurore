@@ -531,8 +531,7 @@ message(STATUS "aurore: driver ${AURORE_DRIVER}")
 # The library: target aurore, Aurore::aurore for the apps
 add_library(aurore STATIC ${AURORE_SRC})
 add_library(Aurore::aurore ALIAS aurore)
-# C++23 where the compiler has it. The Vita's GLES2 toolchain (GCC 10.3) has no
-# C++23 mode and falls back to C++20; the PS4's clang 12 gets -std=gnu++2b
+# C++23 where the compiler has it; the PS4's clang 12 gets -std=gnu++2b
 set_target_properties(aurore PROPERTIES
         CXX_STANDARD 23
         CXX_STANDARD_REQUIRED OFF
