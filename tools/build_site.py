@@ -289,11 +289,14 @@ class Texts:
 
 # Boréale's sites, in the header's menu (switcher()): the same in each of
 # Boréale's sites (boreale/tools/build_site.py's the reference). boreale.dev
-# first, then the homebrew, then the libraries, each group under its title.
+# first, then the homebrew, the libraries, the open data and protocols, each
+# group under its title.
 SITES = [(None, [("boreale", "Boréale", "https://boreale.dev/")]),
          ("sites_homebrew", [("playguard", "PlayGuard", "https://guard.boreale.dev/"),
                              ("playshelf", "PlayShelf", "https://shelf.boreale.dev/")]),
-         ("sites_libraries", [("aurore", "Aurore", "https://aurore.boreale.dev/")])]
+         ("sites_libraries", [("aurore", "Aurore", "https://aurore.boreale.dev/")]),
+         ("sites_open", [("atlas", "Atlas", "https://atlas.boreale.dev/"),
+                         ("lantern", "Lantern", "https://lantern.boreale.dev/")])]
 
 
 # The versions.json this build reads: {"schema": 1, "projects": {...}}, or
@@ -331,7 +334,7 @@ def boreale_versions():
 def switcher(t, lang, to_root, home, here, name, versions):
     """The header's name (`name`), a button that opens the menu of Boréale's
     sites, `here` marked and leading to `home`, each in the page's language
-    (the four sites have the same 15 folders), with its latest release (`versions`). A
+    (Boréale's sites have the same 15 folders), with its latest release (`versions`). A
     popover: the browser closes it on Esc or a click elsewhere; site.css's
     and site.js's "site switcher" blocks."""
     label = t("sites_label")
@@ -688,6 +691,8 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
       <ul><li><a href="https://boreale.dev/{sites_dir}">boreale.dev</a></li>
         <li><a href="https://guard.boreale.dev/{sites_dir}">PlayGuard</a></li>
         <li><a href="https://shelf.boreale.dev/{sites_dir}">PlayShelf</a></li>
+        <li><a href="https://atlas.boreale.dev/{sites_dir}">Atlas</a></li>
+        <li><a href="https://lantern.boreale.dev/{sites_dir}">Lantern</a></li>
         <li><a href="https://boreale.dev/{sites_dir}legal/">{t("sites_legal")}</a></li>
         <li><a href="mailto:contact@boreale.dev">contact@boreale.dev</a></li></ul>
     </div>
