@@ -8,6 +8,10 @@
 
 #ifdef AURORE_USE_STD_THREAD
 #include <thread>
+#elif defined(__3DS__)
+#include <3ds.h>
+
+#include <algorithm>
 #else
 #include <pthread.h>
 #endif
@@ -22,6 +26,26 @@ namespace aurore
 #ifdef AURORE_USE_STD_THREAD
 static std::thread* task_loop_thread = nullptr;
 static std::thread* decode_thread    = nullptr;
+#elif defined(__3DS__)
+static Thread task_loop_thread = nullptr;
+static Thread decode_thread    = nullptr;
+
+// A thread of the New 3DS: on its third core, its own (the app's is the
+// first, the system's the second), else on the app's at a lower priority.
+// The scheduler does not share a core by time: on the app's, it runs when
+// the interface waits (for the screen, for input)
+static Thread startCtrThread(ThreadFunc entry)
+{
+    s32 priority = 0x30;
+    svcGetThreadPriority(&priority, CUR_THREAD_HANDLE);
+    priority   = std::min<s32>(priority + 1, 0x3F);
+    bool isNew = false;
+    APT_CheckNew3DS(&isNew);
+    Thread thread = isNew ? threadCreate(entry, nullptr, 128 * 1024, priority, 2, false) : nullptr;
+    if (!thread)
+        thread = threadCreate(entry, nullptr, 128 * 1024, priority, -2, false);
+    return thread;
+}
 #else
 static pthread_t task_loop_thread = pthread_t(0);
 static pthread_t decode_thread    = pthread_t(0);
@@ -300,6 +324,16 @@ void Threading::stop()
         delete decode_thread;
         decode_thread = nullptr;
     }
+#elif defined(__3DS__)
+    threadJoin(task_loop_thread, U64_MAX);
+    threadFree(task_loop_thread);
+    task_loop_thread = nullptr;
+    if (decode_thread)
+    {
+        threadJoin(decode_thread, U64_MAX);
+        threadFree(decode_thread);
+        decode_thread = nullptr;
+    }
 #else
     pthread_join(task_loop_thread, NULL);
     if (decode_thread_running)
@@ -332,6 +366,14 @@ void Threading::start_task_loop()
     decode_thread         = new std::thread([]
         { decode_loop(nullptr); });
     decode_thread_running = true;
+#elif defined(__3DS__)
+    task_loop_thread      = startCtrThread([](void*)
+        { task_loop(nullptr); });
+    task_loop_running     = task_loop_thread != nullptr;
+    decode_thread         = task_loop_running ? startCtrThread([](void*)
+                                            { decode_loop(nullptr); })
+                                              : nullptr;
+    decode_thread_running = decode_thread != nullptr;
 #else
     task_loop_running     = pthread_create(&task_loop_thread, NULL, task_loop, NULL) == 0;
     decode_thread_running = task_loop_running && pthread_create(&decode_thread, NULL, decode_loop, NULL) == 0;
