@@ -242,15 +242,34 @@
 })();
 
 // The page not found, served at any address: in the address' language
-// (/fr/…, /zh-hant/…), else the visitor's (lang.js).
+// (/fr/…, /zh-hant/…), else the one chosen in the header's menu
+// (boreale-site's lang.js keeps it as "boreale-lang": the folder, "en-US"
+// for English), else the browser's. Its blocks' data-lang is the code
+// (fr-CA), their folder the code in lower case. boreale-site's lang.js
+// sends a page not found to its language's own 404.html (data-lost); Aurore
+// has one 404.html holding the 15, so it chooses here, the browser's
+// language read as lang.js does (lang.js does not expose its choice).
 (function () {
-  const blocks = document.querySelectorAll(".not-found[data-lang]");
-  const languages = window.auroreLanguages;
-  if (blocks.length < 2 || !languages) return;
+  const blocks = Array.from(document.querySelectorAll(".not-found[data-lang]"));
+  if (blocks.length < 2) return;
+  const byFolder = (f) => blocks.find((b) => (b.dataset.lang === "en-US" ? "en-US" : b.dataset.lang.toLowerCase()) === f);
+  const browser = () => {
+    for (const tag of navigator.languages || [navigator.language || ""]) {
+      const t = String(tag).toLowerCase();
+      const [base, region = ""] = t.split("-");
+      if (base === "en") return "en-US";
+      if (base === "fr") return region === "ca" ? "fr-ca" : "fr";
+      if (base === "es") return !region || region === "es" ? "es" : "es-419";
+      if (base === "pt") return region === "br" ? "pt-br" : "pt";
+      if (base === "zh") return ["tw", "hk", "mo", "hant"].includes(region) || t.includes("hant") ? "zh-hant" : "zh-hans";
+      if (byFolder(base)) return base;
+    }
+    return "en-US";
+  };
+  let chosen = null;
+  try { chosen = localStorage.getItem("boreale-lang"); } catch (e) { /* storage refused: no memory */ }
   const first = location.pathname.toLowerCase().split("/").filter(Boolean)[0] || "";
-  const lang = Object.keys(languages.folders).find((c) => languages.folders[c] && languages.folders[c] === first)
-    || languages.visitor();
-  const block = Array.from(blocks).find((b) => b.dataset.lang === lang);
+  const block = (first !== "en-us" && byFolder(first)) || byFolder(chosen) || byFolder(browser());
   if (!block) return;
   for (const b of blocks) b.hidden = b !== block;
   document.documentElement.lang = block.lang;
@@ -263,41 +282,6 @@
   const menu = document.querySelector(".doc-menu");
   if (menu && window.matchMedia("(max-width: 899px)").matches) menu.open = false;
 })();
-
-// Boréale's site switcher: the menu of the four sites opens under the name
-// beside its button, wherever the header is. The same block in boreale.dev's,
-// PlayGuard's, PlayShelf's and Aurore's site.js; boreale's is the reference.
-// Without popovers (an old browser), the name still leads home.
-(function () {
-  const menu = document.getElementById("sites");
-  const anchor = menu && menu.closest(".switcher");
-  if (!anchor || !menu.showPopover) return;
-  menu.addEventListener("beforetoggle", (event) => {
-    if (event.newState !== "open") return;
-    const box = anchor.getBoundingClientRect();
-    const screen = document.documentElement.clientWidth;
-    const width = Math.min(400, screen - 24); // site.css's width
-    menu.style.top = `${box.bottom + window.scrollY + 6}px`;
-    menu.style.left = `${Math.max(12, Math.min(box.left, screen - width - 12)) + window.scrollX}px`;
-  });
-})();
-
-// The header's languages: their menu opens under its button, its right edge
-// on the button's (PlayGuard's block); the language in use in view.
-(function () {
-  const menu = document.getElementById("languages");
-  const button = document.querySelector(".lang-button");
-  if (!menu || !button || !menu.showPopover) return;
-  menu.addEventListener("beforetoggle", (event) => {
-    if (event.newState !== "open") return;
-    const box = button.getBoundingClientRect();
-    const screen = document.documentElement.clientWidth;
-    menu.style.top = `${box.bottom + window.scrollY + 6}px`;
-    menu.style.right = `${Math.max(12, screen - box.right)}px`;
-    requestAnimationFrame(() => menu.querySelector("[aria-current]")?.scrollIntoView({ block: "nearest" }));
-  });
-})();
-
 // The documentation: once the header is scrolled away, a slim bar at the top
 // (the way home, the page"s name, the search, the light reading); and the
 // light reading itself, kept as aurore-reading (reading.js sets it before the

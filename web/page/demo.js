@@ -223,7 +223,7 @@ function homeLinks() {
 }
 
 // Boréale's site switcher: the menu of the four sites opens under the name, as
-// on the website (site/assets/site.js' "site switcher" block). Without
+// on the website (boreale-site's boreale.js). Without
 // popovers (an old browser), the menu stays closed.
 function setUpSites() {
   const menu = $('sites');

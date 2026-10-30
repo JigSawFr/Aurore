@@ -21,7 +21,8 @@
 }
 /* The language menu's flags, the same everywhere (Windows draws none of its
    own): the website's 15 cut out of Twemoji's (CC-BY 4.0,
-   LICENSE-twemoji-flags.txt; both copied by CMake from site/assets/fonts/). */
+   LICENSE-twemoji-flags.txt; both copied by CMake from boreale-site's assets/fonts/,
+   library/boreale-site). */
 @font-face {
   font-family: "Twemoji Flags";
   src: url("twemoji-flags.woff2") format("woff2");
@@ -334,7 +335,7 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
 .btn.primary.pending { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
 .btn.ghost { background: transparent; }
 .header-settings { display: flex; gap: 8px; margin-left: auto; }
-/* The language button as the website's (site/assets/site.css), the theme's
+/* The language button as the website's (boreale-site's boreale.css), the theme's
    select of the same height and look beside it. */
 .header-settings select { width: auto; height: 40px; padding: 0 8px 0 10px; font-size: 14px; color: var(--text); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; }
 .lang-button {

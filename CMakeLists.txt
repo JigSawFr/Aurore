@@ -236,19 +236,24 @@ if (AURORE_WEB)
         target_link_options(${PROJECT_NAME} PRIVATE "SHELL:--preload-file ${AURORE_WEB_CJK_FONT}@/app/resources/font/cjk.otf")
     endif ()
     set(AURORE_WEB_SITE ${CMAKE_BINARY_DIR}/web)
+    # The website's fonts and Boréale's marks: boreale-site's, the submodule
+    # library/boreale-site (git submodule update --init)
+    set(AURORE_SITE_ASSETS ${CMAKE_CURRENT_SOURCE_DIR}/library/boreale-site/assets)
+    if (NOT EXISTS ${AURORE_SITE_ASSETS}/fonts/sora.woff2)
+        message(FATAL_ERROR "The demo's page needs library/boreale-site: git submodule update --init library/boreale-site")
+    endif ()
     add_custom_target(${PROJECT_NAME}_web ALL DEPENDS ${PROJECT_NAME}
         COMMAND ${CMAKE_COMMAND} -E remove_directory ${AURORE_WEB_SITE}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/web/page ${AURORE_WEB_SITE}
         COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.js ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.wasm
                 ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.data
-                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/mark.svg
-                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/sora.woff2
-                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/figtree.woff2
-                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/twemoji-flags.woff2
-                ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/fonts/LICENSE-twemoji-flags.txt
+                ${AURORE_SITE_ASSETS}/fonts/sora.woff2
+                ${AURORE_SITE_ASSETS}/fonts/figtree.woff2
+                ${AURORE_SITE_ASSETS}/fonts/twemoji-flags.woff2
+                ${AURORE_SITE_ASSETS}/fonts/LICENSE-twemoji-flags.txt
                 ${AURORE_WEB_SITE}
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/site/assets/marks ${AURORE_WEB_SITE}/marks
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${AURORE_SITE_ASSETS}/marks ${AURORE_WEB_SITE}/marks
         COMMENT "Assembling the demo's page in ${AURORE_WEB_SITE}")
 endif ()
 

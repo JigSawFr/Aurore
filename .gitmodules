@@ -8,3 +8,6 @@
 [submodule "library/lib/extern/SDL3"]
 	path = library/lib/extern/SDL3
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "library/boreale-site"]
+	path = library/boreale-site
+	url = https://github.com/JigSawFr/boreale-site.git
