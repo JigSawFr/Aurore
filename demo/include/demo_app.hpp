@@ -35,6 +35,8 @@ enum Tab
     TAB_COUNT      = 11,
 };
 bool isSeparator(int position);
+/// The tab shown: its position in the sidebar (a Tab)
+int shownTab();
 /// A tab's short name in English, for files and logs ("home", "library"…).
 const char* tabName(int position);
 

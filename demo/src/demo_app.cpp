@@ -77,6 +77,11 @@ void installCadranHooks()
 namespace demo
 {
 
+int shownTab()
+{
+    return ::shownTab;
+}
+
 bool isSeparator(int position)
 {
     return position == 7 || position == 9;
