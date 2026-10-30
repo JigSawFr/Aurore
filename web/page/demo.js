@@ -57,8 +57,28 @@ let current = new URLSearchParams(location.search);
 
 const t = (key) => text[key] ?? key;
 
+// Links out (the rule "liens sortants anonymes"): our own sites (boreale.dev
+// and its subdomains, the repositories of github.com/JigSawFr/) get the
+// origin alone, any other site nothing. A fork's repository is another site.
+function ownSite(href) {
+  let u;
+  try { u = new URL(href); } catch { return false; }
+  const host = u.hostname.toLowerCase();
+  return u.protocol === 'https:' && (host === 'boreale.dev' || host.endsWith('.boreale.dev') ||
+    (host === 'github.com' && u.pathname.toLowerCase().startsWith('/jigsawfr/')));
+}
+
+function linkOutAttributes(href) {
+  if (!/^https?:/i.test(href)) return {};
+  return ownSite(href) ? { referrerpolicy: 'strict-origin' } : { rel: 'noreferrer' };
+}
+
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
+  if (tag === 'a') {
+    const out = linkOutAttributes(attrs.href || '');
+    attrs = { ...out, ...attrs, ...(out.rel && attrs.rel ? { rel: `${attrs.rel} ${out.rel}` } : {}) };
+  }
   for (const [k, v] of Object.entries(attrs)) {
     if (v === false || v == null) continue;
     if (k === 'text') node.textContent = v;
@@ -580,7 +600,8 @@ function report(build) {
   };
   let lines = 40;
   while (lines > 0 && url(lines).length > 8000) lines -= 5;
-  window.open(url(lines), '_blank', 'noopener');
+  // Opened as a link, so the issue page gets the origin alone (el()).
+  el('a', { href: url(lines), target: '_blank', rel: 'noopener' }).click();
 }
 
 // The tools under the screen: in a row where there is room, behind a
