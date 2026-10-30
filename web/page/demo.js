@@ -191,6 +191,8 @@ function homeLinks() {
   $('nav-docs').href = `${home}docs/getting-started/`;
   // Boréale's other sites, in the page's language (the same folders).
   for (const link of document.querySelectorAll('#sites [data-site]')) link.href = link.dataset.site + folder(language);
+  // The privacy and legal notice, boreale.dev's, in the same folder.
+  $('legal-link').href = `https://boreale.dev/${folder(language)}legal/`;
   $('sites-button').setAttribute('aria-label', `Aurore · ${t('sites_label')}`);
 }
 

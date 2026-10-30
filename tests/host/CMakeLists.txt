@@ -23,6 +23,12 @@ aurore_host_test(markdown markdown_tests.cpp ${CADRAN_SRC}/util/safe_text.cpp ${
 # ui::guarded: a callback that does nothing once its screen is gone
 aurore_host_test(guarded guarded_tests.cpp)
 
+# aurore/compat: the standard library's move_only_function, generator and
+# stacktrace where it has them, then the bundled ones (AURORE_COMPAT_FALLBACK)
+aurore_host_test(compat compat_tests.cpp)
+aurore_host_test(compat_fallback compat_tests.cpp)
+target_compile_definitions(aurore_host_compat_fallback PRIVATE AURORE_COMPAT_FALLBACK)
+
 # The text helpers over Cadran's real catalogs (ui/tr.hpp without Aurore)
 aurore_host_test(cadran_text cadran_text_tests.cpp ${CADRAN_SRC}/ui/cadran_text.cpp)
 aurore_host_test(format_text format_text_tests.cpp ${CADRAN_SRC}/ui/format_text.cpp)
