@@ -23,6 +23,7 @@
 #ifdef __GLFW__
 #include <aurore/platforms/glfw/glfw_ime.hpp>
 #endif
+#include <nanovg_citro3d_aa.h>
 #include <aurore/platforms/desktop/desktop_platform.hpp>
 #include <aurore/test/harness.hpp>
 #include <aurore/test/headless_platform.hpp>
@@ -3387,6 +3388,48 @@ AURORE_TEST(safe_area_dialog_keeps_clear)
     }
 }
 
+// The New 3DS's edge antialiasing (nanovg_citro3d_aa.h): its coverage
+// texture, sampled as the GPU samples it (linearly across the edge, a row's
+// middle down), against nanovg GL's coverage per pixel, at each place across
+// an edge for strokes up to 64 fringes wide
+AURORE_TEST(citro3d_coverage)
+{
+    namespace aa = nvgc3d::aa;
+    std::vector<uint8_t> texture(aa::WIDTH * aa::ROWS);
+    for (int row = 0; row < aa::ROWS; row++)
+        for (int x = 0; x < aa::WIDTH; x++)
+            texture[row * aa::WIDTH + x] = aa::texel(x, row);
+    auto sample = [&](float u, int row)
+    {
+        float x = u * aa::WIDTH - 0.5f;
+        int x0  = (int)std::floor(x);
+        float f = x - x0;
+        auto at = [&](int i)
+        { return texture[row * aa::WIDTH + std::clamp(i, 0, aa::WIDTH - 1)] / 255.0f; };
+        return at(x0) * (1 - f) + at(x0 + 1) * f;
+    };
+    float worstNarrow = 0, worst = 0;
+    for (float m = 1.0f; m <= aa::MULT; m += 0.1f)
+    {
+        int row = aa::rowOf(m);
+        for (int i = 0; i <= 1000; i++)
+        {
+            float u     = i / 1000.0f;
+            float error = std::fabs(sample(u, row) - aa::coverage(u, m));
+            worst       = std::max(worst, error);
+            if (m <= 16.0f)
+                worstNarrow = std::max(worstNarrow, error);
+        }
+    }
+    AURORE_CHECK(worstNarrow < 0.035f);
+    AURORE_CHECK(worst < 0.065f);
+    // A fill (strokeMult 1): no row but the last, full at the middle, none at
+    // the edges
+    AURORE_CHECK_EQ(aa::rowOf(1.0f), aa::ROWS - 1);
+    AURORE_CHECK(sample(0.5f, aa::ROWS - 1) > 0.99f);
+    AURORE_CHECK(sample(0.0f, aa::ROWS - 1) < 0.01f);
+}
+
 // Each simulated console: its screen in the window with the console's
 // proportions, the console drawn around it, the touches read on the screen
 AURORE_TEST(simulated_consoles)
@@ -3410,12 +3453,12 @@ AURORE_TEST(simulated_consoles)
         AURORE_CHECK(h.matchesReference(std::string("simulated_") + id));
     }
 
-    // The New 3DS: the small screen preset, its renderer without antialiasing
+    // The New 3DS: the small screen preset, its renderer antialiased
     demo::simulation::use("3ds");
     h.settle();
     AURORE_CHECK_EQ(aurore::Application::contentWidth, 480.0f);
     AURORE_CHECK(aurore::Application::getWidthClass() == aurore::WidthClass::COMPACT);
-    AURORE_CHECK_EQ(nvgInternalParams(aurore::Application::getNVGContext())->edgeAntiAlias, 0);
+    AURORE_CHECK_EQ(nvgInternalParams(aurore::Application::getNVGContext())->edgeAntiAlias, 1);
 
     // A touch where the screen is in the window opens the tab there; one on
     // the console's body is not the screen's

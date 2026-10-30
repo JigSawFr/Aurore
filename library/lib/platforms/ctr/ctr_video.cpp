@@ -56,7 +56,8 @@ CtrVideoContext::CtrVideoContext()
     else
         Logger::error("3DS: no render target for the top screen");
 
-    this->nvgContext = nvgCreateC3D(0);
+    // The edges antialiased: a coverage texture (nanovg_citro3d_aa.h)
+    this->nvgContext = nvgCreateC3D(NVG_ANTIALIAS);
     if (!this->nvgContext)
     {
         Logger::error("3DS: nanovg could not be created");

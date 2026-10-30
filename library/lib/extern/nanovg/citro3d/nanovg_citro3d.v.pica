@@ -26,6 +26,7 @@
 .fvec proj[4]      ; screen projection (rotated: the screens are portrait)
 .fvec texRow[2]    ; s = texRow[0] . (x, y, u, v) + texOff.x, t likewise
 .fvec texOff
+.fvec aaRow        ; x: the edges' coverage texture's row (nanovg_citro3d_aa.h)
 
 ; constants
 .constf ones(1.0, 0.0, 0.0, 0.0)
@@ -34,6 +35,7 @@
 .out outPos   position
 .out outTc    texcoord0
 .out outColor color
+.out outTc1   texcoord1
 
 ; inputs
 .alias inVert v0
@@ -54,6 +56,12 @@
 	add r1.xy, texOff.xy, r1.xy
 	mov r1.zw, ones.yy
 	mov outTc, r1
+
+	; the edges' coverage: u across the edge, the call's row
+	mov r2.x, inVert.z
+	mov r2.y, aaRow.x
+	mov r2.zw, ones.yy
+	mov outTc1, r2
 
 	; the colours come from the combiners' constants
 	mov outColor, ones.xxxx

@@ -49,7 +49,7 @@ namespace
         { "switch", "Switch", 1280, 720, false, true },
         { "vita", "PS Vita", 960, 544, false, true }, // 4x MSAA rather than nanovg's edges
         { "ps4", "PS4", 1920, 1080, false, true },
-        { "3ds", "New 3DS", 320, 240, true, false },
+        { "3ds", "New 3DS", 320, 240, true, true },
         { "phone", "demo/developers/simulate_phone", 1600, 720, false, true },
     };
 
