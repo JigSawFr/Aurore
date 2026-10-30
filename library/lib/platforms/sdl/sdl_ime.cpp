@@ -8,6 +8,8 @@
 #include <aurore/platforms/sdl/sdl_video.hpp>
 #include <aurore/views/edit_text_dialog.hpp>
 
+#include <cstring>
+
 #include "sdl_compat.hpp"
 
 #ifdef __PSV__
@@ -131,7 +133,7 @@ void SDLImeManager::openInputDialog(
         std::string text = this->inputBuffer;
         if (this->editingBuffer.size() > 0)
         {
-            std::string editing = fmt::format("[{}]", this->editingBuffer);
+            std::string editing = std::format("[{}]", this->editingBuffer);
             if (this->cursor >= 0)
             {
                 int start = utf8_find_next(this->inputBuffer, 0, this->cursor);
@@ -143,7 +145,7 @@ void SDLImeManager::openInputDialog(
             }
         }
         dialog->setText(text);
-        dialog->setCountText(fmt::format("{}/{}", utf8_len(this->inputBuffer), maxStringLength));
+        dialog->setCountText(std::format("{}/{}", utf8_len(this->inputBuffer), maxStringLength));
     };
     auto updateTextCursor = [this, dialog]()
     {

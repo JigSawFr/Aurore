@@ -34,22 +34,17 @@ set(AURORE_VERSION ${AURORE_VERSION} PARENT_SCOPE)
 
 option(AURORE_INSTALL "Install the library, its headers and its CMake package (AuroreConfig.cmake); desktop only" OFF)
 
-# fmt, tinyxml2, GLFW and SDL (2 or 3) from the system when find_package()
+# tinyxml2, GLFW and SDL (2 or 3) from the system when find_package()
 # finds them, downloaded at configure time otherwise, instead of the copies in
 # lib/extern (for packagers). nanovg, yoga and the others stay vendored.
-option(AURORE_FETCH_DEPS "Use fmt, tinyxml2, GLFW and SDL from the system or downloaded (CMake 3.24+)" OFF)
+option(AURORE_FETCH_DEPS "Use tinyxml2, GLFW and SDL from the system or downloaded (CMake 3.24+)" OFF)
 if (AURORE_FETCH_DEPS)
     if (CMAKE_VERSION VERSION_LESS 3.24)
         message(FATAL_ERROR "AURORE_FETCH_DEPS needs CMake 3.24 or later (FIND_PACKAGE_ARGS)")
     endif ()
     include(FetchContent)
     # The versions of the vendored copies: tools/check_extern_versions.py
-    # (CI) checks they match. A system fmt 12 or later will do.
-    FetchContent_Declare(fmt
-            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-            GIT_TAG 12.2.0
-            GIT_SHALLOW TRUE
-            FIND_PACKAGE_ARGS 12)
+    # (CI) checks they match.
     FetchContent_Declare(tinyxml2
             GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
             GIT_TAG 11.0.0
@@ -72,18 +67,6 @@ if (AURORE_FETCH_DEPS)
             GIT_SHALLOW TRUE
             FIND_PACKAGE_ARGS)
 endif ()
-
-# fmt
-if (USE_SYSTEM_FMT)
-  find_package(fmt REQUIRED)
-elseif (AURORE_FETCH_DEPS)
-  FetchContent_MakeAvailable(fmt)
-else()
-  if (AURORE_INSTALL)
-    set(FMT_INSTALL ON CACHE BOOL "" FORCE)
-  endif ()
-  add_subdirectory(${AURORE_PATH}/lib/extern/fmt ${AURORE_EXTERN_EXCLUDE})
-endif()
 
 # tweeny 4: its easings, in animation.cpp only (header-only, not in the
 # library's headers, so not a dependency of an app or of the installed
@@ -561,7 +544,7 @@ if (AURORE_DKSH_INCLUDE)
     target_include_directories(aurore PRIVATE ${AURORE_DKSH_INCLUDE})
 endif ()
 # The vendored projects' headers are system headers too, for the library and the apps
-foreach (dep fmt yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
+foreach (dep yogacore tinyxml2 glfw SDL2-static SDL2main SDL3-static SDL3-shared ${LIBROMFS_LIBRARY})
     if (TARGET ${dep})
         get_target_property(dep_imported ${dep} IMPORTED)
         get_target_property(dep_include ${dep} INTERFACE_INCLUDE_DIRECTORIES)
@@ -574,7 +557,7 @@ endforeach ()
 # can use it
 target_compile_features(aurore PUBLIC cxx_std_23)
 target_link_libraries(aurore
-        PUBLIC fmt::fmt yogacore ${AURORE_PLATFORM_LIBS}
+        PUBLIC yogacore ${AURORE_PLATFORM_LIBS}
         PRIVATE ${AURORE_PRIVATE_LIBS} $<BUILD_INTERFACE:tweeny::tweeny>)
 if (PLATFORM_PSV)
     # vita-elf-create writes the module's SCE data (module info, exports,

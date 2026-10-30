@@ -7,6 +7,8 @@
 #include <aurore/platforms/desktop/desktop_platform.hpp>
 #include <aurore/platforms/glfw/glfw_input.hpp>
 
+#include <cmath>
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <unistd.h>

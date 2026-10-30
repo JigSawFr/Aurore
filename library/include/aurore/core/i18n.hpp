@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <fmt/format.h>
+#include <format>
 
 #include <string>
 #include <aurore/core/logger.hpp>
@@ -64,7 +64,7 @@ std::string getStr(std::string stringName, Args&&... args)
 
     try
     {
-        return fmt::format(fmt::runtime(rawStr), args...);
+        return std::vformat(rawStr, std::make_format_args(args...));
     }
     catch (const std::exception& e)
     {

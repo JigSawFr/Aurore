@@ -10,6 +10,8 @@
 #include <psp2/system_param.h>
 #include <sys/unistd.h>
 
+#include <cstring>
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/psv/psv_platform.hpp>

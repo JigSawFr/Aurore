@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2021 XITRIX
 // SPDX-License-Identifier: Apache-2.0
 
+#include <cmath>
 #include <mutex>
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>

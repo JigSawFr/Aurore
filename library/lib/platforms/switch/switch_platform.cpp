@@ -8,7 +8,7 @@
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/switch/switch_platform.hpp>
 
-#include "fmt/format.h"
+#include <format>
 
 extern "C" u32 __nx_applet_exit_mode;
 
@@ -192,15 +192,15 @@ std::string SwitchPlatform::getIpAddress()
 {
     u32 ip;
     nifmGetCurrentIpAddress(&ip);
-    return fmt::format("{}.{}.{}.{}", ip & 0xff, (ip & 0xff00) >> 8, (ip & 0xff0000) >> 16, (ip & 0xff000000) >> 24);
+    return std::format("{}.{}.{}.{}", ip & 0xff, (ip & 0xff00) >> 8, (ip & 0xff0000) >> 16, (ip & 0xff000000) >> 24);
 }
 
 std::string SwitchPlatform::getDnsServer()
 {
     u32 ip, mask, gateway, dns1, dns2;
     nifmGetCurrentIpConfigInfo(&ip, &mask, &gateway, &dns1, &dns2);
-    std::string dns1_str = fmt::format("{}.{}.{}.{}", dns1 & 0xff, (dns1 & 0xff00) >> 8, (dns1 & 0xff0000) >> 16, (dns1 & 0xff000000) >> 24);
-    std::string dns2_str = fmt::format("{}.{}.{}.{}", dns2 & 0xff, (dns2 & 0xff00) >> 8, (dns2 & 0xff0000) >> 16, (dns2 & 0xff000000) >> 24);
+    std::string dns1_str = std::format("{}.{}.{}.{}", dns1 & 0xff, (dns1 & 0xff00) >> 8, (dns1 & 0xff0000) >> 16, (dns1 & 0xff000000) >> 24);
+    std::string dns2_str = std::format("{}.{}.{}.{}", dns2 & 0xff, (dns2 & 0xff00) >> 8, (dns2 & 0xff0000) >> 16, (dns2 & 0xff000000) >> 24);
     return dns1_str + "\n" + dns2_str;
 }
 

@@ -34,5 +34,4 @@ aurore_host_test(cadran_text cadran_text_tests.cpp ${CADRAN_SRC}/ui/cadran_text.
 aurore_host_test(format_text format_text_tests.cpp ${CADRAN_SRC}/ui/format_text.cpp)
 foreach (name cadran_text format_text)
     target_compile_definitions(aurore_host_${name} PRIVATE AURORE_CADRAN_HOST_I18N)
-    target_link_libraries(aurore_host_${name} PRIVATE fmt::fmt)
 endforeach ()

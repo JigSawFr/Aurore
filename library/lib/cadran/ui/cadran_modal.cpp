@@ -3,9 +3,9 @@
 
 #include <aurore/cadran/ui/cadran_modal.hpp>
 
-#include <fmt/format.h>
 #include <yoga/Yoga.h>
 #include <algorithm>
+#include <format>
 #include <functional>
 #include <memory>
 #include <vector>
@@ -494,7 +494,7 @@ void cadran::Progress::show(float fraction, const std::string& text)
 {
     fraction = std::min(1.0f, std::max(0.0f, fraction));
     this->bar->set(fraction);
-    this->percent->setText(fmt::format("{} %", (int)(fraction * 100 + 0.001f)));
+    this->percent->setText(std::format("{} %", (int)(fraction * 100 + 0.001f)));
     this->detail->setText(text);
 }
 
@@ -577,7 +577,7 @@ void cadran::prompt_time(const std::string& header, std::vector<int> times, int 
     value->setFontSize(56);
     value->setThemeColor("textColor", "cadran/text");
     const auto text = [](int t)
-    { return fmt::format("{:02d}:{:02d}", t / 60, t % 60); };
+    { return std::format("{:02d}:{:02d}", t / 60, t % 60); };
     value->setText(text(times[first]));
     body->addView(value);
     CadranIcon* down = kit::icon("caret-down", 30, "cadran/teal");

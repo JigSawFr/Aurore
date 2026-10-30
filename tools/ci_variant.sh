@@ -11,7 +11,7 @@
 #   install    the library and its harness installed (AURORE_INSTALL), the
 #              prefix moved, and tests/consumer built against it
 #              (find_package(Aurore 0.1)) and run
-#   fetch      AURORE_FETCH_DEPS: fmt, tinyxml2 and GLFW downloaded
+#   fetch      AURORE_FETCH_DEPS: tinyxml2 and GLFW downloaded
 #   fonts      FreeType and FriBidi
 #   unity      the unity build, the whole library in one batch, with the tests
 #   template   template/, the app to copy

@@ -3,6 +3,8 @@
 
 #include <aurore.hpp>
 
+#include <cmath>
+
 // Delta from touch starting point to current, when
 // touch will be recognized as pan movement
 #define MAX_DELTA_MOVEMENT 6

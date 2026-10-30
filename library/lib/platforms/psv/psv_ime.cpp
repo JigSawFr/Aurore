@@ -3,6 +3,7 @@
 
 #include <psp2/ime_dialog.h>
 
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <utility>

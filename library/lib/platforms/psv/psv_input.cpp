@@ -4,6 +4,8 @@
 #include <psp2/ctrl.h>
 #include <psp2/touch.h>
 
+#include <cstring>
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/psv/psv_input.hpp>

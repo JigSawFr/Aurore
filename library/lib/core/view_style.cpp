@@ -949,9 +949,9 @@ std::string accessibilityPercent(float fraction)
     std::string format = accessibilityWord("percent", "{}%");
     try
     {
-        return fmt::format(fmt::runtime(format), percent);
+        return std::vformat(format, std::make_format_args(percent));
     }
-    catch (const fmt::format_error&)
+    catch (const std::format_error&)
     {
         return std::to_string(percent) + "%";
     }
@@ -980,9 +980,9 @@ std::string View::getAccessibilityDescription()
         std::string format = accessibilityWord("position", "{} of {}");
         try
         {
-            joinTo(description, fmt::format(fmt::runtime(format), index, count));
+            joinTo(description, std::vformat(format, std::make_format_args(index, count)));
         }
-        catch (const fmt::format_error&)
+        catch (const std::format_error&)
         {
             joinTo(description, std::to_string(index) + "/" + std::to_string(count));
         }

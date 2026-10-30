@@ -3,6 +3,7 @@
 
 #include <tweeny/easing.h>
 #include <algorithm>
+#include <cmath>
 #include <aurore/core/animation.hpp>
 #include <aurore/core/application.hpp>
 

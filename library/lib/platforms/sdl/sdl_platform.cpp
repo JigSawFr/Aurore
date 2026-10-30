@@ -4,6 +4,7 @@
 #include <strings.h>
 #include <unistd.h> /* chdir */
 
+#include <cstring>
 #include <unordered_map>
 #include <aurore/core/application.hpp>
 #include <aurore/core/i18n.hpp>

@@ -5,6 +5,8 @@
 #include <orbis/_types/ime_dialog.h>
 #include <aurore/extern/libretro-common/retro_timers.h>
 
+#include <cstring>
+
 #include <aurore/core/application.hpp>
 #include <aurore/core/logger.hpp>
 #include <aurore/platforms/ps4/ps4_ime.hpp>

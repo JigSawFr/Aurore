@@ -6,12 +6,12 @@
 static void registerSliderCell(aurore::SliderCell* cell, float init, const std::string& title, const std::function<int(float)>& cb)
 {
     int res = cb(init);
-    cell->setDetailText(res == 0 ? "auto" : fmt::format("{}", res));
+    cell->setDetailText(res == 0 ? "auto" : std::format("{}", res));
     cell->slider->setPointerSize(20);
     cell->init(title, init, [cb, cell](float value)
         {
             int res = cb(value);
-            cell->setDetailText(res == 0 ? "auto" : fmt::format("{}", res)); });
+            cell->setDetailText(res == 0 ? "auto" : std::format("{}", res)); });
 }
 
 TextTestTab::TextTestTab()

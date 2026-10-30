@@ -3,6 +3,8 @@
 
 #include "aurore/views/cells/cell_radio.hpp"
 
+#include <cmath>
+
 namespace aurore
 {
 

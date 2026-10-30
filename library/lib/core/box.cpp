@@ -196,7 +196,7 @@ void Box::addView(View* view)
 void Box::addView(View* view, size_t position)
 {
     if (position > this->children.size() || position < 0)
-        fatal(fmt::format("cannot insert view at {}:{}/{}", this->describe(), this->children.size(), position));
+        fatal(std::format("cannot insert view at {}:{}/{}", this->describe(), this->children.size(), position));
 
     // Add the view to our children and YGNode
     this->children.insert(this->children.begin() + position, view);

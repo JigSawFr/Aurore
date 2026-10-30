@@ -5,7 +5,7 @@
 // ui — durations, days and short answers as text.
 #include <aurore/cadran/ui/format_text.hpp>
 
-#include <fmt/format.h>
+#include <format>
 
 #include <aurore/cadran/ui/tr.hpp>
 
@@ -33,7 +33,7 @@ std::string fmt_minutes(uint32_t m)
     if (m % 60 == 0)
         return glued(aurore::getStr("cadran/common/hours", (unsigned long long)(m / 60)));
     return glued(aurore::getStr("cadran/common/hours_minutes", (unsigned long long)(m / 60),
-        fmt::format("{:02d}", (int)(m % 60))));
+        std::format("{:02d}", (int)(m % 60))));
 }
 
 std::string fmt_duration_ns(uint64_t ns)
@@ -51,21 +51,21 @@ std::string fmt_duration(uint64_t seconds)
     // From 100 h, the minutes are noise: whole hours, rounded.
     if (m % 60 == 0 || m >= 100 * 60)
         return glued(aurore::getStr("cadran/common/hours", (unsigned long long)((m + 30) / 60)));
-    return glued(aurore::getStr("cadran/common/hours_minutes", (unsigned long long)(m / 60), fmt::format("{:02d}", (int)(m % 60))));
+    return glued(aurore::getStr("cadran/common/hours_minutes", (unsigned long long)(m / 60), std::format("{:02d}", (int)(m % 60))));
 }
 
 std::string day_name(int day)
 {
     if (day < 0 || day > 6)
         return "?";
-    return aurore::getStr(fmt::format("cadran/days/{}", day));
+    return aurore::getStr(std::format("cadran/days/{}", day));
 }
 
 std::string day_name_in_text(int day)
 {
     if (day < 0 || day > 6)
         return "?";
-    return aurore::getStr(fmt::format("cadran/days_lower/{}", day));
+    return aurore::getStr(std::format("cadran/days_lower/{}", day));
 }
 
 std::string bool_text(bool ok, bool value, const std::string& yes, const std::string& no)

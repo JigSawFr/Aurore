@@ -33,7 +33,6 @@ SOURCES = {
     "GLFW": ("gh", "glfw/glfw", ""),
     "glad": ("pypi", "glad2"),
     "Yoga": ("gh", "facebook/yoga", "v"),
-    "{fmt}": ("gh", "fmtlib/fmt", ""),
     "TinyXML-2": ("gh", "leethomason/tinyxml2", ""),
     "JSON for Modern C++": ("gh", "nlohmann/json", "v"),
     "Tweeny": ("gh", "mobius3/tweeny", "v"),

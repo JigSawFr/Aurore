@@ -33,7 +33,7 @@ The licences' texts are in LICENSES/; `reuse lint` checks the whole
 (https://reuse.software).
 
 Also bundled, each under its own licence: the libraries in library/lib/extern
-and library/include/aurore/extern (nanovg, fontstash, stb, Yoga, {fmt},
+and library/include/aurore/extern (nanovg, fontstash, stb, Yoga,
 TinyXML-2, JSON for Modern C++, Tweeny, libromfs, GLFW, SDL, libretro-common,
 glad, QR Code generator), the fonts Inter, PromptFont (as Aurore Text and
 Aurore Buttons) and Sora (resources/font, SIL Open Font License 1.1), Material

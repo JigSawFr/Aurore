@@ -5,6 +5,7 @@
 #include <strings.h>
 
 #include <cctype>
+#include <cmath>
 #include <memory>
 #include <aurore/core/i18n.hpp>
 #include <aurore/core/logger.hpp>
