@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace aurore
@@ -182,7 +183,7 @@ struct ThemeDecor
     ThemeParticles particles;
 
     /// The picture of `area`.
-    const ThemePicture& picture(ThemeArea area) const { return this->pictures[(int)area - 1]; }
+    const ThemePicture& picture(ThemeArea area) const { return this->pictures[std::to_underlying(area) - 1]; }
     bool hasPictures() const
     {
         for (const ThemePicture& picture : this->pictures)

@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <typeinfo>
+#include <utility>
 #include <aurore/core/application.hpp>
 #include <aurore/core/box.hpp>
 #include <aurore/core/frame_context.hpp>
@@ -560,7 +561,7 @@ namespace inspector_detail
         else
         {
             const char* names[] = { "none", "sidebar", "backdrop", "colour", "vertical gradient", "horizontal gradient" };
-            sx                  = text(vg, sx, y, TEXT, names[(int)view->getBackground()]);
+            sx                  = text(vg, sx, y, TEXT, names[std::to_underlying(view->getBackground())]);
         }
         if (view->getBorderThickness() > 0)
         {

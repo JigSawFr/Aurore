@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 
 namespace aurore
 {
@@ -50,23 +51,23 @@ enum class SafeAreaEdges : uint8_t
 
 constexpr SafeAreaEdges operator|(SafeAreaEdges a, SafeAreaEdges b)
 {
-    return (SafeAreaEdges)((uint8_t)a | (uint8_t)b);
+    return (SafeAreaEdges)(std::to_underlying(a) | std::to_underlying(b));
 }
 
 constexpr SafeAreaEdges operator&(SafeAreaEdges a, SafeAreaEdges b)
 {
-    return (SafeAreaEdges)((uint8_t)a & (uint8_t)b);
+    return (SafeAreaEdges)(std::to_underlying(a) & std::to_underlying(b));
 }
 
 constexpr SafeAreaEdges operator~(SafeAreaEdges a)
 {
-    return (SafeAreaEdges)(~(uint8_t)a & (uint8_t)SafeAreaEdges::ALL);
+    return (SafeAreaEdges)(~std::to_underlying(a) & std::to_underlying(SafeAreaEdges::ALL));
 }
 
 /// True when `edges` has `edge`
 constexpr bool hasEdge(SafeAreaEdges edges, SafeAreaEdges edge)
 {
-    return ((uint8_t)edges & (uint8_t)edge) != 0;
+    return (std::to_underlying(edges) & std::to_underlying(edge)) != 0;
 }
 
 /// The edges `text` names: `top`, `right`, `bottom`, `left`, `vertical`,

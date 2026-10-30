@@ -6,6 +6,8 @@
 #include <aurore/core/touch/tap_gesture.hpp>
 #include <aurore/views/edit_text_dialog.hpp>
 
+#include <utility>
+
 #ifdef __PSV__
 #define EDIT_TEXT_DIALOG_POP_ANIMATION TransitionAnimation::NONE
 #define EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT false
@@ -250,7 +252,7 @@ void EditTextDialog::updateUI()
     {
         label->setThemeColor("textColor", "aurore/text_secondary");
         label->setText(hint);
-        label->setCursor((int)CursorPosition::START);
+        label->setCursor(std::to_underlying(CursorPosition::START));
     }
     else
     {
