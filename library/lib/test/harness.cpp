@@ -524,7 +524,8 @@ bool Harness::matchesReference(const std::string& name, const Rect& area, int to
     std::string referencePath = opts.referenceDir + "/" + name + ".png";
     std::string outputPath    = opts.outputDir + "/" + name + ".png";
     std::string diffPath      = opts.outputDir + "/" + name + ".diff.png";
-    actual.savePng(outputPath);
+    if (!actual.savePng(outputPath))
+        Logger::warning("test harness: {} not written", outputPath);
 
     Image expected = Image::loadPng(referencePath);
     if (expected.empty() && !flagFromEnvironment("TEST_UPDATE") && std::getenv("CI"))
@@ -537,8 +538,10 @@ bool Harness::matchesReference(const std::string& name, const Rect& area, int to
     }
     if (expected.empty() || flagFromEnvironment("TEST_UPDATE"))
     {
-        Logger::info("test harness: reference {} written", referencePath);
-        actual.savePng(referencePath);
+        if (actual.savePng(referencePath))
+            Logger::info("test harness: reference {} written", referencePath);
+        else
+            Logger::error("test harness: reference {} not written", referencePath);
         this->diff          = ImageDiff();
         this->diff.sameSize = true;
         return true;
@@ -548,8 +551,8 @@ bool Harness::matchesReference(const std::string& name, const Rect& area, int to
     bool matches = this->diff.sameSize && this->diff.ratio <= maxRatio;
     if (!matches)
     {
-        if (this->diff.sameSize)
-            this->diff.map.savePng(diffPath);
+        if (this->diff.sameSize && !this->diff.map.savePng(diffPath))
+            Logger::warning("test harness: {} not written", diffPath);
         Logger::error("test harness: {} differs from {}: {} pixels ({:.3f}%), largest difference {} (see {})",
             name, referencePath, this->diff.differingPixels, this->diff.ratio * 100.0, this->diff.maxDelta,
             this->diff.sameSize ? diffPath : std::string("the sizes"));

@@ -137,7 +137,8 @@ void film(Harness& h, double ms)
             continue;
         char name[32];
         std::snprintf(name, sizeof(name), "/%04d.png", filmFrame++);
-        h.screenshot().savePng(filmFolder + name);
+        if (!h.screenshot().savePng(filmFolder + name))
+            std::printf("%s%s: not written\n", filmFolder.c_str(), name);
     }
 }
 
@@ -471,7 +472,8 @@ int main(int argc, char** argv)
         if (!h.settle())
             std::printf("%s: still moving after 5 s\n", scene.name.c_str());
         std::string path = output + "/" + scene.name + ".png";
-        h.screenshot().savePng(path);
+        if (!h.screenshot().savePng(path))
+            std::printf("%s: not written\n", path.c_str());
         std::vector<std::string> cut = h.cutTexts();
         aurore::View* focus          = h.focus();
         std::printf("%s  (focus: %s \"%s\")%s\n", path.c_str(), focus ? focus->describe().c_str() : "none",

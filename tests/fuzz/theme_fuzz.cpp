@@ -52,7 +52,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     const std::string in(reinterpret_cast<const char*>(data), size);
 
     aurore::ThemeVariant variant = aurore::ThemeVariant::LIGHT;
-    aurore::Theme::load(in, &variant, folder);
+    (void)aurore::Theme::load(in, &variant, folder); // any input: refused or taken, never a crash
     FUZZ_ASSERT(variant == aurore::ThemeVariant::LIGHT || variant == aurore::ThemeVariant::DARK);
     aurore::Theme::reset();
 

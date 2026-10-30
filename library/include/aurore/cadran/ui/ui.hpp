@@ -306,8 +306,8 @@ std::string theme_name(bool tile = false);
 /// − on the main screen: a list of the two, each opening its picker.
 void quick_settings(std::function<void()> after = nullptr);
 
-/// Saves ui::prefs() through hooks::get().save_prefs: false when it cannot be
-/// saved at all.
+/// Saves ui::prefs() through hooks::get().save_prefs: false, logged as a
+/// warning, when it cannot be saved at all.
 bool save_prefs();
 
 } // namespace ui

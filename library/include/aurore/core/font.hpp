@@ -47,13 +47,13 @@ class FontLoader
      * Convenience method to load a font from a file path
      * with some more logging.
      */
-    bool loadFontFromFile(std::string fontName, std::string filePath);
+    [[nodiscard]] bool loadFontFromFile(std::string fontName, std::string filePath);
 
     /**
      * Can be called internally to load the Material icons font from resources.
      * Returns true if the operation succeeds.
      */
-    bool loadMaterialFromResources();
+    [[nodiscard]] bool loadMaterialFromResources();
 };
 
 } // namespace aurore

@@ -43,8 +43,8 @@ class DesktopFontLoader : public FontLoader
     static FontFile findSystemFont(const std::string& language);
 
   private:
-    bool loadFont(const std::string& name, const std::string& path);
-    bool loadFontFile(const std::string& name, const FontFile& file);
+    [[nodiscard]] bool loadFont(const std::string& name, const std::string& path);
+    [[nodiscard]] bool loadFontFile(const std::string& name, const FontFile& file);
     bool loadAppCjkFont(NVGcontext* vg);
     void loadSystemCjkFonts(NVGcontext* vg);
 };
