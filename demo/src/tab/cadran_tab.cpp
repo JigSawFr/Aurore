@@ -108,7 +108,7 @@ aurore::Box* dialogs()
     buttons->addView(show::button("demo/cadran/notice"_i18n, []
         { ui::notice("sparkle", ui::Check::Ok, "demo/cadran/notice_title"_i18n, "demo/cadran/notice_text"_i18n); }));
     buttons->addView(show::button("demo/cadran/qr"_i18n, []
-        { ui::qr_dialog("demo/cadran/qr_text"_i18n, "https://aurore.boreale.dev/"); }));
+        { ui::qr_dialog("demo/cadran/qr_text"_i18n, "https://aurore.boreale.dev/?utm_source=aurore-demo&utm_medium=qr"); }));
     buttons->addView(show::button("demo/cadran/keyboard"_i18n, []
         { ui::prompt_text("demo/cadran/keyboard_title"_i18n, "Aurore", 32, [](std::string text)
               { ui::notify(aurore::getStr("demo/cadran/typed", text)); }); }));

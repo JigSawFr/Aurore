@@ -138,7 +138,10 @@ function translatePage() {
 // ---- The address ------------------------------------------------------------
 
 const linkFor = (values) => {
-  const query = values.toString();
+  // A visit's UTM tags (it came from another of our sites) stay out of the
+  // links the page makes: the first change of the address drops them.
+  const kept = new URLSearchParams([...values].filter(([name]) => !name.startsWith('utm_')));
+  const query = kept.toString();
   return `${location.pathname}${query ? `?${query}` : ''}`;
 };
 const apply = (values) => { location.href = linkFor(values); };
@@ -184,13 +187,19 @@ function chooseVariant(choice) {
 
 // The website's pages in the page's language (tools/build_site.py's
 // folders): its home, and the header's links as on the website.
+// A link to another of Boréale's sites says where the visit comes from, for
+// Umami (workbench's "Mesure d'audience"); the demo is part of aurore.boreale.dev.
+const SITE_TAGS = 'utm_source=aurore&utm_medium=nav';
+
 function homeLinks() {
   const home = `../${folder(language)}`;
   $('home-link').href = home;
   $('nav-features').href = `${home}#features`;
   $('nav-docs').href = `${home}docs/getting-started/`;
   // Boréale's other sites, in the page's language (the same folders).
-  for (const link of document.querySelectorAll('#sites [data-site]')) link.href = link.dataset.site + folder(language);
+  for (const link of document.querySelectorAll('#sites [data-site]')) link.href = `${link.dataset.site}${folder(language)}?${SITE_TAGS}`;
+  // The privacy and legal notice, boreale.dev's, in the same folder.
+  $('legal-link').href = `https://boreale.dev/${folder(language)}legal/?${SITE_TAGS}`;
   $('sites-button').setAttribute('aria-label', `Aurore · ${t('sites_label')}`);
 }
 

@@ -11,8 +11,8 @@
 [![upstream: xfangfang/borealis](https://img.shields.io/badge/upstream-xfangfang%2Fborealis-555.svg)](https://github.com/xfangfang/borealis)
 [![license: GPLv3 · Apache 2.0](https://img.shields.io/badge/license-GPLv3%20%C2%B7%20Apache%202.0-blue.svg)](#-license-and-credits)
 
-[**Website**](https://aurore.boreale.dev/) ·
-[**Try&nbsp;it**](https://aurore.boreale.dev/demo/) ·
+[**Website**](https://aurore.boreale.dev/?utm_source=github&utm_medium=readme) ·
+[**Try&nbsp;it**](https://aurore.boreale.dev/demo/?utm_source=github&utm_medium=readme) ·
 [**What's new**](#-what-aurore-adds) ·
 [**Under&nbsp;the&nbsp;hood**](#-under-the-hood) ·
 [**Use&nbsp;it**](#-use-it-in-your-project) ·
@@ -98,7 +98,7 @@ It is [borealis](https://github.com/natinusala/borealis) under a new name: a for
 - 🖥️ **Platforms** — SDL3 by default (desktop, browser, Android, iOS), SDL2 for the consoles, controllers reconnected under SDL, the browser (Emscripten), the taskbar icon on Linux, deko3d's command memory on the Switch.
 - ⚡ **Speed** — no relayout for an unchanged text or size, XML attributes registered on demand, unused textures freed.
 
-Side by side with borealis, change by change: <https://aurore.boreale.dev/borealis/>.
+Side by side with borealis, change by change: [aurore.boreale.dev/borealis/](https://aurore.boreale.dev/borealis/?utm_source=github&utm_medium=readme).
 
 <details>
 <summary><b>Every change and its API</b></summary>
@@ -218,8 +218,8 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 <!-- under-the-hood: begin (tools/stack.py writes this) -->
 | | Version |
 | --- | --- |
-| Language | C++23 (min. C++20) |
-| CMake | 3.16–3.31 |
+| Language | C++23 |
+| CMake | 3.20–3.31 |
 | SDL3 | 3.4.18 |
 | SDL | 2.32.10 |
 | GLFW | 3.5.1 |
@@ -237,12 +237,12 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | Android API | 36 |
 | Emscripten | 6.0.13 |
 
-Checked on every pull request: 159 test cases in the headless harness, 36 reference screenshots compared pixel by pixel, and 153 checks of Cadran's text code; 42 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 60 of the 60 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: 159 test cases in the headless harness, 36 reference screenshots compared pixel by pixel, and 163 checks of Cadran's text code; 42 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 60 of the 60 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 <!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
 
-1. Build your project as **C++20** or later (C++23 recommended), without `-fno-rtti` or `-fno-exceptions`.
+1. Build your project as **C++23** or later, with CMake 3.20 or later, without `-fno-rtti` or `-fno-exceptions`.
 2. Add Aurore as a submodule:
 
    ```sh
@@ -264,7 +264,7 @@ Checked on every pull request: 159 test cases in the headless harness, 36 refere
 
 ## 🛠️ Build the demo
 
-The demo is a guided tour of Aurore, a tab per subject, each saying what it shows. It runs in a browser too: <https://aurore.boreale.dev/demo/>.
+The demo is a guided tour of Aurore, a tab per subject, each saying what it shows. It runs in a browser too: [aurore.boreale.dev/demo/](https://aurore.boreale.dev/demo/?utm_source=github&utm_medium=readme).
 
 - **Welcome**: Aurore in a sentence over an aurora drawn with nanovg, a dashboard of live cards (a ring, bars, figures), a tile per tab.
 - **Library**: 302 made-up games, their covers key art made up for the demo (28 pictures, eight genres, `tools/make_covers.py`), in a grid that keeps only the cells on screen; sorted, filtered by genre, a menu on each, a page for each with a row of games like it; the same games by genre in a long recycled list.
@@ -286,7 +286,7 @@ cmake --build build_pc
 ./build_pc/aurore_demo
 ```
 
-Aurore builds with CMake only (3.16 or later): upstream's xmake files (`xmake.lua`, `uwp.lua`), untested and behind the CMake build, are gone.
+Aurore builds with CMake only (3.20 or later): upstream's xmake files (`xmake.lua`, `uwp.lua`), untested and behind the CMake build, are gone.
 
 With CMake 3.25 or later and Ninja, the presets in `CMakePresets.json` do the same for the usual targets, in `build/<preset>` (`cmake --list-presets`: also `desktop-debug`, `desktop-asan` and `tests`):
 
@@ -303,13 +303,13 @@ cmake --build --preset switch-deko3d   # build/switch-deko3d/aurore_demo.nro
 
 With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes the app read a file from that folder first, falling back to the built-in copy: `AURORE_RESOURCES_DIR=resources ./build/desktop-sdl3/aurore_demo` picks up changed XML, images or translations without a rebuild, only a restart.
 
-New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme, and `--simulate 3ds` (or `switch`, `vita`, `ps4`, `phone`) on a console's screen, the console drawn around it ([platforms.md](docs/platforms.md#simulated-platforms)). The [API reference](https://aurore.boreale.dev/api/) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
+New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme, and `--simulate 3ds` (or `switch`, `vita`, `ps4`, `phone`) on a console's screen, the console drawn around it ([platforms.md](docs/platforms.md#simulated-platforms)). The [API reference](https://aurore.boreale.dev/api/?utm_source=github&utm_medium=readme) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
 The other platforms (Windows, macOS, the Switch, PS Vita, PS4, the New 3DS family, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
 
-Also on the website, with a search and the API reference: <https://aurore.boreale.dev/>, in the consoles' 15 languages (these pages in English under each language's header). Its home page shows the demo on a console, a screen's XML and its activity in an editor's window beside the screen they draw, the features, Cadran and the screenshots; the demo runs there in a browser: <https://aurore.boreale.dev/demo/>. How the site is made: [site/README.md](site/README.md).
+Also on the website, with a search and the API reference: [aurore.boreale.dev](https://aurore.boreale.dev/?utm_source=github&utm_medium=readme), in the consoles' 15 languages (these pages in English under each language's header). Its home page shows the demo on a console, a screen's XML and its activity in an editor's window beside the screen they draw, the features, Cadran and the screenshots; the demo runs there in a browser: [aurore.boreale.dev/demo/](https://aurore.boreale.dev/demo/?utm_source=github&utm_medium=readme). How the site is made: [site/README.md](site/README.md).
 
 | Page | |
 | --- | --- |

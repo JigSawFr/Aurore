@@ -18,7 +18,7 @@ Pin a release rather than following `main`: `git -C library/aurore checkout vX.Y
 
 ## 2. The build
 
-- **C++20 at least, C++23 recommended.** Aurore's headers need C++20 (Aurore itself builds as C++23): `set(CMAKE_CXX_STANDARD 23)` or `CXX_STANDARD 23` on the app's target. RTTI and exceptions stay on (no `-fno-rtti`, no `-fno-exceptions`).
+- **C++23.** Aurore's headers need it, as Aurore itself: `set(CMAKE_CXX_STANDARD 23)` or `CXX_STANDARD 23` on the app's target, and CMake 3.20 or later. RTTI and exceptions stay on (no `-fno-rtti`, no `-fno-exceptions`).
 - **The library's path.** The app's variable for the `library/` folder (`BOREALIS_LIBRARY` in borealis' template, any name will do) moves to the new path, and the two includes stay before `project()`:
 
   ```cmake
@@ -102,5 +102,5 @@ Look at the result before committing: an app's own name that starts with `BRLS_`
 ## 7. Afterwards
 
 - Turn on the debugging aids while checking the screens: `AURORE_INSPECTOR=1` and `AURORE_HOT_RELOAD=$PWD/resources` ([environment.md](environment.md)).
-- [architecture.md](architecture.md) explains the loop, the focus, ownership and threads; the [API reference](https://aurore.boreale.dev/api/) has each class and function.
+- [architecture.md](architecture.md) explains the loop, the focus, ownership and threads; the [API reference](https://aurore.boreale.dev/api/?utm_source=github&utm_medium=docs) has each class and function.
 - Issues and fixes go to [JigSawFr/aurore](https://github.com/JigSawFr/aurore); a fix that belongs upstream is welcome there too.

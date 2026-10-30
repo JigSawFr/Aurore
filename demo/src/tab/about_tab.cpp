@@ -94,9 +94,9 @@ AboutTab::AboutTab()
     aurore::Box* links = show::row(true, 12);
     links->setMarginTop(show::gap());
     links->addView(show::iconButton("phone", "demo/about/qr"_i18n, []
-        { ui::qr_dialog("demo/cadran/qr_text"_i18n, "https://aurore.boreale.dev/"); }));
+        { ui::qr_dialog("demo/cadran/qr_text"_i18n, "https://aurore.boreale.dev/?utm_source=aurore-demo&utm_medium=qr"); }));
     links->addView(show::iconButton("globe", "demo/about/site"_i18n, []
-        { aurore::Application::getPlatform()->openBrowser("https://aurore.boreale.dev/"); }));
+        { aurore::Application::getPlatform()->openBrowser("https://aurore.boreale.dev/?utm_source=aurore-demo&utm_medium=app"); }));
     page->addView(links);
 
     // The people it comes from

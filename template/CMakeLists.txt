@@ -7,7 +7,7 @@
 #   cmake -B build-switch -DAURORE_PLATFORM=SWITCH && cmake --build build-switch --target my_app.nro
 #
 # See README.md.
-cmake_minimum_required(VERSION 3.16...3.31)
+cmake_minimum_required(VERSION 3.20...3.31)
 
 # Aurore: a submodule at library/aurore (git submodule add -b main
 # https://github.com/JigSawFr/aurore.git library/aurore), or, inside Aurore's

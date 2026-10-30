@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: borealis contributors
 # SPDX-License-Identifier: Apache-2.0
 
-cmake_minimum_required(VERSION 3.16...3.31)
+cmake_minimum_required(VERSION 3.20...3.31)
 
 set(AURORE_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/library)
 
@@ -100,7 +100,7 @@ endif ()
 
 # building target
 program_target(${PROJECT_NAME} "${MAIN_SRC}")
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED OFF CXX_SCAN_FOR_MODULES OFF)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON CXX_SCAN_FOR_MODULES OFF)
 if (PLATFORM_DESKTOP)
     aurore_app_link_options(${PROJECT_NAME})
 endif ()
