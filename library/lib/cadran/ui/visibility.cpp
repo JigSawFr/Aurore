@@ -132,7 +132,7 @@ void keep_focus(aurore::Activity* activity, aurore::View* fallback)
     {
         aurore::View* next   = box->getLastFocusedView();
         const auto& children = box->getChildren();
-        if (!next || std::find(children.begin(), children.end(), next) == children.end())
+        if (!next || !std::ranges::contains(children, next))
             break;
         last = next;
     }
