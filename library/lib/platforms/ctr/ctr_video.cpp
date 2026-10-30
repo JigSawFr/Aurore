@@ -66,6 +66,9 @@ CtrVideoContext::CtrVideoContext()
     Application::setWindowSize(WIDTH, HEIGHT);
     if (this->topTarget)
         TopScreen::setSize(TOP_WIDTH, TOP_HEIGHT);
+    // A frame redrawn only when something changed: the CPU is short for a
+    // full redraw at 60 frames a second (docs/platforms.md)
+    Application::setRedrawOnDemand(true);
 }
 
 CtrVideoContext::~CtrVideoContext()

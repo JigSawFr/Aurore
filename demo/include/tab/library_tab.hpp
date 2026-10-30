@@ -7,6 +7,7 @@
 #include <aurore.hpp>
 
 #include "view/cover_art.hpp"
+#include "view/top_screens.hpp"
 
 /// A cover and its genre: a cell of the library's grid, and of the rows of
 /// covers under a game.
@@ -24,6 +25,7 @@ class GameCell : public aurore::RecyclingGridItem
     const library::Game* game = nullptr;
     CoverArt* cover;
     aurore::Label* caption;
+    demo::top::GameScreen* preview = nullptr; // with a top screen
 };
 
 /// The Library: 302 made-up games in a grid that keeps only the cells on

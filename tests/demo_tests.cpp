@@ -47,6 +47,8 @@
 #include "activity/main_activity.hpp"
 #include "demo_app.hpp"
 #include "simulation.hpp"
+#include "tab/library_tab.hpp"
+#include "view/top_screens.hpp"
 
 using aurore::test::Harness;
 
@@ -3520,11 +3522,51 @@ AURORE_TEST(top_screen_view)
     AURORE_CHECK(std::abs(top->getHeight() - aurore::TopScreen::getContentHeight()) < 1.0f);
     AURORE_CHECK(h.matchesReference("top_screen_view"));
 
-    // Popped: the activity below gives none, the header is back
+    // Popped: the demo's own, the tab shown on the night (its visual went up
+    // there, its buttons stayed below)
     aurore::Application::popActivity(aurore::TransitionAnimation::NONE);
     h.settle();
-    AURORE_CHECK_EQ(h.top()->getTopScreenView(), (aurore::View*)nullptr);
+    AURORE_CHECK(dynamic_cast<demo::top::TabScreen*>(h.top()->getTopScreenView()) != nullptr);
+    AURORE_CHECK(h.matchesReference("top_screen_tab"));
+
+    // An activity that gives none: the header
+    aurore::Application::pushActivity(new aurore::Activity(new aurore::Box()), aurore::TransitionAnimation::NONE);
+    h.settle();
+    AURORE_CHECK_EQ(aurore::TopScreen::getShownView(), (aurore::View*)nullptr);
     AURORE_CHECK(h.matchesReference("top_screen_header"));
+    aurore::Application::popActivity(aurore::TransitionAnimation::NONE);
+    h.settle();
+
+    // The Library: the game focused, its cover and details at the top
+    auto* tabs = dynamic_cast<aurore::TabFrame*>(h.top()->getView("main_tabs"));
+    AURORE_CHECK(tabs != nullptr);
+    if (tabs)
+    {
+        tabs->focusTab(demo::TAB_LIBRARY);
+        h.settle();
+        std::function<GameCell*(aurore::View*)> firstCell = [&](aurore::View* view) -> GameCell*
+        {
+            if (auto* cell = dynamic_cast<GameCell*>(view))
+                return cell;
+            if (auto* box = dynamic_cast<aurore::Box*>(view))
+                for (aurore::View* child : box->getChildren())
+                    if (GameCell* cell = firstCell(child))
+                        return cell;
+            return nullptr;
+        };
+        GameCell* cell = firstCell(h.top()->getContentView());
+        AURORE_CHECK(cell != nullptr);
+        if (cell)
+        {
+            aurore::Application::giveFocus(cell);
+            h.settle();
+            AURORE_CHECK(dynamic_cast<demo::top::GameScreen*>(aurore::TopScreen::getShownView()) != nullptr);
+            AURORE_CHECK(h.matchesReference("top_screen_game"));
+        }
+        tabs->focusTab(demo::TAB_HOME);
+        h.settle();
+    }
+
     // The demo's frame shows its title alone: its header went up there
     auto* frame = dynamic_cast<aurore::AppletFrame*>(h.top()->getContentView());
     AURORE_CHECK(frame != nullptr);
