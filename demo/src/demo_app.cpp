@@ -52,7 +52,7 @@ void installCadranHooks()
     { return "tab/" + std::to_string(shownTab); };
     h.main_screen  = h.shown_screen;
     h.tab_position = [](const std::string& screen)
-    { return screen.rfind("tab/", 0) == 0 ? std::atoi(screen.c_str() + 4) : -1; };
+    { return screen.starts_with("tab/") ? std::atoi(screen.c_str() + 4) : -1; };
     h.push_main = [](int position, const std::string&)
     {
         auto* main = new MainActivity();

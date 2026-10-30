@@ -916,7 +916,7 @@ View* Box::getView(std::string id)
 
 bool Box::applyXMLAttribute(std::string name, std::string value)
 {
-    if (this->forwardedAttributes.count(name) > 0)
+    if (this->forwardedAttributes.contains(name))
     {
         std::pair<std::string, View*> pair = this->forwardedAttributes[name];
         return pair.second->applyXMLAttribute(pair.first, value);
@@ -935,7 +935,7 @@ void Box::forwardXMLAttribute(std::string attributeName, View* target, std::stri
     if (!target->isXMLAttributeValid(targetAttributeName))
         fatal("Error when forwarding \"" + attributeName + "\" of \"" + this->describe() + "\": attribute \"" + targetAttributeName + "\" is not a XML valid attribute for view \"" + target->describe() + "\"");
 
-    if (this->forwardedAttributes.count(attributeName) > 0)
+    if (this->forwardedAttributes.contains(attributeName))
         fatal("Error when forwarding \"" + attributeName + "\" of \"" + this->describe() + "\": the same attribute cannot be forwarded twice");
 
     this->forwardedAttributes[attributeName] = std::make_pair(targetAttributeName, target);

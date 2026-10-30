@@ -162,9 +162,9 @@ void HotReload::setThemeFiles(const std::vector<std::string>& paths)
     {
         // A preset has no file; a resource is one when read from a folder
         std::string disk = path;
-        if (path.rfind("builtin:", 0) == 0)
+        if (path.starts_with("builtin:"))
             continue;
-        if (path.rfind("@res/", 0) == 0)
+        if (path.starts_with("@res/"))
         {
             disk = HotReload::diskResource(path);
             if (disk.empty())
@@ -238,7 +238,7 @@ void HotReload::poll()
             continue;
         }
         View::forgetXMLCache(file.path);
-        if (file.activities.count(top))
+        if (file.activities.contains(top))
             rebuild = true;
         else
             Logger::info("hot reload: {} is not used by the activity on top, it shows next time it is made", file.path);

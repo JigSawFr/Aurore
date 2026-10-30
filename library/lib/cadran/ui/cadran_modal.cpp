@@ -112,7 +112,7 @@ std::vector<std::string> split(const std::string& text, const std::string& by)
 
 bool starts_with(const std::string& text, const std::string& start)
 {
-    return !start.empty() && text.compare(0, start.size(), start) == 0;
+    return !start.empty() && text.starts_with(start);
 }
 
 // The question that opens a paragraph ("Add 30 min today?", "Bloquer tous
@@ -188,7 +188,7 @@ aurore::Box* cadran::dialog_body(const std::string& text)
             if (paragraphs[0].empty())
                 paragraphs.erase(paragraphs.begin());
         }
-        else if (paragraphs.size() > 1 && paragraphs[0].size() <= 90 && paragraphs[0].find('\n') == std::string::npos)
+        else if (paragraphs.size() > 1 && paragraphs[0].size() <= 90 && !paragraphs[0].contains('\n'))
         {
             title = paragraphs[0];
             paragraphs.erase(paragraphs.begin());

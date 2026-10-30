@@ -135,7 +135,7 @@ static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode w
     // (Not when it shrinks to fit instead: on one line at its size or larger.)
     bool fits = false;
     if (availableWidth < requiredWidth && label->isShrinkingToFit() && label->getFullFontSize() > label->getFontSize()
-        && fullText.find("\n") == std::string::npos)
+        && !fullText.contains("\n"))
     {
         float small[4];
         nvgFontSize(vg, label->getFontSize());
@@ -143,7 +143,7 @@ static YGSize labelMeasureFunc(YGNodeConstRef node, float width, YGMeasureMode w
         nvgFontSize(vg, label->getFullFontSize());
         fits = small[2] - small[0] - 0.5f <= availableWidth;
     }
-    if ((availableWidth < requiredWidth || fullText.find("\n") != std::string::npos) && !label->isSingleLine() && !fits)
+    if ((availableWidth < requiredWidth || fullText.contains("\n")) && !label->isSingleLine() && !fits)
     {
         float boxBounds[4];
         nvgTextBoxBounds(vg, 0, 0, availableWidth, fullText.c_str(), nullptr, boxBounds);

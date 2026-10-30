@@ -434,8 +434,8 @@ namespace
             l.label  = values[i];
             l.detail = i < details.size() ? details[i] : "";
             // A picture ("img/…png") or a Cadran icon's name.
-            const std::string icon                          = i < icons.size() ? icons[i] : "";
-            (icon.rfind("img/", 0) == 0 ? l.image : l.icon) = icon;
+            const std::string icon                        = i < icons.size() ? icons[i] : "";
+            (icon.starts_with("img/") ? l.image : l.icon) = icon;
             if (i < swatches.size())
                 l.swatch = swatches[i];
             l.checked       = checked(i);

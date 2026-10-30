@@ -118,7 +118,7 @@ class GamePage : public ScrollView
         aurore::IconButton* favourite = show::iconButton("heart", "", nullptr);
         auto setFavourite             = [favourite, index]()
         {
-            bool on = favourites.count(index) > 0;
+            bool on = favourites.contains(index);
             favourite->setText(on ? "demo/library/favourite_on"_i18n : "demo/library/favourite"_i18n);
             favourite->setIconView(kit::icon("heart", 22, on ? "cadran/coral" : "cadran/text"));
             kit::fit_button(favourite);
@@ -126,7 +126,7 @@ class GamePage : public ScrollView
         setFavourite();
         favourite->registerClickAction([index, setFavourite](aurore::View*)
             {
-            if (favourites.count(index))
+            if (favourites.contains(index))
                 favourites.erase(index);
             else
             {

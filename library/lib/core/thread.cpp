@@ -244,7 +244,7 @@ void Threading::performSyncTasks()
     {
         // Check cancel
         m_delay_mutex.lock();
-        if (m_delay_cancel_set.count(d.index))
+        if (m_delay_cancel_set.contains(d.index))
         {
             m_delay_cancel_set.erase(d.index);
             m_delay_mutex.unlock();

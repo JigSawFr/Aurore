@@ -78,7 +78,7 @@ PsvPlatform::PsvPlatform()
             { SCE_SYSTEM_PARAM_LANG_ITALIAN, LOCALE_IT }
         };
 
-        if (psv2aurore.count(systemLanguage) > 0)
+        if (psv2aurore.contains(systemLanguage))
         {
             this->locale = psv2aurore[systemLanguage];
         }

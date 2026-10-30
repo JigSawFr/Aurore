@@ -276,13 +276,13 @@ void HeadlessInputManager::updateUnifiedControllerState(ControllerState* state)
     // The keyboard on top of the buttons, as GLFW maps it
     bool swap   = Application::isSwapInputKeys();
     bool enter  = keys.count(AURORE_KBD_KEY_ENTER) || keys.count(AURORE_KBD_KEY_KP_ENTER);
-    bool escape = keys.count(AURORE_KBD_KEY_ESCAPE) > 0;
+    bool escape = keys.contains(AURORE_KBD_KEY_ESCAPE);
     state->buttons[swap ? BUTTON_B : BUTTON_A] |= enter;
     state->buttons[swap ? BUTTON_A : BUTTON_B] |= escape;
-    state->buttons[BUTTON_UP] |= keys.count(AURORE_KBD_KEY_UP) > 0;
-    state->buttons[BUTTON_RIGHT] |= keys.count(AURORE_KBD_KEY_RIGHT) > 0;
-    state->buttons[BUTTON_DOWN] |= keys.count(AURORE_KBD_KEY_DOWN) > 0;
-    state->buttons[BUTTON_LEFT] |= keys.count(AURORE_KBD_KEY_LEFT) > 0;
+    state->buttons[BUTTON_UP] |= keys.contains(AURORE_KBD_KEY_UP);
+    state->buttons[BUTTON_RIGHT] |= keys.contains(AURORE_KBD_KEY_RIGHT);
+    state->buttons[BUTTON_DOWN] |= keys.contains(AURORE_KBD_KEY_DOWN);
+    state->buttons[BUTTON_LEFT] |= keys.contains(AURORE_KBD_KEY_LEFT);
 
     state->buttons[BUTTON_NAV_UP] |= state->buttons[BUTTON_UP] || axes[LEFT_Y] < -0.5f || axes[RIGHT_Y] < -0.5f;
     state->buttons[BUTTON_NAV_RIGHT] |= state->buttons[BUTTON_RIGHT] || axes[LEFT_X] > 0.5f || axes[RIGHT_X] > 0.5f;
@@ -292,7 +292,7 @@ void HeadlessInputManager::updateUnifiedControllerState(ControllerState* state)
 
 bool HeadlessInputManager::getKeyboardKeyState(AuroreKeyboardScancode key)
 {
-    return keys.count(key) > 0;
+    return keys.contains(key);
 }
 
 void HeadlessInputManager::updateTouchStates(std::vector<RawTouchState>* states)
@@ -323,7 +323,7 @@ void HeadlessInputManager::setAxis(ControllerAxis axis, float value)
 
 void HeadlessInputManager::setKey(AuroreKeyboardScancode key, bool pressed)
 {
-    if (pressed == (keys.count(key) > 0))
+    if (pressed == keys.contains(key))
         return;
     if (pressed)
         keys.insert(key);

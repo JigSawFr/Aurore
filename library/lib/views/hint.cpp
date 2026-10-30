@@ -280,7 +280,7 @@ void Hints::refillHints(View* focusView)
     roomUnknown           = available <= 0;
     for (size_t i = actions.size(); i-- > 0 && !roomUnknown && need > available;)
     {
-        if (optional.count(actions[i].get()) == 0)
+        if (!optional.contains(actions[i].get()))
             continue;
         need -= hints[i]->fullWidth();
         delete hints[i];

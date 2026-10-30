@@ -230,7 +230,7 @@ namespace
         std::string disk        = HotReload::diskResource(path);
         const std::string& name = disk.empty() ? path : disk;
 #ifdef USE_LIBROMFS
-        if (name.rfind("@res/", 0) == 0)
+        if (name.starts_with("@res/"))
         {
             try
             {
@@ -245,7 +245,7 @@ namespace
             }
         }
 #endif
-        source->file = name.rfind("@res/", 0) == 0 ? std::string(AURORE_RESOURCES) + name.substr(5) : name;
+        source->file = name.starts_with("@res/") ? std::string(AURORE_RESOURCES) + name.substr(5) : name;
         return true;
     }
 
