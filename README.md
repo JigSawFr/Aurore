@@ -4,7 +4,7 @@
 
 ### A Switch-like interface for your app, on every screen
 
-**Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch**
+**Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch · New&nbsp;3DS**
 
 [![CI](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/JigSawFr/Aurore/actions/workflows/ci.yaml?query=branch%3Amain)
 [![C++23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)](#-under-the-hood)
@@ -306,7 +306,7 @@ With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes th
 
 New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme, and `--simulate 3ds` (or `switch`, `vita`, `ps4`, `phone`) on a console's screen, the console drawn around it ([platforms.md](docs/platforms.md#simulated-platforms)). The [API reference](https://aurore.boreale.dev/api/) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
-The other platforms (Windows, macOS, the Switch, PS Vita, PS4, the New 3DS, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
+The other platforms (Windows, macOS, the Switch, PS Vita, PS4, the New 3DS family, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
 
@@ -316,7 +316,7 @@ Also on the website, with a search and the API reference: <https://aurore.boreal
 | --- | --- |
 | [Aurore in 15 minutes](docs/getting-started.md) | From the demo to a screen of your own on the Switch |
 | [Migrating from borealis](docs/migrating-from-borealis.md) | The submodule, the CMake target, the resources, Cadran, what changes on screen |
-| [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, the New 3DS, Android, iOS and in a browser; the consoles simulated on the desktop |
+| [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, the New 3DS (New 3DS, New 3DS XL, New 2DS XL), Android, iOS and in a browser; the consoles simulated on the desktop |
 | [Porting an app](docs/porting.md) | What an app's code and resources should mind on each platform |
 | [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
 | [Views](docs/views.md) | Every XML tag, its class and its header |

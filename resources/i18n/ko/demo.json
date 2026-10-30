@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "borealis에서 출발한, 컨트롤러·TV·터치를 위한 인터페이스 C++ 라이브러리. Switch, PS4, PS Vita, Android, iOS, Windows, macOS, Linux, 브라우저를 지원합니다.",
+        "description": "borealis에서 출발한, 컨트롤러·TV·터치를 위한 인터페이스 C++ 라이브러리. Switch, PS4, PS Vita, New 3DS, Android, iOS, Windows, macOS, Linux, 브라우저를 지원합니다.",
         "qr": "휴대폰에서 열기",
         "site": "웹사이트",
         "credits": "만든 사람들",

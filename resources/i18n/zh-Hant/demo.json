@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "一個源自 borealis 的 C++ 介面函式庫，專為手把、電視和觸控設計：Switch、PS4、PS Vita、Android、iOS、Windows、macOS、Linux 和瀏覽器。",
+        "description": "一個源自 borealis 的 C++ 介面函式庫，專為手把、電視和觸控設計：Switch、PS4、PS Vita、New 3DS、Android、iOS、Windows、macOS、Linux 和瀏覽器。",
         "qr": "在手機上開啟",
         "site": "網站",
         "credits": "致謝",

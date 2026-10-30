@@ -52,5 +52,5 @@
   <image href="icon.svg" x="72" y="56" width="208" height="208"/>
   <text x="326" y="166" font-family="Sora" font-weight="700" font-size="96" letter-spacing="-2.5" fill="#E8EEF7">aurore</text>
   <rect x="330" y="186" width="120" height="5" rx="2.5" fill="url(#b-word)"/>
-  <text x="330" y="232" font-family="Sora" font-weight="400" font-size="26" fill="#A9B6CC">Controller and TV oriented UI library, in C++17</text>
+  <text x="330" y="232" font-family="Sora" font-weight="400" font-size="26" fill="#A9B6CC">Controller and TV oriented UI library, in C++23</text>
 </svg>

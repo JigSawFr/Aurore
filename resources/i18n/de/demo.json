@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "Eine C++-Bibliothek für Oberflächen für Controller, Fernseher und Touch, nach borealis: Switch, PS4, PS Vita, Android, iOS, Windows, macOS, Linux und der Browser.",
+        "description": "Eine C++-Bibliothek für Oberflächen für Controller, Fernseher und Touch, nach borealis: Switch, PS4, PS Vita, New 3DS, Android, iOS, Windows, macOS, Linux und der Browser.",
         "qr": "Auf dem Handy öffnen",
         "site": "Die Website",
         "credits": "Dank",

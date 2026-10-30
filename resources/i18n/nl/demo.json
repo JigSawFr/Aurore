@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "Een C++-bibliotheek voor interfaces voor controller, tv en aanraking, gebaseerd op borealis: Switch, PS4, PS Vita, Android, iOS, Windows, macOS, Linux en de browser.",
+        "description": "Een C++-bibliotheek voor interfaces voor controller, tv en aanraking, gebaseerd op borealis: Switch, PS4, PS Vita, New 3DS, Android, iOS, Windows, macOS, Linux en de browser.",
         "qr": "Openen op je telefoon",
         "site": "De website",
         "credits": "Met dank aan",

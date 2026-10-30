@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "borealis から生まれた、コントローラー・テレビ・タッチ向けインターフェースの C++ ライブラリー。Switch、PS4、PS Vita、Android、iOS、Windows、macOS、Linux、ブラウザーに対応。",
+        "description": "borealis から生まれた、コントローラー・テレビ・タッチ向けインターフェースの C++ ライブラリー。Switch、PS4、PS Vita、New 3DS、Android、iOS、Windows、macOS、Linux、ブラウザーに対応。",
         "qr": "スマートフォンで開く",
         "site": "ウェブサイト",
         "credits": "クレジット",

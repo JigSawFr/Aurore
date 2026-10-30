@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "Una libreria C++ per interfacce fatte per il controller, la TV e il touch, basata su borealis: Switch, PS4, PS Vita, Android, iOS, Windows, macOS, Linux e il browser.",
+        "description": "Una libreria C++ per interfacce fatte per il controller, la TV e il touch, basata su borealis: Switch, PS4, PS Vita, New 3DS, Android, iOS, Windows, macOS, Linux e il browser.",
         "qr": "Aprila sul telefono",
         "site": "Il sito",
         "credits": "Riconoscimenti",
