@@ -146,6 +146,18 @@ SPDX-FileCopyrightText = "Lee Thomason"
 SPDX-License-Identifier = "Zlib"
 
 [[annotations]]
+path = ["library/include/aurore/extern/nontype_functional/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2022 Zhihao Yuan"
+SPDX-License-Identifier = "BSD-2-Clause"
+
+[[annotations]]
+path = ["library/include/aurore/extern/generator/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["Lewis Baker", "Corentin Jabot", "2026 JigSawFr"]
+SPDX-License-Identifier = "BSL-1.0"
+
+[[annotations]]
 path = ["library/include/aurore/extern/nlohmann/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2013-2025 Niels Lohmann"
