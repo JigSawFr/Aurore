@@ -616,7 +616,8 @@ class Application
      * A view that changes how it looks without any of these (a colour set
      * from a timer of its own...) calls requestRedraw().
      *
-     * default is false: every frame is drawn.
+     * default is false: every frame is drawn; true on the New 3DS, whose
+     * CPU is short for a full redraw at 60 frames a second.
      */
     static void setRedrawOnDemand(bool enabled);
     /// See setRedrawOnDemand().

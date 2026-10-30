@@ -9,6 +9,7 @@
 
 #include "demo_app.hpp"
 #include "view/showcase.hpp"
+#include "view/top_screens.hpp"
 
 using namespace aurore::literals; // for _i18n
 
@@ -81,10 +82,18 @@ class ListCell : public aurore::RecyclerCell
         if (show::compact())
             this->bar->setVisibility(aurore::Visibility::GONE);
         this->addView(this->bar);
+        // The game focused, on a top screen to look at
+        if (aurore::TopScreen::isAvailable())
+        {
+            this->preview = new demo::top::GameScreen();
+            this->setTopScreenView(this->preview);
+        }
     }
 
     void setGame(const library::Game& game)
     {
+        if (this->preview)
+            this->preview->setGame(&game);
         this->cover->setGame(&game);
         this->title->setText(game.title);
         std::string played = game.minutes ? aurore::getStr("demo/library/played", library::playtime(game.minutes))
@@ -100,6 +109,7 @@ class ListCell : public aurore::RecyclerCell
     aurore::Label* title;
     aurore::Label* detail;
     kit::Bar* bar;
+    demo::top::GameScreen* preview = nullptr;
 };
 
 // A section's head: its genre and how many, as a kicker
@@ -187,6 +197,12 @@ GameCell::GameCell()
     this->caption->setMarginTop(8);
     this->caption->setMarginLeft(2);
     this->addView(this->caption);
+    // The game focused, on a top screen to look at
+    if (aurore::TopScreen::isAvailable())
+    {
+        this->preview = new demo::top::GameScreen();
+        this->setTopScreenView(this->preview);
+    }
 
     // X or a long press: what can be done with it, next to it
     aurore::ContextMenu::attach(this, [this](aurore::ContextMenu* menu)
@@ -208,6 +224,8 @@ void GameCell::setGame(const library::Game* game)
 {
     this->game = game;
     this->cover->setGame(game);
+    if (this->preview)
+        this->preview->setGame(game);
     this->caption->setText(library::genreName(game->genre) + "  ·  " + std::to_string(game->year));
     this->setAccessibilityLabel(game->title);
 }

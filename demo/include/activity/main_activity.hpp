@@ -14,6 +14,9 @@ class MainActivity : public aurore::Activity
     MainActivity();
     ~MainActivity();
 
+    // A top screen to look at (the New 3DS's): the tab shown, there
+    void onContentAvailable() override;
+
   private:
     aurore::Event<bool>::Subscription enterSubscription;
 };

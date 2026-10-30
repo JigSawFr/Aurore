@@ -37,6 +37,19 @@ aurore::Box* platform(const std::string& name)
 // two ways in
 aurore::View* hero(aurore::View* tab)
 {
+    // A top screen to look at (the New 3DS's): the night, the name and the
+    // pitch go there (demo::top::TabScreen), the ways in stay here
+    if (aurore::TopScreen::isAvailable())
+    {
+        aurore::Box* actions = show::row(true, 12);
+        actions->setMarginTop(16);
+        actions->addView(show::button("demo/home/explore"_i18n, [tab]
+            { demo::openTab(tab, demo::TAB_LIBRARY); }, true));
+        actions->addView(show::button("demo/home/components"_i18n, [tab]
+            { demo::openTab(tab, demo::TAB_COMPONENTS); }));
+        return actions;
+    }
+
     auto* night        = new AuroraView();
     const bool compact = show::compact();
     const float pad    = aurore::dp(compact ? 22 : 40);
