@@ -15,7 +15,7 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 | iOS, tvOS | `IOS`, `TVOS` | SDL3 (default) or SDL2 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
 | Browser | Emscripten (`emcmake`) | SDL3 (default) or SDL2 | OpenGL ES 3 (WebGL 2) | packaged with the page |
 
-Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 or SDL3 built from the submodule) and a C++23 compiler. Two toolchains have less: the PS4's OpenOrbis clang 12 builds in its `-std=gnu++2b` mode, and the Vita's GLES2 toolchain (GCC 10.3) in C++20, which is the minimum for the projects that link Aurore. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
+Every build needs CMake 3.16 or later (3.24 on macOS, iOS and tvOS with SDL2 or SDL3 built from the submodule) and a C++23 compiler. One toolchain has less: the PS4's OpenOrbis clang 12 builds in its `-std=gnu++2b` mode, without C++23's library, so C++20 stays the minimum for the projects that link Aurore. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
 
 SDL3 is the window and input everywhere it runs: the desktop, a browser, Android, iOS and tvOS. It is the submodule `library/lib/extern/SDL3` (3.4.18), the system's with `USE_SYSTEM_SDL3=ON` (`find_package(SDL3)`), a download with `AURORE_FETCH_DEPS`, Emscripten's port in a browser. On the desktop it gives what GLFW gave: the app's ID for the taskbar (`Application::setAppId`), the window's icon (`icon/icon.png`), a saved position kept only while it is on a screen, the app's controller mappings (`gamepad/gamecontrollerdb.txt`), and the system's light or dark theme on every system, Linux's desktop portal too, followed while the app runs until it picks one (`Platform::setThemeVariant`; `Platform::followSystemTheme` goes back to it) or `AURORE_THEME` gives it. Windows and X11 size windows in pixels: a first window, before any size is saved, is opened at the main screen's density (1280x720 is 2560x1440 at 200 %), and a window keeps its size in points when the density changes under it (moved to another screen on Windows, `Xft.dpi` changed on X11), each time within the screen's free area. Under SDL3 as under SDL2, a controller's face buttons are read by their label: A is the button marked A, on a Nintendo controller as on an Xbox one (SDL3 itself numbers them by place). An app's code that means either SDL tests `__SDL__`, defined under both; `__SDL2__` or `__SDL3__` for one only.
 
@@ -84,12 +84,13 @@ With the [VitaSDK](https://vitasdk.org/) (`VITASDK` set in the environment). The
 docker run --rm -v $(pwd):/src/ vitasdk/vitasdk sh -c \
   "cd /src && cmake -B build -DAURORE_PLATFORM=PSV -DCMAKE_BUILD_TYPE=Release -DAURORE_GRAPHICS=GXM && cmake --build build"
 
-# OpenGL ES 2 through SDL2 and PVR_PSP2
-docker run --rm -v $(pwd):/src/ xfangfang/vitasdk_sdl2_gles2 \
+# OpenGL ES 2 through SDL2 and PVR_PSP2, in an image built from psv/scripts/
+docker build -t aurore-vita-gles2 psv/scripts
+docker run --rm -v $(pwd):/src/ aurore-vita-gles2 \
   "cmake -B build -G Ninja -DAURORE_PLATFORM=PSV -DUSE_SYSTEM_SDL2=ON -DCMAKE_BUILD_TYPE=Release && cmake --build build"
 ```
 
-The result is `build/aurore_demo.vpk`, installed with VitaShell. The OpenGL ES build packs what is in `psv/module/` (empty in the repository: the PVR_PSP2 `.suprx` modules go there, `psv/scripts/Dockerfile` shows where they come from); `-DAURORE_VITA_SHARK=ON` (GXM) compiles the shaders at run time with SceShaccCg. `psv/sce_sys/` holds the LiveArea's pictures. `-DAURORE_SIMPLE_HIGHLIGHT=ON` draws a plainer focus highlight, lighter for the Vita. Linking `Aurore::aurore` keeps 16 KiB between the text and data segments (`--defsym=__sce_headroom=0x4000`, read by VitaSDK 2026.08's linker script): `vita-elf-create` writes the module's SCE data there, and fails ("segment 1 overlaps") when the text ends just before the 64 KiB boundary the data starts at.
+The result is `build/aurore_demo.vpk`, installed with VitaShell. The OpenGL ES build packs what is in `psv/module/` (empty in the repository: the image copies the PVR_PSP2 `.suprx` modules there, `psv/scripts/Dockerfile` shows where they come from); `-DAURORE_VITA_SHARK=ON` (GXM) compiles the shaders at run time with SceShaccCg. `psv/sce_sys/` holds the LiveArea's pictures. `-DAURORE_SIMPLE_HIGHLIGHT=ON` draws a plainer focus highlight, lighter for the Vita. Linking `Aurore::aurore` keeps 16 KiB between the text and data segments (`--defsym=__sce_headroom=0x4000`, read by VitaSDK 2026.08's linker script): `vita-elf-create` writes the module's SCE data there, and fails ("segment 1 overlaps") when the text ends just before the 64 KiB boundary the data starts at.
 
 ## PS4
 
