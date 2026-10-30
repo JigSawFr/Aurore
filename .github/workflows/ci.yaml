@@ -458,7 +458,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/shadercross/bin
-          key: shadercross-${{ hashFiles('tools/build_shadercross.sh') }}
+          key: shadercross-ubuntu-26.04-${{ hashFiles('tools/build_shadercross.sh') }}
       - name: Check the SDL_GPU shaders
         if: ${{ matrix.window == 'sdlgpu' }}
         run: |
