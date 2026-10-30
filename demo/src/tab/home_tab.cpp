@@ -87,7 +87,7 @@ aurore::View* hero(aurore::View* tab)
 
     aurore::Box* platforms = show::row(true, 8);
     platforms->setMarginTop(20);
-    for (const char* name : { "Switch", "PS4", "PS Vita", "Android", "iOS", "Windows", "macOS", "Linux" })
+    for (const char* name : { "Switch", "PS4", "PS Vita", "New 3DS", "Android", "iOS", "Windows", "macOS", "Linux" })
         platforms->addView(platform(name));
     platforms->addView(platform("demo/home/web"_i18n));
     night->addView(platforms);

@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "Une bibliothèque C++ pour des interfaces faites pour la manette, la télé et le tactile, d’après borealis : la Switch, la PS4, la PS Vita, Android, iOS, Windows, macOS, Linux et le navigateur.",
+        "description": "Une bibliothèque C++ pour des interfaces faites pour la manette, la télé et le tactile, d’après borealis : la Switch, la PS4, la PS Vita, la New 3DS, Android, iOS, Windows, macOS, Linux et le navigateur.",
         "qr": "L’ouvrir sur un téléphone",
         "site": "Le site",
         "credits": "Remerciements",

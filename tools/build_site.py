@@ -119,7 +119,7 @@ CONSOLES = [("switch", "Switch", "1280 × 720"), ("vita", "PS Vita", "960 × 544
             ("phone", None, "1600 × 720")]
 FEATURES = ["controllers", "layout", "graphics", "components", "themes", "languages", "tools", "toolbox"]
 ADDS = ["themes", "styles", "views", "layout", "text", "focus", "platforms", "speed"]
-PLATFORMS = ["Nintendo Switch", "Android", "iOS", "Windows", "macOS", "Linux", "PS4", "PS Vita", "Browser"]
+PLATFORMS = ["Nintendo Switch", "Android", "iOS", "Windows", "macOS", "Linux", "PS4", "PS Vita", "New 3DS", "Browser"]
 MADE_WITH = [
     ("PlayGuard", "https://github.com/JigSawFr/PlayGuard", "playguard"),
     ("PlayShelf", "https://github.com/JigSawFr/PlayShelf", "playshelf"),

@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "Una biblioteca de C++ para interfaces hechas para el mando, la tele y la pantalla táctil, a partir de borealis: Switch, PS4, PS Vita, Android, iOS, Windows, macOS, Linux y el navegador.",
+        "description": "Una biblioteca de C++ para interfaces hechas para el mando, la tele y la pantalla táctil, a partir de borealis: Switch, PS4, PS Vita, New 3DS, Android, iOS, Windows, macOS, Linux y el navegador.",
         "qr": "Abrirla en el móvil",
         "site": "La web",
         "credits": "Créditos",

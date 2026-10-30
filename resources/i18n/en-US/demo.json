@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "A C++ library for interfaces made for a controller, a TV and touch, after borealis: the Switch, PS4, PS Vita, Android, iOS, Windows, macOS, Linux and the browser.",
+        "description": "A C++ library for interfaces made for a controller, a TV and touch, after borealis: the Switch, PS4, PS Vita, New 3DS, Android, iOS, Windows, macOS, Linux and the browser.",
         "qr": "Open it on a phone",
         "site": "The website",
         "credits": "Credits",

@@ -28,6 +28,6 @@ body:
     attributes:
       label: Platform
       multiple: true
-      options: [ Switch, Linux, Windows, macOS, PS Vita, PS4, Android, iOS, Web ]
+      options: [ Switch, Linux, Windows, macOS, PS Vita, PS4, New 3DS, Android, iOS, Web ]
     validations:
       required: true

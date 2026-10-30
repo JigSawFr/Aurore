@@ -73,7 +73,7 @@
     },
     "about": {
         "title": "Aurore",
-        "description": "Библиотека C++ для интерфейсов под геймпад, телевизор и сенсорный экран, на основе borealis: Switch, PS4, PS Vita, Android, iOS, Windows, macOS, Linux и браузер.",
+        "description": "Библиотека C++ для интерфейсов под геймпад, телевизор и сенсорный экран, на основе borealis: Switch, PS4, PS Vita, New 3DS, Android, iOS, Windows, macOS, Linux и браузер.",
         "qr": "Открыть на телефоне",
         "site": "Сайт",
         "credits": "Благодарности",
