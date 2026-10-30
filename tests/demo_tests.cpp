@@ -2803,6 +2803,50 @@ AURORE_TEST(focus_on_a_scrolling_frame_shows_its_place)
     AURORE_CHECK(h.matchesReference("scrolling_frame_focus"));
 }
 
+// The screenshots that compare (STILL_FOCUS): a list's scroll indicator
+// that hides itself is never drawn, so a frame taken before its fade and
+// one taken after are the same
+AURORE_TEST(still_frames_leave_the_scroll_indicator_out)
+{
+    for (bool still : { false, true })
+    {
+        ui::hooks::get().env_flag = nullptr;
+        if (still)
+            ui::hooks::get().env_flag = [](const char* name)
+            { return std::string(name) == "STILL_FOCUS"; };
+        Harness h;
+        auto* frame   = new aurore::ScrollingFrame();
+        auto* content = new aurore::Box(aurore::Axis::COLUMN);
+        auto* button  = new aurore::Button();
+        button->setText("Top");
+        content->addView(button);
+        auto* tall = new aurore::Rectangle();
+        tall->setHeight(3000);
+        content->addView(tall);
+        frame->setContentView(content);
+        h.push(new aurore::Activity(frame));
+        h.settle();
+        // Dragged by a finger: the frame's own focus would show the indicator in full
+        h.touchDown(400, 500);
+        for (int y = 480; y >= 200; y -= 40)
+        {
+            h.touchMove(400, (float)y);
+            h.step(1);
+        }
+        AURORE_CHECK(frame->getContentOffsetY() > 0);
+        h.step(2);
+        h.touchUp();
+        aurore::Rectangle* indicator = nullptr;
+        for (aurore::View* child : frame->getChildren())
+            if (auto* r = dynamic_cast<aurore::Rectangle*>(child))
+                indicator = r;
+        AURORE_CHECK(indicator != nullptr);
+        if (indicator)
+            AURORE_CHECK_EQ(indicator->getAlpha() > 0.0f, !still);
+    }
+    ui::hooks::get().env_flag = nullptr;
+}
+
 #ifdef __GLFW__
 // A word being composed with an input method: its focused block in [ ], and
 // block sizes that do not add up to the text read no further than blockCount

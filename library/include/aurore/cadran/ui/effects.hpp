@@ -28,4 +28,7 @@ bool reduced();
 /// own (transition=) ask aurore::Application::getReduceMotion(), which asks
 /// this.
 bool motion();
+/// The desktop's still frames (AURORE_STILL_FOCUS): the screenshots that
+/// compare, where nothing may depend on when a frame is taken.
+bool still();
 } // namespace effects

@@ -33,7 +33,7 @@ The debugging aids above (`AURORE_INSPECTOR`, `AURORE_HOT_RELOAD`, `AURORE_PROFI
 
 | Variable | Effect |
 | --- | --- |
-| `AURORE_STILL_FOCUS` | The focus glow and every movement held still (`Application::getReduceMotion()` is then true) |
+| `AURORE_STILL_FOCUS` | The focus glow and every movement held still (`Application::getReduceMotion()` is then true), and a list's scroll indicator that hides itself never drawn |
 | `AURORE_CADRAN_NOGLOW` | No background glow on the screens |
 | `AURORE_FOCUS_LOG` | Each focused line logged by its title |
 | `AURORE_CUT_TEXT` | Every label cut short ("…") written to `cut_text.txt` |
