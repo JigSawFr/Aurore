@@ -3,6 +3,8 @@
 
 #include "activity/main_activity.hpp"
 
+#include "view/top_screens.hpp"
+
 MainActivity::MainActivity()
 {
     auto* input             = aurore::Application::getPlatform()->getInputManager();
@@ -14,4 +16,10 @@ MainActivity::~MainActivity()
 {
     auto* input = aurore::Application::getPlatform()->getInputManager();
     input->getMouseCusorEntered()->unsubscribe(this->enterSubscription);
+}
+
+void MainActivity::onContentAvailable()
+{
+    if (aurore::TopScreen::isAvailable())
+        this->setTopScreenView(new demo::top::TabScreen());
 }
