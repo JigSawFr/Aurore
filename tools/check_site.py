@@ -26,7 +26,7 @@ import json
 import os
 import sys
 from html.parser import HTMLParser
-from urllib.parse import unquote, urlparse, urlsplit
+from urllib.parse import parse_qsl, unquote, urlparse, urlsplit
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -53,6 +53,12 @@ def check_own_site() -> None:
         assert not own_site(url), url
 
 
+# This site's address (build_site.py's SITE_URL) and its name in the UTM tags
+# of its links to our other sites.
+SITE_HOST = (urlparse(os.environ.get("SITE_URL", "https://aurore.boreale.dev/")).hostname or "").lower()
+UTM_SOURCE = "aurore"
+
+
 def link_problem(attrs: dict) -> str:
     """What a link out does wrong by the rule "liens sortants anonymes": a
     third party gets rel="noreferrer"; *.boreale.dev and github.com/JigSawFr
@@ -66,6 +72,17 @@ def link_problem(attrs: dict) -> str:
             return f'link to {href} needs referrerpolicy="strict-origin" and no noreferrer'
     elif "noreferrer" not in rel:
         return f'link to {href} without rel="noreferrer"'
+    # UTM tags (workbench's "Mesure d'audience"): a link to another of our
+    # sites (*.boreale.dev) says where it comes from, utm_source='aurore' and
+    # a utm_medium; one to this site itself or to anyone else carries none.
+    u = urlparse(href)
+    host = (u.hostname or "").lower()
+    query = dict(parse_qsl(u.query))
+    if u.scheme == "https" and (host == "boreale.dev" or host.endswith(".boreale.dev")) and host != SITE_HOST:
+        if query.get("utm_source") != UTM_SOURCE or not query.get("utm_medium"):
+            return f"link to {href} without utm_source={UTM_SOURCE} and a utm_medium"
+    elif any(k.startswith("utm_") for k in query):
+        return f"link to {href} with utm_ parameters: only a link to another of our sites has them"
     return ""
 
 

@@ -1,6 +1,6 @@
 # Aurore in 15 minutes
 
-From nothing to a screen of your own on the Switch: build the demo, describe a screen in XML, add a view of your own, restyle it with a theme, and ship it as a `.nro`. The API reference, read from the headers, is on the website: <https://aurore.boreale.dev/api/> (built with `doxygen docs/Doxyfile` and `tools/build_api.py`, [site/README.md](../site/README.md)).
+From nothing to a screen of your own on the Switch: build the demo, describe a screen in XML, add a view of your own, restyle it with a theme, and ship it as a `.nro`. The API reference, read from the headers, is on the website: [aurore.boreale.dev/api/](https://aurore.boreale.dev/api/?utm_source=github&utm_medium=docs) (built with `doxygen docs/Doxyfile` and `tools/build_api.py`, [site/README.md](../site/README.md)).
 
 ## 1. Build the demo (3 minutes)
 
