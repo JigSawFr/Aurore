@@ -20,6 +20,13 @@ precedence = "closest"
 SPDX-FileCopyrightText = ["2019-2021 borealis contributors", "2026 JigSawFr"]
 SPDX-License-Identifier = "Apache-2.0"
 
+# The PS4 image's patch to LLVM's libc++ (ps4/scripts/Dockerfile)
+[[annotations]]
+path = "ps4/scripts/libcxx-ps4.patch"
+precedence = "override"
+SPDX-FileCopyrightText = ["LLVM project contributors", "2026 JigSawFr"]
+SPDX-License-Identifier = "Apache-2.0 WITH LLVM-exception"
+
 # Cadran's catalogs (NOTICE)
 [[annotations]]
 path = "resources/i18n/*/cadran.json"
