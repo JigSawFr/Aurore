@@ -425,7 +425,7 @@ View* RecyclingView::defaultCell()
         return nullptr;
 
     View* last = this->contentBox->getLastFocusedView();
-    if (last && std::find(children.begin(), children.end(), last) != children.end())
+    if (last && std::ranges::contains(children, last))
         return last;
 
     if (RecyclingGridItem* cell = this->getGridItemByIndex(this->defaultCellFocus))

@@ -2008,7 +2008,7 @@ std::string Application::getLocale()
 
 void Application::addToFreeQueue(View* view)
 {
-    if (std::find(deletionPool.cbegin(), deletionPool.cend(), view) != deletionPool.cend())
+    if (std::ranges::contains(deletionPool, view))
         return;
 
     aurore::Logger::verbose("Application::addToFreeQueue {}", view->describe());

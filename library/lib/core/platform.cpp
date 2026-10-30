@@ -68,7 +68,7 @@ bool Platform::isBrowserUrl(const std::string& url)
     std::string scheme;
     for (size_t i = 0; i < sep; i++)
         scheme += (char)std::tolower((unsigned char)url[i]);
-    if (std::find(BROWSER_URL_SCHEMES.begin(), BROWSER_URL_SCHEMES.end(), scheme) == BROWSER_URL_SCHEMES.end())
+    if (!std::ranges::contains(BROWSER_URL_SCHEMES, scheme))
         return false;
 
     for (unsigned char c : url)

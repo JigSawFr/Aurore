@@ -75,7 +75,7 @@ void Activity::setTopScreenView(View* view)
     view->setDimensions(TopScreen::getContentWidth(), TopScreen::getContentHeight());
     // Shown with the activity: now if it is already
     const auto stack = Application::getActivitiesStack();
-    if (std::find(stack.begin(), stack.end(), this) != stack.end())
+    if (std::ranges::contains(stack, this))
         view->willAppear(true);
 }
 
