@@ -410,18 +410,22 @@ struct ControllersLock
 };
 
 static int mouseButtons[3] = { 0 };
+// The same buttons for the controller's state (the right one as Ⓐ or Ⓑ, the
+// middle one as Ⓧ, as GLFW gives them): a click of its own, since the
+// pointer's state reads, and so releases, a short one first
+static int mouseButtonsAsPad[3] = { 0 };
 
-static inline int getMouseButtonState(int buttonIndex)
+static inline int getMouseButtonState(int buttonIndex, int* buttons = mouseButtons)
 {
     std::lock_guard<std::recursive_mutex> lock(controllersMutex);
-    if (mouseButtons[buttonIndex - 1] == KEY_STICKY)
+    if (buttons[buttonIndex - 1] == KEY_STICKY)
     {
-        mouseButtons[buttonIndex - 1] = KEY_RELEASED;
+        buttons[buttonIndex - 1] = KEY_RELEASED;
         return KEY_PRESSED;
     }
     else
     {
-        return mouseButtons[buttonIndex - 1];
+        return buttons[buttonIndex - 1];
     }
 }
 
@@ -522,13 +526,13 @@ static SDLFilterResult sdlEventWatcher(void* data, SDL_Event* event)
     {
         std::lock_guard<std::recursive_mutex> lock(controllersMutex);
         if (event->button.button <= 3)
-            mouseButtons[event->button.button - 1] = KEY_PRESSED;
+            mouseButtons[event->button.button - 1] = mouseButtonsAsPad[event->button.button - 1] = KEY_PRESSED;
     }
     else if (event->type == SDL_EVENT_MOUSE_BUTTON_UP)
     {
         std::lock_guard<std::recursive_mutex> lock(controllersMutex);
         if (event->button.button <= 3)
-            mouseButtons[event->button.button - 1] = KEY_STICKY;
+            mouseButtons[event->button.button - 1] = mouseButtonsAsPad[event->button.button - 1] = KEY_STICKY;
     }
     else if (event->type == SDL_EVENT_KEY_DOWN || event->type == SDL_EVENT_KEY_UP)
     {
@@ -699,6 +703,7 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
         state->buttons[BUTTON_B] |= getKeyboardKeys(SDL_SCANCODE_RETURN);
         state->buttons[BUTTON_A] |= getKeyboardKeys(SDL_SCANCODE_ESCAPE);
         state->buttons[BUTTON_A] |= getKeyboardKeys(SDL_SCANCODE_AC_BACK);
+        state->buttons[BUTTON_A] |= getMouseButtonState(SDL_BUTTON_RIGHT, mouseButtonsAsPad);
     }
     else
     {
@@ -706,7 +711,9 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
         state->buttons[BUTTON_A] |= getKeyboardKeys(SDL_SCANCODE_RETURN);
         state->buttons[BUTTON_B] |= getKeyboardKeys(SDL_SCANCODE_ESCAPE);
         state->buttons[BUTTON_B] |= getKeyboardKeys(SDL_SCANCODE_AC_BACK);
+        state->buttons[BUTTON_B] |= getMouseButtonState(SDL_BUTTON_RIGHT, mouseButtonsAsPad);
     }
+    state->buttons[BUTTON_X] |= getMouseButtonState(SDL_BUTTON_MIDDLE, mouseButtonsAsPad);
 
     // Android tv remote control
     state->buttons[BUTTON_X] |= getKeyboardKeys(SDL_SCANCODE_MENU);
