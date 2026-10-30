@@ -736,6 +736,10 @@ static const char* BUILTIN_PREFIX = "builtin:";
 static const char* THEME_FOLDER_FILE = "theme.theme";
 static const char* SEASONAL_PATH     = "builtin:seasonal";
 static const int MAX_DEPTH           = 8;
+// The format of a theme file this version reads: its `schema` key, absent in
+// the files written before it (1). A file of a newer one is read all the
+// same, with what this version knows of it, and a warning
+static const int THEME_SCHEMA = 1;
 // What a theme may read: files (itself, what it includes and inherits, its
 // counterpart), their size, the errors kept
 static const int MAX_FILES               = 64;
@@ -1021,6 +1025,8 @@ namespace
 
         std::vector<std::string> errors; // at most MAX_ERRORS
         size_t moreErrors = 0; // the ones past them
+        // The files of a schema newer than THEME_SCHEMA: "<line>: schema N"
+        std::vector<std::string> newerSchemas;
     };
 
     // What reading a theme has read: its files, at most MAX_FILES, and the
@@ -1582,6 +1588,19 @@ static void parseThemeText(const std::string& text, const std::string& directory
             continue;
         }
 
+        // The format the file is written in, whichever file of the theme it
+        // is: a newer one is read as far as this version knows its keys
+        if (section.empty() && key == "schema")
+        {
+            char* end;
+            long schema = std::strtol(value.c_str(), &end, 10);
+            if (value.empty() || *end != '\0' || schema < 1)
+                report(out, where(number) + ": schema is a whole number from 1, not " + value);
+            else if (schema > THEME_SCHEMA)
+                out->newerSchemas.push_back(where(number) + ": schema " + value);
+            continue;
+        }
+
         if (section.empty() && key == "icon")
         {
             // As background_image: an included file's counts, an inherited one's too
@@ -1704,6 +1723,7 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
         theme->icon = parent.icon;
     theme->errors.insert(theme->errors.begin(), parent.errors.begin(), parent.errors.end());
     theme->moreErrors += parent.moreErrors;
+    theme->newerSchemas.insert(theme->newerSchemas.begin(), parent.newerSchemas.begin(), parent.newerSchemas.end());
     if (theme->errors.size() > MAX_ERRORS)
     {
         theme->moreErrors += theme->errors.size() - MAX_ERRORS;
@@ -1803,6 +1823,9 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = 
             resolved.warnings.push_back("unknown metric " + key + " (kept)");
         resolved.metrics[key] = metric;
     }
+    for (const std::string& newer : theme.newerSchemas)
+        resolved.warnings.push_back(newer + " is newer than this app reads (" + std::to_string(THEME_SCHEMA)
+            + "): what it knows of the theme is used");
     // Several warnings for one unknown key styled in both variants: once
     for (std::string& warning : resolved.warnings)
         warning = escapeControlChars(warning);

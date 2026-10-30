@@ -1055,6 +1055,60 @@ AURORE_TEST(theme_errors_are_escaped_and_capped)
     AURORE_CHECK_EQ(info.errors.back(), std::string("and 400 more errors"));
 }
 
+// `schema`: absent is 1; a newer one is read with what this version knows,
+// with one warning; `version` stays the author's
+AURORE_TEST(theme_schema_newer_is_read_with_a_warning)
+{
+    Harness h;
+    ThemeFolder themes("aurore_theme_schema_test");
+    auto schemaWarnings = [](const aurore::ThemeInfo& info, const std::string& text = "schema")
+    {
+        size_t count = 0;
+        for (const std::string& warning : info.warnings)
+            if (warning.find(text) != std::string::npos)
+                count++;
+        return count;
+    };
+
+    aurore::ThemeInfo absent = aurore::Theme::inspect(themes.write("absent.theme", "name = Fern\nversion = 3.1\naccent = #3ddc97\n"));
+    AURORE_CHECK(absent.ok() && absent.warnings.empty());
+    AURORE_CHECK_EQ(absent.version, std::string("3.1"));
+
+    aurore::ThemeInfo current = aurore::Theme::inspect(themes.write("current.theme", "schema = 1\nname = Fern\naccent = #3ddc97\n"));
+    AURORE_CHECK(current.ok() && current.warnings.empty());
+
+    const std::string newer = themes.write("newer.theme",
+        "schema = 2\nname = Moss\nversion = 7\naccent = #3ddc97\n[metrics]\naurore/sidebar/padding_left = 12\n");
+    aurore::ThemeInfo info  = aurore::Theme::inspect(newer);
+    AURORE_CHECK(info.ok());
+    AURORE_CHECK_EQ(schemaWarnings(info), (size_t)1);
+    AURORE_CHECK_EQ(schemaWarnings(info, "line 1: schema 2 is newer than this app reads (1)"), (size_t)1);
+    AURORE_CHECK_EQ(info.name, std::string("Moss"));
+    AURORE_CHECK_EQ(info.version, std::string("7"));
+    AURORE_CHECK(aurore::Theme::loadFile(newer));
+    NVGcolor accent = aurore::Theme::getDarkTheme()["aurore/accent"];
+    AURORE_CHECK(std::lround(accent.r * 255) == 0x3d && std::lround(accent.g * 255) == 0xdc && std::lround(accent.b * 255) == 0x97);
+
+    // An unknown key stays what it was, in a newer file too
+    info = aurore::Theme::inspect(themes.write("unknown.theme", "schema = 3\nname = Moss\nsparkle = 4\n"));
+    AURORE_CHECK(hasErrorWith(info, "line 3: unknown key sparkle"));
+    AURORE_CHECK_EQ(schemaWarnings(info), (size_t)1);
+
+    // An included or inherited file says its own
+    themes.write("parts.inc", "schema = 2\naccent = #3ddc97\n");
+    info = aurore::Theme::inspect(themes.write("includes.theme", "name = Moss\n@include parts.inc\n"));
+    AURORE_CHECK(info.ok());
+    AURORE_CHECK_EQ(schemaWarnings(info), (size_t)1);
+    AURORE_CHECK_EQ(schemaWarnings(info, "parts.inc:1: schema 2 is newer"), (size_t)1);
+    info = aurore::Theme::inspect(themes.write("inherits.theme", "name = Moss\ninherit = newer.theme\n"));
+    AURORE_CHECK_EQ(schemaWarnings(info, "newer.theme:1: schema 2 is newer"), (size_t)1);
+
+    for (const char* bad : { "two", "0", "-1", "1.5", "" })
+        AURORE_CHECK(!aurore::Theme::inspect(themes.write("bad.theme", std::string("schema = ") + bad + "\n")).ok());
+
+    aurore::Theme::reset();
+}
+
 // "@res/…" stays in the resources: in hot reload's folder, when a theme is
 // read and in an XML view's file paths
 AURORE_TEST(resource_names_stay_in_the_resources)
