@@ -10,11 +10,14 @@ FROM devkitpro/devkita64:20260219@sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f87
 
 ARG PACKAGES=https://pkg.devkitpro.org/packages
 
-# curl and the CA certificates to fetch them, ccache for the CI's builds
+# ccache for the CI's builds
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates curl ccache && \
+    apt-get install -y --no-install-recommends ccache && \
     rm -rf /var/lib/apt/lists/*
 
+# pkg.devkitpro.org serves pacman, not curl: dkp-pacman downloads the three
+# packages at their exact versions (and their signatures), then each is
+# checked against its pinned SHA-256 before it is installed
 RUN set -e && \
     mkdir /tmp/r30 && cd /tmp/r30 && \
     printf '%s  %s\n' \
@@ -22,8 +25,9 @@ RUN set -e && \
         0d61ad4946eb1080c6e645c41f0cfaac0a2eba5fec88426fef8f03363e933b5a devkita64-binutils-2.46.0-1-linux_x86_64.pkg.tar.zst \
         8192b899f0a5fcfe10d11fa63a631b45310c0c8f0b98d88c7c283c16e9d6b0fa devkita64-gcc-16.1.0-1-linux_x86_64.pkg.tar.zst \
         > SHA256SUMS && \
-    for f in $(cut -d' ' -f3 SHA256SUMS); do curl -fsSL --retry 3 -o "$f" "$PACKAGES/$f"; done && \
+    dkp-pacman -U --noconfirm --downloadonly --cachedir /tmp/r30 \
+        $(cut -d' ' -f3 SHA256SUMS | sed "s|^|$PACKAGES/|") && \
     sha256sum -c SHA256SUMS && \
-    dkp-pacman -U --noconfirm ./*.pkg.tar.zst && \
+    dkp-pacman -U --noconfirm $(cut -d' ' -f3 SHA256SUMS) && \
     cd / && rm -rf /tmp/r30 && \
     /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc --version | head -1
