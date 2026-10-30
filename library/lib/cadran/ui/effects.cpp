@@ -32,12 +32,17 @@ bool reduced()
     return ui::prefs().effects == "reduced";
 }
 
+bool still()
+{
+    return ui::env_flag("STILL_FOCUS");
+}
+
 bool motion()
 {
     // The smoke test's screenshots compare frames: nothing may depend on when
     // they are taken (the same flag holds the focus highlight still).
-    static const bool still = ui::env_flag("STILL_FOCUS");
-    if (still)
+    static const bool held = still();
+    if (held)
         return false;
     // The app's own reduced motion (aurore::Application::setReduceMotion).
     if (aurore::Application::isReduceMotionSet())
