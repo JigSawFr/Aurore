@@ -215,7 +215,7 @@ StyleValues::StyleValues(std::initializer_list<StyleMetric> list)
 void StyleValues::addMetric(const std::string& key, float metric)
 {
     this->base[key] = metric;
-    if (this->overlay.count(key) == 0)
+    if (!this->overlay.contains(key))
         this->values[key] = metric;
 }
 
@@ -233,7 +233,7 @@ MetricKind StyleValues::getKind(const std::string& name) const
 
 bool StyleValues::hasMetric(const std::string& name) const
 {
-    return this->values.count(name) > 0;
+    return this->values.contains(name);
 }
 
 void StyleValues::setOverlay(const std::unordered_map<std::string, float>& overlay)

@@ -34,7 +34,7 @@
 #define AURORE_REGISTER_ENUM_XML_ATTRIBUTE(name, enumType, method, ...) \
     this->registerStringXMLAttribute(name, [this](std::string value) {                   \
         std::unordered_map<std::string, enumType> enumMap = __VA_ARGS__;                 \
-        if (enumMap.count(value) > 0)                                                    \
+        if (enumMap.contains(value))                                                    \
             method(enumMap[value]);                                                      \
         else                                                                             \
             aurore::View::fatalXML("Illegal value \"" + value + "\" for XML attribute \"" + name + "\"; expected " + aurore::View::listXMLValues(enumMap)); })

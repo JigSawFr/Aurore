@@ -139,9 +139,9 @@ void Mark::set(const char* color_key)
 {
     const std::string key = color_key;
     this->key             = key;
-    this->shape           = key.rfind("cadran/teal", 0) == 0                               ? Shape::CHECK
-                  : key.rfind("cadran/amber", 0) == 0 || key.rfind("cadran/coral", 0) == 0 ? Shape::WARN
-                                                                                           : Shape::DOT;
+    this->shape           = key.starts_with("cadran/teal")                             ? Shape::CHECK
+                  : key.starts_with("cadran/amber") || key.starts_with("cadran/coral") ? Shape::WARN
+                                                                                       : Shape::DOT;
 }
 
 void Mark::draw(NVGcontext* vg, float x, float y, float width, float height, aurore::Style, aurore::FrameContext* ctx)

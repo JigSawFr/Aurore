@@ -749,7 +749,7 @@ void Application::addToWatchedKeys(const AuroreKeyCombination key)
 {
     if (key.code == AURORE_KBD_KEY_UNKNOWN)
         return;
-    if (watchedKeysMap.count(key) == 0 || watchedKeysMap[key] <= 0)
+    if (!watchedKeysMap.contains(key) || watchedKeysMap[key] <= 0)
     {
         watchedKeysMap[key] = 0;
         watchedKeys.emplace_back(key);
@@ -762,7 +762,7 @@ void Application::removeWatchedKeys(const AuroreKeyCombination key)
 {
     if (key.code == AURORE_KBD_KEY_UNKNOWN)
         return;
-    if (watchedKeysMap.count(key) == 0 || watchedKeysMap[key] <= 0)
+    if (!watchedKeysMap.contains(key) || watchedKeysMap[key] <= 0)
     {
         // Key is not watched, nothing to do
         return;
@@ -2042,7 +2042,7 @@ bool Application::loadFontFromFile(std::string fontName, std::string filePath)
 {
 #ifdef USE_LIBROMFS
     // AURORE_ASSET() paths are in the resources built into the program
-    if (filePath.rfind("@res/", 0) == 0)
+    if (filePath.starts_with("@res/"))
     {
         try
         {
@@ -2686,7 +2686,7 @@ void Application::checkThemeChanged()
 
 int Application::getFont(std::string fontName)
 {
-    if (Application::fontStash.count(fontName) == 0)
+    if (!Application::fontStash.contains(fontName))
         return FONT_INVALID;
 
     return Application::fontStash[fontName];
@@ -2715,7 +2715,7 @@ int Application::getDefaultFont()
 
 bool Application::XMLViewsRegisterContains(std::string name)
 {
-    return Application::xmlViewsRegister.count(name) > 0;
+    return Application::xmlViewsRegister.contains(name);
 }
 
 std::vector<std::string> Application::getXMLViewNames()

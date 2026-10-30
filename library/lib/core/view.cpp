@@ -1739,12 +1739,12 @@ void View::setCustomNavigationRoute(FocusDirection direction, std::string target
 
 bool View::hasCustomNavigationRouteByPtr(FocusDirection direction)
 {
-    return this->customFocusByPtr.count(direction) > 0;
+    return this->customFocusByPtr.contains(direction);
 }
 
 bool View::hasCustomNavigationRouteById(FocusDirection direction)
 {
-    return this->customFocusById.count(direction) > 0;
+    return this->customFocusById.contains(direction);
 }
 
 View* View::getCustomNavigationRoutePtr(FocusDirection direction)
@@ -1920,7 +1920,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         return this->setStateStyle(state, property, value);
 
     // String -> string
-    if (this->stringAttributes.count(name) > 0)
+    if (this->stringAttributes.contains(name))
     {
         if (startsWith(value, "@i18n/"))
         {
@@ -1935,7 +1935,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     // File path -> file path
     if (startsWith(value, "@res/"))
     {
-        if (this->filePathAttributes.count(name) > 0)
+        if (this->filePathAttributes.contains(name))
         {
             // "" when refused: the attribute is left unset
             std::string path = View::getFilePathXMLAttributeValue(value);
@@ -1954,7 +1954,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     }
     else
     {
-        if (this->filePathAttributes.count(name) > 0)
+        if (this->filePathAttributes.contains(name))
         {
             this->filePathAttributes[name](value);
             return true;
@@ -1966,7 +1966,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     // Auto -> auto
     if (value == "auto")
     {
-        if (this->autoAttributes.count(name) > 0)
+        if (this->autoAttributes.contains(name))
         {
             this->autoAttributes[name]();
             return true;
@@ -1983,7 +1983,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         try
         {
             float floatValue = readXMLFloat(value.substr(0, value.length() - 2));
-            if (!std::isfinite(floatValue) || this->floatAttributes.count(name) == 0)
+            if (!std::isfinite(floatValue) || !this->floatAttributes.contains(name))
                 return false;
             this->floatAttributes[name](dp(floatValue));
             return true;
@@ -2004,7 +2004,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
             float floatValue = readXMLFloat(newFloat);
             if (!std::isfinite(floatValue))
                 return false;
-            if (this->floatAttributes.count(name) > 0)
+            if (this->floatAttributes.contains(name))
             {
                 this->floatAttributes[name](floatValue);
                 return true;
@@ -2032,7 +2032,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
             if (!std::isfinite(floatValue) || floatValue < -100 || floatValue > 100)
                 return false;
 
-            if (this->percentageAttributes.count(name) > 0)
+            if (this->percentageAttributes.contains(name))
             {
                 this->percentageAttributes[name](floatValue);
                 return true;
@@ -2054,7 +2054,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         std::string styleName = value.substr(7); // length of "@style/"
         float value           = Application::getStyle()[styleName]; // will throw logic_error if the metric doesn't exist
 
-        if (this->floatAttributes.count(name) > 0)
+        if (this->floatAttributes.contains(name))
         {
             this->floatAttributes[name](value);
             return true;
@@ -2068,7 +2068,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     else if (startsWith(value, "#"))
     {
         NVGcolor color;
-        if (!Theme::parseColor(value, &color) || this->colorAttributes.count(name) == 0)
+        if (!Theme::parseColor(value, &color) || !this->colorAttributes.contains(name))
             return false;
         this->colorAttributes[name](color);
         return true;
@@ -2082,7 +2082,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         if (this->getStyleProperty(name, &current) && current.type == StyleValue::Type::COLOR)
             return this->setThemeColor(name, key);
 
-        if (this->colorAttributes.count(name) == 0 || !Application::getTheme().hasColor(key))
+        if (!this->colorAttributes.contains(name) || !Application::getTheme().hasColor(key))
             return false;
         this->colorAttributes[name](Application::getTheme()[key]);
         return true;
@@ -2092,7 +2092,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
     {
         bool boolValue = value == "true" ? true : false;
 
-        if (this->boolAttributes.count(name) > 0)
+        if (this->boolAttributes.contains(name))
         {
             this->boolAttributes[name](boolValue);
             return true;
@@ -2109,7 +2109,7 @@ bool View::applyXMLAttribute(std::string name, std::string value)
         float newValue = readXMLFloat(value);
         if (!std::isfinite(newValue))
             return false;
-        if (this->floatAttributes.count(name) > 0)
+        if (this->floatAttributes.contains(name))
         {
             this->floatAttributes[name](newValue);
             return true;
@@ -2239,7 +2239,7 @@ bool View::isXMLAttributeValid(std::string attributeName)
     StyleValue probe;
     if (splitStateAttribute(attributeName, &state, &property))
         return this->getStyleProperty(property, &probe);
-    return this->knownAttributes.count(attributeName) > 0;
+    return this->knownAttributes.contains(attributeName);
 }
 
 // A custom resource (a folder the app's users may change): an error in it is
@@ -2843,7 +2843,7 @@ void View::printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::str
 {
     this->ensureCommonAttributes();
     ReadingXMLElement reading(element);
-    if (this->knownAttributes.find(name) != this->knownAttributes.end())
+    if (this->knownAttributes.contains(name))
         fatalXML("Illegal value \"" + value + "\" for XML attribute \"" + name + "\"");
     std::string closest = closestXMLName(name, std::vector<std::string>(this->knownAttributes.begin(), this->knownAttributes.end()));
     fatalXML("Unknown XML attribute \"" + name + "\" (with value \"" + value + "\")" + (closest.empty() ? "" : "; did you mean \"" + closest + "\"?"));
@@ -2851,7 +2851,7 @@ void View::printXMLAttributeErrorMessage(tinyxml2::XMLElement* element, std::str
 
 void View::registerFloatXMLAttribute(std::string name, FloatAttributeHandler handler)
 {
-    if (this->registeringCommonAttributes && this->floatAttributes.count(name) > 0)
+    if (this->registeringCommonAttributes && this->floatAttributes.contains(name))
         return; // the subclass's own, registered first
     this->floatAttributes[name] = handler;
     this->knownAttributes.insert(name);
@@ -2859,7 +2859,7 @@ void View::registerFloatXMLAttribute(std::string name, FloatAttributeHandler han
 
 void View::registerPercentageXMLAttribute(std::string name, FloatAttributeHandler handler)
 {
-    if (this->registeringCommonAttributes && this->percentageAttributes.count(name) > 0)
+    if (this->registeringCommonAttributes && this->percentageAttributes.contains(name))
         return; // the subclass's own, registered first
     this->percentageAttributes[name] = handler;
     this->knownAttributes.insert(name);
@@ -2867,7 +2867,7 @@ void View::registerPercentageXMLAttribute(std::string name, FloatAttributeHandle
 
 void View::registerAutoXMLAttribute(std::string name, AutoAttributeHandler handler)
 {
-    if (this->registeringCommonAttributes && this->autoAttributes.count(name) > 0)
+    if (this->registeringCommonAttributes && this->autoAttributes.contains(name))
         return; // the subclass's own, registered first
     this->autoAttributes[name] = handler;
     this->knownAttributes.insert(name);
@@ -2875,7 +2875,7 @@ void View::registerAutoXMLAttribute(std::string name, AutoAttributeHandler handl
 
 void View::registerStringXMLAttribute(std::string name, StringAttributeHandler handler)
 {
-    if (this->registeringCommonAttributes && this->stringAttributes.count(name) > 0)
+    if (this->registeringCommonAttributes && this->stringAttributes.contains(name))
         return; // the subclass's own, registered first
     this->stringAttributes[name] = handler;
     this->knownAttributes.insert(name);
@@ -2883,7 +2883,7 @@ void View::registerStringXMLAttribute(std::string name, StringAttributeHandler h
 
 void View::registerColorXMLAttribute(std::string name, ColorAttributeHandler handler)
 {
-    if (this->registeringCommonAttributes && this->colorAttributes.count(name) > 0)
+    if (this->registeringCommonAttributes && this->colorAttributes.contains(name))
         return; // the subclass's own, registered first
     this->colorAttributes[name] = handler;
     this->knownAttributes.insert(name);
@@ -2891,7 +2891,7 @@ void View::registerColorXMLAttribute(std::string name, ColorAttributeHandler han
 
 void View::registerBoolXMLAttribute(std::string name, BoolAttributeHandler handler)
 {
-    if (this->registeringCommonAttributes && this->boolAttributes.count(name) > 0)
+    if (this->registeringCommonAttributes && this->boolAttributes.contains(name))
         return; // the subclass's own, registered first
     this->boolAttributes[name] = handler;
     this->knownAttributes.insert(name);
@@ -2899,7 +2899,7 @@ void View::registerBoolXMLAttribute(std::string name, BoolAttributeHandler handl
 
 void View::registerFilePathXMLAttribute(std::string name, FilePathAttributeHandler handler)
 {
-    if (this->registeringCommonAttributes && this->filePathAttributes.count(name) > 0)
+    if (this->registeringCommonAttributes && this->filePathAttributes.contains(name))
         return; // the subclass's own, registered first
     this->filePathAttributes[name] = handler;
     this->knownAttributes.insert(name);

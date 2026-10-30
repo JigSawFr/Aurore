@@ -49,19 +49,19 @@ static const AuroreKeyboardScancode sdlToAuroreKeyboardScancode(SDL_Scancode sca
 
     // 1 - 9
     if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_9)
-        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_1 + scancode - SDL_SCANCODE_1);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_1 + (scancode - SDL_SCANCODE_1));
 
     // KP1 - KP9
     if (scancode >= SDL_SCANCODE_KP_1 && scancode <= SDL_SCANCODE_KP_9)
-        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_KP_1 + scancode - SDL_SCANCODE_KP_1);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_KP_1 + (scancode - SDL_SCANCODE_KP_1));
 
     // A - Z
     if (scancode >= SDL_SCANCODE_A && scancode <= SDL_SCANCODE_Z)
-        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_A + scancode - SDL_SCANCODE_A);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_A + (scancode - SDL_SCANCODE_A));
 
     // F1 - F12
     if (scancode >= SDL_SCANCODE_F1 && scancode <= SDL_SCANCODE_F12)
-        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_F1 + scancode - SDL_SCANCODE_F1);
+        return (AuroreKeyboardScancode)(AURORE_KBD_KEY_F1 + (scancode - SDL_SCANCODE_F1));
 
     switch (scancode)
     {
@@ -183,19 +183,19 @@ static const SDL_Scancode auroreToSdlKeyboardScancode(AuroreKeyboardScancode sca
 
     // 1 - 9
     if (scancode >= AURORE_KBD_KEY_1 && scancode <= AURORE_KBD_KEY_9)
-        return (SDL_Scancode)(SDL_SCANCODE_1 + scancode - AURORE_KBD_KEY_1);
+        return (SDL_Scancode)(SDL_SCANCODE_1 + (scancode - AURORE_KBD_KEY_1));
 
     // KP1 - KP9
     if (scancode >= AURORE_KBD_KEY_KP_1 && scancode <= AURORE_KBD_KEY_KP_9)
-        return (SDL_Scancode)(SDL_SCANCODE_KP_1 + scancode - AURORE_KBD_KEY_KP_1);
+        return (SDL_Scancode)(SDL_SCANCODE_KP_1 + (scancode - AURORE_KBD_KEY_KP_1));
 
     // A - Z
     if (scancode >= AURORE_KBD_KEY_A && scancode <= AURORE_KBD_KEY_Z)
-        return (SDL_Scancode)(SDL_SCANCODE_A + scancode - AURORE_KBD_KEY_A);
+        return (SDL_Scancode)(SDL_SCANCODE_A + (scancode - AURORE_KBD_KEY_A));
 
     // F1 - F12
     if (scancode >= AURORE_KBD_KEY_F1 && scancode <= AURORE_KBD_KEY_F12)
-        return (SDL_Scancode)(SDL_SCANCODE_F1 + scancode - AURORE_KBD_KEY_F1);
+        return (SDL_Scancode)(SDL_SCANCODE_F1 + (scancode - AURORE_KBD_KEY_F1));
 
     switch (scancode)
     {
@@ -433,7 +433,7 @@ static inline int getMouseButtonState(int buttonIndex, int* buttons = mouseButto
 static inline int getKeyboardKeys(SDL_Scancode code)
 {
     std::lock_guard<std::recursive_mutex> lock(controllersMutex);
-    if (keyboardKeys.find(code) == keyboardKeys.end())
+    if (!keyboardKeys.contains(code))
         return KEY_RELEASED;
     // Using KEY_STICKY to ensure that no input is lost
     // It's very helpful for devices with frame drops such as PSV

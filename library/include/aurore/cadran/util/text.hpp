@@ -63,12 +63,12 @@ inline std::string capitalise_ascii(std::string s)
 
 inline bool starts_with(const std::string& s, const char* prefix)
 {
-    return s.compare(0, std::strlen(prefix), prefix) == 0;
+    return s.starts_with(prefix);
 }
 
 inline bool starts_with(const std::string& s, const std::string& prefix)
 {
-    return s.compare(0, prefix.size(), prefix) == 0;
+    return s.starts_with(prefix);
 }
 
 inline bool ends_with(const std::string& s, const std::string& suffix)
@@ -161,7 +161,7 @@ class ConsoleComments
     {
         if (block_ == Comment)
         {
-            if (t.find("-->") != std::string::npos)
+            if (t.contains("-->"))
                 block_ = Plain;
             return Skip;
         }

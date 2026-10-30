@@ -30,7 +30,7 @@ namespace
         if (icon.empty())
             return nullptr;
 
-        if (icon.rfind("@res/", 0) == 0 || icon.find('/') != std::string::npos || icon.find('.') != std::string::npos)
+        if (icon.starts_with("@res/") || icon.contains('/') || icon.contains('.'))
         {
             auto* image = new Image();
             image->setImageFromFile(icon);

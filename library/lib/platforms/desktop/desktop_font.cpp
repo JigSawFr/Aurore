@@ -62,7 +62,7 @@ namespace
     std::string cjkLanguageOf(const std::string& locale)
     {
         auto starts = [&](const char* prefix)
-        { return locale.rfind(prefix, 0) == 0; };
+        { return locale.starts_with(prefix); };
         if (starts("ja"))
             return "ja";
         if (starts("ko"))
@@ -293,7 +293,7 @@ namespace
     bool fontExists(const std::string& path)
     {
 #ifdef USE_LIBROMFS
-        if (path.rfind("@res/", 0) == 0)
+        if (path.starts_with("@res/"))
         {
             try
             {
@@ -422,7 +422,7 @@ bool DesktopFontLoader::loadAppCjkFont(NVGcontext* vg)
         void* data       = nullptr;
         size_t size      = 0;
 #ifdef USE_LIBROMFS
-        if (path.rfind("@res/", 0) == 0)
+        if (path.starts_with("@res/"))
         {
             try
             {

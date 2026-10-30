@@ -653,7 +653,7 @@ bool View::bind(const std::string& spec)
             return false;
         std::vector<std::string> property = splitList(entry.substr(0, colon), " \t");
         std::vector<std::string> path     = splitList(entry.substr(colon + 1), " \t");
-        if (property.size() != 1 || path.size() != 1 || path[0].find('.') == std::string::npos)
+        if (property.size() != 1 || path.size() != 1 || !path[0].contains('.'))
             return false;
         bindings.emplace_back(property[0], path[0]);
     }

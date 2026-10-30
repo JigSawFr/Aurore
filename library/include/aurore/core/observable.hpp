@@ -231,7 +231,7 @@ class DataModel
 
     bool has(const std::string& key) const
     {
-        return this->entries.count(key) > 0;
+        return this->entries.contains(key);
     }
 
   private:

@@ -354,7 +354,7 @@ void Image::setImageFromFile(const std::string& path)
 {
     this->asyncGeneration++;
 #ifdef USE_LIBROMFS
-    if (path.rfind("@res/", 0) == 0)
+    if (path.starts_with("@res/"))
         return this->setImageFromRes(path.substr(5));
 #endif
     // TextureCache decides when the texture is deleted (the previous one is
@@ -420,7 +420,7 @@ void Image::setImageFromRGBA(const unsigned char* pixels, int width, int height)
 void Image::setImageFromFileAsync(const std::string& path)
 {
 #ifdef USE_LIBROMFS
-    if (path.rfind("@res/", 0) == 0)
+    if (path.starts_with("@res/"))
         return this->setImageFromRes(path.substr(5));
 #endif
     if (checkCache(path) > 0)

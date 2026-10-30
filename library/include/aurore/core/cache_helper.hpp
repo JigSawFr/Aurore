@@ -306,9 +306,9 @@ class LRUCache
         return num;
     }
 
-    bool isExisted(K key) { return cacheMap.find(key) != cacheMap.end(); }
+    bool isExisted(K key) { return cacheMap.contains(key); }
 
-    bool isExisted(T val) { return valueMap.find(val) != valueMap.end(); }
+    bool isExisted(T val) { return valueMap.contains(val); }
 
     bool isCacheHit(K key)
     {

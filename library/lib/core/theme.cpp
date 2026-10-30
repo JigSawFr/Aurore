@@ -317,7 +317,7 @@ static ColorMap derivePalette(const ColorMap& seeds, const ColorMap& base)
 {
     ColorMap out;
     auto has = [&seeds](const char* seed)
-    { return seeds.count(seed) > 0; };
+    { return seeds.contains(seed); };
     NVGcolor B  = has("background") ? seeds.at("background") : lookup(base, "aurore/background", nvgRGB(45, 45, 45));
     NVGcolor T  = has("text") ? seeds.at("text") : lookup(base, "aurore/text", nvgRGB(255, 255, 255));
     NVGcolor S  = has("surface") ? seeds.at("surface")
@@ -497,7 +497,7 @@ void ThemeValues::addColor(const std::string& key, NVGcolor color)
     if (it != this->base.end() && sameRgba(it->second, color))
         return;
     this->base[key] = color;
-    if (this->overlay.count(key) == 0)
+    if (!this->overlay.contains(key))
     {
         this->values[key] = color;
         generation++;
@@ -517,7 +517,7 @@ NVGcolor ThemeValues::getColor(const std::string& name)
 
 bool ThemeValues::hasColor(const std::string& name) const
 {
-    return this->values.count(name) > 0;
+    return this->values.contains(name);
 }
 
 void ThemeValues::setOverlay(const std::unordered_map<std::string, NVGcolor>& overlay)
@@ -888,14 +888,14 @@ bool Theme::resolveAsset(const std::string& raw, const std::string& directory, c
     {
         if (!trusted)
             return refuse("a theme's files are in its folder, not in the app's resources");
-        if (name.find("..") != std::string::npos)
+        if (name.contains(".."))
             return refuse("\"..\" is not allowed");
         *path = name;
         return true;
     }
     if (root == BUILTIN_PREFIX)
         return refuse("a preset's pictures are resources (@res/...)");
-    if (name.front() == '/' || name.find(':') != std::string::npos || name.find('\\') != std::string::npos)
+    if (name.front() == '/' || name.contains(':') || name.contains('\\'))
         return refuse("an absolute path is not allowed: a theme's files are in its folder");
 
     // From the root, through the including file's folder, to the file
@@ -1151,11 +1151,11 @@ static void inheritPictures(PictureSpec* own, const PictureSpec* parent)
     {
         auto everyVariant = own[0].*member; // this file's, before the inherited ones
         for (auto& [key, value] : parent[0].*member)
-            if (!everyVariant.count(key))
+            if (!everyVariant.contains(key))
                 (own[0].*member).emplace(key, value);
         for (int slot : { 1, 2 })
             for (auto& [key, value] : parent[slot].*member)
-                if (!everyVariant.count(key))
+                if (!everyVariant.contains(key))
                     (own[slot].*member).emplace(key, value);
     };
     inherit(&PictureSpec::files);
@@ -1201,7 +1201,7 @@ static ThemePictures resolvePictures(const PictureSpec* spec, int v, std::vector
         else
         {
             std::string slot = key.substr(6);
-            if (!imageSlots.count(slot))
+            if (!imageSlots.contains(slot))
             {
                 std::string declared;
                 for (auto& [each, value] : imageSlots)
@@ -1636,7 +1636,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
             continue;
         }
 
-        if (section.empty() && !isSeed(key) && key.find('/') == std::string::npos)
+        if (section.empty() && !isSeed(key) && !key.contains('/'))
         {
             report(out, where(number) + ": unknown key " + key);
             continue;
@@ -1785,7 +1785,7 @@ static ResolvedTheme resolveTheme(const ParsedTheme& theme, bool decodeImages = 
         for (int slot : { 0, v + 1 })
             for (auto& [key, color] : theme.colors[slot])
             {
-                if (!base.count(key))
+                if (!base.contains(key))
                     resolved.warnings.push_back(std::string(name) + ": unknown key " + key + " (kept)");
                 overlay[key] = color;
             }

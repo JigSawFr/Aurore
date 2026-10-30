@@ -291,7 +291,7 @@ namespace
 
     bool is_table_rule(const std::string& t)
     {
-        if (t.find('-') == std::string::npos || t.find('|') == std::string::npos)
+        if (!t.contains('-') || !t.contains('|'))
             return false;
         for (const std::string& c : cells(t))
         {
@@ -432,7 +432,7 @@ namespace
         // Setext headings: a paragraph's single line underlined.
         bool setext_heading(const std::string& t)
         {
-            if (!open_paragraph || blocks.empty() || blocks.back().text.find('\n') != std::string::npos || (t.find_first_not_of('=') != std::string::npos && t.find_first_not_of('-') != std::string::npos))
+            if (!open_paragraph || blocks.empty() || blocks.back().text.contains('\n') || (t.find_first_not_of('=') != std::string::npos && t.find_first_not_of('-') != std::string::npos))
                 return false;
             blocks.back().kind  = Block::Heading;
             blocks.back().level = t[0] == '=' ? 1 : 2;
@@ -510,7 +510,7 @@ namespace
         // A table: a row of cells, then a row of dashes.
         bool table(size_t& n, const std::string& t)
         {
-            if (t.find('|') == std::string::npos || n + 1 >= lines.size() || !is_table_rule(text::trim_blank(lines[n + 1])))
+            if (!t.contains('|') || n + 1 >= lines.size() || !is_table_rule(text::trim_blank(lines[n + 1])))
                 return false;
             Block b;
             b.kind   = Block::Table;
