@@ -693,8 +693,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
         <li><a href="https://shelf.boreale.dev/{sites_dir}">PlayShelf</a></li>
         <li><a href="https://atlas.boreale.dev/{sites_dir}">Atlas</a></li>
         <li><a href="https://lantern.boreale.dev/{sites_dir}">Lantern</a></li>
-        <li><a href="https://boreale.dev/{sites_dir}legal/">{t("sites_legal")}</a></li>
-        <li><a href="mailto:contact@boreale.dev">contact@boreale.dev</a></li></ul>
+        <li><a href="https://boreale.dev/{sites_dir}legal/">{t("sites_legal")}</a></li></ul>
     </div>
     <div>
       <h2>{t("footer_project")}</h2>
