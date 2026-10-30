@@ -186,6 +186,13 @@ jobs:
     timeout-minutes: 30
     container:
       image: devkitpro/devkita64:20260219@sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f876a187fd705de14b4440c00282
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPRESS: "1"
+      CCACHE_MAXSIZE: 300M
     strategy:
       fail-fast: false
       matrix:
@@ -200,10 +207,20 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
+      # ccache in the devkitPro image, its objects in GitHub's cache from one
+      # run to the next, as PlayGuard's Switch build
+      - name: ccache
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends ccache
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ccache
+          key: ccache-switch-${{ matrix.driver }}-${{ github.sha }}
+          restore-keys: ccache-switch-${{ matrix.driver }}-
       - name: Build
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=SWITCH ${{ matrix.cmake }}
           make -C build aurore_demo.nro -j$(nproc)
+          ccache --show-stats
       - name: Upload dist
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -218,16 +235,32 @@ jobs:
     timeout-minutes: 30
     container:
       image: devkitpro/devkitarm:20260610@sha256:15b79ce75822c289538d8153da5fa7aafe5e6adc32ad8a575a197beca0f0761b
+    env:
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPRESS: "1"
+      CCACHE_MAXSIZE: 300M
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
+      # ccache in the devkitPro image, as the Switch jobs
+      - name: ccache
+        run: apt-get update -qq && apt-get install -y -qq --no-install-recommends ccache
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ccache
+          key: ccache-3ds-${{ github.sha }}
+          restore-keys: ccache-3ds-
       - name: Build
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=3DS
           cmake --build build -j$(nproc)
+          ccache --show-stats
       - name: Upload dist
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -269,6 +302,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install ninja-build pkg-config
+      # Gradle's distribution and dependencies kept from one run to the next
+      # (not setup-gradle: it validates SDL's own wrappers too, which the
+      # job above leaves out, and caches through a proprietary provider)
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('android-project/**/*.gradle*', 'android-project/gradle/wrapper/gradle-wrapper.properties', 'android-project/gradle/libs.versions.toml') }}
+          restore-keys: gradle-
       - name: Build
         id: build
         run: |
@@ -348,12 +391,26 @@ jobs:
           install: >-
             mingw-w64-x86_64-ninja
             mingw-w64-x86_64-cc
+            mingw-w64-x86_64-ccache
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: recursive
+      # MSYS2's ccache, its objects in GitHub's cache from one run to the next
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ccache
+          key: ccache-windows-${{ matrix.driver }}-${{ github.sha }}
+          restore-keys: ccache-windows-${{ matrix.driver }}-
       - name: Build
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPRESS: "1"
+          CCACHE_MAXSIZE: 300M
         run: |
           cmake -B build -G Ninja ${{ matrix.cmake }} \
             -DCMAKE_BUILD_TYPE=Release \
@@ -362,6 +419,7 @@ jobs:
             -DAURORE_LIBROMFS=ON \
             -DZLIB_USE_STATIC_LIBS=ON
           cmake --build build
+          ccache --show-stats
       - name: Run the demo on Direct3D 12
         if: ${{ matrix.driver == 'sdlgpu' }}
         run: |
