@@ -24,12 +24,25 @@ Usage: tools/check_site.py <site-dir> [site-url]
 """
 import json
 import os
+import re
 import sys
 from html.parser import HTMLParser
 from urllib.parse import parse_qsl, unquote, urlparse, urlsplit
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+
+
+
+# No real e-mail address on the site, ours or anyone's: contact goes through
+# the repository's issues, a security flaw through a private advisory.
+EMAIL = re.compile(r"[\w.+-]+@(?:[\w-]+\.)+[a-z]{2,}", re.IGNORECASE)
+RESERVED = re.compile(r"@(?:[\w-]+\.)*(?:example\.(?:org|com|net)|[\w-]+\.example)$", re.IGNORECASE)
+
+
+def emails(text: str) -> list:
+    return [f"an e-mail address ({m.group(0)}), contact goes through GitHub"
+            for m in EMAIL.finditer(text) if not RESERVED.search(m.group(0))]
 
 
 def own_site(url: str) -> bool:
@@ -158,7 +171,9 @@ def main():
             path = os.path.join(folder, name)
             if name.endswith(".html"):
                 page = Page()
-                page.feed(open(path, encoding="utf-8").read())
+                html = open(path, encoding="utf-8").read()
+                page.feed(html)
+                page.links_out += emails(html)
                 pages[path] = page
             elif name.endswith((".json", ".webmanifest")):
                 try:
