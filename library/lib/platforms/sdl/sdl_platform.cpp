@@ -216,6 +216,33 @@ void SDLPlatform::disableScreenDimming(bool disable, const std::string& reason, 
     }
 }
 
+#if !defined(IOS) && !defined(TVOS)
+// A battery SDL can read: one on battery, charging or charged (not none,
+// unknown, nor SDL3's error)
+static bool sdlHasBattery(SDL_PowerState state)
+{
+    return state == SDL_POWERSTATE_ON_BATTERY || state == SDL_POWERSTATE_CHARGING || state == SDL_POWERSTATE_CHARGED;
+}
+
+bool SDLPlatform::canShowBatteryLevel()
+{
+    return sdlHasBattery(SDL_GetPowerInfo(nullptr, nullptr));
+}
+
+int SDLPlatform::getBatteryLevel()
+{
+    int percent = -1;
+    SDL_GetPowerInfo(nullptr, &percent);
+    // Charged without a percentage: full
+    return percent < 0 ? 100 : percent;
+}
+
+bool SDLPlatform::isBatteryCharging()
+{
+    return SDL_GetPowerInfo(nullptr, nullptr) == SDL_POWERSTATE_CHARGING;
+}
+#endif
+
 bool SDLPlatform::isScreenDimmingDisabled()
 {
     return !SDL_ScreenSaverEnabled();
