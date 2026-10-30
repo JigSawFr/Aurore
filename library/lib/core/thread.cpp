@@ -38,7 +38,7 @@ static Thread startCtrThread(ThreadFunc entry)
 {
     s32 priority = 0x30;
     svcGetThreadPriority(&priority, CUR_THREAD_HANDLE);
-    priority   = std::min(priority + 1, 0x3F);
+    priority   = std::min<s32>(priority + 1, 0x3F);
     bool isNew = false;
     APT_CheckNew3DS(&isNew);
     Thread thread = isNew ? threadCreate(entry, nullptr, 128 * 1024, priority, 2, false) : nullptr;
