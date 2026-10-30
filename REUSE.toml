@@ -13,7 +13,7 @@ path = [
     ".clang-format", ".editorconfig", ".gitattributes", ".gitignore", ".gitmodules", ".git-blame-ignore-revs",
     ".release-please-manifest.json", "release-please-config.json", "CMakePresets.json",
     "AUTHORS", "NOTICE", "*.md", ".github/**", "docs/**",
-    "android-project/**", "demo/**", "ps4/**", "psv/**", "ctr/**", "template/**", "web/**",
+    "android-project/**", "demo/**", "ps4/**", "psv/**", "switch/**", "ctr/**", "template/**", "web/**",
     "resources/**", "tests/**", "site/**",
 ]
 precedence = "closest"
