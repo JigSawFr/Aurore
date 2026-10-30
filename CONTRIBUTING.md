@@ -32,6 +32,17 @@ bench.
   Reformatting commits are listed in `.git-blame-ignore-revs` (`git config blame.ignoreRevsFile .git-blame-ignore-revs`).
 - **Other platforms** (Switch, PS Vita, PS4, New 3DS, Android, iOS, Windows, macOS, a browser) are built by CI on every pull request. The macOS and iOS jobs are not required: GitHub's macOS runners sometimes leave them without a machine until they are cancelled, so their failure does not fail the run; a failure that comes from the change is still fixed.
 
+## File formats
+
+What crosses a version boundary carries an integer `schema`: a reader takes a file of a newer `schema` as far as it
+knows it (or as absent), never as an error, and a missing `schema` counts as 1. Adding a key keeps the schema; a key
+that changes meaning bumps it.
+
+| Format | `schema` | Read by |
+| --- | --- | --- |
+| `*.theme` (and what it includes or inherits) | 1, `THEME_SCHEMA` in `library/lib/core/theme.cpp` | `Theme::load`, `loadFile`, `inspect`, `listThemes` ([docs/themes.md](docs/themes.md#the-format)) |
+| `https://boreale.dev/versions.json` (Boréale's) | 1, `VERSIONS_SCHEMA` in `tools/build_site.py`; the flat form before it | `tools/build_site.py`, for the menu of Boréale's sites |
+
 ## Pull requests
 
 - One change per pull request, from a branch named `type/subject` (`fix/rail-focus`, `feat/theme-particles`).

@@ -13,7 +13,11 @@ accent = #3ddc97
 A theme file is text, `*.theme` by convention: `key = value` lines, `[sections]`, `#` comments (a `#` at the start of a line or after a space; `#3ddc97` right after `=` is a colour, and so is one after a comma, in a list of colours). A theme with pictures is a folder holding its file and its pictures (below, [Theme folders and pictures](#theme-folders-and-pictures)).
 
 ```ini
-# Metadata: shown by a picker (Theme::listThemes)
+# The format the file is written in (below); without it, 1
+schema = 1
+
+# Metadata: shown by a picker (Theme::listThemes); `version` is the
+# theme's own, its author's to bump
 name = Ocean
 author = Aurore
 version = 1
@@ -62,6 +66,7 @@ cadran/glow = rgba(63, 167, 255, 0.15)
 aurore/highlight/stroke_width = 6
 ```
 
+- **`schema`**: the version of the format the file is written in, a whole number from 1; a file without it is 1, today's format. A file of a newer `schema` (written for a later Aurore) is read all the same: what this version knows of it is used, a key it does not know is reported as always (below), and one warning says so (`line 1: schema 2 is newer than this app reads (1): what it knows of the theme is used`). Each file of a theme says its own, an `@include`d or inherited one too. It is not the theme's `version`, which is its author's own (`ThemeInfo::version`), free text Aurore never compares.
 - **Colours**: `#rgb`, `#rrggbb`, `#rrggbbaa`, `rgb(r, g, b)`, `rgba(r, g, b, a)` (r, g and b from 0 to 255, a from 0 to 1; a value out of its range, `nan` or `inf` is not a colour).
 - **Variants**: a file styles the variant it inherits (`inherit = light` or `dark`, dark by default), or both when it has `[light]` and `[dark]` sections; it then follows the system's mode (or the app's light/dark setting). The variant a file does not style stays as it is without a file.
 - **`counterpart`**, for a file that styles one variant only: the file (or preset) with the other variant, the same look in light or dark. A picker asked for the variant this file lacks switches to it (Cadran's does, below); `--check-themes` reports a counterpart that cannot be read or lacks that variant.

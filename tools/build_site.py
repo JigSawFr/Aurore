@@ -296,13 +296,34 @@ SITES = [(None, [("boreale", "Boréale", "https://boreale.dev/")]),
          ("sites_libraries", [("aurore", "Aurore", "https://aurore.boreale.dev/")])]
 
 
+# The versions.json this build reads: {"schema": 1, "projects": {...}}, or
+# the flat {project: "vX"} published before it had a schema
+VERSIONS_SCHEMA = 1
+
+
+def read_versions(document):
+    """The {project: version} of versions.json's document: its `projects`
+    for schema 1, the document itself without a schema (the older, flat
+    form); any other shape (a newer schema, a list, ...) as none."""
+    if not isinstance(document, dict):
+        return {}
+    if "schema" in document or "projects" in document:
+        projects = document.get("projects")
+        schema = document.get("schema")
+        if type(schema) is not int or schema != VERSIONS_SCHEMA or not isinstance(projects, dict):
+            return {}
+        document = projects
+    return {k: v for k, v in document.items() if isinstance(k, str) and isinstance(v, str)}
+
+
 def boreale_versions():
     """The projects' latest releases as boreale.dev publishes them
     (versions.json), for the menu; none when it cannot be read (offline, a
-    local build), and the menu shows no versions."""
+    local build, a shape this build does not know), and the menu shows no
+    versions."""
     try:
         with urllib.request.urlopen("https://boreale.dev/versions.json", timeout=10) as r:
-            return {k: v for k, v in json.load(r).items() if isinstance(v, str)}
+            return read_versions(json.load(r))
     except (OSError, ValueError):
         return {}
 
