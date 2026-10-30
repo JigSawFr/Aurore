@@ -6,7 +6,7 @@
 # this against it (tools/ci_variant.sh install).
 #
 #   cmake -S tests/consumer -B build-consumer -DCMAKE_PREFIX_PATH=<prefix>
-cmake_minimum_required(VERSION 3.16...3.31)
+cmake_minimum_required(VERSION 3.20...3.31)
 project(aurore_consumer CXX)
 
 find_package(Aurore 0.1 REQUIRED)
