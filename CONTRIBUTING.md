@@ -41,6 +41,7 @@ that changes meaning bumps it.
 | Format | `schema` | Read by |
 | --- | --- | --- |
 | `*.theme` (and what it includes or inherits) | 1, `THEME_SCHEMA` in `library/lib/core/theme.cpp` | `Theme::load`, `loadFile`, `inspect`, `listThemes` ([docs/themes.md](docs/themes.md#the-format)) |
+| `https://boreale.dev/versions.json` (Boréale's) | 1, `VERSIONS_SCHEMA` in `tools/build_site.py`; the flat form before it | `tools/build_site.py`, for the menu of Boréale's sites |
 
 ## Pull requests
 
