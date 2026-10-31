@@ -57,6 +57,25 @@ let current = new URLSearchParams(location.search);
 
 const t = (key) => text[key] ?? key;
 
+// ---- The audience ------------------------------------------------------------
+
+// A first visit loads the page twice: once to install sw.js, once under it
+// (start()). Umami's tracker (on the published site) counts the second only:
+// it asks auroreAudience() before each send (data-before-send, added by
+// tools/build_site.py), which drops what this first load would send. Decided
+// now, before the tracker's first page view, and as start() will decide.
+function coiTried() {
+  try { return sessionStorage.getItem('aurore-coi') === '1'; } catch { return false; }
+}
+let isolating = !window.crossOriginIsolated && 'serviceWorker' in navigator && window.isSecureContext && !coiTried();
+window.auroreAudience = (type, payload) => (isolating ? null : payload);
+// The page stays (no reload after all): its visit is counted now.
+function countThisVisit() {
+  if (!isolating) return;
+  isolating = false;
+  window.umami?.track();
+}
+
 // Links out (the rule "liens sortants anonymes"): our own sites (boreale.dev
 // and its subdomains, the repositories of github.com/JigSawFr/) get the
 // origin alone, any other site nothing. A fork's repository is another site.
@@ -204,7 +223,7 @@ function homeLinks() {
 }
 
 // Boréale's site switcher: the menu of the four sites opens under the name, as
-// on the website (site/assets/site.js' "site switcher" block). Without
+// on the website (boreale-site's boreale.js). Without
 // popovers (an old browser), the menu stays closed.
 function setUpSites() {
   const menu = $('sites');
@@ -432,12 +451,11 @@ function start() {
   // headers, sw.js adds them, and the page loads once more under it.
   if (!window.crossOriginIsolated) {
     if (!('serviceWorker' in navigator) || !window.isSecureContext) { showError(t('no_isolation')); return; }
-    let tried = false;
-    try { tried = sessionStorage.getItem('aurore-coi') === '1'; } catch { /* storage refused */ }
-    if (tried) { showError(t('no_isolation')); return; }
+    if (coiTried()) { showError(t('no_isolation')); return; }
     try { sessionStorage.setItem('aurore-coi', '1'); } catch { /* idem */ }
+    setTimeout(countThisVisit, 10000);   // still here: the reload is not coming
     navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready)
-      .then(() => location.reload(), () => showError(t('no_isolation')));
+      .then(() => location.reload(), () => { countThisVisit(); showError(t('no_isolation')); });
     return;
   }
   try { sessionStorage.removeItem('aurore-coi'); } catch { /* idem */ }

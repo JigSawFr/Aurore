@@ -43,7 +43,7 @@ namespace
     struct CjkLanguage
     {
         const char* language;
-        const std::string& fontName;
+        const char* fontName;
         uint32_t sample; // a character only a font of this language is sure to have
     };
 
@@ -497,7 +497,7 @@ void DesktopFontLoader::loadSystemCjkFonts(NVGcontext* vg)
         aurore::Logger::info("Using {} font: {} ({})", cjk->language, file.path, file.index);
         // The same face for two languages: looked up once
         std::pair<std::string, int> face { file.path, file.index };
-        if (std::find(added.begin(), added.end(), face) != added.end())
+        if (std::ranges::contains(added, face))
             continue;
         added.push_back(face);
         nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont(cjk->fontName));

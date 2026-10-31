@@ -245,8 +245,9 @@ void HotReload::poll()
     }
 
     // Again from the file in use, which replaces the files watched
+    // (A file that cannot be read keeps the theme as it was; loadFile logs why.)
     if (theme && !Theme::getCurrentPath().empty())
-        Theme::loadFile(Theme::getCurrentPath());
+        (void)Theme::loadFile(Theme::getCurrentPath());
 
     if (rebuild && top)
         Application::rebuildActivity();

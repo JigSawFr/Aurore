@@ -20,9 +20,6 @@
 .api-section > h2 { scroll-margin-top: 72px; }
 .api-member, .api-line, .api-values tr { scroll-margin-top: 72px; }
 
-/* The header's link to the API, marked: the page is one of its. */
-.top nav a[aria-current="page"] { color: var(--snow); background: rgba(232, 238, 247, 0.06); }
-
 /* Code in a link of the sidebar or a list: the link's look, in the code's font. */
 .api .doc-nav code, .api-list code, .api-chips code, .api-lineage code, .api-inherited code {
   background: none; border: 0; padding: 0; font-size: 0.875em; overflow-wrap: anywhere;
@@ -107,7 +104,11 @@ code.sig:focus-visible { outline-offset: -2px; }
 .api-doc > * + * { margin-top: 0.8em; }
 .api-doc ul, .api-doc ol { padding-left: 1.3em; }
 .api-doc pre { font-size: 0.8125rem; }
-.api-source { display: block; width: fit-content; margin-left: auto; font: 0.75rem var(--mono); color: var(--dusk); text-decoration: none; }
+/* The member's source line: a target of 24px (WCAG 2.2, 2.5.8), its small
+   text's line padded; the bottom margin takes the padding back and the
+   offset centres the box on the text, so that nothing moves. */
+.api-source { display: block; width: fit-content; margin-left: auto; font: 0.75rem var(--mono); color: var(--dusk); text-decoration: none;
+  padding-block: 4px; margin-bottom: -8px; position: relative; top: -4px; }
 .api-source:hover { color: var(--link); text-decoration: underline; }
 .api-over { color: var(--mist); font-size: 0.9375rem; }
 

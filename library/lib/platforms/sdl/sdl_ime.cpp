@@ -9,6 +9,7 @@
 #include <aurore/views/edit_text_dialog.hpp>
 
 #include <cstring>
+#include <utility>
 
 #include "sdl_compat.hpp"
 
@@ -150,7 +151,7 @@ void SDLImeManager::openInputDialog(
     auto updateTextCursor = [this, dialog]()
     {
         int cursor = this->cursor;
-        if (cursor >= (int)CursorPosition::START && this->editingBuffer.size() > 0)
+        if (cursor >= std::to_underlying(CursorPosition::START) && this->editingBuffer.size() > 0)
         {
             cursor += utf8_len(this->editingBuffer) + 2;
         }
@@ -231,11 +232,14 @@ void SDLImeManager::openInputDialog(
         "hints/left"_i18n, BUTTON_LEFT, [this, updateTextCursor](...)
         {
                 if (this->isEditing) return true;
-                if (this->cursor == (int)CursorPosition::END) {
+                if (this->cursor == std::to_underlying(CursorPosition::END))
+                {
                     this->cursor = utf8_len(this->inputBuffer) - 1;
                     if(this->cursor < 0) this->cursor = 0;
                     updateTextCursor();
-                } else if (this->cursor > (int)CursorPosition::START) {
+                }
+                else if (this->cursor > std::to_underlying(CursorPosition::START))
+                {
                     this->cursor--;
                     updateTextCursor();
                 }
@@ -244,7 +248,8 @@ void SDLImeManager::openInputDialog(
         "hints/right"_i18n, BUTTON_RIGHT, [this, updateTextCursor](...)
         {
                 if (this->isEditing) return true;
-                if (this->cursor >= (int)CursorPosition::START) {
+                if (this->cursor >= std::to_underlying(CursorPosition::START))
+                {
                     if (this->cursor < utf8_len(this->inputBuffer)) {
                         this->cursor++;
                         updateTextCursor();
@@ -264,14 +269,18 @@ void SDLImeManager::openInputDialog(
     dialog->getBackspaceEvent()->subscribe([this, updateText, updateTextCursor](...)
         {
             if(inputBuffer.empty()) return true;
-            if (this->cursor == (int)CursorPosition::START) return true;
-            if (this->cursor > (int)CursorPosition::START) {
+            if (this->cursor == std::to_underlying(CursorPosition::START))
+                return true;
+            if (this->cursor > std::to_underlying(CursorPosition::START))
+            {
                 int start = utf8_find_next(inputBuffer, 0, this->cursor-1);
                 int n = utf8_find_next(inputBuffer, start, 1);
                 inputBuffer.erase(start, n);
                 this->cursor -= 1;
                 updateTextCursor();
-            } else {
+            }
+            else
+            {
                 int offset = utf8_find_prev(inputBuffer, 1);
                 inputBuffer.erase(inputBuffer.size()-offset, offset);
             }

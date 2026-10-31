@@ -12,7 +12,7 @@
 
 using namespace aurore::literals;
 
-const std::string tabFrameContentXML = R"xml(
+constexpr std::string_view tabFrameContentXML = R"xml(
     <aurore:Box
         width="auto"
         height="auto"

@@ -237,7 +237,7 @@ Each commit says what it changes, why, and where it comes from: `git log 5f08b28
 | Android API | 36 |
 | Emscripten | 6.0.13 |
 
-Checked on every pull request: 160 test cases in the headless harness, 36 reference screenshots compared pixel by pixel, and 163 checks of Cadran's text code; 43 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 71 of the 71 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
+Checked on every pull request: 161 test cases in the headless harness, 36 reference screenshots compared pixel by pixel, and 163 checks of Cadran's text code; 43 CI jobs build every platform, consoles included; the demo runs under AddressSanitizer and UndefinedBehaviorSanitizer, and in headless Chromium for its build in a browser; Markdown and theme files are fuzzed; a build fails on a deprecated API; every file says its licence (REUSE); 72 of the 72 GitHub Actions used are pinned to a commit; every Monday, `tools/check_upstream.py` compares the bundled components with their upstream's latest release and keeps an issue open with those behind. The versions are those of the build files and [`THIRD_PARTY_NOTICES.md`](resources/THIRD_PARTY_NOTICES.md), which `tools/check_notices.py` checks against the sources; `tools/stack.py` writes this section.
 <!-- under-the-hood: end -->
 
 ## 📦 Use it in your project
@@ -257,7 +257,7 @@ Checked on every pull request: 160 test cases in the headless harness, 36 refere
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
-5. Pick a version: the submodule can follow a release tag (`vX.Y.Z`), and [`CHANGELOG.md`](CHANGELOG.md) says what each one changes. Before 1.0 a minor version may break the API. In code, `AURORE_VERSION` and `AURORE_VERSION_AT_LEAST(0, 2, 0)` come with `aurore.hpp`; an installed Aurore answers `find_package(Aurore 0.1)`.
+5. Pick a version: the submodule can follow a release tag (`vX.Y.Z`), and [`CHANGELOG.md`](CHANGELOG.md) says what each one changes. From 1.0, semantic versioning: a breaking change waits for 2.0. In code, `AURORE_VERSION` and `AURORE_VERSION_AT_LEAST(1, 1, 0)` come with `aurore.hpp`; an installed Aurore answers `find_package(Aurore 1.0)`.
 
 > [!TIP]
 > Starting from scratch? Copy [**`template/`**](template/README.md): a minimal app (one XML screen, its strings, an icon) whose CMake builds a desktop binary and a Switch `.nro` with Aurore as a submodule. Upstream's [template](https://github.com/xfangfang/borealis_template) has the build files for the other platforms.

@@ -29,6 +29,8 @@ others each in its folder (/fr/, /de/, /zh-hant/…).
 
 Usage: tools/build_site.py <out-dir> [repo-root]          (needs Python-Markdown and PyYAML)
 """
+import datetime
+import functools
 import html
 import json
 import os
@@ -36,56 +38,31 @@ import re
 import shutil
 import struct
 import sys
-import urllib.request
-from urllib.parse import parse_qsl, urlencode, urlparse, urlsplit, urlunsplit
+from pathlib import Path
+from urllib.parse import urlsplit
 
 import markdown
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import stack as under_the_hood  # noqa: E402 (tools/stack.py: the versions and figures of "Under the hood")
 
+# What Boréale's sites share (library/boreale-site, a submodule): the
+# consoles' 15 languages (LANGUAGES: the catalog's code, the folder, the name,
+# the html lang), the header's menus, the links out and their UTM tags, the
+# audience (Umami), the common texts and assets.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "library", "boreale-site"))
+import boreale_site as boreale  # noqa: E402
+from boreale_site import LANGUAGES, OG_LOCALES, UMAMI_GATEWAY  # noqa: E402
+
 REPO_URL = "https://github.com/JigSawFr/Aurore"
-SITE_URL = os.environ.get("SITE_URL", "https://aurore.boreale.dev/").rstrip("/") + "/"
+AURORE = boreale.Site("aurore", os.environ.get("SITE_URL"))
+SITE_URL = AURORE.url
 VERSIONS = {}  # the projects' latest releases, for the menu of Boréale's sites (main())
+# A pull request's preview: kept out of search engines, and without Umami's
+# tracker (site/README.md).
 NOINDEX = os.environ.get("SITE_NOINDEX") == "1"
-# The audience, counted by Umami Cloud (site/README.md): its tracker, served
-# from assets/, sends each page seen to gateway.umami.is, without cookie, and
-# only from the site's own address; a pull request's preview has none. The
-# site in Umami is Boréale's, shared by its projects' sites: Umami tells them
-# apart by their address (its "Hostname" filter).
-UMAMI_WEBSITE = "6410ffdd-ae2e-4ddb-8e18-0a77e9fa374e"
-UMAMI_DOMAIN = urlsplit(SITE_URL).hostname
 API_DIR = os.environ.get("SITE_API", "")
 DEMO_DIR = os.environ.get("SITE_DEMO", "")
-# The consoles' languages, Aurore's own (resources/i18n/): the catalog's code
-# (site/i18n/<code>.json), the site's folder ('' for the root), the name in
-# its own words, the html lang. PlayGuard's and PlayShelf's sites have the same.
-LANGUAGES = [
-    ("en-US", "", "English", "en"),
-    ("fr", "fr", "Français", "fr"),
-    ("fr-CA", "fr-ca", "Français (Canada)", "fr-CA"),
-    ("de", "de", "Deutsch", "de"),
-    ("es", "es", "Español", "es"),
-    ("es-419", "es-419", "Español (Latinoamérica)", "es-419"),
-    ("it", "it", "Italiano", "it"),
-    ("nl", "nl", "Nederlands", "nl"),
-    ("pt", "pt", "Português", "pt-PT"),
-    ("pt-BR", "pt-br", "Português (Brasil)", "pt-BR"),
-    ("ru", "ru", "Русский", "ru"),
-    ("ja", "ja", "日本語", "ja"),
-    ("ko", "ko", "한국어", "ko"),
-    ("zh-Hans", "zh-hans", "简体中文", "zh-Hans"),
-    ("zh-Hant", "zh-hant", "繁體中文", "zh-Hant"),
-]
-# Each language's flag in the language menu (fonts/twemoji-flags.woff2 draws
-# them the same everywhere, Windows included): the country of the console's
-# language, Mexico for Latin America's Spanish, Taiwan for Traditional Chinese.
-FLAGS = {"en-US": "US", "fr": "FR", "fr-CA": "CA", "de": "DE", "es": "ES", "es-419": "MX", "it": "IT", "nl": "NL",
-         "pt": "PT", "pt-BR": "BR", "ru": "RU", "ja": "JP", "ko": "KR", "zh-Hans": "CN", "zh-Hant": "TW"}
-# Open Graph's name of each language.
-OG_LOCALES = {"en-US": "en_US", "fr": "fr_FR", "fr-CA": "fr_CA", "de": "de_DE", "es": "es_ES", "es-419": "es_LA",
-              "it": "it_IT", "nl": "nl_NL", "pt": "pt_PT", "pt-BR": "pt_BR", "ru": "ru_RU", "ja": "ja_JP",
-              "ko": "ko_KR", "zh-Hans": "zh_CN", "zh-Hant": "zh_TW"}
 # The documentation in the sidebar's order: (page, group, short name).
 DOCS = [
     ("getting-started", "start", "Aurore in 15 minutes"),
@@ -130,9 +107,9 @@ MADE_WITH = [
 ]
 # Only the site's own files, no inline script or style (a <meta>: GitHub
 # Pages sends no headers). connect-src: the documentation's search index, and
-# Umami, which counts the audience (UMAMI_WEBSITE).
+# Umami, which counts the audience (boreale-site's UMAMI_WEBSITE).
 CSP = ("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; "
-       "connect-src 'self' https://gateway.umami.is; manifest-src 'self'; base-uri 'none'; form-action 'none'")
+       f"connect-src 'self' {UMAMI_GATEWAY}; manifest-src 'self'; base-uri 'none'; form-action 'none'")
 # Each feature's icon: a line drawing on a 24px grid, in the text's colour.
 ICONS = {
     "controllers": '<path d="M7 9v4M5 11h4"/><circle cx="15.5" cy="10" r=".8"/><circle cx="17.5" cy="12.5" r=".8"/>'
@@ -177,88 +154,6 @@ DEVICE_GRIPS = (
 
 
 
-# Links out say nothing of the visit (workbench rule "liens sortants
-# anonymes"): the page sends no referrer (template.html's meta), a link to a
-# third party carries rel="noreferrer"; a link to *.boreale.dev or to
-# github.com/JigSawFr keeps the origin alone (referrerpolicy="strict-origin"),
-# so GitHub's traffic insights still see our sites.
-LINK_OUT = re.compile(r'<a\b[^<>]*?\bhref="(https?://[^"]*)"[^<>]*>')
-
-
-def own_site(url: str) -> bool:
-    """boreale.dev, its subdomains, and the repositories of github.com/JigSawFr/
-    (that account's alone: another owner, a gist or GitHub's own pages are
-    third parties)."""
-    u = urlparse(url)
-    host = (u.hostname or "").lower()
-    return u.scheme == "https" and (host == "boreale.dev" or host.endswith(".boreale.dev") or
-                                    (host == "github.com" and u.path.lower().startswith("/jigsawfr/")))
-
-
-def link_out(tag: str, url: str) -> str:
-    tag = re.sub(r'\sreferrerpolicy="[^"]*"', "", tag)
-    rel = re.search(r'\srel="([^"]*)"', tag)
-    words = [w for w in (rel.group(1).split() if rel else []) if w != "noreferrer"]
-    if rel:
-        tag = tag[:rel.start()] + tag[rel.end():]
-    if own_site(url):
-        extra = ' referrerpolicy="strict-origin"'
-    else:
-        words.append("noreferrer")
-        extra = ""
-    if words:
-        extra = f' rel="{" ".join(words)}"' + extra
-    return tag[:-1] + extra + ">"
-
-
-# Where a visit to another of Boréale's sites came from, for Umami (workbench's
-# "Mesure d'audience"): a link from this site to another *.boreale.dev site
-# carries utm_source='aurore' and a utm_medium telling where on the page it
-# is: "nav" (the header, its sites menu), "footer", or "link" (the page's
-# text). A link to this site itself carries none: tags a page's text came with
-# (a documentation page written for GitHub, utm_source=github) are taken off.
-UTM_SOURCE = "aurore"
-
-
-def utm(url: str, medium: str) -> str:
-    """`url` (as written in the page's HTML) tagged for its medium, or as it is
-    when it leads out of Boréale's sites."""
-    u = urlsplit(html.unescape(url))
-    host = (u.hostname or "").lower()
-    if u.scheme != "https" or not (host == "boreale.dev" or host.endswith(".boreale.dev")):
-        return url
-    query = [(k, v) for k, v in parse_qsl(u.query, keep_blank_values=True) if not k.startswith("utm_")]
-    if host != (urlsplit(SITE_URL).hostname or ""):
-        query += [("utm_source", UTM_SOURCE), ("utm_medium", medium)]
-    tagged = urlunsplit(u._replace(query=urlencode(query)))
-    return url if tagged == html.unescape(url) else html.escape(tagged, quote=True)
-
-
-SELF_LINK = re.compile(r"https://" + re.escape(urlsplit(SITE_URL).hostname or "") + r"/[^\s)<>\]\"']*")
-
-
-def untagged(text: str) -> str:
-    """Markdown or text the site serves (a documentation page, llms.txt) with
-    its links to the site itself free of the UTM tags it was written with for
-    GitHub."""
-    def one(m):
-        u = urlsplit(m.group(0))
-        query = [(k, v) for k, v in parse_qsl(u.query, keep_blank_values=True) if not k.startswith("utm_")]
-        return urlunsplit(u._replace(query=urlencode(query))) if len(query) != len(parse_qsl(u.query, keep_blank_values=True)) else m.group(0)
-    return SELF_LINK.sub(one, text)
-
-def links_out(text: str) -> str:
-    main, footer = text.find("<main"), text.find("<footer")
-
-    def one(m):
-        at = m.start()
-        medium = "footer" if 0 <= footer <= at else "nav" if main < 0 or at < main else "link"
-        url = utm(m.group(1), medium)
-        tag = m.group(0).replace(f'href="{m.group(1)}"', f'href="{url}"', 1)
-        return link_out(tag, url)
-
-    return LINK_OUT.sub(one, text)
-
 
 def icon(name):
     return (f'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
@@ -270,12 +165,19 @@ def read(*parts):
         return f.read()
 
 
+@functools.lru_cache(maxsize=None)
+def catalogs(root):
+    """Each language's texts: site/i18n/'s and boreale-site's common ones
+    (the menu of Boréale's sites, the language button)."""
+    return boreale.catalogs(Path(root, "site", "i18n"))
+
+
 class Texts:
     """The site's texts in one language: HTML, `{{repo}}` filled in."""
 
     def __init__(self, lang):
         self.lang = lang
-        self.texts = json.loads(read("site", "i18n", f"{lang}.json"))
+        self.texts = catalogs(ROOT)[lang]
 
     def __call__(self, key):
         if key not in self.texts:
@@ -285,76 +187,6 @@ class Texts:
     def plain(self, key):
         """The text without its markup, for an attribute or a title."""
         return html.unescape(re.sub(r"<[^>]+>", "", self(key)))
-
-
-# Boréale's sites, in the header's menu (switcher()): the same in each of
-# Boréale's sites (boreale/tools/build_site.py's the reference). boreale.dev
-# first, then the homebrew, then the libraries, each group under its title.
-SITES = [(None, [("boreale", "Boréale", "https://boreale.dev/")]),
-         ("sites_homebrew", [("playguard", "PlayGuard", "https://guard.boreale.dev/"),
-                             ("playshelf", "PlayShelf", "https://shelf.boreale.dev/")]),
-         ("sites_libraries", [("aurore", "Aurore", "https://aurore.boreale.dev/")])]
-
-
-# The versions.json this build reads: {"schema": 1, "projects": {...}}, or
-# the flat {project: "vX"} published before it had a schema
-VERSIONS_SCHEMA = 1
-
-
-def read_versions(document):
-    """The {project: version} of versions.json's document: its `projects`
-    for schema 1, the document itself without a schema (the older, flat
-    form); any other shape (a newer schema, a list, ...) as none."""
-    if not isinstance(document, dict):
-        return {}
-    if "schema" in document or "projects" in document:
-        projects = document.get("projects")
-        schema = document.get("schema")
-        if type(schema) is not int or schema != VERSIONS_SCHEMA or not isinstance(projects, dict):
-            return {}
-        document = projects
-    return {k: v for k, v in document.items() if isinstance(k, str) and isinstance(v, str)}
-
-
-def boreale_versions():
-    """The projects' latest releases as boreale.dev publishes them
-    (versions.json), for the menu; none when it cannot be read (offline, a
-    local build, a shape this build does not know), and the menu shows no
-    versions."""
-    try:
-        with urllib.request.urlopen("https://boreale.dev/versions.json", timeout=10) as r:
-            return read_versions(json.load(r))
-    except (OSError, ValueError):
-        return {}
-
-
-def switcher(t, lang, to_root, home, here, name, versions):
-    """The header's name (`name`), a button that opens the menu of Boréale's
-    sites, `here` marked and leading to `home`, each in the page's language
-    (the four sites have the same 15 folders), with its latest release (`versions`). A
-    popover: the browser closes it on Esc or a click elsewhere; site.css's
-    and site.js's "site switcher" blocks."""
-    label = t("sites_label")
-    folder = lang_dir(lang)   # the same folder on each of Boréale's sites
-    groups = []
-    for title, sites in SITES:
-        items = []
-        for key, site, url in sites:
-            href = home if key == here else url + folder
-            soon = f'<em class="soon">{t("sites_soon")}</em>' if key == "playshelf" else ""
-            version = f' <span class="sites-version">{html.escape(versions[key])}</span>' if key in versions else ""
-            current = ' aria-current="true"' if key == here else ""
-            items.append(f'<li><a href="{href}"{current}>'
-                         f'<img src="{to_root}assets/marks/{key}.svg" alt="" width="36" height="36">'
-                         f'<span><strong>{site}{version}</strong><small>{t(f"sites_{key}")}</small></span>{soon}</a></li>')
-        heading = f'<p class="sites-title">{t(title)}</p>' if title else ""
-        groups.append(f'        {heading}<ul>\n          ' + "\n          ".join(items) + '\n        </ul>')
-    title = next(site for _, sites in SITES for key, site, _ in sites if key == here)
-    return (f'<div class="switcher">\n'
-            f'      <button class="brand switch" type="button" popovertarget="sites" aria-label="{title} · {label}">'
-            f'{name}<svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>\n'
-            f'      <div id="sites" class="sites" popover aria-label="{label}">\n'
-            + "\n".join(groups) + '\n      </div>\n    </div>')
 
 
 SUN_ICON = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>')
@@ -375,39 +207,6 @@ def punctuation(lang, mark):
     if lang.startswith("fr") and mark == ":":
         return "\u00a0:"
     return mark
-
-
-def lang_dir(lang):
-    folder = next(l[1] for l in LANGUAGES if l[0] == lang)
-    return f"{folder}/" if folder else ""
-
-
-def html_lang(lang):
-    return next(l[3] for l in LANGUAGES if l[0] == lang)
-
-
-def flag(lang):
-    """`lang`'s flag, two regional indicator letters, for the eyes only."""
-    emoji = "".join(chr(0x1F1E6 + ord(c) - ord("A")) for c in FLAGS[lang])
-    return f'<span class="flag" aria-hidden="true">{emoji}</span>'
-
-
-def language_menu(t, lang, to_root, path):
-    """The header's languages: a button showing the page's (its flag, its
-    name, its code on a phone), and under it their menu, a popover as the
-    menu of Boréale's sites, this page in each (site.css's and site.js's
-    "languages" blocks; lang.js keeps the one chosen)."""
-    name = next(n for c, _, n, _ in LANGUAGES if c == lang)
-    current = ' aria-current="true"'
-    options = "\n".join(
-        f'        <li><a href="{to_root}{f"{d}/" if d else ""}{path}" data-lang="{c}" lang="{hl}" hreflang="{hl}"'
-        f'{current if c == lang else ""}>{flag(c)}{html.escape(n)}</a></li>'
-        for c, d, n, hl in LANGUAGES)
-    return (f'<div class="settings">\n'
-            f'      <button class="lang-button" type="button" popovertarget="languages" aria-label="{t.plain("language")} · {html.escape(name)}">'
-            f'{flag(lang)}<span class="lang-name">{html.escape(name)}</span><span class="lang-code">{lang.split("-")[0].upper()}</span>'
-            f'<svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>\n'
-            f'      <ul id="languages" class="langs" popover aria-label="{t.plain("language")}">\n{options}\n      </ul>\n    </div>')
 
 
 # ---- Code ------------------------------------------------------------------
@@ -506,14 +305,14 @@ def rewrite_links(body, source, lang, to_root, assets):
         anchor = f"#{parts.fragment}" if parts.fragment else ""
         name = os.path.basename(path)
         if path.startswith("docs/") and name.endswith(".md") and name[:-3] in pages:
-            return f"{to_root}{lang_dir(lang)}docs/{name[:-3]}/{anchor}"
+            return f"{to_root}{boreale.folder(lang)}docs/{name[:-3]}/{anchor}"
         if path == "README.md":
             # The README's sections the home page has; the others on GitHub.
             if parts.fragment and parts.fragment not in README_SECTIONS:
                 return f"{REPO_URL}#{parts.fragment}"
-            return f"{to_root}{lang_dir(lang)}{'#' + README_SECTIONS[parts.fragment] if parts.fragment else ''}"
+            return f"{to_root}{boreale.folder(lang)}{'#' + README_SECTIONS[parts.fragment] if parts.fragment else ''}"
         if path == "CHANGELOG.md":
-            return f"{to_root}{lang_dir(lang)}changelog/"
+            return f"{to_root}{boreale.folder(lang)}changelog/"
         if path.startswith(".github/readme/") and name.endswith((".png", ".gif")):
             assets.add(f"screenshots/{name}")
             return f"{to_root}assets/screenshots/{name}"
@@ -572,30 +371,32 @@ def json_ld(data):
 def page(t, lang, to_root, path, title, body, description=None, home=False, structured=(), indexed=True,
          markdown_url=None, lost=False, night=False):
     """A whole page: `path` is its place under the language's folder ('' or 'docs/x/')."""
-    code, folder, _, hl = next(l for l in LANGUAGES if l[0] == lang)
+    hl = boreale.html_lang(lang)
     description = description or t.plain("meta_description")
     full_title = title or f"Aurore — {t.plain('hero_title_plain')}"
-    url = f"{SITE_URL}{lang_dir(lang)}{path}"
+    url = AURORE.address(lang, path)
     head = []
     if indexed:
-        head.append(f'<link rel="canonical" href="{url}">')
-        head += [f'<link rel="alternate" hreflang="{h}" href="{SITE_URL}{f"{d}/" if d else ""}{path}">'
-                 for _, d, _, h in LANGUAGES]
-        head.append(f'<link rel="alternate" hreflang="x-default" href="{SITE_URL}{path}">')
+        head.append(AURORE.indexing(lang, path))
     if markdown_url:
         head.append(f'<link rel="alternate" type="text/markdown" href="{markdown_url}">')
     if NOINDEX or not indexed:
         head.append('<meta name="robots" content="noindex">')
     first_visit = " data-first-visit" if home and lang == "en-US" else ""
-    base = f"{to_root}{lang_dir(lang)}"
-    api = f'<li><a href="{to_root}api/">{t("nav_api")}</a></li>' if API_DIR else ""
-    api += f'<li><a class="nav-try" href="{to_root}demo/{demo_query(lang)}">{t("nav_demo")}</a></li>' if DEMO_DIR else ""
+    base = f"{to_root}{boreale.folder(lang)}"
+    # The header's links (boreale-site's chrome): the demo is its call to
+    # action, the API's link is there when the API reference is built.
+    nav_links = [("nav_features", f"{base}#features"), ("nav_docs", f"{base}docs/getting-started/"),
+                 ("nav_borealis", f"{base}borealis/")]
+    if API_DIR:
+        nav_links.append(("nav_api", f"{to_root}api/"))
+    demo = ("nav_demo", f"{to_root}demo/{demo_query(lang)}") if DEMO_DIR else None
+    here = "nav_api" if path.startswith("api/") else "nav_borealis" if path == "borealis/" else None
     # The aurora behind the home page's hero, and the page not found's (body
     # a pair, then: what stands under the sky, and the rest).
     # The page on borealis (night) stands under it too, the night going on
     # down the page as the home page's.
     aurora = home or lost or night
-    sky = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
     hero = body[0] if aurora else ""
     main = body[1] if aurora else body
     # A page of the documentation: once the header is scrolled away, a slim
@@ -605,19 +406,25 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
     doc_title = re.search(r'<div class="wrap doc">.*?<h1[^>]*>(.*?)</h1>', main, re.S)
     if doc_title:
         doc_bar = (f'<div class="doc-bar" hidden><div class="wrap doc-bar-inner">'
-                   f'<a class="doc-bar-home" href="{base}" aria-label="Aurore"><img src="{to_root}assets/mark.svg" alt="" width="24" height="24"><span>Aurore</span></a>'
+                   f'<a class="doc-bar-home" href="{base}" aria-label="Aurore"><img src="{to_root}assets/marks/aurore.svg" alt="" width="24" height="24"><span>Aurore</span></a>'
                    f'<span class="doc-bar-title">{doc_title.group(1)}</span>'
                    f'<button class="doc-bar-search" type="button" aria-label="{t.plain("search_placeholder")}">'
                    f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
                    f'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
                    f'{reading_toggle(t)}</div></div>\n')
-    sites_dir = lang_dir(lang)   # Boréale's other sites, in the page's language (the same folders)
-    docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
-                         for p, g, n in DOCS if g == "start")
-    umami = "" if NOINDEX else (f'<script src="{to_root}assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
-                               f'data-domains="{UMAMI_DOMAIN}"></script>\n')
+    footer = AURORE.footer(
+        lang, t.texts, to_root,
+        columns=[(t("docs_title"), [(html.escape(n), f"{base}docs/{p}/") for p, g, n in DOCS if g == "start"]
+                  + ([(t("api_title"), f"{to_root}api/")] if API_DIR else [])),
+                 (t("footer_project"), [("GitHub", REPO_URL), (t("changelog"), f"{base}changelog/"),
+                                        (t("vs_footer"), f"{base}borealis/"),
+                                        (t("footer_contributing"), f"{REPO_URL}/blob/main/CONTRIBUTING.md"),
+                                        (t("footer_issues"), f"{REPO_URL}/issues/new"),
+                                        (t("footer_upstream"), "https://github.com/xfangfang/borealis")])],
+        about=[t("footer_license")], fine=t("footer_nintendo"))
+    umami = "" if NOINDEX else AURORE.audience(to_root) + "\n"
     return f"""<!doctype html>
-<html lang="{hl}" data-lang="{code}"{first_visit}>
+<html lang="{hl}" data-lang="{lang}"{first_visit}>
 <head>
 <meta charset="utf-8">
 <meta name="referrer" content="no-referrer">
@@ -627,7 +434,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <meta name="description" content="{html.escape(description)}">
 <meta name="theme-color" content="#0b1424">
 {chr(10).join(head)}
-<link rel="icon" href="{to_root}assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="{to_root}assets/marks/aurore.svg" type="image/svg+xml">
 <link rel="icon" href="{to_root}assets/icon.png" type="image/png" sizes="256x256">
 <link rel="apple-touch-icon" href="{to_root}assets/icon.png">
 <link rel="manifest" href="{to_root}manifest.webmanifest">
@@ -635,6 +442,8 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <link rel="preload" href="{to_root}assets/fonts/sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{to_root}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
 <script src="{to_root}assets/reading.js"></script>
+<link rel="stylesheet" href="{to_root}assets/boreale.css">
+<link rel="stylesheet" href="{to_root}assets/chrome.css">
 <link rel="stylesheet" href="{to_root}assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aurore">
@@ -645,63 +454,23 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta property="og:image:alt" content="Aurore">
-<meta property="og:locale" content="{OG_LOCALES[code]}">
+<meta property="og:locale" content="{OG_LOCALES[lang]}">
 <meta name="twitter:card" content="summary_large_image">
 {"".join(json_ld(d) for d in structured)}<script src="{to_root}assets/lang.js"></script>
+<script src="{to_root}assets/boreale.js" defer></script>
+<script src="{to_root}assets/chrome.js" defer></script>
 <script src="{to_root}assets/site.js" defer></script>
 {umami}</head>
-<body class="{'home' if home or night else 'inner'}" data-copy="{t.plain('copy')}" data-copied="{t.plain('copied')}">
-<a class="skip" href="#main">{t("skip")}</a>
-{doc_bar}<div class="sky{' sky-home' if aurora else ''}">
-  {sky}
-  <header class="wrap top">
-    {switcher(t, lang, to_root, base, "aurore", f'<img src="{to_root}assets/mark.svg" alt="" width="34" height="34">Aurore', VERSIONS)}
-    <nav aria-label="{t.plain('nav_label')}">
-      <ul>
-        <li><a href="{base}#features">{t("nav_features")}</a></li>
-        <li><a href="{base}docs/getting-started/">{t("nav_docs")}</a></li>
-        <li class="nav-vs"><a href="{base}borealis/"{' aria-current="page"' if path == "borealis/" else ""}>{t("nav_borealis")}</a></li>
-        {api}
-        <li class="nav-gh"><a href="{REPO_URL}">GitHub</a></li>
-      </ul>
-    </nav>
-    {language_menu(t, lang, to_root, path)}
-  </header>
+<body class="reset-margins" data-copy="{t.plain('copy')}" data-copied="{t.plain('copied')}">
+{AURORE.skip(t.texts)}
+{doc_bar}{AURORE.sky(home=aurora, veils=not lost)}
+  {AURORE.header(lang, t.texts, to_root, path, links=nav_links, cta=demo, github=REPO_URL, current=here, home=base, latest=VERSIONS)}
 {hero}
 </div>
 <main id="main">
 {main}
 </main>
-<footer class="site">
-  <div class="wrap footer-cols">
-    <div>
-      <p class="footer-brand"><img src="{to_root}assets/mark.svg" alt="" width="24" height="24"> <strong>Aurore</strong></p>
-      <p>{t("footer_license")}</p>
-      <p><a href="https://boreale.dev/{sites_dir}">{t("footer_boreale")}</a></p>
-    </div>
-    <div>
-      <h2>{t("docs_title")}</h2>
-      <ul>{docs_links}{f'<li><a href="{to_root}api/">{t("api_title")}</a></li>' if API_DIR else ""}</ul>
-    </div>
-    <div>
-      <h2>Boréale</h2>
-      <ul><li><a href="https://boreale.dev/{sites_dir}">boreale.dev</a></li>
-        <li><a href="https://guard.boreale.dev/{sites_dir}">PlayGuard</a></li>
-        <li><a href="https://shelf.boreale.dev/{sites_dir}">PlayShelf</a></li>
-        <li><a href="https://boreale.dev/{sites_dir}legal/">{t("sites_legal")}</a></li>
-        <li><a href="mailto:contact@boreale.dev">contact@boreale.dev</a></li></ul>
-    </div>
-    <div>
-      <h2>{t("footer_project")}</h2>
-      <ul><li><a href="{REPO_URL}">GitHub</a></li><li><a href="{base}changelog/">{t("changelog")}</a></li>
-        <li><a href="{base}borealis/">{t("vs_footer")}</a></li>
-        <li><a href="{REPO_URL}/blob/main/CONTRIBUTING.md">{t("footer_contributing")}</a></li>
-        <li><a href="{REPO_URL}/issues/new">{t("footer_issues")}</a></li>
-        <li><a href="https://github.com/xfangfang/borealis">{t("footer_upstream")}</a></li></ul>
-    </div>
-  </div>
-  <p class="wrap fine">{t("footer_nintendo")}</p>
-</footer>
+{footer}
 <dialog class="lightbox" aria-label="{t.plain('screens_title')}">
   <figure><img alt=""><figcaption></figcaption></figure>
   <button type="button" class="lightbox-close" aria-label="{t.plain('close')}"></button>
@@ -809,27 +578,31 @@ def editor(t):
     </div>"""
 
 
-def release_line(t, base):
+def release_pill(t, base):
+    """The latest release and its date over the home page's title, its notes
+    (PlayGuard's pill); before the first, that the submodule follows main."""
     found = releases()
     if not found:
-        return f'<p class="release">{t("release_none")}</p>'
+        return f'<p class="pill-eyebrow"><span>{t("release_pill_none")}</span></p>'
     version, date, _ = found[0]
-    return (f'<p class="release">{t("release_latest")}{punctuation(t.lang, ":")} <a href="{base}changelog/#v{version}">v{version}</a> '
-            f'· <time datetime="{date}">{date}</time></p>')
+    return (f'<p class="pill-eyebrow"><a href="{base}changelog/#v{version}">v{version} '
+            f'· <time datetime="{date}">{boreale.day(datetime.date.fromisoformat(date), t.lang)}</time></a></p>')
 
 
 def demo_audience(page):
-    """The published demo counted as the site's pages are (UMAMI_WEBSITE): the
-    site's copy of the tracker, and Umami's address in the page's connect-src.
-    Not in a preview (NOINDEX), as the pages' tracker isn't."""
+    """The published demo counted as the site's pages are (AURORE.audience()'s
+    tag, with the demo's data-before-send): the site's copy of the tracker,
+    and Umami's address in the page's connect-src. Not in a preview
+    (NOINDEX), as the pages' tracker isn't."""
     with open(page, encoding="utf-8") as f:
         text = f.read()
     csp = "connect-src 'self';"
     if text.count(csp) != 1 or text.count("</head>") != 1:
         sys.exit(f"build_site: {page} has not the one connect-src and </head> expected")
-    tag = (f'<script src="../assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
-           f'data-domains="{UMAMI_DOMAIN}"></script>\n</head>')
-    text = text.replace(csp, "connect-src 'self' https://gateway.umami.is;").replace("</head>", tag)
+    # data-before-send: demo.js leaves out the first load of a first visit,
+    # which loads the page again under its service worker (auroreAudience).
+    tag = AURORE.audience("../", before_send="auroreAudience") + "\n</head>"
+    text = text.replace(csp, f"connect-src 'self' {UMAMI_GATEWAY};").replace("</head>", tag)
     with open(page, "w", encoding="utf-8") as f:
         f.write(text)
 
@@ -852,7 +625,7 @@ def demo_band(t, lang, to_root):
     if not DEMO_DIR:
         return ""
     return f"""
-  <section class="wrap" id="demo">
+  <section class="wrap section" id="demo">
     <div class="band">
       <div>
         <p class="eyebrow">{t("demo_eyebrow")}</p>
@@ -891,7 +664,7 @@ def stack_section(t):
         f'<code>{html.escape(version)}</code></li>'
         for name, version in facts["versions"])
     checks = "\n".join(f"          <li>{t(f'stack_check_{k}')}</li>" for k in STACK_CHECKS)
-    return f"""  <section class="wrap" id="stack">
+    return f"""  <section class="wrap section" id="stack">
     <div class="section-head">
       <p class="eyebrow">{t("stack_eyebrow")}</p>
       <h2>{t("stack_title")}</h2>
@@ -938,7 +711,7 @@ def consoles(t, to_root):
 
 
 def home_body(t, lang, to_root):
-    base = f"{to_root}{lang_dir(lang)}"
+    base = f"{to_root}{boreale.folder(lang)}"
     platforms = "".join(f"<li>{html.escape(p)}</li>" for p in PLATFORMS)
     features = "\n".join(
         f'      <li class="card">{icon(k)}<h3>{t(f"f_{k}_title")}</h3><p>{t(f"f_{k}_text")}</p></li>'
@@ -953,13 +726,13 @@ def home_body(t, lang, to_root):
                      for name, url, key in MADE_WITH)
     hero = f"""  <section class="wrap hero">
     <div class="hero-text">
+      {release_pill(t, base)}
       <p class="eyebrow">{t("hero_eyebrow")}</p>
       <h1>{t("hero_title")}</h1>
       <p class="lede">{t("hero_lede")}</p>
       <div class="actions">
         {hero_actions(t, lang, to_root, base)}
       </div>
-      {release_line(t, base)}
     </div>
     <!-- The demo on a console's screen: a handheld drawn by site.css
          (.device), leaning towards the text on a wide screen. -->
@@ -972,7 +745,7 @@ def home_body(t, lang, to_root):
       <ul>{platforms}</ul>
     </div>
   </section>"""
-    main = f"""  <section class="wrap code-section" id="code">
+    main = f"""  <section class="wrap section code-section" id="code">
     <div class="section-head">
       <h2>{t("code_title")}</h2>
       <p>{t("code_text")}</p>
@@ -982,7 +755,7 @@ def home_body(t, lang, to_root):
   </section>
 
 {demo_band(t, lang, to_root)}
-  <section class="wrap" id="features">
+  <section class="wrap section" id="features">
     <div class="section-head">
       <p class="eyebrow">{t("features_eyebrow")}</p>
       <h2>{t("features_title")}</h2>
@@ -992,7 +765,7 @@ def home_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap cadran" id="cadran">
+  <section class="wrap section cadran" id="cadran">
     <div class="cadran-text">
       <p class="eyebrow">{t("cadran_eyebrow")}</p>
       <h2>{t("cadran_title")}</h2>
@@ -1004,7 +777,7 @@ def home_body(t, lang, to_root):
     </figure>
   </section>
 
-  <section class="wrap" id="screens">
+  <section class="wrap section" id="screens">
     <div class="section-head">
       <p class="eyebrow">{t("screens_eyebrow")}</p>
       <h2>{t("screens_title")}</h2>
@@ -1014,7 +787,7 @@ def home_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="consoles">
+  <section class="wrap section" id="consoles">
     <div class="section-head">
       <p class="eyebrow">{t("consoles_eyebrow")}</p>
       <h2>{t("consoles_title")}</h2>
@@ -1026,7 +799,7 @@ def home_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap" id="adds">
+  <section class="wrap section" id="adds">
     <div class="adds">
       <div class="section-head">
         <p class="eyebrow">{t("adds_eyebrow")}</p>
@@ -1043,7 +816,7 @@ def home_body(t, lang, to_root):
 
 {stack_section(t)}
 
-  <section class="wrap" id="start">
+  <section class="wrap section" id="start">
     <div class="section-head">
       <p class="eyebrow">{t("start_eyebrow")}</p>
       <h2>{t("start_title")}</h2>
@@ -1067,7 +840,7 @@ def home_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="made">
+  <section class="wrap section" id="made">
     <div class="section-head">
       <p class="eyebrow">{t("made_eyebrow")}</p>
       <h2>{t("made_title")}</h2>
@@ -1077,7 +850,7 @@ def home_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap" id="docs">
+  <section class="wrap section" id="docs">
     <div class="section-head">
       <p class="eyebrow">{t("docs_eyebrow")}</p>
       <h2>{t("docs_title")}</h2>
@@ -1085,7 +858,7 @@ def home_body(t, lang, to_root):
 {docs_list(t, lang, to_root, None)}
   </section>
 
-  <section class="wrap closing">
+  <section class="wrap section closing">
     <div class="promise">
       <h2>{t("license_title")}</h2>
       <p>{t("license_text")}</p>
@@ -1154,7 +927,7 @@ def vs_rename_editor(t):
 
 def vs_body(t, lang, to_root):
     """The page on what Aurore adds to borealis: (what stands under the sky, the rest)."""
-    base = f"{to_root}{lang_dir(lang)}"
+    base = f"{to_root}{boreale.folder(lang)}"
     migrate = f"{base}docs/migrating-from-borealis/"
     jumps = "".join(f'<li><a href="#{k}">{t(f"vs_jump_{k}")}</a></li>' for k in ("new", "sides", "fixes", "move", "project"))
     lineage = "\n".join(
@@ -1163,8 +936,8 @@ def vs_body(t, lang, to_root):
                                ("pick", "forks", t("vs_line_forks_name")), ("pick", "playguard", t("vs_line_playguard_name")),
                                ("node now", "aurore", "JigSawFr/Aurore")))
     glance = "\n".join(
-        f'      <li class="stat"><p class="stat-figure"><span class="sr-only">borealis: </span><span class="was">{was}</span>'
-        f'<span class="to" aria-hidden="true">→</span><span class="sr-only">, Aurore: </span><span class="now">{now}</span></p>'
+        f'      <li class="stat"><p class="stat-figure"><span class="sr">borealis: </span><span class="was">{was}</span>'
+        f'<span class="to" aria-hidden="true">→</span><span class="sr">, Aurore: </span><span class="now">{now}</span></p>'
         f'<p class="stat-text">{t(f"vs_glance_{k}")}</p></li>'
         for k, was, now in VS_GLANCE)
     new = "\n".join(
@@ -1213,14 +986,14 @@ def vs_body(t, lang, to_root):
       <ul>{jumps}</ul>
     </nav>
   </section>"""
-    main = f"""  <section class="wrap" id="glance">
-    <h2 class="sr-only">{t("vs_glance_title")}</h2>
+    main = f"""  <section class="wrap section" id="glance">
+    <h2 class="sr">{t("vs_glance_title")}</h2>
     <ul class="glance">
 {glance}
     </ul>
   </section>
 
-  <section class="wrap" id="new">
+  <section class="wrap section" id="new">
     <div class="section-head">
       <p class="eyebrow">{t("vs_new_eyebrow")}</p>
       <h2>{t("vs_new_title")}</h2>
@@ -1231,7 +1004,7 @@ def vs_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap" id="sides">
+  <section class="wrap section" id="sides">
     <div class="section-head">
       <p class="eyebrow">{t("vs_sides_eyebrow")}</p>
       <h2>{t("vs_sides_title")}</h2>
@@ -1240,7 +1013,7 @@ def vs_body(t, lang, to_root):
 {chr(10).join(tables)}
   </section>
 
-  <section class="wrap" id="fixes">
+  <section class="wrap section" id="fixes">
     <div class="adds">
       <div class="section-head">
         <p class="eyebrow">{t("vs_fixes_eyebrow")}</p>
@@ -1260,7 +1033,7 @@ def vs_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="move">
+  <section class="wrap section" id="move">
     <div class="vs-move">
       <div class="section-head">
         <p class="eyebrow">{t("vs_move_eyebrow")}</p>
@@ -1275,7 +1048,7 @@ def vs_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="project">
+  <section class="wrap section" id="project">
     <div class="section-head">
       <p class="eyebrow">{t("vs_project_eyebrow")}</p>
       <h2>{t("vs_project_title")}</h2>
@@ -1285,7 +1058,7 @@ def vs_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap closing">
+  <section class="wrap section closing">
     <div class="band">
       <div>
         <h2>{t("vs_band_title")}</h2>
@@ -1301,7 +1074,7 @@ def vs_body(t, lang, to_root):
 
 
 def docs_list(t, lang, to_root, current):
-    base = f"{to_root}{lang_dir(lang)}"
+    base = f"{to_root}{boreale.folder(lang)}"
     groups = []
     for group in GROUPS:
         items = "".join(
@@ -1323,7 +1096,7 @@ def doc_body(t, lang, to_root, page_name, assets):
                             f'aria-label="{t.plain("anchor_link")}"></a></{m.group(1)}>', body, flags=re.S)
     names = [p for p, _, _ in DOCS]
     at = names.index(page_name)
-    base = f"{to_root}{lang_dir(lang)}"
+    base = f"{to_root}{boreale.folder(lang)}"
     pager = "".join(
         f'<a class="{cls}" href="{base}docs/{names[i]}/"><span>{t(label)}</span>{html.escape(DOCS[i][2])}</a>'
         for cls, label, i in (("prev", "previous", at - 1), ("next", "next", at + 1)) if 0 <= i < len(names))
@@ -1394,7 +1167,7 @@ def software(t, lang):
         "@context": "https://schema.org",
         "@type": "SoftwareSourceCode",
         "name": "Aurore",
-        "url": f"{SITE_URL}{lang_dir(lang)}",
+        "url": f"{SITE_URL}{boreale.folder(lang)}",
         "description": t.plain("meta_description"),
         "codeRepository": REPO_URL,
         "programmingLanguage": "C++",
@@ -1411,7 +1184,7 @@ def software(t, lang):
 
 
 def doc_data(t, lang, page_name, title, description):
-    home = f"{SITE_URL}{lang_dir(lang)}"
+    home = f"{SITE_URL}{boreale.folder(lang)}"
     url = f"{home}docs/{page_name}/"
     return [
         {"@context": "https://schema.org", "@type": "TechArticle", "headline": title, "description": description,
@@ -1493,22 +1266,9 @@ def releases_atom():
   <link rel="alternate" type="text/html" href="{SITE_URL}changelog/"/>
   <updated>{updated}T00:00:00Z</updated>
   <author><name>JigSawFr</name><uri>{REPO_URL}</uri></author>
-  <icon>{SITE_URL}assets/mark.svg</icon>
+  <icon>{SITE_URL}assets/marks/aurore.svg</icon>
 {entries}</feed>
 """
-
-
-def sitemap(paths):
-    entries = []
-    for path in paths:
-        alternates = "".join(f'\n    <xhtml:link rel="alternate" hreflang="{h}" href="{SITE_URL}{f"{d}/" if d else ""}{path}"/>'
-                             for _, d, _, h in LANGUAGES)
-        alternates += f'\n    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE_URL}{path}"/>'
-        for _, d, _, _ in LANGUAGES:
-            entries.append(f'  <url>\n    <loc>{SITE_URL}{f"{d}/" if d else ""}{path}</loc>{alternates}\n  </url>')
-    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
-            + "\n".join(entries) + "\n</urlset>\n")
 
 
 def redirect_page(to, canonical, lang):
@@ -1529,9 +1289,9 @@ def write(out, rel, text):
     path = os.path.join(out, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if rel.endswith(".html"):
-        text = links_out(text)
+        text = AURORE.links_out(text)
     elif rel.endswith((".md", ".txt")):
-        text = untagged(text)
+        text = AURORE.untagged(text)
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
 
@@ -1544,7 +1304,7 @@ def main():
     out = sys.argv[1]
     ROOT = sys.argv[2] if len(sys.argv) > 2 else "."
     global VERSIONS
-    VERSIONS = boreale_versions()
+    VERSIONS = boreale.latest_versions()
     os.makedirs(out, exist_ok=True)
     assets = {f"screenshots/{s}.png" for s in SHOTS} | {f"screenshots/console-{c[0]}.png" for c in CONSOLES}
     count = 0
@@ -1556,7 +1316,7 @@ def main():
         write(out, f"{base}index.html",
               page(t, lang, to_root, "", "", home_body(t, lang, to_root), home=True,
                    structured=[{"@context": "https://schema.org", "@type": "WebSite", "name": "Aurore",
-                                "url": f"{SITE_URL}{base}", "inLanguage": html_lang(lang)}, software(t, lang)]))
+                                "url": f"{SITE_URL}{base}", "inLanguage": boreale.html_lang(lang)}, software(t, lang)]))
         index = []
         for name, _, short in DOCS:
             doc_root = to_root + "../../"
@@ -1585,18 +1345,19 @@ def main():
     t = Texts("en-US")
     write(out, "llms.txt", llms_txt(t, descriptions))
     write(out, "llms-full.txt", llms_txt(t, descriptions, full))
-    write(out, "sitemap.xml", sitemap([""] + ["borealis/"] + [f"docs/{p}/" for p, _, _ in DOCS] + ["changelog/"]))
+    write(out, "sitemap.xml", AURORE.sitemap([""] + ["borealis/"] + [f"docs/{p}/" for p, _, _ in DOCS] + ["changelog/"]))
     write(out, "releases.atom", releases_atom())
     at_root = urlsplit(SITE_URL).path == "/"
     if at_root:
         write(out, "robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n")
     # 404.html, served at any address: its links start from the site's root,
-    # every language in it, site.js shows the address' or the visitor's.
+    # every language in it, boreale-site's lang.js shows the address', else
+    # the one chosen, else the browser's.
     root_path = urlsplit(SITE_URL).path
     blocks = []
     for lang, folder, _, _ in LANGUAGES:
         tl = Texts(lang)
-        blocks.append(f'<div class="not-found" lang="{html_lang(lang)}" data-lang="{lang}"{" hidden" if lang != "en-US" else ""}>'
+        blocks.append(f'<div class="not-found" lang="{boreale.html_lang(lang)}" data-lang="{lang}"{" hidden" if lang != "en-US" else ""}>'
                       f'<h1>{tl("not_found_title")}</h1><p>{tl("not_found_text")}</p>'
                       f'<p class="actions"><a class="button primary" href="{root_path}{f"{folder}/" if folder else ""}">{tl("home")}</a> '
                       f'<a class="button ghost" href="{root_path}{f"{folder}/" if folder else ""}docs/getting-started/">{tl("docs_title")}</a></p></div>')
@@ -1605,10 +1366,15 @@ def main():
     write(out, "manifest.webmanifest", json.dumps({
         "name": "Aurore", "short_name": "Aurore", "start_url": "./", "scope": "./", "display": "browser",
         "background_color": "#0b1424", "theme_color": "#0b1424",
-        "icons": [{"src": "assets/mark.svg", "sizes": "any", "type": "image/svg+xml"},
+        "icons": [{"src": "assets/marks/aurore.svg", "sizes": "any", "type": "image/svg+xml"},
                   {"src": "assets/icon.png", "sizes": "256x256", "type": "image/png"}]}, indent=1) + "\n")
-    # The site's own files, then the README's screenshots and Aurore's icons.
-    shutil.copytree(os.path.join(ROOT, "site", "assets"), os.path.join(out, "assets"), dirs_exist_ok=True)
+    # The site's own files, boreale-site's (fonts, marks, the tracker,
+    # lang.js, boreale.css and .js), then the README's screenshots and
+    # Aurore's icons.
+    # assets/ made afresh: copy_assets() refuses a file already there.
+    shutil.rmtree(os.path.join(out, "assets"), ignore_errors=True)
+    shutil.copytree(os.path.join(ROOT, "site", "assets"), os.path.join(out, "assets"))
+    boreale.copy_assets(Path(out))
     shutil.copy(os.path.join(ROOT, ".github", "branding", "icon.png"), os.path.join(out, "assets", "icon.png"))
     shutil.copy(os.path.join(ROOT, ".github", "branding", "social-preview.png"),
                 os.path.join(out, "assets", "social-preview.png"))

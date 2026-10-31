@@ -13,7 +13,7 @@ using namespace aurore::literals;
 namespace aurore
 {
 
-const std::string sidebarItemXML = R"xml(
+constexpr std::string_view sidebarItemXML = R"xml(
     <aurore:Box
         width="auto"
         height="@style/aurore/sidebar/item_height"

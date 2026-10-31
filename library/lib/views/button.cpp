@@ -11,7 +11,7 @@
 namespace aurore
 {
 
-const std::string buttonXML = R"xml(
+constexpr std::string_view buttonXML = R"xml(
     <aurore:Box
         width="auto"
         height="auto"

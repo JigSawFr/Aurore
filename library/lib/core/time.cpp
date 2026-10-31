@@ -27,7 +27,7 @@ void Ticking::updateTickings()
         // A ticking stopped or destroyed by the callback of one before it
         // (an activity deleted at the end of its animation) is no longer
         // in the list: skip it rather than touch it.
-        if (std::find(Ticking::runningTickings.begin(), Ticking::runningTickings.end(), ticking) == Ticking::runningTickings.end())
+        if (!std::ranges::contains(Ticking::runningTickings, ticking))
             continue;
 
         bool run = ticking->onUpdate(delta);

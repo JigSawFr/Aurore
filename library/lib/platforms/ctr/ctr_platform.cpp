@@ -213,7 +213,8 @@ void CtrFontLoader::loadFonts()
         Logger::warning("3DS: no text font at {}", TEXT_FONT_PATH);
     if (this->loadFontFromFile(FONT_SWITCH_ICONS, BUTTONS_FONT_PATH))
         nvgAddFallbackFontId(vg, Application::getFont(FONT_REGULAR), Application::getFont(FONT_SWITCH_ICONS));
-    this->loadMaterialFromResources();
+    if (!this->loadMaterialFromResources())
+        Logger::warning("3DS: no Material icons font in the resources");
 }
 
 CtrPlatform::CtrPlatform()

@@ -748,7 +748,7 @@ class Builder:
     </article>
     {f'<nav class="toc" aria-label="{t.plain("on_this_page")}"><p>{t("on_this_page")}</p><ul>{toc_items}</ul></nav>' if len(toc) > 1 else ""}
   </div></div>"""
-        home = f"{site.SITE_URL}{site.lang_dir(self.lang)}"
+        home = f"{site.SITE_URL}{site.boreale.folder(self.lang)}"
         trail = [("Aurore", home), (t.plain("api_title"), f"{site.SITE_URL}api/")] + \
                 [(n, f"{site.SITE_URL}api/{u}") for n, u in crumbs]
         structured = [{"@context": "https://schema.org", "@type": "TechArticle", "headline": title,
@@ -764,7 +764,8 @@ class Builder:
 
     def dress(self, text, to_root, path):
         """The site's page made the API's: its stylesheet and script, the
-        header's API link marked, the other languages' links to their home."""
+        other languages' links to their home (page() marks the header's API
+        link: the page is one of its)."""
         def once(pattern, replacement, s, what):
             new, n = re.subn(pattern, replacement, s, count=1)
             if not n:
@@ -774,8 +775,6 @@ class Builder:
         text = once(re.escape(css), css + f'\n<link rel="stylesheet" href="{to_root}assets/api.css">', text, "site.css")
         js = f'<script src="{to_root}assets/site.js" defer></script>'
         text = once(re.escape(js), js + f'\n<script src="{to_root}assets/api.js" defer></script>', text, "site.js")
-        text = once(rf'<li><a href="{re.escape(to_root)}api/">', f'<li><a href="{to_root}api/" aria-current="page">',
-                    text, "the header's API link")
         # The same page in another language: none, its home instead.
         text = re.sub(r'<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n?', "", text)
         text = re.sub(rf'href="([^"]*?)api/{re.escape(path)}"(?=[^>]*hreflang=)', r'href="\1"', text)
@@ -821,7 +820,7 @@ class Builder:
                          f'<h2 id="{key}-title">{html.escape(title)}</h2><p>{sentence}</p>'
                          f'<ul class="api-chips">{"".join(links)}</ul></section>')
         namespaces = [i for i, cd in self.api.compounds.items() if cd.get("kind") == "namespace"]
-        base = f"../{site.lang_dir(self.lang)}docs/"
+        base = f"../{site.boreale.folder(self.lang)}docs/"
         article = f"""<p class="api-eyebrow">Aurore · C++</p>
       <h1>{self.t("api_title")}</h1>
       <p class="lede">Every class, function and enum of Aurore's public headers (namespace <code>aurore</code> unless named), read from them at each build. To see how they fit together, start with the guides: <a href="{base}getting-started/">Aurore in 15 minutes</a>, <a href="{base}views/">Views</a>, <a href="{base}cadran/">Cadran</a>, <a href="{base}themes/">Themes</a>.</p>
@@ -1050,7 +1049,7 @@ def main():
     folder, out = sys.argv[1], sys.argv[2]
     site.ROOT = sys.argv[3] if len(sys.argv) > 3 else "."
     site.API_DIR = site.API_DIR or out   # the header's link to the API
-    site.VERSIONS = site.boreale_versions()
+    site.VERSIONS = site.boreale.latest_versions()
     if not os.path.isfile(os.path.join(folder, "index.xml")):
         raise SystemExit(f"api: no {folder}/index.xml: run doxygen docs/Doxyfile first")
     api = Api(folder)

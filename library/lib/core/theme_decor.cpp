@@ -15,6 +15,7 @@
 #include <cmath>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace aurore
@@ -269,7 +270,7 @@ namespace
 
     void makePool(const ThemeParticles& spec, int count)
     {
-        const Look& look = LOOKS[(int)spec.kind];
+        const Look& look = LOOKS[std::to_underlying(spec.kind)];
         pool.particles.clear();
         int colors = (int)pool.colors.size();
         for (int i = 0; i < count; i++)
@@ -385,7 +386,7 @@ namespace
 
     Place placeOf(const Particle& p, ParticleKind kind, double t, float width, float height, float speedFactor)
     {
-        const Look& look = LOOKS[(int)kind];
+        const Look& look = LOOKS[std::to_underlying(kind)];
         Place place { 0, 0, p.size, 0, 1 };
         double sway = std::sin(TAU * p.swayFrequency * t + p.swayPhase);
 
@@ -591,7 +592,7 @@ void ThemeDecorations::update(ThemeVariant variant)
     if (pool.colors.empty())
         pool.colors.push_back(nvgRGB(255, 255, 255));
     int count = spec.enabled()
-        ? std::max(1, (int)std::lround(MAX_PARTICLES * spec.density * LOOKS[(int)spec.kind].share))
+        ? std::max(1, (int)std::lround(MAX_PARTICLES * spec.density * LOOKS[std::to_underlying(spec.kind)].share))
         : 0;
     // (The same pool is made again: their places go on where they were.)
     if (spec.kind != pool.spec.kind || count != (int)pool.particles.size())
@@ -660,7 +661,7 @@ void ThemeDecorations::drawBackdrop(ThemeArea area, NVGcontext* vg, float x, flo
 {
     if (area == ThemeArea::NONE || area == ThemeArea::TOP || area == ThemeArea::BOTTOM)
         return;
-    const Held& picture = held[(int)area - 1];
+    const Held& picture = held[std::to_underlying(area) - 1];
     if (!drawable(picture.shown.get()))
         return;
     drawPicture(vg, picture.shown.get(), picture.spec, x, y, width, height, radius, Anchor::CENTER, 1.0f);
@@ -671,7 +672,7 @@ void ThemeDecorations::drawStrips(NVGcontext* vg, float x, float y, float width,
     float screenWidth = Application::contentWidth, screenHeight = Application::contentHeight;
     for (ThemeArea area : { ThemeArea::TOP, ThemeArea::BOTTOM })
     {
-        const Held& strip       = held[(int)area - 1];
+        const Held& strip       = held[std::to_underlying(area) - 1];
         const ThemeImage* image = strip.shown.get();
         if (!drawable(image))
             continue;
@@ -694,7 +695,7 @@ void ThemeDecorations::drawStrips(NVGcontext* vg, float x, float y, float width,
 
 bool ThemeDecorations::hasPicture(ThemeArea area)
 {
-    return area != ThemeArea::NONE && drawable(held[(int)area - 1].shown.get());
+    return area != ThemeArea::NONE && drawable(held[std::to_underlying(area) - 1].shown.get());
 }
 
 void ThemeDecorations::reset()

@@ -15,7 +15,7 @@
 namespace aurore
 {
 
-const std::string bottomBarXML = R"xml(
+constexpr std::string_view bottomBarXML = R"xml(
 
 <aurore:Box
     width="auto"

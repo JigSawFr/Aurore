@@ -21,10 +21,10 @@ void SwitchFontLoader::loadFonts()
 
     // Standard
     rc = plGetSharedFontByType(&font, PlSharedFontType_Standard);
-    if (R_SUCCEEDED(rc))
-        Application::loadFontFromMemory(FONT_REGULAR, font.address, font.size, false);
-    else
+    if (R_FAILED(rc))
         Logger::error("switch: could not load Standard shared font: {:#x}", rc);
+    else if (!Application::loadFontFromMemory(FONT_REGULAR, font.address, font.size, false))
+        Logger::error("switch: the Standard shared font could not be read");
 
     // Simplified Chinese
     // custom Font
@@ -54,8 +54,8 @@ void SwitchFontLoader::loadFonts()
             // Every label is drawn with this font's name: without it no text
             // at all would show. The Standard font takes its place.
             rc = plGetSharedFontByType(&font, PlSharedFontType_Standard);
-            if (R_SUCCEEDED(rc))
-                Application::loadFontFromMemory(FONT_CHINESE_SIMPLIFIED, font.address, font.size, false);
+            if (R_SUCCEEDED(rc) && !Application::loadFontFromMemory(FONT_CHINESE_SIMPLIFIED, font.address, font.size, false))
+                Logger::error("switch: the Standard shared font could not stand in for Chinese Simplified");
         }
     }
 
@@ -99,8 +99,10 @@ void SwitchFontLoader::loadFonts()
         if (access(USER_EMOJI_PATH.c_str(), F_OK) != -1)
         {
             aurore::Logger::info("Load emoji font: {}", USER_EMOJI_PATH);
-            this->loadFontFromFile("emoji", USER_EMOJI_PATH);
-            nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont("emoji"));
+            if (this->loadFontFromFile("emoji", USER_EMOJI_PATH))
+                nvgAddFallbackFontId(vg, Application::getFont(FONT_CHINESE_SIMPLIFIED), Application::getFont("emoji"));
+            else
+                aurore::Logger::warning("Emoji font not loaded: {}", USER_EMOJI_PATH);
         }
         else
         {

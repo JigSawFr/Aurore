@@ -15,7 +15,7 @@
 <title>Aurore · Demo</title>
 <meta name="description" content="Aurore's demo, compiled with Emscripten: the real library in your browser, on each console it runs on, with a controller on screen.">
 <meta name="theme-color" content="#0e1a33">
-<link rel="icon" href="mark.svg" type="image/svg+xml">
+<link rel="icon" href="marks/aurore.svg" type="image/svg+xml">
 <link rel="preload" href="sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="figtree.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="demo.css">
@@ -29,7 +29,7 @@
          the demo is in demo/, its home one level up. -->
     <div class="switcher">
       <button class="brand switch" type="button" popovertarget="sites" aria-label="Aurore · Boréale's projects" id="sites-button">
-        <img src="mark.svg" alt="" width="30" height="30">
+        <img src="marks/aurore.svg" alt="" width="30" height="30">
         <span class="name">Aurore</span>
         <span class="tag" data-i18n="title">Demo</span><svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div id="sites" class="sites" popover data-i18n-label="sites_label" aria-label="Boréale's projects">
@@ -44,6 +44,11 @@
         <p class="sites-title" data-i18n="sites_libraries">Libraries</p>
         <ul>
           <li><a href="../" id="home-link" aria-current="true"><img src="marks/aurore.svg" alt="" width="36" height="36"><span><strong>Aurore</strong><small data-i18n="sites_aurore">The interface library behind them</small></span></a></li>
+        </ul>
+        <p class="sites-title" data-i18n="sites_open">Open data and protocols</p>
+        <ul>
+          <li><a href="https://atlas.boreale.dev/?utm_source=aurore&amp;utm_medium=nav" referrerpolicy="strict-origin" data-site="https://atlas.boreale.dev/"><img src="marks/atlas.svg" alt="" width="36" height="36"><span><strong>Atlas</strong><small data-i18n="sites_atlas">A map of every game, on every platform</small></span></a></li>
+          <li><a href="https://lantern.boreale.dev/?utm_source=aurore&amp;utm_medium=nav" referrerpolicy="strict-origin" data-site="https://lantern.boreale.dev/"><img src="marks/lantern.svg" alt="" width="36" height="36"><span><strong>Lantern</strong><small data-i18n="sites_lantern">The protocol between servers and consoles</small></span></a></li>
         </ul>
         <p class="sites-legal"><a id="legal-link" href="https://boreale.dev/legal/?utm_source=aurore&amp;utm_medium=nav" referrerpolicy="strict-origin" data-i18n="sites_legal">Privacy and legal notice</a></p>
       </div>

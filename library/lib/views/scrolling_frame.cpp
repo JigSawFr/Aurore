@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2021 XITRIX
 // SPDX-License-Identifier: Apache-2.0
 
+#include <aurore/cadran/ui/effects.hpp>
 #include <aurore/core/application.hpp>
 #include <aurore/core/touch/scroll_gesture.hpp>
 #include <aurore/core/touch/tap_gesture.hpp>
@@ -197,6 +198,12 @@ void ScrollingFrame::updateScrollingIndicatior()
     float alpha = 0.3f;
     if (showsFocus)
         alpha = 1.0f;
+    else if (autoHideScrollingIndicator && effects::still())
+    {
+        // The screenshots that compare: a frame taken before or after the
+        // fade would differ, so it is never shown
+        alpha = 0;
+    }
     else if (autoHideScrollingIndicator)
     {
         // Shown while the offset moves, then faded out over 300 ms once it

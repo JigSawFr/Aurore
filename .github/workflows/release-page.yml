@@ -1,0 +1,46 @@
+name: release-page
+
+# By hand (Actions › release-page › Run workflow): the page the release job
+# lays out (tools/release_page.sh: "Aurore X.Y.Z", the figures, the summary,
+# the commit list folded, how to use it, the build report) for an existing
+# release. By default it only shows it on the run page; with "apply", it
+# updates the release (one laid out before this existed, or after editing its
+# .github/release-notes/<version>.md). A release laid out before is laid out
+# again, keeping its summary when there is no file for it.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release (vX.Y.Z; empty for the latest)
+        type: string
+        required: false
+      apply:
+        description: Update the release (else only show the result)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: read   # the CI run of the tagged commit, for the build report
+
+jobs:
+  page:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            .github/release-notes
+            tools/release_notes.py
+            tools/release_page.sh
+          sparse-checkout-cone-mode: false
+      - name: Release page
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+          APPLY: ${{ inputs.apply && '--apply' || '' }}
+        run: |
+          [ -n "$TAG" ] || TAG=$(gh release view --json tagName --jq .tagName)
+          tools/release_page.sh "$TAG" $APPLY

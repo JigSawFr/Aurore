@@ -460,7 +460,7 @@ AURORE_TEST(theme_change_draws_at_once_on_demand)
     // A theme loaded from code, nothing else asking for a frame: drawn at
     // the next iteration, not at the next periodic redraw
     uint64_t drawn = aurore::Application::getDrawnFrameCount();
-    aurore::Theme::loadFile("builtin:high-contrast-dark");
+    AURORE_CHECK(aurore::Theme::loadFile("builtin:high-contrast-dark"));
     h.step();
     AURORE_CHECK(aurore::Application::getDrawnFrameCount() > drawn);
 
@@ -523,17 +523,17 @@ AURORE_TEST(seasonal_theme_changes_at_midnight)
     options.wallTime = noonOf(2026, 10, 16) + 12 * 3600 - 15;
     Harness h(options);
     h.push(new aurore::Activity(screenOf({ new aurore::Button() })));
-    aurore::Theme::loadFile("builtin:seasonal");
+    AURORE_CHECK(aurore::Theme::loadFile("builtin:seasonal"));
     h.settle();
     NVGcolor autumn;
-    aurore::Theme::parseColor("#1a1310", &autumn);
+    AURORE_CHECK(aurore::Theme::parseColor("#1a1310", &autumn));
     NVGcolor background = aurore::Theme::getDarkTheme()["aurore/background"];
     AURORE_CHECK(background.r == autumn.r && background.g == autumn.g && background.b == autumn.b);
     aurore::test::Image before = h.screenshot();
 
     h.advance(20000);
     NVGcolor halloween;
-    aurore::Theme::parseColor("#150d1f", &halloween);
+    AURORE_CHECK(aurore::Theme::parseColor("#150d1f", &halloween));
     background = aurore::Theme::getDarkTheme()["aurore/background"];
     AURORE_CHECK(background.r == halloween.r && background.g == halloween.g && background.b == halloween.b);
     AURORE_CHECK_EQ(aurore::Theme::getCurrentPath(), std::string("builtin:seasonal"));
@@ -789,7 +789,7 @@ struct ThemeFolder
         image.height = height;
         for (int i = 0; i < width * height; i++)
             image.rgba.insert(image.rgba.end(), { r, g, b, 255 });
-        image.savePng((dir / name).string());
+        AURORE_CHECK(image.savePng((dir / name).string()));
         return (dir / name).generic_string();
     }
 
@@ -805,7 +805,7 @@ struct ThemeFolder
                 bool inside = x >= size / 4 && x < size * 3 / 4 && y >= size / 4 && y < size * 3 / 4;
                 image.rgba.insert(image.rgba.end(), { r, g, b, (unsigned char)(inside ? 255 : 0) });
             }
-        image.savePng((dir / name).string());
+        AURORE_CHECK(image.savePng((dir / name).string()));
         return (dir / name).generic_string();
     }
 };
@@ -1866,7 +1866,7 @@ AURORE_TEST(theme_particles_follow_motion_and_input)
     h.advance(900);
     AURORE_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 1);
     // ...and not a frozen frame of them: the screen is the one without
-    aurore::Theme::load("inherit = builtin:winter\n");
+    AURORE_CHECK(aurore::Theme::load("inherit = builtin:winter\n"));
     h.settle();
     AURORE_CHECK_EQ(aurore::test::compareImages(h.screenshot(), still, 0).differingPixels, (size_t)0);
     useParticles("winter", "snow");
@@ -1918,7 +1918,7 @@ AURORE_TEST(theme_particles_draw_every_kind)
         for (aurore::ThemeVariant variant : { aurore::ThemeVariant::DARK, aurore::ThemeVariant::LIGHT })
         {
             aurore::Application::getPlatform()->setThemeVariant(variant);
-            aurore::Theme::load(std::string("inherit = builtin:") + each.preset + "\n");
+            AURORE_CHECK(aurore::Theme::load(std::string("inherit = builtin:") + each.preset + "\n"));
             h.step(2);
             aurore::test::Image plain = h.screenshot();
             useParticles(each.preset, each.kind, "particles_density = high\n");
@@ -1926,8 +1926,8 @@ AURORE_TEST(theme_particles_draw_every_kind)
             aurore::test::Image shot = h.screenshot();
             AURORE_CHECK(aurore::test::compareImages(shot, plain, 4).differingPixels > 200);
             if (folder)
-                shot.savePng(std::string(folder) + "/particles_" + each.kind
-                    + (variant == aurore::ThemeVariant::DARK ? "_dark" : "_light") + ".png");
+                AURORE_CHECK(shot.savePng(std::string(folder) + "/particles_" + each.kind
+                    + (variant == aurore::ThemeVariant::DARK ? "_dark" : "_light") + ".png"));
         }
     // A few frames in a row, for a moving picture
     if (folder)
@@ -1941,7 +1941,7 @@ AURORE_TEST(theme_particles_draw_every_kind)
                 h.advance(1000.0 / 30);
                 char name[64];
                 std::snprintf(name, sizeof(name), "/frames_%s_%02d.png", kind, i);
-                h.screenshot().crop(0, 0, 640, 360).savePng(std::string(folder) + name);
+                AURORE_CHECK(h.screenshot().crop(0, 0, 640, 360).savePng(std::string(folder) + name));
             }
         }
     aurore::Theme::reset();
@@ -2801,6 +2801,50 @@ AURORE_TEST(focus_on_a_scrolling_frame_shows_its_place)
     NVGcolor got  = indicator->getColor();
     AURORE_CHECK(std::fabs(got.r - want.r) < 0.01f && std::fabs(got.g - want.g) < 0.01f && std::fabs(got.b - want.b) < 0.01f);
     AURORE_CHECK(h.matchesReference("scrolling_frame_focus"));
+}
+
+// The screenshots that compare (STILL_FOCUS): a list's scroll indicator
+// that hides itself is never drawn, so a frame taken before its fade and
+// one taken after are the same
+AURORE_TEST(still_frames_leave_the_scroll_indicator_out)
+{
+    for (bool still : { false, true })
+    {
+        ui::hooks::get().env_flag = nullptr;
+        if (still)
+            ui::hooks::get().env_flag = [](const char* name)
+            { return std::string(name) == "STILL_FOCUS"; };
+        Harness h;
+        auto* frame   = new aurore::ScrollingFrame();
+        auto* content = new aurore::Box(aurore::Axis::COLUMN);
+        auto* button  = new aurore::Button();
+        button->setText("Top");
+        content->addView(button);
+        auto* tall = new aurore::Rectangle();
+        tall->setHeight(3000);
+        content->addView(tall);
+        frame->setContentView(content);
+        h.push(new aurore::Activity(frame));
+        h.settle();
+        // Dragged by a finger: the frame's own focus would show the indicator in full
+        h.touchDown(400, 500);
+        for (int y = 480; y >= 200; y -= 40)
+        {
+            h.touchMove(400, (float)y);
+            h.step(1);
+        }
+        AURORE_CHECK(frame->getContentOffsetY() > 0);
+        h.step(2);
+        h.touchUp();
+        aurore::Rectangle* indicator = nullptr;
+        for (aurore::View* child : frame->getChildren())
+            if (auto* r = dynamic_cast<aurore::Rectangle*>(child))
+                indicator = r;
+        AURORE_CHECK(indicator != nullptr);
+        if (indicator)
+            AURORE_CHECK_EQ(indicator->getAlpha() > 0.0f, !still);
+    }
+    ui::hooks::get().env_flag = nullptr;
 }
 
 #ifdef __GLFW__

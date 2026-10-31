@@ -5,6 +5,7 @@
 #include <yoga/Yoga.h>
 
 #include <cmath>
+#include <utility>
 
 #include <aurore/core/application.hpp>
 #include <aurore/core/bidi.hpp>
@@ -581,7 +582,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
     nvgFillColor(vg, a(this->textColor));
 
     // Edit cursor: blinking, or still with the motion reduced
-    if (this->cursor >= (int)CursorPosition::END)
+    if (this->cursor >= std::to_underlying(CursorPosition::END))
     {
         auto blink = ((aurore::getCPUTimeUsec() - cursor_blink) >> 10) % 1000;
         bool still = Application::getReduceMotion();
@@ -592,7 +593,7 @@ void Label::draw(NVGcontext* vg, float x, float y, float width, float height, St
         {
             cursor_position = this->cursor;
             // At the end: after the last character drawn
-            if (this->cursor == (int)CursorPosition::END)
+            if (this->cursor == std::to_underlying(CursorPosition::END))
             {
                 const std::string& drawn = this->animating || this->isWrapping ? this->fullText : this->truncatedText;
                 cursor_position          = 0;

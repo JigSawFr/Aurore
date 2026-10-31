@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace aurore
@@ -182,7 +183,7 @@ struct ThemeDecor
     ThemeParticles particles;
 
     /// The picture of `area`.
-    const ThemePicture& picture(ThemeArea area) const { return this->pictures[(int)area - 1]; }
+    const ThemePicture& picture(ThemeArea area) const { return this->pictures[std::to_underlying(area) - 1]; }
     bool hasPictures() const
     {
         for (const ThemePicture& picture : this->pictures)
@@ -328,13 +329,13 @@ class Theme
      * iteration of the main loop, which draws them again (redraw on demand
      * or not).
      */
-    static bool loadFile(const std::string& path, ThemeVariant* variant = nullptr);
+    [[nodiscard]] static bool loadFile(const std::string& path, ThemeVariant* variant = nullptr);
 
     /**
      * As loadFile, from the file's text; `directory` is where its `@include`
      * and inherit files are looked for.
      */
-    static bool load(const std::string& text, ThemeVariant* variant = nullptr, const std::string& directory = "");
+    [[nodiscard]] static bool load(const std::string& text, ThemeVariant* variant = nullptr, const std::string& directory = "");
 
     /**
      * Back to the look without a theme file.
@@ -502,7 +503,7 @@ class Theme
      * Reads a colour as theme files write it ("#2ec4b6", "#2ec4b680",
      * "rgba(…)"); false if it is not one.
      */
-    static bool parseColor(const std::string& text, NVGcolor* color);
+    [[nodiscard]] static bool parseColor(const std::string& text, NVGcolor* color);
 
     /**
      * WCAG's contrast ratio of two opaque colours (1 to 21).

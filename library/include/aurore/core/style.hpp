@@ -60,7 +60,7 @@ float dp(float length);
  * A density by name: "comfortable", "compact", "dense", or a number
  * ("0.8"); false for anything else (and NaN).
  */
-bool parseDensity(const std::string& text, float* density);
+[[nodiscard]] bool parseDensity(const std::string& text, float* density);
 
 /// The metrics (sizes, margins, durations) by name, "aurore/sidebar/width"…: the ones
 /// the code adds, and over them a theme file's `[metrics]`.

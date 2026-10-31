@@ -8,7 +8,7 @@
 namespace aurore
 {
 
-const std::string radioCellXML = R"xml(
+constexpr std::string_view radioCellXML = R"xml(
     <aurore:Box
         width="auto"
         height="@style/aurore/sidebar/item_height"

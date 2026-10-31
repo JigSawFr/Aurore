@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 #include <algorithm>
 #include <set>
@@ -835,7 +836,7 @@ void Application::navigate(FocusDirection direction, bool repeating)
         nextFocus = currentFocus->getCustomNavigationRoutePtr(direction);
 
         if (!nextFocus)
-            Logger::warning("Tried to follow a navigation route that leads to a nullptr view! (from=\"{}\", direction={})", currentFocus->describe(), std::to_string((int)direction));
+            Logger::warning("Tried to follow a navigation route that leads to a nullptr view! (from=\"{}\", direction={})", currentFocus->describe(), std::to_underlying(direction));
     }
     // By ID
     else if (currentFocus->hasCustomNavigationRouteById(direction))
@@ -844,7 +845,7 @@ void Application::navigate(FocusDirection direction, bool repeating)
         nextFocus      = currentFocus->getNearestView(id);
 
         if (!nextFocus)
-            Logger::warning("Tried to follow a navigation route that leads to an unknown view ID! (from=\"{}\", direction={}, targetId=\"{}\")", currentFocus->describe(), std::to_string((int)direction), id);
+            Logger::warning("Tried to follow a navigation route that leads to an unknown view ID! (from=\"{}\", direction={}, targetId=\"{}\")", currentFocus->describe(), std::to_underlying(direction), id);
     }
     // Do nothing if current focus doesn't have a parent
     // (in which case there is nothing to traverse)
@@ -2008,7 +2009,7 @@ std::string Application::getLocale()
 
 void Application::addToFreeQueue(View* view)
 {
-    if (std::find(deletionPool.cbegin(), deletionPool.cend(), view) != deletionPool.cend())
+    if (std::ranges::contains(deletionPool, view))
         return;
 
     aurore::Logger::verbose("Application::addToFreeQueue {}", view->describe());

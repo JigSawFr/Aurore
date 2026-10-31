@@ -3,6 +3,7 @@
 // SPDX-FileCopyrightText: 2026 JigSawFr
 // SPDX-License-Identifier: Apache-2.0
 
+#include <utility>
 #include <aurore/core/application.hpp>
 #include <aurore/core/assets.hpp>
 #include <aurore/core/hot_reload.hpp>
@@ -680,7 +681,7 @@ static std::vector<std::string> surfaceKeys = {
 
 void Theme::addSurfaceKey(const std::string& key)
 {
-    if (std::find(surfaceKeys.begin(), surfaceKeys.end(), key) == surfaceKeys.end())
+    if (!std::ranges::contains(surfaceKeys, key))
         surfaceKeys.push_back(key);
 }
 
@@ -731,11 +732,11 @@ static NVGcolor backdropOf(const ColorMap& colors, const ThemeBackground& backgr
 // Theme files
 // ---------------------------------------------------------------------------
 
-static const char* BUILTIN_PREFIX = "builtin:";
+static constexpr const char* BUILTIN_PREFIX = "builtin:";
 // A theme folder's file: <themes>/<id>/theme.theme, next to its pictures
-static const char* THEME_FOLDER_FILE = "theme.theme";
-static const char* SEASONAL_PATH     = "builtin:seasonal";
-static const int MAX_DEPTH           = 8;
+static constexpr const char* THEME_FOLDER_FILE = "theme.theme";
+static constexpr const char* SEASONAL_PATH     = "builtin:seasonal";
+static constexpr int MAX_DEPTH                 = 8;
 // The format of a theme file this version reads: its `schema` key, absent in
 // the files written before it (1). A file of a newer one is read all the
 // same, with what this version knows of it, and a warning
@@ -1096,9 +1097,9 @@ static bool parseFit(const std::string& value, BackgroundFit* fit)
 
 // Logos and images (docs/themes.md, "Logos and images")
 
-static const char* ICON_PREFIX  = "icon.";
-static const char* IMAGE_PREFIX = "image.";
-static const char* TINT_SUFFIX  = ".tint";
+static constexpr const char* ICON_PREFIX  = "icon.";
+static constexpr const char* IMAGE_PREFIX = "image.";
+static constexpr const char* TINT_SUFFIX  = ".tint";
 
 static bool isPictureKey(const std::string& key)
 {
@@ -1287,7 +1288,7 @@ static bool parseDecorLine(const std::string& key, const std::string& value, con
             continue;
         DecorPictureSpec& picture  = decor->pictures[i];
         const std::string property = key.substr(prefix.size());
-        bool strip                 = i >= (int)ThemeArea::TOP - 1;
+        bool strip                 = i >= std::to_underlying(ThemeArea::TOP) - 1;
         if (property.empty())
         {
             std::string path;
@@ -1478,7 +1479,7 @@ static void parseThemeText(const std::string& text, const std::string& directory
                 report(out, where(number) + ": @include " + name + ": skipped, the theme reads more than " + std::to_string(MAX_FILES) + " files");
             else if (!resolveThemeFile(name, directory, assets, &path, &error))
                 report(out, where(number) + ": @include " + error);
-            else if (std::find(chain.begin(), chain.end(), path) != chain.end())
+            else if (std::ranges::contains(chain, path))
                 report(out, where(number) + ": @include " + name + " includes itself (a loop)");
             else if (reading->files++, !readThemeText(path, &included))
                 report(out, where(number) + ": @include " + name + ": cannot read " + path);
@@ -1696,7 +1697,7 @@ static void resolveInherit(ParsedTheme* theme, const std::string& directory, int
         report(theme, "inherit " + inherit + ": skipped, the theme reads more than " + std::to_string(MAX_FILES) + " files");
     else if (!resolveThemeFile(inherit, directory, directory, &path, &error))
         report(theme, "inherit " + error);
-    else if (std::find(chain.begin(), chain.end(), path) != chain.end())
+    else if (std::ranges::contains(chain, path))
         report(theme, "inherit " + inherit + " inherits itself (a loop)");
     else if (reading->files++, !readThemeText(path, &text))
         report(theme, "inherit " + inherit + ": cannot read " + path);
@@ -2087,7 +2088,7 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
         std::string error = "background_image: cannot read " + background->image;
         bool readable     = decodePictures ? ThemeImages::meanColor(background->image, &mean)
                                            : ThemeImages::exists(background->image);
-        if (background->hasImage() && !readable && std::find(info.errors.begin(), info.errors.end(), error) == info.errors.end())
+        if (background->hasImage() && !readable && !std::ranges::contains(info.errors, error))
             info.errors.push_back(error);
     }
 
@@ -2104,7 +2105,7 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
             NVGcolor mean;
             std::string error = key + ": cannot read " + path;
             bool readable     = decodePictures ? ThemeImages::meanColor(path, &mean) : ThemeImages::exists(path);
-            if (!path.empty() && !readable && std::find(info.errors.begin(), info.errors.end(), error) == info.errors.end())
+            if (!path.empty() && !readable && !std::ranges::contains(info.errors, error))
                 info.errors.push_back(error);
         }
     }
@@ -2118,7 +2119,7 @@ static ThemeInfo inspectText(const std::string& text, const std::string& path, b
             NVGcolor mean;
             std::string error = std::string(DECOR_PICTURES[i]) + ": cannot read " + picture.image;
             bool readable     = decodePictures ? ThemeImages::meanColor(picture.image, &mean) : ThemeImages::exists(picture.image);
-            if (!readable && std::find(info.errors.begin(), info.errors.end(), error) == info.errors.end())
+            if (!readable && !std::ranges::contains(info.errors, error))
                 info.errors.push_back(error);
         }
 

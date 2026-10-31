@@ -165,7 +165,7 @@ struct TempDir
         image.rgba.reserve((size_t)width * height * 4);
         for (size_t i = 0; i < (size_t)width * height; i++)
             image.rgba.insert(image.rgba.end(), { r, g, b, 255 });
-        image.savePng((dir / name).string());
+        AURORE_CHECK(image.savePng((dir / name).string()));
         return (dir / name).generic_string();
     }
 };

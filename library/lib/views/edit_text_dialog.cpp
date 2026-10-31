@@ -6,6 +6,8 @@
 #include <aurore/core/touch/tap_gesture.hpp>
 #include <aurore/views/edit_text_dialog.hpp>
 
+#include <utility>
+
 #ifdef __PSV__
 #define EDIT_TEXT_DIALOG_POP_ANIMATION TransitionAnimation::NONE
 #define EDIT_TEXT_DIALOG_BACKGROUND_TRANSLUCENT false
@@ -19,7 +21,7 @@
 namespace aurore
 {
 
-const std::string editTextDialogXML = R"xml(
+constexpr std::string_view editTextDialogXML = R"xml(
     <aurore:Box
         id="aurore/container"
         width="auto"
@@ -35,11 +37,11 @@ const std::string editTextDialogXML = R"xml(
             id="aurore/dialog/header"
             fontSize="24")xml"
 #ifdef __PSV__
-                                      R"xml(marginTop="30")xml"
+                                               R"xml(marginTop="30")xml"
 #else
-                                      R"xml(marginTop="50")xml"
+                                               R"xml(marginTop="50")xml"
 #endif
-                                      R"xml(marginBottom="30"
+                                               R"xml(marginBottom="30"
             textColor="#FFFFFF"/>
 
         <aurore:Box
@@ -250,7 +252,7 @@ void EditTextDialog::updateUI()
     {
         label->setThemeColor("textColor", "aurore/text_secondary");
         label->setText(hint);
-        label->setCursor((int)CursorPosition::START);
+        label->setCursor(std::to_underlying(CursorPosition::START));
     }
     else
     {

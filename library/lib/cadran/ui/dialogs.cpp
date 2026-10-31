@@ -636,7 +636,7 @@ void pick_palette(std::function<void()> after)
         if (info.path == ui::prefs().theme_file)
             selected = (int)labels.size();
         // A user's theme named as one above it: told apart by its file
-        if (std::find(labels.begin(), labels.end(), info.name) != labels.end())
+        if (std::ranges::contains(labels, info.name))
             labels.push_back(info.name + " (" + info.id + ")");
         else
             labels.push_back(info.name);
