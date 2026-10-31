@@ -66,9 +66,9 @@ class SwitchPlatform : public Platform
     ThemeVariant systemThemeVariant; // the console's, read at start
     std::string locale;
 
-    AudioPlayer* audioPlayer = nullptr;
+    AudioPlayer* audioPlayer         = nullptr;
     SwitchInputManager* inputManager = nullptr;
-    SwitchImeManager* imeManager = nullptr;
+    SwitchImeManager* imeManager     = nullptr;
 
 #ifdef AURORE_USE_DEKO3D
     SwitchVideoContext* videoContext = nullptr; // set once the context is built: its own constructor reads it
