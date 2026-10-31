@@ -27,6 +27,9 @@ code, pre, kbd { font-family: var(--mono); }
   overflow-wrap: anywhere;
 }
 .muted { color: var(--mist); }
+/* The changelog quotes long names in plain text (CMAKE_OSX_DEPLOYMENT_TARGET):
+   they break rather than widen a small phone's page. */
+.release-entry { overflow-wrap: break-word; }
 .narrow { max-width: calc(820px + var(--gutter-l) + var(--gutter-r)); }
 
 /* ---- The home page ------------------------------------------------------ */
