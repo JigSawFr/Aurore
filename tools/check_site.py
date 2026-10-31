@@ -16,6 +16,10 @@
   included, the demo, built apart, left out; a page that only sends its
   visitor on (docs/, Doxygen's old addresses) needs neither tracker nor
   policy;
+- the page chrome (library/boreale-site, "The page chrome (v4)"): one header
+  with the name's menu and the nav, the call to action (the demo) before
+  GitHub, the footer linking to every other of Boréale's sites, chrome.css and
+  chrome.js loaded;
 - the catalogs of site/i18n/ and boreale-site's (check_catalogs()): the same
   keys as en-US.json, none empty but English's notes that a page is in
   English, the same {placeholders} and <em> as English's, no common text
@@ -59,7 +63,8 @@ def main():
         return 2
     out = Path(sys.argv[1])
     site = boreale.Site("aurore", sys.argv[2] if len(sys.argv) > 2 else os.environ.get("SITE_URL"))
-    problems, count = check.pages(out, site, apart=("demo",), tracker=os.environ.get("SITE_NOINDEX") != "1")
+    problems, count = check.pages(out, site, apart=("demo",), tracker=os.environ.get("SITE_NOINDEX") != "1",
+                                chrome=True)
     # English's texts left empty on purpose: the note that a page is in
     # English, shown in the other languages alone.
     problems += boreale.check_catalogs(ROOT / "site" / "i18n",

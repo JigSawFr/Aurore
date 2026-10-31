@@ -1,8 +1,5 @@
 {
   "meta_description": "Aurore — библиотека интерфейса на C++23 для геймпадов, телевизоров и сенсорных экранов: облик Nintendo Switch из коробки, на Android, iOS, Windows, macOS, Linux, PS4, PS Vita, New 3DS, Switch и в браузере.",
-  "skip": "К содержимому",
-  "nav_label": "Aurore",
-  "sites_legal": "Конфиденциальность и правовая информация",
   "nav_features": "Возможности",
   "nav_start": "Начало работы",
   "nav_docs": "Документация",
@@ -277,7 +274,6 @@
   "api_text": "Каждый класс и каждая функция, собранные Doxygen из заголовков.",
   "license_title": "Лицензия",
   "license_text": "Код borealis распространяется под лицензией <strong>Apache 2.0</strong>; Cadran, облик Aurore, — под <strong>GPLv3</strong>, как и приложение, собранное с ним. Свободное ПО, поддерживаемое JigSawFr.",
-  "footer_boreale": "Проект Boréale",
   "footer_license": "Apache 2.0 · Cadran GPLv3",
   "footer_project": "Проект",
   "footer_issues": "Сообщить об ошибке",

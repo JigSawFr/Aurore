@@ -1,8 +1,5 @@
 {
   "meta_description": "Aurore는 컨트롤러, TV, 터치스크린을 위한 C++23 UI 라이브러리입니다. 처음부터 Nintendo Switch 같은 모습으로 Android, iOS, Windows, macOS, Linux, PS4, PS Vita, New 3DS, Switch, 브라우저에서 실행됩니다.",
-  "skip": "본문으로 건너뛰기",
-  "nav_label": "Aurore",
-  "sites_legal": "개인정보 및 법적 고지",
   "nav_features": "기능",
   "nav_start": "시작하기",
   "nav_docs": "문서",
@@ -277,7 +274,6 @@
   "api_text": "Doxygen이 헤더에서 만든 모든 클래스와 함수.",
   "license_title": "라이선스",
   "license_text": "borealis의 코드는 <strong>Apache 2.0</strong> 라이선스입니다. Aurore의 모습인 Cadran은 <strong>GPLv3</strong>이며, 이를 사용해 만든 앱도 마찬가지입니다. JigSawFr가 관리하는 자유 소프트웨어입니다.",
-  "footer_boreale": "Boréale 프로젝트",
   "footer_license": "Apache 2.0 · Cadran GPLv3",
   "footer_project": "프로젝트",
   "footer_issues": "버그 신고",
