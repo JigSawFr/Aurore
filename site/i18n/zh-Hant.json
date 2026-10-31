@@ -1,8 +1,5 @@
 {
   "meta_description": "Aurore 是一套為控制器、電視和觸控螢幕打造的 C++23 介面函式庫：開箱即是 Nintendo Switch 的外觀，可在 Android、iOS、Windows、macOS、Linux、PS4、PS Vita、New 3DS、Switch 和瀏覽器上執行。",
-  "skip": "跳到內容",
-  "nav_label": "Aurore",
-  "sites_legal": "隱私與法律聲明",
   "nav_features": "功能",
   "nav_start": "入門",
   "nav_docs": "說明文件",
@@ -277,7 +274,6 @@
   "api_text": "由 Doxygen 從標頭檔產生的每個類別和函式。",
   "license_title": "授權條款",
   "license_text": "borealis 的程式碼採用 <strong>Apache 2.0</strong> 授權；Aurore 的外觀 Cadran 採用 <strong>GPLv3</strong>，用它建置的 App 也是如此。由 JigSawFr 維護的自由軟體。",
-  "footer_boreale": "Boréale 專案",
   "footer_license": "Apache 2.0 · Cadran GPLv3",
   "footer_project": "專案",
   "footer_issues": "回報問題",

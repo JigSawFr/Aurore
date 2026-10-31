@@ -384,14 +384,19 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
         head.append('<meta name="robots" content="noindex">')
     first_visit = " data-first-visit" if home and lang == "en-US" else ""
     base = f"{to_root}{boreale.folder(lang)}"
-    api = f'<li><a href="{to_root}api/">{t("nav_api")}</a></li>' if API_DIR else ""
-    api += f'<li><a class="nav-try" href="{to_root}demo/{demo_query(lang)}">{t("nav_demo")}</a></li>' if DEMO_DIR else ""
+    # The header's links (boreale-site's chrome): the demo is its call to
+    # action, the API's link is there when the API reference is built.
+    nav_links = [("nav_features", f"{base}#features"), ("nav_docs", f"{base}docs/getting-started/"),
+                 ("nav_borealis", f"{base}borealis/")]
+    if API_DIR:
+        nav_links.append(("nav_api", f"{to_root}api/"))
+    demo = ("nav_demo", f"{to_root}demo/{demo_query(lang)}") if DEMO_DIR else None
+    here = "nav_api" if path.startswith("api/") else "nav_borealis" if path == "borealis/" else None
     # The aurora behind the home page's hero, and the page not found's (body
     # a pair, then: what stands under the sky, and the rest).
     # The page on borealis (night) stands under it too, the night going on
     # down the page as the home page's.
     aurora = home or lost or night
-    sky = '<canvas id="sky" aria-hidden="true"></canvas>' if aurora else ""
     hero = body[0] if aurora else ""
     main = body[1] if aurora else body
     # A page of the documentation: once the header is scrolled away, a slim
@@ -407,9 +412,16 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
                    f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">'
                    f'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>'
                    f'{reading_toggle(t)}</div></div>\n')
-    sites_dir = boreale.folder(lang)   # Boréale's other sites, in the page's language (the same folders)
-    docs_links = "".join(f'<li><a href="{base}docs/{p}/">{html.escape(n)}</a></li>'
-                         for p, g, n in DOCS if g == "start")
+    footer = AURORE.footer(
+        lang, t.texts, to_root,
+        columns=[(t("docs_title"), [(html.escape(n), f"{base}docs/{p}/") for p, g, n in DOCS if g == "start"]
+                  + ([(t("api_title"), f"{to_root}api/")] if API_DIR else [])),
+                 (t("footer_project"), [("GitHub", REPO_URL), (t("changelog"), f"{base}changelog/"),
+                                        (t("vs_footer"), f"{base}borealis/"),
+                                        (t("footer_contributing"), f"{REPO_URL}/blob/main/CONTRIBUTING.md"),
+                                        (t("footer_issues"), f"{REPO_URL}/issues/new"),
+                                        (t("footer_upstream"), "https://github.com/xfangfang/borealis")])],
+        about=[t("footer_license")], fine=t("footer_nintendo"))
     umami = "" if NOINDEX else AURORE.audience(to_root) + "\n"
     return f"""<!doctype html>
 <html lang="{hl}" data-lang="{lang}"{first_visit}>
@@ -431,6 +443,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <link rel="preload" href="{to_root}assets/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
 <script src="{to_root}assets/reading.js"></script>
 <link rel="stylesheet" href="{to_root}assets/boreale.css">
+<link rel="stylesheet" href="{to_root}assets/chrome.css">
 <link rel="stylesheet" href="{to_root}assets/site.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Aurore">
@@ -445,61 +458,19 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
 <meta name="twitter:card" content="summary_large_image">
 {"".join(json_ld(d) for d in structured)}<script src="{to_root}assets/lang.js"></script>
 <script src="{to_root}assets/boreale.js" defer></script>
+<script src="{to_root}assets/chrome.js" defer></script>
 <script src="{to_root}assets/site.js" defer></script>
 {umami}</head>
-<body class="{'home' if home or night else 'inner'}" data-copy="{t.plain('copy')}" data-copied="{t.plain('copied')}">
-<a class="skip" href="#main">{t("skip")}</a>
-{doc_bar}<div class="sky{' sky-home' if aurora else ''}">
-  {sky}
-  <header class="wrap top">
-    {AURORE.switcher(lang, t.texts, to_root, VERSIONS, home=base)}
-    <nav class="nav" aria-label="{t.plain('nav_label')}">
-      <ul>
-        <li><a href="{base}#features">{t("nav_features")}</a></li>
-        <li><a href="{base}docs/getting-started/">{t("nav_docs")}</a></li>
-        <li class="nav-vs"><a href="{base}borealis/"{' aria-current="page"' if path == "borealis/" else ""}>{t("nav_borealis")}</a></li>
-        {api}
-        <li class="nav-gh"><a href="{REPO_URL}">GitHub</a></li>
-      </ul>
-    </nav>
-    {AURORE.languages(lang, t.texts, to_root, path)}
-  </header>
+<body class="reset-margins" data-copy="{t.plain('copy')}" data-copied="{t.plain('copied')}">
+{AURORE.skip(t.texts)}
+{doc_bar}{AURORE.sky(home=aurora, veils=not lost)}
+  {AURORE.header(lang, t.texts, to_root, path, links=nav_links, cta=demo, github=REPO_URL, current=here, home=base, latest=VERSIONS)}
 {hero}
 </div>
 <main id="main">
 {main}
 </main>
-<footer class="site">
-  <div class="wrap footer-cols">
-    <div>
-      <p class="footer-brand"><img src="{to_root}assets/marks/aurore.svg" alt="" width="24" height="24"> <strong>Aurore</strong></p>
-      <p>{t("footer_license")}</p>
-      <p><a href="https://boreale.dev/{sites_dir}">{t("footer_boreale")}</a></p>
-    </div>
-    <div>
-      <h2>{t("docs_title")}</h2>
-      <ul>{docs_links}{f'<li><a href="{to_root}api/">{t("api_title")}</a></li>' if API_DIR else ""}</ul>
-    </div>
-    <div>
-      <h2>Boréale</h2>
-      <ul><li><a href="https://boreale.dev/{sites_dir}">boreale.dev</a></li>
-        <li><a href="https://guard.boreale.dev/{sites_dir}">PlayGuard</a></li>
-        <li><a href="https://shelf.boreale.dev/{sites_dir}">PlayShelf</a></li>
-        <li><a href="https://atlas.boreale.dev/{sites_dir}">Atlas</a></li>
-        <li><a href="https://lantern.boreale.dev/{sites_dir}">Lantern</a></li>
-        <li><a href="https://boreale.dev/{sites_dir}legal/">{t("sites_legal")}</a></li></ul>
-    </div>
-    <div>
-      <h2>{t("footer_project")}</h2>
-      <ul><li><a href="{REPO_URL}">GitHub</a></li><li><a href="{base}changelog/">{t("changelog")}</a></li>
-        <li><a href="{base}borealis/">{t("vs_footer")}</a></li>
-        <li><a href="{REPO_URL}/blob/main/CONTRIBUTING.md">{t("footer_contributing")}</a></li>
-        <li><a href="{REPO_URL}/issues/new">{t("footer_issues")}</a></li>
-        <li><a href="https://github.com/xfangfang/borealis">{t("footer_upstream")}</a></li></ul>
-    </div>
-  </div>
-  <p class="wrap fine">{t("footer_nintendo")}</p>
-</footer>
+{footer}
 <dialog class="lightbox" aria-label="{t.plain('screens_title')}">
   <figure><img alt=""><figcaption></figcaption></figure>
   <button type="button" class="lightbox-close" aria-label="{t.plain('close')}"></button>
@@ -612,9 +583,9 @@ def release_pill(t, base):
     (PlayGuard's pill); before the first, that the submodule follows main."""
     found = releases()
     if not found:
-        return f'<p class="release-pill"><span>{t("release_pill_none")}</span></p>'
+        return f'<p class="pill-eyebrow"><span>{t("release_pill_none")}</span></p>'
     version, date, _ = found[0]
-    return (f'<p class="release-pill"><a href="{base}changelog/#v{version}">v{version} '
+    return (f'<p class="pill-eyebrow"><a href="{base}changelog/#v{version}">v{version} '
             f'· <time datetime="{date}">{boreale.day(datetime.date.fromisoformat(date), t.lang)}</time></a></p>')
 
 
@@ -654,7 +625,7 @@ def demo_band(t, lang, to_root):
     if not DEMO_DIR:
         return ""
     return f"""
-  <section class="wrap" id="demo">
+  <section class="wrap section" id="demo">
     <div class="band">
       <div>
         <p class="eyebrow">{t("demo_eyebrow")}</p>
@@ -693,7 +664,7 @@ def stack_section(t):
         f'<code>{html.escape(version)}</code></li>'
         for name, version in facts["versions"])
     checks = "\n".join(f"          <li>{t(f'stack_check_{k}')}</li>" for k in STACK_CHECKS)
-    return f"""  <section class="wrap" id="stack">
+    return f"""  <section class="wrap section" id="stack">
     <div class="section-head">
       <p class="eyebrow">{t("stack_eyebrow")}</p>
       <h2>{t("stack_title")}</h2>
@@ -774,7 +745,7 @@ def home_body(t, lang, to_root):
       <ul>{platforms}</ul>
     </div>
   </section>"""
-    main = f"""  <section class="wrap code-section" id="code">
+    main = f"""  <section class="wrap section code-section" id="code">
     <div class="section-head">
       <h2>{t("code_title")}</h2>
       <p>{t("code_text")}</p>
@@ -784,7 +755,7 @@ def home_body(t, lang, to_root):
   </section>
 
 {demo_band(t, lang, to_root)}
-  <section class="wrap" id="features">
+  <section class="wrap section" id="features">
     <div class="section-head">
       <p class="eyebrow">{t("features_eyebrow")}</p>
       <h2>{t("features_title")}</h2>
@@ -794,7 +765,7 @@ def home_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap cadran" id="cadran">
+  <section class="wrap section cadran" id="cadran">
     <div class="cadran-text">
       <p class="eyebrow">{t("cadran_eyebrow")}</p>
       <h2>{t("cadran_title")}</h2>
@@ -806,7 +777,7 @@ def home_body(t, lang, to_root):
     </figure>
   </section>
 
-  <section class="wrap" id="screens">
+  <section class="wrap section" id="screens">
     <div class="section-head">
       <p class="eyebrow">{t("screens_eyebrow")}</p>
       <h2>{t("screens_title")}</h2>
@@ -816,7 +787,7 @@ def home_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="consoles">
+  <section class="wrap section" id="consoles">
     <div class="section-head">
       <p class="eyebrow">{t("consoles_eyebrow")}</p>
       <h2>{t("consoles_title")}</h2>
@@ -828,7 +799,7 @@ def home_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap" id="adds">
+  <section class="wrap section" id="adds">
     <div class="adds">
       <div class="section-head">
         <p class="eyebrow">{t("adds_eyebrow")}</p>
@@ -845,7 +816,7 @@ def home_body(t, lang, to_root):
 
 {stack_section(t)}
 
-  <section class="wrap" id="start">
+  <section class="wrap section" id="start">
     <div class="section-head">
       <p class="eyebrow">{t("start_eyebrow")}</p>
       <h2>{t("start_title")}</h2>
@@ -869,7 +840,7 @@ def home_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="made">
+  <section class="wrap section" id="made">
     <div class="section-head">
       <p class="eyebrow">{t("made_eyebrow")}</p>
       <h2>{t("made_title")}</h2>
@@ -879,7 +850,7 @@ def home_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap" id="docs">
+  <section class="wrap section" id="docs">
     <div class="section-head">
       <p class="eyebrow">{t("docs_eyebrow")}</p>
       <h2>{t("docs_title")}</h2>
@@ -887,7 +858,7 @@ def home_body(t, lang, to_root):
 {docs_list(t, lang, to_root, None)}
   </section>
 
-  <section class="wrap closing">
+  <section class="wrap section closing">
     <div class="promise">
       <h2>{t("license_title")}</h2>
       <p>{t("license_text")}</p>
@@ -965,8 +936,8 @@ def vs_body(t, lang, to_root):
                                ("pick", "forks", t("vs_line_forks_name")), ("pick", "playguard", t("vs_line_playguard_name")),
                                ("node now", "aurore", "JigSawFr/Aurore")))
     glance = "\n".join(
-        f'      <li class="stat"><p class="stat-figure"><span class="sr-only">borealis: </span><span class="was">{was}</span>'
-        f'<span class="to" aria-hidden="true">→</span><span class="sr-only">, Aurore: </span><span class="now">{now}</span></p>'
+        f'      <li class="stat"><p class="stat-figure"><span class="sr">borealis: </span><span class="was">{was}</span>'
+        f'<span class="to" aria-hidden="true">→</span><span class="sr">, Aurore: </span><span class="now">{now}</span></p>'
         f'<p class="stat-text">{t(f"vs_glance_{k}")}</p></li>'
         for k, was, now in VS_GLANCE)
     new = "\n".join(
@@ -1015,14 +986,14 @@ def vs_body(t, lang, to_root):
       <ul>{jumps}</ul>
     </nav>
   </section>"""
-    main = f"""  <section class="wrap" id="glance">
-    <h2 class="sr-only">{t("vs_glance_title")}</h2>
+    main = f"""  <section class="wrap section" id="glance">
+    <h2 class="sr">{t("vs_glance_title")}</h2>
     <ul class="glance">
 {glance}
     </ul>
   </section>
 
-  <section class="wrap" id="new">
+  <section class="wrap section" id="new">
     <div class="section-head">
       <p class="eyebrow">{t("vs_new_eyebrow")}</p>
       <h2>{t("vs_new_title")}</h2>
@@ -1033,7 +1004,7 @@ def vs_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap" id="sides">
+  <section class="wrap section" id="sides">
     <div class="section-head">
       <p class="eyebrow">{t("vs_sides_eyebrow")}</p>
       <h2>{t("vs_sides_title")}</h2>
@@ -1042,7 +1013,7 @@ def vs_body(t, lang, to_root):
 {chr(10).join(tables)}
   </section>
 
-  <section class="wrap" id="fixes">
+  <section class="wrap section" id="fixes">
     <div class="adds">
       <div class="section-head">
         <p class="eyebrow">{t("vs_fixes_eyebrow")}</p>
@@ -1062,7 +1033,7 @@ def vs_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="move">
+  <section class="wrap section" id="move">
     <div class="vs-move">
       <div class="section-head">
         <p class="eyebrow">{t("vs_move_eyebrow")}</p>
@@ -1077,7 +1048,7 @@ def vs_body(t, lang, to_root):
     </div>
   </section>
 
-  <section class="wrap" id="project">
+  <section class="wrap section" id="project">
     <div class="section-head">
       <p class="eyebrow">{t("vs_project_eyebrow")}</p>
       <h2>{t("vs_project_title")}</h2>
@@ -1087,7 +1058,7 @@ def vs_body(t, lang, to_root):
     </ul>
   </section>
 
-  <section class="wrap closing">
+  <section class="wrap section closing">
     <div class="band">
       <div>
         <h2>{t("vs_band_title")}</h2>

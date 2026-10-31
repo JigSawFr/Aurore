@@ -764,7 +764,8 @@ class Builder:
 
     def dress(self, text, to_root, path):
         """The site's page made the API's: its stylesheet and script, the
-        header's API link marked, the other languages' links to their home."""
+        other languages' links to their home (page() marks the header's API
+        link: the page is one of its)."""
         def once(pattern, replacement, s, what):
             new, n = re.subn(pattern, replacement, s, count=1)
             if not n:
@@ -774,8 +775,6 @@ class Builder:
         text = once(re.escape(css), css + f'\n<link rel="stylesheet" href="{to_root}assets/api.css">', text, "site.css")
         js = f'<script src="{to_root}assets/site.js" defer></script>'
         text = once(re.escape(js), js + f'\n<script src="{to_root}assets/api.js" defer></script>', text, "site.js")
-        text = once(rf'<li><a href="{re.escape(to_root)}api/">', f'<li><a href="{to_root}api/" aria-current="page">',
-                    text, "the header's API link")
         # The same page in another language: none, its home instead.
         text = re.sub(r'<link rel="alternate" hreflang="[^"]*" href="[^"]*">\n?', "", text)
         text = re.sub(rf'href="([^"]*?)api/{re.escape(path)}"(?=[^>]*hreflang=)', r'href="\1"', text)

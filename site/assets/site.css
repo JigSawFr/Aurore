@@ -10,38 +10,18 @@
    the documentation's night), the links' blue, Consolas among the code's
    fonts, the page's sides (PlayGuard's: 16px, more beside an iPhone's notch
    in landscape, viewport-fit=cover letting the page under it). */
-:root {
-  --night-2: #12213f;
-  --dusk: #8593ae;
-  --link: #6fd0ff;
-  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
-  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
-}
-
-* { box-sizing: border-box; }
-html { background: var(--abyss); scroll-padding-top: 24px; }
-body {
-  margin: 0; background: var(--abyss); color: var(--snow);
-  font-family: var(--body); font-size: 1.0625rem; line-height: 1.6;
-  -webkit-font-smoothing: antialiased; text-size-adjust: 100%;
-}
-h1, h2, h3, h4 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; overflow-wrap: break-word; hyphens: auto; }
-/* Line breaks as each script wants them (PlayGuard's rules): Japanese
-   between phrases, never inside a word (headings and short lines; the
-   browsers without it break as before), Korean between words as its spaces
-   say, Chinese without a punctuation mark opening a line. */
-:lang(ja) :is(h1, h2, h3, h4, .eyebrow, .release-pill, .lede, .button, figcaption, .made span, .preview-screen p, .pane-name, .lang-button, .langs a, .sites small, .lost p, .band p, .section-head p, .stat-text, .lineage li > span, .sides th, .pickers p) { word-break: auto-phrase; }
-:lang(ko) body { word-break: keep-all; }
-:lang(zh-Hans) body, :lang(zh-Hant) body { line-break: strict; }
-/* Chinese titles kept whole between their spaces and punctuation, broken
-   elsewhere only when a run is wider than its line. */
-:is(:lang(zh-Hans), :lang(zh-Hant)) :is(h1, h2, h3) { word-break: keep-all; overflow-wrap: anywhere; }
-p { margin: 0; }
-a { color: var(--link); text-underline-offset: 3px; }
-a:hover { color: var(--aurora); }
-:focus-visible { outline: 2px solid var(--aurora); outline-offset: 3px; border-radius: 6px; }
-img { max-width: 100%; height: auto; }
+/* The tokens, the reset, the links and the focus ring are boreale-site's
+   (boreale.css, chrome.css). Aurore's own: its text a little larger, its
+   buttons' size, its headings' leading and hyphens. */
+:root { --button-size: 1rem; }
+body { font-size: 1.0625rem; }
+h1, h2, h3, h4 { line-height: 1.15; letter-spacing: normal; overflow-wrap: break-word; hyphens: auto; }
+h4 { margin: 0; }
+.eyebrow { line-height: 1.6; }
+/* Line breaks as each script wants them (chrome.css has the common ones):
+   Japanese between phrases in what is Aurore's own. */
+:lang(ja) :is(h4, .lede, .made span, .preview-screen p, .pane-name, .lang-button, .langs a, .sites small, .lost p, .section-head p, .stat-text, .lineage li > span, .sides th, .pickers p) { word-break: auto-phrase; }
+img { height: auto; }
 code, pre, kbd { font-family: var(--mono); }
 :not(pre) > code {
   font-size: 0.875em; padding: 0.1em 0.38em; border-radius: 6px;
@@ -49,51 +29,9 @@ code, pre, kbd { font-family: var(--mono); }
   overflow-wrap: anywhere;
 }
 .muted { color: var(--mist); }
-.skip { position: absolute; left: -9999px; }
-.skip:focus { left: 16px; top: 16px; z-index: 20; background: var(--night); padding: 8px 12px; border-radius: 8px; }
-
-.wrap {
-  width: 100%; max-width: calc(1180px + var(--gutter-l) + var(--gutter-r)); margin: 0 auto;
-  padding-left: var(--gutter-l); padding-right: var(--gutter-r);
-}
+/* The space above the footer is the last section's (the documentation's, the home page's main). */
+.footer { margin-top: 0; }
 .narrow { max-width: calc(820px + var(--gutter-l) + var(--gutter-r)); }
-
-/* ---- The sky: the canvas (site.js) behind the home page's header and hero;
-   without script, or with less motion asked, the same aurora as a gradient. */
-.sky { position: relative; isolation: isolate; overflow: hidden; }
-.sky::before {
-  content: ""; position: absolute; inset: 0; z-index: -2;
-  background:
-    radial-gradient(120% 60% at 30% -10%, rgba(0, 255, 204, 0.2), transparent 60%),
-    radial-gradient(90% 50% at 75% -5%, rgba(138, 92, 255, 0.22), transparent 60%),
-    radial-gradient(80% 40% at 55% 10%, rgba(51, 187, 255, 0.14), transparent 70%),
-    var(--abyss);
-}
-.inner .sky::before {
-  background:
-    radial-gradient(70% 140% at 15% -60%, rgba(0, 255, 204, 0.16), transparent 70%),
-    radial-gradient(60% 140% at 85% -60%, rgba(138, 92, 255, 0.18), transparent 70%),
-    var(--abyss);
-}
-.inner .sky { border-bottom: 1px solid var(--night-line); }
-.sky canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; }
-.sky-home::after {
-  content: ""; position: absolute; inset: auto 0 0 0; height: 40%; z-index: -1;
-  background: linear-gradient(to top, var(--abyss), transparent);
-}
-
-/* The header, as on Boréale's other sites (PlayGuard's): the name and its
-   menu, the page's links beside it (the demo's in the aurora, GitHub last),
-   the languages at the end. */
-.top { display: flex; align-items: center; gap: 20px; padding-block: 14px; }
-.brand { display: flex; align-items: center; gap: 10px; color: var(--snow); text-decoration: none; font: 700 20px var(--display); letter-spacing: -0.02em; min-height: 44px; }
-.brand:hover { color: var(--snow); }
-.brand img { width: 34px; height: 34px; }
-.top .nav { flex: 1; min-width: 0; }
-.top .nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; }
-.top .nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: var(--mist); text-decoration: none; font-weight: 500; font-size: 15px; border-radius: 10px; white-space: nowrap; }
-@media (hover: hover) { .top .nav a:hover { color: var(--snow); background: rgba(232, 238, 247, 0.06); } }
-.settings { gap: 8px; }
 
 /* ---- The home page ------------------------------------------------------ */
 /* The hero, PlayGuard's: the release over the title, the text beside the
@@ -103,23 +41,13 @@ code, pre, kbd { font-family: var(--mono); }
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   padding-block: clamp(32px, 6vw, 80px) clamp(40px, 6vw, 72px);
 }
-.eyebrow { font-family: var(--mono); font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--aurora); }
-.hero-text .eyebrow { margin-bottom: 10px; }
 .hero h1 { font-weight: 600; font-size: clamp(2.1rem, 4.2vw, 3.15rem); letter-spacing: -0.035em; line-height: 1.1; margin-bottom: 16px; }
 .hero h1 em, .gradient { font-style: normal; background: var(--aurora-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.lede { color: var(--mist); font-size: clamp(1.0625rem, 1.6vw, 1.15rem); max-width: 56ch; }
-.hero .actions { margin-top: 26px; }
 .release { margin-top: 16px; color: var(--dusk); font-size: 0.9375rem; }
-/* The latest release and its date, over the title: its notes; before the
-   first, a pill without a link. */
-.release-pill { margin-bottom: 18px; }
-.release-pill > * {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 12px;
-  border: 1px solid rgb(0 255 204 / 0.35); border-radius: 999px; background: rgb(0 255 204 / 0.08);
-  color: var(--aurora); font: 500 13px/1.4 var(--mono); text-decoration: none;
-}
-.release-pill a:hover { border-color: var(--aurora); color: var(--aurora); }
-.release-pill span::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgb(0 255 204 / 0.18); }
+/* The latest release and its date over the title (the pill is chrome.css's);
+   before the first, a pill without a link, with a dot. */
+.pill-eyebrow > :not(.pill-more) { line-height: 1.4; }
+.pill-eyebrow span::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgb(0 255 204 / 0.18); }
 .hero-shot { margin: 0; }
 .hero-shot img, .cadran img {
   display: block; width: 100%; border-radius: 14px; border: 1px solid rgba(232, 238, 247, 0.12);
@@ -130,25 +58,18 @@ code, pre, kbd { font-family: var(--mono); }
 .platforms ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .platforms li { font-size: 0.875rem; color: var(--mist); border: 1px solid var(--night-line); background: rgba(14, 26, 51, 0.6); border-radius: 99px; padding: 4px 12px; }
 
-.actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.button {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; padding: 0 20px;
-  border: 1px solid var(--night-line); border-radius: 12px; background: rgba(11, 20, 36, 0.4); color: var(--snow);
-  font-weight: 600; text-decoration: none; font-size: 1rem;
-}
-.button.primary { background: var(--snow); border-color: var(--snow); color: var(--abyss); }
-@media (hover: hover) {
-  .button:hover { border-color: var(--mist); color: var(--snow); }
-  .button.primary:hover { background: var(--aurora); border-color: var(--aurora); color: var(--abyss); }
-}
-
-/* The sections one after the other, PlayGuard's rhythm: the same space
-   above each, none below (the next one's, or the footer's). */
-main > section { padding-block: clamp(48px, 7vw, 88px) 0; }
-.home main { padding-bottom: clamp(48px, 7vw, 88px); }
-.section-head { display: grid; gap: 12px; margin-bottom: 32px; max-width: 64ch; }
-.section-head h2, .cadran h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 600; letter-spacing: -0.025em; }
-.section-head p, .cadran p { color: var(--mist); }
+.sky-home:not(.no-veils) ~ main { padding-bottom: clamp(48px, 7vw, 88px); }
+.section-head { gap: 12px; }
+.wrap > .band { margin-top: 0; }
+.actions { margin-top: 0; }
+.hero .actions { margin-top: 26px; }
+.cadran h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 600; letter-spacing: -0.025em; }
+.cadran p { color: var(--mist); }
+.cadran-text .eyebrow { margin: 0; }
+/* The sections' eyebrows are the text's grey, the band's the aurora's. */
+.section-head .eyebrow, .cadran .eyebrow { color: var(--mist); }
+.band .eyebrow { color: var(--aurora); }
+.card p { font-size: 0.975rem; }
 .section-head a, .cadran a { font-weight: 600; }
 
 .code-section .section-head { margin-bottom: 28px; }
@@ -156,15 +77,6 @@ main > section { padding-block: clamp(48px, 7vw, 88px) 0; }
 @media (min-width: 900px) { .code-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 figure.code { margin: 0; min-width: 0; }
 figure.code figcaption { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dusk); margin-bottom: 8px; }
-
-.cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-.card {
-  display: grid; gap: 10px; align-content: start; padding: 22px;
-  background: var(--night); border: 1px solid var(--night-line); border-radius: var(--radius);
-}
-.card .icon { width: 28px; height: 28px; color: var(--aurora); }
-.card h3 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
-.card p { color: var(--mist); font-size: 0.975rem; }
 
 .cadran { display: grid; gap: clamp(24px, 5vw, 56px); align-items: center; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .cadran { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); } }
@@ -420,18 +332,6 @@ pre code { font-size: inherit; color: #d6deeb; }
 .lightbox-next { right: 12px; top: 50%; transform: translateY(-50%); }
 .lightbox-next::before { content: "›"; }
 
-/* ---- The footer ----------------------------------------------------------- */
-footer.site { position: relative; padding-block: 40px 32px; color: var(--dusk); font-size: 0.9375rem; background: linear-gradient(180deg, rgba(14, 26, 51, 0.5), transparent); }
-.footer-cols { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-.footer-cols > div { display: grid; gap: 8px; align-content: start; }
-.footer-cols h2 { font-family: var(--mono); font-weight: 400; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mist); }
-.footer-cols ul { list-style: none; margin: 0; padding: 0; display: grid; }
-.footer-cols ul a { display: inline-flex; min-height: 32px; align-items: center; }
-.footer-brand { display: flex; align-items: center; gap: 8px; color: var(--snow); font-family: var(--display); font-size: 1.05rem; }
-footer.site a { color: var(--mist); }
-footer.site a:hover { color: var(--aurora); }
-.fine { margin-top: 28px; font-size: 0.8125rem; }
-
 .lost { padding-block: clamp(64px, 12vw, 140px); }
 .not-found { display: grid; gap: 18px; justify-items: start; }
 .not-found h1 { font-size: clamp(2.25rem, 6vw, 3.5rem); font-weight: 600; letter-spacing: -0.03em; }
@@ -441,34 +341,9 @@ footer.site a:hover { color: var(--aurora); }
 @media (prefers-reduced-motion: reduce) {
   .gallery img { transition: none; }
   .gallery a:hover img { transform: none; }
-  html { scroll-behavior: auto; }
 }
 
-/* The header on two rows until its links, menus and name fit on one: up to
-   1080px, for the longer languages (a phone in landscape, a small tablet),
-   as on Boréale's other sites. */
-@media (max-width: 1080px) {
-  .top { flex-wrap: wrap; gap: 10px 16px; }
-  /* The links on a row of their own to scroll, Try it first; GitHub is in
-     the footer. */
-  .top .nav { order: 3; flex-basis: 100%; overflow-x: auto; scrollbar-width: none; margin: -6px 0 -4px; }
-  .top .nav::-webkit-scrollbar { display: none; }
-  /* The edge fades only while there is more to scroll to (site.js). */
-  .top .nav.more { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
-                   mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); }
-  .top .nav a { padding: 0 10px; }
-  .top .nav li:has(> .nav-try) { order: -1; }
-  .top .nav li:first-child a:not(.nav-try) { padding-left: 0; }
-  .top .nav .nav-try { padding: 0 14px; }
-  .top .nav .nav-gh { display: none; }
-  .settings { margin-left: auto; gap: 6px; }
-  /* The languages' button: its flag and code only. */
-  .lang-name { display: none; }
-  .lang-code { display: inline; }
-}
 @media (max-width: 860px) {
-  .brand { font-size: 18px; gap: 8px; }
-  .brand img { width: 28px; height: 28px; }
   /* The hero: the title, then the demo on its console, then the rest, the
      buttons a finger's width (PlayGuard's). */
   .hero { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding-block: 24px 40px; }
@@ -481,18 +356,15 @@ footer.site a:hover { color: var(--aurora); }
   .hero > .platforms { margin-top: 28px; }
 }
 
-/* The demo: the header's link and the home page's band. */
-.top .nav a.nav-try { color: var(--abyss); background: var(--aurora-grad); font-weight: 600; }
-@media (hover: hover) { .top .nav a.nav-try:hover { color: var(--abyss); background: var(--aurora); } }
-.band {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px;
-  padding: clamp(22px, 4vw, 40px); border-radius: var(--radius); border: 1px solid var(--night-line);
-  background: radial-gradient(80% 140% at 0% 0%, rgba(0, 255, 204, 0.14), transparent 60%),
-              radial-gradient(70% 140% at 100% 100%, rgba(138, 92, 255, 0.18), transparent 60%), var(--night);
+/* The home page's band (chrome.css's): its text over its button as long as
+   they fit on a line. */
+.band { flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .band { flex-direction: row; align-items: center; padding: clamp(22px, 4vw, 40px); }
+  .band .button { align-self: auto; }
 }
-.band > div { display: grid; gap: 10px; max-width: 60ch; }
-.band h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); font-weight: 600; letter-spacing: -0.025em; }
-.band p:not(.eyebrow) { color: var(--mist); }
+.band > div, .band > div:first-child { display: grid; gap: 10px; max-width: 60ch; }
+.band > div > * { margin: 0; }
 
 /* ---- The showcase: the same blocks on boreale.dev's, PlayGuard's,
    PlayShelf's and Aurore's sites (PlayGuard's is the reference). */
@@ -530,54 +402,15 @@ footer.site a:hover { color: var(--aurora); }
   .device:hover { transform: perspective(1800px) translateX(-0.6%) rotateY(-2deg) rotateX(1deg); }
 }
 
-/* The night goes on under the hero: veils of aurora down the page and
-   faint stars, then a horizon over the footer. */
-.home main { position: relative; isolation: isolate; }
-.home main::before, .home main::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
-.home main::before {
-  background:
-    radial-gradient(45% 22% at -5% 22%, rgb(0 255 204 / 0.07), transparent 70%),
-    radial-gradient(45% 22% at 105% 45%, rgb(138 92 255 / 0.09), transparent 70%),
-    radial-gradient(50% 20% at -5% 72%, rgb(51 187 255 / 0.07), transparent 70%),
-    radial-gradient(45% 18% at 105% 92%, rgb(0 255 204 / 0.06), transparent 70%);
-}
-.home main::after {
-  opacity: 0.55;
-  background-image:
-    radial-gradient(1px 1px at 24px 36px, #e8eef7, transparent), radial-gradient(1px 1px at 132px 92px, #e8eef7, transparent),
-    radial-gradient(1.4px 1.4px at 210px 18px, #e8eef7, transparent), radial-gradient(1px 1px at 300px 160px, #e8eef7, transparent),
-    radial-gradient(1px 1px at 70px 210px, #a9b6cc, transparent), radial-gradient(1.2px 1.2px at 380px 260px, #a9b6cc, transparent);
-  background-size: 420px 300px;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 75%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 75%, transparent);
-}
-footer.site::before {
-  content: ""; position: absolute; left: 50%; top: 0; width: min(1180px, 100%); height: 140px; transform: translateX(-50%); pointer-events: none;
-  background: radial-gradient(50% 100% at 50% 0%, rgb(0 255 204 / 0.14), rgb(51 187 255 / 0.06) 45%, transparent 75%);
-}
-footer.site::after {
-  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--aurora-grad);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-  opacity: 0.6;
-}
+/* The icon's tile has 4px under it. */
+.card .icon { margin-bottom: 4px; }
 
-/* The features: each icon on its own tile; under the pointer, the card's
-   edge lights up in the aurora where the pointer is (site.js). */
-.card { position: relative; transition: transform 0.3s, border-color 0.3s; }
-.card .icon {
-  box-sizing: border-box; width: 44px; height: 44px; padding: 10px; border-radius: 12px; margin-bottom: 4px;
-  background: linear-gradient(135deg, rgb(0 255 204 / 0.16), rgb(138 92 255 / 0.14)); box-shadow: inset 0 0 0 1px rgb(0 255 204 / 0.22);
-}
-.card::before {
-  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none; opacity: 0; transition: opacity 0.3s;
-  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(0 255 204 / 0.85), rgb(138 92 255 / 0.4) 45%, transparent 75%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-}
-@media (hover: hover) {
-  .card:hover { transform: translateY(-3px); }
-  .card:hover::before { opacity: 1; }
+/* A phone keeps the cards as they were: the icon over the title, 22px around. */
+@media (max-width: 860px) {
+  .cards { gap: 16px; }
+  .card { padding: 22px; }
+  .card:has(> .icon) { grid-template-columns: none; gap: 10px; }
+  .card:has(> .icon) > .icon { grid-row: auto; }
 }
 
 /* Whole rows of features: four, two, or one under the other. */
@@ -591,14 +424,6 @@ footer.site::after {
   @media (min-width: 600px) {
     .cards > .card { grid-row: span 3; grid-template-rows: subgrid; row-gap: 10px; }
   }
-}
-
-/* The sections rise into view once (site.js; not with less motion asked). */
-@media (prefers-reduced-motion: no-preference) {
-  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .reveal.in { opacity: 1; transform: none; }
-  .reveal .card { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease calc(var(--i, 0) * 70ms), transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 70ms), border-color 0.3s; }
-  .reveal.in .card { opacity: 1; transform: none; }
 }
 
 /* The screens on a wide screen (site.js): the one chosen large, the others
@@ -719,15 +544,8 @@ figure.editor-pane figcaption { grid-column: 1; grid-row: 1; margin: 0; padding:
   background: linear-gradient(to right, rgb(8 16 32 / 0), #081020 85%);
 }
 
-/* From one page of the site to the next: a short cross-fade, the header
-   staying where it is (where the browser can; not with less motion asked). */
-@media (prefers-reduced-motion: no-preference) {
-  @view-transition { navigation: auto; }
-  .top { view-transition-name: top; }
-  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.25s; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .device, .card, .card::before, .preview-notice { transition: none; }
+  .device, .preview-notice { transition: none; }
 }
 @media (max-width: 860px) {
   .device { padding: 2.2%; border-radius: 22px; }
@@ -735,7 +553,6 @@ figure.editor-pane figcaption { grid-column: 1; grid-row: 1; margin: 0; padding:
 }
 @media print {
   .grip, .gallery-stage, .copy, .editor-tabs { display: none !important; }
-  .reveal, .reveal .card { opacity: 1 !important; transform: none !important; }
   .editor.tabbed .editor-pane:not(.on) { visibility: visible; }
   .editor.tabbed .editor-panes { display: block; }
   .editor.tabbed .pane-name { display: inline; }
@@ -745,8 +562,7 @@ figure.editor-pane figcaption { grid-column: 1; grid-row: 1; margin: 0; padding:
    same night as the home page, where Aurore comes from beside the title, the
    headline differences, the new features on cards, what both have side by
    side (a table, cards on a phone), the fixes, the names an app changes. */
-.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.top .nav a[aria-current="page"] { color: var(--snow); background: rgb(232 238 247 / 0.06); }
+.nav a[aria-current="page"] { background: rgb(232 238 247 / 0.06); }
 
 /* The title kept whole (no hyphen in "borealis"), the text a little wider. */
 .vs-hero h1 { hyphens: manual; }
