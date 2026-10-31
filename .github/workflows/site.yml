@@ -29,8 +29,8 @@ env:
   # demo's smoke test; Pillow for the latter's screenshots.
   PLAYWRIGHT_VERSION: 1.64.0
   PILLOW_VERSION: 13.0.0
-  # axe-core, for accessibility (tools/site_layout.py): its npm package,
-  # checked against the hash it had when pinned.
+  # axe-core, for accessibility (boreale-site's tools/site_layout.py): its
+  # npm package, checked against the hash it had when pinned.
   AXE_VERSION: 4.13.0
   AXE_SHA256: 096912f6e77b4b695fc9304b7be65091db42d98de054da674ae222a11cb33f70
 
@@ -163,8 +163,9 @@ jobs:
           # The catalogs (boreale-site's too), every link and #anchor, links
           # out and their UTM tags, what the CSP would block.
           python3 tools/check_site.py out "$SITE_URL"
-      # No page wider than the screen on a phone, a tablet or a desktop, no
-      # script that throws, nothing axe finds against WCAG 2.2 AA. Seconds.
+      # boreale-site's check: no page wider than the screen on a phone, a
+      # tablet or a desktop, no script that throws, no target under 24px, no
+      # field under 16px on a phone, nothing axe finds against WCAG 2.2 AA.
       - name: The website on a phone, a tablet and a desktop
         timeout-minutes: 10
         run: |
@@ -176,7 +177,13 @@ jobs:
           echo "$AXE_SHA256  $RUNNER_TEMP/axe.tgz" | sha256sum -c --quiet
           python3 -c 'import sys, tarfile; open(sys.argv[2], "wb").write(tarfile.open(sys.argv[1]).extractfile("package/axe.min.js").read())' \
             "$RUNNER_TEMP/axe.tgz" "$RUNNER_TEMP/axe.min.js"
-          SITE_AXE="$RUNNER_TEMP/axe.min.js" "$RUNNER_TEMP/playwright/bin/python" -u tools/site_layout.py out
+          # Every page on an iPhone, the widest also on the four other
+          # screens, in each language; axe on the English pages and each
+          # language's home page; the demo, built apart, left out.
+          SITE_AXE="$RUNNER_TEMP/axe.min.js" "$RUNNER_TEMP/playwright/bin/python" -u library/boreale-site/tools/site_layout.py out \
+            --skip demo --axe-english --wide '' --wide borealis/ --wide docs/xml-attributes/ --wide docs/platforms/ \
+            --wide docs/themes/ --wide changelog/ --wide api/ --wide api/aurore/ --wide api/aurore/View/ \
+            --wide api/aurore/Application/ --wide api/ui/
       - name: Upload the site
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0

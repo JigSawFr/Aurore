@@ -241,41 +241,6 @@
   });
 })();
 
-// The page not found, served at any address: in the address' language
-// (/fr/…, /zh-hant/…), else the one chosen in the header's menu
-// (boreale-site's lang.js keeps it as "boreale-lang": the folder, "en-US"
-// for English), else the browser's. Its blocks' data-lang is the code
-// (fr-CA), their folder the code in lower case. boreale-site's lang.js
-// sends a page not found to its language's own 404.html (data-lost); Aurore
-// has one 404.html holding the 15, so it chooses here, the browser's
-// language read as lang.js does (lang.js does not expose its choice).
-(function () {
-  const blocks = Array.from(document.querySelectorAll(".not-found[data-lang]"));
-  if (blocks.length < 2) return;
-  const byFolder = (f) => blocks.find((b) => (b.dataset.lang === "en-US" ? "en-US" : b.dataset.lang.toLowerCase()) === f);
-  const browser = () => {
-    for (const tag of navigator.languages || [navigator.language || ""]) {
-      const t = String(tag).toLowerCase();
-      const [base, region = ""] = t.split("-");
-      if (base === "en") return "en-US";
-      if (base === "fr") return region === "ca" ? "fr-ca" : "fr";
-      if (base === "es") return !region || region === "es" ? "es" : "es-419";
-      if (base === "pt") return region === "br" ? "pt-br" : "pt";
-      if (base === "zh") return ["tw", "hk", "mo", "hant"].includes(region) || t.includes("hant") ? "zh-hant" : "zh-hans";
-      if (byFolder(base)) return base;
-    }
-    return "en-US";
-  };
-  let chosen = null;
-  try { chosen = localStorage.getItem("boreale-lang"); } catch (e) { /* storage refused: no memory */ }
-  const first = location.pathname.toLowerCase().split("/").filter(Boolean)[0] || "";
-  const block = (first !== "en-us" && byFolder(first)) || byFolder(chosen) || byFolder(browser());
-  if (!block) return;
-  for (const b of blocks) b.hidden = b !== block;
-  document.documentElement.lang = block.lang;
-  document.title = `${block.querySelector("h1").textContent} · Aurore`;
-})();
-
 // On a phone, the documentation's list of pages starts folded, under the
 // page's title (open in the HTML, for a page read without script).
 (function () {

@@ -307,7 +307,10 @@ pre code { font-size: inherit; color: #d6deeb; }
 .prose img { border-radius: 10px; }
 .prose hr { border: 0; border-top: 1px solid var(--night-line); margin-block: 2em; }
 .prose blockquote { margin: 1em 0; padding-left: 16px; border-left: 3px solid var(--night-line); color: var(--mist); }
-.prose .anchor { margin-left: 8px; opacity: 0; text-decoration: none; color: var(--dusk); display: inline-block; min-width: 24px; }
+/* A target of 24px at least (WCAG 2.2, 2.5.8), an h4's line being shorter:
+   the padding gives it the height, the negative margin keeps the line as it was. */
+.prose .anchor { margin-left: 8px; opacity: 0; text-decoration: none; color: var(--dusk); display: inline-block; min-width: 24px;
+  padding-block: 2px; margin-block: -2px; }
 .prose .anchor::before { content: "#"; }
 .prose h2:hover .anchor, .prose h3:hover .anchor, .prose .anchor:focus-visible { opacity: 1; }
 @media (hover: none) { .prose .anchor { display: none; } }

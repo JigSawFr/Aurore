@@ -51,7 +51,7 @@ import stack as under_the_hood  # noqa: E402 (tools/stack.py: the versions and f
 # audience (Umami), the common texts and assets.
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "library", "boreale-site"))
 import boreale_site as boreale  # noqa: E402
-from boreale_site import LANGUAGES, OG_LOCALES, UMAMI_GATEWAY, UMAMI_WEBSITE  # noqa: E402
+from boreale_site import LANGUAGES, OG_LOCALES, UMAMI_GATEWAY  # noqa: E402
 
 REPO_URL = "https://github.com/JigSawFr/Aurore"
 AURORE = boreale.Site("aurore", os.environ.get("SITE_URL"))
@@ -627,8 +627,7 @@ def demo_audience(page):
         sys.exit(f"build_site: {page} has not the one connect-src and </head> expected")
     # data-before-send: demo.js leaves out the first load of a first visit,
     # which loads the page again under its service worker (auroreAudience).
-    tag = (f'<script src="../assets/umami.js" defer data-website-id="{UMAMI_WEBSITE}" '
-           f'data-domains="{AURORE.host}" data-before-send="auroreAudience"></script>\n</head>')
+    tag = AURORE.audience("../", before_send="auroreAudience") + "\n</head>"
     text = text.replace(csp, f"connect-src 'self' {UMAMI_GATEWAY};").replace("</head>", tag)
     with open(page, "w", encoding="utf-8") as f:
         f.write(text)
@@ -1378,7 +1377,8 @@ def main():
     if at_root:
         write(out, "robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n")
     # 404.html, served at any address: its links start from the site's root,
-    # every language in it, site.js shows the address' or the visitor's.
+    # every language in it, boreale-site's lang.js shows the address', else
+    # the one chosen, else the browser's.
     root_path = urlsplit(SITE_URL).path
     blocks = []
     for lang, folder, _, _ in LANGUAGES:
