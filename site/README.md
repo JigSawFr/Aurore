@@ -46,6 +46,6 @@ With the API reference: `doxygen docs/Doxyfile` (its XML in `build_docs/xml`), `
 
 ## Publishing
 
-`.github/workflows/site.yml` builds the demo for a browser, the API reference and the site, and runs both checks for each pull request (the `site` artifact) and for main, whose site it publishes on GitHub Pages.
+`.github/workflows/site.yml` builds the demo for a browser, the API reference and the site, and runs both checks for each pull request (the `site` artifact) and for main, whose site it publishes on GitHub Pages. The site's job (checkout, build, both checks, the artifact) is boreale-site's reusable workflow (`library/boreale-site`'s README, *Reusable workflow*), called by commit; the demo and the deployment stay here. Dependabot moves that commit as it does the actions'.
 
 In the repository's settings, *Pages › Build and deployment › Source: GitHub Actions*, with the custom domain `aurore.boreale.dev`; the workflow reads the address from Pages.

@@ -4,6 +4,8 @@ name: site
 # changelog, the API reference (Doxygen) and the demo in a browser
 # (web/README.md), built and checked for each pull request and for main, and
 # main's published on GitHub Pages (Settings › Pages › Source: GitHub Actions).
+# The site's job is boreale-site's reusable workflow (library/boreale-site's
+# README, "Reusable workflow"); the demo and the deployment are this one's.
 on:
   push:
     branches: [ main ]
@@ -25,14 +27,11 @@ env:
   # The emsdk tool itself, at that version's tag, checked against the commit
   # the tag pointed to when pinned: a tag can be moved, a commit cannot.
   EMSDK_COMMIT: 35659964bc2762fffec0d257997fb61475f765b7
-  # Playwright, pinned, for the layout and accessibility check and the
-  # demo's smoke test; Pillow for the latter's screenshots.
+  # Playwright, pinned, for the demo's smoke test; Pillow for its
+  # screenshots. The layout check's Playwright and axe-core are pinned in
+  # boreale-site's reusable workflow.
   PLAYWRIGHT_VERSION: 1.64.0
   PILLOW_VERSION: 13.0.0
-  # axe-core, for accessibility (boreale-site's tools/site_layout.py): its
-  # npm package, checked against the hash it had when pinned.
-  AXE_VERSION: 4.13.0
-  AXE_SHA256: 096912f6e77b4b695fc9304b7be65091db42d98de054da674ae222a11cb33f70
 
 jobs:
   # The demo compiled with Emscripten, and the page around it (<build>/web/).
@@ -111,93 +110,36 @@ jobs:
 
   build:
     needs: demo
-    runs-on: ubuntu-26.04
-    timeout-minutes: 20
     permissions:
       contents: read
       pages: read   # the site's address (a custom domain, once it has one)
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          submodules: true   # library/boreale-site, what Boréale's sites share
-      - name: Install Python-Markdown and Doxygen
-        run: |
-          sudo apt-get update -y -q
-          sudo apt-get install -y -q --no-install-recommends python3-markdown python3-yaml doxygen
-      # The site's address, as GitHub Pages serves it: its custom domain when
-      # it has one, else <owner>.github.io/<repo>/. A pull request's build is
-      # kept out of search engines.
-      - name: The site's address
-        env:
-          REPO: ${{ github.repository }}
-          PR: ${{ github.event.pull_request.number }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # No Pages site yet (404): gh prints its error body on stdout, so
-          # nothing of a failed call is kept.
-          if ! pages=$(gh api "repos/$REPO/pages" \
-                         --jq 'if .https_enforced then (.html_url | sub("^http:"; "https:")) else .html_url end' 2>/dev/null); then
-            pages=""
-          fi
-          owner="${REPO%%/*}"
-          pages="${pages:-https://${owner,,}.github.io/${REPO#*/}/}"
-          {
-            echo "SITE_URL=${pages%/}/"
-            echo "SITE_NOINDEX=${PR:+1}"
-          } | tee -a "$GITHUB_ENV"
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: demo
-          path: demo
+    uses: JigSawFr/boreale-site/.github/workflows/site.yml@49844b1a733f738afdabcc1c903bbf8696028d96 # v1.0.0
+    with:
+      # The site's address, as GitHub Pages serves it; a pull request's build
+      # is kept out of search engines (SITE_URL, SITE_NOINDEX).
+      address: url
+      apt: python3-markdown python3-yaml doxygen
+      download_artifact: demo
+      download_path: demo
       # Doxygen reads the headers into XML (fails on a warning, WARN_AS_ERROR
       # in docs/Doxyfile), which tools/build_api.py makes the site's pages
       # (SITE_DEMO: their header's link to the demo, as the other pages').
-      - name: The API reference
-        run: |
-          doxygen docs/Doxyfile
-          SITE_DEMO=demo python3 tools/build_api.py build_docs/xml build_api
-      - name: The website
-        run: |
-          SITE_API=build_api SITE_DEMO=demo python3 tools/build_site.py out .
-          # The catalogs (boreale-site's too), every link and #anchor, links
-          # out and their UTM tags, what the CSP would block.
-          python3 tools/check_site.py out "$SITE_URL"
-      # boreale-site's check: no page wider than the screen on a phone, a
-      # tablet or a desktop, no script that throws, no target under 24px, no
-      # field under 16px on a phone, nothing axe finds against WCAG 2.2 AA.
-      - name: The website on a phone, a tablet and a desktop
-        timeout-minutes: 10
-        run: |
-          python3 -m venv "$RUNNER_TEMP/playwright"
-          "$RUNNER_TEMP/playwright/bin/pip" install -q "playwright==$PLAYWRIGHT_VERSION"
-          sudo "$RUNNER_TEMP/playwright/bin/python" -m playwright install-deps chromium
-          "$RUNNER_TEMP/playwright/bin/python" -m playwright install chromium
-          curl -sfL --retry 3 -o "$RUNNER_TEMP/axe.tgz" "https://registry.npmjs.org/axe-core/-/axe-core-$AXE_VERSION.tgz"
-          echo "$AXE_SHA256  $RUNNER_TEMP/axe.tgz" | sha256sum -c --quiet
-          python3 -c 'import sys, tarfile; open(sys.argv[2], "wb").write(tarfile.open(sys.argv[1]).extractfile("package/axe.min.js").read())' \
-            "$RUNNER_TEMP/axe.tgz" "$RUNNER_TEMP/axe.min.js"
-          # Every page on an iPhone, the widest also on the four other
-          # screens, in each language; axe on the English pages and each
-          # language's home page; the demo, built apart, left out.
-          SITE_AXE="$RUNNER_TEMP/axe.min.js" "$RUNNER_TEMP/playwright/bin/python" -u library/boreale-site/tools/site_layout.py out \
-            --skip demo --axe-english --wide '' --wide borealis/ --wide docs/xml-attributes/ --wide docs/platforms/ \
-            --wide docs/themes/ --wide changelog/ --wide api/ --wide api/aurore/ --wide api/aurore/View/ \
-            --wide api/aurore/Application/ --wide api/ui/
-      - name: Upload the site
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        with:
-          path: out
-      - name: Upload the site for the pull request
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: site
-          path: out
-          include-hidden-files: true   # .nojekyll
-          retention-days: 14
+      setup: |
+        doxygen docs/Doxyfile
+        SITE_DEMO=demo python3 tools/build_api.py build_docs/xml build_api
+      directory: out
+      build: SITE_API=build_api SITE_DEMO=demo python3 tools/build_site.py out .
+      # The catalogs (boreale-site's too), every link and #anchor, links out
+      # and their UTM tags, what the CSP would block.
+      check: python3 tools/check_site.py out "$SITE_URL"
+      # Every page on an iPhone, the widest also on the four other screens,
+      # in each language; axe on the English pages and each language's home
+      # page; the demo, built apart, left out.
+      skip: '["demo"]'
+      axe_english: true
+      wide: '["", "borealis/", "docs/xml-attributes/", "docs/platforms/", "docs/themes/", "changelog/", "api/", "api/aurore/", "api/aurore/View/", "api/aurore/Application/", "api/ui/"]'
+      pages_artifact: ${{ github.event_name != 'pull_request' }}
+      artifact_name: ${{ github.event_name == 'pull_request' && 'site' || '' }}
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
