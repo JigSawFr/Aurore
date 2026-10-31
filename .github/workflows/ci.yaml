@@ -237,6 +237,56 @@ jobs:
           name: aurore-switch-${{ matrix.ext }}
           path: build/aurore_demo.nro
 
+  # The Switch demo with devkitA64 r30 (GCC 16.1), which devkitPro published
+  # as packages but not yet as an image: switch/scripts/Dockerfile puts r30
+  # over the image the jobs above pin, libnx unchanged. Not required until a
+  # build has run on a console; GitHub's cache keeps the image while
+  # switch/scripts/ stays the same.
+  switch-gcc16:
+    name: switch (gcc 16)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Toolchain image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: switch/scripts
+          tags: aurore-devkita64-r30
+          load: true
+          cache-from: type=gha,scope=devkita64-r30
+          cache-to: type=gha,scope=devkita64-r30,mode=max
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .ccache
+          key: ccache-switch-gcc16-${{ github.sha }}
+          restore-keys: ccache-switch-gcc16-
+      - name: Build
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src \
+            -e CMAKE_C_COMPILER_LAUNCHER=ccache -e CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -e CCACHE_DIR=/src/.ccache -e CCACHE_BASEDIR=/src -e CCACHE_COMPRESS=1 -e CCACHE_MAXSIZE=300M \
+            aurore-devkita64-r30 sh -c '
+              git config --global --add safe.directory '*' 2> /dev/null
+              /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc --version | head -1
+              cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=SWITCH -DAURORE_GRAPHICS=DEKO3D &&
+              make -C build aurore_demo.nro -j$(nproc) &&
+              ccache --show-stats'
+          # The container wrote as root
+          sudo chown -R "$(id -u):$(id -g)" build .ccache
+      - name: Upload dist
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aurore-switch-deko3d-gcc16
+          path: build/aurore_demo.nro
+
   # The New 3DS before its renderer: the library and a smoke test on the console
   # (docs/platforms.md)
   ctr:
