@@ -65,7 +65,7 @@ cmake --build build
 
 ## Nintendo Switch
 
-With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `switch-dev` group, and for the OpenGL build `switch-glfw`, `switch-mesa` and `switch-glm` (or `switch-sdl2` with `-DAURORE_WINDOW=SDL2`). The CI uses the `devkitpro/devkita64` image.
+With [devkitPro](https://devkitpro.org/wiki/Getting_Started): the `switch-dev` group, and for the OpenGL build `switch-glfw`, `switch-mesa` and `switch-glm` (or `switch-sdl2` with `-DAURORE_WINDOW=SDL2`). The CI uses the `devkitpro/devkita64` image (devkitA64 r29.2, GCC 15.2). Its `switch (gcc 16)` job builds the demo with devkitA64 r30 (GCC 16.1), which devkitPro published as packages but not yet as an image: [`switch/scripts/Dockerfile`](../switch/scripts/Dockerfile) installs them over the pinned image (`docker build -t aurore-devkita64-r30 switch/scripts`). Not required until a build has run on a console.
 
 ```sh
 export DEVKITPRO=/opt/devkitpro
