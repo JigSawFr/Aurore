@@ -641,6 +641,34 @@ namespace nvg {
             m_dyn_cmd_buf.pushConstants(m_view_uniform_buffer.getGpuAddr(), m_view_uniform_buffer.getSize(), 0, sizeof(view), &view);
             m_dyn_cmd_buf.bindUniformBuffer(DkStage_Vertex, 0, m_view_uniform_buffer.getGpuAddr(), m_view_uniform_buffer.getSize());
 
+            /* DIAGNOSTIC: draw_by_draw sends each call alone and waits for
+               the GPU, so the one that puts the queue in error is logged. */
+            static const bool by_draw = diagFlag("draw_by_draw");
+            static unsigned diag_frame = 0;
+            diag_frame++;
+            auto diag_sync = [&](const char *what, int i) {
+                m_queue.submitCommands(m_dyn_cmd_buf.finishList());
+                m_queue.waitIdle();
+                if (!dkQueueIsInErrorState(m_queue)) return;
+                fprintf(stderr, "aurore diag: GPU error after %s, frame %u, call %d of %d, %d vertices (buffer %u bytes)\n",
+                        what, diag_frame, i, ctx.ncalls, ctx.nverts, (unsigned)(m_vertex_buffer ? m_vertex_buffer->getSize() : 0));
+                if (i >= 0) {
+                    const DKNVGcall &c = ctx.calls[i];
+                    fprintf(stderr, "aurore diag:   type %d image %d paths %d+%d triangles %d+%d uniforms %d blend %d %d %d %d\n",
+                            c.type, c.image, c.pathOffset, c.pathCount, c.triangleOffset, c.triangleCount, c.uniformOffset,
+                            c.blendFunc.srcRGB, c.blendFunc.dstRGB, c.blendFunc.srcAlpha, c.blendFunc.dstAlpha);
+                    for (int p = 0; p < c.pathCount && p < 8; p++) {
+                        const DKNVGpath &path = ctx.paths[c.pathOffset + p];
+                        fprintf(stderr, "aurore diag:   path %d fill %d+%d stroke %d+%d\n", p, path.fillOffset, path.fillCount, path.strokeOffset, path.strokeCount);
+                    }
+                    if (const DKNVGtextureDescriptor *t = this->GetTextureDescriptor(ctx, c.image)) {
+                        fprintf(stderr, "aurore diag:   texture %dx%d type %d flags 0x%x\n", t->width, t->height, t->type, t->flags);
+                    }
+                }
+                fflush(stderr);
+            };
+            if (by_draw) diag_sync("the frame's setup", -1);
+
             /* Iterate over calls. */
             for (int i = 0; i < ctx.ncalls; i++) {
                 const DKNVGcall &call = ctx.calls[i];
@@ -657,6 +685,7 @@ namespace nvg {
                 } else if (call.type == DKNVG_TRIANGLES) {
                     this->DrawTriangles(ctx, call);
                 }
+                if (by_draw && !dkQueueIsInErrorState(m_queue)) diag_sync("a call", i);
             }
 
             m_queue.submitCommands(m_dyn_cmd_mem.end(m_dyn_cmd_buf));
