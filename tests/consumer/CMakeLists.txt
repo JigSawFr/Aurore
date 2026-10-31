@@ -9,7 +9,8 @@
 cmake_minimum_required(VERSION 3.20...3.31)
 project(aurore_consumer CXX)
 
-find_package(Aurore 0.1 REQUIRED)
+# No version asked while 0.1.0 becomes 1.0.0 (SameMajorVersion); 1.0 comes back after the release.
+find_package(Aurore REQUIRED)
 
 add_executable(aurore_consumer main.cpp)
 target_link_libraries(aurore_consumer PRIVATE Aurore::aurore)

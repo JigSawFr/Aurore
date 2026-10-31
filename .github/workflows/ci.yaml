@@ -788,6 +788,9 @@ jobs:
       - name: Under the hood
         # The README's versions and figures, as the repository has them
         run: python3 tools/stack.py --check
+      - name: Release page
+        # tools/release_notes.py lays out a release's notes; the summary of the next release is the one in .github/release-notes
+        run: python3 tests/release_notes_test.py
       - name: Test
         run: ctest --preset tests
       - name: Bench
