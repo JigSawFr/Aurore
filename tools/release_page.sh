@@ -6,7 +6,7 @@
 # is: "Aurore X.Y.Z" as its title, then the figures, the summary
 # (.github/release-notes/<version>.md), the commit list folded (what app
 # authors notice, then what contributors do), how to use it, the build report
-# and the contributors.
+# and the contributors (mentioned).
 #
 #   tools/release_page.sh vX.Y.Z [--apply]
 #
@@ -37,6 +37,8 @@ elif [ -s "$work/existing.md" ]; then
 else
   how="no summary (no $summary)"
 fi
+
+gh release view "$tag" --json assets > "$work/assets.json" 2>/dev/null && args+=(--assets "$work/assets.json") || true
 
 # The previous release, from the compare link release-please puts in the heading.
 prev=$(sed -n '1,/^## /s|.*/compare/\([^/ ]*\)\.\.\..*|\1|p' "$work/notes.md" | head -n 1)

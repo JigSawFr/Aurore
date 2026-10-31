@@ -16,9 +16,13 @@ and the heading `## X.Y.Z · <date>`:
 3. **what changed**: release-please's lists, folded: what app authors notice
    (breaking changes, features, fixes, security, performance, refactorings),
    then **for contributors** (build, tests, docs);
-4. **📦 Use it**: the submodule at the tag, the migration guide, the install;
-5. **🔍 Build**: the CI run of the tagged commit and the contributors, as
-   links (a release page does not `@`-mention the people it thanks).
+4. **📦 Use it**: the submodule at the tag, the migration guide, the install,
+   and the assets with their size: `aurore-template.zip` (a minimal app) and
+   `aurore-api.zip` (the API reference as web pages), attached by the `assets`
+   job with `SHA256SUMS.txt` and the build provenance;
+5. **🔍 Build**: the CI run of the tagged commit, the checksums and the
+   attestation (`gh attestation verify aurore-api.zip -R JigSawFr/Aurore`),
+   and the contributors, `@`-mentioned.
 
 `CHANGELOG.md` stays release-please's, whole.
 

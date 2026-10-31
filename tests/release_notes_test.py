@@ -83,19 +83,32 @@ class ReleaseNotes(unittest.TestCase):
         self.assertNotIn("Highlights", page)
         self.assertIn("## 📦 Use it", page)
 
-    def test_contributors_are_links_not_mentions(self):
+    def test_contributors_are_mentioned_but_not_bots(self):
         compare = {"total_commits": 1, "commits": [{"author": {"login": "someone"}}, {"author": {"login": "bot[bot]"}}, {}]}
         page = self.page(compare=compare)
-        self.assertIn("**Contributors**: [someone](https://github.com/someone)", page)
-        self.assertNotIn("@", page.replace("](mailto", ""))
+        self.assertIn("**Contributors**: @someone", page)
         self.assertNotIn("bot[bot]", page)
+
+    def test_assets_with_their_sizes_and_the_checksums(self):
+        assets = [{"name": "aurore-template.zip", "size": 52000}, {"name": "aurore-api.zip", "size": 3 * 1048576},
+                  {"name": "SHA256SUMS.txt", "size": 200}]
+        page = self.page(assets=assets)
+        self.assertIn("[`aurore-template.zip`](https://github.com/JigSawFr/Aurore/releases/download/v1.1.0/aurore-template.zip) (51 KB)", page)
+        self.assertIn("aurore-api.zip`](https://github.com/JigSawFr/Aurore/releases/download/v1.1.0/aurore-api.zip) (3.0 MB)", page)
+        self.assertIn("`SHA256SUMS.txt` · provenance: `gh attestation verify aurore-api.zip -R JigSawFr/Aurore`", page)
+        self.assertEqual(rn.layout(page, "1.1.0", REPO, assets=assets), page)
+
+    def test_no_assets_no_checksums(self):
+        page = self.page()
+        self.assertNotIn("SHA256SUMS", page)
+        self.assertNotIn("aurore-api.zip", page)
 
     def test_first_release_has_no_compare(self):
         page = rn.layout(NOTES.replace("## 1.1.0", "## [1.1.0](x/compare/v1.0.0...v1.1.0)"), "1.1.0", REPO)
         self.assertIn("/compare/v1.0.0...v1.1.0", page)
         first = self.page(contributors=["b", "a"])
         self.assertIn("every commit", first)
-        self.assertLess(first.index("[a]("), first.index("[b]("))
+        self.assertLess(first.index("@a"), first.index("@b"))
 
     def test_install_names_the_series(self):
         self.assertIn("find_package(Aurore 1.1 REQUIRED)", self.page())

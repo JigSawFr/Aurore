@@ -4,8 +4,8 @@
 """The notes of a GitHub release, laid out for reading, as PlayGuard's are.
 
   tools/release_notes.py --version 1.0.0 --repo-url https://github.com/o/r \\
-      [--summary SUMMARY] [--compare compare.json] [--contributors logins.json] \\
-      [--run-url URL] < notes.md > new-notes.md
+      [--summary SUMMARY] [--assets assets.json] [--compare compare.json] \\
+      [--contributors logins.json] [--run-url URL] < notes.md > new-notes.md
 
 release-please writes the release's notes from the conventional commits: a
 "## <version> (<date>)" heading, then one line per commit under "### "
@@ -19,10 +19,12 @@ sections. This lays out, under "## <version> · <date>":
   after the last bullet of a section as an "Important" box;
   "What changed": the sections app authors notice, then those for
   contributors (build, tests, docs), each folded;
-  "## 📦 Use it": the submodule at the tag, the migration guide, the install;
-  "## 🔍 Build": the CI run of the tagged commit, the contributors.
+  "## 📦 Use it": the submodule at the tag, the migration guide, the install,
+  the template and the API reference with their size;
+  "## 🔍 Build": the CI run of the tagged commit, the checksums and the
+  attestation, the contributors (mentioned).
 
-compare.json is the GitHub API's compare of the previous tag with this one
+assets.json is `gh release view --json assets`; compare.json the GitHub API's compare of the previous tag with this one
 (its commits give the contributors); logins.json a list of logins, the
 contributors of a first release. Each is optional: what it feeds is left out
 without it.
@@ -64,7 +66,7 @@ USE_IT = """## 📦 Use it
 2. **Coming from borealis?** [Migrating from borealis]({repo}/blob/{tag}/docs/migrating-from-borealis.md) lists each rename, the CMake changes and what changes on screen.
 
 3. **Installed on the desktop?** Configure Aurore with `-DAURORE_INSTALL=ON`, then `find_package(Aurore {series} REQUIRED)` and link `Aurore::aurore`. In code, `AURORE_VERSION_AT_LEAST({major}, {minor}, {patch})` tells the version.
-
+{extras}
 > [!NOTE]
 > Consoles, phones, the desktop and the browser: [what runs where]({repo}/blob/{tag}/docs/platforms.md). The documentation, the API reference and the demo in a browser are on [aurore.boreale.dev]({site}{utm})."""
 
@@ -90,6 +92,12 @@ def sections(text: str):
 
 def items(block: str) -> int:
     return sum(1 for line in block.splitlines() if line.startswith(("* ", "- ")))
+
+
+def fmt_size(n) -> str:
+    if not isinstance(n, int) or n <= 0:
+        return ""
+    return f"{n / 1048576:.1f} MB" if n >= 1048576 else f"{max(1, round(n / 1024))} KB"
 
 
 def plural(n: int, word: str) -> str:
@@ -200,7 +208,7 @@ def unlayout(notes: str):
 
 
 def layout(notes: str, version: str, repo: str, summary: str = "", compare=None,
-           run_url: str = "", contributors=None) -> str:
+           run_url: str = "", contributors=None, assets=None) -> str:
     notes, existing = unlayout(notes)
     summary = (summary or existing).strip()
     lines = notes.splitlines(keepends=True)
@@ -217,6 +225,11 @@ def layout(notes: str, version: str, repo: str, summary: str = "", compare=None,
     prev = m.group(1) if m else ""
     nums = (re.findall(r"\d+", version) + ["0", "0", "0"])[:3]
     utm = UTM.format(tag=tag)
+    dl = f"{repo}/releases/download/{tag}"
+    sizes = {a.get("name"): fmt_size(a.get("size")) for a in (assets or []) if isinstance(a, dict)}
+
+    def size(name):
+        return f" ({sizes[name]})" if sizes.get(name) else ""
 
     out = [head]
     out.append(f'<p>📦 <a href="{repo}/archive/refs/tags/{tag}.zip"><b>Source code</b></a> · '
@@ -251,21 +264,30 @@ def layout(notes: str, version: str, repo: str, summary: str = "", compare=None,
         out.append(folded(f"🛠️ For contributors: {names}", plural(sum(items(b) for _, b in contrib), "change"),
                           "\n\n".join(b for _, b in contrib)))
 
-    out.append(USE_IT.format(repo=repo, tag=tag, site=SITE_URL, utm=utm, series=f"{nums[0]}.{nums[1]}",
+    extras = ""
+    if "aurore-template.zip" in sizes:
+        extras += (f"\n4. **Starting from scratch?** [`aurore-template.zip`]({dl}/aurore-template.zip){size('aurore-template.zip')} "
+                   "is a minimal app (one XML screen, its strings, an icon) that builds a desktop binary and a Switch `.nro`.\n")
+    if "aurore-api.zip" in sizes:
+        extras += (f"\n{5 if extras else 4}. **Offline?** [`aurore-api.zip`]({dl}/aurore-api.zip){size('aurore-api.zip')} "
+                   "is the API reference of this release, as web pages.\n")
+    out.append(USE_IT.format(repo=repo, tag=tag, extras=extras, site=SITE_URL, utm=utm, series=f"{nums[0]}.{nums[1]}",
                              major=nums[0], minor=nums[1], patch=nums[2]))
 
     build = []
     if run_url:
         build.append(f"[**Build report**]({run_url}) (the CI run of the tagged commit: every platform, the tests, the sanitizers)")
+    if "SHA256SUMS.txt" in sizes:
+        build.append("`SHA256SUMS.txt`")
+        build.append(f"provenance: `gh attestation verify aurore-api.zip -R {slug}`")
     build.append(f"[Every commit]({repo}/commits/{tag})")
     people = {(c.get("author") or {}).get("login", "") for c in (compare or {}).get("commits") or []}
     if not compare:
         people |= set(contributors or [])
-    # Links, not @mentions: a release page should not notify the people it thanks.
     people = sorted((p for p in people if p and not p.endswith("[bot]")), key=str.lower)
     section = "## 🔍 Build\n\n" + " · ".join(build)
     if people:
-        section += "\n\n**Contributors**: " + ", ".join(f"[{p}](https://github.com/{p})" for p in people)
+        section += "\n\n**Contributors**: " + ", ".join(f"@{p}" for p in people)
     out.append(section)
     return "\n\n".join(out) + "\n"
 
@@ -283,6 +305,7 @@ def main() -> int:
     ap.add_argument("--version", required=True, help="1.0.0 (a leading v is dropped)")
     ap.add_argument("--repo-url", required=True, help="https://github.com/owner/repo")
     ap.add_argument("--summary", help="the summary file, if any")
+    ap.add_argument("--assets", help="gh release view --json assets, for the sizes")
     ap.add_argument("--compare", help="the API's compare of the previous tag, for the contributors")
     ap.add_argument("--contributors", help="a JSON list of logins, the contributors when there is no compare")
     ap.add_argument("--run-url", default="", help="the CI run of the tagged commit, for the build report")
@@ -297,11 +320,12 @@ def main() -> int:
     if a.summary:
         with open(a.summary, encoding="utf-8") as f:
             summary = f.read()
+    assets = (read_json(a.assets) or {}).get("assets") if a.assets else None
     compare = read_json(a.compare) if a.compare else None
     contributors = read_json(a.contributors) if a.contributors else None
     sys.stdout.write(layout(sys.stdin.read(), a.version.lstrip("v"), a.repo_url.rstrip("/"), summary,
                             compare if isinstance(compare, dict) else None, a.run_url,
-                            contributors if isinstance(contributors, list) else None))
+                            contributors if isinstance(contributors, list) else None, assets))
     return 0
 
 
