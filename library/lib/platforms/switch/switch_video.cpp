@@ -7,6 +7,20 @@
 #include <aurore/platforms/switch/switch_video.hpp>
 
 #include <cmath>
+#include <cstdio>
+
+// DIAGNOSTIC (not to be merged): a file sdmc:/aurore_diag/<name> turns a
+// suspect of PlayGuard 1.4.0's GPU exception off; each is logged to stderr.
+bool diagFlag(const char* name);
+bool diagFlag(const char* name)
+{
+    char path[96];
+    std::snprintf(path, sizeof(path), "sdmc:/aurore_diag/%s", name);
+    std::FILE* f = std::fopen(path, "rb");
+    if (f) std::fclose(f);
+    std::fprintf(stderr, "aurore diag: %s %s\n", name, f ? "ON" : "off");
+    return f != nullptr;
+}
 
 // nanovg implementation
 #include <nanovg_dk.h>
@@ -43,7 +57,12 @@ SwitchVideoContext::SwitchVideoContext()
 
     // Init deko
     this->device = dk::DeviceMaker {}.create();
-    this->queue  = dk::QueueMaker { this->device }.setFlags(DkQueueFlags_Graphics | DkQueueFlags_HighPrio | DkQueueFlags_DisableZcull).create();
+    // DIAGNOSTIC (not to be merged): sdmc:/aurore_diag/queue_plain gives the
+    // queue the flags it had before 335af3bd (Graphics only).
+    {
+        const bool plain = diagFlag("queue_plain");
+        this->queue = dk::QueueMaker { this->device }.setFlags(plain ? DkQueueFlags_Graphics : (DkQueueFlags_Graphics | DkQueueFlags_HighPrio | DkQueueFlags_DisableZcull)).create();
+    }
 
     this->imagesPool.emplace(device, DkMemBlockFlags_GpuCached | DkMemBlockFlags_Image, IMAGES_POOL_SIZE);
     this->codePool.emplace(device, DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached | DkMemBlockFlags_Code, CODE_POOL_SIZE);

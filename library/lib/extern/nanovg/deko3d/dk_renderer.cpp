@@ -10,6 +10,8 @@
 
 #include <dk_shaders.h>
 
+bool diagFlag(const char* name); // switch_video.cpp, DIAGNOSTIC
+
 /* The size of a shader built in, or 0 when it was not (a null pointer). */
 template <size_t N>
 static constexpr size_t DkshSize(const unsigned char (&)[N]) { return N; }
@@ -194,7 +196,9 @@ namespace nvg {
     }
 
     int DkRenderer::FindFreeImageDescriptor() const {
-        for (int desc = 0; desc <= m_last_image_descriptor; desc++) {
+        /* DIAGNOSTIC: no_desc_reuse never hands out a freed descriptor again. */
+        static const bool no_reuse = diagFlag("no_desc_reuse");
+        for (int desc = 0; !no_reuse && desc <= m_last_image_descriptor; desc++) {
             if (m_image_descriptor_owners[desc] == DescriptorOwner::Free) {
                 return desc;
             }
@@ -209,7 +213,8 @@ namespace nvg {
     }
 
     void DkRenderer::TrimImageDescriptorTail() {
-        while (m_last_image_descriptor >= 0 &&
+        static const bool no_reuse = diagFlag("no_desc_reuse");
+        while (!no_reuse && m_last_image_descriptor >= 0 &&
                m_image_descriptor_owners[m_last_image_descriptor] == DescriptorOwner::Free) {
             m_last_image_descriptor--;
         }
@@ -496,7 +501,16 @@ namespace nvg {
             }
         };
 
-        load(m_vertex_shader, dksh_fill_vsh, DkshSize(dksh_fill_vsh), "romfs:/shaders/fill_vsh.dksh");
+        /* DIAGNOSTIC: vsh_130 puts back the one byte 1.3.0's fill_vsh had
+           (0xe1 at 0x220, a stall count of 1 instead of 2). */
+        if (diagFlag("vsh_130") && DkshSize(dksh_fill_vsh) > 0x220) {
+            static unsigned char vsh[sizeof(dksh_fill_vsh)];
+            memcpy(vsh, dksh_fill_vsh, sizeof(vsh));
+            vsh[0x220] = 0xe1;
+            load(m_vertex_shader, vsh, sizeof(vsh), "romfs:/shaders/fill_vsh.dksh");
+        } else {
+            load(m_vertex_shader, dksh_fill_vsh, DkshSize(dksh_fill_vsh), "romfs:/shaders/fill_vsh.dksh");
+        }
 
         /* Load the appropriate fragment shader depending on whether AA is enabled. */
         if (ctx.flags & NVG_ANTIALIAS) {
