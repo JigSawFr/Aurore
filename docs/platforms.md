@@ -75,6 +75,8 @@ make -C build_switch aurore_demo.nro -j$(nproc)
 
 `build_switch/aurore_demo.nro` goes to `/switch/` on the SD card, or straight to a console with `nxlink -s build_switch/aurore_demo.nro` (its logs come back to the terminal). Without `-DAURORE_GRAPHICS=DEKO3D`, the OpenGL driver. The presets `switch-deko3d` and `switch-gl` do the same. The `.nro` target of the demo's `CMakeLists.txt` shows how the resources go into its romfs, and why the text and button fonts are left out of it: the system's shared fonts take their place ([fonts.md](fonts.md)).
 
+`-DAURORE_DEKO3D_DEBUG=ON` links deko3d's debug library (`libdeko3dd`) instead: every call is checked, and when the console would abort with `2359-xxxx` (a deko3d error), the reason goes to stderr and onto the screen first; a queue in error state also says why (a GPU page fault and its address, a method error, a timeout). An app that has no terminal sends stderr to a file (`freopen`). For a diagnostic build only: it is slower.
+
 With the deko3d driver, nanovg's shaders are built into the library from `library/lib/extern/nanovg/deko3d/shaders/prebuilt/`: `uam` does not always give the same bytes for the same GLSL, so an app built twice from one commit would not be byte for byte the same. Each `.dksh` there is kept with the hash of the `.glsl` it came from; the build uses it while they match, and compiles with `uam` (with a warning) when they do not. After changing a shader, `python3 tools/dksh.py --update` with devkitPro's `uam` compiles them again, and `python3 tools/dksh.py` (run by CI) checks them.
 
 ## PS Vita
