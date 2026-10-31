@@ -228,6 +228,8 @@ pre code { font-size: inherit; color: #d6deeb; }
 .prose h4 { font-size: 1.05rem; font-weight: 600; margin-top: 1.4em; }
 .prose h2 small { font-family: var(--mono); font-size: 0.8rem; color: var(--dusk); font-weight: 400; margin-left: 8px; }
 .prose ul, .prose ol { padding-left: 1.4em; }
+/* The changelog's lines are release-please's, with identifiers like CMAKE_OSX_DEPLOYMENT_TARGET that have no place to break */
+.release-entry li { overflow-wrap: anywhere; }
 .prose li + li { margin-top: 0.3em; }
 .prose li > ul, .prose li > ol { margin-top: 0.3em; }
 .prose img { border-radius: 10px; }
