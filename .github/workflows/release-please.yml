@@ -29,29 +29,34 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      # A hand-written summary, .github/release-notes/X.Y.Z.md, goes above
-      # release-please's lists on the release page. None for that version: the
-      # page stays as it is. Run again, it does not repeat itself.
-      - name: Add the release summary
-        if: steps.release.outputs.release_created == 'true'
+  # The release page, as PlayGuard's: "Aurore X.Y.Z", the figures, the
+  # hand-written summary (.github/release-notes/X.Y.Z.md, if there is one),
+  # the commit list folded, how to use it, the build report and the
+  # contributors (tools/release_page.sh). Actions › release-page lays out a
+  # release again.
+  page:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          sparse-checkout: |
+            .github/release-notes
+            tools/release_notes.py
+            tools/release_page.sh
+          sparse-checkout-cone-mode: false
+      - name: Release page
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.release.outputs.tag_name }}
-        run: |
-          version="${TAG#v}"
-          gh api "repos/$GITHUB_REPOSITORY/contents/.github/release-notes/$version.md?ref=$TAG" \
-            -H 'Accept: application/vnd.github.raw' > summary.md || {
-            echo "No summary for $version: the page stays as release-please wrote it." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          }
-          gh release view "$TAG" --json body --jq .body > body.md
-          if grep -qxF -- "$(head -n 1 summary.md)" body.md; then
-            echo "$TAG already has its summary." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          { cat summary.md; printf '\n\n'; cat body.md; } > notes.md
-          gh release edit "$TAG" --notes-file notes.md
-          echo "$TAG: summary added from .github/release-notes/$version.md" >> "$GITHUB_STEP_SUMMARY"
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: tools/release_page.sh "$TAG" --apply
 
   # boreale.dev shows each project's latest version: tell it once the release
   # is out. Needs BOREALE_DISPATCH_TOKEN, a token allowed to send
