@@ -221,6 +221,16 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DAURORE_PLATFORM=SWITCH ${{ matrix.cmake }}
           make -C build aurore_demo.nro -j$(nproc)
           ccache --show-stats
+      - name: Kept shaders built in
+        # The build took the compiled shaders kept in the repository, not uam's
+        # (whose bytes can differ from one run to the next)
+        if: ${{ matrix.driver == 'deko3d' }}
+        run: |
+          for name in fill_vsh fill_aa_fsh fill_fsh; do
+            built=$(find build -path "*/dksh/$name.dksh" | head -n 1)
+            test -n "$built" || { echo "::error::$name.dksh was not built"; exit 1; }
+            cmp "$built" "library/lib/extern/nanovg/deko3d/shaders/prebuilt/$name.dksh"
+          done
       - name: Upload dist
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -772,6 +782,9 @@ jobs:
       - name: Third-party notices
         # Each vendored component and font listed, the versions they say (needs the submodules)
         run: python3 tools/check_notices.py
+      - name: Kept deko3d shaders
+        # Each compiled shader kept in shaders/prebuilt/ is of the GLSL next to it
+        run: python3 tools/dksh.py
       - name: Under the hood
         # The README's versions and figures, as the repository has them
         run: python3 tools/stack.py --check
