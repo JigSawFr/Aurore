@@ -744,6 +744,9 @@ jobs:
         run: |
           doxygen docs/Doxyfile
           python3 tools/build_api.py build_docs/xml build_api
+      - name: The website's own version
+        # tools/build_site.py puts Aurore's version from CHANGELOG.md in the menu, not boreale.dev's
+        run: python3 tests/site_versions_test.py
 
   # The libFuzzer targets of tests/fuzz (docs/testing.md), a few minutes
   # each: Cadran's Markdown and a theme file, under AddressSanitizer and

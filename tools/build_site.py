@@ -360,6 +360,15 @@ def releases():
     return out
 
 
+def with_own_version(versions):
+    """boreale.dev's versions, with Aurore's own from the CHANGELOG.md of this
+    checkout: the file release-please just wrote says what was released, where
+    boreale.dev's versions.json can still be the previous one when the site
+    builds right after a release (it is rebuilt by the release in parallel)."""
+    found = releases()
+    return {**versions, "aurore": found[0][0]} if found else dict(versions)
+
+
 # ---- Pages -------------------------------------------------------------------
 
 def json_ld(data):
@@ -1304,7 +1313,7 @@ def main():
     out = sys.argv[1]
     ROOT = sys.argv[2] if len(sys.argv) > 2 else "."
     global VERSIONS
-    VERSIONS = boreale.latest_versions()
+    VERSIONS = with_own_version(boreale.latest_versions())
     os.makedirs(out, exist_ok=True)
     assets = {f"screenshots/{s}.png" for s in SHOTS} | {f"screenshots/console-{c[0]}.png" for c in CONSOLES}
     count = 0
