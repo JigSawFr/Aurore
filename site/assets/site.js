@@ -425,3 +425,14 @@
     }
   }, true);
 })();
+
+// The header's links on a phone or a tablet, a row to scroll (site.css):
+// its edge fades while there are more of them to scroll to.
+(function () {
+  const nav = document.querySelector(".top .nav");
+  if (!nav) return;
+  const fade = () => nav.classList.toggle("more", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+  nav.addEventListener("scroll", fade, { passive: true });
+  addEventListener("resize", fade);
+  fade();
+})();
