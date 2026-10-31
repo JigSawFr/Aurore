@@ -66,18 +66,18 @@ class SwitchPlatform : public Platform
     ThemeVariant systemThemeVariant; // the console's, read at start
     std::string locale;
 
-    AudioPlayer* audioPlayer;
-    SwitchInputManager* inputManager;
-    SwitchImeManager* imeManager;
+    AudioPlayer* audioPlayer         = nullptr;
+    SwitchInputManager* inputManager = nullptr;
+    SwitchImeManager* imeManager     = nullptr;
 
 #ifdef AURORE_USE_DEKO3D
-    SwitchVideoContext* videoContext;
+    SwitchVideoContext* videoContext = nullptr; // set once the context is built: its own constructor reads it
 #elif defined(__SDL2__)
-    SDLVideoContext* videoContext;
+    SDLVideoContext* videoContext = nullptr;
 #else
-    GLFWVideoContext* videoContext;
+    GLFWVideoContext* videoContext = nullptr;
 #endif
-    SwitchFontLoader* fontLoader;
+    SwitchFontLoader* fontLoader = nullptr;
     AppletHookCookie applet_hook_cookie;
 };
 
