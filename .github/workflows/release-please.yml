@@ -29,6 +29,30 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+      # A hand-written summary, .github/release-notes/X.Y.Z.md, goes above
+      # release-please's lists on the release page. None for that version: the
+      # page stays as it is. Run again, it does not repeat itself.
+      - name: Add the release summary
+        if: steps.release.outputs.release_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          version="${TAG#v}"
+          gh api "repos/$GITHUB_REPOSITORY/contents/.github/release-notes/$version.md?ref=$TAG" \
+            -H 'Accept: application/vnd.github.raw' > summary.md || {
+            echo "No summary for $version: the page stays as release-please wrote it." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          }
+          gh release view "$TAG" --json body --jq .body > body.md
+          if grep -qxF -- "$(head -n 1 summary.md)" body.md; then
+            echo "$TAG already has its summary." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          { cat summary.md; printf '\n\n'; cat body.md; } > notes.md
+          gh release edit "$TAG" --notes-file notes.md
+          echo "$TAG: summary added from .github/release-notes/$version.md" >> "$GITHUB_STEP_SUMMARY"
+
   # boreale.dev shows each project's latest version: tell it once the release
   # is out. Needs BOREALE_DISPATCH_TOKEN, a token allowed to send
   # repository_dispatch to JigSawFr/boreale (Contents: read and write on it
