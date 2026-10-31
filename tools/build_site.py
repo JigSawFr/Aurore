@@ -29,6 +29,7 @@ others each in its folder (/fr/, /de/, /zh-hant/…).
 
 Usage: tools/build_site.py <out-dir> [repo-root]          (needs Python-Markdown and PyYAML)
 """
+import datetime
 import functools
 import html
 import json
@@ -452,7 +453,7 @@ def page(t, lang, to_root, path, title, body, description=None, home=False, stru
   {sky}
   <header class="wrap top">
     {AURORE.switcher(lang, t.texts, to_root, VERSIONS, home=base)}
-    <nav aria-label="{t.plain('nav_label')}">
+    <nav class="nav" aria-label="{t.plain('nav_label')}">
       <ul>
         <li><a href="{base}#features">{t("nav_features")}</a></li>
         <li><a href="{base}docs/getting-started/">{t("nav_docs")}</a></li>
@@ -606,13 +607,15 @@ def editor(t):
     </div>"""
 
 
-def release_line(t, base):
+def release_pill(t, base):
+    """The latest release and its date over the home page's title, its notes
+    (PlayGuard's pill); before the first, that the submodule follows main."""
     found = releases()
     if not found:
-        return f'<p class="release">{t("release_none")}</p>'
+        return f'<p class="release-pill"><span>{t("release_pill_none")}</span></p>'
     version, date, _ = found[0]
-    return (f'<p class="release">{t("release_latest")}{punctuation(t.lang, ":")} <a href="{base}changelog/#v{version}">v{version}</a> '
-            f'· <time datetime="{date}">{date}</time></p>')
+    return (f'<p class="release-pill"><a href="{base}changelog/#v{version}">v{version} '
+            f'· <time datetime="{date}">{boreale.day(datetime.date.fromisoformat(date), t.lang)}</time></a></p>')
 
 
 def demo_audience(page):
@@ -752,13 +755,13 @@ def home_body(t, lang, to_root):
                      for name, url, key in MADE_WITH)
     hero = f"""  <section class="wrap hero">
     <div class="hero-text">
+      {release_pill(t, base)}
       <p class="eyebrow">{t("hero_eyebrow")}</p>
       <h1>{t("hero_title")}</h1>
       <p class="lede">{t("hero_lede")}</p>
       <div class="actions">
         {hero_actions(t, lang, to_root, base)}
       </div>
-      {release_line(t, base)}
     </div>
     <!-- The demo on a console's screen: a handheld drawn by site.css
          (.device), leaning towards the text on a wide screen. -->

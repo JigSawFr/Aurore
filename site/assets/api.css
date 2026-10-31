@@ -21,7 +21,7 @@
 .api-member, .api-line, .api-values tr { scroll-margin-top: 72px; }
 
 /* The header's link to the API, marked: the page is one of its. */
-.top nav a[aria-current="page"] { color: var(--snow); background: rgba(232, 238, 247, 0.06); }
+.top .nav a[aria-current="page"] { color: var(--snow); background: rgba(232, 238, 247, 0.06); }
 
 /* Code in a link of the sidebar or a list: the link's look, in the code's font. */
 .api .doc-nav code, .api-list code, .api-chips code, .api-lineage code, .api-inherited code {

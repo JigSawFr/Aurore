@@ -37,7 +37,7 @@ python3 tools/build_site.py /tmp/site
 python3 -m http.server -d /tmp/site 8000      # http://localhost:8000/
 ```
 
-With the API reference: `doxygen docs/Doxyfile` (its XML in `build_docs/xml`), `python3 tools/build_api.py build_docs/xml build_api`, then `SITE_API=build_api python3 tools/build_site.py /tmp/site`.
+With the API reference: `doxygen docs/Doxyfile` (its XML in `build_docs/xml`), `python3 tools/build_api.py build_docs/xml build_api` (with `SITE_DEMO` too when the demo is published: its pages' header links to it), then `SITE_API=build_api python3 tools/build_site.py /tmp/site`.
 
 ## Checks
 
