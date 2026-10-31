@@ -13,11 +13,9 @@
 /* The tokens, the reset, the links and the focus ring are boreale-site's
    (boreale.css, chrome.css). Aurore's own: its text a little larger, its
    buttons' size, its headings' leading and hyphens. */
-:root { --button-size: 1rem; }
+:root { --button-size: 1rem; --footer-gap: 0; --eyebrow-leading: 1.6; --band-eyebrow: var(--aurora); }
 body { font-size: 1.0625rem; }
 h1, h2, h3, h4 { line-height: 1.15; letter-spacing: normal; overflow-wrap: break-word; hyphens: auto; }
-h4 { margin: 0; }
-.eyebrow { line-height: 1.6; }
 /* Line breaks as each script wants them (chrome.css has the common ones):
    Japanese between phrases in what is Aurore's own. */
 :lang(ja) :is(h4, .lede, .made span, .preview-screen p, .pane-name, .lang-button, .langs a, .sites small, .lost p, .section-head p, .stat-text, .lineage li > span, .sides th, .pickers p) { word-break: auto-phrase; }
@@ -29,8 +27,6 @@ code, pre, kbd { font-family: var(--mono); }
   overflow-wrap: anywhere;
 }
 .muted { color: var(--mist); }
-/* The space above the footer is the last section's (the documentation's, the home page's main). */
-.footer { margin-top: 0; }
 .narrow { max-width: calc(820px + var(--gutter-l) + var(--gutter-r)); }
 
 /* ---- The home page ------------------------------------------------------ */
@@ -46,7 +42,6 @@ code, pre, kbd { font-family: var(--mono); }
 .release { margin-top: 16px; color: var(--dusk); font-size: 0.9375rem; }
 /* The latest release and its date over the title (the pill is chrome.css's);
    before the first, a pill without a link, with a dot. */
-.pill-eyebrow > :not(.pill-more) { line-height: 1.4; }
 .pill-eyebrow span::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgb(0 255 204 / 0.18); }
 .hero-shot { margin: 0; }
 .hero-shot img, .cadran img {
@@ -60,15 +55,13 @@ code, pre, kbd { font-family: var(--mono); }
 
 .sky-home:not(.no-veils) ~ main { padding-bottom: clamp(48px, 7vw, 88px); }
 .section-head { gap: 12px; }
-.wrap > .band { margin-top: 0; }
 .actions { margin-top: 0; }
 .hero .actions { margin-top: 26px; }
 .cadran h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 600; letter-spacing: -0.025em; }
 .cadran p { color: var(--mist); }
 .cadran-text .eyebrow { margin: 0; }
-/* The sections' eyebrows are the text's grey, the band's the aurora's. */
+/* The sections' eyebrows are the text's grey (the band's is --band-eyebrow, on :root). */
 .section-head .eyebrow, .cadran .eyebrow { color: var(--mist); }
-.band .eyebrow { color: var(--aurora); }
 .card p { font-size: 0.975rem; }
 .section-head a, .cadran a { font-weight: 600; }
 
@@ -359,10 +352,6 @@ pre code { font-size: inherit; color: #d6deeb; }
 /* The home page's band (chrome.css's): its text over its button as long as
    they fit on a line. */
 .band { flex-wrap: wrap; }
-@media (max-width: 600px) {
-  .band { flex-direction: row; align-items: center; padding: clamp(22px, 4vw, 40px); }
-  .band .button { align-self: auto; }
-}
 .band > div, .band > div:first-child { display: grid; gap: 10px; max-width: 60ch; }
 .band > div > * { margin: 0; }
 
@@ -404,14 +393,6 @@ pre code { font-size: inherit; color: #d6deeb; }
 
 /* The icon's tile has 4px under it. */
 .card .icon { margin-bottom: 4px; }
-
-/* A phone keeps the cards as they were: the icon over the title, 22px around. */
-@media (max-width: 860px) {
-  .cards { gap: 16px; }
-  .card { padding: 22px; }
-  .card:has(> .icon) { grid-template-columns: none; gap: 10px; }
-  .card:has(> .icon) > .icon { grid-row: auto; }
-}
 
 /* Whole rows of features: four, two, or one under the other. */
 @media (min-width: 600px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
