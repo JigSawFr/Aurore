@@ -27,6 +27,9 @@ code, pre, kbd { font-family: var(--mono); }
   overflow-wrap: anywhere;
 }
 .muted { color: var(--mist); }
+/* The changelog quotes long names in plain text (CMAKE_OSX_DEPLOYMENT_TARGET):
+   they break rather than widen a small phone's page. */
+.release-entry { overflow-wrap: break-word; }
 .narrow { max-width: calc(820px + var(--gutter-l) + var(--gutter-r)); }
 
 /* ---- The home page ------------------------------------------------------ */
@@ -228,6 +231,8 @@ pre code { font-size: inherit; color: #d6deeb; }
 .prose h4 { font-size: 1.05rem; font-weight: 600; margin-top: 1.4em; }
 .prose h2 small { font-family: var(--mono); font-size: 0.8rem; color: var(--dusk); font-weight: 400; margin-left: 8px; }
 .prose ul, .prose ol { padding-left: 1.4em; }
+/* The changelog's lines are release-please's, with identifiers like CMAKE_OSX_DEPLOYMENT_TARGET that have no place to break */
+.release-entry li { overflow-wrap: anywhere; }
 .prose li + li { margin-top: 0.3em; }
 .prose li > ul, .prose li > ol { margin-top: 0.3em; }
 .prose img { border-radius: 10px; }
