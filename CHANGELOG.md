@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/JigSawFr/Aurore/compare/v1.0.1...v1.1.0) (2026-11-01)
+
+
+### Features
+
+* **deko3d:** AURORE_DEKO3D_DEBUG links deko3d's debug library ([#154](https://github.com/JigSawFr/Aurore/issues/154)) ([f812cd9](https://github.com/JigSawFr/Aurore/commit/f812cd958f8cbe4ab4a40b9f56cb436889ff35a6))
+
+
+### Documentation
+
+* **readme:** stop saying Aurore looks like the Switch's menus ([#158](https://github.com/JigSawFr/Aurore/issues/158)) ([a452fb2](https://github.com/JigSawFr/Aurore/commit/a452fb2d6b1e1f82c527f700e0650c6439cb41d3))
+
 ## [1.0.1](https://github.com/JigSawFr/Aurore/compare/v1.0.0...v1.0.1) (2026-11-01)
 
 
