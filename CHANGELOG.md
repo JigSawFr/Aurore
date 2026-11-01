@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.1](https://github.com/JigSawFr/Aurore/compare/v1.0.0...v1.0.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **deko3d:** the shaders built in are loaded, and a missing one says so ([#156](https://github.com/JigSawFr/Aurore/issues/156)) ([5f51642](https://github.com/JigSawFr/Aurore/commit/5f516429f136ecb5b7f2a1d94981a17019a48436))
+* **site:** Aurore's own version in the menu comes from its changelog ([#151](https://github.com/JigSawFr/Aurore/issues/151)) ([8a23d41](https://github.com/JigSawFr/Aurore/commit/8a23d41b8f5895a49996db9fe34d4c30b167f05a))
+* **site:** long names in the changelog wrap on a small phone ([#153](https://github.com/JigSawFr/Aurore/issues/153)) ([348a254](https://github.com/JigSawFr/Aurore/commit/348a254f244fc59b1538454240b2aaae6e161e01))
+* **site:** the changelog's long identifiers wrap on a phone ([#152](https://github.com/JigSawFr/Aurore/issues/152)) ([a81ae93](https://github.com/JigSawFr/Aurore/commit/a81ae936297b37a7459e117d46bb8669c7023609))
+
+
+### Documentation
+
+* **release:** the summary of 1.0.1 ([#157](https://github.com/JigSawFr/Aurore/issues/157)) ([22f54f2](https://github.com/JigSawFr/Aurore/commit/22f54f25eed9fb292aeedbccc2733aa61dd9314b))
+
 ## 1.0.0 (2026-10-31)
 
 
