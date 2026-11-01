@@ -7,8 +7,8 @@
 // changed). Semantic versioning: from 1.0, a breaking change waits for the next major version.
 #define AURORE_VERSION_MAJOR 1 // x-release-please-major
 #define AURORE_VERSION_MINOR 0 // x-release-please-minor
-#define AURORE_VERSION_PATCH 0 // x-release-please-patch
-#define AURORE_VERSION "1.0.0" // x-release-please-version
+#define AURORE_VERSION_PATCH 1 // x-release-please-patch
+#define AURORE_VERSION "1.0.1" // x-release-please-version
 
 // For a test on the version: #if AURORE_VERSION_AT_LEAST(1, 1, 0)
 #define AURORE_VERSION_AT_LEAST(major, minor, patch)                                                       \
