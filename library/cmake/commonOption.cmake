@@ -50,6 +50,11 @@ option(AURORE_LIBJBC "PS4: root access (libjbc)" OFF)
 # PS Vita with GXM only
 option(AURORE_VITA_SHARK "PS Vita GXM: compile the shaders at run time (vitashark)" OFF)
 
+# Switch with deko3d only: deko3d's debug library, for a console that aborts
+# with 2359-xxxx. It checks every call and writes the reason (a GPU page fault
+# and its address, a bad call) to stderr before showing it on the screen.
+option(AURORE_DEKO3D_DEBUG "Switch deko3d: link libdeko3dd, deko3d's checks and messages on stderr" OFF)
+
 option(AURORE_BOOST_FILESYSTEM "Use boost::filesystem instead of std::filesystem" OFF)
 
 option(AURORE_STD_THREAD "Use std::thread instead of pthread" OFF)
