@@ -8,12 +8,32 @@
 #include <math.h>
 #include <switch.h>
 
+#include <aurore/core/util.hpp>
 #include <dk_shaders.h>
 
-/* The size of a shader built in, or 0 when it was not (a null pointer). */
-template <size_t N>
-static constexpr size_t DkshSize(const unsigned char (&)[N]) { return N; }
-static constexpr size_t DkshSize(const unsigned char *) { return 0; }
+#include <type_traits>
+
+/* The size of a shader built in (an array in dk_shaders.h), or 0 when it was
+   not (a null pointer). One template for both: with an overload taking a
+   pointer, an array picked it (a plain function beats a template on an equal
+   match), so the size was always 0, no shader was ever loaded from memory,
+   and an app without romfs:/shaders drew with no shader at all. */
+template <typename T>
+static constexpr size_t DkshSize(const T &) {
+    if constexpr (std::is_array_v<T>) {
+        return sizeof(T);
+    } else {
+        return 0;
+    }
+}
+
+#define AURORE_DKSH_SIZE_CHECK(name) \
+    static_assert(DkshSize(name) == (std::is_array_v<std::remove_cvref_t<decltype(name)>> ? sizeof(name) : 0), \
+                  #name ": the size of a shader built in is its array's")
+AURORE_DKSH_SIZE_CHECK(dksh_fill_vsh);
+AURORE_DKSH_SIZE_CHECK(dksh_fill_aa_fsh);
+AURORE_DKSH_SIZE_CHECK(dksh_fill_fsh);
+#undef AURORE_DKSH_SIZE_CHECK
 
 
 namespace nvg {
@@ -491,9 +511,12 @@ namespace nvg {
         /* The shaders built into the library (dk_shaders.h), else those of
            the app's romfs. */
         auto load = [this](CShader &shader, const unsigned char *data, size_t size, const char *path) {
-            if (!shader.loadFromMemory(m_code_mem_pool, data, size)) {
-                shader.load(m_code_mem_pool, path);
+            if (shader.loadFromMemory(m_code_mem_pool, data, size) || shader.load(m_code_mem_pool, path)) {
+                return;
             }
+            /* Drawing without it puts the GPU in error at the first draw
+               (2359-0001 a frame later): say which shader is missing. */
+            aurore::fatal(std::string("deko3d: nanovg's shader is neither built in nor in ") + path);
         };
 
         load(m_vertex_shader, dksh_fill_vsh, DkshSize(dksh_fill_vsh), "romfs:/shaders/fill_vsh.dksh");
