@@ -2,7 +2,7 @@
 
 <img src=".github/readme/banner.png" alt="Aurore" width="100%">
 
-### A Switch-like interface for your app, on every screen
+### A controller-first interface for your app, on every screen
 
 **Android · iOS · Windows · macOS · Linux · PS4 · PS&nbsp;Vita · Nintendo&nbsp;Switch · New&nbsp;3DS**
 
@@ -25,7 +25,7 @@
 
 ---
 
-Aurore is a C++ UI library for controllers, TVs and touch screens. It looks like the Nintendo Switch's own menus out of the box, and can be restyled into anything else.
+Aurore is a C++ UI library for controllers, TVs and touch screens. It comes with its own look, [Cadran](docs/cadran.md) (an icon rail, cards, modals, action sheets), and every colour, picture and icon can be themed.
 
 It is [borealis](https://github.com/natinusala/borealis) under a new name: a fork of [xfangfang/borealis](https://github.com/xfangfang/borealis) (the `wiliwili` branch), maintained by [JigSawFr](https://github.com/JigSawFr) for [PlayGuard](https://github.com/JigSawFr/playguard) and [PlayShelf](https://github.com/JigSawFr/playshelf). It follows upstream and adds **fixes and features picked from other forks** and **the changes those apps need**, each one opt-in unless it is a fix. Its code has its own names (`aurore::`, `<aurore.hpp>`, `AURORE_`), in place of borealis' (`brls::`, `<borealis.hpp>`, `BRLS_`): a borealis app moves to Aurore by changing its submodule and renaming them, a search and replace ([migrating from borealis](docs/migrating-from-borealis.md)).
 
