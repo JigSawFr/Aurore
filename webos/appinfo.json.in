@@ -1,0 +1,11 @@
+{
+  "id": "@WEBOS_APP_ID@",
+  "version": "@WEBOS_APP_VERSION@",
+  "vendor": "@PROJECT_AUTHOR@",
+  "type": "native",
+  "main": "@WEBOS_APP_MAIN@",
+  "title": "@WEBOS_APP_TITLE@",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "requiredPermissions": ["time.query"]
+}

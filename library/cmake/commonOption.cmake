@@ -23,8 +23,8 @@ set(_AURORE_OPTIONS_READ ON)
 include(CMakeDependentOption)
 
 # Target platform
-set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, 3DS (New 3DS, citro3d), ANDROID, IOS or TVOS")
-set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 3DS ANDROID IOS TVOS)
+set(AURORE_PLATFORM "" CACHE STRING "Platform to build for: DESKTOP (Linux, macOS, Windows), SWITCH, PSV, PS4, 3DS (New 3DS, citro3d), ANDROID, IOS, TVOS or WEBOS (LG webOS TV)")
+set_property(CACHE AURORE_PLATFORM PROPERTY STRINGS DESKTOP SWITCH PSV PS4 3DS ANDROID IOS TVOS WEBOS)
 
 # Window and input. SDL3 by default on desktop, in a browser, on Android,
 # iOS and tvOS; SDL2 or GLFW (desktop) when asked for. The consoles have no
@@ -106,8 +106,8 @@ set(IOS_GUI_IDENTIFIER "" CACHE STRING "Package name.")
 
 string(TOUPPER "${AURORE_PLATFORM}" AURORE_PLATFORM)
 set_property(CACHE AURORE_PLATFORM PROPERTY VALUE "${AURORE_PLATFORM}")
-if (AURORE_PLATFORM AND NOT AURORE_PLATFORM MATCHES "^(DESKTOP|SWITCH|PSV|PS4|3DS|ANDROID|IOS|TVOS)$")
-    message(FATAL_ERROR "AURORE_PLATFORM=${AURORE_PLATFORM}: DESKTOP, SWITCH, PSV, PS4, 3DS, ANDROID, IOS or TVOS")
+if (AURORE_PLATFORM AND NOT AURORE_PLATFORM MATCHES "^(DESKTOP|SWITCH|PSV|PS4|3DS|ANDROID|IOS|TVOS|WEBOS)$")
+    message(FATAL_ERROR "AURORE_PLATFORM=${AURORE_PLATFORM}: DESKTOP, SWITCH, PSV, PS4, 3DS, ANDROID, IOS, TVOS or WEBOS")
 endif ()
 
 string(TOUPPER "${AURORE_WINDOW}" AURORE_WINDOW)
@@ -120,7 +120,7 @@ endif ()
 if (AURORE_PLATFORM STREQUAL "3DS" AND (AURORE_WINDOW OR AURORE_GRAPHICS))
     message(FATAL_ERROR "AURORE_PLATFORM=3DS takes no AURORE_WINDOW nor AURORE_GRAPHICS: its window is libctru's, and its renderer citro3d")
 endif ()
-if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4|3DS)$")
+if (AURORE_WINDOW STREQUAL "SDL3" AND AURORE_PLATFORM MATCHES "^(SWITCH|PSV|PS4|3DS|WEBOS)$")
     message(FATAL_ERROR "AURORE_WINDOW=SDL3 is for DESKTOP, ANDROID, IOS and TVOS: ${AURORE_PLATFORM} has no SDL3 yet")
 endif ()
 
@@ -142,13 +142,18 @@ endif ()
 # The plain variables the build files read. toolchain.cmake changes some of
 # them for the platforms that impose a choice (iOS and Android: SDL, and
 # libromfs).
-foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH 3DS)
+foreach (_aurore_p DESKTOP IOS TVOS ANDROID PSV PS4 SWITCH 3DS WEBOS)
     if (AURORE_PLATFORM STREQUAL _aurore_p)
         set(PLATFORM_${_aurore_p} ON)
     else ()
         set(PLATFORM_${_aurore_p} OFF)
     endif ()
 endforeach ()
+# webOS is a Linux desktop with SDL2 and OpenGL ES 2 (toolchain.cmake): the
+# desktop code runs, PLATFORM_WEBOS adds the TV's packaging and definitions
+if (PLATFORM_WEBOS)
+    set(PLATFORM_DESKTOP ON)
+endif ()
 foreach (_aurore_p GLFW SDL2 SDL3)
     if (AURORE_WINDOW STREQUAL _aurore_p)
         set(USE_${_aurore_p} ON)

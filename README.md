@@ -253,7 +253,7 @@ Checked on every pull request: 161 test cases in the headless harness, 36 refere
 3. Copy its `resources` folder to the root of your project.
 4. In your `CMakeLists.txt`, include `library/aurore/library/cmake/commonOption.cmake` and `toolchain.cmake` before `project()`, `add_subdirectory(library/aurore/library)` after it, and link `Aurore::aurore`. It brings its include directories, definitions and dependencies with it.
 
-   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `3DS`, `ANDROID`, `IOS`, `TVOS`), `AURORE_WINDOW` (`SDL3`, `GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `GXM`, `SDLGPU`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
+   The build options are prefixed: `AURORE_PLATFORM` (`DESKTOP`, `SWITCH`, `PSV`, `PS4`, `3DS`, `ANDROID`, `IOS`, `TVOS`, `WEBOS`), `AURORE_WINDOW` (`SDL3`, `GLFW`, `SDL2`), `AURORE_GRAPHICS` (`GL3`, `GL2`, `GLES2`, `GLES3`, `DEKO3D`, `GXM`, `SDLGPU`), `AURORE_LIBROMFS`, `AURORE_FREETYPE`, `AURORE_FRIBIDI`… ([`commonOption.cmake`](library/cmake/commonOption.cmake) lists them). Only these are read; `PLATFORM_DESKTOP`, `USE_GLFW`, `USE_DEKO3D`… are then set as plain variables for the app's own tests.
 
    On the desktop, `-DAURORE_INSTALL=ON` (with `AURORE_LIBROMFS=OFF`) installs the library instead, for `find_package(Aurore)` and `Aurore::aurore`.
 
@@ -305,7 +305,7 @@ With the resources built in (`AURORE_LIBROMFS`), `AURORE_RESOURCES_DIR` makes th
 
 New to it? [**Aurore in 15 minutes**](docs/getting-started.md) goes from the demo to a screen of your own on the Switch. `./build_pc/aurore_demo -t winter` (or `aurora`, `prism`, `builtin:halloween`…) starts it with a theme, and `--simulate 3ds` (or `switch`, `vita`, `ps4`, `phone`) on a console's screen, the console drawn around it ([platforms.md](docs/platforms.md#simulated-platforms)). The [API reference](https://aurore.boreale.dev/api/?utm_source=github&utm_medium=readme) has every class, sorted by theme, and two debugging aids are a switch away: the [inspector](docs/inspector.md) (F12) and [hot reload](docs/hot_reload.md) of the XML and the theme.
 
-The other platforms (Windows, macOS, the Switch, PS Vita, PS4, the New 3DS family, Android, iOS, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
+The other platforms (Windows, macOS, the Switch, PS Vita, PS4, the New 3DS family, Android, iOS, LG webOS TV, a browser) have their toolchains and commands, the CI's, in [**docs/platforms.md**](docs/platforms.md).
 
 ## 📚 Documentation
 
@@ -315,7 +315,7 @@ Also on the website, with a search and the API reference: [aurore.boreale.dev](h
 | --- | --- |
 | [Aurore in 15 minutes](docs/getting-started.md) | From the demo to a screen of your own on the Switch |
 | [Migrating from borealis](docs/migrating-from-borealis.md) | The submodule, the CMake target, the resources, Cadran, what changes on screen |
-| [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, the New 3DS (New 3DS, New 3DS XL, New 2DS XL), Android, iOS and in a browser; the consoles simulated on the desktop |
+| [Platforms](docs/platforms.md) | Building on Linux, macOS, Windows, the Switch, PS Vita, PS4, the New 3DS (New 3DS, New 3DS XL, New 2DS XL), Android, iOS, LG webOS TV and in a browser; the consoles simulated on the desktop |
 | [Porting an app](docs/porting.md) | What an app's code and resources should mind on each platform |
 | [Architecture](docs/architecture.md) | The layers, the main loop, layout, focus, ownership, themes, platforms, threads, resources |
 | [Views](docs/views.md) | Every XML tag, its class and its header |

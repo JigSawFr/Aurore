@@ -22,7 +22,29 @@ endfunction()
 # that link it (target_compile_definitions(aurore PUBLIC ...))
 set(AURORE_TOOLCHAIN_DEFINITIONS)
 
-if (PLATFORM_DESKTOP)
+if (PLATFORM_WEBOS)
+    # LG webOS TV: a 32-bit ARM Linux with SDL2 and OpenGL ES 2 in its
+    # sysroot. The SDK is webosbrew's unofficial Buildroot one
+    # (docs/platforms.md): WEBOS_SDK is the folder relocate-sdk.sh ran in
+    message(STATUS "building for webOS TV")
+    if (NOT DEFINED ENV{WEBOS_SDK})
+        message(FATAL_ERROR "Please set WEBOS_SDK in your environment: export WEBOS_SDK=<path to>/arm-webos-linux-gnueabi_sdk-buildroot")
+    endif ()
+    set(WEBOS_SDK $ENV{WEBOS_SDK} CACHE PATH "webOS SDK")
+    set(CMAKE_TOOLCHAIN_FILE "${WEBOS_SDK}/share/buildroot/toolchainfile.cmake" CACHE PATH "toolchain file")
+    set(USE_GLFW OFF)
+    set(USE_SDL3 OFF)
+    set(USE_SDL2 ON)
+    set(USE_SYSTEM_SDL2 ON)
+    if (NOT USE_GLES3)
+        set(USE_GLES2 ON)
+    endif ()
+    # The resources are built in: a native app's working directory is the
+    # system's, not the app's folder
+    set(USE_LIBROMFS ON)
+    check_libromfs_generator()
+    list(APPEND AURORE_TOOLCHAIN_DEFINITIONS __WEBOS__)
+elseif (PLATFORM_DESKTOP)
     message(STATUS "building for Desktop")
     if (NOT USE_GLFW AND NOT USE_SDL2 AND NOT USE_SDL3)
         set(USE_SDL3 ON)
