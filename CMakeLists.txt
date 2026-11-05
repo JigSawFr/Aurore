@@ -107,6 +107,11 @@ endif ()
 if (PLATFORM_DESKTOP AND MINGW)
     target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++ -static)
 endif ()
+# The TV's libstdc++ is the firmware's, older than the SDK's compiler (GCC 16):
+# the program carries its own
+if (PLATFORM_WEBOS)
+    target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++)
+endif ()
 
 
 # building release file
@@ -214,6 +219,34 @@ elseif (PLATFORM_TVOS)
             "${CMAKE_CURRENT_SOURCE_DIR}/demo/ios/iOSBundleInfo.plist.in"
             "Aurore"
             "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}")
+endif ()
+
+# The demo on an LG webOS TV (docs/platforms.md): the folder of a native app
+# (appinfo.json, its icons, the program), then the .ipk by ares-package when
+# the CLI is there (npm i -g @webos-tools/cli).
+if (PLATFORM_WEBOS)
+    set(WEBOS_APP_ID "com.aurore.demo")
+    set(WEBOS_APP_TITLE "Aurore")
+    set(WEBOS_APP_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_ALTER}")
+    set(WEBOS_APP_MAIN ${PROJECT_NAME})
+    set(WEBOS_APP_DIR ${CMAKE_BINARY_DIR}/webos/${WEBOS_APP_ID})
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/webos/appinfo.json.in ${CMAKE_BINARY_DIR}/webos/appinfo.json @ONLY)
+    add_custom_target(${PROJECT_NAME}_webos ALL DEPENDS ${PROJECT_NAME}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBOS_APP_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}>
+                ${CMAKE_BINARY_DIR}/webos/appinfo.json
+                ${CMAKE_CURRENT_SOURCE_DIR}/webos/icon.png
+                ${CMAKE_CURRENT_SOURCE_DIR}/webos/largeIcon.png
+                ${WEBOS_APP_DIR}
+        COMMENT "Assembling the webOS app in ${WEBOS_APP_DIR}")
+    find_program(ARES_PACKAGE ares-package)
+    if (ARES_PACKAGE)
+        add_custom_command(TARGET ${PROJECT_NAME}_webos POST_BUILD
+            COMMAND ${ARES_PACKAGE} --no-minify -o ${CMAKE_BINARY_DIR} ${WEBOS_APP_DIR}
+            COMMENT "Packaging the .ipk")
+    else ()
+        message(STATUS "ares-package not found: ${WEBOS_APP_DIR} is the folder to package")
+    endif ()
 endif ()
 
 # The demo in a browser (web/README.md): threads (a pool started with the

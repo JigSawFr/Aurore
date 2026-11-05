@@ -57,7 +57,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 | language, theme | `getLocale()`, `getThemeVariant()`: the system's, unless the app sets `Platform::APP_LOCALE_DEFAULT` or a variant ([environment.md](environment.md) for the desktop's overrides) |
 | the home menu | `isApplicationMode()`, `exitToHomeMode()`: the Switch's |
 
-When something is a platform's own (a Switch service, an Android intent), keep it behind one function of the app's, with the compiler's defines: `__SWITCH__`, `__PSV__`, `PS4`, `ANDROID`, `IOS`, `__APPLE__`, `_WIN32`, `__linux__`, `__EMSCRIPTEN__`.
+When something is a platform's own (a Switch service, an Android intent), keep it behind one function of the app's, with the compiler's defines: `__SWITCH__`, `__PSV__`, `PS4`, `ANDROID`, `IOS`, `__WEBOS__`, `__APPLE__`, `_WIN32`, `__linux__`, `__EMSCRIPTEN__`.
 
 ## Threads and speed
 

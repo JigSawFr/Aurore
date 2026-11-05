@@ -130,6 +130,38 @@ jobs:
           name: aurore-ps4
           path: build/*.pkg
 
+  # LG webOS TV: webosbrew's unofficial Buildroot SDK (GCC 16, SDL2 and OpenGL ES 2
+  # in its sysroot). Compiles only: nothing runs without a TV (docs/platforms.md).
+  # Tried on 2026-11-04 with the SDK whose archive has this SHA-256:
+  # 2230a6351e5cce6fcb9d4fdcb4697335f223995401ef969c81744aaeb14c5344
+  webos:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: recursive
+      - name: SDK
+        run: |
+          curl -fsSL -o sdk.tar.gz https://github.com/openlgtv/buildroot-nc4/releases/latest/download/arm-webos-linux-gnueabi_sdk-buildroot-x86_64.tar.gz
+          mkdir "$RUNNER_TEMP/webos-sdk"
+          tar -xzf sdk.tar.gz -C "$RUNNER_TEMP/webos-sdk"
+          "$RUNNER_TEMP/webos-sdk/arm-webos-linux-gnueabi_sdk-buildroot/relocate-sdk.sh"
+      - name: Build
+        run: |
+          export WEBOS_SDK="$RUNNER_TEMP/webos-sdk/arm-webos-linux-gnueabi_sdk-buildroot"
+          ./build_libromfs_generator.sh
+          cmake -B build -DAURORE_PLATFORM=WEBOS -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j$(nproc)
+          file build/aurore_demo | grep -q 'ARM, EABI5'
+      - name: Upload dist
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aurore-webos
+          path: build/webos/com.aurore.demo
+
   psv:
     runs-on: ubuntu-26.04
     timeout-minutes: 30

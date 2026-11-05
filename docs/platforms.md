@@ -13,6 +13,7 @@ An app builds the same way as the demo: its `CMakeLists.txt` includes `library/a
 | New 3DS, New 3DS XL, New 2DS XL (demo and test card) | `3DS` | libctru's | citro3d | `romfs:/` |
 | Android | `ANDROID` | SDL3 (default) or SDL2 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
 | iOS, tvOS | `IOS`, `TVOS` | SDL3 (default) or SDL2 | OpenGL ES 3 (or `GLES2`) | built in (libromfs, forced) |
+| LG webOS TV | `WEBOS` | SDL2 | OpenGL ES 2 (or `GLES3`) | built in (libromfs, forced) |
 | Browser | Emscripten (`emcmake`) | SDL3 (default) or SDL2 | OpenGL ES 3 (WebGL 2) | packaged with the page |
 
 Every build needs CMake 3.20 or later (3.24 on macOS, iOS and tvOS with SDL2 or SDL3 built from the submodule) and a C++23 compiler, for Aurore and for the projects that link it. Clone with the submodules (`git clone --recursive`, or `git submodule update --init --recursive`).
@@ -151,6 +152,19 @@ cmake --build build
 With Xcode 27, for iOS 27 (`DEPLOYMENT_TARGET`; Xcode 27 goes down to iOS 15). The app is `build/Debug-iphoneos/aurore_demo.app`; the CI zips it unsigned. `-DIOS_CODE_SIGN_IDENTITY="Apple Development: …"` signs it, `-DIOS_GUI_IDENTIFIER=com.example.app` sets its bundle identifier (`PACKAGE_NAME` by default). `-DAURORE_WINDOW=SDL2` builds on SDL2. `library/cmake/ios.toolchain.cmake` takes the usual options of ios-cmake: `-DPLATFORM=SIMULATORARM64` builds for the simulator. `-DAURORE_PLATFORM=TVOS` builds for the Apple TV (not built by CI). The demo's `ios_bundle()` call (in its `CMakeLists.txt`) gives the app its storyboard, icons and `Info.plist` (`demo/ios/`).
 
 The notch, the rounded corners and the home indicator (on tvOS, the TV's safe area) are the [safe area](safe-areas.md), from `UIWindow.safeAreaInsets`.
+
+## LG webOS TV
+
+A webOS TV is a 32-bit ARM Linux with SDL2 and OpenGL ES 2, and LG offers no public native SDK: this builds with webosbrew's unofficial one, [`native-toolchain`](https://github.com/webosbrew/native-toolchain) (the Buildroot SDK of [`openlgtv/buildroot-nc4`](https://github.com/openlgtv/buildroot-nc4): GCC 16, so C++23, and the TV's SDL2, EGL and GLESv2 in its sysroot). Extract the Linux archive, run its `relocate-sdk.sh`, and point `WEBOS_SDK` at the folder. The platform is the desktop's code (SDL2, OpenGL ES 2, as on the PS4 and Android) under that toolchain; the resources are built in (libromfs, forced), and the program carries its own libstdc++ (the TV's is the firmware's, older than the compiler's):
+
+```sh
+export WEBOS_SDK=/path/to/arm-webos-linux-gnueabi_sdk-buildroot
+./build_libromfs_generator.sh
+cmake -B build -DAURORE_PLATFORM=WEBOS -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+```
+
+`build/webos/com.aurore.demo/` is the app (`appinfo.json` of type `native`, its icons, the program); when `ares-package` is installed (`npm i -g @webos-tools/cli`) the build packages it into an `.ipk` too. There is no Content Store for native apps: put the TV in Developer Mode and install with `ares-install`, or with [dev-manager-desktop](https://github.com/webosbrew/dev-manager-desktop); a TV with the Homebrew Channel runs it as root. `AURORE_WINDOW=SDL3` stops the configuration (no SDL3 in the SDK). The CI compiles it (`webos`); **nothing has run on a TV yet**: the remote's keys (back, colours), the 4K resolution and the Magic Remote's pointer are to check on one.
 
 ## In a browser
 
