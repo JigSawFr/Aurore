@@ -28,7 +28,7 @@ class SDLImeManager : public ImeManager
 
   private:
     Event<SDL_Event*>* event;
-    int cursor;
+    int cursor = 0;
     std::string inputBuffer;
     bool isEditing = false; // 是否正在编辑文字
     std::string editingBuffer;

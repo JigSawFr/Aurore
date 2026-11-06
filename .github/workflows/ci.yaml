@@ -867,6 +867,9 @@ jobs:
       - name: Third-party notices
         # Each vendored component and font listed, the versions they say (needs the submodules)
         run: python3 tools/check_notices.py
+      - name: Platform members initialised
+        # A number, a bool or a pointer of a platform class has an initial value (Aurore#145)
+        run: python3 tools/check_member_init.py
       - name: Kept deko3d shaders
         # Each compiled shader kept in shaders/prebuilt/ is of the GLSL next to it
         run: python3 tools/dksh.py

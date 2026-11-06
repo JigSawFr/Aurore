@@ -26,8 +26,8 @@ class PsvVideoContext : public VideoContext
     NVGXMwindow* getWindow();
 
   private:
-    NVGcontext* nvgContext;
-    NVGXMwindow* window;
+    NVGcontext* nvgContext = nullptr;
+    NVGXMwindow* window    = nullptr;
 };
 
 } // namespace aurore

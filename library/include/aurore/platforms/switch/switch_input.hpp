@@ -47,23 +47,23 @@ class SwitchInputManager : public InputManager
 
   private:
     bool cursorInited = false;
-    int cursorWidth, cursorHeight;
+    int cursorWidth = 0, cursorHeight = 0;
     int cursorTexture = 0;
-    NVGpaint paint;
-    Point lastCursorPosition;
-    PadState padStateHandheld;
-    HidVibrationDeviceHandle m_vibration_device_handheld[2];
-    HidVibrationValue m_vibration_values_handheld[2];
-    PadState padsState[GAMEPADS_MAX];
-    HidVibrationDeviceHandle m_vibration_device_handles[GAMEPADS_MAX][2];
-    HidVibrationValue m_vibration_values[GAMEPADS_MAX][2];
-    u32 padsStyleSet[GAMEPADS_MAX];
+    NVGpaint paint {};
+    Point lastCursorPosition {};
+    PadState padStateHandheld {};
+    HidVibrationDeviceHandle m_vibration_device_handheld[2] {};
+    HidVibrationValue m_vibration_values_handheld[2] {};
+    PadState padsState[GAMEPADS_MAX] {};
+    HidVibrationDeviceHandle m_vibration_device_handles[GAMEPADS_MAX][2] {};
+    HidVibrationValue m_vibration_values[GAMEPADS_MAX][2] {};
+    u32 padsStyleSet[GAMEPADS_MAX] {};
     // How many vibration devices each pad has (2 for a pair of Joy-Con,
     // 1 for a Pro Controller or a single Joy-Con)
     int m_vibration_count[GAMEPADS_MAX] = {};
     bool pointerLocked                  = false;
-    HidMouseState currentMouseState;
-    HidSixAxisSensorHandle m_six_axis_sensor_handle[4]; // All for player 1, player 2 not supported
+    HidMouseState currentMouseState {};
+    HidSixAxisSensorHandle m_six_axis_sensor_handle[4] {}; // All for player 1, player 2 not supported
 
     std::vector<bool> m_hid_keyboard_state;
     std::unordered_map<int, AuroreKeyboardScancode> m_hid_aurore_map;

@@ -37,7 +37,7 @@ class GLFWImeManager : public ImeManager
         std::string subText, size_t maxStringLength = 50, std::string initialText = "");
 
   private:
-    GLFWwindow* window;
+    GLFWwindow* window = nullptr;
     inline static bool showIME;
     inline static std::u32string textBuffer;
     inline static std::string preeditTextBuffer;
