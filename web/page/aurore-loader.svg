@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="Loading">
+<!-- SPDX-FileCopyrightText: 2026 JigSawFr -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Boréale's aurora loader (boreale/branding/aurora-loader.svg), copied. -->
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00FFCC"/><stop offset="0.65" stop-color="#33BBFF"/><stop offset="1" stop-color="#8A5CFF"/></linearGradient></defs>
+<path d="M0 104 C 50 64, 90 144, 128 104 S 206 64, 256 104" fill="none" stroke="url(#g)" stroke-width="22" stroke-linecap="round" opacity="0.45"><animate attributeName="d" dur="3s" begin="0s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" values="M0 104 C 50 64, 90 144, 128 104 S 206 64, 256 104;M0 104 C 50 144, 90 64, 128 104 S 206 144, 256 104;M0 104 C 50 64, 90 144, 128 104 S 206 64, 256 104"/></path>
+<path d="M0 128 C 50 88, 90 168, 128 128 S 206 88, 256 128" fill="none" stroke="url(#g)" stroke-width="22" stroke-linecap="round" opacity="0.8"><animate attributeName="d" dur="3s" begin="-1s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" values="M0 128 C 50 88, 90 168, 128 128 S 206 88, 256 128;M0 128 C 50 168, 90 88, 128 128 S 206 168, 256 128;M0 128 C 50 88, 90 168, 128 128 S 206 88, 256 128"/></path>
+<path d="M0 152 C 50 112, 90 192, 128 152 S 206 112, 256 152" fill="none" stroke="url(#g)" stroke-width="22" stroke-linecap="round" opacity="0.45"><animate attributeName="d" dur="3s" begin="-2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" values="M0 152 C 50 112, 90 192, 128 152 S 206 112, 256 152;M0 152 C 50 192, 90 112, 128 152 S 206 192, 256 152;M0 152 C 50 112, 90 192, 128 152 S 206 112, 256 152"/></path>
+<style>@media (prefers-reduced-motion: reduce) { animate { display: none } }</style>
+</svg>
