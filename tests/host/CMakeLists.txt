@@ -23,6 +23,9 @@ aurore_host_test(markdown markdown_tests.cpp ${CADRAN_SRC}/util/safe_text.cpp ${
 # ui::guarded: a callback that does nothing once its screen is gone
 aurore_host_test(guarded guarded_tests.cpp)
 
+# The screen rest's timing: idle, warning, dark, the wake-up
+aurore_host_test(screen_rest screen_rest_tests.cpp ${PROJECT_SOURCE_DIR}/library/lib/core/screen_rest.cpp)
+
 # aurore/compat: the standard library's move_only_function, generator and
 # stacktrace where it has them, then the bundled ones (AURORE_COMPAT_FALLBACK)
 aurore_host_test(compat compat_tests.cpp)

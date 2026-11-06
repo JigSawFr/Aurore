@@ -21,6 +21,7 @@
 #include <aurore/core/observable.hpp>
 #include <aurore/core/platform.hpp>
 #include <aurore/core/screen_frame.hpp>
+#include <aurore/core/screen_rest.hpp>
 #include <aurore/core/style.hpp>
 #include <aurore/core/theme.hpp>
 #include <aurore/core/view.hpp>
@@ -452,6 +453,24 @@ class Application
     static bool isInputBlocks();
 
     /**
+     * Lets the screen rest while the app has long work running (a download): after
+     * `options.idleSeconds` without input `onWarning` is called, `warnSeconds` later the panel is
+     * turned off (Platform::setPanelPower), and any button, touch or click turns it back on. That
+     * input is not delivered to the screen: its inputs are skipped until it is let go of. The
+     * panel is also back on if the main loop stops answering for 15 s (a watchdog), when
+     * the options change, with wakeScreen() and at exit. Where the platform cannot turn the panel
+     * off the phases and callbacks still run, and the app can draw its own veil. An empty
+     * `idleSeconds` (0) turns the rest off.
+     */
+    static void setScreenRest(ScreenRestOptions options);
+
+    /// Where the screen rest is.
+    static ScreenRestPhase getScreenRestPhase();
+
+    /// The panel back on and the idle clock starting again (the app went to the background, a call came).
+    static void wakeScreen();
+
+    /**
      * True when the screen has stopped moving: no animation running nor
      * Timer waiting (a RepeatingTimer does not count: a clock's refresh runs
      * as long as its screen is open), no task queued or running on the
@@ -830,8 +849,9 @@ class Application
     inline static std::unordered_map<std::string, DataModel*> models;
     inline static View* hoveredView = nullptr;
 
-    inline static bool inited               = false;
-    inline static bool quitRequested        = false;
+    inline static bool inited        = false;
+    inline static bool quitRequested = false;
+    static bool screenRestFrame();
     inline static bool debuggingViewEnabled = false;
     inline static bool swapInputKeys        = false;
     inline static bool drawCoursor          = false;

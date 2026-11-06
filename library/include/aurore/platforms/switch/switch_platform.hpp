@@ -52,6 +52,8 @@ class SwitchPlatform : public Platform
     void setBacklightBrightness(float brightness) override;
     float getBacklightBrightness() override;
     bool canSetBacklightBrightness() override;
+    void setPanelPower(bool on) override;
+    bool canSetPanelPower() override;
     std::string getIpAddress() override;
     std::string getDnsServer() override;
     bool isApplicationMode() override;

@@ -19,6 +19,11 @@ add_executable(aurore_open_url_tests open_url_tests.cpp)
 target_link_libraries(aurore_open_url_tests PRIVATE Aurore::test)
 aurore_add_tests(aurore_open_url_tests)
 
+# The screen rest: warning, dark panel, the waking press kept from the screen
+add_executable(aurore_screen_rest_tests screen_rest_tests.cpp)
+target_link_libraries(aurore_screen_rest_tests PRIVATE Aurore::test)
+aurore_add_tests(aurore_screen_rest_tests)
+
 # Pictures too large are refused before they are decoded
 add_executable(aurore_image_limits_tests image_limits_tests.cpp)
 target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)

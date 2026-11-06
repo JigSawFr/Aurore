@@ -179,6 +179,16 @@ class Platform
     virtual void setWindowAlwaysOnTop(bool enable) { }
 
     /**
+     * Turn the panel itself on or off (the backlight, with a short fade), apart from the
+     * brightness setting. Safe to call twice. What Application::setScreenRest() uses; the
+     * default does nothing (canSetPanelPower() is false: the screen stays lit).
+     */
+    virtual void setPanelPower(bool on) { }
+
+    /// Whether setPanelPower() does something here.
+    virtual bool canSetPanelPower() { return false; }
+
+    /**
      * Called at every iteration of the main loop.
      * Must return false if the app should continue running
      * (for example, return false if the X button was pressed on the window).
