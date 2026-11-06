@@ -33,3 +33,8 @@ AURORE_TEST(cpu_boost_is_counted_and_guarded)
     aurore::Application::releaseCpuBoost(); // nobody holds: nothing
     AURORE_CHECK_EQ((int)platform->cpuBoostChanges - before, 2);
 }
+
+int main(int argc, char** argv)
+{
+    return aurore::test::runTests(argc, argv);
+}
