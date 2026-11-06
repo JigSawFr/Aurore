@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.2.0](https://github.com/JigSawFr/Aurore/compare/v1.1.0...v1.2.0) (2026-11-06)
+
+
+### Features
+
+* **android:** adaptive and themed launcher icon ([#167](https://github.com/JigSawFr/Aurore/issues/167)) ([75c5e8f](https://github.com/JigSawFr/Aurore/commit/75c5e8f0386ce30eab77a640c8531083ab5b4f2a))
+* **cadran:** add the tab base, loading dial, tool chip, segment bar, row icon and minutes prompt ([#171](https://github.com/JigSawFr/Aurore/issues/171)) ([1f06d6e](https://github.com/JigSawFr/Aurore/commit/1f06d6ec825a8d8663b8f3ef1862f272eba66287))
+* **core:** count the CPU boost for loading work ([#169](https://github.com/JigSawFr/Aurore/issues/169)) ([644cc1b](https://github.com/JigSawFr/Aurore/commit/644cc1babaa9f41ad548bd9116d611063ae157b7))
+* **webos:** full-screen window and the remote's Back key ([#170](https://github.com/JigSawFr/Aurore/issues/170)) ([9a81a89](https://github.com/JigSawFr/Aurore/commit/9a81a893d5897740768e275322fbcc2f0de82585))
+* **web:** show Boréale's aurora loader while the demo loads ([#168](https://github.com/JigSawFr/Aurore/issues/168)) ([1a1a6e0](https://github.com/JigSawFr/Aurore/commit/1a1a6e08bc863f599de2f4ec9542ded3c67866d7))
+
+
+### Bug Fixes
+
+* **branding:** favicon drawn from the kit's small mark ([#166](https://github.com/JigSawFr/Aurore/issues/166)) ([d84bc76](https://github.com/JigSawFr/Aurore/commit/d84bc76848929eefde4f4d87cd318483a9eeeebf))
+* **branding:** platform icons from the kit's icon ([#164](https://github.com/JigSawFr/Aurore/issues/164)) ([257f174](https://github.com/JigSawFr/Aurore/commit/257f174f667c87531c752414afa431bdeca5d822))
+* **platforms:** give every number, bool and pointer member of the platform classes an initial value ([#172](https://github.com/JigSawFr/Aurore/issues/172)) ([24b82f6](https://github.com/JigSawFr/Aurore/commit/24b82f6ed5907a6a5b7953309959b6846d5a8567))
+
 ## [1.1.0](https://github.com/JigSawFr/Aurore/compare/v1.0.1...v1.1.0) (2026-11-06)
 
 
