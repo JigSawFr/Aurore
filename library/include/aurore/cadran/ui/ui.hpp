@@ -72,6 +72,12 @@ void confirm(const std::string& body, const std::string& confirm_label,
 /// "bad" colour so it never looks like an ordinary OK.
 void confirm_danger(const std::string& body, const std::string& confirm_label, std::function<void()> on_yes);
 void info(const std::string& body);
+/// A duration chosen with the stick, in place of the system number pad: up /
+/// down 15 min (an arrow held goes by whole hours, cadran::held_step), L / R
+/// 5 min, or a tap on the arrows, from 0 to `max` minutes. OK runs `on_value`
+/// once the dialog has closed; Cancel and B do nothing.
+void prompt_minutes(const std::string& header, int initial, std::function<void(int minutes)> on_value,
+    int max = 24 * 60);
 /// A web page to open on a phone: `body`, the QR code of `url`, then `url`
 /// itself, shortened (text::short_url), and OK.
 void qr_dialog(const std::string& body, const std::string& url);

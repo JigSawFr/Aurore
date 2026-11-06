@@ -32,6 +32,9 @@ aurore_host_test(compat compat_tests.cpp)
 aurore_host_test(compat_fallback compat_tests.cpp)
 target_compile_definitions(aurore_host_compat_fallback PRIVATE AURORE_COMPAT_FALLBACK)
 
+# A duration set with the stick: 15 minutes a press, whole hours when held
+aurore_host_test(held_step held_step_tests.cpp ${CADRAN_SRC}/util/held_step.cpp)
+
 # The text helpers over Cadran's real catalogs (ui/tr.hpp without Aurore)
 aurore_host_test(cadran_text cadran_text_tests.cpp ${CADRAN_SRC}/ui/cadran_text.cpp)
 aurore_host_test(format_text format_text_tests.cpp ${CADRAN_SRC}/ui/format_text.cpp)
