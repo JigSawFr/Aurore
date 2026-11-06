@@ -14,6 +14,7 @@
 #include <utility>
 
 #include <algorithm>
+#include <atomic>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -88,6 +89,67 @@ static void writeSettleFile()
 
 // The app's own work Aurore cannot see (setBusyCheck)
 static std::function<bool()> busyCheck;
+
+// The screen rest (setScreenRest)
+static ScreenRestOptions screenRestOptions;
+static ScreenRestTimer screenRestTimer;
+static bool screenRestWaitingRelease = false; // the press that woke the panel is still held
+static std::atomic<int64_t> screenRestBeat { 0 }; // the last frame, in ms: the watchdog reads it
+static std::atomic<bool> screenRestDark { false }; // the panel is off
+static std::thread screenRestWatchdog;
+static std::atomic<bool> screenRestWatchdogStop { false };
+static constexpr int64_t SCREEN_REST_FREEZE_MS = 15000;
+
+static int64_t restNowMs()
+{
+    return (int64_t)(getCPUTimeUsec() / 1000);
+}
+
+static void stopScreenRestWatchdog()
+{
+    screenRestWatchdogStop = true;
+    if (screenRestWatchdog.joinable())
+        screenRestWatchdog.join();
+}
+
+// While the panel is off: if the frames stop (the main loop is stuck), the panel is turned back on
+static void startScreenRestWatchdog(Platform* platform)
+{
+    stopScreenRestWatchdog();
+    screenRestWatchdogStop = false;
+    screenRestWatchdog     = std::thread([platform]()
+        {
+            while (!screenRestWatchdogStop)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                if (screenRestDark && restNowMs() - screenRestBeat > SCREEN_REST_FREEZE_MS)
+                {
+                    Logger::error("screen rest: the main loop has not answered for 15 s, the panel is turned back on");
+                    platform->setPanelPower(true);
+                    screenRestDark = false;
+                }
+            } });
+}
+
+// An input right now, read from the devices themselves (the frame's own input is skipped while resting)
+static bool restInputHeld(Platform* platform)
+{
+    InputManager* im = platform->getInputManager();
+    im->runloopStart();
+    std::vector<RawTouchState> touches;
+    RawMouseState mouse;
+    ControllerState pad = {};
+    im->updateTouchStates(&touches);
+    im->updateMouseStates(&mouse);
+    im->updateUnifiedControllerState(&pad);
+    for (int i = 0; i < ControllerButton::_BUTTON_MAX; i++)
+        if (pad.buttons[i])
+            return true;
+    for (const RawTouchState& t : touches)
+        if (t.pressed)
+            return true;
+    return mouse.leftButton || mouse.middleButton || mouse.rightButton || mouse.scroll.x != 0 || mouse.scroll.y != 0;
+}
 
 static std::thread::id mainThreadId;
 
@@ -320,8 +382,15 @@ bool Application::internalMainLoop()
     }
     Profiler::endPhase(Profiler::Phase::EVENTS);
 
+    // The screen rest: while the panel is dark (or its waking press is held) the frame's input is skipped
+    const bool restSkipsInput = Application::screenRestFrame();
+
     // Mouse and touch
-    if (Application::blockInputsTokens == 0)
+    if (restSkipsInput)
+    {
+        // nothing: read by the rest itself
+    }
+    else if (Application::blockInputsTokens == 0)
     {
         Application::processInput();
     }
@@ -1341,6 +1410,11 @@ void Application::exit()
     exitEvent.fire();
     Logger::info("Exiting...");
 
+    // The panel never stays dark after the app
+    stopScreenRestWatchdog();
+    if (screenRestTimer.phase() == ScreenRestPhase::REST && platform)
+        platform->setPanelPower(true);
+
     // The async thread first: a task still running must not reach views
     // or textures freed below
     Threading::stop();
@@ -2131,6 +2205,78 @@ void Application::unblockInputs()
 
     getGlobalHintsUpdateEvent()->fire();
     Logger::debug("Removing an inputs block token (tokens={})", Application::blockInputsTokens);
+}
+
+void Application::setScreenRest(ScreenRestOptions options)
+{
+    wakeScreen();
+    screenRestOptions = std::move(options);
+}
+
+ScreenRestPhase Application::getScreenRestPhase()
+{
+    return screenRestTimer.phase();
+}
+
+void Application::wakeScreen()
+{
+    const bool wasDark = screenRestDark.exchange(false);
+    if (wasDark || screenRestTimer.phase() == ScreenRestPhase::REST)
+    {
+        stopScreenRestWatchdog();
+        if (platform)
+            platform->setPanelPower(true);
+        Application::requestRedraw();
+        if (screenRestOptions.onWake)
+            screenRestOptions.onWake();
+    }
+    screenRestWaitingRelease = false;
+    screenRestTimer.reset(restNowMs());
+}
+
+bool Application::screenRestFrame()
+{
+    const bool resting = screenRestTimer.phase() == ScreenRestPhase::REST || screenRestWaitingRelease;
+    if (screenRestOptions.idleSeconds <= 0 && !resting && screenRestTimer.phase() == ScreenRestPhase::AWAKE)
+        return false;
+
+    const int64_t now = restNowMs();
+    screenRestBeat    = now;
+    const bool held   = resting ? restInputHeld(Application::platform) : false;
+    if (screenRestWaitingRelease && !held)
+        screenRestWaitingRelease = false;
+
+    const bool allowed = !screenRestOptions.allowed || screenRestOptions.allowed();
+    switch (screenRestTimer.tick(now, (int64_t)(Application::lastInputTime / 1000), held, screenRestOptions.idleSeconds, screenRestOptions.warnSeconds, allowed))
+    {
+        case ScreenRestTimer::Action::WARN:
+            if (screenRestOptions.onWarning)
+                screenRestOptions.onWarning();
+            break;
+        case ScreenRestTimer::Action::PANEL_OFF:
+            screenRestDark = true;
+            if (Application::platform->canSetPanelPower())
+            {
+                Application::platform->setPanelPower(false);
+                startScreenRestWatchdog(Application::platform);
+            }
+            if (screenRestOptions.onRest)
+                screenRestOptions.onRest();
+            break;
+        case ScreenRestTimer::Action::PANEL_ON:
+            screenRestDark = false;
+            stopScreenRestWatchdog();
+            Application::platform->setPanelPower(true);
+            screenRestWaitingRelease   = held; // the press that woke it is not the screen's
+            Application::lastInputTime = getCPUTimeUsec();
+            Application::requestRedraw();
+            if (screenRestOptions.onWake)
+                screenRestOptions.onWake();
+            break;
+        default:
+            break;
+    }
+    return screenRestTimer.phase() == ScreenRestPhase::REST || screenRestWaitingRelease;
 }
 
 void Application::setBusyCheck(std::function<bool()> busy)

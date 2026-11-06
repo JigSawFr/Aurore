@@ -131,6 +131,8 @@ class HeadlessPlatform : public DesktopPlatform
     std::string getDnsServer() override { return "127.0.0.1"; }
     void disableScreenDimming(bool disable, const std::string& reason, const std::string& app) override { screenDimmingOff = disable; }
     bool isScreenDimmingDisabled() override { return screenDimmingOff; }
+    void setPanelPower(bool on) override { panelOn = on; }
+    bool canSetPanelPower() override { return true; }
     void openBrowser(std::string url) override { openedUrls.push_back(url); }
     void pasteToClipboard(const std::string& text) override { clipboard = text; }
     std::string pasteFromClipboard() override { return clipboard; }
@@ -142,6 +144,9 @@ class HeadlessPlatform : public DesktopPlatform
 
     // Ends the main loop on its next iteration
     void requestClose() { closeRequested = true; }
+
+    // Whether the panel is on (Application::setScreenRest turns it off)
+    std::atomic<bool> panelOn { true };
 
     // The links openBrowser() was asked to open
     std::vector<std::string> openedUrls;

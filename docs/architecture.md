@@ -168,3 +168,18 @@ Aurore and its apps are C++23, but libc++ (the web, Android, Apple, the PS4) sti
 | What libc++ lacks | `library/include/aurore/compat/` |
 | A platform | `library/lib/platforms/<name>/` |
 | Cadran | `library/lib/cadran/`, [cadran.md](cadran.md) |
+
+## Letting the screen rest
+
+An app with long work running (a download that keeps the console awake) can let the panel rest:
+
+```cpp
+aurore::ScreenRestOptions rest;
+rest.idleSeconds = 300;                              // 0 turns it off
+rest.warnSeconds = 10;
+rest.allowed     = [] { return downloads_running(); } // asked each frame
+rest.onWarning   = [] { notify("The screen turns off in 10 seconds"); };
+aurore::Application::setScreenRest(rest);
+```
+
+After `idleSeconds` without a button, touch or click, `onWarning` is called; `warnSeconds` later `Platform::setPanelPower(false)` turns the panel off (the Switch's backlight, with a fade). Any button, touch or click turns it back on, and **that input is not delivered to the screen**: while the panel is dark the frame's input is skipped and read from the devices (`InputManager`) alone, and it stays skipped until that input is let go of. The panel is also turned back on when `allowed` turns false, when the options change, with `Application::wakeScreen()` (the app went to the background), at exit, and by a watchdog thread if the main loop stops answering for 15 s. Where `canSetPanelPower()` is false the phases and the callbacks (`onRest`, `onWake`) still run, so the app can draw its own veil. `Application::getScreenRestPhase()` says where it is. The timing is `ScreenRestTimer` (`core/screen_rest.hpp`), with the clock given, tested on the host.

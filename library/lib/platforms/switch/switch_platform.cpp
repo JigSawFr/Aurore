@@ -188,6 +188,20 @@ bool SwitchPlatform::canSetBacklightBrightness()
     return true;
 }
 
+void SwitchPlatform::setPanelPower(bool on)
+{
+    // lbl is started with the platform (switch_wrapper.c); the fade is the system's own
+    if (on)
+        lblSwitchBacklightOn(0);
+    else
+        lblSwitchBacklightOff(500ull * 1000 * 1000);
+}
+
+bool SwitchPlatform::canSetPanelPower()
+{
+    return true;
+}
+
 std::string SwitchPlatform::getIpAddress()
 {
     u32 ip;
