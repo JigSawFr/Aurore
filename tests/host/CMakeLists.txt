@@ -26,6 +26,11 @@ aurore_host_test(guarded guarded_tests.cpp)
 # The screen rest's timing: idle, warning, dark, the wake-up
 aurore_host_test(screen_rest screen_rest_tests.cpp ${PROJECT_SOURCE_DIR}/library/lib/core/screen_rest.cpp)
 
+# The counted CPU boost: first holder on, last off, from any thread
+aurore_host_test(cpu_boost cpu_boost_tests.cpp ${PROJECT_SOURCE_DIR}/library/lib/core/cpu_boost.cpp)
+find_package(Threads REQUIRED)
+target_link_libraries(aurore_host_cpu_boost PRIVATE Threads::Threads)
+
 # aurore/compat: the standard library's move_only_function, generator and
 # stacktrace where it has them, then the bundled ones (AURORE_COMPAT_FALLBACK)
 aurore_host_test(compat compat_tests.cpp)

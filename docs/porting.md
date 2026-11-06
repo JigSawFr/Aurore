@@ -53,6 +53,7 @@ What to mind when an app on Aurore runs on more than the platform it was written
 | battery, network, IP address | `canShowBatteryLevel()`, `canShowWirelessLevel()` |
 | screen brightness | `canSetBacklightBrightness()` |
 | screen resting | `Application::setScreenRest(options)` runs everywhere; `canSetPanelPower()` says whether the panel itself goes dark (the Switch's). Elsewhere the callbacks still run and the app can draw its own veil |
+| CPU boost | `Platform::setCpuBoost(bool)` is optional (the Switch raises the CPU); `Application::acquireCpuBoost()` counts the holders so the platform sees one on and one off |
 | links | `openBrowser(url)` opens http and https links only, in the system's browser (the web applet on the Switch); `Platform::isBrowserUrl` says beforehand |
 | clipboard | `pasteToClipboard`, `pasteFromClipboard`: GLFW and SDL only, nothing elsewhere |
 | language, theme | `getLocale()`, `getThemeVariant()`: the system's, unless the app sets `Platform::APP_LOCALE_DEFAULT` or a variant ([environment.md](environment.md) for the desktop's overrides) |

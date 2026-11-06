@@ -133,6 +133,11 @@ class HeadlessPlatform : public DesktopPlatform
     bool isScreenDimmingDisabled() override { return screenDimmingOff; }
     void setPanelPower(bool on) override { panelOn = on; }
     bool canSetPanelPower() override { return true; }
+    void setCpuBoost(bool on) override
+    {
+        cpuBoostOn = on;
+        cpuBoostChanges++;
+    }
     void openBrowser(std::string url) override { openedUrls.push_back(url); }
     void pasteToClipboard(const std::string& text) override { clipboard = text; }
     std::string pasteFromClipboard() override { return clipboard; }
@@ -147,6 +152,8 @@ class HeadlessPlatform : public DesktopPlatform
 
     // Whether the panel is on (Application::setScreenRest turns it off)
     std::atomic<bool> panelOn { true };
+    std::atomic<bool> cpuBoostOn { false };
+    std::atomic<int> cpuBoostChanges { 0 }; // how many times the platform was told
 
     // The links openBrowser() was asked to open
     std::vector<std::string> openedUrls;

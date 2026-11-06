@@ -188,6 +188,11 @@ bool SwitchPlatform::canSetBacklightBrightness()
     return true;
 }
 
+void SwitchPlatform::setCpuBoost(bool on)
+{
+    appletSetCpuBoostMode(on ? ApmCpuBoostMode_FastLoad : ApmCpuBoostMode_Normal);
+}
+
 void SwitchPlatform::setPanelPower(bool on)
 {
     // lbl is started with the platform (switch_wrapper.c); the fade is the system's own

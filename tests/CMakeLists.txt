@@ -24,6 +24,11 @@ add_executable(aurore_screen_rest_tests screen_rest_tests.cpp)
 target_link_libraries(aurore_screen_rest_tests PRIVATE Aurore::test)
 aurore_add_tests(aurore_screen_rest_tests)
 
+# The counted CPU boost reaches the platform at the first holder and the last release
+add_executable(aurore_cpu_boost_tests cpu_boost_tests.cpp)
+target_link_libraries(aurore_cpu_boost_tests PRIVATE Aurore::test)
+aurore_add_tests(aurore_cpu_boost_tests)
+
 # Pictures too large are refused before they are decoded
 add_executable(aurore_image_limits_tests image_limits_tests.cpp)
 target_link_libraries(aurore_image_limits_tests PRIVATE Aurore::test)
