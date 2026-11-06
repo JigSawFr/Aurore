@@ -50,7 +50,7 @@ class SDLInputManager : public InputManager
     Point pointerOffsetBuffer;
     bool pointerLocked = false;
 
-    SDL_Window* window;
+    SDL_Window* window = nullptr;
 };
 
 };

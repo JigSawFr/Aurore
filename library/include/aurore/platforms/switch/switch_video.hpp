@@ -58,7 +58,7 @@ class SwitchVideoContext : public VideoContext
     void queueFlush();
 
   private:
-    _LibNXEvent defaultDisplayResolutionChangeEvent;
+    _LibNXEvent defaultDisplayResolutionChangeEvent {};
     bool displayResolutionChangeEventReady = true;
 
     void resetFramebuffer(); // triggered by either display resolution change event or operation mode change event
@@ -67,8 +67,8 @@ class SwitchVideoContext : public VideoContext
 
     void destroyFramebufferResources();
 
-    float framebufferWidth, framebufferHeight;
-    int imageSlot;
+    float framebufferWidth = 0, framebufferHeight = 0;
+    int imageSlot = 0;
 
     dk::UniqueDevice device;
     dk::UniqueQueue queue;
@@ -76,20 +76,20 @@ class SwitchVideoContext : public VideoContext
     dk::UniqueSwapchain swapchain;
 
     dk::Image depthBuffer;
-    CMemPool::Handle depthBufferHandle;
+    CMemPool::Handle depthBufferHandle {};
 
     dk::Image framebuffers[FRAMEBUFFERS_COUNT];
-    CMemPool::Handle framebuffersHandles[FRAMEBUFFERS_COUNT];
+    CMemPool::Handle framebuffersHandles[FRAMEBUFFERS_COUNT] {};
 
-    DkCmdList framebuffersCmdLists[FRAMEBUFFERS_COUNT];
-    DkCmdList renderCmdlist;
+    DkCmdList framebuffersCmdLists[FRAMEBUFFERS_COUNT] {};
+    DkCmdList renderCmdlist {};
 
     std::optional<CMemPool> imagesPool;
     std::optional<CMemPool> codePool;
     std::optional<CMemPool> dataPool;
 
     std::optional<nvg::DkRenderer> renderer;
-    NVGcontext* nvgContext;
+    NVGcontext* nvgContext = nullptr;
 };
 
 } // namespace aurore

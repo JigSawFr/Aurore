@@ -65,8 +65,8 @@ class SwitchPlatform : public Platform
     void appletCallback(AppletHookType hookType);
 
   private:
-    ThemeVariant themeVariant;
-    ThemeVariant systemThemeVariant; // the console's, read at start
+    ThemeVariant themeVariant {};
+    ThemeVariant systemThemeVariant {}; // the console's, read at start
     std::string locale;
 
     AudioPlayer* audioPlayer         = nullptr;
@@ -81,7 +81,7 @@ class SwitchPlatform : public Platform
     GLFWVideoContext* videoContext = nullptr;
 #endif
     SwitchFontLoader* fontLoader = nullptr;
-    AppletHookCookie applet_hook_cookie;
+    AppletHookCookie applet_hook_cookie {};
 };
 
 } // namespace aurore
