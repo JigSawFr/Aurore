@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/JigSawFr/Aurore/compare/v1.0.1...v1.1.0) (2026-11-06)
+
+
+### Features
+
+* **core:** let the screen rest while an app has long work running ([#163](https://github.com/JigSawFr/Aurore/issues/163)) ([75963c2](https://github.com/JigSawFr/Aurore/commit/75963c2804fd626eba9eeabb4300cdb7e50e991d))
+* **deko3d:** AURORE_DEKO3D_DEBUG links deko3d's debug library ([#154](https://github.com/JigSawFr/Aurore/issues/154)) ([f812cd9](https://github.com/JigSawFr/Aurore/commit/f812cd958f8cbe4ab4a40b9f56cb436889ff35a6))
+* **webos:** build Aurore for LG webOS TV ([#161](https://github.com/JigSawFr/Aurore/issues/161)) ([2103188](https://github.com/JigSawFr/Aurore/commit/2103188d001186d969e01fc591b643d2f586c7f5))
+
+
+### Documentation
+
+* **readme:** stop saying Aurore looks like the Switch's menus ([#158](https://github.com/JigSawFr/Aurore/issues/158)) ([a452fb2](https://github.com/JigSawFr/Aurore/commit/a452fb2d6b1e1f82c527f700e0650c6439cb41d3))
+* **site:** say how Aurore is made, in the README and the site's footer ([#160](https://github.com/JigSawFr/Aurore/issues/160)) ([8461843](https://github.com/JigSawFr/Aurore/commit/8461843aa40f7dd3bf5dc6af4d9b89ccf8c3f753))
+
 ## [1.0.1](https://github.com/JigSawFr/Aurore/compare/v1.0.0...v1.0.1) (2026-11-01)
 
 
