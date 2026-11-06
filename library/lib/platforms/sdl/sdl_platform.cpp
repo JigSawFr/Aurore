@@ -57,6 +57,12 @@ SDLPlatform::SDLPlatform()
     // SDL3 has no accelerometer joystick
     SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
 #endif
+#elif defined(__WEBOS__)
+    // A TV app is full screen, and takes the remote's Back key: SDL-webOS
+    // leaves it to the system (the launcher strip opens) unless the app asks.
+    // The hint is a string, as an older SDL2 ignores it
+    VideoContext::FULLSCREEN = true;
+    SDL_SetHint("SDL_WEBOS_ACCESS_POLICY_KEYS_BACK", "true");
 #elif defined(IOS) || defined(TVOS)
     // Enable Fullscreen on iOS
     VideoContext::FULLSCREEN = true;

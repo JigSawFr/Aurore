@@ -715,6 +715,12 @@ void SDLInputManager::updateUnifiedControllerState(ControllerState* state)
         state->buttons[BUTTON_B] |= getMouseButtonState(SDL_BUTTON_RIGHT, mouseButtonsAsPad);
     }
     state->buttons[BUTTON_X] |= getMouseButtonState(SDL_BUTTON_MIDDLE, mouseButtonsAsPad);
+#ifdef __WEBOS__
+    // The webOS remote's Back key (SDL-webOS's SDL_SCANCODE_WEBOS_BACK, 482),
+    // which is not SDL_SCANCODE_AC_BACK
+    constexpr auto WEBOS_SCANCODE_BACK = static_cast<SDL_Scancode>(482);
+    state->buttons[Application::isSwapInputKeys() ? BUTTON_A : BUTTON_B] |= getKeyboardKeys(WEBOS_SCANCODE_BACK);
+#endif
 
     // Android tv remote control
     state->buttons[BUTTON_X] |= getKeyboardKeys(SDL_SCANCODE_MENU);
