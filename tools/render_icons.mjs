@@ -4,14 +4,16 @@
 // Renders the demo's platform icons from Aurore's icon (.github/branding/icon.svg,
 // copied from Boréale's brand kit), in a headless Chromium: the window icon,
 // the Switch's, PS4's, PS Vita's (with its LiveArea), Android's, iOS's and
-// macOS's, Windows', webOS's, and the template's.
+// macOS's, Windows', webOS's, and the template's. Android 8+ gets its adaptive
+// icon as three layers (background, foreground, and the themed monochrome of
+// Android 13), drawn from the kit's mark.
 //
 //   node tools/render_icons.mjs
 //
 // Needs Playwright with its Chromium (npm i -g playwright, npx playwright
 // install chromium), Python 3 with Pillow (the Vita's PNGs are 8-bit indexed)
 // and the boreale-site submodule (its fonts).
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
@@ -23,6 +25,8 @@ const { chromium } = require("playwright");
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const at = (p) => join(root, p);
 const icon = readFileSync(at(".github/branding/icon.svg"), "utf8").replace(/<!--[\s\S]*?-->/, "");
+const mark = readFileSync(at(".github/branding/mark.svg"), "utf8").replace(/<!--[\s\S]*?-->/, "");
+const mono = readFileSync(at(".github/branding/mark-mono-white.svg"), "utf8").replace(/<!--[\s\S]*?-->/, "");
 const fonts = at("library/boreale-site/assets/fonts");
 
 const SNOW = "#E8EEF7", AURORA = "#00FFCC", ICE = "#33BBFF", VIOLET = "#8A5CFF";
@@ -57,6 +61,21 @@ const ICONS = [
     .map(([d, n]) => [`android-project/app/src/main/res/mipmap-${d}/ic_launcher.png`, n, "tile"]),
   ...ios.map((n) => [`demo/ios/Images.xcassets/AppIcon.appiconset/${n}.png`, n, "full"]),
 ];
+
+// Android's adaptive icon: a 108 dp canvas of which the system shows a
+// rounded or circular 72 dp and moves the layers apart a little, so the mark
+// sits in the central 66 dp (its frame spans 56 dp) over a night of stars.
+const DENSITIES = [["mdpi", 1], ["hdpi", 1.5], ["xhdpi", 2], ["xxhdpi", 3], ["xxxhdpi", 4]];
+const layer = (svg) => {
+  const body = svg.replace(/<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108"><svg x="12" y="12" width="84" height="84" viewBox="0 0 256 256">${body}</svg></svg>`;
+};
+const sized = (svg, px) => svg.replace('width="108" height="108"', `width="${px}" height="${px}"`);
+const NIGHT_BACKGROUND = `<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+  <defs><linearGradient id="n" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A1020"/><stop offset="1" stop-color="#16203A"/></linearGradient></defs>
+  <rect width="108" height="108" fill="url(#n)"/>
+  <g fill="${SNOW}"><circle cx="22" cy="26" r="0.8" opacity="0.7"/><circle cx="84" cy="20" r="0.7" opacity="0.8"/><circle cx="90" cy="78" r="0.6" opacity="0.5"/><circle cx="16" cy="84" r="0.6" opacity="0.5"/><circle cx="54" cy="12" r="0.6" opacity="0.6"/></g>
+</svg>`;
 
 function readdirSizes(dir) {
   const json = JSON.parse(readFileSync(at(join(dir, "Contents.json")), "utf8"));
@@ -115,6 +134,26 @@ for (const [file, size, kind] of ICONS) {
 writeFileSync(at("psv/sce_sys/livearea/contents/bg.png"), await render(LIVEAREA_BG, 840, 500, "png", true));
 writeFileSync(at("psv/sce_sys/livearea/contents/startup.png"), await render(LIVEAREA_GATE, 280, 158, "png", true));
 console.log("psv/sce_sys/livearea/contents/{bg,startup}.png");
+
+for (const [d, k] of DENSITIES) {
+  const res = `android-project/app/src/main/res/mipmap-${d}`;
+  const px = Math.round(108 * k);
+  writeFileSync(at(`${res}/ic_launcher_background.png`), await render(sized(NIGHT_BACKGROUND, px), px, px, "png", true));
+  writeFileSync(at(`${res}/ic_launcher_foreground.png`), await render(sized(layer(mark), px), px, px, "png"));
+  writeFileSync(at(`${res}/ic_launcher_monochrome.png`), await render(sized(layer(mono), px), px, px, "png"));
+}
+mkdirSync(at("android-project/app/src/main/res/mipmap-anydpi-v26"), { recursive: true });
+writeFileSync(at("android-project/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"), `<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 JigSawFr -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Written by tools/render_icons.mjs. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome"/>
+</adaptive-icon>
+`);
+console.log("android adaptive: mipmap-*/ic_launcher_{background,foreground,monochrome}.png, mipmap-anydpi-v26/ic_launcher.xml");
 
 // Windows: an ICO holding PNGs (16 to 256). macOS: an ICNS of PNGs on its grid.
 const tiles = {};
