@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Aurore's mark in one colour (white), written by tools/brand.py, for what prints or engraves one ink and for Android's themed icon: the frame and the drawing, the night left empty. -->
+  <defs><clipPath id="pane"><rect x="50" y="50" width="156" height="156" rx="26"/></clipPath></defs>
+  <g >
+  <rect x="42" y="42" width="172" height="172" rx="34" fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linejoin="round"/>
+  <g clip-path="url(#pane)"><path d="M40 150 C 80 132, 120 150, 150 128 S 196 100, 216 104" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/><path d="M40 216 L 40 200 L 84 164 L 106 184 L 140 146 L 186 192 L 216 172 L 216 216 Z" fill="#FFFFFF"/></g>
+  </g>
+</svg>
