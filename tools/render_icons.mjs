@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 JigSawFr
+// SPDX-License-Identifier: Apache-2.0
+//
 // Renders the demo's platform icons from Aurore's icon (.github/branding/icon.svg,
 // copied from Boréale's brand kit), in a headless Chromium: the window icon,
 // the Switch's, PS4's, PS Vita's (with its LiveArea), Android's, iOS's and
