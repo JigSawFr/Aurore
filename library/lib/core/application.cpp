@@ -100,6 +100,12 @@ static std::thread screenRestWatchdog;
 static std::atomic<bool> screenRestWatchdogStop { false };
 static constexpr int64_t SCREEN_REST_FREEZE_MS = 15000;
 
+// The CPU boost (acquireCpuBoost): the platform only sees the first holder and the last release
+static CpuBoostCounter cpuBoostCounter([](bool on)
+    {
+    if (Platform* p = Application::getPlatform())
+        p->setCpuBoost(on); });
+
 static int64_t restNowMs()
 {
     return (int64_t)(getCPUTimeUsec() / 1000);
@@ -1415,6 +1421,9 @@ void Application::exit()
     if (screenRestTimer.phase() == ScreenRestPhase::REST && platform)
         platform->setPanelPower(true);
 
+    // The CPU back to normal, whoever still holds the boost
+    cpuBoostCounter.releaseAll();
+
     // The async thread first: a task still running must not reach views
     // or textures freed below
     Threading::stop();
@@ -2216,6 +2225,35 @@ void Application::setScreenRest(ScreenRestOptions options)
 ScreenRestPhase Application::getScreenRestPhase()
 {
     return screenRestTimer.phase();
+}
+
+// The guard lives here, with the counter it holds
+CpuBoostGuard::CpuBoostGuard(bool enabled)
+    : held(enabled)
+{
+    if (this->held)
+        Application::acquireCpuBoost();
+}
+
+CpuBoostGuard::~CpuBoostGuard()
+{
+    if (this->held)
+        Application::releaseCpuBoost();
+}
+
+void Application::acquireCpuBoost()
+{
+    cpuBoostCounter.acquire();
+}
+
+void Application::releaseCpuBoost()
+{
+    cpuBoostCounter.release();
+}
+
+int Application::getCpuBoostHolders()
+{
+    return cpuBoostCounter.holders();
 }
 
 void Application::wakeScreen()

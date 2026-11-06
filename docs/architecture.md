@@ -183,3 +183,17 @@ aurore::Application::setScreenRest(rest);
 ```
 
 After `idleSeconds` without a button, touch or click, `onWarning` is called; `warnSeconds` later `Platform::setPanelPower(false)` turns the panel off (the Switch's backlight, with a fade). Any button, touch or click turns it back on, and **that input is not delivered to the screen**: while the panel is dark the frame's input is skipped and read from the devices (`InputManager`) alone, and it stays skipped until that input is let go of. The panel is also turned back on when `allowed` turns false, when the options change, with `Application::wakeScreen()` (the app went to the background), at exit, and by a watchdog thread if the main loop stops answering for 15 s. Where `canSetPanelPower()` is false the phases and the callbacks (`onRest`, `onWake`) still run, so the app can draw its own veil. `Application::getScreenRestPhase()` says where it is. The timing is `ScreenRestTimer` (`core/screen_rest.hpp`), with the clock given, tested on the host.
+
+## Raising the CPU for loading work
+
+An install or a compression runs faster with the CPU raised (the Switch's `appletSetCpuBoostMode`). Several jobs can overlap, so the boost is counted: `Application::acquireCpuBoost()` and `releaseCpuBoost()` (from any thread) tell `Platform::setCpuBoost()` only at the first holder and the last release, and everyone still holding is released at exit. Prefer the guard, which lets go on every way out of a scope:
+
+```cpp
+void install(const Job& job)
+{
+    aurore::CpuBoostGuard boost(settings.cpu_boost); // false holds nothing
+    ...
+}
+```
+
+The default `setCpuBoost` does nothing (only the Switch implements it). The counting is `CpuBoostCounter` (`core/cpu_boost.hpp`), tested on the host.

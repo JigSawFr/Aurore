@@ -14,6 +14,7 @@
 #include <vector>
 #include <aurore/core/activity.hpp>
 #include <aurore/core/audio.hpp>
+#include <aurore/core/cpu_boost.hpp>
 #include <aurore/core/font.hpp>
 #include <aurore/core/frame_context.hpp>
 #include <aurore/core/logger.hpp>
@@ -469,6 +470,20 @@ class Application
 
     /// The panel back on and the idle clock starting again (the app went to the background, a call came).
     static void wakeScreen();
+
+    /**
+     * Raises the CPU for loading work (Platform::setCpuBoost), counted: the boost goes on with the
+     * first holder and off with the last release, from any thread, so two overlapping jobs do not
+     * switch it off under each other. Prefer CpuBoostGuard, which lets go on every way out of a
+     * scope. Every holder is released at exit.
+     */
+    static void acquireCpuBoost();
+
+    /// One holder lets go. Nothing happens when nobody holds.
+    static void releaseCpuBoost();
+
+    /// How many hold the boost now.
+    static int getCpuBoostHolders();
 
     /**
      * True when the screen has stopped moving: no animation running nor

@@ -189,6 +189,13 @@ class Platform
     virtual bool canSetPanelPower() { return false; }
 
     /**
+     * Raise the CPU for loading work (an install, a compression) or put it back. What
+     * Application::acquireCpuBoost() uses, counted: the platform sees only the first holder
+     * and the last release. The default does nothing.
+     */
+    virtual void setCpuBoost(bool on) { }
+
+    /**
      * Called at every iteration of the main loop.
      * Must return false if the app should continue running
      * (for example, return false if the X button was pressed on the window).
