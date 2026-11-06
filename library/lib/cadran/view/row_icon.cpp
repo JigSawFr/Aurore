@@ -5,16 +5,16 @@
 
 #include <aurore/cadran/ui/cadran_kit.hpp>
 
-static constexpr float SIZE          = 26;
-static constexpr const char* ICON_ID = "row_icon";
+static constexpr float ROW_ICON_SIZE     = 26;
+static constexpr const char* ROW_ICON_ID = "row_icon";
 
 RowIcon::RowIcon(Kind shown)
     : kind(shown)
 {
-    this->setId(ICON_ID);
+    this->setId(ROW_ICON_ID);
     this->setFocusable(false);
-    this->setWidth(SIZE);
-    this->setHeight(SIZE);
+    this->setWidth(ROW_ICON_SIZE);
+    this->setHeight(ROW_ICON_SIZE);
     this->setAlignSelf(aurore::AlignSelf::CENTER);
     this->setMarginLeft(12);
     this->setVisibility(aurore::Visibility::GONE);
@@ -73,7 +73,7 @@ RowIcon* RowIcon::on_row(aurore::Box* row, Kind kind)
 {
     if (!row)
         return nullptr;
-    if (auto* icon = dynamic_cast<RowIcon*>(row->getView(ICON_ID)))
+    if (auto* icon = dynamic_cast<RowIcon*>(row->getView(ROW_ICON_ID)))
         return icon;
     auto* icon = new RowIcon(kind);
     // Right after the value (before a badge): a long value overflows its

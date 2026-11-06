@@ -8,18 +8,18 @@
 
 namespace
 {
-constexpr float HEIGHT = 42;
+constexpr float TOOL_CHIP_HEIGHT = 42;
 } // namespace
 
 ToolChip::ToolChip(const char* icon_name, const std::string& words)
 {
     this->setAxis(aurore::Axis::ROW);
     this->setAlignItems(aurore::AlignItems::CENTER);
-    this->setHeight(HEIGHT);
+    this->setHeight(TOOL_CHIP_HEIGHT);
     this->setPadding(0, 18, 0, 14);
     this->setMargins(0, 10, 10, 0);
-    this->setCornerRadius(HEIGHT / 2);
-    this->setHighlightCornerRadius(HEIGHT / 2 + 2);
+    this->setCornerRadius(TOOL_CHIP_HEIGHT / 2);
+    this->setHighlightCornerRadius(TOOL_CHIP_HEIGHT / 2 + 2);
     this->setThemeColor("backgroundColor", "cadran/surf");
     this->setThemeColor("borderColor", "cadran/line");
     this->setBorderThickness(1);

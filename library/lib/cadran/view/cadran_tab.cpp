@@ -12,8 +12,8 @@ using namespace aurore::literals;
 
 namespace
 {
-CadranTab* s_shown = nullptr;
-std::string s_main_screen; // main_screen()
+CadranTab* s_shown_tab = nullptr;
+std::string s_main_tab_screen; // main_screen()
 } // namespace
 
 CadranTab::CadranTab(const std::string& xml_res, bool refreshes)
@@ -34,8 +34,8 @@ CadranTab::CadranTab(const std::string& xml_res, bool refreshes)
 
 CadranTab::~CadranTab()
 {
-    if (s_shown == this)
-        s_shown = nullptr;
+    if (s_shown_tab == this)
+        s_shown_tab = nullptr;
 }
 
 void CadranTab::onChildFocusGained(aurore::View* directChild, aurore::View* focusedView)
@@ -54,10 +54,10 @@ void CadranTab::update_ro_note()
 void CadranTab::willAppear(bool resetState)
 {
     aurore::Box::willAppear(resetState);
-    s_shown = this;
+    s_shown_tab = this;
     for (aurore::View* v = this; v; v = v->hasParent() ? v->getParent() : nullptr)
         if (v->getId() == "main_tabs")
-            s_main_screen = this->screen;
+            s_main_tab_screen = this->screen;
     if (ui::hooks::get().tab_shown)
         ui::hooks::get().tab_shown(this->screen);
     this->update_ro_note();
@@ -75,25 +75,25 @@ void CadranTab::willAppear(bool resetState)
 
 bool CadranTab::shown() const
 {
-    return s_shown == this;
+    return s_shown_tab == this;
 }
 
 std::string CadranTab::shown_screen()
 {
-    return s_shown ? s_shown->screen : "";
+    return s_shown_tab ? s_shown_tab->screen : "";
 }
 
 std::string CadranTab::main_screen()
 {
-    return s_main_screen;
+    return s_main_tab_screen;
 }
 
 void CadranTab::refresh_shown()
 {
-    if (!s_shown)
+    if (!s_shown_tab)
         return;
-    s_shown->update_ro_note();
-    s_shown->refresh();
+    s_shown_tab->update_ro_note();
+    s_shown_tab->refresh();
 }
 
 void CadranTab::enable_auto_refresh(int period_ms)

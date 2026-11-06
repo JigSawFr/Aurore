@@ -7,10 +7,10 @@
 
 namespace
 {
-constexpr float EASE_US = 250000.0f; // a segment taking its colour, in µs
-constexpr float GAP     = 4.0f; // between two segments, px
+constexpr float SEGMENT_EASE_US = 250000.0f; // a segment taking its colour, in µs
+constexpr float SEGMENT_GAP     = 4.0f; // between two segments, px
 
-NVGcolor mix(NVGcolor a, NVGcolor b, float t)
+NVGcolor segment_mix(NVGcolor a, NVGcolor b, float t)
 {
     return nvgRGBAf(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, a.a + (b.a - a.a) * t);
 }
@@ -42,7 +42,7 @@ void SegmentBar::draw(NVGcontext* vg, float x, float y, float width, float heigh
         return;
     aurore::Theme theme    = aurore::Application::getTheme();
     const aurore::Time now = aurore::getCPUTimeUsec();
-    const float w          = (width - GAP * (float)(n - 1)) / (float)n;
+    const float w          = (width - SEGMENT_GAP * (float)(n - 1)) / (float)n;
     const float radius     = std::min(height, w) / 2.0f;
     for (size_t i = 0; i < n; i++)
     {
@@ -50,12 +50,12 @@ void SegmentBar::draw(NVGcontext* vg, float x, float y, float width, float heigh
         NVGcolor color      = well;
         if (this->states[i] != State::WAITING)
         {
-            const float t     = std::min(1.0f, (float)(now - this->since[i]) / EASE_US);
+            const float t     = std::min(1.0f, (float)(now - this->since[i]) / SEGMENT_EASE_US);
             const NVGcolor to = this->states[i] == State::DONE ? theme["cadran/teal_fill"] : theme["cadran/coral"];
-            color             = mix(well, to, t);
+            color             = segment_mix(well, to, t);
         }
         nvgBeginPath(vg);
-        nvgRoundedRect(vg, x + (float)i * (w + GAP), y, w, height, radius);
+        nvgRoundedRect(vg, x + (float)i * (w + SEGMENT_GAP), y, w, height, radius);
         nvgFillColor(vg, this->a(color));
         nvgFill(vg);
     }

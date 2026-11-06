@@ -9,16 +9,16 @@
 
 namespace
 {
-constexpr float PI = 3.14159265f;
+constexpr float DIAL_PI = 3.14159265f;
 // Where the gate has it on its 1280 x 720 screen.
-constexpr float CX = 1196.0f, CY = 340.0f;
+constexpr float DIAL_CX = 1196.0f, DIAL_CY = 340.0f;
 
-constexpr const char* LINE  = "cadran/dial/line";
-constexpr const char* TRACK = "cadran/dial/track";
-constexpr const char* TEAL  = "cadran/brand/fill";
+constexpr const char* DIAL_LINE  = "cadran/dial/line";
+constexpr const char* DIAL_TRACK = "cadran/dial/track";
+constexpr const char* DIAL_TEAL  = "cadran/brand/fill";
 
 // `c` with its alpha scaled by `a` (0..1).
-NVGcolor faded(NVGcolor c, float a)
+NVGcolor dial_faded(NVGcolor c, float a)
 {
     c.a *= a;
     return c;
@@ -36,8 +36,8 @@ void LoadingDial::draw(NVGcontext* vg, float x, float y, float width, float heig
     (void)width;
     (void)height;
     (void)style;
-    const float cx = x + CX, cy = y + CY;
-    const NVGcolor line_ink = ctx->theme[LINE], teal = ctx->theme[TEAL];
+    const float cx = x + DIAL_CX, cy = y + DIAL_CY;
+    const NVGcolor line_ink = ctx->theme[DIAL_LINE], teal = ctx->theme[DIAL_TEAL];
     // A line `strength` strong (0..1).
     const auto line = [line_ink](float strength)
     {
@@ -47,7 +47,7 @@ void LoadingDial::draw(NVGcontext* vg, float x, float y, float width, float heig
     };
 
     // The teal glow.
-    NVGpaint glow = nvgRadialGradient(vg, cx, cy, 0.0f, 290.0f, faded(teal, 23 / 255.0f), faded(teal, 0));
+    NVGpaint glow = nvgRadialGradient(vg, cx, cy, 0.0f, 290.0f, dial_faded(teal, 23 / 255.0f), dial_faded(teal, 0));
     nvgBeginPath(vg);
     nvgCircle(vg, cx, cy, 290.0f);
     nvgFillPaint(vg, glow);
@@ -66,7 +66,7 @@ void LoadingDial::draw(NVGcontext* vg, float x, float y, float width, float heig
     // The minutes, longer every five.
     for (int i = 0; i < 60; i++)
     {
-        const float ang = (float)i * 2.0f * PI / 60.0f, len = i % 5 == 0 ? 16.0f : 7.0f;
+        const float ang = (float)i * 2.0f * DIAL_PI / 60.0f, len = i % 5 == 0 ? 16.0f : 7.0f;
         const float sx = std::sin(ang), sy = -std::cos(ang);
         nvgBeginPath(vg);
         nvgMoveTo(vg, cx + sx * 235.0f, cy + sy * 235.0f);
@@ -81,11 +81,11 @@ void LoadingDial::draw(NVGcontext* vg, float x, float y, float width, float heig
     nvgStrokeWidth(vg, 18.0f);
     nvgBeginPath(vg);
     nvgCircle(vg, cx, cy, 182.0f);
-    nvgStrokeColor(vg, ctx->theme[TRACK]);
+    nvgStrokeColor(vg, ctx->theme[DIAL_TRACK]);
     nvgStroke(vg);
     nvgBeginPath(vg);
-    nvgArc(vg, cx, cy, 182.0f, -PI / 2.0f, -PI / 2.0f + 1.5f * PI, NVG_CW);
-    nvgStrokeColor(vg, faded(teal, 41 / 255.0f));
+    nvgArc(vg, cx, cy, 182.0f, -DIAL_PI / 2.0f, -DIAL_PI / 2.0f + 1.5f * DIAL_PI, NVG_CW);
+    nvgStrokeColor(vg, dial_faded(teal, 41 / 255.0f));
     nvgLineCap(vg, NVG_ROUND);
     nvgStroke(vg);
     nvgLineCap(vg, NVG_BUTT);
