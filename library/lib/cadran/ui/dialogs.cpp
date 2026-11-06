@@ -14,7 +14,10 @@
 #include <aurore/cadran/ui/live_prefs.hpp>
 #include <aurore/cadran/ui/prefs.hpp>
 #include <aurore/cadran/ui/text_size.hpp>
+#include <aurore/cadran/util/held_step.hpp>
 #include <aurore/cadran/util/text.hpp>
+#include <aurore/cadran/view/cadran_digits.hpp>
+#include <aurore/cadran/view/cadran_icon.hpp>
 
 #include <yoga/Yoga.h>
 #include <algorithm>
@@ -782,6 +785,81 @@ void quick_settings(std::function<void()> after)
         else if (i == 1) pick_theme(after);
         else if (i == 2) pick_text_size(after);
         else pick_density(after); }, false, {}, icons);
+}
+
+void prompt_minutes(const std::string& header, int initial, std::function<void(int)> on_value, int max)
+{
+    namespace kit = cadran::kit;
+    auto minutes  = std::make_shared<int>(std::max(0, std::min(initial, max)));
+    auto* body    = new aurore::Box(aurore::Axis::COLUMN);
+    body->setAlignItems(aurore::AlignItems::CENTER);
+    body->setPadding(30, 40, 22, 40);
+    aurore::Label* title = kit::display(header, kit::TEXT_TITLE);
+    title->setHorizontalAlign(aurore::HorizontalAlign::CENTER);
+    body->addView(title);
+    CadranIcon* up = kit::icon("caret-up", 30, "cadran/teal");
+    up->setMarginTop(18);
+    body->addView(up);
+    auto* value = new CadranDigits();
+    value->setFontSize(56);
+    value->setSmallUnits(true);
+    value->setThemeColor("textColor", "cadran/text");
+    value->setText(fmt_minutes((uint32_t)*minutes));
+    body->addView(value);
+    CadranIcon* down = kit::icon("caret-down", 30, "cadran/teal");
+    body->addView(down);
+    // The keys: the arrows 15 min, L and R 5 min.
+    auto* keys = new aurore::Box(aurore::Axis::ROW);
+    keys->setAlignItems(aurore::AlignItems::CENTER);
+    keys->setMarginTop(16);
+    const auto key = [](const char* letter)
+    {
+        aurore::Box* bubble = kit::key(letter);
+        bubble->setMarginRight(4);
+        return bubble;
+    };
+    keys->addView(kit::icon("caret-up", 18, "cadran/text3"));
+    keys->addView(kit::icon("caret-down", 18, "cadran/text3"));
+    aurore::Label* quarter = kit::label(fmt_minutes(15), 16, "cadran/text3");
+    quarter->setMarginLeft(6);
+    quarter->setMarginRight(22);
+    keys->addView(quarter);
+    keys->addView(key("L"));
+    keys->addView(key("R"));
+    aurore::Label* five = kit::label(fmt_minutes(5), 16, "cadran/text3");
+    five->setMarginLeft(4);
+    keys->addView(five);
+    body->addView(keys);
+
+    auto* dialog    = new aurore::Dialog(body);
+    const auto step = [minutes, value, max](int delta)
+    {
+        *minutes = std::max(0, std::min(max, *minutes + delta));
+        value->setText(fmt_minutes((uint32_t)*minutes));
+    };
+    aurore::View* frame = dialog->getAppletFrame();
+    // An arrow held: 15 min at a time, then whole hours (cadran::held_step).
+    auto held = std::make_shared<cadran::Held>();
+    for (const auto& [button, delta] : { std::pair<aurore::ControllerButton, int> { aurore::BUTTON_NAV_UP, 15 },
+             { aurore::BUTTON_NAV_DOWN, -15 }, { aurore::BUTTON_RB, 5 }, { aurore::BUTTON_LB, -5 } })
+        frame->registerAction("", button, [step, held, minutes, max, delta = delta](aurore::View*)
+            {
+            step(cadran::held_step(*held, *minutes, delta, aurore::getCPUTimeUsec(), max) - *minutes);
+            return true; }, true, true, aurore::SOUND_FOCUS_CHANGE);
+    up->addGestureRecognizer(new aurore::TapGestureRecognizer(up, [step]()
+        { step(15); }));
+    down->addGestureRecognizer(new aurore::TapGestureRecognizer(down, [step]()
+        { step(-15); }));
+    dialog->addButton("hints/cancel"_i18n, []() {});
+    dialog->addButton("hints/ok"_i18n, [minutes, on_value]()
+        {
+        if (on_value) on_value(*minutes); });
+    dialog->setCancelable(true);
+    cadran::style_dialog(dialog, cadran::Emphasis::PRIMARY);
+    // A value is set, then confirmed: A right after the arrows is OK, not Cancel.
+    if (aurore::View* ok = dialog->getView("aurore/dialog/button2"))
+        dialog->setLastFocusedView(ok);
+    dialog->open();
 }
 
 } // namespace ui

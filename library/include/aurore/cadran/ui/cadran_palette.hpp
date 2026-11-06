@@ -67,6 +67,9 @@ struct Palette
     /// The loading screen's bar (LoadingBar::setBrand), alike in both themes:
     /// its track, its fill and the fill's lighter end.
     Rgba brand_track, brand_fill, brand_glow;
+    /// The loading dial's lines (LoadingDial): half drawn at each line's strength, so
+    /// white at half its alpha over the navy, the navy whole on white; and its day track.
+    Rgba dial_line, dial_track;
 };
 
 constexpr Rgba NAVY = { 0x0B, 0x14, 0x24, 255 };
@@ -123,7 +126,9 @@ constexpr Palette DARK = {
     { 0xEE, 0xF2, 0xF8, 110 }, // text_off
     { 0x1F, 0x33, 0x55, 255 }, // brand_track
     { 0x2E, 0xC4, 0xA6, 255 }, // brand_fill
-    { 0x9A, 0xF0, 0xDC, 255 } // brand_glow
+    { 0x9A, 0xF0, 0xDC, 255 }, // brand_glow
+    { 255, 255, 255, 128 }, // dial_line
+    { 0x1F, 0x33, 0x55, 71 } // dial_track
 };
 
 constexpr Palette LIGHT = {
@@ -178,7 +183,9 @@ constexpr Palette LIGHT = {
     { 0x0B, 0x14, 0x24, 110 }, // text_off
     { 0x1F, 0x33, 0x55, 255 }, // brand_track
     { 0x2E, 0xC4, 0xA6, 255 }, // brand_fill
-    { 0x9A, 0xF0, 0xDC, 255 } // brand_glow
+    { 0x9A, 0xF0, 0xDC, 255 }, // brand_glow
+    { 0x0B, 0x14, 0x24, 255 }, // dial_line
+    { 0x1F, 0x33, 0x55, 30 } // dial_track
 };
 
 /// Each colour's theme keys: the Cadran one ("cadran/…"), and the core's it
@@ -265,6 +272,8 @@ constexpr Key KEYS[] = {
     { "cadran/brand/track", &Palette::brand_track },
     { "cadran/brand/fill", &Palette::brand_fill },
     { "cadran/brand/glow", &Palette::brand_glow },
+    { "cadran/dial/line", &Palette::dial_line },
+    { "cadran/dial/track", &Palette::dial_track },
 };
 
 /// The pairs the palettes promise to keep readable (an ink on a surface, at

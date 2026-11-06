@@ -164,14 +164,7 @@ canvas:focus-visible { box-shadow: 0 0 0 3px var(--accent); }
 .overlay.error .spinner { display: none; }
 .overlay p { margin: 0; max-width: 46ch; }
 .overlay button { margin-top: 4px; }
-.spinner {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  border: 3px solid rgb(255 255 255 / 0.15);
-  border-top-color: #22b39a;
-  animation: spin 0.9s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { width: 96px; height: 96px; }
 
 .controls {
   width: 100%;

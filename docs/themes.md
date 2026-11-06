@@ -433,6 +433,7 @@ Without a theme file, each variant has the core's defaults, then Cadran's palett
 | `cadran/avatar0` … `avatar3` | The accounts' avatars |
 | `cadran/hold_fill` | A held button filling up |
 | `cadran/brand/track`, `brand/fill`, `brand/glow` | The loading screen's bar, alike in both variants |
+| `cadran/dial/line`, `dial/track` | The loading screen's dial (`LoadingDial`): its lines, white at half strength over the navy and navy on white, and the day's track |
 | `cadran/none` | Transparent |
 
 Not colour keys, on purpose: the app's logo (`CadranIcon` "mark", the app's own drawing through `ui::hooks`' `mark`; a theme replaces it with a picture, `logo`, below), the debug layer and the layout wireframe (`-v`), and a `Rectangle`'s default colour before the app sets one.
