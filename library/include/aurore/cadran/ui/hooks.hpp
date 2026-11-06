@@ -35,6 +35,12 @@ struct Hooks
     std::function<std::string()> shown_screen;
     std::function<std::string()> main_screen;
     std::function<bool(aurore::View* view)> is_tab;
+    /// A tab (CadranTab) has come on screen, `screen` its name ("tab/about"):
+    /// for an app's frame statistics. Unset: nothing.
+    std::function<void(const std::string& screen)> tab_shown;
+    /// Whether the app is in the foreground (a console's applet focus); a
+    /// tab's timer refreshes only then. Unset: always.
+    std::function<bool()> in_focus;
 
     /// The sidebar position of the tab whose screen name is `screen`, -1 when
     /// there is none; and the position to fall back on.
