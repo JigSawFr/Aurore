@@ -36,7 +36,6 @@ import json
 import os
 import re
 import shutil
-import struct
 import sys
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -1287,13 +1286,6 @@ def redirect_page(to, canonical, lang):
             f'<title>Aurore</title>\n<a href="{to}">{canonical}</a>\n')
 
 
-def favicon_ico(png):
-    """An ICO holding one PNG, what a domain's root is asked for."""
-    width, height = struct.unpack(">II", png[16:24])
-    return (struct.pack("<HHH", 0, 1, 1)
-            + struct.pack("<BBBBHHII", width % 256, height % 256, 0, 0, 1, 32, len(png), 22) + png)
-
-
 def write(out, rel, text):
     path = os.path.join(out, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -1391,9 +1383,8 @@ def main():
         os.makedirs(os.path.join(out, "assets", os.path.dirname(path)), exist_ok=True)
         shutil.copy(os.path.join(ROOT, ".github", "readme", os.path.basename(path)), os.path.join(out, "assets", path))
     if at_root:
-        with open(os.path.join(ROOT, ".github", "branding", "icon.png"), "rb") as f, \
-                open(os.path.join(out, "favicon.ico"), "wb") as ico:
-            ico.write(favicon_ico(f.read()))
+        # What a domain's root is asked for: the kit's, the mark at 16, 32 and 48.
+        shutil.copy(os.path.join(ROOT, ".github", "branding", "favicon.ico"), os.path.join(out, "favicon.ico"))
     if API_DIR:
         shutil.copytree(API_DIR, os.path.join(out, "api"), dirs_exist_ok=True)
     if DEMO_DIR:
