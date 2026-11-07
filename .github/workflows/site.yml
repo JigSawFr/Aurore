@@ -113,7 +113,7 @@ jobs:
     permissions:
       contents: read
       pages: read   # the site's address (a custom domain, once it has one)
-    uses: JigSawFr/boreale-site/.github/workflows/site.yml@49844b1a733f738afdabcc1c903bbf8696028d96 # v1.0.0
+    uses: JigSawFr/boreale-site/.github/workflows/site.yml@5d96c0446ad6bbfce20b977f699b6884643d055a # v1.1.0
     with:
       # The site's address, as GitHub Pages serves it; a pull request's build
       # is kept out of search engines (SITE_URL, SITE_NOINDEX).
