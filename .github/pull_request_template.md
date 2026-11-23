@@ -1,23 +1,37 @@
 <!--
-The title is a conventional commit with a scope (feat(theme): …, fix(cadran): …): CI checks it, and the squash merge
-makes it the commit release-please writes the changelog from. A breaking change says so (feat(view)!: …).
+Title: a Conventional Commit with a scope, e.g. feat(cadran): …, fix(theme): …. CI checks it, and the squash merge
+makes it the changelog entry release-please writes. A breaking change uses `!` (feat(view)!: …) and a `BREAKING CHANGE:` paragraph.
 -->
 
-## What this changes, and why
+## ✨ At a glance
 
-<!-- The diff says what; this says what it is for. Link the issue it closes, if any. -->
+<!-- One or two sentences: what changes for someone using or building Aurore. -->
 
-## How it was verified
+## 💡 Why
 
-<!-- The tests added or run; the platforms tried beyond CI (a console, Windows, macOS…). -->
+<!-- The problem or the goal. Link the issue it closes, if any (Closes #…). -->
 
-## Checklist
+## 🔧 What changes
 
-- [ ] `ctest` passes (desktop build with `-DAURORE_BUILD_TESTS=ON`)
+<!-- The diff says what; this says what it is for and what to look at first. -->
+
+## 🖼️ Before / After
+
+<!-- Only when the change is visible. Screenshots of the same screen, before and after, at the same size. -->
+
+| Before | After |
+|---|---|
+| | |
+
+## ✅ Checked
+
+<!-- CI already runs format, REUSE licences, the desktop tests and the platform builds: only what CI does not check goes here. -->
+
 - [ ] New behaviour has a test; a fix has a test that fails without it
 - [ ] Changed screenshots in `tests/references/` were looked at and are meant
-- [ ] Files touched are formatted (`clang-format-18`)
-- [ ] The public API still builds for PlayGuard and PlayShelf, or the break is in the title (`!`) and the body
+- [ ] Public API still builds for PlayGuard and PlayShelf, or the break is in the title (`!`) and the body
 - [ ] Docs (`docs/`, `README.md`) follow a change app authors can see
+
+Verified on: <!-- platforms run beyond CI (a console, Windows, macOS…), or "CI only". -->
 
 Merge: squash
