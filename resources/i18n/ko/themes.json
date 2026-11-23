@@ -15,5 +15,8 @@
         "christmas": "크리스마스",
         "new_year": "새해 전야",
         "seasonal": "계절에 따라"
+    },
+    "greetings": {
+        "christmas": "메리 크리스마스! 즐거운 연휴 보내세요!"
     }
 }

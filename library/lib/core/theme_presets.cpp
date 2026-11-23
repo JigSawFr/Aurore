@@ -554,8 +554,10 @@ name = @i18n/themes/presets/christmas
 author = Aurore
 icon = tree
 particles = snow
+ornaments = christmas
+greeting = @i18n/themes/greetings/christmas
 version = 1
-description = Pine, cranberry and gold; the focus twinkles like the tree's lights.
+description = Pine, cranberry and gold; the focus twinkles like the tree's lights, a garland hangs along the top and firs stand along the bottom.
 
 [light]
 background = #f4f6f1

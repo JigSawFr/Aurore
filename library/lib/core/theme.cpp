@@ -1002,6 +1002,8 @@ namespace
         std::optional<float> speed;
         std::optional<ParticleLayer> layer;
         std::optional<std::vector<NVGcolor>> colors;
+        std::optional<ThemeOrnaments> ornaments;
+        std::optional<std::string> greeting;
     };
 
     // A file read, with what it includes and inherits
@@ -1235,7 +1237,8 @@ namespace
 
 static bool isDecorKey(const std::string& key)
 {
-    return startsWith(key, "backdrop.") || startsWith(key, "decor.") || key == "particles" || startsWith(key, "particles_");
+    return startsWith(key, "backdrop.") || startsWith(key, "decor.") || key == "ornaments" || key == "greeting" || key == "particles"
+        || startsWith(key, "particles_");
 }
 
 static bool parseNumber(const std::string& value, float minimum, float maximum, float* out)
@@ -1325,6 +1328,20 @@ static bool parseDecorLine(const std::string& key, const std::string& value, con
         return true;
     }
 
+    if (key == "greeting")
+    {
+        if (value.size() > 120)
+            return fail("is a line of 120 characters at most");
+        decor->greeting = value == "none" ? std::string() : value;
+        return true;
+    }
+    if (key == "ornaments")
+    {
+        if (value != "none" && value != "christmas")
+            return fail("is none or christmas, not " + value);
+        decor->ornaments = value == "none" ? ThemeOrnaments::NONE : ThemeOrnaments::CHRISTMAS;
+        return true;
+    }
     if (key == "particles")
     {
         for (auto& [name, kind] : PARTICLE_KINDS)
@@ -1404,6 +1421,8 @@ static void inheritDecor(DecorSpec* own, const DecorSpec* parent)
     inherit(own, parent, &DecorSpec::speed);
     inherit(own, parent, &DecorSpec::layer);
     inherit(own, parent, &DecorSpec::colors);
+    inherit(own, parent, &DecorSpec::ornaments);
+    inherit(own, parent, &DecorSpec::greeting);
 }
 
 // Variant `v`'s decorations (0 light, 1 dark), as resolveBackground
@@ -1428,6 +1447,8 @@ static ThemeDecor resolveDecor(const DecorSpec* spec, int v)
     particles.speed           = own.speed.value_or(all.speed.value_or(1.0f));
     particles.layer           = own.layer.value_or(all.layer.value_or(ParticleLayer::BACK));
     particles.colors          = own.colors.value_or(all.colors.value_or(std::vector<NVGcolor>()));
+    decor.ornaments           = own.ornaments.value_or(all.ornaments.value_or(ThemeOrnaments::NONE));
+    decor.greeting            = own.greeting.value_or(all.greeting.value_or(std::string()));
     return decor;
 }
 

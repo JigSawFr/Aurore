@@ -2853,6 +2853,16 @@ void Application::checkThemeChanged()
 
     Application::loadThemeBackground();
     ThemeDecorations::update(variant);
+
+    // A theme's greeting, said once per run (not each time the variant or
+    // the calendar brings the theme back)
+    static std::string greeted;
+    const std::string& greeting = Theme::getDecor(variant).greeting;
+    if (!greeting.empty() && greeting != greeted && Application::notificationManager)
+    {
+        greeted = greeting;
+        Application::notify(startsWith(greeting, "@i18n/") ? getStr(greeting.substr(6)) : greeting);
+    }
     for (Activity* activity : Application::activitiesStack)
         if (View* view = activity->getContentView())
             view->onThemeChanged();

@@ -3743,3 +3743,46 @@ AURORE_TEST(top_screen_view)
     if (frame)
         AURORE_CHECK(frame->getHeader()->getVisibility() == aurore::Visibility::VISIBLE);
 }
+
+// Christmas: a garland along the top and firs along the bottom, drawn (no
+// picture), chasing while motion is allowed and lit steady when it is not;
+// the greeting is said once (shots in AURORE_DECOR_SHOTS=<folder>)
+AURORE_TEST(theme_christmas_ornaments)
+{
+    const char* folder = std::getenv("AURORE_DECOR_SHOTS");
+    DemoHarness h;
+    for (aurore::ThemeVariant variant : { aurore::ThemeVariant::DARK, aurore::ThemeVariant::LIGHT })
+    {
+        const char* name = variant == aurore::ThemeVariant::DARK ? "dark" : "light";
+        aurore::Application::getPlatform()->setThemeVariant(variant);
+        AURORE_CHECK(aurore::Theme::load("inherit = builtin:christmas\nornaments = none\nparticles = none\n"));
+        h.settle();
+        aurore::test::Image plain = h.screenshot();
+        AURORE_CHECK(aurore::Theme::load("inherit = builtin:christmas\nparticles = none\n"));
+        h.advance(500);
+        aurore::test::Image first = h.screenshot();
+        h.advance(900);
+        aurore::test::Image second = h.screenshot();
+        // The garland, then the firs, drawn over the plain screen
+        AURORE_CHECK(aurore::test::compareImages(first, plain, 4).differingPixels > 500);
+        // ...and the lights moved
+        AURORE_CHECK(aurore::test::compareImages(first, second, 4).differingPixels > 50);
+        if (folder)
+        {
+            AURORE_CHECK(plain.savePng(std::string(folder) + "/christmas_before_" + name + ".png"));
+            AURORE_CHECK(second.savePng(std::string(folder) + "/christmas_after_" + name + ".png"));
+        }
+    }
+
+    // Reduced motion: still lit, and still
+    aurore::Application::setReduceMotion(true);
+    AURORE_CHECK(aurore::Theme::load("inherit = builtin:christmas\nparticles = none\n"));
+    h.settle();
+    // (the focus pulses of its own: the strips only)
+    aurore::test::Image lit = h.screenshot().crop(0, 0, 1280, 30);
+    h.advance(1500);
+    AURORE_CHECK_EQ(aurore::test::compareImages(h.screenshot().crop(0, 0, 1280, 30), lit, 0).differingPixels, (size_t)0);
+    aurore::Application::setReduceMotion(false);
+    aurore::Theme::reset();
+    h.settle();
+}

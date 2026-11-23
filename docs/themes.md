@@ -335,6 +335,15 @@ What to draw: a backdrop is under text, so keep it quiet (a texture, a faint pat
 
 Which views: the core's AppletFrame header, `Sidebar`, `Dialog`, `Dropdown` and `EditTextDialog`, and Cadran's sheets; an app's own panel opts in with `view->setThemeArea(aurore::ThemeArea::DIALOG)` (or `HEADER`, `SIDEBAR`).
 
+### Ornaments and the greeting
+
+| Key | Values | Default | What |
+| --- | --- | --- | --- |
+| `ornaments` | `none`, `christmas` | `none` | Drawn in code, so an app ships no picture for them: `christmas` hangs a garland of lights (cranberry, gold, green and ice) along the top edge and stands a row of firs, a few lit, along the bottom |
+| `greeting` | a line of 120 characters at most, `@i18n/…`, or `none` | none | Said once per run, as a toast, when the theme comes on (not again when the variant or the calendar brings it back) |
+
+The garland and the firs stay inside the header's first 30 units and the footer's last 25. The lights chase each other at the particles' rate, under the same rules (motion allowed, 60 seconds without input and they stop); when motion is not allowed they are lit and still, since a still picture is no motion. They are drawn after the strips and before the particles. Read like the other decoration keys: at the top or per variant, inherited.
+
 ### Particles
 
 | Key | Values | Default | What |
@@ -469,7 +478,7 @@ Each season has both variants and keeps the roles of every theme (the accent for
 | `summer` | A warm night by the sea (`#0d2327`), a sunset-coral accent (`#ff8f5a`), the focus from coral to sun | Sun-bleached sand (`#fdf7ea`), a lagoon accent (`#00798c`), the focus from tangerine to lagoon |
 | `autumn` | Dark bark (`#1a1310`), a maple accent (`#e8743b`), the focus from maple to amber | Linen (`#f6efe4`), a rust accent (`#a83f12`), the focus from rust to olive |
 | `halloween` | A violet night (`#150d1f`), bone text (`#f3ead8`), a pumpkin accent (`#ff8a1f`), the focus flickering to candlelight with a warm shadow, a violet moonlight glow, slime green and violet inks | Moonlit lilac (`#f1edf6`), a pumpkin accent (`#c2520a`), the focus from violet to pumpkin |
-| `christmas` | Pine (`#0d1f17`), snow text, a gold accent (`#e8c15a`), the focus twinkling from gold to cranberry like the tree's lights, a golden shadow; a cranberry loading bar | Snow (`#f4f6f1`), a cranberry accent (`#b3162f`), the focus from pine to gold |
+| `christmas` | A garland of lights along the top, firs along the bottom (`ornaments`), a greeting once per run, snow; Pine (`#0d1f17`), snow text, a gold accent (`#e8c15a`), the focus twinkling from gold to cranberry like the tree's lights, a golden shadow; a cranberry loading bar | Snow (`#f4f6f1`), a cranberry accent (`#b3162f`), the focus from pine to gold |
 | `new-year` | Midnight (`#0a0c18`), a champagne accent (`#e9c46a`), the focus sparkling from gold to silver | Silver (`#f3f2ef`), champagne-gold fills (`#c9a227`), the focus from gold to midnight blue |
 
 #### Seasonal
