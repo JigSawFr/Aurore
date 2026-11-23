@@ -126,6 +126,9 @@ class List
     /// The same with a picture in its icon's place (a resource, "img/…png":
     /// a language's flag), drawn as it is, without the square.
     static void row_image(aurore::DetailCell* cell, const std::string& image);
+    /// The same with a picture held in memory (`data`, an encoded PNG or JPEG:
+    /// a homebrew's icon). It is decoded at once; the bytes are not kept.
+    static void row_picture(aurore::DetailCell* cell, const unsigned char* data, int size);
     /// The same with a swatch of colours in its icon's place (CadranSwatch).
     static void row_swatch(aurore::DetailCell* cell, const CadranSwatch::Colors& colors);
     /// A row's icon (row()'s, at its start) changed: another `icon` (nullptr:

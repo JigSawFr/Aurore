@@ -15,6 +15,7 @@
 #include <cmath>
 #include <memory>
 #include <optional>
+#include <type_traits>
 
 #include <aurore/cadran/ui/action_sheet.hpp>
 #include <aurore/cadran/ui/cadran_kit.hpp>
@@ -63,6 +64,7 @@ namespace
         std::string icon; // a Cadran icon's name; empty: none
         std::string image; // a picture in the icon's place (pick()'s `icons`)
         std::optional<Swatch> swatch; // colours in the icon's place (pick()'s `swatches`)
+        std::shared_ptr<const std::vector<unsigned char>> picture; // a picture held in memory (PickOptions)
         Choice::Tone tone = Choice::Tone::PLAIN;
         int toggle        = -1; // a switch: 0 off, 1 on; -1 none
         bool checked      = false; // the value chosen (pick())
@@ -353,7 +355,9 @@ namespace
                 cell->setText(l.label);
                 cell->setDetailText(l.detail);
             }
-            if (l.swatch)
+            if (l.picture && !l.picture->empty())
+                cadran::List::row_picture(cell, l.picture->data(), (int)l.picture->size());
+            else if (l.swatch)
                 cadran::List::row_swatch(cell, *l.swatch);
             else if (!l.image.empty())
                 cadran::List::row_image(cell, l.image);
@@ -424,7 +428,8 @@ namespace
 
     std::vector<Line> value_lines(const std::vector<std::string>& values, const std::vector<std::string>& details,
         std::function<bool(size_t)> checked, std::function<void(int)> on_pick,
-        const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {})
+        const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {},
+        const std::vector<std::shared_ptr<const std::vector<unsigned char>>>& pictures = {})
     {
         std::vector<Line> lines;
         auto pick = std::make_shared<std::function<void(int)>>(std::move(on_pick));
@@ -438,6 +443,8 @@ namespace
             (icon.starts_with("img/") ? l.image : l.icon) = icon;
             if (i < swatches.size())
                 l.swatch = swatches[i];
+            if (i < pictures.size())
+                l.picture = pictures[i];
             l.checked       = checked(i);
             const int index = (int)i;
             l.run           = [pick, index]()
@@ -474,15 +481,113 @@ void pick_actions(const std::string& title, const std::vector<Choice>& choices, 
     open(title, subtitle, image, std::move(lines), 0);
 }
 
+namespace
+{
+    using Picture = std::shared_ptr<const std::vector<unsigned char>>;
+
+    // What pick() was given, kept for as long as its search opens it again.
+    struct PickData
+    {
+        std::string title;
+        std::vector<std::string> values, details, icons;
+        std::vector<Swatch> swatches;
+        std::vector<Picture> pictures;
+        std::function<void(int)> on_pick;
+        bool checked = true;
+        int selected = 0;
+        std::string search, clear;
+    };
+
+    std::string lowered(std::string text)
+    {
+        for (char& c : text)
+            if (c >= 'A' && c <= 'Z')
+                c = (char)(c - 'A' + 'a');
+        return text;
+    }
+
+    // The sheet of the rows whose label holds `query` (every row: empty), under
+    // the search row when the caller asked for one.
+    void open_pick(const std::shared_ptr<const PickData>& d, const std::string& query)
+    {
+        const std::vector<size_t> shown = filter_rows(d->values, query);
+
+        const auto pick_of = [&d, &shown](const auto& all)
+        {
+            std::decay_t<decltype(all)> some;
+            for (size_t i : shown)
+                if (i < all.size())
+                    some.push_back(all[i]);
+                else
+                    break; // the lists may be shorter than the values: the rest has none
+            return some;
+        };
+        const int selected = d->selected;
+        std::vector<Line> lines;
+        if (!d->search.empty())
+        {
+            Line search;
+            search.label  = d->search;
+            search.detail = query;
+            search.icon   = "pencil";
+            search.run    = [d, query]()
+            { prompt_text(d->search, query, 64, [d](std::string text)
+                  { open_pick(d, text); }); };
+            lines.push_back(std::move(search));
+            if (!query.empty() && !d->clear.empty())
+            {
+                Line clear;
+                clear.label = d->clear;
+                clear.icon  = "refresh";
+                clear.run   = [d]()
+                { open_pick(d, ""); };
+                lines.push_back(std::move(clear));
+            }
+        }
+        const size_t before = lines.size();
+        auto rows           = value_lines(pick_of(d->values), pick_of(d->details), [&](size_t k)
+                      { return d->checked && (int)shown[k] == selected; }, [d, shown](int k)
+                      { if (d->on_pick && k >= 0 && (size_t)k < shown.size()) d->on_pick((int)shown[k]); }, pick_of(d->icons), pick_of(d->swatches), pick_of(d->pictures));
+        const bool any      = !rows.empty();
+        for (Line& l : rows)
+            lines.push_back(std::move(l));
+
+        size_t focus = any ? before : 0;
+        for (size_t k = 0; k < shown.size(); k++)
+            if ((int)shown[k] == selected)
+                focus = before + k;
+        open(d->title, "", 0, std::move(lines), focus);
+    }
+} // namespace
+
+std::vector<size_t> filter_rows(const std::vector<std::string>& values, const std::string& query)
+{
+    const std::string needle = lowered(query);
+    std::vector<size_t> rows;
+    for (size_t i = 0; i < values.size(); i++)
+        if (needle.empty() || lowered(values[i]).find(needle) != std::string::npos)
+            rows.push_back(i);
+    return rows;
+}
+
 void pick(const std::string& title, const std::vector<std::string>& values, int selected,
     std::function<void(int)> on_pick, bool checked, const std::vector<std::string>& details,
-    const std::vector<std::string>& icons, const std::vector<Swatch>& swatches)
+    const std::vector<std::string>& icons, const std::vector<Swatch>& swatches, const PickOptions& options)
 {
-    const size_t focus = selected < 0 ? 0 : (size_t)selected;
-    open(title, "", 0,
-        value_lines(values, details, [checked, focus](size_t i)
-            { return checked && i == focus; }, std::move(on_pick), icons, swatches),
-        focus);
+    auto data      = std::make_shared<PickData>();
+    data->title    = title;
+    data->values   = values;
+    data->details  = details;
+    data->icons    = icons;
+    data->swatches = swatches;
+    for (const auto& bytes : options.pictures)
+        data->pictures.push_back(bytes.empty() ? nullptr : std::make_shared<const std::vector<unsigned char>>(bytes));
+    data->on_pick  = std::move(on_pick);
+    data->checked  = checked;
+    data->selected = selected < 0 ? 0 : selected;
+    data->search   = options.search;
+    data->clear    = options.clear;
+    open_pick(data, "");
 }
 
 void pick_grid(const std::string& title, const std::vector<std::string>& values, const std::vector<std::string>& icons,

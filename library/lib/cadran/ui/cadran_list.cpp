@@ -729,9 +729,12 @@ void cadran::List::row(aurore::DetailCell* cell, const char* icon, bool alone)
     }
 }
 
-void cadran::List::row_image(aurore::DetailCell* cell, const std::string& image)
+namespace
 {
-    row(cell);
+// row_image()'s and row_picture()'s square, the picture set by `load`.
+void picture_row(aurore::DetailCell* cell, const std::function<void(aurore::Image*)>& load)
+{
+    cadran::List::row(cell);
     cell->setPaddingLeft(aurore::dp(ROW_PAD_ICON));
     // In a box as row_icon()'s square, so the rows' lines start after it too.
     auto* square = new aurore::Box(aurore::Axis::ROW);
@@ -743,11 +746,24 @@ void cadran::List::row_image(aurore::DetailCell* cell, const std::string& image)
     square->setMarginRight(aurore::dp(ICON_GAP));
     auto* picture = new aurore::Image();
     picture->setScalingType(aurore::ImageScalingType::FIT);
-    picture->setImageFromRes(image);
+    load(picture);
     picture->setWidth(aurore::dp(30));
     picture->setHeight(aurore::dp(30));
     square->addView(picture);
     cell->addView(square, 0);
+}
+} // namespace
+
+void cadran::List::row_picture(aurore::DetailCell* cell, const unsigned char* data, int size)
+{
+    picture_row(cell, [data, size](aurore::Image* picture)
+        { picture->setImageFromMem(data, size); });
+}
+
+void cadran::List::row_image(aurore::DetailCell* cell, const std::string& image)
+{
+    picture_row(cell, [&image](aurore::Image* picture)
+        { picture->setImageFromRes(image); });
 }
 
 void cadran::List::row_swatch(aurore::DetailCell* cell, const CadranSwatch::Colors& colors)

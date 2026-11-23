@@ -135,6 +135,24 @@ void add_cancel(aurore::Dialog* dialog, std::function<void()> cancel);
 /// A row's colours in pick()'s `swatches` (CadranSwatch).
 using Swatch = CadranSwatch::Colors;
 
+/// What pick() can add: pictures held in memory, and a search.
+struct PickOptions
+{
+    /// A picture per row, held in memory as it was read (an encoded PNG or
+    /// JPEG: a homebrew's icon); empty bytes: none. It takes the icon's place
+    /// and wins over `icons` and `swatches`.
+    std::vector<std::vector<unsigned char>> pictures;
+    /// A first row that asks for a text (the system keyboard) and keeps only
+    /// the rows whose label contains it, whatever the case; its label, as the
+    /// keyboard's header. Empty: no search. The caller words it (translated).
+    std::string search;
+    /// The row that shows every row again, while a text is searched. Empty:
+    /// none (a search then only changes to another text).
+    std::string clear;
+};
+/// The indexes of the `values` that contain `query`, whatever the case (ASCII
+/// letters; every index when it is empty): what pick()'s search keeps.
+std::vector<size_t> filter_rows(const std::vector<std::string>& values, const std::string& query);
 /// A list of values, as a sheet (ui/action_sheet.cpp); `on_pick(index)` runs
 /// after it has closed. The row
 /// `selected` has the focus and is checked as the current value, unless
@@ -146,9 +164,11 @@ using Swatch = CadranSwatch::Colors;
 /// has (a palette's, as pick_palette() shows them): its background in a
 /// rounded square, its ring inside, its motif (a Cadran icon's name) in its
 /// ink, a hairline of the theme's cadran/line around it (CadranSwatch).
+/// `options` adds pictures held in memory and a search (PickOptions).
 void pick(const std::string& title, const std::vector<std::string>& values, int selected,
     std::function<void(int)> on_pick, bool checked = true, const std::vector<std::string>& details = {},
-    const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {});
+    const std::vector<std::string>& icons = {}, const std::vector<Swatch>& swatches = {},
+    const PickOptions& options = {});
 /// The same as tiles, `columns` to a row, each its Cadran icon (`icons`, a
 /// name) large above its label: a few values that read better side by side
 /// (the tabs of Start on).

@@ -2435,6 +2435,39 @@ AURORE_TEST(cadran_picker_says_its_title_and_the_choice)
     AURORE_CHECK_EQ(announced(), std::string("Light, 2 of 3"));
 }
 
+AURORE_TEST(cadran_picker_filters_its_rows_by_name)
+{
+    const std::vector<std::string> names = { "Dune Runner", "Star Quest", "dune tactics", "Éclair" };
+    AURORE_CHECK_EQ(ui::filter_rows(names, "").size(), size_t(4));
+    const std::vector<size_t> dune = ui::filter_rows(names, "DUNE");
+    AURORE_CHECK_EQ(dune.size(), size_t(2));
+    AURORE_CHECK_EQ(dune[0], size_t(0));
+    AURORE_CHECK_EQ(dune[1], size_t(2));
+    AURORE_CHECK_EQ(ui::filter_rows(names, "zzz").size(), size_t(0));
+    AURORE_CHECK_EQ(ui::filter_rows(names, "Écl").size(), size_t(1));
+}
+
+AURORE_TEST(cadran_picker_with_search_and_pictures_keeps_its_rows)
+{
+    // A 1 × 1 PNG: the picture of the first row; the second has none.
+    const std::vector<unsigned char> png = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49,
+        0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+        0x89, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x44, 0x41, 0x54, 0x78, 0xDA, 0x63, 0x64, 0x60, 0xF8, 0x0F, 0x00, 0x01, 0x87,
+        0x01, 0x80, 0xEB, 0x47, 0xBA, 0x92, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82 };
+    CadranHarness h;
+    auto* button = new aurore::Button();
+    button->setText("Homebrew");
+    h.push(new aurore::Activity(screenOf({ button })));
+    h.settle();
+    ui::PickOptions options;
+    options.pictures = { png, {} };
+    options.search   = "Search";
+    ui::pick("Homebrew", { "Dune Runner", "Star Quest" }, 1, [](int) {}, true, {}, {}, {}, options);
+    h.settle();
+    // The search row comes first: the chosen row is the third of three.
+    AURORE_CHECK_EQ(announced(), std::string("Homebrew, list, Star Quest, selected, 3 of 3"));
+}
+
 AURORE_TEST(every_focusable_demo_view_says_something)
 {
     DemoHarness h;
