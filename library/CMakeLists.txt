@@ -450,7 +450,10 @@ if (PLATFORM_SWITCH AND AURORE_USE_DEKO3D)
     # next), which made every build of an app unreproducible: each shader is
     # compiled once and kept in shaders/prebuilt/ with the hash of the GLSL it
     # came from, and uam runs only when the GLSL no longer matches it
-    # (tools/dksh.py --update compiles them again).
+    # (tools/dksh.py --update compiles them again). The cause is in uam: it
+    # reads an uninitialised field (Instruction::sched) whose value is
+    # whatever the heap held, so uam runs with MALLOC_PERTURB_=255, which makes
+    # glibc zero every allocation, and gives the same bytes each time.
     find_program(NX_UAM_EXE NAMES uam HINTS "${DEVKITPRO}/tools/bin")
     set(DKSH_GLSL "${AURORE_PATH}/lib/extern/nanovg/deko3d/shaders")
     set(DKSH_PREBUILT "${DKSH_GLSL}/prebuilt")
@@ -477,7 +480,7 @@ if (PLATFORM_SWITCH AND AURORE_USE_DEKO3D)
                 message(WARNING "deko3d shader ${name}: the prebuilt copy is not of this GLSL, compiled with uam instead (its bytes can differ from one build to the next); run tools/dksh.py --update")
             endif ()
             if (NX_UAM_EXE)
-                execute_process(COMMAND ${NX_UAM_EXE} -s ${stage} -o "${DKSH_OUT}/${name}.dksh" "${DKSH_GLSL}/${name}.glsl"
+                execute_process(COMMAND ${CMAKE_COMMAND} -E env MALLOC_PERTURB_=255 ${NX_UAM_EXE} -s ${stage} -o "${DKSH_OUT}/${name}.dksh" "${DKSH_GLSL}/${name}.glsl"
                     RESULT_VARIABLE uam_result TIMEOUT 30)
             else ()
                 set(uam_result 1)
