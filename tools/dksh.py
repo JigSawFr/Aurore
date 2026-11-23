@@ -6,7 +6,8 @@
 # (library/lib/extern/nanovg/deko3d/shaders/prebuilt/): uam does not always
 # give the same bytes for the same GLSL, so library/CMakeLists.txt takes the
 # kept copy while the GLSL still hashes to the one it was compiled from, and
-# runs uam only when it does not.
+# runs uam only when it does not. uam reads an uninitialised field, so it runs
+# with MALLOC_PERTURB_=255 (glibc zeroes every allocation): same bytes each time.
 #
 #     python3 tools/dksh.py            checks each kept copy against its GLSL
 #     python3 tools/dksh.py --update   compiles them again with uam (devkitPro)
@@ -15,6 +16,7 @@
 # Exits 1 with the list of what is out of date.
 
 import hashlib
+import os
 import shutil
 import subprocess
 import sys
@@ -48,7 +50,8 @@ def update() -> None:
     PREBUILT.mkdir(exist_ok=True)
     for name, stage in STAGES.items():
         glsl = SHADERS / f"{name}.glsl"
-        subprocess.run([uam, "-s", stage, "-o", str(PREBUILT / f"{name}.dksh"), str(glsl)], check=True, timeout=60)
+        subprocess.run([uam, "-s", stage, "-o", str(PREBUILT / f"{name}.dksh"), str(glsl)], check=True, timeout=60,
+                       env={**os.environ, "MALLOC_PERTURB_": "255"})
         (PREBUILT / f"{name}.glsl.sha256").write_text(digest(glsl) + "\n")
         print(f"{name}: compiled")
 
