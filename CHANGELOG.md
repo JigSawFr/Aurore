@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/JigSawFr/Aurore/compare/v1.2.0...v1.2.1) (2026-11-24)
+
+
+### Performance
+
+* **core:** let redraw on demand skip frames while a repeating timer runs ([#181](https://github.com/JigSawFr/Aurore/issues/181)) ([09b06f6](https://github.com/JigSawFr/Aurore/commit/09b06f6cbb7e4bc59c08ff2044d0d82ea000ed98))
+
 ## [1.2.0](https://github.com/JigSawFr/Aurore/compare/v1.1.0...v1.2.0) (2026-11-23)
 
 
