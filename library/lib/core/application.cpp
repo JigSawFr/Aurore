@@ -429,8 +429,14 @@ bool Application::internalMainLoop()
     bool draw = true;
     if (Application::redrawOnDemand)
     {
-        if (!Ticking::runningTickings.empty())
-            Application::requestRedraw();
+        for (const Ticking* ticking : Ticking::runningTickings)
+        {
+            if (ticking->drivesRedraw())
+            {
+                Application::requestRedraw();
+                break;
+            }
+        }
         draw = Application::redrawFrames > 0 || particlesMoved || Application::frameStartTime - Application::lastDrawTime >= 1000000;
     }
 

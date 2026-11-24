@@ -67,6 +67,12 @@ class RepeatingTimer : public Ticking
      */
     void setCallback(TickingGenericCallback callback);
 
+    /**
+     * A repeating timer does not draw anything by itself: redraw on demand
+     * keeps skipping the frames between two of its callbacks.
+     */
+    bool drivesRedraw() const override { return false; }
+
     void onStart() override;
     bool onUpdate(Time delta) override;
 

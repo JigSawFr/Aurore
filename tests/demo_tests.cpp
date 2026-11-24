@@ -449,6 +449,29 @@ AURORE_TEST(redraw_on_demand_skips_still_frames)
     AURORE_CHECK_EQ(h.focusText(), std::string("Second"));
 }
 
+AURORE_TEST(repeating_timer_does_not_force_frames_on_demand)
+{
+    Harness h;
+    h.push(new aurore::Activity(screenOf({ new aurore::Button() })));
+    aurore::Application::setRedrawOnDemand(true);
+    h.settle();
+    h.step(3);
+
+    // A repeating timer running, its callback changing nothing: the frames
+    // between its turns are still skipped (the one a second is drawn)
+    int turns = 0;
+    aurore::RepeatingTimer timer;
+    timer.setPeriod(200);
+    timer.setCallback([&turns]()
+        { turns++; });
+    timer.start();
+    uint64_t drawn = aurore::Application::getDrawnFrameCount();
+    h.advance(900);
+    AURORE_CHECK(turns >= 3);
+    AURORE_CHECK(aurore::Application::getDrawnFrameCount() - drawn <= 1);
+    timer.stop();
+}
+
 AURORE_TEST(theme_change_draws_at_once_on_demand)
 {
     Harness h;
