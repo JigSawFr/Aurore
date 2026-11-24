@@ -176,11 +176,22 @@ struct ThemeParticles
     bool enabled() const { return this->kind != ParticleKind::NONE && this->density > 0.0f; }
 };
 
-/// A variant's decorations: one picture per area, and particles
+/// ornaments: what a theme draws along the edges of the screen with no
+/// picture (the app ships none)
+enum class ThemeOrnaments
+{
+    NONE,
+    CHRISTMAS, ///< a garland of lights along the top, a row of firs along the bottom
+};
+
+/// A variant's decorations: one picture per area, particles and ornaments
 struct ThemeDecor
 {
     ThemePicture pictures[THEME_AREA_COUNT]; ///< by ThemeArea, HEADER first
     ThemeParticles particles;
+    ThemeOrnaments ornaments = ThemeOrnaments::NONE;
+    /// greeting: a line said once when the theme comes on ("@i18n/…" is translated), or empty
+    std::string greeting;
 
     /// The picture of `area`.
     const ThemePicture& picture(ThemeArea area) const { return this->pictures[std::to_underlying(area) - 1]; }
@@ -350,6 +361,15 @@ class Theme
      * resuming from sleep included).
      */
     static void followCalendar();
+
+    /**
+     * Whether the feasts' presets carry their ornaments (`ornaments`, and
+     * the greeting): the garland and firs of "builtin:christmas". Off by
+     * default, so an app that uses the presets sees only their colours and
+     * particles until it opts in. Applied at once to the theme in use.
+     */
+    static void setFestiveDecor(bool on);
+    static bool getFestiveDecor();
 
     /**
      * The preset "builtin:seasonal" uses at `when` (seconds since the

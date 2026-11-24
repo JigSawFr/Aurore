@@ -15,5 +15,8 @@
         "christmas": "クリスマス",
         "new_year": "年越し",
         "seasonal": "季節に合わせて"
+    },
+    "greetings": {
+        "christmas": "メリークリスマス！すてきなホリデーを！"
     }
 }

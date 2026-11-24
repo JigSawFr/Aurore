@@ -15,5 +15,8 @@
         "christmas": "Christmas",
         "new_year": "New Year's Eve",
         "seasonal": "Seasonal"
+    },
+    "greetings": {
+        "christmas": "Merry Christmas and happy holidays!"
     }
 }

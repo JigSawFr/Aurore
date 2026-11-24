@@ -15,5 +15,8 @@
         "christmas": "圣诞节",
         "new_year": "跨年",
         "seasonal": "随季节变化"
+    },
+    "greetings": {
+        "christmas": "圣诞快乐，节日愉快！"
     }
 }

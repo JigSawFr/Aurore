@@ -15,5 +15,8 @@
         "christmas": "Noël",
         "new_year": "Nouvel An",
         "seasonal": "Au fil des saisons"
+    },
+    "greetings": {
+        "christmas": "Joyeux Noël et bonnes fêtes !"
     }
 }

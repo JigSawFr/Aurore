@@ -335,6 +335,15 @@ What to draw: a backdrop is under text, so keep it quiet (a texture, a faint pat
 
 Which views: the core's AppletFrame header, `Sidebar`, `Dialog`, `Dropdown` and `EditTextDialog`, and Cadran's sheets; an app's own panel opts in with `view->setThemeArea(aurore::ThemeArea::DIALOG)` (or `HEADER`, `SIDEBAR`).
 
+### Ornaments and the greeting
+
+| Key | Values | Default | What |
+| --- | --- | --- | --- |
+| `ornaments` | `none`, `christmas` | `none` | Drawn in code, so an app ships no picture for them: `christmas` hangs a garland of lights (cranberry, gold, green and ice) along the top edge and stands a row of firs, a few lit, along the bottom |
+| `greeting` | a line of 120 characters at most, `@i18n/…`, or `none` | none | Said once per run, as a toast, when the theme comes on (not again when the variant or the calendar brings it back) |
+
+`builtin:christmas` has them only when the app turns them on with `Theme::setFestiveDecor(true)` (off by default: for anyone else the preset is its colours and snow, as before); a theme file sets the keys itself. The garland and the firs stay inside the header's first 30 units and the footer's last 25. The lights chase each other at the particles' rate, under the same rules (motion allowed, 60 seconds without input and they stop); when motion is not allowed they are lit and still, since a still picture is no motion. They are drawn after the strips and before the particles. Read like the other decoration keys: at the top or per variant, inherited.
+
 ### Particles
 
 | Key | Values | Default | What |

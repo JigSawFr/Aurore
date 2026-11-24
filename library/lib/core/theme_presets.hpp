@@ -22,6 +22,10 @@ const std::vector<BuiltinTheme>& builtinThemeTexts();
 // The preset's text: its own, or the one made for now
 std::string builtinThemeText(const BuiltinTheme& theme, std::time_t now);
 
+// Theme::setFestiveDecor: whether the feasts' presets carry their ornaments
+void setFestiveDecorOn(bool on);
+bool festiveDecorOn();
+
 // The id of the preset builtin:seasonal uses at `now` (in local time)
 const char* seasonalThemeId(std::time_t now);
 

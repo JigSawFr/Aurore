@@ -543,6 +543,129 @@ namespace
         }
     }
 
+    // ---------------------------------------------------------------------------
+    // Ornaments: drawn, so that an app ships no picture for them
+    // ---------------------------------------------------------------------------
+
+    ThemeOrnaments ornaments = ThemeOrnaments::NONE;
+    bool ornamentsDark       = true;
+
+    // The garland's bulbs, in the order they chase each other
+    const NVGcolor BULBS[] = { nvgRGB(224, 56, 79), nvgRGB(242, 201, 76), nvgRGB(63, 174, 106), nvgRGB(120, 190, 240) };
+
+    // The garland of lights along the top: a cord swagged between anchors
+    // every SWAG units, a bulb under it every GAP; `t` seconds, `chase`
+    // false for a steady light (motion is not allowed)
+    void drawGarland(NVGcontext* vg, float width, double t, bool chase)
+    {
+        constexpr float SWAG = 160.0f, SAG = 12.0f, GAP = 40.0f, TOP = 2.0f;
+        auto cordY = [&](float x)
+        {
+            float u = std::fmod(x, SWAG) / SWAG;
+            return TOP + SAG * std::sin(3.14159265f * u);
+        };
+        // The cord
+        nvgBeginPath(vg);
+        for (float x = 0.0f; x <= width + 4.0f; x += 4.0f)
+        {
+            if (x == 0.0f)
+                nvgMoveTo(vg, x, cordY(x));
+            else
+                nvgLineTo(vg, x, cordY(x));
+        }
+        nvgStrokeColor(vg, ornamentsDark ? nvgRGBA(86, 140, 104, 230) : nvgRGBA(24, 70, 48, 235));
+        nvgStrokeWidth(vg, 1.8f);
+        nvgStroke(vg);
+
+        int index = 0;
+        for (float x = GAP / 2; x < width; x += GAP, index++)
+        {
+            float y   = cordY(x);
+            float lit = 1.0f;
+            if (chase)
+            {
+                float wave = 0.5f + 0.5f * std::cos((float)(TAU * ((index % 5) / 5.0 - t / 2.5)));
+                lit        = 0.4f + 0.6f * wave * wave;
+            }
+            NVGcolor color = BULBS[index % 4];
+            float cy       = y + 8.0f;
+            // Socket
+            nvgBeginPath(vg);
+            nvgRect(vg, x - 2.0f, y, 4.0f, 3.5f);
+            nvgFillColor(vg, ornamentsDark ? nvgRGBA(150, 170, 150, 240) : nvgRGBA(18, 40, 30, 240));
+            nvgFill(vg);
+            // Glow, then the bulb
+            NVGpaint glow = nvgRadialGradient(vg, x, cy, 1.0f, 14.0f, faded(color, 0.5f * lit), faded(color, 0.0f));
+            nvgBeginPath(vg);
+            nvgCircle(vg, x, cy, 14.0f);
+            nvgFillPaint(vg, glow);
+            nvgFill(vg);
+            nvgBeginPath(vg);
+            nvgEllipse(vg, x, cy, 3.6f, 5.0f);
+            nvgFillColor(vg, mix(faded(color, 0.45f + 0.55f * lit), nvgRGB(255, 255, 255), 0.25f * lit));
+            nvgFill(vg);
+        }
+    }
+
+    // The firs along the bottom: three tiers each, of heights that vary
+    void drawFirs(NVGcontext* vg, float width, float height, double t, bool chase)
+    {
+        constexpr float STEP = 21.0f;
+        NVGcolor dark        = ornamentsDark ? nvgRGBA(21, 74, 48, 235) : nvgRGBA(29, 107, 69, 235);
+        NVGcolor light       = ornamentsDark ? nvgRGBA(33, 100, 64, 235) : nvgRGBA(47, 130, 86, 235);
+        for (int pass = 0; pass < 2; pass++)
+        {
+            nvgBeginPath(vg);
+            int index = 0;
+            for (float x = -4.0f; x < width + STEP; x += STEP, index++)
+            {
+                float tall = 15.0f + 10.0f * unit((uint32_t)index, 7);
+                float cx   = x + 5.0f * unit((uint32_t)index, 11);
+                if ((index % 2) != pass)
+                    continue;
+                for (int tier = 0; tier < 3; tier++)
+                {
+                    float top    = height - tall * (1.0f - 0.28f * tier) + 0.0f;
+                    float base   = height - tall * (0.62f - 0.30f * tier);
+                    float spread = (5.0f + 3.0f * (tier + 1)) * 1.0f;
+                    nvgMoveTo(vg, cx, top + tier * 3.0f);
+                    nvgLineTo(vg, cx + spread, base + tier * 3.0f);
+                    nvgLineTo(vg, cx - spread, base + tier * 3.0f);
+                    nvgClosePath(vg);
+                }
+                nvgRect(vg, cx - 1.2f, height - 3.0f, 2.4f, 3.0f);
+            }
+            nvgFillColor(vg, pass == 0 ? dark : light);
+            nvgFill(vg);
+        }
+        // A few lights on the firs
+        int index = 0;
+        for (float x = -4.0f; x < width + STEP; x += STEP, index++)
+        {
+            if (index % 3 != 1)
+                continue;
+            float tall     = 15.0f + 10.0f * unit((uint32_t)index, 7);
+            float cx       = x + 5.0f * unit((uint32_t)index, 11) + 2.0f * (unit((uint32_t)index, 13) - 0.5f) * 4.0f;
+            float cy       = height - tall * 0.45f;
+            float lit      = chase ? 0.45f + 0.55f * (0.5f + 0.5f * std::sin((float)(TAU * (t / 1.7 + index * 0.31)))) : 1.0f;
+            NVGcolor color = BULBS[(index / 3) % 4];
+            nvgBeginPath(vg);
+            nvgCircle(vg, cx, cy, 2.1f);
+            nvgFillColor(vg, mix(faded(color, 0.5f + 0.5f * lit), nvgRGB(255, 255, 255), 0.2f * lit));
+            nvgFill(vg);
+        }
+    }
+
+    // The ornaments of the theme in use over `width` x `height`, at `at`
+    void drawOrnaments(NVGcontext* vg, float width, float height, bool chase, Time at)
+    {
+        double t = (double)at / (double)SECOND;
+        nvgSave(vg);
+        drawGarland(vg, width, t, chase);
+        drawFirs(vg, width, height, t, chase);
+        nvgRestore(vg);
+    }
+
 } // namespace
 
 void ThemeDecorations::update(ThemeVariant variant)
@@ -555,6 +678,8 @@ void ThemeDecorations::update(ThemeVariant variant)
     }
 
     ThemeDecor decor = Theme::getDecor(variant);
+    ornaments        = decor.ornaments;
+    ornamentsDark    = variant == ThemeVariant::DARK;
     for (int i = 0; i < THEME_AREA_COUNT; i++)
     {
         Held& area               = held[i];
@@ -605,7 +730,7 @@ void ThemeDecorations::update(ThemeVariant variant)
 
 bool ThemeDecorations::step(Time now)
 {
-    bool wanted = !pool.particles.empty() && !Application::getReduceMotion();
+    bool wanted = (!pool.particles.empty() || ornaments != ThemeOrnaments::NONE) && !Application::getReduceMotion();
     Time last   = std::max(Application::getLastInputTime(), pool.activity);
     bool run    = wanted && now - last < IDLE + FADE_OUT;
     if (run && !pool.running)
@@ -670,6 +795,20 @@ void ThemeDecorations::drawBackdrop(ThemeArea area, NVGcontext* vg, float x, flo
 void ThemeDecorations::drawStrips(NVGcontext* vg, float x, float y, float width, float height)
 {
     float screenWidth = Application::contentWidth, screenHeight = Application::contentHeight;
+    if (ornaments != ThemeOrnaments::NONE)
+    {
+        bool whole = x <= 0 && y <= 0 && x + width >= screenWidth && y + height >= screenHeight;
+        if (!whole)
+        {
+            nvgSave(vg);
+            nvgIntersectScissor(vg, x, y, width, height);
+        }
+        // They chase while motion runs, else they stay lit (nothing moves)
+        pool.drawnTick = pool.running ? pool.tick : pool.drawnTick;
+        drawOrnaments(vg, screenWidth, screenHeight, pool.running, pool.tick * PERIOD);
+        if (!whole)
+            nvgRestore(vg);
+    }
     for (ThemeArea area : { ThemeArea::TOP, ThemeArea::BOTTOM })
     {
         const Held& strip       = held[std::to_underlying(area) - 1];
@@ -706,7 +845,8 @@ void ThemeDecorations::reset()
         area.loading.reset();
         area.spec = ThemePicture();
     }
-    pool = Pool();
+    pool      = Pool();
+    ornaments = ThemeOrnaments::NONE;
 }
 
 } // namespace aurore

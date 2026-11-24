@@ -15,5 +15,8 @@
         "christmas": "聖誕節",
         "new_year": "跨年",
         "seasonal": "隨季節變化"
+    },
+    "greetings": {
+        "christmas": "聖誕快樂，佳節愉快！"
     }
 }

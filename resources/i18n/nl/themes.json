@@ -15,5 +15,8 @@
         "christmas": "Kerstmis",
         "new_year": "Oud en nieuw",
         "seasonal": "Volgens het seizoen"
+    },
+    "greetings": {
+        "christmas": "Vrolijk kerstfeest en fijne feestdagen!"
     }
 }
