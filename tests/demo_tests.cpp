@@ -462,7 +462,8 @@ AURORE_TEST(repeating_timer_does_not_force_frames_on_demand)
     int turns = 0;
     aurore::RepeatingTimer timer;
     timer.setPeriod(200);
-    timer.setCallback([&turns]() { turns++; });
+    timer.setCallback([&turns]()
+        { turns++; });
     timer.start();
     uint64_t drawn = aurore::Application::getDrawnFrameCount();
     h.advance(900);
