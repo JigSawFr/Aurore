@@ -554,10 +554,8 @@ name = @i18n/themes/presets/christmas
 author = Aurore
 icon = tree
 particles = snow
-ornaments = christmas
-greeting = @i18n/themes/greetings/christmas
 version = 1
-description = Pine, cranberry and gold; the focus twinkles like the tree's lights, a garland hangs along the top and firs stand along the bottom.
+description = Pine, cranberry and gold; the focus twinkles like the tree's lights.
 
 [light]
 background = #f4f6f1
@@ -751,10 +749,33 @@ const char* seasonalThemeId(std::time_t now)
     return "winter";
 }
 
+static bool festiveDecor = false;
+
+void setFestiveDecorOn(bool on)
+{
+    festiveDecor = on;
+}
+
+bool festiveDecorOn()
+{
+    return festiveDecor;
+}
+
 std::string builtinThemeText(const BuiltinTheme& theme, std::time_t now)
 {
     if (theme.text)
-        return theme.text;
+    {
+        std::string text = theme.text;
+        // Christmas' garland, firs and greeting: only for an app that asked (Theme::setFestiveDecor)
+        if (festiveDecor && std::string(theme.id) == "christmas")
+        {
+            const std::string icon = "icon = tree\n";
+            size_t at              = text.find(icon);
+            if (at != std::string::npos)
+                text.insert(at + icon.size(), "ornaments = christmas\ngreeting = @i18n/themes/greetings/christmas\n");
+        }
+        return text;
+    }
     return std::string("name = @i18n/themes/presets/seasonal\n"
                        "author = Aurore\n"
                        "version = 1\n"

@@ -1970,6 +1970,25 @@ bool Theme::loadFile(const std::string& path, ThemeVariant* variant)
     return applyTheme(text, directoryOf(path), path, variant);
 }
 
+void Theme::setFestiveDecor(bool on)
+{
+    if (on == festiveDecorOn())
+        return;
+    setFestiveDecorOn(on);
+    // The theme in use is read again: a preset it inherits is read when it loads
+    if (!currentTheme)
+        return;
+    if (!currentPath.empty())
+        Theme::loadFile(currentPath);
+    else
+        Theme::load(std::string(currentText));
+}
+
+bool Theme::getFestiveDecor()
+{
+    return festiveDecorOn();
+}
+
 void Theme::followCalendar()
 {
     if (currentPath != SEASONAL_PATH)

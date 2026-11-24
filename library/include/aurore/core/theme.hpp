@@ -363,6 +363,15 @@ class Theme
     static void followCalendar();
 
     /**
+     * Whether the feasts' presets carry their ornaments (`ornaments`, and
+     * the greeting): the garland and firs of "builtin:christmas". Off by
+     * default, so an app that uses the presets sees only their colours and
+     * particles until it opts in. Applied at once to the theme in use.
+     */
+    static void setFestiveDecor(bool on);
+    static bool getFestiveDecor();
+
+    /**
      * The preset "builtin:seasonal" uses at `when` (seconds since the
      * epoch, read in local time): "builtin:halloween"...
      */

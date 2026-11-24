@@ -3751,6 +3751,15 @@ AURORE_TEST(theme_christmas_ornaments)
 {
     const char* folder = std::getenv("AURORE_DECOR_SHOTS");
     DemoHarness h;
+    // Off unless the app asks: the preset is its colours and snow alone
+    AURORE_CHECK(!aurore::Theme::getFestiveDecor());
+    AURORE_CHECK(aurore::Theme::load("inherit = builtin:christmas\n"));
+    h.settle();
+    AURORE_CHECK(aurore::Theme::getDecor(aurore::ThemeVariant::DARK).ornaments == aurore::ThemeOrnaments::NONE);
+    AURORE_CHECK(aurore::Theme::getDecor(aurore::ThemeVariant::DARK).greeting.empty());
+    aurore::Theme::setFestiveDecor(true);
+    h.settle();
+    AURORE_CHECK(aurore::Theme::getDecor(aurore::ThemeVariant::DARK).ornaments == aurore::ThemeOrnaments::CHRISTMAS);
     for (aurore::ThemeVariant variant : { aurore::ThemeVariant::DARK, aurore::ThemeVariant::LIGHT })
     {
         const char* name = variant == aurore::ThemeVariant::DARK ? "dark" : "light";
@@ -3783,6 +3792,7 @@ AURORE_TEST(theme_christmas_ornaments)
     h.advance(1500);
     AURORE_CHECK_EQ(aurore::test::compareImages(h.screenshot().crop(0, 0, 1280, 30), lit, 0).differingPixels, (size_t)0);
     aurore::Application::setReduceMotion(false);
+    aurore::Theme::setFestiveDecor(false);
     aurore::Theme::reset();
     h.settle();
 }
