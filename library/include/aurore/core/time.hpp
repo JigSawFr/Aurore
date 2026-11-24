@@ -153,6 +153,16 @@ class Ticking
      */
     static void updateTickings();
 
+    /**
+     * Whether this ticking changes what is on screen by running, so that
+     * every frame must be drawn while it does (redraw on demand,
+     * Application::setRedrawOnDemand). True for animations. A timer that
+     * only calls back now and then says false: what its callback changes
+     * asks for its own redraw (invalidate(), requestRedraw()), and the frames
+     * between two of its turns are not drawn for nothing.
+     */
+    virtual bool drivesRedraw() const { return true; }
+
     inline static std::vector<Ticking*> runningTickings;
 
   protected:
